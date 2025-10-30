@@ -16,10 +16,11 @@ import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { _, Table } from '@/components/sw360'
-import { HttpStatus, LinkedPackage, Release } from '@/object-types'
+import { LinkedPackage, Release } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
 
 interface Props {
     releaseId: string
@@ -59,7 +60,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
 
             const response = await ApiUtils.DELETE(`packages/${selectedPkg.id}`, session.user.access_token)
 
-            if (response.status === HttpStatus.OK || response.status === HttpStatus.NO_CONTENT) {
+            if (response.status === StatusCodes.OK || response.status === StatusCodes.NO_CONTENT) {
                 MessageService.success(t('Package deleted successfully'))
                 setTableData((prev) => prev.filter((row) => row[row.length - 1] !== selectedPkg.id))
                 setShowModal(false)
@@ -67,7 +68,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                     variant: 'success',
                     message: <>{t('Package deleted successfully')}</>,
                 })
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 setAlert({
                     variant: 'danger',
                     message: <>{t('Package cannot be deleted')}</>,
@@ -139,7 +140,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                                 ) : releaseClearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
                                     <span className='badge bg-info overlay-badge'>CS</span>
                                 ) : releaseClearingState === 'SENT_TO_CLEARING_TOOL' ||
-                                  releaseClearingState === 'SCAN_AVAILABLE' ? (
+                                    releaseClearingState === 'SCAN_AVAILABLE' ? (
                                     <span className='badge bg-info overlay-badge'>CS</span>
                                 ) : (
                                     <span className='badge bg-success overlay-badge'>CS</span>
@@ -238,9 +239,9 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
             return undefined
         }
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             return (await response.json()) as Release
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             void signOut()
             return undefined
         } else {
@@ -352,12 +353,20 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                     }}
                     closeButton
                 >
-                    <Modal.Title id='delete-package-modal'>{t('Delete Package')}</Modal.Title>
+                    <Modal.Title id='delete-package-modal'>{t('Delete Package')}?</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
                     {alert && <Alert variant={alert.variant}>{alert.message}</Alert>}
-                    {!alert && <p>{t('Do you really want to delete the package')}?</p>}
+                    {!alert && selectedPkg && (
+                        <p>
+                            {`${t('Do you really want to delete the package')} `}
+                            <span className='fw-medium'>
+                                {`${selectedPkg.name}${selectedPkg.version ? ` (${selectedPkg.version})` : ''}`}
+                            </span>
+                            ?
+                        </p>
+                    )}
                 </Modal.Body>
 
                 <Modal.Footer>

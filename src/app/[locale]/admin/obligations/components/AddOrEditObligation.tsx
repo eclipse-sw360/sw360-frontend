@@ -9,6 +9,7 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { ReactNode, useEffect, useState } from 'react'
 import { ObligationFormProps, ObligationLevels, ObligationTypes } from '../../../../../object-types/Obligation'
 import { useObligationTree } from '../hook/useObligationTree'
@@ -46,7 +47,13 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps): Rea
                     (key) => ObligationLevels[key as keyof typeof ObligationLevels] === obligationLevel,
                 ) ?? '',
         }))
-    }, [title, treeText, obligationType, obligationLevel, setObligation])
+    }, [
+        title,
+        treeText,
+        obligationType,
+        obligationLevel,
+        setObligation,
+    ])
 
     return (
         <div className='obligation-container'>
@@ -72,18 +79,26 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps): Rea
 
                 <div
                     className='row'
-                    style={{ marginBottom: '10px' }}
+                    style={{
+                        marginBottom: '10px',
+                    }}
                 >
                     <div className='col-md-4'>
                         <label
                             className='form-label'
-                            style={{ fontWeight: 'bold' }}
+                            style={{
+                                fontWeight: 'bold',
+                            }}
                         >
                             {'Preview'}
                         </label>
                         <div
                             className='border p-3'
-                            style={{ minHeight: '100px', backgroundColor: '#f8f9fa', whiteSpace: 'pre-wrap' }}
+                            style={{
+                                minHeight: '100px',
+                                backgroundColor: '#f8f9fa',
+                                whiteSpace: 'pre-wrap',
+                            }}
                         >
                             {title}
                             <br />

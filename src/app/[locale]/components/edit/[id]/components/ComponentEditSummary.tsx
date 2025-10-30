@@ -11,24 +11,25 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
+import { useConfigValue } from '@/contexts'
 import {
     Attachment,
     Component,
     ComponentPayload,
     DocumentTypes,
-    HttpStatus,
     InputKeyValue,
+    UIConfigKeys,
     Vendor,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
     componentId: string
@@ -51,25 +52,37 @@ export default function ComponentEditSummary({
         fullName: '',
     })
 
-    const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    const [componentOwner, setComponentOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
     const { status } = useSession()
+
+    // Configs from backend
+    const componentExternalIdSuggestions =
+        useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) as string[])
+            : undefined
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as Component
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return notFound()
@@ -147,7 +160,12 @@ export default function ComponentEditSummary({
             }
             setComponentPayload(componentPayloadData)
         })
-    }, [componentId, fetchData, attachmentData, setComponentPayload])
+    }, [
+        componentId,
+        fetchData,
+        attachmentData,
+        setComponentPayload,
+    ])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -210,6 +228,7 @@ export default function ComponentEditSummary({
                                 setData={setExternalIds}
                                 data={externalIds}
                                 setObject={setDataExternalIds}
+                                keySuggestions={componentExternalIdSuggestions}
                             />
                         </div>
                         <div className='row mb-4'>

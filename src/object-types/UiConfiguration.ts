@@ -7,10 +7,47 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { UIConfigKeys } from './enums/UIConfigKeys'
+import { ArrayTypeUIConfigKeys, UIConfigKeys } from './enums/UIConfigKeys'
 
-type UiConfiguration = {
+export type UiConfiguration = {
     [key in UIConfigKeys]: string
 }
 
-export default UiConfiguration
+// Extended type for processed configuration after parsing
+export type ProcessedUiConfig = {
+    [key in UIConfigKeys]: key extends (typeof ArrayTypeUIConfigKeys)[number] ? string[] : boolean
+}
+
+// Helper functions to process raw configuration
+export function parseConfigValue(key: UIConfigKeys, value: string): string[] | boolean {
+    if (ArrayTypeUIConfigKeys.includes(key)) {
+        if (value === undefined) {
+            return []
+        }
+        let parsedValues: string[]
+        try {
+            parsedValues = JSON.parse(value) as string[]
+        } catch {
+            parsedValues = []
+        }
+        return parsedValues.map((item) => item.trim()).filter(Boolean)
+    } else {
+        if (value) {
+            return value.toLowerCase() === 'true'
+        } else {
+            return false
+        }
+    }
+}
+
+// Function to transform raw config to processed config
+export function parseRawUiConfig(rawConfig: UiConfiguration): ProcessedUiConfig {
+    const processedConfig = {} as ProcessedUiConfig
+
+    for (const key of Object.values(UIConfigKeys)) {
+        // @ts-expect-error The types are assigned dynamically
+        processedConfig[key] = parseConfigValue(key, rawConfig[key])
+    }
+
+    return processedConfig
+}

@@ -9,15 +9,16 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, Release, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { Embedded, ErrorDetails, Release, Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import VendorDetailForm from '../../../components/VendorDetailForm'
 
 type EmbeddedReleases = Embedded<Release, 'sw360:releases'>
@@ -33,7 +34,9 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -45,7 +48,7 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`vendors/${id}`, session.user.access_token, signal)
 
-                if (response.status === HttpStatus.OK) {
+                if (response.status === StatusCodes.OK) {
                     const vendor = (await response.json()) as Vendor
                     setVendorData(vendor)
 
@@ -55,10 +58,10 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
                         signal,
                     )
 
-                    if (releasesResponse.status === HttpStatus.OK) {
+                    if (releasesResponse.status === StatusCodes.OK) {
                         const releases = (await releasesResponse.json()) as EmbeddedReleases
                         setReleases(releases._embedded['sw360:releases'])
-                    } else if (releasesResponse.status === HttpStatus.NO_CONTENT) {
+                    } else if (releasesResponse.status === StatusCodes.NO_CONTENT) {
                         setReleases([])
                     } else {
                         const err = (await releasesResponse.json()) as ErrorDetails
@@ -79,7 +82,9 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [id])
+    }, [
+        id,
+    ])
 
     const handleCancel = () => {
         router.push('/admin/vendors')
@@ -92,10 +97,10 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
             if (vendorData === null) return
             delete vendorData['_links']
             const response = await ApiUtils.PATCH(`vendors/${id}`, vendorData, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 MessageService.success(t('Vendor is updated'))
                 router.push('/admin/vendors')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails
@@ -115,7 +120,7 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.DELETE(`vendors/${id}`, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 MessageService.success(t('Vendor deleted successfully'))
                 router.push('/admin/vendors')
             } else {

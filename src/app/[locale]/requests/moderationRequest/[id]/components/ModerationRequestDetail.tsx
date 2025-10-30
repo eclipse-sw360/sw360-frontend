@@ -9,22 +9,24 @@
 
 'use client'
 
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { HttpStatus, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useParams, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
-import ModerationDecision from './ModerationDecision'
-import ModerationRequestInfo from './ModerationRequestInfo'
-import ProposedChanges from './ProposedChanges'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
+import ModerationDecision from './ModerationDecision'
+import ModerationRequestInfo from './ModerationRequestInfo'
+import ProposedChanges from './ProposedChanges'
 
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }): ReactNode | undefined {
     const t = useTranslations('default')
@@ -72,16 +74,18 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ModerationRequestDetails
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -124,11 +128,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     updatedAcceptPayload,
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have accepted the moderation request'))
                     router.push('/requests')
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
@@ -158,11 +162,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     updatedRejectPayload,
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have rejected the moderation request'))
                     router.push('/requests')
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
@@ -192,11 +196,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     updatedPostponePayload,
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.ACCEPTED) {
+                if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have postponed the moderation request'))
                     router.push('/requests')
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
@@ -224,15 +228,15 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 updatedUnassignPayload,
                 session.user.access_token,
             )
-            if (response.status == HttpStatus.ACCEPTED) {
+            if (response.status == StatusCodes.ACCEPTED) {
                 await response.json()
                 MessageService.success(t('You have unassigned yourself from the moderation request'))
                 router.push('/requests')
-            } else if (response.status == HttpStatus.CONFLICT) {
+            } else if (response.status == StatusCodes.CONFLICT) {
                 await response.json()
                 MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
                 router.push('/requests')
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 MessageService.error(t('There are some errors while updating moderation request'))
@@ -254,7 +258,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     return (
         <>
             <Breadcrumb className='container page-content'>
-                <Breadcrumb.Item href={requestsPath}>{t('Requests')}</Breadcrumb.Item>
+                <Breadcrumb.Item
+                    linkAs={Link}
+                    href={requestsPath}
+                >
+                    {t('Requests')}
+                </Breadcrumb.Item>
                 <Breadcrumb.Item active>
                     {moderationRequestData &&
                     (moderationRequestData.documentType === 'COMPONENT' ||
@@ -327,7 +336,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(0)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -370,7 +382,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(1)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -408,7 +423,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(2)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -466,4 +484,6 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(ModerationRequestDetail, [UserGroupType.SECURITY_USER])
+export default AccessControl(ModerationRequestDetail, [
+    UserGroupType.SECURITY_USER,
+])

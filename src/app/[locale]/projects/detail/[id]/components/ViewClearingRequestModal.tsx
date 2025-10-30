@@ -9,16 +9,17 @@
 
 'use client'
 
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { ClearingRequestDetails, HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Dispatch, SetStateAction, useEffect, useState, type JSX } from 'react'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { ClearingRequestDetails } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     show: boolean
@@ -50,7 +51,9 @@ export default function ViewClearingRequestModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -63,13 +66,13 @@ export default function ViewClearingRequestModal({
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`clearingrequest/${clearingRequestId}`, session.user.access_token)
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     const data = (await response.json()) as ClearingRequestDetails
                     setClearingRequestData(data)
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     displayMessage('warning', t('Failed to fetch clearing request from database'))
                     return signOut()
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else {
                     notFound()
@@ -79,7 +82,9 @@ export default function ViewClearingRequestModal({
             }
         })()
         return () => controller.abort(signal)
-    }, [clearingRequestId])
+    }, [
+        clearingRequestId,
+    ])
 
     const handleCloseDialog = () => {
         setShow(!show)
@@ -98,10 +103,18 @@ export default function ViewClearingRequestModal({
         >
             <Modal.Header
                 closeButton
-                style={{ color: '#2E5AAC' }}
+                style={{
+                    color: '#2E5AAC',
+                }}
             >
                 <Modal.Title id='create-clearing-request-modal'>
-                    <BsCheck2Square style={{ marginBottom: '5px', color: '#2E5AAC', fontSize: '23px' }} />{' '}
+                    <BsCheck2Square
+                        style={{
+                            marginBottom: '5px',
+                            color: '#2E5AAC',
+                            fontSize: '23px',
+                        }}
+                    />{' '}
                     {t('View Clearing Request')}
                 </Modal.Title>
             </Modal.Header>

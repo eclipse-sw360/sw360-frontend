@@ -52,7 +52,12 @@ const createUrlWithParams = (url: string, params: UrlWithParams): string => {
     const queryString = Object.keys(params)
         .filter((key) => params[key])
         .map((key) => {
-            return [key, params[key]].map(encodeURIComponent).join('=')
+            return [
+                key,
+                params[key],
+            ]
+                .map(encodeURIComponent)
+                .join('=')
         })
         .join('&')
     return `${url}?${queryString}`
@@ -121,7 +126,14 @@ const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
  */
-const convertObjectToMapRoles = (data: { [k: string]: Array<string> } | null | undefined): InputKeyValue[] => {
+const convertObjectToMapRoles = (
+    data:
+        | {
+              [k: string]: Array<string>
+          }
+        | null
+        | undefined,
+): InputKeyValue[] => {
     if (isNullOrUndefined(data)) return []
     const inputRoles: InputKeyValue[] = []
     const mapRoles = new Map(Object.entries(data))
@@ -142,7 +154,11 @@ const convertObjectToMapRoles = (data: { [k: string]: Array<string> } | null | u
  * @param datas - The array of key-value pairs to convert.
  * @returns An object with keys for each role type and an array of values for each role.
  */
-const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
+const convertRoles = (
+    datas: InputKeyValue[],
+): {
+    [key: string]: string[]
+} => {
     const contributors: string[] = []
     const committers: string[] = []
     const expecters: string[] = []
@@ -270,23 +286,38 @@ const readDateTime = (datePicker: string, timePicker: string): string => {
     return localDate.toISOString().slice(0, -5) + 'Z'
 }
 
-const extractEmailsAndFullNamesFromUsers = (users: Array<User>): { [k: string]: string } => {
+const extractEmailsAndFullNamesFromUsers = (
+    users: Array<User>,
+): {
+    [k: string]: string
+} => {
     return users.reduce(
         (result, user) => {
             result[user.email] = user.fullName ?? ''
             return result
         },
-        {} as { [k: string]: string },
+        {} as {
+            [k: string]: string
+        },
     )
 }
 
 const nullToEmptyString = (item: string | null | undefined): string => (item != null ? item : '')
+
+const isCrAllowed = (businessUnit: string, clearingState: string, clearingRequestDisabledGroups: string[] | null) => {
+    return (
+        clearingState.toLowerCase() !== 'closed' &&
+        clearingRequestDisabledGroups !== null &&
+        !(businessUnit in clearingRequestDisabledGroups)
+    )
+}
 
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
     createUrlWithParams,
     isNullEmptyOrUndefinedArray,
+    isCrAllowed,
     getIdFromUrl,
     getEmailsModerators,
     convertObjectToMap,

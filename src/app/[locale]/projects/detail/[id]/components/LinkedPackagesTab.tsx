@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -17,7 +18,7 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from '@/components/sw360'
-import { ErrorDetails, HttpStatus, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
+import { ErrorDetails, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
@@ -253,7 +254,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                     session.data.user.access_token,
                     signal,
                 )
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -292,7 +293,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

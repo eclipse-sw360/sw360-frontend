@@ -9,11 +9,11 @@
 
 'use client'
 
+import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { ReactNode } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { ReactNode } from 'react'
 
 interface ModerationRequestMap {
     [key: string]: string
@@ -70,7 +70,14 @@ function ModerationDecision({ data, moderationRequestPayload, setModerationReque
                     </tr>
                     <tr>
                         <td>
-                            {t('Comment on Moderation Decision')}: <span style={{ color: 'red' }}>*</span>
+                            {t('Comment on Moderation Decision')}:{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </td>
                         <td>
                             <textarea
@@ -78,7 +85,9 @@ function ModerationDecision({ data, moderationRequestPayload, setModerationReque
                                 id='moderationDecision.commentModerationRequestDecision'
                                 name='comment'
                                 aria-describedby={t('Comment on Moderation Decision')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={moderationRequestPayload.comment || ''}
                                 onChange={updateInputField}
                                 required
@@ -92,4 +101,6 @@ function ModerationDecision({ data, moderationRequestPayload, setModerationReque
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(ModerationDecision, [UserGroupType.SECURITY_USER])
+export default AccessControl(ModerationDecision, [
+    UserGroupType.SECURITY_USER,
+])

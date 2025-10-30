@@ -10,13 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, ReleaseDetail } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-
 import {
     Annotations,
     DocumentCreationInformation,
@@ -25,9 +23,12 @@ import {
     OtherLicensingInformationDetected,
     PackageInformation,
     RelationshipsBetweenSPDXElements,
+    ReleaseDetail,
     SnippetInformation,
     SPDX,
 } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 
 import styles from './spdx/CssButton.module.css'
 import EditAnnotationInformation from './spdx/EditAnnotationInformation'
@@ -96,16 +97,18 @@ const EditSPDXDocument = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined
@@ -223,10 +226,23 @@ const EditSPDXDocument = ({
                             ),
                         )
                         if (externalRefsDatas[0].referenceCategory === 'SECURITY') {
-                            setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
+                            setTypeCategory([
+                                'cpe22Type',
+                                'cpe23Type',
+                                'advisory',
+                                'fix',
+                                'url',
+                                'swid',
+                            ])
                             setIsTypeCateGoryEmpty(false)
                         } else if (externalRefsDatas[0].referenceCategory === 'PACKAGE-MANAGER') {
-                            setTypeCategory(['maven-central', 'npm', 'nuget', 'bower', 'purl'])
+                            setTypeCategory([
+                                'maven-central',
+                                'npm',
+                                'nuget',
+                                'bower',
+                                'purl',
+                            ])
                             setIsTypeCateGoryEmpty(false)
                         } else {
                             setTypeCategory([])
@@ -234,13 +250,22 @@ const EditSPDXDocument = ({
                         }
                         setIndexExternalRefsData(0)
                     } else {
-                        setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
+                        setTypeCategory([
+                            'cpe22Type',
+                            'cpe23Type',
+                            'advisory',
+                            'fix',
+                            'url',
+                            'swid',
+                        ])
                         setIsTypeCateGoryEmpty(false)
                     }
                 }
             })
             .catch((err) => console.error(err))
-    }, [releaseId])
+    }, [
+        releaseId,
+    ])
 
     const changeModeFull = () => {
         setIsModeFull(true)

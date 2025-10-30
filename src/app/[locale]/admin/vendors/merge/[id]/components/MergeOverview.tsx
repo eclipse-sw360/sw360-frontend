@@ -9,14 +9,15 @@
 
 'use client'
 
-import { ErrorDetails, HttpStatus, MergeOrSplitActionType, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { ErrorDetails, MergeOrSplitActionType, Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import MergeVendor from './MergeData'
 import VendorTable from './VendorsTable'
 
@@ -40,7 +41,11 @@ function GetPrevState(currentState: MergeOrSplitActionType): MergeOrSplitActionT
     }
 }
 
-export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNode {
+export default function MergeOverview({
+    id,
+}: Readonly<{
+    id: string
+}>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
@@ -55,7 +60,9 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleMergeVendor = async () => {
         try {
@@ -69,7 +76,7 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                 finalVendorPayload ?? {},
                 session.user.access_token,
             )
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 setLoading(false)
                 router.push(`/admin/vendors`)
             } else {
@@ -95,9 +102,9 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`vendors/${id}`, session.user.access_token, signal)
 
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status === HttpStatus.OK) {
+                } else if (response.status === StatusCodes.OK) {
                     const vendor = (await response.json()) as Vendor
                     setTargetVendor(vendor)
                 } else {
@@ -115,7 +122,9 @@ export default function MergeOverview({ id }: Readonly<{ id: string }>): ReactNo
         })()
 
         return () => controller.abort()
-    }, [id])
+    }, [
+        id,
+    ])
 
     return (
         <div className='mx-5 mt-3'>

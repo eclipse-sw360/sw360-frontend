@@ -10,16 +10,15 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 import { ReactNode, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
-
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
-import { HttpStatus } from '@/object-types'
 import { AUTH_PROVIDER } from '@/utils/env'
-import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 
 function AuthScreen(): ReactNode {
     const router = useRouter()
@@ -54,7 +53,7 @@ function AuthScreen(): ReactNode {
                 return
             }
 
-            if (result.status === HttpStatus.OK) {
+            if (result.status === StatusCodes.OK) {
                 router.push(`/${locale}/home`)
             } else {
                 setMessageShow(true)

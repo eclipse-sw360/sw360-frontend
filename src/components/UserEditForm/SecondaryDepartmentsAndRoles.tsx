@@ -8,13 +8,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { HttpStatus, UserGroupType, UserPayload } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
+import { UserGroupType, UserPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 
 interface SecondaryDepartmentAndRole {
     department: string
@@ -33,22 +34,30 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
 
     const onChangeDepartmentAndRole = useCallback(
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
-            const newSecondaryDepartmentsAndRoles = [...secondaryDepartmentsAndRoles]
+            const newSecondaryDepartmentsAndRoles = [
+                ...secondaryDepartmentsAndRoles,
+            ]
             newSecondaryDepartmentsAndRoles[index][e.target.name as keyof SecondaryDepartmentAndRole] = e.target.value
             setSecondaryDepartmentsAndRoles(newSecondaryDepartmentsAndRoles)
             updateUserPayload(newSecondaryDepartmentsAndRoles)
         },
-        [secondaryDepartmentsAndRoles],
+        [
+            secondaryDepartmentsAndRoles,
+        ],
     )
 
     const onDeleteRow = useCallback(
         (index: number) => {
-            const newSecondaryDepartmentsAndRoles = [...secondaryDepartmentsAndRoles]
+            const newSecondaryDepartmentsAndRoles = [
+                ...secondaryDepartmentsAndRoles,
+            ]
             newSecondaryDepartmentsAndRoles.splice(index, 1)
             setSecondaryDepartmentsAndRoles(newSecondaryDepartmentsAndRoles)
             updateUserPayload(newSecondaryDepartmentsAndRoles)
         },
-        [secondaryDepartmentsAndRoles],
+        [
+            secondaryDepartmentsAndRoles,
+        ],
     )
 
     /* Convert the secondaryDepartmentsAndRoles from the userPayload into list
@@ -64,7 +73,10 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
         if (userPayload.secondaryDepartmentsAndRoles === undefined) return []
 
         return Object.entries(userPayload.secondaryDepartmentsAndRoles).flatMap(([department, roles]) =>
-            Array.from(roles).map((role: string) => ({ department, role })),
+            Array.from(roles).map((role: string) => ({
+                department,
+                role,
+            })),
         )
     }
 
@@ -77,11 +89,11 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
         }
 
         const response = await ApiUtils.GET('users/departments', session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             return
         }
         const departments = (await response.json()) as string[]
@@ -105,10 +117,15 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
                 }
                 return current
             },
-            {} as { [key: string]: Array<string> },
+            {} as {
+                [key: string]: Array<string>
+            },
         )
 
-        setUserPayload((prev) => ({ ...prev, secondaryDepartmentsAndRoles: secondaryDepartmentsAndRolesMap }))
+        setUserPayload((prev) => ({
+            ...prev,
+            secondaryDepartmentsAndRoles: secondaryDepartmentsAndRolesMap,
+        }))
     }
 
     return (
@@ -171,7 +188,13 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
                 className='btn btn-secondary col-auto row mb-2 pb-2 px-2'
                 type='button'
                 onClick={() =>
-                    setSecondaryDepartmentsAndRoles([...secondaryDepartmentsAndRoles, { department: '', role: '' }])
+                    setSecondaryDepartmentsAndRoles([
+                        ...secondaryDepartmentsAndRoles,
+                        {
+                            department: '',
+                            role: '',
+                        },
+                    ])
                 }
             >
                 {t('Click to add Secondary Department and Roles')}

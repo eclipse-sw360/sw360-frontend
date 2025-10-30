@@ -10,12 +10,14 @@
 // License-Filename: LICENSE
 
 'use client'
-import { Embedded, HttpStatus, LicensePayload, LicenseType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
+import { Embedded, LicensePayload, LicenseType } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import styles from './LicenseDetails.module.css'
 
 interface Props {
@@ -52,7 +54,9 @@ const AddLicenseDetail = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.target.name === 'shortName') {
@@ -85,9 +89,9 @@ const AddLicenseDetail = ({
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`licenseTypes`, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const licenses = (await response.json()) as EmbeddedLicenseTypes
@@ -97,39 +101,60 @@ const AddLicenseDetail = ({
             }
         })()
         return () => controller.abort()
-    }, [params])
+    }, [
+        params,
+    ])
 
     return (
         <div
             className='row mb-4'
-            style={{ padding: '0px 12px', fontSize: '14px' }}
+            style={{
+                padding: '0px 12px',
+                fontSize: '14px',
+            }}
         >
             <div
                 className={`${styles['header']} mb-1`}
-                style={{ paddingTop: '0.5rem', height: '45px' }}
+                style={{
+                    paddingTop: '0.5rem',
+                    height: '45px',
+                }}
             >
                 <p
                     className='fw-bold mt-1'
-                    style={{ fontSize: '0.875rem' }}
+                    style={{
+                        fontSize: '0.875rem',
+                    }}
                 >
                     {t('License Details')}
                 </p>
             </div>
-            <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
+            <div
+                style={{
+                    backgroundColor: '#FFF',
+                    borderBottom: '1px solid #DCDCDC',
+                }}
+            >
                 <div
                     className='row'
-                    style={{ paddingBottom: '0.7rem' }}
+                    style={{
+                        paddingBottom: '0.7rem',
+                    }}
                 >
                     <div className='col-lg-4'>
                         <label
                             htmlFor='fullName'
                             className='form-label fw-bold'
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                            }}
                         >
                             {t('Full Name')}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>
@@ -152,12 +177,16 @@ const AddLicenseDetail = ({
                         <label
                             htmlFor='shortName'
                             className='form-label fw-bold'
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                            }}
                         >
                             {t('Short Name')}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>
@@ -182,7 +211,9 @@ const AddLicenseDetail = ({
                         <label
                             htmlFor='licenseTypeDatabaseId'
                             className='form-label fw-bold'
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                            }}
                         >
                             {t('License Type')}{' '}
                         </label>
@@ -208,16 +239,25 @@ const AddLicenseDetail = ({
                 </div>
             </div>
 
-            <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
+            <div
+                style={{
+                    backgroundColor: '#FFF',
+                    borderBottom: '1px solid #DCDCDC',
+                }}
+            >
                 <div
                     className='row'
-                    style={{ paddingBottom: '0.7rem' }}
+                    style={{
+                        paddingBottom: '0.7rem',
+                    }}
                 >
                     <div className='col-lg-4'>
                         <label
                             htmlFor='OSIApproved'
                             className='form-label fw-bold'
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                            }}
                         >
                             {t('OSI Approved')}{' '}
                         </label>
@@ -238,7 +278,9 @@ const AddLicenseDetail = ({
                         <label
                             htmlFor='FSFLibre'
                             className='form-label fw-bold'
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                            }}
                         >
                             {t('FSF Free Libre')}{' '}
                         </label>
@@ -268,7 +310,9 @@ const AddLicenseDetail = ({
                             <label
                                 className='form-label fw-bold'
                                 htmlFor='isChecked'
-                                style={{ cursor: 'pointer' }}
+                                style={{
+                                    cursor: 'pointer',
+                                }}
                             >
                                 {t('Is Checked')}
                             </label>
@@ -276,16 +320,26 @@ const AddLicenseDetail = ({
                     </div>
                 </div>
             </div>
-            <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC', width: '495px' }}>
+            <div
+                style={{
+                    backgroundColor: '#FFF',
+                    borderBottom: '1px solid #DCDCDC',
+                    width: '495px',
+                }}
+            >
                 <div
                     className='row'
-                    style={{ paddingBottom: '0.7rem' }}
+                    style={{
+                        paddingBottom: '0.7rem',
+                    }}
                 >
                     <div className='col-lg-12'>
                         <label
                             htmlFor='note'
                             className='form-label fw-bold'
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                            }}
                         >
                             {t('Note')}
                         </label>

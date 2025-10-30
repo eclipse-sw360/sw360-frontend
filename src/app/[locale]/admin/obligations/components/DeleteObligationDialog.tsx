@@ -11,14 +11,14 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     obligationId: string
@@ -34,17 +34,19 @@ function DeleteObligationDialog({ obligationId, show, setShow }: Props): ReactNo
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const deleteObligation = async () => {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.DELETE(`obligations/${obligationId}`, session.user.access_token)
-            if (response.status === HttpStatus.MULTIPLE_STATUS) {
+            if (response.status === StatusCodes.MULTI_STATUS) {
                 MessageService.success(t('Obligation deleted successfully'))
                 setShow(false)
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 MessageService.error(t('Error when processing'))
@@ -72,10 +74,16 @@ function DeleteObligationDialog({ obligationId, show, setShow }: Props): ReactNo
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
+                    <AiOutlineQuestionCircle
+                        style={{
+                            marginBottom: '5px',
+                        }}
+                    />
                     {t('Delete Obligation')} ?
                 </Modal.Title>
             </Modal.Header>

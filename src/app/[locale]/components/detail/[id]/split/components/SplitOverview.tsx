@@ -9,15 +9,16 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { Component, ErrorDetails, HttpStatus, MergeOrSplitActionType, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { redirect, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { redirect, useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Component, ErrorDetails, MergeOrSplitActionType, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import ComponentTable from '../../components/ComponentTable'
 import SplitComponentConfirmation from './ConfirmSplit'
 import SplitComponent from './SplitData'
@@ -47,7 +48,11 @@ interface SplitComponentPayload {
     targetComponent: Component
 }
 
-function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
+function SplitOverview({
+    id,
+}: Readonly<{
+    id: string
+}>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
     const [splitState, setSplitState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
@@ -61,7 +66,9 @@ function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleSplitComponent = async () => {
         try {
@@ -113,9 +120,9 @@ function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`components/${id}`, session.user.access_token, signal)
 
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status === HttpStatus.OK) {
+                } else if (response.status === StatusCodes.OK) {
                     const component = (await response.json()) as Component
                     setSourceComponent(component)
                 } else {
@@ -133,7 +140,9 @@ function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [id])
+    }, [
+        id,
+    ])
     return (
         <div className='mx-5 mt-3'>
             {sourceComponent ? (
@@ -254,4 +263,6 @@ function SplitOverview({ id }: Readonly<{ id: string }>): ReactNode {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(SplitOverview, [UserGroupType.SECURITY_USER])
+export default AccessControl(SplitOverview, [
+    UserGroupType.SECURITY_USER,
+])

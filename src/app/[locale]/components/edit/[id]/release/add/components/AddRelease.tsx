@@ -11,18 +11,18 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
     COTSDetails,
     CommonTabIds,
     Component,
-    HttpStatus,
     Release,
     ReleaseDetail,
     ReleaseTabIds,
@@ -31,7 +31,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
 import ReleaseAddSummary from './ReleaseAddSummary'
 import ReleaseAddTabs from './ReleaseAddTab'
 
@@ -92,11 +91,17 @@ function AddRelease({ componentId }: Props): ReactNode {
         fullName: '',
     })
 
-    const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
+    const [mainLicenses, setMainLicenses] = useState<{
+        [k: string]: string
+    }>({})
 
-    const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
+    const [otherLicenses, setOtherLicenses] = useState<{
+        [k: string]: string
+    }>({})
 
-    const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
+    const [cotsResponsible, setCotsResponsible] = useState<{
+        [k: string]: string
+    }>({})
 
     const { status } = useSession()
 
@@ -104,7 +109,9 @@ function AddRelease({ componentId }: Props): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         void (async () => {
@@ -112,9 +119,9 @@ function AddRelease({ componentId }: Props): ReactNode {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`components/${componentId}`, session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const component: Component = (await response.json()) as Component
@@ -129,18 +136,20 @@ function AddRelease({ componentId }: Props): ReactNode {
                 console.error(e)
             }
         })()
-    }, [componentId])
+    }, [
+        componentId,
+    ])
 
     const submit = async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.POST('releases', releasePayload, session.user.access_token)
-        if (response.status === HttpStatus.CREATED) {
+        if (response.status === StatusCodes.CREATED) {
             const release = (await response.json()) as ReleaseDetail
             MessageService.success(t('Release is created'))
             const releaseId: string = CommonUtils.getIdFromUrl(release._links.self.href)
             router.push('/components/editRelease/' + releaseId)
-        } else if (response.status === HttpStatus.CONFLICT) {
+        } else if (response.status === StatusCodes.CONFLICT) {
             MessageService.warn(t('Release is Duplicate'))
         } else {
             MessageService.error(t('Release Create failed'))
@@ -148,15 +157,27 @@ function AddRelease({ componentId }: Props): ReactNode {
     }
 
     const headerButtons = {
-        'Create Release': { link: '', type: 'primary', name: t('Create Release'), onClick: submit },
-        Cancel: { link: '/components/detail/' + componentId, type: 'secondary', name: t('Cancel') },
+        'Create Release': {
+            link: '',
+            type: 'primary',
+            name: t('Create Release'),
+            onClick: submit,
+        },
+        Cancel: {
+            link: '/components/detail/' + componentId,
+            type: 'secondary',
+            name: t('Cancel'),
+        },
     }
 
     return (
         <>
             <div
                 className='container'
-                style={{ maxWidth: '98vw', marginTop: '10px' }}
+                style={{
+                    maxWidth: '98vw',
+                    marginTop: '10px',
+                }}
             >
                 <div className='row'>
                     <div className='col-2 sidebar'>
@@ -169,7 +190,9 @@ function AddRelease({ componentId }: Props): ReactNode {
                     <div className='col'>
                         <div
                             className='row'
-                            style={{ marginBottom: '20px' }}
+                            style={{
+                                marginBottom: '20px',
+                            }}
                         >
                             <PageButtonHeader buttons={headerButtons}></PageButtonHeader>
                         </div>

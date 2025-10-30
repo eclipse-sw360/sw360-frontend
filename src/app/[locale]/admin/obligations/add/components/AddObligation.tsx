@@ -10,15 +10,17 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, Obligation } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
+import { Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 import ObligationForm from '../../components/AddOrEditObligation'
 
 function AddObligation(): ReactNode {
@@ -36,7 +38,9 @@ function AddObligation(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const isFieldValid = (field: string | null | undefined): boolean =>
         field !== null && field !== undefined && field.trim() !== ''
@@ -54,10 +58,10 @@ function AddObligation(): ReactNode {
             return
         }
         const response = await ApiUtils.POST('obligations', obligation, session.user.access_token)
-        if (response.status == HttpStatus.CREATED) {
+        if (response.status == StatusCodes.CREATED) {
             MessageService.success(t('Obligation added successfully'))
             router.push('/admin/obligations')
-        } else if (response.status == HttpStatus.CONFLICT) {
+        } else if (response.status == StatusCodes.CONFLICT) {
             MessageService.error(t('Obligation text has already taken'))
         } else {
             MessageService.error(t('Create obligation failed'))

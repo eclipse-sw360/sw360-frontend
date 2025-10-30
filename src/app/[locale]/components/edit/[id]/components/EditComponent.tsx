@@ -11,11 +11,12 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import {
@@ -26,11 +27,9 @@ import {
     ComponentPayload,
     DocumentTypes,
     Embedded,
-    HttpStatus,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
@@ -95,7 +94,9 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -110,9 +111,9 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                     Object.fromEntries(params),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const component = (await response.json()) as Component
@@ -131,9 +132,9 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                     Object.fromEntries(params),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const dataAttachments: EmbeddedAttachments = (await response.json()) as EmbeddedAttachments
@@ -146,17 +147,20 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         })()
 
         return () => controller.abort()
-    }, [params, componentId])
+    }, [
+        params,
+        componentId,
+    ])
 
     const updateComponent = async (payload?: ComponentPayload) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const dataToUpdate = payload ?? componentPayload
         const response = await ApiUtils.PATCH(`components/${componentId}`, dataToUpdate, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             MessageService.success(`Component ${dataToUpdate.name}  updated successfully!`)
             router.push('/components/detail/' + componentId)
-        } else if (response.status === HttpStatus.ACCEPTED) {
+        } else if (response.status === StatusCodes.ACCEPTED) {
             MessageService.success(t('Moderation request is created'))
             router.push('/components/detail/' + componentId)
         } else {
@@ -174,22 +178,22 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         })
         const response = await ApiUtils.POST(url, {}, session.user.access_token)
         switch (response.status) {
-            case HttpStatus.UNAUTHORIZED:
+            case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))
                 return 'DENIED'
-            case HttpStatus.FORBIDDEN:
+            case StatusCodes.FORBIDDEN:
                 MessageService.warn(t('Access Denied'))
                 return 'DENIED'
-            case HttpStatus.BAD_REQUEST:
+            case StatusCodes.BAD_REQUEST:
                 MessageService.warn(t('Invalid input or missing required parameters'))
                 return 'DENIED'
-            case HttpStatus.INTERNAL_SERVER_ERROR:
+            case StatusCodes.INTERNAL_SERVER_ERROR:
                 MessageService.error(t('Internal server error'))
                 return 'DENIED'
-            case HttpStatus.OK:
+            case StatusCodes.OK:
                 MessageService.info(t('You can write to the entity'))
                 return 'OK'
-            case HttpStatus.ACCEPTED:
+            case StatusCodes.ACCEPTED:
                 MessageService.info(t('You are allowed to perform write with MR'))
                 return 'ACCEPTED'
             default:
@@ -202,11 +206,9 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         const isEligible = await checkUpdateEligibility(componentId)
         if (isEligible === 'OK') {
             await updateComponent()
-        }
-        else if (isEligible === 'ACCEPTED') {
+        } else if (isEligible === 'ACCEPTED') {
             setShowCommentModal(true)
-        }
-        else if (isEligible === 'DENIED') {
+        } else if (isEligible === 'DENIED') {
             return
         }
     }
@@ -228,7 +230,11 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
             name: t('Delete Component'),
             onClick: handleDeleteComponent,
         },
-        Cancel: { link: '/components/detail/' + componentId, type: 'secondary', name: t('Cancel') },
+        Cancel: {
+            link: '/components/detail/' + componentId,
+            type: 'secondary',
+            name: t('Cancel'),
+        },
     }
 
     return (
@@ -258,7 +264,9 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                         <div className='col'>
                             <div
                                 className='row'
-                                style={{ marginBottom: '20px' }}
+                                style={{
+                                    marginBottom: '20px',
+                                }}
                             >
                                 <PageButtonHeader
                                     title={component.name}

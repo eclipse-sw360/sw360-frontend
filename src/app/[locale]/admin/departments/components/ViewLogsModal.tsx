@@ -11,12 +11,12 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useCallback, useEffect, useState, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     show: boolean
@@ -34,7 +34,9 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchLogFiles = useCallback(async () => {
         const session = await getSession()
@@ -42,7 +44,7 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
             return signOut()
         }
         const response = await ApiUtils.GET('departments/logFiles', session.user.access_token)
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             return
         }
         const logFiles = (await response.json()) as string[]
@@ -68,22 +70,28 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
             `departments/logFileContent?date=${selectedDate}`,
             session.user.access_token,
         )
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             setLogFileContents([])
             return
         }
         const logFileContents = (await response.json()) as string[]
         setLogFileContents(logFileContents)
-    }, [selectedDate])
+    }, [
+        selectedDate,
+    ])
 
     useEffect(() => {
         if (show !== true) return
         fetchLogFiles().catch((err) => console.error(err))
-    }, [show])
+    }, [
+        show,
+    ])
 
     useEffect(() => {
         fetchLogFileContentBySelectedDate().catch((err) => console.error(err))
-    }, [selectedDate])
+    }, [
+        selectedDate,
+    ])
 
     const onDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedDate(event.target.value)

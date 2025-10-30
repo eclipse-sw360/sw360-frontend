@@ -9,11 +9,11 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-
-import { ProjectPayload } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
-
 import type { JSX } from 'react'
+
+import { useConfigValue } from '@/contexts'
+import { ProjectPayload, UIConfigKeys } from '@/object-types'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -23,6 +23,10 @@ interface Props {
 export default function Clearing({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
+
+    // Configs from backend
+    const projectClearingTeams = useConfigValue(UIConfigKeys.UI_CLEARING_TEAMS) as string[] | null
+    const unknownClearingTeamEnabled = useConfigValue(UIConfigKeys.UI_CLEARING_TEAM_UNKNOWN_ENABLED) as boolean | null
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -74,21 +78,32 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         <select
                             className='form-select'
                             id='addProjects.clearingTeam'
-                            defaultValue='CT'
                             aria-label='Clearing Team'
-                            name='businessUnit'
-                            value={projectPayload.businessUnit}
+                            name='clearingTeam'
+                            value={projectPayload.clearingTeam}
                             onChange={updateInputField}
                         >
-                            <option value='CT'>CT</option>
-                            <option value='GP'>GP</option>
-                            <option value='IOT'>IOT</option>
-                            <option value='MO'>MO</option>
-                            <option value='MO ITS'>MO ITS</option>
-                            <option value='SGRE'>SGRE</option>
-                            <option value='SHS'>SHS</option>
-                            <option value='SI'>SI</option>
-                            <option value='SOP'>SOP</option>
+                            {unknownClearingTeamEnabled && (
+                                <option
+                                    value={'Unknown'}
+                                    selected={
+                                        projectPayload.clearingTeam === undefined ||
+                                        projectPayload.clearingTeam === null ||
+                                        projectPayload.clearingTeam.length < 1
+                                    }
+                                >
+                                    {t('Unknown')}
+                                </option>
+                            )}
+                            {projectClearingTeams &&
+                                projectClearingTeams.map((team) => (
+                                    <option
+                                        value={team}
+                                        selected={projectPayload.clearingTeam === team}
+                                    >
+                                        {team}
+                                    </option>
+                                ))}
                         </select>
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -128,7 +143,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         className='form-control'
                         aria-label='Clearing Summary'
                         id='addProjects.clearingSummary'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='clearingSummary'
                         value={projectPayload.clearingSummary}
                         onChange={updateInputField}
@@ -146,7 +163,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         className='form-control'
                         id='addProjects.specialRiskOpenSourceSoftware'
                         aria-label='Special Risk Open Source Software'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='specialRisksOSS'
                         value={projectPayload.specialRisksOSS}
                         onChange={updateInputField}
@@ -164,7 +183,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         className='form-control'
                         id='addProjects.generalRiskThirdPartySoftware'
                         aria-label='General risk 3rd party software'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='generalRisks3rdParty'
                         value={projectPayload.generalRisks3rdParty}
                         onChange={updateInputField}
@@ -182,7 +203,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         className='form-control'
                         id='addProjects.specialRiskThirdPartySoftware'
                         aria-label='Special risk 3rd party software'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='specialRisks3rdParty'
                         value={projectPayload.specialRisks3rdParty}
                         onChange={updateInputField}
@@ -200,7 +223,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         className='form-control'
                         id='addProjects.salesAndDeliveryChannels'
                         aria-label='Sales and delivery channels'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='deliveryChannels'
                         value={projectPayload.deliveryChannels}
                         onChange={updateInputField}
@@ -218,7 +243,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         className='form-control'
                         id='addProjects.remarksAdditionalRequirements'
                         aria-label='Remarks additional requirements'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='remarksAdditionalRequirements'
                         value={projectPayload.remarksAdditionalRequirements}
                         onChange={updateInputField}

@@ -8,15 +8,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useTranslations } from 'next-intl'
 
-import { HttpStatus, ProjectPayload } from '@/object-types'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import type { JSX } from 'react'
+import { ProjectPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
-
-import type { JSX } from 'react'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -42,7 +42,7 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const url = 'projects/licenseInfoHeader'
             const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 const data = (await response.json()) as LicenseInfoHeader
                 setProjectPayload({
                     ...projectPayload,
@@ -76,7 +76,9 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
                         className='form-control'
                         id='addProjects.licenseInfoHeader'
                         aria-label='License Info Header'
-                        style={{ height: '500px' }}
+                        style={{
+                            height: '500px',
+                        }}
                         name='licenseInfoHeaderText'
                         value={projectPayload.licenseInfoHeaderText}
                         onChange={updateInputField}

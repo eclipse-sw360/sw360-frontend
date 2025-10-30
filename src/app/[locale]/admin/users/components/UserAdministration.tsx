@@ -9,22 +9,23 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, User } from '@/object-types'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import React, { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
+import { TfiFiles } from 'react-icons/tfi'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import dynamic from 'next/dynamic'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useCallback, useEffect, useMemo, useState, type JSX } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
-import { TfiFiles } from 'react-icons/tfi'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
 
@@ -47,7 +48,9 @@ export default function UserAdminstration(): JSX.Element {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const handleAddUsers = () => {
         router.push('/admin/users/add')
@@ -74,10 +77,10 @@ export default function UserAdminstration(): JSX.Element {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = await response.json()
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Unauthorized request'))
             return
         } else {
@@ -243,7 +246,9 @@ export default function UserAdminstration(): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -257,7 +262,12 @@ export default function UserAdminstration(): JSX.Element {
         number: 0,
     })
     const [userData, setUserData] = useState<User[]>(() => [])
-    const memoizedData = useMemo(() => userData, [userData])
+    const memoizedData = useMemo(
+        () => userData,
+        [
+            userData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -277,14 +287,17 @@ export default function UserAdminstration(): JSX.Element {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `users`,
                     Object.fromEntries(
-                        Object.entries({ ...searchParams, ...pageableQueryParam }).map(([key, value]) => [
+                        Object.entries({
+                            ...searchParams,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -310,7 +323,11 @@ export default function UserAdminstration(): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, params.toString(), session])
+    }, [
+        pageableQueryParam,
+        params.toString(),
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

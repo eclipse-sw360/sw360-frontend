@@ -8,7 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { AuthToken, HttpStatus, OAuthClient, RequestContent, UserCredentialInfo } from '@/object-types'
+import { StatusCodes } from 'http-status-codes'
+import { AuthToken, OAuthClient, RequestContent, UserCredentialInfo } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 
 const generateToken = async (userData: UserCredentialInfo): Promise<null | AuthToken> => {
@@ -16,7 +17,11 @@ const generateToken = async (userData: UserCredentialInfo): Promise<null | AuthT
         const clientManagementURL: string = SW360_API_URL + '/authorization/client-management'
         let credentials: string = Buffer.from(`${userData.username}:${userData.password}`).toString('base64')
 
-        const opts: RequestContent = { method: 'GET', headers: {}, body: null }
+        const opts: RequestContent = {
+            method: 'GET',
+            headers: {},
+            body: null,
+        }
 
         opts.headers['Content-Type'] = 'application/json'
         opts.headers['Authorization'] = `Basic ${credentials}`
@@ -24,7 +29,7 @@ const generateToken = async (userData: UserCredentialInfo): Promise<null | AuthT
         let oAuthClient: OAuthClient | null = null
 
         const response = await fetch(clientManagementURL, opts)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const oauth_clients = (await response.json()) as Array<OAuthClient>
             oAuthClient = oauth_clients[0]
         }
@@ -45,7 +50,7 @@ const generateToken = async (userData: UserCredentialInfo): Promise<null | AuthT
 
         let sw360token: AuthToken | null = null
         const tokenResponse = await fetch(authorizationURL, opts)
-        if (tokenResponse.status == HttpStatus.OK) {
+        if (tokenResponse.status == StatusCodes.OK) {
             sw360token = (await tokenResponse.json()) as AuthToken
         }
         return sw360token

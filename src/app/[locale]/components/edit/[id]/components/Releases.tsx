@@ -11,18 +11,18 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-
+import { Spinner } from 'react-bootstrap'
 import { SW360Table } from '@/components/sw360'
-import { Embedded, ErrorDetails, HttpStatus, LinkedRelease, ReleaseLink } from '@/object-types'
+import { Embedded, ErrorDetails, LinkedRelease, ReleaseLink } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { Spinner } from 'react-bootstrap'
 
 interface Props {
     componentId: string
@@ -39,7 +39,9 @@ const Releases = ({ componentId }: Props): ReactNode => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const columns = useMemo<ColumnDef<ReleaseLink>[]>(
         () => [
@@ -72,11 +74,18 @@ const Releases = ({ componentId }: Props): ReactNode => {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [releaseData, setReleaseData] = useState<ReleaseLink[]>(() => [])
-    const memoizedData = useMemo(() => releaseData, [releaseData])
+    const memoizedData = useMemo(
+        () => releaseData,
+        [
+            releaseData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -97,7 +106,7 @@ const Releases = ({ componentId }: Props): ReactNode => {
                     session.data.user.access_token,
                     signal,
                 )
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -121,7 +130,10 @@ const Releases = ({ componentId }: Props): ReactNode => {
         })()
 
         return () => controller.abort()
-    }, [session, componentId])
+    }, [
+        session,
+        componentId,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

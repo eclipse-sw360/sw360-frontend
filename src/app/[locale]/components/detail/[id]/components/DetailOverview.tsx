@@ -11,9 +11,11 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useParams } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
@@ -30,7 +32,6 @@ import {
     DocumentTypes,
     Embedded,
     ErrorDetails,
-    HttpStatus,
     LinkedVulnerability,
     PageableQueryParam,
     PaginationMeta,
@@ -66,22 +67,26 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const fetchData = useCallback(
         async (url: string) => {
             if (CommonUtils.isNullOrUndefined(session.data)) return
             const response = await ApiUtils.GET(url, session.data.user.access_token)
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
                 return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 return undefined
             }
         },
-        [session],
+        [
+            session,
+        ],
     )
 
     const downloadBundle = async () => {
@@ -123,7 +128,10 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 }
             })
             .catch((err) => console.error(err))
-    }, [componentId, fetchData])
+    }, [
+        componentId,
+        fetchData,
+    ])
 
     const getSubcribersEmail = (component: Component) => {
         return component._embedded !== undefined && component._embedded['sw360:subscribers'] !== undefined
@@ -213,7 +221,12 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         number: 0,
     })
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
-    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -231,11 +244,16 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${componentId}`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -265,7 +283,11 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, componentId, session])
+    }, [
+        pageableQueryParam,
+        componentId,
+        session,
+    ])
 
     const param = useParams()
     const locale = (param.locale as string) || 'en'
@@ -275,7 +297,12 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         component && (
             <>
                 <Breadcrumb className='container page-content'>
-                    <Breadcrumb.Item href={componentsPath}>{t('Components')}</Breadcrumb.Item>
+                    <Breadcrumb.Item
+                        linkAs={Link}
+                        href={componentsPath}
+                    >
+                        {t('Components')}
+                    </Breadcrumb.Item>
                     <Breadcrumb.Item active>{component.name}</Breadcrumb.Item>
                 </Breadcrumb>
                 <div className='container page-content'>
@@ -291,7 +318,9 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                         <div className='col'>
                             <div
                                 className='row'
-                                style={{ marginBottom: '20px' }}
+                                style={{
+                                    marginBottom: '20px',
+                                }}
                             >
                                 <PageButtonHeader
                                     title={component.name}
@@ -326,7 +355,10 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                             <a
                                                 className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
                                                 onClick={() => setChangelogTab('list-change')}
-                                                style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                                style={{
+                                                    color: '#F7941E',
+                                                    fontWeight: 'bold',
+                                                }}
                                             >
                                                 {t('Change Log')}
                                             </a>
@@ -337,7 +369,10 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                                         setChangelogTab('view-log')
                                                     }
                                                 }}
-                                                style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                                style={{
+                                                    color: '#F7941E',
+                                                    fontWeight: 'bold',
+                                                }}
                                             >
                                                 {t('Changes')}
                                             </a>
@@ -406,7 +441,9 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                         />
                                         <div
                                             id='cardScreen'
-                                            style={{ padding: '0px' }}
+                                            style={{
+                                                padding: '0px',
+                                            }}
                                         ></div>
                                     </div>
                                 </div>

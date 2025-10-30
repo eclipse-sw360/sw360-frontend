@@ -11,24 +11,25 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
+import { useConfigValue } from '@/contexts'
 import {
-    COTSDetails,
     ClearingInformation,
+    COTSDetails,
     DocumentTypes,
     ECCInformation,
     InputKeyValue,
     Release,
     ReleaseDetail,
+    UIConfigKeys,
     Vendor,
 } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
     release: ReleaseDetail
@@ -38,10 +39,22 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: { [k: string]: string }
-    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses: { [k: string]: string }
-    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    mainLicenses: {
+        [k: string]: string
+    }
+    setMainLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    otherLicenses: {
+        [k: string]: string
+    }
+    setOtherLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
     cotsDetails: COTSDetails
     eccInformation?: ECCInformation
     clearingInformation?: ClearingInformation
@@ -68,15 +81,27 @@ function ReleaseEditSummary({
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
 
     // Store users data in format {'email': 'fullName'}
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
     const { status } = useSession()
+
+    // Configs from backend
+    const releaseExternalIdSuggestions =
+        useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) as string[])
+            : undefined
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -188,7 +213,9 @@ function ReleaseEditSummary({
             >
                 <div
                     className='col'
-                    style={{ fontSize: '0.875rem' }}
+                    style={{
+                        fontSize: '0.875rem',
+                    }}
                 >
                     <ReleaseSummary
                         actionType={actionType}
@@ -221,6 +248,7 @@ function ReleaseEditSummary({
                             setData={setExternalIds}
                             data={externalIds}
                             setObject={setDataExternalIds}
+                            keySuggestions={releaseExternalIdSuggestions}
                         />
                     </div>
                     <div className='row mb-4'>

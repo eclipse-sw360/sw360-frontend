@@ -10,29 +10,31 @@
 
 'use client'
 
-import LicenseClearing from '@/components/LicenseClearing'
-import {
-    Embedded,
-    ErrorDetails,
-    HttpStatus,
-    PageableQueryParam,
-    PaginationMeta,
-    Project as TypeProject,
-    UserGroupType,
-} from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import { IoMdClipboard } from 'react-icons/io'
 import { MdDeleteOutline, MdOutlineTask } from 'react-icons/md'
+import LicenseClearing from '@/components/LicenseClearing'
+import { useConfigValue } from '@/contexts'
+import {
+    Embedded,
+    ErrorDetails,
+    PageableQueryParam,
+    PaginationMeta,
+    Project as TypeProject,
+    UIConfigKeys,
+    UserGroupType,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
@@ -56,6 +58,11 @@ function Project(): JSX.Element {
         importType: 'SPDX',
     })
 
+    // Configs from backend
+    const clearingRequestDisabledGroups = useConfigValue(
+        UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
+    ) as string[] | null
+
     const [showCreateCRModal, setShowCreateCRModal] = useState(false)
     const [createCRProjectId, setCreateCRProjectId] = useState('')
 
@@ -66,7 +73,9 @@ function Project(): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleDeleteProject = (projectId: string) => {
         setDeleteProjectId(projectId)
@@ -201,6 +210,11 @@ function Project(): JSX.Element {
                     const projectClearingRequestId = row.original.clearingRequestId
                     const clearingState = row.original.clearingState
                     const isOpenClearingRequest = clearingState === 'OPEN'
+                    const crIsAllowed = CommonUtils.isCrAllowed(
+                        row.original.businessUnit ?? '',
+                        row.original.clearingState ?? '',
+                        clearingRequestDisabledGroups,
+                    )
                     return (
                         <>
                             {id && (
@@ -228,7 +242,7 @@ function Project(): JSX.Element {
                                                 />
                                             </span>
                                         </OverlayTrigger>
-                                    ) : (
+                                    ) : crIsAllowed ? (
                                         <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
                                             <span
                                                 className='d-inline-block'
@@ -237,6 +251,23 @@ function Project(): JSX.Element {
                                                     setShowCreateCRModal(true)
                                                 }}
                                             >
+                                                <MdOutlineTask
+                                                    size={25}
+                                                    className='btn-icon overlay-trigger'
+                                                />
+                                            </span>
+                                        </OverlayTrigger>
+                                    ) : (
+                                        <OverlayTrigger
+                                            overlay={
+                                                <Tooltip>
+                                                    {t(
+                                                        'CR is disabled for projects with specific Business unit or PRIVATE or CLOSED projects',
+                                                    )}
+                                                </Tooltip>
+                                            }
+                                        >
+                                            <span className={'d-inline-block'}>
                                                 <MdOutlineTask
                                                     size={25}
                                                     className='btn-icon overlay-trigger'
@@ -275,7 +306,9 @@ function Project(): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -289,7 +322,12 @@ function Project(): JSX.Element {
         number: 0,
     })
     const [projectData, setProjectData] = useState<TypeProject[]>(() => [])
-    const memoizedData = useMemo(() => projectData, [projectData])
+    const memoizedData = useMemo(
+        () => projectData,
+        [
+            projectData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -310,14 +348,17 @@ function Project(): JSX.Element {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects`,
                     Object.fromEntries(
-                        Object.entries({ ...searchParams, ...pageableQueryParam }).map(([key, value]) => [
+                        Object.entries({
+                            ...searchParams,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -342,7 +383,10 @@ function Project(): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, params.toString()])
+    }, [
+        pageableQueryParam,
+        params.toString(),
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -421,13 +465,13 @@ function Project(): JSX.Element {
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             if (withLinkedRelease === false) {
                 const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             } else {
@@ -435,13 +479,13 @@ function Project(): JSX.Element {
                     'reports?module=PROJECTS&withLinkedRelease=true',
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             }
@@ -607,14 +651,20 @@ function Project(): JSX.Element {
                                             <Dropdown.Menu>
                                                 <Dropdown.Item
                                                     onClick={() =>
-                                                        setImportSBOMMetadata({ importType: 'SPDX', show: true })
+                                                        setImportSBOMMetadata({
+                                                            importType: 'SPDX',
+                                                            show: true,
+                                                        })
                                                     }
                                                 >
                                                     {t('SPDX')}
                                                 </Dropdown.Item>
                                                 <Dropdown.Item
                                                     onClick={() =>
-                                                        setImportSBOMMetadata({ importType: 'CycloneDx', show: true })
+                                                        setImportSBOMMetadata({
+                                                            importType: 'CycloneDx',
+                                                            show: true,
+                                                        })
                                                     }
                                                 >
                                                     {t('CycloneDX')}
@@ -627,14 +677,18 @@ function Project(): JSX.Element {
                                         <Dropdown.Menu>
                                             <Dropdown.Item
                                                 onClick={() =>
-                                                    void exportProjectSpreadsheet({ withLinkedRelease: false })
+                                                    void exportProjectSpreadsheet({
+                                                        withLinkedRelease: false,
+                                                    })
                                                 }
                                             >
                                                 {t('Projects only')}
                                             </Dropdown.Item>
                                             <Dropdown.Item
                                                 onClick={() =>
-                                                    void exportProjectSpreadsheet({ withLinkedRelease: true })
+                                                    void exportProjectSpreadsheet({
+                                                        withLinkedRelease: true,
+                                                    })
                                                 }
                                             >
                                                 {t('Projects with linked releases')}

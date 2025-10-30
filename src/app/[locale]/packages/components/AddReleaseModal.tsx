@@ -9,17 +9,18 @@
 
 'use client'
 
-import { Embedded, HttpStatus, Package, ReleaseDetail } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
-import Link from 'next/link'
-import { SetStateAction, useEffect, useMemo, useRef, useState, type JSX } from 'react'
+import { type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
+import { Embedded, Package, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 type RowData = (string | SummaryReleaseInfo)[]
@@ -61,7 +62,9 @@ export default function AddReleaseModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const displayMessage = (variant: string, message: JSX.Element) => {
         setVariant(variant)
@@ -85,18 +88,18 @@ export default function AddReleaseModal({
                 allDetails: 'true',
             })
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 displayMessage('warning', <>{t('Unauthorized request')}</>)
                 setLoading(false)
                 return signOut()
             }
-            if (response.status === HttpStatus.NO_CONTENT) {
+            if (response.status === StatusCodes.NO_CONTENT) {
                 displayMessage('info', <>{t('No matching data found')}</>)
                 setLoading(false)
                 return
             }
 
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 displayMessage('danger', <>{t('Error while processing')}</>)
                 return
             }
@@ -185,7 +188,9 @@ export default function AddReleaseModal({
                         </div>
                     )
                 },
-                meta: { width: '8%' },
+                meta: {
+                    width: '8%',
+                },
             },
             {
                 id: 'vendor',
@@ -195,7 +200,12 @@ export default function AddReleaseModal({
             {
                 id: 'componentName',
                 header: t('Component Name'),
-                accessorFn: (row) => (row[2] as { name: string }).name,
+                accessorFn: (row) =>
+                    (
+                        row[2] as {
+                            name: string
+                        }
+                    ).name,
                 cell: ({ row }) => {
                     const data = row.original[2] as {
                         name: string
@@ -207,7 +217,12 @@ export default function AddReleaseModal({
             {
                 id: 'releaseVersion',
                 header: t('Release version'),
-                accessorFn: (row) => (row[3] as { releaseVersion: string }).releaseVersion,
+                accessorFn: (row) =>
+                    (
+                        row[3] as {
+                            releaseVersion: string
+                        }
+                    ).releaseVersion,
                 cell: ({ row }) => {
                     const data = row.original[3] as {
                         releaseVersion: string
@@ -227,7 +242,10 @@ export default function AddReleaseModal({
                 accessorFn: (row) => row[5] as string,
             },
         ],
-        [t, interimReleaseId],
+        [
+            t,
+            interimReleaseId,
+        ],
     )
 
     const table = useReactTable({

@@ -9,11 +9,16 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import {
     ActionType,
     ErrorDetails,
-    HttpStatus,
     NestedRows,
     ObligationData,
     ObligationEntry,
@@ -25,11 +30,6 @@ import {
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
-import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useEffect, useMemo, useState, type JSX } from 'react'
-import { Spinner } from 'react-bootstrap'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import UpdateCommentModal from './UpdateCommentModal'
 
@@ -64,9 +64,20 @@ export default function ObligationTab({
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
-    const detailColumns = useMemo<ColumnDef<NestedRows<[string, ObligationData]>>[]>(
+    const detailColumns = useMemo<
+        ColumnDef<
+            NestedRows<
+                [
+                    string,
+                    ObligationData,
+                ]
+            >
+        >[]
+    >(
         () => [
             {
                 id: 'expand',
@@ -131,10 +142,21 @@ export default function ObligationTab({
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
-    const editColumns = useMemo<ColumnDef<NestedRows<[string, ObligationData]>>[]>(
+    const editColumns = useMemo<
+        ColumnDef<
+            NestedRows<
+                [
+                    string,
+                    ObligationData,
+                ]
+            >
+        >[]
+    >(
         () => [
             {
                 id: 'expand',
@@ -246,7 +268,10 @@ export default function ObligationTab({
                 },
             },
         ],
-        [t, payload],
+        [
+            t,
+            payload,
+        ],
     )
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -260,8 +285,20 @@ export default function ObligationTab({
         totalPages: 0,
         number: 0,
     })
-    const [obligationData, setObligationData] = useState<NestedRows<[string, ObligationData]>[]>(() => [])
-    const memoizedData = useMemo(() => obligationData, [obligationData])
+    const [obligationData, setObligationData] = useState<
+        NestedRows<
+            [
+                string,
+                ObligationData,
+            ]
+        >[]
+    >(() => [])
+    const memoizedData = useMemo(
+        () => obligationData,
+        [
+            obligationData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -288,11 +325,14 @@ export default function ObligationTab({
                                     : obligationType === ObligationType.COMPONENT_OBLIGATION
                                       ? 'component'
                                       : 'project',
-                        }).map(([key, value]) => [key, String(value)]),
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -301,7 +341,20 @@ export default function ObligationTab({
                 setPaginationMeta(data.page)
                 setObligationData(
                     Object.entries(data.obligations).map(
-                        (o) => ({ node: o, children: [{ node: o }] }) as NestedRows<[string, ObligationData]>,
+                        (o) =>
+                            ({
+                                node: o,
+                                children: [
+                                    {
+                                        node: o,
+                                    },
+                                ],
+                            }) as NestedRows<
+                                [
+                                    string,
+                                    ObligationData,
+                                ]
+                            >,
                     ),
                 )
             } catch (error) {
@@ -317,7 +370,10 @@ export default function ObligationTab({
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, session])
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
     const detailTable = useReactTable({
         data: memoizedData,

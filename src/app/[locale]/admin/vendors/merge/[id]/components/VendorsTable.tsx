@@ -9,22 +9,26 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
 export default function VendorTable({
     vendor,
     setVendor,
-}: Readonly<{ vendor: Vendor | null; setVendor: Dispatch<SetStateAction<null | Vendor>> }>): ReactNode {
+}: Readonly<{
+    vendor: Vendor | null
+    setVendor: Dispatch<SetStateAction<null | Vendor>>
+}>): ReactNode {
     const t = useTranslations('default')
     const session = useSession()
 
@@ -32,7 +36,9 @@ export default function VendorTable({
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const columns = useMemo<ColumnDef<Vendor>[]>(
         () => [
@@ -81,7 +87,10 @@ export default function VendorTable({
                 },
             },
         ],
-        [t, vendor],
+        [
+            t,
+            vendor,
+        ],
     )
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -96,7 +105,12 @@ export default function VendorTable({
         number: 0,
     })
     const [vendorData, setVendorData] = useState<Vendor[]>(() => [])
-    const memoizedData = useMemo(() => vendorData, [vendorData])
+    const memoizedData = useMemo(
+        () => vendorData,
+        [
+            vendorData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -114,10 +128,15 @@ export default function VendorTable({
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vendors`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -142,7 +161,10 @@ export default function VendorTable({
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, session])
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

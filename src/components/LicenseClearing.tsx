@@ -9,12 +9,13 @@
 
 'use client'
 
-import { ErrorDetails, HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { ErrorDetails } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface LicenseClearingData {
     'Release Count': number
@@ -36,7 +37,7 @@ export default function LicenseClearing({ projectId }: { projectId: string }): R
                     session.user.access_token,
                     signal,
                 )
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -53,7 +54,9 @@ export default function LicenseClearing({ projectId }: { projectId: string }): R
             }
         })()
         return () => controller.abort()
-    }, [projectId])
+    }, [
+        projectId,
+    ])
 
     return (
         <>

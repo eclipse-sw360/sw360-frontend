@@ -11,8 +11,8 @@
 
 import {
     Attachment,
-    COTSDetails,
     ClearingInformation,
+    COTSDetails,
     ECCInformation,
     LicenseDetail,
     ReleaseLink,
@@ -20,6 +20,7 @@ import {
     User,
     Vendor,
 } from '@/object-types'
+import Package from './Package'
 import DocumentCreationInformation from './spdx/DocumentCreationInformation'
 import PackageInformation from './spdx/PackageInformation'
 import SPDXDocument from './spdx/SPDXDocument'
@@ -31,14 +32,20 @@ export default interface ReleaseDetail {
     releaseDate?: string
     description?: string
     componentType?: string
-    externalIds?: { [k: string]: string }
-    additionalData?: { [k: string]: string }
+    externalIds?: {
+        [k: string]: string
+    }
+    additionalData?: {
+        [k: string]: string
+    }
     createdOn?: string
     repository?: Repository
     mainlineState?: string
     clearingState: string
     createdBy?: string
-    roles?: { [k: string]: Array<string> }
+    roles?: {
+        [k: string]: Array<string>
+    }
     mainLicenseIds?: string[]
     otherLicenseIds?: string[]
     clearingInformation?: ClearingInformation
@@ -47,7 +54,9 @@ export default interface ReleaseDetail {
     softwarePlatforms?: string[]
     sourceCodeDownloadurl?: string
     binaryDownloadurl?: string
-    releaseIdToRelationship?: { [k: string]: string }
+    releaseIdToRelationship?: {
+        [k: string]: string
+    }
     modifiedOn?: string
     cpeId?: string
     eccInformation?: ECCInformation
@@ -82,6 +91,7 @@ export default interface ReleaseDetail {
         'sw360:subscribers'?: User[]
         'sw360:documentCreationInformation'?: DocumentCreationInformation
         'sw360:packageInformation'?: PackageInformation
+        'sw360:packages'?: Package[]
         'sw360:spdxDocument'?: SPDXDocument
     }
 }

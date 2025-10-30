@@ -30,6 +30,7 @@
       "next-sw360": ["./src/components/sw360"],
       "@/app/*": ["./src/app/*"],
       "@/assets/*": ["./src/assets/*"],
+      "@/contexts": ["./src/contexts"],
       "@/components/*": ["./src/components/*"],
       "@/constants": ["./src/object-types/Constants"],
       "@/hooks": ["./src/hooks"],

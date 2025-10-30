@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -17,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { _, ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { Embedded, ErrorDetails, HttpStatus, ModerationRequest } from '@/object-types'
+import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
@@ -190,7 +191,7 @@ function OpenModerationRequest(): ReactNode {
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -267,23 +268,21 @@ function OpenModerationRequest(): ReactNode {
                         {t('Bulk Actions')}
                     </button>
                 </div>
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <div className='mb-3'>
-                        {table ? (
-                            <>
-                                <ClientSidePageSizeSelector table={table} />
-                                <SW360Table
-                                    table={table}
-                                    showProcessing={showProcessing}
-                                />
-                                <ClientSideTableFooter table={table} />
-                            </>
-                        ) : (
-                            <div className='col-12 mt-1 text-center'>
-                                <Spinner className='spinner' />
-                            </div>
-                        )}
-                    </div>
+                <div className='mb-3'>
+                    {table ? (
+                        <>
+                            <ClientSidePageSizeSelector table={table} />
+                            <SW360Table
+                                table={table}
+                                showProcessing={showProcessing}
+                            />
+                            <ClientSideTableFooter table={table} />
+                        </>
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
                 </div>
             </div>
         </>

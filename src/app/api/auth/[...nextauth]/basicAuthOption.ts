@@ -7,12 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { CREDENTIAL_PROVIDER } from '@/constants'
-import { User as AppUser, HttpStatus, UserCredentialInfo } from '@/object-types'
-import AuthService from '@/services/auth.service'
-import { ApiUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { NextAuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { CREDENTIAL_PROVIDER } from '@/constants'
+import { User as AppUser, UserCredentialInfo } from '@/object-types'
+import AuthService from '@/services/auth.service'
+import { ApiUtils } from '@/utils'
 
 const basicAuthOption: NextAuthOptions = {
     providers: [
@@ -34,11 +35,15 @@ const basicAuthOption: NextAuthOptions = {
                     const authToken = AuthService.generateBasicToken(userCredential)
 
                     const response = await ApiUtils.GET(`users/${username}`, authToken)
-                    if (response.status !== HttpStatus.OK) {
+                    if (response.status !== StatusCodes.OK) {
                         throw new Error('Error while fetching User Group')
                     }
                     const data = (await response.json()) as AppUser
-                    return { access_token: authToken, userGroup: data.userGroup, email: username } as User
+                    return {
+                        access_token: authToken,
+                        userGroup: data.userGroup,
+                        email: username,
+                    } as User
                 } catch (e) {
                     console.error(e)
                     return null
@@ -53,7 +58,10 @@ const basicAuthOption: NextAuthOptions = {
 
     callbacks: {
         jwt({ token, user }) {
-            return { ...token, ...user } as User
+            return {
+                ...token,
+                ...user,
+            } as User
         },
         session({ session, token }) {
             session.user = token

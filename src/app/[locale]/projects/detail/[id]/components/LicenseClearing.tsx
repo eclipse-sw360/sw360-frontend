@@ -9,23 +9,29 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ConfigKeys, HttpStatus, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect, useState } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useConfigValue } from '@/contexts'
+import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import ListView from './ListView'
 import TreeView from './TreeView'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
 
-const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), { ssr: false })
-const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), { ssr: false })
+const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), {
+    ssr: false,
+})
+const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), {
+    ssr: false,
+})
 
 function LicenseClearing({
     projectId,
@@ -33,12 +39,16 @@ function LicenseClearing({
     projectVersion,
     clearingRequestId,
     isCalledFromModerationRequestCurrentProject,
+    businessUnit,
+    clearingState,
 }: {
     projectId: string
     projectName: string
     projectVersion: string
     clearingRequestId?: string
     isCalledFromModerationRequestCurrentProject?: boolean
+    businessUnit: string
+    clearingState: string
 }): JSX.Element {
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
@@ -48,11 +58,20 @@ function LicenseClearing({
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
     const { status } = useSession()
 
+    // Configs from backend
+    const clearingRequestDisabledGroups = useConfigValue(
+        UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
+    ) as string[] | null
+    const crIsAllowed = CommonUtils.isCrAllowed(businessUnit, clearingState, clearingRequestDisabledGroups)
+    const disableCrButton = !(clearingRequestId !== undefined && clearingRequestId !== '') || !crIsAllowed
+
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         ;(async () => {
@@ -63,9 +82,9 @@ function LicenseClearing({
                     return signOut()
                 }
                 const response = await ApiUtils.GET('configurations', session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     setDependencyNetworkFeatureEnabled(false)
                     return
                 }
@@ -95,13 +114,13 @@ function LicenseClearing({
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             if (withLinkedRelease === false) {
                 const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             } else {
@@ -109,13 +128,13 @@ function LicenseClearing({
                     'reports?module=PROJECTS&withLinkedRelease=true',
                     session.user.access_token,
                 )
-                if (response.status == HttpStatus.OK) {
+                if (response.status == StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == HttpStatus.FORBIDDEN) {
+                } else if (response.status == StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == HttpStatus.INTERNAL_SERVER_ERROR) {
+                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == HttpStatus.UNAUTHORIZED) {
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             }
@@ -210,8 +229,9 @@ function LicenseClearing({
                                     onClick={
                                         clearingRequestId && clearingRequestId !== ''
                                             ? () => setShowViewClearingRequestModal(true)
-                                            : () => setShowCreateClearingRequestModal(true)
+                                            : () => (crIsAllowed ? setShowCreateClearingRequestModal(true) : null)
                                     }
+                                    disabled={disableCrButton}
                                 >
                                     {
                                         <>
@@ -251,4 +271,6 @@ function LicenseClearing({
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(LicenseClearing, [UserGroupType.SECURITY_USER])
+export default AccessControl(LicenseClearing, [
+    UserGroupType.SECURITY_USER,
+])

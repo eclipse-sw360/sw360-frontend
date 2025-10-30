@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -24,7 +25,6 @@ import {
     AttachmentUsages,
     Embedded,
     ErrorDetails,
-    HttpStatus,
     NestedRows,
     Project,
     Release,
@@ -129,7 +129,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 saveUsagesPayload,
                 session.user.access_token,
             )
-            if (response.status !== HttpStatus.CREATED) {
+            if (response.status !== StatusCodes.CREATED) {
                 MessageService.error(t('Something went wrong'))
                 return notFound()
             }
@@ -159,7 +159,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     signal,
                 )
 
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -202,7 +202,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     signal,
                 )
 
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

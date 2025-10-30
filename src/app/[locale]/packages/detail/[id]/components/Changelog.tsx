@@ -9,15 +9,16 @@
 
 'use client'
 
-import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
-import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import { Changelogs, Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
+import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
+import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
+import { Changelogs, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -31,7 +32,9 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -45,7 +48,12 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
         number: 0,
     })
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
-    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -63,11 +71,16 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${packageId}`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -97,7 +110,11 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, packageId, session])
+    }, [
+        pageableQueryParam,
+        packageId,
+        session,
+    ])
 
     return (
         <>
@@ -147,7 +164,9 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
                         />
                         <div
                             id='cardScreen'
-                            style={{ padding: '0px' }}
+                            style={{
+                                padding: '0px',
+                            }}
                         ></div>
                     </Tab.Pane>
                 </Tab.Content>

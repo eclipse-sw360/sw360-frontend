@@ -11,18 +11,19 @@
 
 'use client'
 
-import { Embedded, ErrorDetails, HttpStatus, Obligation, PageableQueryParam, PaginationMeta } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
-import { useRouter } from 'next/navigation'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { MdOutlineTask } from 'react-icons/md'
+import { Embedded, ErrorDetails, Obligation, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import { ObligationLevelInfo, ObligationLevels } from '../../../../../object-types/Obligation'
 import DeleteObligationDialog from './DeleteObligationDialog'
 
@@ -41,7 +42,9 @@ function Obligations(): ReactNode {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const openDeleteDialog = (obligationId: string | undefined) => {
         if (obligationId !== undefined) {
@@ -58,7 +61,11 @@ function Obligations(): ReactNode {
     }
 
     const headerButtons = {
-        'Add Obligation': { type: 'primary', link: '/admin/obligations/add', name: t('Add Obligation') },
+        'Add Obligation': {
+            type: 'primary',
+            link: '/admin/obligations/add',
+            name: t('Add Obligation'),
+        },
     }
 
     const columns = useMemo<ColumnDef<Obligation>[]>(
@@ -154,7 +161,10 @@ function Obligations(): ReactNode {
                                         onClick={() => {
                                             openDeleteDialog(extractObligationId(row.original))
                                         }}
-                                        style={{ color: 'gray', fontSize: '18px' }}
+                                        style={{
+                                            color: 'gray',
+                                            fontSize: '18px',
+                                        }}
                                     />
                                 </span>
                             </OverlayTrigger>
@@ -166,7 +176,9 @@ function Obligations(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -180,7 +192,12 @@ function Obligations(): ReactNode {
         number: 0,
     })
     const [obligationData, setObligationData] = useState<Obligation[]>(() => [])
-    const memoizedData = useMemo(() => obligationData, [obligationData])
+    const memoizedData = useMemo(
+        () => obligationData,
+        [
+            obligationData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -199,14 +216,17 @@ function Obligations(): ReactNode {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `obligations`,
                     Object.fromEntries(
-                        Object.entries({ ...search, ...pageableQueryParam }).map(([key, value]) => [
+                        Object.entries({
+                            ...search,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -232,7 +252,11 @@ function Obligations(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, session, search])
+    }, [
+        pageableQueryParam,
+        session,
+        search,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -268,7 +292,9 @@ function Obligations(): ReactNode {
     })
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        setSearch({ search: event.currentTarget.value })
+        setSearch({
+            search: event.currentTarget.value,
+        })
     }
 
     return (

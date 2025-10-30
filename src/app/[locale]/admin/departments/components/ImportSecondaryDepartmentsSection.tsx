@@ -11,14 +11,14 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import ViewLogsModal from './ViewLogsModal'
 
 interface ImportDepartmentInformation {
@@ -59,7 +59,9 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchImportSchedulerStatus = useCallback(async () => {
         const session = await getSession()
@@ -68,11 +70,11 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             return signOut()
         }
         const response = await ApiUtils.GET('departments/importInformation', session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ImportDepartmentInformation
             setImportDepartmentInformation(data)
             setFolderPath(data.folderPath)
@@ -97,24 +99,33 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             {},
             session.user.access_token,
         )
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        const data = (await response.json()) as { message: string }
-        if (response.status === HttpStatus.OK) {
+        const data = (await response.json()) as {
+            message: string
+        }
+        if (response.status === StatusCodes.OK) {
             MessageService.success(data.message)
             setImportDepartmentInformation((prev) =>
-                prev ? { ...prev, isSchedulerStarted: !prev.isSchedulerStarted } : prev,
+                prev
+                    ? {
+                          ...prev,
+                          isSchedulerStarted: !prev.isSchedulerStarted,
+                      }
+                    : prev,
             )
         } else {
             MessageService.error(data.message)
         }
-    }, [importDepartmentInformation])
+    }, [
+        importDepartmentInformation,
+    ])
 
     const updateFolderPath = async () => {
         const session = await getSession()
@@ -127,15 +138,22 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             {},
             session.user.access_token,
         )
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Update folder path failed'))
         } else {
             MessageService.success(t('Update folder path successfully'))
-            setImportDepartmentInformation((prev) => (prev ? { ...prev, folderPath } : prev))
+            setImportDepartmentInformation((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          folderPath,
+                      }
+                    : prev,
+            )
         }
     }
 
@@ -147,16 +165,16 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         }
         setImportedManuallyStatus(ImportStatus.IMPORTING)
         const response = await ApiUtils.POST(`departments/manuallyactive`, {}, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             setImportedManuallyStatus(ImportStatus.FAILURE)
             return signOut()
         }
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ImportManualResponse
             if (data.requestStatus === 'SUCCESS') {
                 setImportedManuallyStatus(ImportStatus.SUCCESS)
@@ -277,7 +295,9 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
                             <tbody>
                                 <tr>
                                     <th
-                                        style={{ lineHeight: '40px' }}
+                                        style={{
+                                            lineHeight: '40px',
+                                        }}
                                         className='table-header'
                                     >
                                         {t('Registration Folder Path')}

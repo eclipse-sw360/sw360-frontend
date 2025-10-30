@@ -11,12 +11,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
-
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
@@ -24,14 +26,13 @@ import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCo
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
     ActionType,
-    COTSDetails,
     ClearingInformation,
+    COTSDetails,
     CommonTabIds,
     Creator,
     DocumentCreationInformation,
     DocumentTypes,
     ECCInformation,
-    HttpStatus,
     Release,
     ReleaseDetail,
     ReleaseTabIds,
@@ -41,7 +42,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
@@ -74,7 +74,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const [SPDXPayload, setSPDXPayload] = useState<SPDX>({
         spdxDocument: null,
@@ -102,9 +104,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const release: ReleaseDetail = (await response.json()) as ReleaseDetail
@@ -206,7 +208,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                             if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
                             return result
                         },
-                        {} as { [k: string]: string },
+                        {} as {
+                            [k: string]: string
+                        },
                     )
                     setMainLicenses(mainLicenses)
                 }
@@ -218,7 +222,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                             if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
                             return result
                         },
-                        {} as { [k: string]: string },
+                        {} as {
+                            [k: string]: string
+                        },
                     )
                     setOtherLicenses(otherLicenses)
                 }
@@ -231,7 +237,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 console.error(e)
             }
         })()
-    }, [releaseId])
+    }, [
+        releaseId,
+    ])
 
     const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
@@ -316,11 +324,17 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         fullName: '',
     })
 
-    const [mainLicenses, setMainLicenses] = useState<{ [k: string]: string }>({})
+    const [mainLicenses, setMainLicenses] = useState<{
+        [k: string]: string
+    }>({})
 
-    const [otherLicenses, setOtherLicenses] = useState<{ [k: string]: string }>({})
+    const [otherLicenses, setOtherLicenses] = useState<{
+        [k: string]: string
+    }>({})
 
-    const [cotsResponsible, setCotsResponsible] = useState<{ [k: string]: string }>({})
+    const [cotsResponsible, setCotsResponsible] = useState<{
+        [k: string]: string
+    }>({})
 
     const [errorLicenseIdentifier, setErrorLicenseIdentifier] = useState(false)
     const [errorExtractedText, setErrorExtractedText] = useState(false)
@@ -392,11 +406,14 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     SPDXPayload,
                     session.user.access_token,
                 )
-                if (responseUpdateSPDX.status === HttpStatus.UNAUTHORIZED) {
+                if (responseUpdateSPDX.status === StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Session has expired'))
                     return
                 }
-                if (responseUpdateSPDX.status !== HttpStatus.OK && responseUpdateSPDX.status !== HttpStatus.ACCEPTED) {
+                if (
+                    responseUpdateSPDX.status !== StatusCodes.OK &&
+                    responseUpdateSPDX.status !== StatusCodes.ACCEPTED
+                ) {
                     MessageService.error('Release update failed')
                     return
                 }
@@ -404,11 +421,11 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         }
 
         const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const release = (await response.json()) as ReleaseDetail
             MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
             router.push('/components/releases/detail/' + releaseId)
-        } else if (response.status === HttpStatus.ACCEPTED) {
+        } else if (response.status === StatusCodes.ACCEPTED) {
             MessageService.success(t('Moderation request is created'))
             router.push('/components/releases/detail/' + releaseId)
         } else {
@@ -425,22 +442,22 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             entityId: releaseId,
         })
         const response = await ApiUtils.POST(url, {}, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.warn(t('Unauthorized request'))
             return false
-        } else if (response.status === HttpStatus.FORBIDDEN) {
+        } else if (response.status === StatusCodes.FORBIDDEN) {
             MessageService.warn(t('Access Denied'))
             return false
-        } else if (response.status === HttpStatus.BAD_REQUEST) {
+        } else if (response.status === StatusCodes.BAD_REQUEST) {
             MessageService.warn(t('Invalid input or missing required parameters'))
             return false
-        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+        } else if (response.status === StatusCodes.INTERNAL_SERVER_ERROR) {
             MessageService.error(t('Internal server error'))
             return false
-        } else if (response.status === HttpStatus.OK) {
+        } else if (response.status === StatusCodes.OK) {
             MessageService.info(t('You can write to the entity'))
             return true
-        } else if (response.status !== HttpStatus.ACCEPTED) {
+        } else if (response.status !== StatusCodes.ACCEPTED) {
             MessageService.info(t('You are allowed to perform write with MR'))
             setShowCommentModal(true)
             return true
@@ -458,14 +475,23 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     }
 
     const headerButtons = {
-        'Update Release': { link: '', type: 'primary', onClick: checkPreRequisite, name: t('Update Release') },
+        'Update Release': {
+            link: '',
+            type: 'primary',
+            onClick: checkPreRequisite,
+            name: t('Update Release'),
+        },
         'Delete Release': {
             link: '',
             type: 'danger',
             onClick: handleDeleteRelease,
             name: t('Delete Release'),
         },
-        Cancel: { link: '/components/releases/detail/' + releaseId, type: 'secondary', name: t('Cancel') },
+        Cancel: {
+            link: '/components/releases/detail/' + releaseId,
+            type: 'secondary',
+            name: t('Cancel'),
+        },
     }
 
     const param = useParams()
@@ -476,8 +502,18 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         release && (
             <>
                 <Breadcrumb className='container page-content'>
-                    <Breadcrumb.Item href={componentsPath}>{t('Components')}</Breadcrumb.Item>
-                    <Breadcrumb.Item href={`${componentsPath}/detail/${componentId}`}>{release.name}</Breadcrumb.Item>
+                    <Breadcrumb.Item
+                        linkAs={Link}
+                        href={componentsPath}
+                    >
+                        {t('Components')}
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item
+                        linkAs={Link}
+                        href={`${componentsPath}/detail/${componentId}`}
+                    >
+                        {release.name}
+                    </Breadcrumb.Item>
                     <Breadcrumb.Item active>{`${release.name} (${release.version})`}</Breadcrumb.Item>
                 </Breadcrumb>
                 <CreateMRCommentDialog<Release>
@@ -498,7 +534,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                         <div className='col'>
                             <div
                                 className='row'
-                                style={{ marginBottom: '20px' }}
+                                style={{
+                                    marginBottom: '20px',
+                                }}
                             >
                                 <PageButtonHeader
                                     buttons={headerButtons}
@@ -624,4 +662,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(EditRelease, [UserGroupType.SECURITY_USER])
+export default AccessControl(EditRelease, [
+    UserGroupType.SECURITY_USER,
+])

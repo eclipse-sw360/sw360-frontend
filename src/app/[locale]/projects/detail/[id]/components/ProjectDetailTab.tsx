@@ -9,18 +9,28 @@
 
 'use client'
 
-import { ActionType, AdministrationDataType, HttpStatus, SummaryDataType, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
+import { type JSX, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
+import Attachments from '@/components/Attachments/Attachments'
+import {
+    ActionType,
+    AdministrationDataType,
+    ClearingDetailsCount,
+    SummaryDataType,
+    UserGroupType,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
+import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import LinkProjects from '../../../components/LinkProjects'
 import Obligations from '../../../components/Obligations/Obligations'
 import Administration from './Administration'
-import ProjectAttachments from './Attachments'
 import AttachmentUsages from './AttachmentUsages'
 import ChangeLog from './Changelog'
 import EccDetails from './Ecc'
@@ -31,14 +41,11 @@ import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
-import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
-import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
-import ImportSBOMModal from '../../../components/ImportSBOMModal'
-
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
+    const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
     const router = useRouter()
@@ -55,12 +62,16 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB
         setActiveKey(fragment)
-    }, [searchParams])
+    }, [
+        searchParams,
+    ])
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
@@ -80,9 +91,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                     session.user.access_token,
                     signal,
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
 
@@ -96,7 +107,44 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         })()
 
         return () => controller.abort()
-    }, [projectId, session, status])
+    }, [
+        projectId,
+        session,
+        status,
+    ])
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+        void (async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/clearingDetailsCount`,
+                    session.user.access_token,
+                    signal,
+                )
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status !== StatusCodes.OK) {
+                    return notFound()
+                }
+                const data = (await response.json()) as ClearingDetailsCount
+                setClearingDetailCount(data)
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }
+        })()
+        return () => controller.abort()
+    }, [
+        projectId,
+        session,
+    ])
 
     const handleEditProject = (projectId: string) => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -357,7 +405,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         {!summaryData ? (
                                             <div
                                                 className='col-12'
-                                                style={{ textAlign: 'center' }}
+                                                style={{
+                                                    textAlign: 'center',
+                                                }}
                                             >
                                                 <Spinner className='spinner' />
                                             </div>
@@ -369,12 +419,17 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         {!administrationData ? (
                                             <div
                                                 className='col-12'
-                                                style={{ textAlign: 'center' }}
+                                                style={{
+                                                    textAlign: 'center',
+                                                }}
                                             >
                                                 <Spinner className='spinner' />
                                             </div>
                                         ) : (
-                                            <Administration data={administrationData} />
+                                            <Administration
+                                                data={administrationData}
+                                                clearingDetailCount={clearingDetailCount}
+                                            />
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='licenseClearing'>
@@ -384,6 +439,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 projectName={summaryData.name}
                                                 projectVersion={summaryData.version ?? ''}
                                                 clearingRequestId={summaryData.clearingRequestId ?? ''}
+                                                businessUnit={summaryData.businessUnit ?? ''}
+                                                clearingState={summaryData.clearingState ?? ''}
                                             />
                                         )}
                                     </Tab.Pane>
@@ -420,7 +477,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='attachments'>
-                                        <ProjectAttachments projectId={projectId} />
+                                        <Attachments
+                                            documentId={projectId}
+                                            documentType={'projects'}
+                                        />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='attachmentUsages'>
                                         <AttachmentUsages projectId={projectId} />

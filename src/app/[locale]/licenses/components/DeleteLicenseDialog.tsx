@@ -11,15 +11,15 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
-
-import { HttpStatus, LicensePayload } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { BsQuestionCircle } from 'react-icons/bs'
+import { LicensePayload } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     licensePayload: LicensePayload
@@ -41,7 +41,9 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -60,15 +62,15 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.DELETE(`licenses/${licensePayload.shortName}`, session.user.access_token)
         try {
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 displayMessage('success', t('Delete license successful'))
                 router.push('/licenses?delete=success')
                 setReloadPage(true)
-            } else if (response.status == HttpStatus.ACCEPTED) {
+            } else if (response.status == StatusCodes.ACCEPTED) {
                 displayMessage('success', t('Created moderation request'))
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
-            } else if (response.status == HttpStatus.BAD_REQUEST) {
+            } else if (response.status == StatusCodes.BAD_REQUEST) {
                 const errorResponse = await response.json()
                 displayMessage('danger', errorResponse.message)
             } else {
@@ -105,7 +107,9 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>
                     <BsQuestionCircle />

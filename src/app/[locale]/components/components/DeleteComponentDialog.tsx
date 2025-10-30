@@ -11,16 +11,23 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
-import { ActionType, Component, HttpStatus } from '@/object-types'
+import { ActionType, Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
-const DEFAULT_COMPONENT_INFO: Component = { id: '', name: '', _embedded: { 'sw360:releases': [] } }
+const DEFAULT_COMPONENT_INFO: Component = {
+    id: '',
+    name: '',
+    _embedded: {
+        'sw360:releases': [],
+    },
+}
 
 interface Props {
     componentId?: string
@@ -42,13 +49,20 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
+    const [dependencies, setDependencies] = useState({
+        releases: 0,
+        attachments: 0,
+    })
+    const [comment, setComment] = useState('')
     const { status } = useSession()
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -59,36 +73,41 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     const handleError = useCallback(() => {
         displayMessage('danger', t('Error when processing'))
         setReloadPage(true)
-    }, [t])
+    }, [
+        t,
+    ])
 
     const deleteComponent = async () => {
         if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.DELETE(`components/${componentId}`, session.user.access_token)
+        const url = CommonUtils.createUrlWithParams(`components/${componentId}`, {
+            comment: comment,
+        })
+        const response = await ApiUtils.DELETE(url, session.user.access_token)
         try {
-            if (response.status === HttpStatus.MULTIPLE_STATUS) {
+            if (response.status === StatusCodes.MULTI_STATUS) {
                 const body = (await response.json()) as Array<DeleteResponse>
                 const deleteStatus = body[0].status
-                if (deleteStatus === HttpStatus.OK) {
+                if (deleteStatus === StatusCodes.OK) {
                     displayMessage('success', t('Delete component success!'))
                     if (actionType === ActionType.EDIT) {
                         router.push('/components')
                     }
                     setReloadPage(true)
-                } else if (deleteStatus === HttpStatus.CONFLICT) {
+                } else if (deleteStatus === StatusCodes.CONFLICT) {
                     displayMessage(
                         'danger',
                         t(
                             'The component cannot be deleted, since it contains releases Please delete the releases first',
                         ),
                     )
-                } else if (deleteStatus === HttpStatus.ACCEPTED) {
+                } else if (deleteStatus === StatusCodes.ACCEPTED) {
                     displayMessage('success', t('Created moderation request'))
                 } else {
                     displayMessage('danger', t('Error when processing'))
                 }
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 handleError()
@@ -108,17 +127,27 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 session.user.access_token,
                 signal,
             )
-            if (componentsResponse.status === HttpStatus.OK) {
+            if (componentsResponse.status === StatusCodes.OK) {
                 const component = (await componentsResponse.json()) as Component
                 setComponent(component)
-            } else if (componentsResponse.status === HttpStatus.UNAUTHORIZED) {
+                setDependencies({
+                    releases: component['releaseIds'] ? component['releaseIds'].length : 0,
+                    attachments:
+                        component._embedded && component._embedded['sw360:attachments']
+                            ? component._embedded['sw360:attachments'].length
+                            : 0,
+                })
+            } else if (componentsResponse.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 setComponent(DEFAULT_COMPONENT_INFO)
                 handleError()
             }
         },
-        [componentId, handleError],
+        [
+            componentId,
+            handleError,
+        ],
     )
 
     const handleSubmit = () => {
@@ -130,6 +159,11 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     const handleCloseDialog = () => {
         setShow(!show)
         setShowMessage(false)
+        setComment('')
+        setDependencies({
+            releases: 0,
+            attachments: 0,
+        })
         if (reloadPage === true) {
             window.location.reload()
         }
@@ -145,7 +179,15 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         return () => {
             controller.abort()
         }
-    }, [show, componentId, fetchData])
+    }, [
+        show,
+        componentId,
+        fetchData,
+    ])
+
+    const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
+        setComment(e.target.value)
+    }
 
     return (
         <Modal
@@ -157,7 +199,9 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>{t('Delete Component')} ?</Modal.Title>
             </Modal.Header>
@@ -170,20 +214,57 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 >
                     {message}
                 </Alert>
-                <Form>
-                    {t.rich('Do you really want to delete the component?', {
-                        name: component.name,
-                        strong: (chunks) => <b>{chunks}</b>,
-                    })}
-                    <hr />
-                    <Form.Group className='mb-3'>
-                        <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
-                        <Form.Control
-                            as='textarea'
-                            aria-label='With textarea'
-                        />
-                    </Form.Group>
-                </Form>
+                {dependencies['releases'] > 0 ? (
+                    <p>
+                        {t.rich('the_component_cannot_be_deleted_contains_releases', {
+                            name: component.name,
+                            releaseCount: dependencies['releases'],
+                            strong: (chunks) => <b>{chunks}</b>,
+                        })}
+                    </p>
+                ) : (
+                    <Form>
+                        {t.rich('Do you really want to delete the component?', {
+                            name: component.name,
+                            strong: (chunks) => <b>{chunks}</b>,
+                        })}
+                        {(dependencies['releases'] !== 0 || dependencies['attachments'] !== 0) && (
+                            <>
+                                <br />
+                                <br />
+                                {t.rich('This component contains', {
+                                    name: component.name,
+                                    strong: (chunks) => <b>{chunks}</b>,
+                                })}
+                                <br />
+                                <ul>
+                                    {dependencies['releases'] !== 0 && (
+                                        <li>{`${t('Releases')}: ${dependencies['releases']}`}</li>
+                                    )}
+                                    {dependencies['attachments'] !== 0 && (
+                                        <li>{`${t('Attachments')}: ${dependencies['attachments']}`}</li>
+                                    )}
+                                </ul>
+                            </>
+                        )}
+                        <hr />
+                        <Form.Group className='mb-3'>
+                            <Form.Label
+                                style={{
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                {t('Please comment your changes')}
+                            </Form.Label>
+                            <Form.Control
+                                as='textarea'
+                                aria-label='With textarea'
+                                placeholder='Comment your message...'
+                                onChange={handleUserComment}
+                            />
+                        </Form.Group>
+                    </Form>
+                )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
@@ -199,6 +280,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                     variant='danger'
                     onClick={() => handleSubmit()}
                     hidden={reloadPage}
+                    disabled={!comment}
                 >
                     {t('Delete Component')}
                 </Button>

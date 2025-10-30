@@ -11,14 +11,14 @@
 
 'use client'
 
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
-
-import { ActionType, HttpStatus, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { ReactNode, useCallback, useEffect, useState, ChangeEvent } from 'react'
+import { Alert, Button, Form, Modal } from 'react-bootstrap'
+import { ActionType, ReleaseDetail } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     componentId?: string
@@ -40,6 +40,12 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
+    const [containsLinkedPackages, setContainsLinkedPackages] = useState(false)
+    const [dependencies, setDependencies] = useState({
+        releases: 0,
+        attachments: 0,
+    })
+    const [comment, setComment] = useState('')
     const router = useRouter()
     const { status } = useSession()
 
@@ -47,7 +53,9 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -64,25 +72,28 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) return
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.DELETE(`releases/${releaseId}`, session.user.access_token)
+        const url = CommonUtils.createUrlWithParams(`releases/${releaseId}`, {
+            comment: comment,
+        })
+        const response = await ApiUtils.DELETE(url, session.user.access_token)
         try {
-            if (response.status === HttpStatus.MULTIPLE_STATUS) {
+            if (response.status === StatusCodes.MULTI_STATUS) {
                 const body = (await response.json()) as Array<DeleteResponse>
                 const deleteStatus = body[0].status
-                if (deleteStatus === HttpStatus.OK) {
+                if (deleteStatus === StatusCodes.OK) {
                     displayMessage('success', 'Delete release success!')
                     setReloadPage(true)
-                } else if (deleteStatus === HttpStatus.CONFLICT) {
+                } else if (deleteStatus === StatusCodes.CONFLICT) {
                     displayMessage(
                         'danger',
                         'I could not delete the release, since it is used by another component (release) or project',
                     )
-                } else if (deleteStatus === HttpStatus.ACCEPTED) {
+                } else if (deleteStatus === StatusCodes.ACCEPTED) {
                     displayMessage('success', 'Created moderation request!')
                 } else {
                     displayMessage('danger', 'Error when processing!')
                 }
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 handleError()
             } else {
                 handleError()
@@ -98,17 +109,29 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const releaseResponse = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
-            if (releaseResponse.status === HttpStatus.OK) {
+            if (releaseResponse.status === StatusCodes.OK) {
                 const release = (await releaseResponse.json()) as ReleaseDetail
                 setRelease(release)
-            } else if (releaseResponse.status === HttpStatus.UNAUTHORIZED) {
+                setContainsLinkedPackages(!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:packages']))
+                setDependencies({
+                    releases: release['releaseIdToRelationship']
+                        ? Object.keys(release['releaseIdToRelationship']).length
+                        : 0,
+                    attachments: release['_embedded']['sw360:attachments']
+                        ? release['_embedded']['sw360:attachments'].length
+                        : 0,
+                })
+            } else if (releaseResponse.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 setRelease(undefined)
                 handleError()
             }
         },
-        [releaseId, handleError],
+        [
+            releaseId,
+            handleError,
+        ],
     )
 
     const handleSubmit = () => {
@@ -118,6 +141,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     const handleCloseDialog = () => {
         setShow(!show)
         setShowMessage(false)
+        setComment('')
         if (actionType === ActionType.EDIT) {
             router.push('/components/detail/' + componentId)
         } else if (reloadPage === true) {
@@ -133,7 +157,15 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         return () => {
             controller.abort()
         }
-    }, [show, releaseId, fetchData])
+    }, [
+        show,
+        releaseId,
+        fetchData,
+    ])
+
+    const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
+        setComment(e.target.value)
+    }
 
     return (
         <Modal
@@ -145,7 +177,9 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>{t('Delete Release')} ?</Modal.Title>
             </Modal.Header>
@@ -158,36 +192,61 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                 >
                     {!CommonUtils.isNullEmptyOrUndefinedString(message) && t(message as never)}
                 </Alert>
-                {release && (
-                    <Form>
-                        {t.rich('Do you really want to delete the release?', {
-                            name: release.name + release.version,
-                            strong: (chunks) => <b>{chunks}</b>,
-                        })}
-                        <br />
-                        <br />
-                        {release['_embedded']['sw360:attachments'] && (
-                            <>
-                                {t.rich('This release contains', {
-                                    name: release.name + release.version,
-                                    strong: (chunks) => <b>{chunks}</b>,
-                                })}
-                                <br />
-                                <ul>
-                                    <li>{`${t('Attachments')}: ${release['_embedded']['sw360:attachments'].length}`}</li>
-                                </ul>
-                            </>
-                        )}
-                        <hr />
-                        <Form.Group className='mb-3'>
-                            <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
-                            <Form.Control
-                                as='textarea'
-                                aria-label='With textarea'
-                            />
-                        </Form.Group>
-                    </Form>
-                )}
+                {release &&
+                    (containsLinkedPackages ? (
+                        <p>
+                            {t.rich('release_cannot_be_deleted_contains_linked_packages', {
+                                name: `${release.name} (${release.version})`,
+                                packageCount:
+                                    release._embedded && release._embedded['sw360:packages']
+                                        ? release._embedded['sw360:packages'].length
+                                        : 1,
+                                strong: (chunks) => <b>{chunks}</b>,
+                            })}
+                        </p>
+                    ) : (
+                        <Form>
+                            {t.rich('Do you really want to delete the release?', {
+                                name: `${release.name} (${release.version})`,
+                                strong: (chunks) => <b>{chunks}</b>,
+                            })}
+                            <br />
+                            <br />
+                            {(dependencies['releases'] !== 0 || dependencies['attachments'] !== 0) && (
+                                <>
+                                    {t.rich('This release contains', {
+                                        name: `${release.name} (${release.version})`,
+                                        strong: (chunks) => <b>{chunks}</b>,
+                                    })}
+                                    <br />
+                                    <ul>
+                                        {dependencies['releases'] !== 0 && (
+                                            <li>{`${t('Releases')}: ${dependencies['releases']}`}</li>
+                                        )}
+                                        {dependencies['attachments'] !== 0 && (
+                                            <li>{`${t('Attachments')}: ${dependencies['attachments']}`}</li>
+                                        )}
+                                    </ul>
+                                </>
+                            )}
+                            <hr />
+                            <Form.Group className='mb-3'>
+                                <Form.Label
+                                    style={{
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    {t('Please comment your changes')}
+                                </Form.Label>
+                                <Form.Control
+                                    as='textarea'
+                                    aria-label='With textarea'
+                                    placeholder='Comment your message...'
+                                    onChange={handleUserComment}
+                                />
+                            </Form.Group>
+                        </Form>
+                    ))}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
@@ -198,14 +257,17 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                     {' '}
                     {t('Close')}{' '}
                 </Button>
-                <Button
-                    className='login-btn'
-                    variant='danger'
-                    onClick={handleSubmit}
-                    hidden={reloadPage}
-                >
-                    {t('Delete Release')}
-                </Button>
+                {!containsLinkedPackages && (
+                    <Button
+                        className='login-btn'
+                        variant='danger'
+                        onClick={handleSubmit}
+                        hidden={reloadPage}
+                        disabled={!comment}
+                    >
+                        {t('Delete Release')}
+                    </Button>
+                )}
             </Modal.Footer>
         </Modal>
     )

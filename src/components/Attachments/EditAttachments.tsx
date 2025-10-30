@@ -9,11 +9,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 
-import { Attachment, Embedded, HttpStatus } from '@/object-types'
+import { Attachment, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import AttachmentRowData from './AttachmentRowData'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
@@ -41,16 +42,18 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedAttachments
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined
@@ -115,7 +118,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
             ...documentPayload,
             attachments: attachmentsToSave,
         })
-    }, [attachmentsData])
+    }, [
+        attachmentsData,
+    ])
 
     return (
         <>

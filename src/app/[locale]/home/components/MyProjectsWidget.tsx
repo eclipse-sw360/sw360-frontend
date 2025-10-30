@@ -8,20 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import LicenseClearing from '@/components/LicenseClearing'
-import MessageService from '@/services/message.service'
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-
-import { HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-
+import LicenseClearing from '@/components/LicenseClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
@@ -75,7 +73,9 @@ export default function MyProjectsWidget(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -90,7 +90,12 @@ export default function MyProjectsWidget(): ReactNode {
         number: 0,
     })
     const [projectData, setProjectData] = useState<Project[]>(() => [])
-    const memoizedData = useMemo(() => projectData, [projectData])
+    const memoizedData = useMemo(
+        () => projectData,
+        [
+            projectData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -109,10 +114,15 @@ export default function MyProjectsWidget(): ReactNode {
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/myprojects`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -137,7 +147,10 @@ export default function MyProjectsWidget(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, reload])
+    }, [
+        pageableQueryParam,
+        reload,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

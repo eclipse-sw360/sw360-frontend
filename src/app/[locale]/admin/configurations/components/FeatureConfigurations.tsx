@@ -11,13 +11,14 @@
 
 'use client'
 
-import { ConfigKeys, Configuration, ConfigurationContainers, HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
+import { ConfigKeys, Configuration, ConfigurationContainers } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import AttachmentStorageConfigurations from './AttachmentStorageConfigurations'
 import MailConfigurations from './MailConfigurations'
 import OnOffSwitch from './OnOffSwitch'
@@ -34,7 +35,9 @@ const FeatureConfigurations = (): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchSw360Config = useCallback(async () => {
         const session = await getSession()
@@ -44,10 +47,10 @@ const FeatureConfigurations = (): JSX.Element => {
             return
         }
         const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as Configuration
             setCurrentConfig(data)
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
             setCurrentConfig({} as Configuration)
@@ -68,9 +71,9 @@ const FeatureConfigurations = (): JSX.Element => {
             return
         }
         const response = await ApiUtils.PATCH(apiEndpoint, currentConfig, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             MessageService.success(t('Update backend configurations successfully'))
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
             const message = await response.json()
@@ -98,7 +101,9 @@ const FeatureConfigurations = (): JSX.Element => {
                     <>
                         <h6
                             className='fw-bold text-uppercase'
-                            style={{ color: '#5D8EA9' }}
+                            style={{
+                                color: '#5D8EA9',
+                            }}
                         >
                             {t('Feature Configurations')}
                             <hr className='my-2 mb-2' />

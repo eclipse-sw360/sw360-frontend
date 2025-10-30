@@ -11,11 +11,12 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { HttpStatus, OAuthClient } from '@/object-types'
+import { OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -96,11 +97,11 @@ function OAuthClientsList(): ReactNode {
 
             const response = await sendOAuthClientRequest(session.user.access_token)
             console.log('Response:', response)
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as OAuthClient[]
                 setClients(data)
                 setNumberClient(data.length)
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 MessageService.error(t('Error when processing'))

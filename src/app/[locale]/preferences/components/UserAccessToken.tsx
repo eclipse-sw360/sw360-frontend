@@ -11,14 +11,16 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
+import { useConfigValue } from '@/contexts'
+import { UIConfigKeys } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import styles from '../preferences.module.css'
 import TokensTable from './TokensTable'
 
@@ -28,16 +30,26 @@ const UserAccessToken = (): ReactNode => {
     const [tokenData, setTokenData] = useState({
         name: '',
         expirationDate: '',
-        authorities: ['READ'],
+        authorities: [
+            'READ',
+        ],
     })
     const [generatedToken, setGeneratedToken] = useState<string>('')
     const { status } = useSession()
+
+    // Config values from backend
+    const writeAuthorityAllowed =
+        useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE) === null
+            ? true
+            : (useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE) as boolean)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const generateToken = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -49,17 +61,22 @@ const UserAccessToken = (): ReactNode => {
         } else {
             setValidated(false)
             try {
+                if (!writeAuthorityAllowed && 'WRITE' in tokenData.authorities) {
+                    tokenData.authorities = tokenData.authorities.filter((v) => v.toLowerCase() !== 'write')
+                }
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
 
-                if (response.status === HttpStatus.CREATED) {
+                if (response.status === StatusCodes.CREATED) {
                     const data: string = (await response.json()) as string
                     setGeneratedToken(data)
                     setTokenData({
                         name: '',
                         expirationDate: '',
-                        authorities: ['READ'],
+                        authorities: [
+                            'READ',
+                        ],
                     })
                 } else {
                     const errorData: Record<string, string> = (await response.json()) as Record<string, string>
@@ -152,15 +169,17 @@ const UserAccessToken = (): ReactNode => {
                                                 checked={tokenData.authorities.includes('READ')}
                                                 onChange={handleChangeAuthorities}
                                             />
-                                            <Form.Check
-                                                type='checkbox'
-                                                value='WRITE'
-                                                id='authorities_write'
-                                                name='authorities'
-                                                label='Write Access'
-                                                checked={tokenData.authorities.includes('WRITE')}
-                                                onChange={handleChangeAuthorities}
-                                            />
+                                            {writeAuthorityAllowed && (
+                                                <Form.Check
+                                                    type='checkbox'
+                                                    value='WRITE'
+                                                    id='authorities_write'
+                                                    name='authorities'
+                                                    label='Write Access'
+                                                    checked={tokenData.authorities.includes('WRITE')}
+                                                    onChange={handleChangeAuthorities}
+                                                />
+                                            )}
                                         </Form.Group>
                                     </td>
                                 </tr>

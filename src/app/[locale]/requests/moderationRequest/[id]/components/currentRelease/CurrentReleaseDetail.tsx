@@ -9,6 +9,9 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import ClearingDetails from '@/app/[locale]/components/releases/detail/[id]/components/ClearingDetails'
 import ECCDetails from '@/app/[locale]/components/releases/detail/[id]/components/ECCDetails'
 import LinkedReleases from '@/app/[locale]/components/releases/detail/[id]/components/LinkedReleases'
@@ -26,7 +29,6 @@ import {
     DocumentTypes,
     Embedded,
     ErrorDetails,
-    HttpStatus,
     PageableQueryParam,
     PaginationMeta,
     ReleaseDetail,
@@ -34,8 +36,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -58,17 +58,19 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const fetchData = async (url: string, signal: AbortSignal) => {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return
             const response = await ApiUtils.GET(url, session.user.access_token, signal)
-            if (response.status == HttpStatus.OK) {
+            if (response.status == StatusCodes.OK) {
                 const data = (await response.json()) as ReleaseDetail & EmbeddedChangelogs
                 return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 void signOut()
             }
         } catch (e) {
@@ -93,7 +95,9 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
             })
             .catch((err) => console.error(err))
         return () => controller.abort()
-    }, [releaseId])
+    }, [
+        releaseId,
+    ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -107,7 +111,12 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
         number: 0,
     })
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
-    const memoizedData = useMemo(() => changeLogList, [changeLogList])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -125,11 +134,16 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -159,7 +173,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, releaseId, session])
+    }, [
+        pageableQueryParam,
+        releaseId,
+        session,
+    ])
 
     return release ? (
         <div className='container page-content'>
@@ -242,7 +260,9 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                                 />
                                 <div
                                     id='cardScreen'
-                                    style={{ padding: '0px' }}
+                                    style={{
+                                        padding: '0px',
+                                    }}
                                 ></div>
                             </div>
                         </div>

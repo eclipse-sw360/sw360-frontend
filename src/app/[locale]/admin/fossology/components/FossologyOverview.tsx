@@ -9,15 +9,16 @@
 
 'use client'
 
-import { FossologyConfig, HttpStatus } from '@/object-types'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { FossologyConfig } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
 
 enum FossologyStatus {
     SUCCESS = 'Success',
@@ -43,18 +44,20 @@ export default function FossologyOverview(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = useCallback(async (url: string, serverConfig: boolean) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             if (serverConfig) {
                 const data = await response.json()
                 return data
-            } else return HttpStatus.OK
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else return StatusCodes.OK
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined
@@ -65,7 +68,7 @@ export default function FossologyOverview(): ReactNode {
         setLoading(true)
         fetchData('fossology/reServerConnection', false)
             .then((response: number | undefined) => {
-                if (response === HttpStatus.OK) {
+                if (response === StatusCodes.OK) {
                     setFossologyStatus(FossologyStatus.SUCCESS)
                 } else {
                     setFossologyStatus(FossologyStatus.UNKNOWN)
@@ -82,7 +85,10 @@ export default function FossologyOverview(): ReactNode {
                 setLoading(false)
                 setRecheckConnection(false)
             })
-    }, [fetchData, recheckConnection])
+    }, [
+        fetchData,
+        recheckConnection,
+    ])
 
     useEffect(() => {
         fetchData('fossology/configData', true)
@@ -98,7 +104,9 @@ export default function FossologyOverview(): ReactNode {
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
             })
-    }, [fetchData])
+    }, [
+        fetchData,
+    ])
 
     const updateInputField = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFossologyConfigData({
@@ -111,9 +119,9 @@ export default function FossologyOverview(): ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.POST('fossology/saveConfig', fossologyConfigData, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             MessageService.success(t('Fossology configuration updated successfully'))
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.warn(t('Unauthorized request'))
             return
         } else {
@@ -179,14 +187,18 @@ export default function FossologyOverview(): ReactNode {
                                 ) : fossologyStatus === 'Success' ? (
                                     <span
                                         className='badge bg-success capsule-right'
-                                        style={{ fontSize: '0.8rem' }}
+                                        style={{
+                                            fontSize: '0.8rem',
+                                        }}
                                     >
                                         {t(`${fossologyStatus}`)}
                                     </span>
                                 ) : (
                                     <span
                                         className='badge bg-danger capsule-right'
-                                        style={{ fontSize: '0.8rem' }}
+                                        style={{
+                                            fontSize: '0.8rem',
+                                        }}
                                     >
                                         {t(`${fossologyStatus}`)}
                                     </span>

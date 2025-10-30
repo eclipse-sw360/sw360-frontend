@@ -9,20 +9,21 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Breadcrumb } from 'next-sw360'
+import { type JSX, useEffect, useState } from 'react'
+import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { ConfigKeys, HttpStatus, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
+import { ConfigKeys, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Breadcrumb } from 'next-sw360'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
-import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 function AddProjects(): JSX.Element {
     const router = useRouter()
@@ -35,12 +36,24 @@ function AddProjects(): JSX.Element {
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([])
 
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [securityResponsibles, setSecurityResponsibles] = useState<{ [k: string]: string }>({})
-    const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
-    const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
-    const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [securityResponsibles, setSecurityResponsibles] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectOwner, setProjectOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectManager, setProjectManager] = useState<{
+        [k: string]: string
+    }>({})
+    const [leadArchitect, setLeadArchitect] = useState<{
+        [k: string]: string
+    }>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -60,6 +73,7 @@ function AddProjects(): JSX.Element {
         businessUnit: '',
         preevaluationDeadline: '',
         clearingSummary: '',
+        clearingTeam: '',
         specialRisksOSS: '',
         generalRisks3rdParty: '',
         specialRisks3rdParty: '',
@@ -84,7 +98,9 @@ function AddProjects(): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         ;(async () => {
@@ -95,9 +111,9 @@ function AddProjects(): JSX.Element {
                     return signOut()
                 }
                 const response = await ApiUtils.GET('configurations', session.user.access_token)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     setDependencyNetworkFeatureEnabled(false)
                     return
                 }
@@ -142,7 +158,7 @@ function AddProjects(): JSX.Element {
             const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
 
-            if (response.status == HttpStatus.CREATED) {
+            if (response.status == StatusCodes.CREATED) {
                 const data = (await response.json()) as Project
                 MessageService.success(t('Your project is created'))
                 router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
@@ -297,4 +313,6 @@ function AddProjects(): JSX.Element {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(AddProjects, [UserGroupType.SECURITY_USER])
+export default AccessControl(AddProjects, [
+    UserGroupType.SECURITY_USER,
+])

@@ -11,14 +11,16 @@
 
 import { _, Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { HttpStatus, LinkedPackage, LinkedPackageData, Release } from '@/object-types'
+import { LinkedPackage, LinkedPackageData, Release } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useState } from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import React, { type JSX, useCallback, useEffect, useState } from 'react'
+import { Alert, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import { StatusCodes } from 'http-status-codes'
+import MessageService from '@/services/message.service'
 
 interface ExtendedRelease extends Release {
     linkedPackages?: {
@@ -44,6 +46,11 @@ export default function EditLinkedPackages({ releaseId, releasePayload, setRelea
     const [tableData, setTableData] = useState<Array<RowData>>([])
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
     const [linkedPackageMap, setLinkedPackageMap] = useState<Map<string, LinkedPackageData>>(new Map())
+
+    const [showModal, setShowModal] = useState(false)
+    const [selectedPkg, setSelectedPkg] = useState<{ id: string; name: string; version: string } | null>(null)
+    const [deleting, setDeleting] = useState(false)
+    const [alert, setAlert] = useState<{ variant: string; message: JSX.Element } | null>(null)
 
     const extractDataFromMap = (dataMap: Map<string, LinkedPackageData>): Array<RowData> => {
         const extractedData: Array<RowData> = []
@@ -73,14 +80,49 @@ export default function EditLinkedPackages({ releaseId, releasePayload, setRelea
         }
     }
 
-    const handleDeletePackage = (packageId: string) => {
-        const updatedMap = new Map(linkedPackageMap)
-        updatedMap.delete(packageId)
+    const deleteLinkedPackage = async () => {
+        if (!selectedPkg) return
+        try {
+            setDeleting(true)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
-        const updatedPayload = { ...releasePayload, linkedPackages: Array.from(updatedMap.values()) }
-        setLinkedPackageMap(updatedMap)
-        setReleasePayload(updatedPayload)
-        setTableData(extractDataFromMap(updatedMap))
+            const response = await ApiUtils.DELETE(`packages/${selectedPkg.id}`, session.user.access_token)
+
+            if (response.status === StatusCodes.OK || response.status === StatusCodes.NO_CONTENT) {
+                MessageService.success(t('Package deleted successfully'))
+                const updatedMap = new Map(linkedPackageMap)
+                updatedMap.delete(selectedPkg.id)
+                setLinkedPackageMap(updatedMap)
+                const updatedPayload = { ...releasePayload, linkedPackages: Array.from(updatedMap.values()) }
+                setReleasePayload(updatedPayload)
+                setTableData(extractDataFromMap(updatedMap))
+
+                setShowModal(false)
+                setAlert({
+                    variant: 'success',
+                    message: <>{t('Package deleted successfully')}</>,
+                })
+            } else if (response.status === StatusCodes.CONFLICT) {
+                setAlert({
+                    variant: 'danger',
+                    message: <>{t('Package cannot be deleted')}</>,
+                })
+            } else {
+                setAlert({
+                    variant: 'danger',
+                    message: <>{t('Package cannot be deleted')}</>,
+                })
+            }
+        } catch (error) {
+            console.error(error)
+            setAlert({
+                variant: 'danger',
+                message: <>{t('Package cannot be deleted')}</>,
+            })
+        } finally {
+            setDeleting(false)
+        }
     }
 
     const fetchData = useCallback(async () => {
@@ -89,7 +131,7 @@ export default function EditLinkedPackages({ releaseId, releasePayload, setRelea
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await ApiUtils.GET(`releases/${releaseId}?embed=packages`, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = await response.json()
             const embedded = data?._embedded?.['sw360:packages']
             if (!embedded || embedded.length === 0) return
@@ -107,7 +149,7 @@ export default function EditLinkedPackages({ releaseId, releasePayload, setRelea
             })
             setLinkedPackageMap(updatedMap)
             setTableData(extractDataFromMap(updatedMap))
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             signOut()
         }
     }, [releaseId])
@@ -170,13 +212,20 @@ export default function EditLinkedPackages({ releaseId, releasePayload, setRelea
             id: 'linkedPackagesData.delete',
             name: t('Actions'),
             sort: false,
-            formatter: (packageId: string) =>
+            formatter: (pkgTuple: [string, string, string]) =>
                 _(
                     <OverlayTrigger overlay={<Tooltip>{t('Delete Package')}</Tooltip>}>
-                        <span className='d-inline-block'>
+                        <span className='d-inline-block'
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                                const [id, name, version] = pkgTuple
+                                setSelectedPkg({ id, name, version })
+                                setAlert(null)
+                                setShowModal(true)
+                            }}
+                        >
                             <FaTrashAlt
                                 className='btn-icon'
-                                onClick={() => handleDeletePackage(packageId)}
                                 style={{ color: 'gray', fontSize: '18px', cursor: 'pointer' }}
                             />
                         </span>
@@ -229,6 +278,75 @@ export default function EditLinkedPackages({ releaseId, releasePayload, setRelea
                     </div>
                 </div>
             </div>
+            <Modal
+                size='lg'
+                centered
+                show={showModal}
+                onHide={() => {
+                    setShowModal(false)
+                    setSelectedPkg(null)
+                    setAlert(null)
+                    setDeleting(false)
+                }}
+                aria-labelledby='delete-package-modal'
+                scrollable
+            >
+                <Modal.Header style={{ backgroundColor: '#feefef', color: '#da1414' }} closeButton>
+                    <Modal.Title id='delete-package-modal'>{t('Delete Package')}?</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    {alert && <Alert variant={alert.variant}>{alert.message}</Alert>}
+                    {!alert && selectedPkg && (
+                        <p>
+                            {`${t('Do you really want to delete the package')} `}
+                            <span className='fw-medium'>
+                                {`${selectedPkg.name}${selectedPkg.version ? ` (${selectedPkg.version})` : ''}`}
+                            </span>
+                            ?
+                        </p>
+                    )}
+                </Modal.Body>
+
+                <Modal.Footer>
+                    {alert ? (
+                        <button
+                            className='btn btn-dark'
+                            onClick={() => {
+                                setShowModal(false)
+                                setSelectedPkg(null)
+                                setAlert(null)
+                                setDeleting(false)
+                            }}
+                        >
+                            {t('Close')}
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                className='btn btn-dark'
+                                onClick={() => {
+                                    setShowModal(false)
+                                    setSelectedPkg(null)
+                                }}
+                                disabled={deleting}
+                            >
+                                {t('Cancel')}
+                            </button>
+                            <button
+                                className='btn btn-danger'
+                                onClick={() => void deleteLinkedPackage()}
+                                disabled={deleting}
+                            >
+                                {t('Delete Package')}
+                                {deleting && (
+                                    <Spinner size='sm' className='ms-1 spinner' />
+                                )}
+                            </button>
+                        </>
+                    )}
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

@@ -11,12 +11,13 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import React, { Dispatch, type JSX, SetStateAction, useCallback, useMemo, useRef, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
-import { Embedded, ErrorDetails, HttpStatus, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import AddVendorDialog from './AddVendor'
@@ -135,7 +136,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 ),
             )
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }

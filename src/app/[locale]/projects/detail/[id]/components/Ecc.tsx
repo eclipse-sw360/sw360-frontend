@@ -8,7 +8,9 @@
 // License-Filename: LICENSE
 
 'use client'
+
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -16,15 +18,7 @@ import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import {
-    ECCInterface,
-    Embedded,
-    ErrorDetails,
-    HttpStatus,
-    PageableQueryParam,
-    PaginationMeta,
-    UserGroupType,
-} from '@/object-types'
+import { ECCInterface, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -173,7 +167,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

@@ -8,14 +8,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     licenseTypeId: string
@@ -40,16 +41,18 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = await response.json()
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Unauthorized request'))
             return
         } else {
@@ -79,18 +82,21 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
             .finally(() => {
                 setLoading(false)
             })
-    }, [fetchData, licenseTypeId])
+    }, [
+        fetchData,
+        licenseTypeId,
+    ])
 
     const handleDeleteLicenseType = async () => {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.DELETE(`licenseTypes/${licenseTypeId}`, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Delete License Type successful'))
                 setShow(false)
                 window.location.reload()
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 MessageService.error(t('Error when processing'))
@@ -114,9 +120,20 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
                 centered
                 size='lg'
             >
-                <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414', fontWeight: '700' }}>
+                <Modal.Header
+                    style={{
+                        backgroundColor: '#FEEFEF',
+                        color: '#da1414',
+                        fontWeight: '700',
+                    }}
+                >
                     <h5>
-                        <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
+                        <Modal.Title
+                            style={{
+                                fontSize: '1.25rem',
+                                fontWeight: '700',
+                            }}
+                        >
                             <BsQuestionCircle />
                             &nbsp;
                             {t('Delete License Type')}?

@@ -9,34 +9,42 @@
 
 'use client'
 
-import { ErrorDetails, HttpStatus, SearchDuplicatesResponse } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
-import Link from 'next/link'
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { ErrorDetails, SearchDuplicatesResponse } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 export default function DatabaseSanitation(): JSX.Element {
     const t = useTranslations('default')
     const [duplicates, setDuplicates] = useState<SearchDuplicatesResponse | null | undefined>(undefined)
-    const memoizedData = useMemo(() => duplicates, [duplicates])
+    const memoizedData = useMemo(
+        () => duplicates,
+        [
+            duplicates,
+        ],
+    )
     const session = useSession()
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [session])
+    }, [
+        session,
+    ])
 
     const searchDuplicate = async () => {
         try {
             setDuplicates(null)
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             const response = await ApiUtils.GET('databaseSanitation/searchDuplicate', session.data.user.access_token)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
@@ -51,7 +59,14 @@ export default function DatabaseSanitation(): JSX.Element {
         }
     }
 
-    const duplicateReleasesColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+    const duplicateReleasesColumns = useMemo<
+        ColumnDef<
+            [
+                string,
+                string[],
+            ]
+        >[]
+    >(
         () => [
             {
                 id: 'releaseName',
@@ -85,7 +100,9 @@ export default function DatabaseSanitation(): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const duplicateReleasesTable = useReactTable({
         data: Object.entries(memoizedData?.duplicateReleases ?? []),
@@ -93,7 +110,14 @@ export default function DatabaseSanitation(): JSX.Element {
         getCoreRowModel: getCoreRowModel(),
     })
 
-    const duplicateReleaseSourcesColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+    const duplicateReleaseSourcesColumns = useMemo<
+        ColumnDef<
+            [
+                string,
+                string[],
+            ]
+        >[]
+    >(
         () => [
             {
                 id: 'releaseName',
@@ -114,7 +138,9 @@ export default function DatabaseSanitation(): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const duplicateReleaseSourcesTable = useReactTable({
         data: Object.entries(memoizedData?.duplicateReleaseSources ?? []),
@@ -122,7 +148,14 @@ export default function DatabaseSanitation(): JSX.Element {
         getCoreRowModel: getCoreRowModel(),
     })
 
-    const duplicateComponentsColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+    const duplicateComponentsColumns = useMemo<
+        ColumnDef<
+            [
+                string,
+                string[],
+            ]
+        >[]
+    >(
         () => [
             {
                 id: 'componentName',
@@ -156,7 +189,9 @@ export default function DatabaseSanitation(): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const duplicateComponentsTable = useReactTable({
         data: Object.entries(memoizedData?.duplicateComponents ?? []),
@@ -164,7 +199,14 @@ export default function DatabaseSanitation(): JSX.Element {
         getCoreRowModel: getCoreRowModel(),
     })
 
-    const duplicateProjectsColumns = useMemo<ColumnDef<[string, string[]]>[]>(
+    const duplicateProjectsColumns = useMemo<
+        ColumnDef<
+            [
+                string,
+                string[],
+            ]
+        >[]
+    >(
         () => [
             {
                 id: 'projectName',
@@ -198,7 +240,9 @@ export default function DatabaseSanitation(): JSX.Element {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const duplicateProjectsTable = useReactTable({
         data: Object.entries(memoizedData?.duplicateProjects ?? []),

@@ -14,7 +14,9 @@
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { useCallback, useState } from 'react'
-import { ComponentPayload, Vendor } from '@/object-types'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
+import { useConfigValue } from '@/contexts'
+import { ComponentPayload, UIConfigKeys, Vendor } from '@/object-types'
 
 interface Props {
     componentPayload: ComponentPayload
@@ -28,6 +30,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
 
+    // Configs from backend
+    const categoriesSuggestions = useConfigValue(UIConfigKeys.UI_COMPONENT_CATEGORIES) as string[] | null
+
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setComponentPayload({
             ...componentPayload,
@@ -35,16 +40,16 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
         })
     }
 
-    const setCategoriesData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        const data: string[] = splitValueCategories(e.target.value)
+    const setCategoriesData = (input: string) => {
+        const data: string[] = splitValueCategories(input)
         setComponentPayload({
             ...componentPayload,
             categories: data,
         })
     }
 
-    const splitValueCategories = (valueCatergories: string) => {
-        return valueCatergories.split(',')
+    const splitValueCategories = (valueCategories: string) => {
+        return valueCategories.split(',').map((v) => v.trim())
     }
 
     const setVendorId = (vendorResponse: Vendor) => {
@@ -141,16 +146,17 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                     *
                                 </span>
                             </label>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder='e.g.,Library,cloud,mobile,...'
-                                id='categories'
-                                aria-describedby='categories'
-                                required
-                                name='categories'
-                                onChange={setCategoriesData}
-                                value={componentPayload.categories ?? ''}
+                            <SuggestionBox
+                                initialValue={componentPayload.categories?.join(', ')}
+                                possibleValues={categoriesSuggestions === null ? [] : categoriesSuggestions}
+                                onValueChange={setCategoriesData}
+                                inputProps={{
+                                    id: 'categories',
+                                    name: 'categories',
+                                    required: true,
+                                    placeHolder: 'e.g.,Library,cloud,mobile,...',
+                                }}
+                                isMultiValue={true}
                             />
                         </div>
                     </div>

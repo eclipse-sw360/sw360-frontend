@@ -11,12 +11,13 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Spinner } from 'react-bootstrap'
-import { AccessToken, Embedded, ErrorDetails, HttpStatus } from '@/object-types'
+import { AccessToken, Embedded, ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
@@ -50,10 +51,10 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
                 session.user.access_token,
             )
 
-            if (response.status === HttpStatus.NO_CONTENT) {
+            if (response.status === StatusCodes.NO_CONTENT) {
                 MessageService.success(t('Revoke token sucessfully'))
                 setRevoked(!revoked)
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 MessageService.error(t('Error while processing'))
@@ -148,7 +149,7 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const response = await ApiUtils.GET('users/tokens', session.data.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }

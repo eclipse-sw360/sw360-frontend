@@ -9,15 +9,16 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { HttpStatus, Package, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
 import { ListGroup, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Package, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
 
 function CreatePackage(): ReactNode {
@@ -34,7 +35,9 @@ function CreatePackage(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -59,14 +62,14 @@ function CreatePackage(): ReactNode {
                 session.user.access_token,
             )
             const res = (await response.json()) as Record<string, string>
-            if (response.status == HttpStatus.CREATED) {
+            if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Package created successfully'))
                 if (res.id) {
                     router.push(`/packages/detail/${res.id}`)
                 } else {
                     handleGoBack()
                 }
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 MessageService.error(`${t('Something went wrong')}: ${res.message}`)
@@ -118,4 +121,6 @@ function CreatePackage(): ReactNode {
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(CreatePackage, [UserGroupType.SECURITY_USER])
+export default AccessControl(CreatePackage, [
+    UserGroupType.SECURITY_USER,
+])

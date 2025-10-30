@@ -9,22 +9,27 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { notFound } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useState } from 'react'
+import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Administration from '@/app/[locale]/projects/detail/[id]/components/Administration'
-import ProjectAttachments from '@/app/[locale]/projects/detail/[id]/components/Attachments'
 import ChangeLog from '@/app/[locale]/projects/detail/[id]/components/Changelog'
 import EccDetails from '@/app/[locale]/projects/detail/[id]/components/Ecc'
 import LicenseClearing from '@/app/[locale]/projects/detail/[id]/components/LicenseClearing'
 import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
-import { AdministrationDataType, HttpStatus, SummaryDataType } from '@/object-types'
+import Attachments from '@/components/Attachments/Attachments'
+import { AdministrationDataType, SummaryDataType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { notFound } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
-import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 
-export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId: string }>): ReactNode {
+export default function CurrentProjectDetail({
+    projectId,
+}: Readonly<{
+    projectId: string
+}>): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
@@ -34,7 +39,9 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -49,15 +56,18 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
                     session.user.access_token,
                     signal,
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
 
                 const data = (await response.json()) as SummaryDataType | AdministrationDataType
 
-                setSummaryData({ ...data, id: projectId } as SummaryDataType)
+                setSummaryData({
+                    ...data,
+                    id: projectId,
+                } as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
             } catch (e) {
                 console.error(e)
@@ -65,7 +75,11 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
         })()
 
         return () => controller.abort()
-    }, [projectId, session, status])
+    }, [
+        projectId,
+        session,
+        status,
+    ])
 
     return (
         <div className='ms-5 mt-2'>
@@ -131,7 +145,9 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
                                     {!summaryData ? (
                                         <div
                                             className='col-12'
-                                            style={{ textAlign: 'center' }}
+                                            style={{
+                                                textAlign: 'center',
+                                            }}
                                         >
                                             <Spinner className='spinner' />
                                         </div>
@@ -143,7 +159,9 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
                                     {!administrationData ? (
                                         <div
                                             className='col-12'
-                                            style={{ textAlign: 'center' }}
+                                            style={{
+                                                textAlign: 'center',
+                                            }}
                                         >
                                             <Spinner className='spinner' />
                                         </div>
@@ -158,6 +176,8 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
                                             projectName={summaryData.name}
                                             projectVersion={summaryData.version ?? ''}
                                             isCalledFromModerationRequestCurrentProject={true}
+                                            businessUnit={summaryData.businessUnit ?? ''}
+                                            clearingState={summaryData.clearingState ?? ''}
                                         />
                                     )}
                                 </Tab.Pane>
@@ -179,7 +199,10 @@ export default function CurrentProjectDetail({ projectId }: Readonly<{ projectId
                                     )}
                                 </Tab.Pane>
                                 <Tab.Pane eventKey='attachments'>
-                                    <ProjectAttachments projectId={projectId} />
+                                    <Attachments
+                                        documentId={projectId}
+                                        documentType={'projects'}
+                                    />
                                 </Tab.Pane>
                                 <Tab.Pane eventKey='changeLog'>
                                     <ChangeLog

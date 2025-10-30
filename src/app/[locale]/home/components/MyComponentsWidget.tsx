@@ -7,19 +7,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import MessageService from '@/services/message.service'
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-
-import { HttpStatus } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-
 import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
@@ -60,7 +58,9 @@ export default function MyComponentsWidget(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -75,7 +75,12 @@ export default function MyComponentsWidget(): ReactNode {
         number: 0,
     })
     const [componentData, setComponentData] = useState<Component[]>(() => [])
-    const memoizedData = useMemo(() => componentData, [componentData])
+    const memoizedData = useMemo(
+        () => componentData,
+        [
+            componentData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -94,10 +99,15 @@ export default function MyComponentsWidget(): ReactNode {
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/mycomponents`,
-                    Object.fromEntries(Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)])),
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -122,7 +132,10 @@ export default function MyComponentsWidget(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, reload])
+    }, [
+        pageableQueryParam,
+        reload,
+    ])
 
     const table = useReactTable({
         data: memoizedData,

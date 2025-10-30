@@ -9,17 +9,18 @@
 
 'use client'
 
-import { Table, _ } from '@/components/sw360'
-import { ErrorDetails, HttpStatus, ObligationRelease, ObligationResponse } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { SW360_API_URL } from '@/utils/env'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
 import { GrCheckboxSelected } from 'react-icons/gr'
+import { _, Table } from '@/components/sw360'
+import { ErrorDetails, ObligationRelease, ObligationResponse } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import { SW360_API_URL } from '@/utils/env'
 import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
 
 const Capitalize = (text: string) =>
@@ -47,7 +48,9 @@ export default function LicenseDbObligationsModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const addObligationsToLicense = async () => {
         try {
@@ -59,9 +62,9 @@ export default function LicenseDbObligationsModal({
                 obligationIds,
                 session.user.access_token,
             )
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
-            } else if (response.status === HttpStatus.CREATED) {
+            } else if (response.status === StatusCodes.CREATED) {
                 MessageService.success(t('Added obligations successfully'))
             } else {
                 const err = (await response.json()) as ErrorDetails
@@ -110,7 +113,10 @@ export default function LicenseDbObligationsModal({
                             if (!e.target.checked) {
                                 setObligationIds(obligationIds.filter((ob) => ob !== id))
                             } else {
-                                setObligationIds([...obligationIds, id])
+                                setObligationIds([
+                                    ...obligationIds,
+                                    id,
+                                ])
                             }
                         }}
                     />,
@@ -143,7 +149,9 @@ export default function LicenseDbObligationsModal({
                                     return (
                                         <li
                                             key={licenseId}
-                                            style={{ display: 'inline' }}
+                                            style={{
+                                                display: 'inline',
+                                            }}
                                         >
                                             <Link
                                                 href={`/licenses/${licenseId}`}
@@ -220,7 +228,9 @@ export default function LicenseDbObligationsModal({
                 return tableData
             },
             total: (data: ObligationResponse) => data.page?.totalElements ?? 0,
-            headers: { Authorization: session.user.access_token },
+            headers: {
+                Authorization: session.user.access_token,
+            },
         }
     }
 
@@ -233,7 +243,10 @@ export default function LicenseDbObligationsModal({
             scrollable
         >
             <Modal.Header
-                style={{ backgroundColor: '#eef2fa', color: '#2e5aac' }}
+                style={{
+                    backgroundColor: '#eef2fa',
+                    color: '#2e5aac',
+                }}
                 closeButton
             >
                 <Modal.Title id='delete-all-license-info-modal'>

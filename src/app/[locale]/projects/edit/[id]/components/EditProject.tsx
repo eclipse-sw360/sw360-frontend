@@ -9,6 +9,7 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -25,8 +26,9 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import {
     ActionType,
     DocumentTypes,
-    HttpStatus,
     InputKeyValue,
+    LinkedPackageData,
+    LinkedProjectData,
     ObligationEntry,
     Project,
     ProjectPayload,
@@ -259,10 +261,10 @@ function EditProject({
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as User
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Unauthorized request'))
             return
         } else {
@@ -276,7 +278,7 @@ function EditProject({
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
                 const project = (await response.json()) as Project
@@ -407,6 +409,24 @@ function EditProject({
                     projectResponsible: project.projectResponsible ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
+                    linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
+                        (acc, proj) => {
+                            acc[proj.id ?? ''] = {
+                                name: proj.name,
+                                version: proj.version ?? '',
+                                enableSvm:
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.enableSvm === 'true',
+                                projectRelationship:
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.relation ?? '',
+                            }
+                            return acc
+                        },
+                        {} as {
+                            [k: string]: LinkedProjectData
+                        },
+                    ),
                     comment: projectPayload.comment ?? '',
                     packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
                         (acc, singlePackage) => {
@@ -414,15 +434,18 @@ function EditProject({
                                 // Get comment from project's packageIds if it exists, otherwise empty string
                                 const existingComment = project.packageIds?.[singlePackage.id]?.comment || ''
                                 acc[singlePackage.id] = {
+                                    packageId: singlePackage._links?.self.href.split('/').at(-1) ?? '',
+                                    name: singlePackage.name ?? '',
+                                    version: singlePackage.version ?? '',
+                                    licenseIds: singlePackage.licenseIds ?? [],
+                                    packageManager: singlePackage.packageManager ?? '',
                                     comment: existingComment,
                                 }
                             }
                             return acc
                         },
                         {} as {
-                            [key: string]: {
-                                comment?: string
-                            }
+                            [key: string]: LinkedPackageData
                         },
                     ),
                 }
@@ -445,22 +468,22 @@ function EditProject({
         })
         const response = await ApiUtils.POST(url, {}, session.user.access_token)
         switch (response.status) {
-            case HttpStatus.UNAUTHORIZED:
+            case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))
                 return 'DENIED'
-            case HttpStatus.FORBIDDEN:
+            case StatusCodes.FORBIDDEN:
                 MessageService.warn(t('Access Denied'))
                 return 'DENIED'
-            case HttpStatus.BAD_REQUEST:
+            case StatusCodes.BAD_REQUEST:
                 MessageService.warn(t('Invalid input or missing required parameters'))
                 return 'DENIED'
-            case HttpStatus.INTERNAL_SERVER_ERROR:
+            case StatusCodes.INTERNAL_SERVER_ERROR:
                 MessageService.error(t('Internal server error'))
                 return 'DENIED'
-            case HttpStatus.OK:
+            case StatusCodes.OK:
                 MessageService.info(t('You can write to the entity'))
                 return 'OK'
-            case HttpStatus.ACCEPTED:
+            case StatusCodes.ACCEPTED:
                 MessageService.info(t('You are allowed to perform write with MR'))
                 return 'ACCEPTED'
             default:
@@ -535,9 +558,13 @@ function EditProject({
             const responses = await Promise.all(requests)
             let allOk = true
             for (const r of responses) {
-                if (!(r.status === HttpStatus.OK ||
-                        r.status === HttpStatus.CREATED ||
-                        r.status === HttpStatus.ACCEPTED)) {
+                if (
+                    !(
+                        r.status === StatusCodes.OK ||
+                        r.status === StatusCodes.CREATED ||
+                        r.status === StatusCodes.ACCEPTED
+                    )
+                ) {
                     allOk = false
                     break
                 }
@@ -566,13 +593,11 @@ function EditProject({
         const isEligible = await checkUpdateEligibility(projectId)
         if (isEligible === 'OK') {
             await updateProject()
-        }
-        else if (isEligible === 'ACCEPTED') {
+        } else if (isEligible === 'ACCEPTED') {
             setShowCommentModal(true)
-        }
-        else if (isEligible === 'DENIED') {
+        } else if (isEligible === 'DENIED') {
             return
-        } 
+        }
     }
 
     const handleCancelClick = () => {

@@ -9,15 +9,16 @@
 
 'use client'
 
-import UserEditForm from '@/components/UserEditForm/UserEditForm'
-import UserOperationType from '@/components/UserEditForm/UserOperationType'
-import { HttpStatus, UserPayload } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
+import UserEditForm from '@/components/UserEditForm/UserEditForm'
+import UserOperationType from '@/components/UserEditForm/UserOperationType'
+import { UserPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 
 export default function CreateUser(): JSX.Element {
     const t = useTranslations('default')
@@ -37,10 +38,15 @@ export default function CreateUser(): JSX.Element {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+        setUser((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }))
     }
 
     const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -52,12 +58,12 @@ export default function CreateUser(): JSX.Element {
             }
             user.fullName = `${user.givenName} ${user.lastName}`
             const response = await ApiUtils.POST('users', user, session.user.access_token)
-            if (response.status == HttpStatus.CREATED) {
+            if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('User is created'))
                 router.push('/admin/users')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('User with the same email already exists'))
             } else {
                 MessageService.error(t('Something went wrong'))

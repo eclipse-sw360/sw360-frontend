@@ -9,16 +9,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-
-import MessageService from '@/services/message.service'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useEffect, type JSX } from 'react'
+import React, { type JSX, useEffect } from 'react'
 import { Modal } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 
 interface Props {
     userId: string
@@ -43,7 +42,9 @@ const ToggleUserActiveModal = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const toggleUserAccount = async () => {
         try {
@@ -53,13 +54,15 @@ const ToggleUserActiveModal = ({
             }
             const response = await ApiUtils.PATCH(
                 `users/${userId}`,
-                { deactivated: !isUserDeactived },
+                {
+                    deactivated: !isUserDeactived,
+                },
                 session.user.access_token,
             )
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 router.push('/admin/users')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
                 return signOut()
             } else {
@@ -80,7 +83,9 @@ const ToggleUserActiveModal = ({
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>
                     <FaRegQuestionCircle /> {isUserDeactived === true ? t('Activate User') : t('Deactivate User')} ?

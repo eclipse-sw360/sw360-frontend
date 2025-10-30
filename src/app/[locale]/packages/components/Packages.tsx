@@ -9,28 +9,21 @@
 
 'use client'
 
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import {
-    Embedded,
-    ErrorDetails,
-    HttpStatus,
-    Package,
-    PageableQueryParam,
-    PaginationMeta,
-    UserGroupType,
-} from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 import { MdDeleteOutline } from 'react-icons/md'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -81,7 +74,12 @@ function Packages(): ReactNode {
         number: 0,
     })
     const [packageData, setPackageData] = useState<PackageWithRelease[]>([])
-    const memoizedData = useMemo(() => packageData, [packageData])
+    const memoizedData = useMemo(
+        () => packageData,
+        [
+            packageData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     const releaseCache = useMemo(() => new Map<string, ReleaseCache>(), [])
@@ -90,7 +88,9 @@ function Packages(): ReactNode {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleCreatePackage = () => {
         router.push('/packages/add')
@@ -252,7 +252,9 @@ function Packages(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     useEffect(() => {
@@ -269,7 +271,11 @@ function Packages(): ReactNode {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `packages`,
                     Object.fromEntries(
-                        Object.entries({ ...searchParams, ...pageableQueryParam, allDetails: true }).map(([k, v]) => [
+                        Object.entries({
+                            ...searchParams,
+                            ...pageableQueryParam,
+                            allDetails: true,
+                        }).map(([k, v]) => [
                             k,
                             String(v),
                         ]),
@@ -277,7 +283,7 @@ function Packages(): ReactNode {
                 )
 
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status !== HttpStatus.OK) {
+                if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
@@ -317,7 +323,7 @@ function Packages(): ReactNode {
                                 session.user.access_token,
                                 signal,
                             )
-                            if (releaseResp.status === HttpStatus.OK) {
+                            if (releaseResp.status === StatusCodes.OK) {
                                 const release = await releaseResp.json()
                                 releaseCache.set(pkg.releaseId, release)
                                 return {
@@ -346,7 +352,11 @@ function Packages(): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [pageableQueryParam, params.toString(), status])
+    }, [
+        pageableQueryParam,
+        params.toString(),
+        status,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -379,38 +389,86 @@ function Packages(): ReactNode {
                 const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
                 if (nextSorting.length > 0) {
                     const { id, desc } = nextSorting[0]
-                    return { ...prev, sort: `${id},${desc ? 'desc' : 'asc'}` }
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
                 }
-                return { ...prev, sort: '' }
+                return {
+                    ...prev,
+                    sort: '',
+                }
             })
         },
         onPaginationChange: (updater) => {
             const next =
                 typeof updater === 'function'
-                    ? updater({ pageIndex: pageableQueryParam.page, pageSize: pageableQueryParam.page_entries })
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
                     : updater
-            setPageableQueryParam((prev) => ({ ...prev, page: next.pageIndex + 1, page_entries: next.pageSize }))
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
         },
     })
 
     const advancedSearch = [
-        { fieldName: t('Package Name'), value: '', paramName: 'name' },
-        { fieldName: t('Package Version'), value: '', paramName: 'version' },
+        {
+            fieldName: t('Package Name'),
+            value: '',
+            paramName: 'name',
+        },
+        {
+            fieldName: t('Package Version'),
+            value: '',
+            paramName: 'version',
+        },
         {
             fieldName: t('Package Manager'),
-            value: packageManagers.map((p) => ({ key: p, text: p })),
+            value: packageManagers.map((p) => ({
+                key: p,
+                text: p,
+            })),
             paramName: 'packageManager',
         },
-        { fieldName: t('Licenses'), value: '', paramName: 'licenses' },
-        { fieldName: t('purl'), value: '', paramName: 'purl' },
-        { fieldName: `${t('Created By')} (${t('Email')})`, value: '', paramName: 'createdBy' },
+        {
+            fieldName: t('Licenses'),
+            value: '',
+            paramName: 'licenses',
+        },
+        {
+            fieldName: t('purl'),
+            value: '',
+            paramName: 'purl',
+        },
+        {
+            fieldName: `${t('Created By')} (${t('Email')})`,
+            value: '',
+            paramName: 'createdBy',
+        },
         {
             fieldName: t('Created On'),
             value: [
-                { key: 'EQUAL', text: '=' },
-                { key: 'LESS_THAN_OR_EQUAL_TO', text: '<=' },
-                { key: 'GREATER_THAN_OR_EQUAL_TO', text: '>=' },
-                { key: 'BETWEEN', text: t('Between') },
+                {
+                    key: 'EQUAL',
+                    text: '=',
+                },
+                {
+                    key: 'LESS_THAN_OR_EQUAL_TO',
+                    text: '<=',
+                },
+                {
+                    key: 'GREATER_THAN_OR_EQUAL_TO',
+                    text: '>=',
+                },
+                {
+                    key: 'BETWEEN',
+                    text: t('Between'),
+                },
             ],
             paramName: 'createdOn',
         },
@@ -476,4 +534,6 @@ function Packages(): ReactNode {
     )
 }
 
-export default AccessControl(Packages, [UserGroupType.SECURITY_USER])
+export default AccessControl(Packages, [
+    UserGroupType.SECURITY_USER,
+])

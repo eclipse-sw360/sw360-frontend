@@ -9,18 +9,19 @@
 
 'use client'
 
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ClearingRequestDetails, HttpStatus, UserGroupType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { ShowInfoOnHover } from 'next-sw360'
+import { StatusCodes } from 'http-status-codes'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ClearingRequestDetails, UserGroupType } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
 import ClearingDecision from './ClearingDecision'
 import ClearingRequestInfo from './ClearingRequestInfo'
@@ -43,7 +44,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const ClearingComments = dynamic(() => import('./ClearingComments'), {
         ssr: false,
@@ -53,10 +56,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ClearingRequestDetails
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -82,7 +85,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                 setClearingRequestData(clearingRequestDetails)
             },
         )
-    }, [clearingRequestId])
+    }, [
+        clearingRequestId,
+    ])
 
     const handleEditClearingRequest = (requestId: string | undefined) => {
         router.push(`/requests/clearingRequest/edit/${requestId}`)
@@ -99,7 +104,12 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                 setShow={setShowReopenClearingRequestModal}
             />
             <Breadcrumb className='container page-content'>
-                <Breadcrumb.Item href={requestsPath}>{t('Requests')}</Breadcrumb.Item>
+                <Breadcrumb.Item
+                    linkAs={Link}
+                    href={requestsPath}
+                >
+                    {t('Requests')}
+                </Breadcrumb.Item>
                 <Breadcrumb.Item active>{clearingRequestData?.id || clearingRequestId}</Breadcrumb.Item>
             </Breadcrumb>
             <div className='ms-5 mt-2'>
@@ -138,7 +148,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(0)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -192,7 +205,10 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                 <Card className={`${styles['card']}`}>
                                     <div
                                         onClick={() => toggleCollapse(1)}
-                                        style={{ cursor: 'pointer', padding: '0' }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
                                             className={`
@@ -237,4 +253,6 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(ClearingRequestDetail, [UserGroupType.SECURITY_USER])
+export default AccessControl(ClearingRequestDetail, [
+    UserGroupType.SECURITY_USER,
+])

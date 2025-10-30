@@ -8,33 +8,27 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import OnOffSwitch from '@/app/[locale]/admin/configurations/components/OnOffSwitch'
-import PillsInput from '@/components/sw360/PillsInput/PillsInput'
 import {
-    ArrayTypeUIConfigKeys,
     ConfigurationContainers,
-    HttpStatus,
+    ProcessedUiConfig,
+    parseRawUiConfig,
     UIConfigKeys,
     UiConfiguration,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { PageButtonHeader, PageSpinner } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useState } from 'react'
 
 const FrontEndConfigs = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
-    const [arrayKeyStates, setArrayKeyStates] = useState<Record<UIConfigKeys, Set<string>>>(
-        () =>
-            Object.fromEntries(
-                ArrayTypeUIConfigKeys.map((key) => {
-                    return [key, new Set<string>()]
-                }),
-            ) as Record<UIConfigKeys, Set<string>>,
-    )
+    const [arrayKeyStates, setArrayKeyStates] = useState<ProcessedUiConfig>({} as ProcessedUiConfig)
     const { status } = useSession()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
 
@@ -42,7 +36,9 @@ const FrontEndConfigs = (): JSX.Element => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const fetchUiConfig = useCallback(async () => {
         const session = await getSession()
@@ -52,10 +48,10 @@ const FrontEndConfigs = (): JSX.Element => {
             return
         }
         const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as UiConfiguration
             setCurrentUiConfig(data)
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
             setCurrentUiConfig({} as UiConfiguration)
@@ -68,7 +64,9 @@ const FrontEndConfigs = (): JSX.Element => {
 
     useEffect(() => {
         updateInternalState()
-    }, [currentUiConfig])
+    }, [
+        currentUiConfig,
+    ])
 
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
@@ -80,9 +78,9 @@ const FrontEndConfigs = (): JSX.Element => {
             return
         }
         const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             MessageService.success(t('Updated frontend configurations successfully'))
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
             const message = await response.json()
@@ -99,37 +97,17 @@ const FrontEndConfigs = (): JSX.Element => {
         },
     }
 
-    const getSetForStateKey = (key: UIConfigKeys): Set<string> => {
-        let values: string[]
-        if (currentUiConfig) {
-            try {
-                values = JSON.parse(currentUiConfig[key]) as string[]
-            } catch {
-                values = []
-            }
-        } else {
-            values = []
-        }
-        return new Set(values)
-    }
-
     const updateInternalState = () => {
-        setArrayKeyStates(
-            Object.fromEntries(
-                ArrayTypeUIConfigKeys.map((key) => {
-                    return [key, getSetForStateKey(key)]
-                }),
-            ) as Record<UIConfigKeys, Set<string>>,
-        )
+        setArrayKeyStates(parseRawUiConfig(currentUiConfig ?? ({} as UiConfiguration)))
     }
 
-    const onArrayStateChangeHandler = (key: UIConfigKeys) => (newValues: Set<string>) => {
+    const onArrayStateChangeHandler = (key: UIConfigKeys) => (newValues: string[]) => {
         // Update the global state, internal state will be updated by useEffect
         setCurrentUiConfig(
             (prev) =>
                 ({
                     ...prev,
-                    [key]: JSON.stringify(Array.from(newValues)),
+                    [key]: JSON.stringify(newValues),
                 }) as UiConfiguration,
         )
     }
@@ -424,10 +402,11 @@ const FrontEndConfigs = (): JSX.Element => {
                                             size={25}
                                             setCurrentUiConfig={setCurrentUiConfig}
                                             checked={
-                                                currentUiConfig[UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE] ===
-                                                'true'
+                                                currentUiConfig[
+                                                    UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE
+                                                ] === 'true'
                                             }
-                                            propKey={UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE}
+                                            propKey={UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE}
                                         />
                                     </td>
                                     <td>{t('ui_rest_apitoken_generator_enable')}</td>

@@ -20,6 +20,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { ReactNode, type JSX } from 'react'
 
+import { UiConfigProvider } from '@/contexts'
 import { Footer, GlobalMessages, Navbar } from 'next-sw360'
 import { Providers } from '../provider'
 
@@ -45,15 +46,17 @@ async function RootLayout({ children }: Props): Promise<JSX.Element> {
             <body>
                 <Providers>
                     <NextIntlClientProvider messages={messages}>
-                        <div
-                            id='container'
-                            className='d-flex flex-column min-vh-100'
-                        >
-                            <GlobalMessages />
-                            <Navbar />
-                            {children}
-                            <Footer />
-                        </div>
+                        <UiConfigProvider>
+                            <div
+                                id='container'
+                                className='d-flex flex-column min-vh-100'
+                            >
+                                <GlobalMessages />
+                                <Navbar />
+                                {children}
+                                <Footer />
+                            </div>
+                        </UiConfigProvider>
                     </NextIntlClientProvider>
                 </Providers>
             </body>

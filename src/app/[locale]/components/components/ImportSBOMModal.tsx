@@ -11,13 +11,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
 
-import { Component, HttpStatus } from '@/object-types'
+import { Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 import styles from '../components.module.css'
 
@@ -54,7 +55,9 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.currentTarget.files) return
@@ -83,11 +86,11 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
             formData,
             session.user.access_token,
         )
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const responseData = (await response.json()) as PrepareImportData
             setPrepareImportData(responseData)
             setImportState(ImportSBOMState.PREPARE_IMPORT)
-        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+        } else if (response.status === StatusCodes.INTERNAL_SERVER_ERROR) {
             setImportState(ImportSBOMState.IMPORT_ERROR)
         }
     }
@@ -107,7 +110,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                 formData,
                 session.user.access_token,
             )
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 const responseData = (await response.json()) as Component
                 router.push(`/components/detail/${responseData.id}`)
             }
@@ -234,7 +237,12 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                     <>
                         <h4> {'Failed :('} </h4>
                         <div>
-                            {JSON.stringify({ readyState: 4, responseText: '', status: 500, statusText: 'error' })}
+                            {JSON.stringify({
+                                readyState: 4,
+                                responseText: '',
+                                status: 500,
+                                statusText: 'error',
+                            })}
                         </div>
                     </>
                 )}

@@ -9,13 +9,14 @@
 
 'use client'
 
-import { HttpStatus, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useState, type JSX } from 'react'
+import React, { type JSX, useState } from 'react'
 import { Modal } from 'react-bootstrap'
+import { Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface AlertData {
     variant: string
@@ -45,7 +46,10 @@ const AddVendorDialog = ({
     const [state, setState] = useState<AddVendorState>(AddVendorState.ADD_NEW_VENDOR)
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setVendor((prev: Vendor) => ({ ...prev, [e.target.name]: e.target.value }))
+        setVendor((prev: Vendor) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }))
     }
 
     const handleSubmit = async () => {
@@ -63,7 +67,7 @@ const AddVendorDialog = ({
                 url: vendor.url,
             }
             const response = await ApiUtils.POST('vendors', payload, session.user.access_token)
-            if (response.status == HttpStatus.CREATED) {
+            if (response.status == StatusCodes.CREATED) {
                 setAlert({
                     variant: 'success',
                     message: (
@@ -73,11 +77,11 @@ const AddVendorDialog = ({
                     ),
                 })
                 setState(AddVendorState.VENDOR_ADDED)
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
                 setState(AddVendorState.ADD_NEW_VENDOR)
                 return signOut()
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 setAlert({
                     variant: 'danger',
                     message: (
@@ -132,7 +136,9 @@ const AddVendorDialog = ({
                             {t('Full Name')}{' '}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>
@@ -160,7 +166,9 @@ const AddVendorDialog = ({
                             {t('Short Name')}{' '}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>
@@ -188,7 +196,9 @@ const AddVendorDialog = ({
                             {t('URL')}{' '}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>

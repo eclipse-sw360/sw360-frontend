@@ -10,15 +10,16 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { _, Table } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button } from 'react-bootstrap'
 import { FiAlertTriangle } from 'react-icons/fi'
-
-import { Attachment, AttachmentTypes, Embedded, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentTypes, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { Table, _ } from 'next-sw360'
 import SPDXLicenseView from './SPDXLicenseView'
 
 interface Props {
@@ -35,7 +36,9 @@ interface CellData {
     licenseInfo?: {
         [key: string]: string | Array<string> | number
     }
-    addLicensesState?: { [key: string]: string }
+    addLicensesState?: {
+        [key: string]: string
+    }
 }
 
 const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
@@ -47,7 +50,9 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const columns = [
         {
@@ -57,7 +62,13 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 _(
                     isISR ? (
                         <>
-                            {fileName} <FiAlertTriangle style={{ color: 'red', fontSize: '20px' }} />
+                            {fileName}{' '}
+                            <FiAlertTriangle
+                                style={{
+                                    color: 'red',
+                                    fontSize: '20px',
+                                }}
+                            />
                         </>
                     ) : (
                         <>{fileName}</>
@@ -101,7 +112,9 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                         <>
                             {addLicensesState ? (
                                 <Alert variant={addLicensesState.variant}>
-                                    {t('VALUE', { value: addLicensesState.message })}
+                                    {t('VALUE', {
+                                        value: addLicensesState.message,
+                                    })}
                                 </Alert>
                             ) : (
                                 <SPDXLicenseView
@@ -132,7 +145,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 requestBody,
                 session.user.access_token,
             )
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 updateAddLicenseState(response.status, rowIndex)
@@ -144,7 +157,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
     const updateAddLicenseState = (status: number, rowIndex: number) => {
         const addLicensesState =
-            status === HttpStatus.OK
+            status === StatusCodes.OK
                 ? {
                       variant: 'success',
                       message: 'Success! Please reload page to see the changes!',
@@ -170,13 +183,12 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            const data = (await response.json()) as { [key: string]: string | Array<string> } & Embedded<
-                Attachment,
-                'sw360:attachments'
-            >
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as {
+                [key: string]: string | Array<string>
+            } & Embedded<Attachment, 'sw360:attachments'>
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         }
     }, [])
@@ -211,14 +223,20 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
     useEffect(() => {
         const convertAttachmentToRowData = (attachment: Attachment, isISR: boolean, rowIndex: number) => {
             return [
-                { isISR: isISR, fileName: attachment.filename },
+                {
+                    isISR: isISR,
+                    fileName: attachment.filename,
+                },
                 {
                     isISR: isISR,
                     showLicenseClicked: false,
                     rowIndex: rowIndex,
                     attachmentId: attachment.attachmentContentId,
                 },
-                { isISR: isISR, attachmentName: attachment.filename },
+                {
+                    isISR: isISR,
+                    attachmentName: attachment.filename,
+                },
             ] as Array<CellData>
         }
 
@@ -240,7 +258,9 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         fetchData(`releases/${releaseId}/attachments`)
             .then((response: Embedded<Attachment, 'sw360:attachments'> | undefined) => {
                 const attachments = response ? response._embedded['sw360:attachments'] : []
-                const isrAttachments = filterAttachmentByType(attachments, [AttachmentTypes.INITIAL_SCAN_REPORT])
+                const isrAttachments = filterAttachmentByType(attachments, [
+                    AttachmentTypes.INITIAL_SCAN_REPORT,
+                ])
                 const cliAndClxAttachments = filterAttachmentByType(attachments, [
                     AttachmentTypes.COMPONENT_LICENSE_INFO_XML,
                     AttachmentTypes.COMPONENT_LICENSE_INFO_COMBINED,
@@ -248,7 +268,10 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 convertToTableData(isrAttachments, cliAndClxAttachments)
             })
             .catch((err) => console.error(err))
-    }, [releaseId, fetchData])
+    }, [
+        releaseId,
+        fetchData,
+    ])
 
     return (
         <Table

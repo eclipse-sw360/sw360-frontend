@@ -10,17 +10,17 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { ChangeEvent, type JSX, useEffect, useMemo, useRef, useState } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 import {
     Embedded,
     ErrorDetails,
-    HttpStatus,
     LinkedProjectData,
     PageableQueryParam,
     PaginationMeta,
@@ -48,13 +48,6 @@ type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-interface ProjectRelationship {
-    enableSvm: boolean
-    name: string
-    projectRelationship: string
-    version?: string
-}
-
 export default function LinkProjectsModal({
     setLinkedProjectData,
     projectPayload,
@@ -65,7 +58,6 @@ export default function LinkProjectsModal({
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
-    const isExactMatch = useRef<boolean>(false)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
     const session = useSession()
@@ -298,11 +290,6 @@ export default function LinkProjectsModal({
         },
     })
 
-    const handleExactMatchChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const isExactMatchSelected = event.target.checked
-        isExactMatch.current = isExactMatchSelected
-    }
-
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
@@ -326,7 +313,7 @@ export default function LinkProjectsModal({
                 ),
             )
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-            if (response.status !== HttpStatus.OK) {
+            if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
@@ -349,7 +336,7 @@ export default function LinkProjectsModal({
         }
     }
 
-    const projectPayloadSetter = (projectPayloadData: Map<string, ProjectRelationship>) => {
+    const projectPayloadSetter = (projectPayloadData: Map<string, LinkedProjectData>) => {
         if (projectPayloadData.size > 0) {
             const updatedProjectPayload = {
                 ...projectPayload,
@@ -361,6 +348,8 @@ export default function LinkProjectsModal({
                 updatedProjectPayload.linkedProjects[projectId] = {
                     projectRelationship: linkedProject.projectRelationship,
                     enableSvm: linkedProject.enableSvm,
+                    name: linkedProject.name,
+                    version: linkedProject.version,
                 }
             }
             setProjectPayload(updatedProjectPayload)
@@ -387,7 +376,19 @@ export default function LinkProjectsModal({
         setProjectData([])
         setAlert(null)
         setLinkProjects(new Map())
-        isExactMatch.current = false
+        setExactMatch(false)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
     }
 
     return (
@@ -433,12 +434,11 @@ export default function LinkProjectsModal({
                                         name='exact-match'
                                         type='checkbox'
                                         id='exact-match'
-                                        onChange={handleExactMatchChange}
+                                        onChange={() => setExactMatch(!exactMatch)}
                                     />
                                     <Form.Label
                                         className='pt-2'
                                         value={exactMatch}
-                                        onClick={() => setExactMatch((prev) => !prev)}
                                     >
                                         {t('Exact Match')}{' '}
                                         <sup>
