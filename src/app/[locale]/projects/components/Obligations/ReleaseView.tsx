@@ -9,15 +9,29 @@
 
 'use client'
 
-import { _, TreeTable } from '@/components/sw360'
-import { NodeData } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
 import { BsCaretRightFill } from 'react-icons/bs'
+import { PaddedCell, SW360Table } from '@/components/sw360'
+import { NestedRows, TypedEntity } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+
+interface ViewRelease {
+    id: string
+    name: string
+    version: string
+}
+
+type LicenseType = 'Global' | 'Others'
+
+interface ViewObligation {
+    topic: string
+    text: string
+}
 
 interface ObligationsReleaseView {
     processedLicenses: {
@@ -25,181 +39,107 @@ interface ObligationsReleaseView {
             licenseNamesWithTexts: {
                 licenseName: string
                 type: string
-                obligationsAtProject: [
-                    {
-                        topic: string
-                        text: string
-                    },
-                ]
+                obligationsAtProject: ViewObligation[]
             }[]
         }
-        release: {
-            id: string
-            name: string
-            version: string
-        }
+        release: ViewRelease
     }[]
 }
 
-export default function ReleaseView({ projectId }: Readonly<{ projectId: string }>): ReactNode {
-    const { status } = useSession()
+type TypedRelease = TypedEntity<ViewRelease, 'release'>
+
+type TypedLicenseType = TypedEntity<LicenseType, 'type'>
+
+type TypedLicense = TypedEntity<string, 'license'>
+
+type TypedObligation = TypedEntity<ViewObligation, 'obligation'>
+
+export default function ReleaseView({
+    projectId,
+}: Readonly<{
+    projectId: string
+}>): ReactNode {
     const t = useTranslations('default')
-    const [data, setData] = useState<NodeData[]>()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        session,
+    ])
+
+    const [rowData, setRowData] = useState<
+        NestedRows<TypedRelease | TypedLicense | TypedLicenseType | TypedObligation>[]
+    >([])
+    const memoizedData = useMemo(
+        () => rowData,
+        [
+            rowData,
+        ],
+    )
+    const [expandedState, setExpandedState] = useState<ExpandedState>({})
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
+        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
-        ;(async () => {
+        const timeLimit = memoizedData.length === 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseObligations?view=true`,
-                    session.user.access_token,
+                    session.data.user.access_token,
                     signal,
                 )
                 const obligations: ObligationsReleaseView = await response.json()
-                const tableData: NodeData[] = []
+                const tableData: NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType>[] = []
                 for (const x of obligations.processedLicenses) {
-                    const release_id = x.release.id
-                    const globalLicenses: NodeData = {
-                        rowData: [
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_global_project_obligation_status`}
-                            >
-                                {t('Global')}
-                            </div>,
-                            <div
-                                className={`text-center border-0-cell text-truncate green-cell`}
-                                key={`${release_id}_release_view_global_text`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_global_type`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_global_id`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_global_status`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_global_comment`}
-                            ></div>,
-                        ],
-                        children: [],
-                        isExpanded: false,
-                    }
-                    const otherLicenses: NodeData = {
-                        rowData: [
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_others_project_obligation_status`}
-                            >
-                                {t('Others')}
-                            </div>,
-                            <div
-                                className={`text-center border-0-cell text-truncate green-cell`}
-                                key={`${release_id}_release_view_others_text`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_others_type`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_others_id`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_others_status`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell green-cell`}
-                                key={`${release_id}_release_view_others_comment`}
-                            ></div>,
-                        ],
-                        children: [],
-                        isExpanded: false,
-                    }
+                    const globalLicenses: NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType> =
+                        {
+                            node: {
+                                type: 'type',
+                                entity: 'Global',
+                            },
+                            children: [],
+                        }
+                    const otherLicenses: NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType> =
+                        {
+                            node: {
+                                type: 'type',
+                                entity: 'Others',
+                            },
+                            children: [],
+                        }
 
                     for (const l of x.licenseInfo.licenseNamesWithTexts) {
-                        const license: NodeData = {
-                            rowData: [
-                                <div
-                                    className={`text-center border-0-cell orange-cell`}
-                                    key={`${release_id}_release_view_license_project_obligation_status`}
-                                >
-                                    {l.licenseName}
-                                </div>,
-                                <div
-                                    className={`text-center border-0-cell text-truncate orange-cell`}
-                                    key={`${release_id}_release_view_license_text`}
-                                ></div>,
-                                <div
-                                    className={`text-center border-0-cell orange-cell`}
-                                    key={`${release_id}_release_view_license_type`}
-                                ></div>,
-                                <div
-                                    className={`text-center border-0-cell orange-cell`}
-                                    key={`${release_id}_release_view_license_id`}
-                                ></div>,
-                                <div
-                                    className={`text-center border-0-cell orange-cell`}
-                                    key={`${release_id}_release_view_license_status`}
-                                ></div>,
-                                <div
-                                    className={`text-center border-0-cell orange-cell`}
-                                    key={`${release_id}_release_view_license_comment`}
-                                ></div>,
-                            ],
-                            isExpanded: false,
+                        const license: NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType> = {
+                            node: {
+                                type: 'license',
+                                entity: l.licenseName,
+                            },
+                            children: [],
                         }
-                        const obligations: NodeData[] = []
+                        const obligations: NestedRows<
+                            TypedRelease | TypedLicense | TypedObligation | TypedLicenseType
+                        >[] = []
                         for (const o of l.obligationsAtProject) {
-                            const obligation: NodeData = {
-                                rowData: [
-                                    <OverlayTrigger
-                                        overlay={<Tooltip>{o.topic}</Tooltip>}
-                                        key={`${release_id}_release_view_obligation_project_obligation_status`}
-                                    >
-                                        <div className={`text-center border-0-cell text-truncate`}>{o.topic}</div>
-                                    </OverlayTrigger>,
-                                    <OverlayTrigger
-                                        overlay={<Tooltip>{o.text}</Tooltip>}
-                                        key={`${release_id}_release_view_others_text`}
-                                    >
-                                        <div className={`text-center border-0-cell text-truncate`}>{o.text}</div>
-                                    </OverlayTrigger>,
-                                    <div
-                                        className={`text-center border-0-cell`}
-                                        key={`${release_id}_release_view_obligation_type`}
-                                    ></div>,
-                                    <div
-                                        className={`text-center border-0-cell`}
-                                        key={`${release_id}_release_view_obligation_id`}
-                                    ></div>,
-                                    <div
-                                        className={`text-center border-0-cell`}
-                                        key={`${release_id}_release_view_obligation_status`}
-                                    ></div>,
-                                    <div
-                                        className={`text-center border-0-cell`}
-                                        key={`${release_id}_release_view_obligation_comment`}
-                                    ></div>,
-                                ],
-                                isExpanded: false,
+                            const obligation: NestedRows<
+                                TypedRelease | TypedLicense | TypedObligation | TypedLicenseType
+                            > = {
+                                node: {
+                                    type: 'obligation',
+                                    entity: o,
+                                },
+                                children: [],
                             }
                             obligations.push(obligation)
                         }
@@ -210,38 +150,12 @@ export default function ReleaseView({ projectId }: Readonly<{ projectId: string 
                             otherLicenses.children?.push(license)
                         }
                     }
-                    const relNode: NodeData = {
-                        rowData: [
-                            <Link
-                                href={`/component/release/detail/${release_id}`}
-                                className={`text-center text-link border-0-cell`}
-                                key={`${release_id}_release_view_project_obligation_status`}
-                            >
-                                {`${x.release.name} ${x.release.version}`}
-                            </Link>,
-                            <div
-                                className={`text-center border-0-cell text-truncate`}
-                                key={`${release_id}_release_view_text`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell`}
-                                key={`${release_id}_release_view_type`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell`}
-                                key={`${release_id}_release_view_id`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell`}
-                                key={`${release_id}_release_view_status`}
-                            ></div>,
-                            <div
-                                className={`text-center border-0-cell`}
-                                key={`${release_id}_release_view_comment`}
-                            ></div>,
-                        ],
+                    const relNode: NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType> = {
+                        node: {
+                            type: 'release',
+                            entity: x.release,
+                        },
                         children: [],
-                        isExpanded: false,
                     }
                     if (globalLicenses.children && globalLicenses.children.length > 0) {
                         relNode.children?.push(globalLicenses)
@@ -251,9 +165,16 @@ export default function ReleaseView({ projectId }: Readonly<{ projectId: string 
                     }
                     tableData.push(relNode)
                 }
-                setData(tableData)
-            } catch (e) {
-                console.error(e)
+                setRowData(tableData)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                throw new Error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
             }
         })()
 
@@ -262,61 +183,160 @@ export default function ReleaseView({ projectId }: Readonly<{ projectId: string 
         }
     }, [])
 
-    const columns = [
-        {
-            id: 'releaseView.status',
-            name: _(
-                <>
-                    {t('Release')}
-                    <BsCaretRightFill className='mx-1' />
-                    {t('License Type')}
-                    <BsCaretRightFill className='mx-1' />
-                    {t('Release')}
-                    <BsCaretRightFill className='mx-1' />
-                    {t('Obligation')}
-                </>,
-            ),
-            width: '40%',
+    const columns = useMemo<ColumnDef<NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType>>[]>(
+        () => [
+            {
+                id: 'status_hierarchy',
+                header: () => (
+                    <>
+                        {t('Release')}
+                        <BsCaretRightFill className='mx-1' />
+                        {t('License Type')}
+                        <BsCaretRightFill className='mx-1' />
+                        {t('Release')}
+                        <BsCaretRightFill className='mx-1' />
+                        {t('Obligation')}
+                    </>
+                ),
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'release') {
+                        const { id, name, version } = row.original.node.entity
+                        let totalObligations = 0
+                        for (const ob of row.original.children?.[0]?.children ?? []) {
+                            totalObligations += ob.children?.length ?? 0
+                        }
+                        for (const ob of row.original.children?.[1]?.children ?? []) {
+                            totalObligations += ob.children?.length ?? 0
+                        }
+                        return (
+                            <PaddedCell row={row}>
+                                <Link
+                                    href={`/component/release/detail/${id}`}
+                                    className='text-center text-link'
+                                >
+                                    {`${name} ${version}`}
+                                </Link>
+                                <span className='ms-1 pt-1 badge bg-secondary capsule-right capsule-left'>
+                                    {`(${totalObligations})`}
+                                </span>
+                            </PaddedCell>
+                        )
+                    } else if (row.original.node.type === 'type') {
+                        return (
+                            <PaddedCell row={row}>
+                                <p className='green-cell'>{row.original.node.entity}</p>
+                            </PaddedCell>
+                        )
+                    } else if (row.original.node.type === 'license') {
+                        return (
+                            <PaddedCell row={row}>
+                                <p className='orange-cell'>{row.original.node.entity}</p>
+                            </PaddedCell>
+                        )
+                    } else {
+                        return (
+                            <PaddedCell row={row}>
+                                <p>{row.original.node.entity.topic}</p>
+                            </PaddedCell>
+                        )
+                    }
+                },
+                meta: {
+                    width: '40%',
+                },
+            },
+            {
+                id: 'text',
+                header: t('Text'),
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'obligation') {
+                        return <p>{row.original.node.entity.text}</p>
+                    } else if (row.original.node.type === 'type') {
+                        return <p className='green-cell'></p>
+                    } else if (row.original.node.type === 'license') {
+                        return <p className='orange-cell'></p>
+                    }
+                },
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'type',
+                header: t('Type'),
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'type') {
+                        return <p className='green-cell'></p>
+                    } else if (row.original.node.type === 'license') {
+                        return <p className='orange-cell'></p>
+                    }
+                },
+            },
+            {
+                id: 'id',
+                header: t('Id'),
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'type') {
+                        return <p className='green-cell'></p>
+                    } else if (row.original.node.type === 'license') {
+                        return <p className='orange-cell'></p>
+                    }
+                },
+            },
+            {
+                id: 'status',
+                header: t('Status'),
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'type') {
+                        return <p className='green-cell'></p>
+                    } else if (row.original.node.type === 'license') {
+                        return <p className='orange-cell'></p>
+                    }
+                },
+            },
+            {
+                id: 'comment',
+                header: t('Comment'),
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'type') {
+                        return <p className='green-cell'></p>
+                    } else if (row.original.node.type === 'license') {
+                        return <p className='orange-cell'></p>
+                    }
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
+
+    const table = useReactTable({
+        // table state config
+        state: {
+            expanded: expandedState,
         },
-        {
-            id: 'releaseView.text',
-            name: t('Text'),
-            width: '25%',
-        },
-        {
-            id: 'releaseView.type',
-            name: t('Type'),
-            width: '8%',
-        },
-        {
-            id: 'releaseView.Id',
-            name: t('Id'),
-            width: '8%',
-        },
-        {
-            id: 'releaseView.status',
-            name: t('Status'),
-            width: '8%',
-        },
-        {
-            id: 'releaseView.Comment',
-            name: t('Comment'),
-            width: '10%',
-        },
-    ]
+
+        data: rowData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
+        onExpandedChange: setExpandedState,
+    })
 
     return (
-        <div className='ms-1'>
-            {data ? (
-                <TreeTable
-                    columns={columns}
-                    data={data}
-                    setData={setData as Dispatch<SetStateAction<NodeData[]>>}
-                    selector={true}
-                    sort={false}
+        <div className='mb-3'>
+            {table ? (
+                <SW360Table
+                    table={table}
+                    showProcessing={showProcessing}
                 />
             ) : (
-                <div className='col-12 text-center'>
+                <div className='col-12 mt-1 text-center'>
                     <Spinner className='spinner' />
                 </div>
             )}
