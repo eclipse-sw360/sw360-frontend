@@ -103,7 +103,7 @@ function AddProjects(): JSX.Element {
     ])
 
     useEffect(() => {
-        ;(async () => {
+        ; (async () => {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) {
@@ -152,21 +152,37 @@ function AddProjects(): JSX.Element {
     }
 
     const createProject = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
 
             if (response.status == StatusCodes.CREATED) {
                 const data = (await response.json()) as Project
                 MessageService.success(t('Your project is created'))
                 router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
+            }
+            else if (response.status === StatusCodes.CONFLICT) {
+                const body = await response.json().catch(() => ({}))
+                const msg = body?.message ?? t('SW360 project already exists')
+                MessageService.error(`${msg}`)
             } else {
                 MessageService.error(t('There are some errors while creating project'))
             }
-        } catch (e) {
-            console.error(e)
+        } catch (err: unknown) {
+            const res = (err as Response) ?? {}
+            if ('status' in res && res.status === StatusCodes.CONFLICT) {
+                let msg = t('SW360 project already exists')
+                try {
+                    const body = await res.json()
+                    msg = body?.message ?? msg
+                } catch { }
+                MessageService.error(`${msg}`)
+                return
+            }
+
+            MessageService.error(t('There are some errors while creating project'))
         }
     }
 

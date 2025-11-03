@@ -379,13 +379,31 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
             isDependencyNetworkFeatureEnabled === true
                 ? `projects/network/duplicate/${projectId}`
                 : `projects/duplicate/${projectId}`
-        const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
+        try {
+            const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
 
-        if (response.status == StatusCodes.CREATED) {
-            const data = (await response.json()) as Project
-            MessageService.success(t('Your project is created'))
-            router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
-        } else {
+            if (response.status == StatusCodes.CREATED) {
+                const data = (await response.json()) as Project
+                MessageService.success(t('Your project is created'))
+                router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                const body = await response.json().catch(() => ({}))
+                const msg = body?.message ?? t('SW360 project already exists')
+                MessageService.error(`${msg}`)
+            } else {
+                MessageService.error(t('There are some errors while creating project'))
+            }
+        } catch (err: unknown) {
+            const res = (err as Response) ?? {}
+            if ('status' in res && res.status === StatusCodes.CONFLICT) {
+                let msg = t('SW360 project already exists')
+                try {
+                    const body = await res.json()
+                    msg = body?.message ?? msg
+                } catch { }
+                MessageService.error(`${msg}`)
+                return
+            }
             MessageService.error(t('There are some errors while creating project'))
         }
     }
