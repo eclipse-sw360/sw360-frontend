@@ -38,18 +38,28 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
     }, [status])
 
     const Clipboard = ({ text }: { text: string }) => {
+        const [copied, setCopied] = useState(false)
+
+        async function handleCopy() {
+            try {
+                await navigator.clipboard.writeText(text)
+                setCopied(true)
+            } catch (e) {
+                console.error(e)
+            }
+        }
         return (
-            <>
-                <OverlayTrigger overlay={<Tooltip>{t('Copy to Clipboard')}</Tooltip>}>
-                    <span className='d-inline-block'>
-                        <BiClipboard
-                            onClick={() => {
-                                void navigator.clipboard.writeText(text)
-                            }}
-                        />
-                    </span>
-                </OverlayTrigger>
-            </>
+            <OverlayTrigger trigger={['hover', 'focus']} placement="top" overlay={(props) => (<Tooltip{...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>)}
+                onToggle={(show) => {
+                    if (show) setCopied(false)
+                }}
+            >
+                <span className='d-inline-block'>
+                    <BiClipboard
+                        onClick={handleCopy}
+                    />
+                </span>
+            </OverlayTrigger>
         )
     }
 
@@ -254,7 +264,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:moderators']?.length !== undefined &&
-                                    i === summaryData._embedded['sw360:moderators'].length - 1
+                                        i === summaryData._embedded['sw360:moderators'].length - 1
                                         ? ''
                                         : ','}{' '}
                                 </li>
@@ -277,7 +287,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:contributors']?.length !== undefined &&
-                                    i === summaryData._embedded['sw360:contributors'].length - 1
+                                        i === summaryData._embedded['sw360:contributors'].length - 1
                                         ? ''
                                         : ','}{' '}
                                 </li>
@@ -300,7 +310,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.securityResponsibles?.length !== undefined &&
-                                    i === summaryData._embedded.securityResponsibles.length - 1
+                                        i === summaryData._embedded.securityResponsibles.length - 1
                                         ? ''
                                         : ','}{' '}
                                 </li>
