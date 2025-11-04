@@ -1552,6 +1552,7 @@
     "mainline_state_phaseout_tooltip": "Le logiciel a des problèmes, veuillez envisager de le supprimer bientôt, s'il est utilisé",
     "mainline_state_specific_tooltip": "Le logiciel n'est pas recommandé en général, mais pour des cas d'utilisation particuliers ou pour cette version particulière, il est acceptable",
     "n a modified list": "n / A. (liste modifiée)",
+    "not set": "pas réglé",
     "not used in any project yet": "pas encore utilisé dans aucun projet",
     "number of the vulnerabilities were matched by": "<strong>{compte}</strong> des vulnérabilités ont été jumelées par <strong>{comparé par}</strong>",
     "number_of_attachments_not_match_condition": "Il doit y avoir exactement une pièce jointe source, mais il y a {count} à cette publication. Revenez une fois que vous l'avez corrigé.",

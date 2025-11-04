@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, Table } from 'next-sw360'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
@@ -88,7 +88,7 @@ function OpenModerationRequest(): ReactNode {
                     return (
                         <Link
                             className='text-link'
-                            href={'moderationrequest/' + id}
+                            href={'requests/moderationRequest/' + id}
                         >
                             {documentName}
                         </Link>

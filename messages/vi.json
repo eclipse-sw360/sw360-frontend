@@ -1552,6 +1552,7 @@
     "mainline_state_phaseout_tooltip": "Phần mềm có vấn đề mong bạn cân nhắc gỡ bỏ sớm nếu đang sử dụng",
     "mainline_state_specific_tooltip": "Phần mềm nói chung không được khuyến nghị, nhưng đối với trường hợp sử dụng đặc biệt hoặc đối với phiên bản cụ thể này thì có thể chấp nhận được",
     "n a modified list": "không (danh sách đã sửa đổi)",
+    "not set": "chưa được đặt",
     "not used in any project yet": "chưa được sử dụng trong bất kỳ dự án nào",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> số các lỗ hổng đã được so khớp bởi <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "Phải có chính xác một tệp đính kèm nguồn nhưng có {count} ở bản phát hành này. \nVui lòng quay lại sau khi bạn sửa lỗi đó.",

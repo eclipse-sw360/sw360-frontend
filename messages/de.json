@@ -1552,6 +1552,7 @@
     "mainline_state_phaseout_tooltip": "Es gibt Probleme mit der Software. Bitte entfernen Sie sie bald, wenn Sie sie verwenden",
     "mainline_state_specific_tooltip": "Die Software wird im Allgemeinen nicht empfohlen, ist aber für spezielle Anwendungsfälle oder für diese bestimmte Version akzeptabel",
     "n a modified list": "n / A. (geänderte Liste)",
+    "not set": "nicht eingestellt",
     "not used in any project yet": "noch in keinem Projekt verwendet",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> der Schwachstellen wurden von <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "Es muss genau ein Quell-Ansatz sein, aber es gibt {count} bei dieser Freigabe. Bitte kommen Sie zurück, sobald Sie das korrigiert haben.",
