@@ -28,15 +28,34 @@ export default interface ModerationRequestDetails {
     componentType?: string
     commentRequestingUser?: string
     commentDecisionModerator?: null
-    componentAdditions?: { [k: string]: string }
-    releaseAdditions?: { [k: string]: string }
-    projectAdditions?: { [k: string]: string }
-    licenseAdditions?: { [k: string]: string }
-    user?: { [k: string]: string }
-    componentDeletions?: { [k: string]: string }
-    releaseDeletions?: { [k: string]: string }
-    projectDeletions?: { [k: string]: string }
-    licenseDeletions?: { [k: string]: string }
+    'sw360:project'?: Project
+    componentAdditions?: {
+        [k: string]: string
+    }
+    releaseAdditions?: {
+        [k: string]: string
+    }
+    projectAdditions?: {
+        [k: string]: string
+    }
+    licenseAdditions?: {
+        [k: string]: string
+    }
+    user?: {
+        [k: string]: string
+    }
+    componentDeletions?: {
+        [k: string]: string
+    }
+    releaseDeletions?: {
+        [k: string]: string
+    }
+    projectDeletions?: {
+        [k: string]: string
+    }
+    licenseDeletions?: {
+        [k: string]: string
+    }
     moderatorsSize?: number
     links?: {
         self: {

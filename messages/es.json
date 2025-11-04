@@ -1553,6 +1553,7 @@
     "mainline_state_phaseout_tooltip": "El software tiene problemas; considere eliminarlo pronto, si está en uso.",
     "mainline_state_specific_tooltip": "El software no se recomienda en general, pero para casos de uso especiales o para esta versión particular es aceptable.",
     "n a modified list": "n / A. (lista modificada)",
+    "not set": "no establecido",
     "not used in any project yet": "Aún no se ha utilizado en ningún proyecto.",
     "number of the vulnerabilities were matched by": "<strong>{contador}</strong> de las vulnerabilidades fueron igualadas por <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "Tiene que haber exactamente un apego fuente, pero hay {cuenta} en esta liberación. Por favor, vuelve una vez que lo corrigiste.",

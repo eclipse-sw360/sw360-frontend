@@ -1553,6 +1553,7 @@
     "mainline_state_phaseout_tooltip": "该软件有问题，如果正在使用，请考虑尽快删除",
     "mainline_state_specific_tooltip": "一般情况下不推荐使用该软件，但对于特殊用例或此特定版本是可以接受的",
     "n a modified list": "不适用（修改后的列表）",
+    "not set": "未设置",
     "not used in any project yet": "尚未在任何项目中使用",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> 个漏洞与 <strong>{matchedBy}</strong> 匹配",
     "number_of_attachments_not_match_condition": "必须只有一个源附件，但此版本中有 {count} 个。\n更正后请回来。",

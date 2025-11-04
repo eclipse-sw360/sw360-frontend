@@ -1553,6 +1553,7 @@
     "mainline_state_phaseout_tooltip": "ソフトウェアには問題があります。使用中の場合はすぐに削除することを検討してください。",
     "mainline_state_specific_tooltip": "このソフトウェアは一般的に推奨されませんが、特殊な使用例またはこの特定のバージョンでは許容されます。",
     "n a modified list": "いや。 (変更されたリスト)",
+    "not set": "設定されていません",
     "not used in any project yet": "まだどのプロジェクトでも使用されていません",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> of the vulnerabilities were matched by <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "There has to be exactly one source attachment, but there are {count} at this release. Please come back once you corrected that.",

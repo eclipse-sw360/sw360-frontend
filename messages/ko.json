@@ -1553,6 +1553,7 @@
     "mainline_state_phaseout_tooltip": "소프트웨어에 문제가 있습니다. 사용 중인 경우 즉시 제거하는 것이 좋습니다.",
     "mainline_state_specific_tooltip": "이 소프트웨어는 일반적으로 권장되지 않지만 특별한 사용 사례나 이 특정 버전의 경우 허용됩니다.",
     "n a modified list": "해당 없음 (수정된 목록)",
+    "not set": "설정되지 않음",
     "not used in any project yet": "아직 어떤 프로젝트에도 사용되지 않았습니다",
     "number of the vulnerabilities were matched by": "<strong>이름 *</strong> 취약점의 일치 <strong>이름 *</strong>",
     "number_of_attachments_not_match_condition": "정확히 하나의 소스 첨부 파일이 있지만,이 릴리스에서 {count}이 있습니다. 한 번에 다시 오십시오.",

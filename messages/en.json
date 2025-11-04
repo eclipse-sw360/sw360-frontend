@@ -1553,6 +1553,7 @@
     "mainline_state_phaseout_tooltip": "The software has issues, please consider removing it soon, if in use",
     "mainline_state_specific_tooltip": "The software is not recommended in general, but for special use case or for this particular version it is acceptable",
     "n a modified list": "n.a. (modified list)",
+    "not set": "not set",
     "not used in any project yet": "not used in any project yet",
     "number of the vulnerabilities were matched by": "<strong>{count}</strong> of the vulnerabilities were matched by <strong>{matchedBy}</strong>",
     "number_of_attachments_not_match_condition": "There has to be exactly one source attachment, but there are {count} at this release. Please come back once you corrected that.",
