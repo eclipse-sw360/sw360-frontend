@@ -178,6 +178,7 @@ export default function CurrentProjectDetail({
                                             isCalledFromModerationRequestCurrentProject={true}
                                             businessUnit={summaryData.businessUnit ?? ''}
                                             clearingState={summaryData.clearingState ?? ''}
+                                            visibility={summaryData.visibility}
                                         />
                                     )}
                                 </Tab.Pane>

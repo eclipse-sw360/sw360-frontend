@@ -214,6 +214,7 @@ function Project(): JSX.Element {
                         row.original.businessUnit ?? '',
                         row.original.clearingState ?? '',
                         clearingRequestDisabledGroups,
+                        row.original.visibility,
                     )
                     return (
                         <>

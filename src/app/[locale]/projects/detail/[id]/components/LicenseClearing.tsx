@@ -41,6 +41,7 @@ function LicenseClearing({
     isCalledFromModerationRequestCurrentProject,
     businessUnit,
     clearingState,
+    visibility,
 }: {
     projectId: string
     projectName: string
@@ -49,6 +50,7 @@ function LicenseClearing({
     isCalledFromModerationRequestCurrentProject?: boolean
     businessUnit: string
     clearingState: string
+    visibility?: string
 }): JSX.Element {
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
@@ -62,8 +64,8 @@ function LicenseClearing({
     const clearingRequestDisabledGroups = useConfigValue(
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
-    const crIsAllowed = CommonUtils.isCrAllowed(businessUnit, clearingState, clearingRequestDisabledGroups)
-    const disableCrButton = !(clearingRequestId !== undefined && clearingRequestId !== '') || !crIsAllowed
+    const crIsAllowed = CommonUtils.isCrAllowed(businessUnit, clearingState, clearingRequestDisabledGroups, visibility)
+    const disableCrButton = !crIsAllowed
 
     useEffect(() => {
         if (status === 'unauthenticated') {
