@@ -27,7 +27,6 @@ export default function DownloadLicenseInfoModal({
     setShowConfirmation,
     projectId,
     isCalledFromProjectLicenseTab,
-    withSubProjects,
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
@@ -35,7 +34,6 @@ export default function DownloadLicenseInfoModal({
     saveUsagesPayload: SaveUsagesPayload
     projectId: string
     isCalledFromProjectLicenseTab: boolean
-    withSubProjects: boolean
 }): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -122,7 +120,7 @@ export default function DownloadLicenseInfoModal({
                     </div>
                     <div
                         className='form-check'
-                        hidden={!withSubProjects}
+                        hidden={Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false}
                     >
                         <input
                             id='project_clearing_report_contained'
@@ -140,7 +138,7 @@ export default function DownloadLicenseInfoModal({
                     <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
                     <div
                         className='form-check'
-                        hidden={!withSubProjects}
+                        hidden={Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false}
                     >
                         <input
                             id='project_clearing_report_linked_project_relation'
