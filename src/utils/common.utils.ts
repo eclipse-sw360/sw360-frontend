@@ -304,11 +304,16 @@ const extractEmailsAndFullNamesFromUsers = (
 
 const nullToEmptyString = (item: string | null | undefined): string => (item != null ? item : '')
 
-const isCrAllowed = (businessUnit: string, clearingState: string, clearingRequestDisabledGroups: string[] | null) => {
+const isCrAllowed = (
+    businessUnit: string,
+    clearingState: string,
+    clearingRequestDisabledGroups: string[] | null,
+    visibility?: string,
+) => {
     return (
+        visibility?.toUpperCase() !== 'PRIVATE' &&
         clearingState.toLowerCase() !== 'closed' &&
-        clearingRequestDisabledGroups !== null &&
-        !(businessUnit in clearingRequestDisabledGroups)
+        (clearingRequestDisabledGroups === null || !clearingRequestDisabledGroups.includes(businessUnit))
     )
 }
 
