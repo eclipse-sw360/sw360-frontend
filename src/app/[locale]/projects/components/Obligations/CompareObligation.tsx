@@ -9,25 +9,24 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, SetStateAction, useEffect, useRef, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
+import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
-
-import { _, Table } from '@/components/sw360'
-import { Project } from '@/object-types'
+import { _, PageSizeSelector, SW360Table, Table, TableFooter } from '@/components/sw360'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+
+type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
-interface AlertData {
-    variant: string
-    message: JSX.Element
-}
 
 export default function CompareObligation({
     show,
@@ -39,298 +38,415 @@ export default function CompareObligation({
     setSelectedProjectId: Dispatch<SetStateAction<string | undefined>>
 }): JSX.Element {
     const t = useTranslations('default')
-    const [projectData, setProjectData] = useState<(object | string)[][] | null>(null)
-    const [compareProject, setCompareProject] = useState<Map<string, object>>(new Map())
-    const [alert, setAlert] = useState<AlertData | null>(null)
-    const searchValueRef = useRef<HTMLInputElement>(null)
-    const topRef = useRef(null)
     const [pid, setPid] = useState('')
-    const { status } = useSession()
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [exactMatch, setExactMatch] = useState(false)
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
     }, [
-        status,
+        session,
     ])
 
-    const scrollToTop = () => {
-        ;(topRef.current as HTMLDivElement | null)?.scrollTo({
-            top: 0,
-            left: 0,
-        })
-    }
-
-    const columns = [
-        {
-            id: 'compareProject.selectProjectCheckbox',
-            name: '',
-            width: '8%',
-            formatter: (projectId: string) =>
-                _(
+    const columns = useMemo<ColumnDef<Project>[]>(
+        () => [
+            {
+                id: 'select',
+                cell: ({ row }) => (
                     <div className='form-check'>
                         <input
                             className='form-check-input'
-                            type='checkbox'
-                            name='projectId'
-                            value={projectId}
-                            id={projectId}
-                            checked={compareProject.has(projectId)}
-                            onChange={() => handleCheckboxes(projectId)}
-                            disabled={compareProject.size > 0 && !compareProject.has(projectId)}
+                            type='radio'
+                            value={row.original._links.self.href.split('/').at(-1) ?? ''}
+                            checked={pid === (row.original._links.self.href.split('/').at(-1) ?? '')}
+                            onChange={() => handleCheckboxes(row.original._links.self.href.split('/').at(-1) ?? '')}
                         />
-                    </div>,
+                    </div>
                 ),
-        },
-        {
-            id: 'compareProject.name',
-            name: t('Name'),
-            sort: true,
-        },
-        {
-            id: 'compareProject.version',
-            name: t('Version'),
-            sort: true,
-        },
-        {
-            id: 'compareProject.state',
-            name: t('State'),
-            width: '15%',
-            formatter: ({ state, clearingState }: { state: string; clearingState: string }) =>
-                _(
-                    <>
-                        <OverlayTrigger overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}>
-                            {state === 'ACTIVE' ? (
-                                <span
-                                    className='badge bg-success capsule-left'
-                                    style={{
-                                        fontSize: '0.8rem',
-                                    }}
-                                >
-                                    {'PS'}
-                                </span>
-                            ) : (
-                                <span
-                                    className='badge bg-secondary capsule-left'
-                                    style={{
-                                        fontSize: '0.8rem',
-                                    }}
-                                >
-                                    {'PS'}
-                                </span>
+                meta: {
+                    width: '7%',
+                },
+            },
+            {
+                id: 'name',
+                header: t('Name'),
+                accessorKey: 'name',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'version',
+                header: t('Version'),
+                accessorKey: 'version',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'state',
+                header: t('State'),
+                accessorKey: 'state',
+                cell: ({ row }) => {
+                    const { state, clearingState } = row.original
+                    return (
+                        <>
+                            {state && clearingState && (
+                                <div className='text-center'>
+                                    <OverlayTrigger
+                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
+                                    >
+                                        {state === 'ACTIVE' ? (
+                                            <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
+                                        ) : (
+                                            <span className='badge bg-secondary capsule-left overlay-badge'>
+                                                {'PS'}
+                                            </span>
+                                        )}
+                                    </OverlayTrigger>
+                                    <OverlayTrigger
+                                        overlay={
+                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
+                                        }
+                                    >
+                                        {clearingState === 'OPEN' ? (
+                                            <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
+                                        ) : clearingState === 'IN_PROGRESS' ? (
+                                            <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
+                                        ) : (
+                                            <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
+                                        )}
+                                    </OverlayTrigger>
+                                </div>
                             )}
-                        </OverlayTrigger>
-
-                        <OverlayTrigger
-                            overlay={
-                                <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
-                            }
-                        >
-                            {clearingState === 'OPEN' ? (
-                                <span
-                                    className='badge bg-danger capsule-right'
-                                    style={{
-                                        fontSize: '0.8rem',
-                                    }}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'projectResponsible',
+                header: t('Project Responsible'),
+                accessorKey: 'projectResponsible',
+                cell: ({ row }) => {
+                    const { projectResponsible } = row.original
+                    return (
+                        <>
+                            {projectResponsible && (
+                                <Link
+                                    href={`mailto:${projectResponsible}`}
+                                    className='text-link'
                                 >
-                                    {'CS'}
-                                </span>
-                            ) : clearingState === 'IN_PROGRESS' ? (
-                                <span
-                                    className='badge bg-warning capsule-right'
-                                    style={{
-                                        fontSize: '0.8rem',
-                                    }}
-                                >
-                                    {'CS'}
-                                </span>
-                            ) : (
-                                <span
-                                    className='badge bg-success capsule-right'
-                                    style={{
-                                        fontSize: '0.8rem',
-                                    }}
-                                >
-                                    {'CS'}
-                                </span>
+                                    {projectResponsible}
+                                </Link>
                             )}
-                        </OverlayTrigger>
-                    </>,
-                ),
-            sort: true,
-        },
-        {
-            id: 'compareProject.projectResponsible',
-            name: t('Project Responsible'),
-            sort: true,
-        },
-        {
-            id: 'compareProject.description',
-            name: t('Description'),
-            sort: true,
-        },
-    ]
+                        </>
+                    )
+                },
+                meta: {
+                    width: '13%',
+                },
+            },
+            {
+                id: 'description',
+                header: t('Description'),
+                accessorKey: 'description',
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '40%',
+                },
+            },
+        ],
+        [
+            t,
+            pid,
+        ],
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [projectData, setProjectData] = useState<Project[]>(() => [])
+    const memoizedData = useMemo(
+        () => projectData,
+        [
+            projectData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
 
-    const handleSearch = async ({ searchValue }: { searchValue: string }) => {
+    useEffect(() => {
+        if (session.status === 'loading' || searchText === undefined) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        handleSearch(signal)
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
+
+    const handleSearch = async (signal?: AbortSignal) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.GET(
-                `projects?name=${searchValue}&luceneSearch=false`,
-                session.user.access_token,
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `projects`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                                  luceneSearch: exactMatch,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
             )
-            if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
-            } else if (response.status !== StatusCodes.OK) {
-                return notFound()
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
             }
-            const data = (await response.json()) as Project
-            const dataTableFormat: (object | string)[][] = CommonUtils.isNullOrUndefined(
-                data['_embedded']?.['sw360:projects'],
+
+            const data = (await response.json()) as EmbeddedProjects
+            setPaginationMeta(data.page)
+            setProjectData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                    ? []
+                    : data['_embedded']['sw360:projects'],
             )
-                ? []
-                : data['_embedded']['sw360:projects'].map((elem: Project) => {
-                      return [
-                          elem['_links']['self']['href'].substring(elem['_links']['self']['href'].lastIndexOf('/') + 1),
-                          elem.name,
-                          elem.version ?? '',
-                          {
-                              state: elem.state ?? '',
-                              clearingState: elem.clearingState ?? '',
-                          },
-                          elem.projectResponsible ?? '',
-                          elem.description ?? '',
-                      ]
-                  })
-            setProjectData(dataTableFormat)
-        } catch (e) {
-            console.error(e)
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
         }
     }
 
     const handleCheckboxes = (projectId: string) => {
-        const m = new Map(compareProject)
-        setPid(projectId)
-        if (compareProject.has(projectId)) {
-            m.delete(projectId)
+        if (projectId === pid) {
+            setPid('')
         } else {
-            m.clear()
-            m.set(projectId, {
-                enableSvm: true,
-                projectRelationship: 'CONTAINED',
-            })
+            setPid(projectId)
         }
-        setCompareProject(m)
+    }
+
+    const closeModal = () => {
+        setShow(false)
+        setProjectData([])
+        setPid('')
+        setExactMatch(false)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
     }
 
     return (
-        <>
-            <Modal
-                size='lg'
-                centered
-                show={show}
-                onHide={() => {
-                    setShow(false)
-                    setProjectData(null)
-                    setAlert(null)
-                    setCompareProject(new Map())
-                }}
-                aria-labelledby={t('Link Projects')}
-                scrollable
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title id='projects-list-modal'>{t('List of Projects')}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body ref={topRef}>
-                    {alert && (
-                        <Alert
-                            variant={alert.variant}
-                            id='compareProject.alert'
-                        >
-                            {alert.message}
-                        </Alert>
-                    )}
-                    <Form>
-                        <Col>
-                            <Row className='mb-3'>
-                                <Col xs={6}>
-                                    <Form.Control
-                                        type='text'
-                                        placeholder={`${t('Enter Search Text')}...`}
-                                        name='searchValue'
-                                        ref={searchValueRef}
+        <Modal
+            size='lg'
+            centered
+            show={show}
+            onHide={() => {
+                closeModal()
+            }}
+            scrollable
+        >
+            <Modal.Header closeButton>
+                <Modal.Title id='linked-projects-modal'>{t('List of Projects')}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Col>
+                        <Row className='mb-3'>
+                            <Col xs={6}>
+                                <Form.Control
+                                    type='text'
+                                    placeholder={`${t('Enter Search Text')}...`}
+                                    name='searchValue'
+                                    onChange={(event) => {
+                                        setSearchText(event.target.value)
+                                    }}
+                                />
+                            </Col>
+                            <Col xs='auto'>
+                                <Form.Group controlId='exact-match-group'>
+                                    <Form.Check
+                                        inline
+                                        name='exact-match'
+                                        type='checkbox'
+                                        id='exact-match'
+                                        onChange={() => setExactMatch(!exactMatch)}
                                     />
-                                </Col>
-                                <Col xs='auto'>
-                                    <Form.Group controlId='exact-match-group'>
-                                        <Form.Check
-                                            inline
-                                            name='exact-match'
-                                            type='checkbox'
-                                            id='exact-match'
-                                        />
-                                        <Form.Label className='pt-2'>
-                                            {t('Exact Match')}{' '}
-                                            <sup>
-                                                <FaInfoCircle />
-                                            </sup>
-                                        </Form.Label>
-                                    </Form.Group>
-                                </Col>
-                                <Col xs='auto'>
-                                    <Button
-                                        variant='secondary'
-                                        onClick={() => {
-                                            void handleSearch({
-                                                searchValue: searchValueRef.current?.value ?? '',
-                                            })
-                                        }}
+                                    <Form.Label
+                                        className='pt-2'
+                                        value={exactMatch}
                                     >
-                                        {t('Search')}
-                                    </Button>
-                                </Col>
-                            </Row>
-                            <Row>
-                                {projectData && (
-                                    <Table
-                                        columns={columns}
-                                        data={projectData}
-                                        sort={false}
-                                    />
+                                        {t('Exact Match')}{' '}
+                                        <sup>
+                                            <FaInfoCircle />
+                                        </sup>
+                                    </Form.Label>
+                                </Form.Group>
+                            </Col>
+                            <Col xs='auto'>
+                                <Button
+                                    variant='secondary'
+                                    onClick={() => {
+                                        if (!searchText) setSearchText('')
+                                        handleSearch()
+                                    }}
+                                >
+                                    {t('Search')}
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <div className='mb-3'>
+                                {pageableQueryParam && table && paginationMeta ? (
+                                    <>
+                                        <PageSizeSelector
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                        />
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                        <TableFooter
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                            paginationMeta={paginationMeta}
+                                        />
+                                    </>
+                                ) : (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
                                 )}
-                            </Row>
-                        </Col>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant='dark'
-                        onClick={() => {
-                            setShow(false)
-                            setProjectData(null)
-                            setAlert(null)
-                            setCompareProject(new Map())
-                        }}
-                    >
-                        {t('Close')}
-                    </Button>
-                    <Button
-                        variant='primary'
-                        onClick={() => {
-                            scrollToTop()
-                            setAlert({
-                                variant: 'success',
-                                message: <>{t('Comparing')}</>,
-                            })
-                            setSelectedProjectId(pid)
-                        }}
-                        disabled={compareProject.size === 0}
-                    >
-                        {t('Compare')}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        </>
+                            </div>
+                        </Row>
+                    </Col>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button
+                    variant='dark'
+                    onClick={() => {
+                        closeModal()
+                    }}
+                >
+                    {t('Close')}
+                </Button>
+                <Button
+                    variant='primary'
+                    onClick={() => {
+                        setSelectedProjectId(pid)
+                        closeModal()
+                    }}
+                    disabled={pid === ''}
+                >
+                    {t('Compare')}
+                </Button>
+            </Modal.Footer>
+        </Modal>
     )
 }
