@@ -12,8 +12,6 @@ declare interface IntlMessages extends Messages {}
 
 import { RowData } from '@tanstack/react-table'
 
-import { RowData } from '@tanstack/react-table'
-
 declare module '@tanstack/react-table' {
   interface Row<TData extends RowData> {
     meta?: {
@@ -21,4 +19,3 @@ declare module '@tanstack/react-table' {
     }
   }
 }
-

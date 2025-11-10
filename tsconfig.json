@@ -9,37 +9,71 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": false,
+    "checkJs": false,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "strictNullChecks": true,
-    "typeRoots": ["node_modules/@types", "./types"],
+    "typeRoots": [
+      "node_modules/@types",
+      "./types"
+    ],
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "next-sw360": ["./src/components/sw360"],
-      "@/app/*": ["./src/app/*"],
-      "@/assets/*": ["./src/assets/*"],
-      "@/contexts": ["./src/contexts"],
-      "@/components/*": ["./src/components/*"],
-      "@/constants": ["./src/object-types/Constants"],
-      "@/hooks": ["./src/hooks"],
-      "@/messages": ["./messages"],
-      "@/object-types": ["./src/object-types"],
-      "@/services/*": ["./src/services/*"],
-      "@/styles/*": ["./src/styles/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/utils": ["./src/utils"]
+      "next-sw360": [
+        "./src/components/sw360"
+      ],
+      "@/app/*": [
+        "./src/app/*"
+      ],
+      "@/assets/*": [
+        "./src/assets/*"
+      ],
+      "@/contexts": [
+        "./src/contexts"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/constants": [
+        "./src/object-types/Constants"
+      ],
+      "@/hooks": [
+        "./src/hooks"
+      ],
+      "@/messages": [
+        "./messages"
+      ],
+      "@/object-types": [
+        "./src/object-types"
+      ],
+      "@/services/*": [
+        "./src/services/*"
+      ],
+      "@/styles/*": [
+        "./src/styles/*"
+      ],
+      "@/utils/*": [
+        "./src/utils/*"
+      ],
+      "@/utils": [
+        "./src/utils"
+      ]
     },
     "plugins": [
       {
@@ -54,7 +88,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "eslint.config.mjs"
+    ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["dist", "node_modules", "src/**/*.test.tsx"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.test.tsx"
+  ]
 }
