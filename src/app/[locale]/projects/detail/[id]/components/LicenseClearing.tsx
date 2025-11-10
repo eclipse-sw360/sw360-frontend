@@ -25,13 +25,8 @@ import CreateClearingRequestModal from './CreateClearingRequestModal'
 import ListView from './ListView'
 import TreeView from './TreeView'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
-
-const DependencyNetworkListView = dynamic(() => import('./DependencyNetworkListView'), {
-    ssr: false,
-})
-const DependencyNetworkTreeView = dynamic(() => import('./DependencyNetworkTreeView'), {
-    ssr: false,
-})
+import DependencyNetworkListView from './DependencyNetworkListView'
+import DependencyNetworkTreeView from './DependencyNetworkTreeView'
 
 function LicenseClearing({
     projectId,

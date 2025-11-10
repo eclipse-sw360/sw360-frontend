@@ -9,22 +9,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 'use client'
 
-import React, { useEffect, useState, type JSX } from 'react'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
-
-import { NodeData } from '@/object-types'
-import { OneDArray, TColumn } from 'gridjs/dist/src/types'
-import { SearchConfig } from 'gridjs/dist/src/view/plugin/search/search'
-import { Table, _ } from 'next-sw360'
+import type { OneDArray } from 'gridjs'
+import { SearchConfig, TColumn } from 'gridjs'
+import { _, Table } from 'next-sw360'
 import { ComponentChild } from 'preact'
-import { Language } from '../Table/Table'
+import React, { type JSX, useEffect, useState } from 'react'
+import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
+import { Language } from '@/components/sw360/Table/Table'
+import { NodeData } from '@/object-types'
 
 interface Props {
     children: React.ReactNode
@@ -47,7 +41,9 @@ const PaddedCell: React.FC<Props> = ({
         <div className='d-flex'>
             <span
                 className='indenter'
-                style={{ paddingLeft: `${padLength * 1}rem` }}
+                style={{
+                    paddingLeft: `${padLength * 1}rem`,
+                }}
                 role='button'
             >
                 {parent &&
@@ -96,12 +92,16 @@ const TreeTable = ({
             manipulateData(item, 0, newData)
         })
         setTableData(newData)
-    }, [data])
+    }, [
+        data,
+    ])
 
     const expandRow = (item: NodeData) => {
         if (!onExpand) {
             item.isExpanded = true
-            setData([...data])
+            setData([
+                ...data,
+            ])
             return
         }
         onExpand(item)
@@ -109,7 +109,9 @@ const TreeTable = ({
 
     const collapseRow = (item: NodeData) => {
         item.isExpanded = false
-        setData([...data])
+        setData([
+            ...data,
+        ])
     }
 
     const parseRowData = (item: NodeData, isExpanded: boolean, isParent: boolean, level: number) => {

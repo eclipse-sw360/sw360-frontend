@@ -23,6 +23,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequestDetails, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
+import ClearingComments from './ClearingComments'
 import ClearingDecision from './ClearingDecision'
 import ClearingRequestInfo from './ClearingRequestInfo'
 
@@ -47,10 +48,6 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     }, [
         status,
     ])
-
-    const ClearingComments = dynamic(() => import('./ClearingComments'), {
-        ssr: false,
-    })
 
     const fetchData = async (url: string) => {
         const session = await getSession()

@@ -12,17 +12,22 @@
 import { Config, Grid } from 'gridjs'
 import type { JSX } from 'react'
 import * as React from 'react'
-import { Component, RefObject, createRef } from 'react'
+import { Component, createRef, RefObject } from 'react'
 import { Form } from 'react-bootstrap'
+
 const defaultOptions = {
-    pagination: { limit: 10 },
+    pagination: {
+        limit: 10,
+    },
     search: false,
     selector: true,
     sort: true,
 }
 type MessageFormat = (...args: []) => string
 type Message = string | MessageFormat
-export type Language = { [key: string]: Message | Language }
+export type Language = {
+    [key: string]: Message | Language
+}
 
 export interface TableProps extends Partial<Config> {
     selector?: boolean
@@ -30,7 +35,10 @@ export interface TableProps extends Partial<Config> {
 }
 
 const createTableProps = (tableProps: TableProps) => {
-    let newTableProps = { ...defaultOptions, ...tableProps }
+    let newTableProps = {
+        ...defaultOptions,
+        ...tableProps,
+    }
 
     if (newTableProps.server) {
         newTableProps = {
@@ -109,7 +117,12 @@ class Table extends Component<TableProps, unknown> {
                     <div className='col-11 mt-3 mb-3'>
                         <div className='dataTables_length'>
                             <span className='my-2'>Show</span>
-                            <label style={{ marginLeft: '5px', marginRight: '5px' }}>
+                            <label
+                                style={{
+                                    marginLeft: '5px',
+                                    marginRight: '5px',
+                                }}
+                            >
                                 <Form.Select
                                     size='sm'
                                     onChange={this.handlePageSizeChange}

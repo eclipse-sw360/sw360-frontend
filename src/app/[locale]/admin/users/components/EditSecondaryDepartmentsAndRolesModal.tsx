@@ -26,7 +26,7 @@ interface Props {
     editingUserId: string
 }
 
-const EditSecondaryDepartmentAndRolesModal = ({ show, setShow, editingUserId }: Props): JSX.Element => {
+function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: Props): JSX.Element {
     const t = useTranslations('default')
     const [editingUser, setEditingUser] = useState<User | undefined>(undefined)
     const [updateUserPayload, setUpdateUserPayload] = useState<UserPayload>({

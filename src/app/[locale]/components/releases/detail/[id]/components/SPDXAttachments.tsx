@@ -58,8 +58,9 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         {
             id: 'name',
             name: t('SPDX Attachments'),
-            formatter: ({ isISR, fileName }: CellData) =>
-                _(
+            formatter: (cell: unknown) => {
+                const { isISR, fileName } = cell as CellData
+                return _(
                     isISR ? (
                         <>
                             {fileName}{' '}
@@ -73,25 +74,25 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                     ) : (
                         <>{fileName}</>
                     ),
-                ),
+                )
+            },
             sort: false,
         },
         {
             id: 'action',
             name: t('Action'),
-            formatter: ({ isISR, showLicenseClicked, rowIndex, attachmentId }: CellData) =>
-                _(
+            formatter: (cell: unknown) => {
+                const { isISR, showLicenseClicked, rowIndex, attachmentId } = cell as CellData
+                return _(
                     showLicenseClicked === true ? (
-                        isISR == false ? (
+                        isISR === false ? (
                             <Button
                                 variant='primary'
                                 onClick={() => void handleAddSpdxLicenses(rowIndex)}
                             >
                                 {t('Add License To Release')}
                             </Button>
-                        ) : (
-                            <></>
-                        )
+                        ) : null
                     ) : (
                         <Button
                             variant='secondary'
@@ -100,14 +101,17 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                             {t('Show License Info')}
                         </Button>
                     ),
-                ),
+                )
+            },
             sort: false,
         },
         {
             id: 'result',
             name: t('Result'),
-            formatter: ({ isISR, attachmentName, licenseInfo, addLicensesState }: CellData) =>
-                _(
+            formatter: (cell: unknown) => {
+                const { isISR, attachmentName, licenseInfo, addLicensesState } = cell as CellData
+
+                return _(
                     licenseInfo && (
                         <>
                             {addLicensesState ? (
@@ -125,7 +129,8 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                             )}
                         </>
                     ),
-                ),
+                )
+            },
             sort: false,
         },
     ]

@@ -26,12 +26,9 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
-
-const EditSecondaryDepartmentAndRolesModal = dynamic(() => import('./EditSecondaryDepartmentsAndRolesModal'), {
-    ssr: false,
-})
 
 export default function UserAdminstration(): JSX.Element {
     const t = useTranslations('default')
