@@ -194,9 +194,9 @@ export default function LinkPackagesModal({
             const next =
                 typeof updater === 'function'
                     ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
+                        pageIndex: pageableQueryParam.page,
+                        pageSize: pageableQueryParam.page_entries,
+                    })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -218,9 +218,9 @@ export default function LinkPackagesModal({
                         ...pageableQueryParam,
                         ...(searchText && searchText !== ''
                             ? {
-                                  searchText: searchText,
-                                  luceneSearch: exactMatch,
-                              }
+                                searchText: searchText,
+                                luceneSearch: !exactMatch,
+                            }
                             : {}),
                         allDetails: true,
                     }).map(([key, value]) => [
