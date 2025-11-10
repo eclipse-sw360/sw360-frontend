@@ -84,7 +84,7 @@ export default function AddReleaseModal({
             }
             const queryUrl = CommonUtils.createUrlWithParams('releases', {
                 name: searchText.current,
-                luceneSearch: `${isExactMatch.current}`,
+                luceneSearch: `${!isExactMatch.current}`,
                 allDetails: 'true',
             })
             const response = await ApiUtils.GET(queryUrl, session.user.access_token)
@@ -107,26 +107,26 @@ export default function AddReleaseModal({
 
             const tableData =
                 CommonUtils.isNullOrUndefined(data['_embedded']) &&
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
                     ? []
                     : data['_embedded']['sw360:releases'].map((release: ReleaseDetail) => [
-                          {
-                              releaseId: release.id ?? '',
-                              name: release.name,
-                              releaseVersion: release.version,
-                          },
-                          release.vendor ? (release.vendor.fullName ?? '') : '',
-                          {
-                              name: release.name,
-                              componentId: release['_links']['sw360:component']['href'].split('/').pop() ?? '',
-                          },
-                          {
-                              releaseVersion: release.version,
-                              releaseId: release.id ?? '',
-                          },
-                          release.clearingState,
-                          release.mainlineState ?? 'OPEN',
-                      ])
+                        {
+                            releaseId: release.id ?? '',
+                            name: release.name,
+                            releaseVersion: release.version,
+                        },
+                        release.vendor ? (release.vendor.fullName ?? '') : '',
+                        {
+                            name: release.name,
+                            componentId: release['_links']['sw360:component']['href'].split('/').pop() ?? '',
+                        },
+                        {
+                            releaseVersion: release.version,
+                            releaseId: release.id ?? '',
+                        },
+                        release.clearingState,
+                        release.mainlineState ?? 'OPEN',
+                    ])
             setReleaseData(tableData)
             setLoading(false)
         } catch (error) {

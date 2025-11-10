@@ -44,6 +44,7 @@ export default function LinkProjects({
     const [linkProjects, setLinkProjects] = useState<Map<string, object>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
     const searchValueRef = useRef<HTMLInputElement>(null)
+    const [exactMatch, setExactMatch] = useState(false)
     const topRef = useRef<HTMLDivElement | null>(null)
     const [linking, setLinking] = useState(false)
     const { status } = useSession()
@@ -261,9 +262,9 @@ export default function LinkProjects({
             const next =
                 typeof updater === 'function'
                     ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
+                        pageIndex: pageableQueryParam.page,
+                        pageSize: pageableQueryParam.page_entries,
+                    })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -317,9 +318,9 @@ export default function LinkProjects({
                         ...(CommonUtils.isNullEmptyOrUndefinedString(searchValue)
                             ? {}
                             : {
-                                  name: searchValue,
-                                  luceneSearch: true,
-                              }),
+                                name: searchValue,
+                                luceneSearch: !exactMatch,
+                            }),
                     }).map(([key, value]) => [
                         key,
                         String(value),
@@ -429,6 +430,7 @@ export default function LinkProjects({
         })
         setAlert(null)
         setLinkProjects(new Map())
+        setExactMatch(false)
     }
 
     return (
@@ -462,8 +464,12 @@ export default function LinkProjects({
                                         name='exact-match'
                                         type='checkbox'
                                         id='exact-match'
+                                        onChange={() => setExactMatch(!exactMatch)}
                                     />
-                                    <Form.Label className='pt-2'>
+                                    <Form.Label
+                                        className='pt-2'
+                                        value={exactMatch}
+                                    >
                                         {t('Exact Match')}{' '}
                                         <sup>
                                             <FaInfoCircle />
