@@ -45,6 +45,7 @@ header:
     - 'pnpm-lock.yaml'
     - 'pnpm-workspace.yaml'
     - 'docs/templates/**'
+    - 'configs/**'
 
   comment: on-failure
 

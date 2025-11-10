@@ -9,16 +9,20 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { UserGroupType } from '@/object-types'
+import { NextRequest } from 'next/server'
 import { withAuth } from 'next-auth/middleware'
 import createMiddleware from 'next-intl/middleware'
-import { NextRequest } from 'next/server'
+import { UserGroupType } from '@/object-types'
 import { routing } from './i18n/routing'
 import { locales } from './object-types/Constants'
 
-const publicPages = ['/']
+const publicPages = [
+    '/',
+]
 
-const adminPages = ['/admin']
+const adminPages = [
+    '/admin',
+]
 
 const intlMiddleware = createMiddleware(routing)
 
@@ -54,15 +58,33 @@ const authAdminMiddleware = withAuth(
 
 import { NextResponse } from 'next/server'
 
-export default function middleware(req: NextRequest): NextResponse | Promise<NextResponse> {
+export default function proxy(req: NextRequest): NextResponse | Promise<NextResponse> {
     const publicPathnameRegex = RegExp(
-        `^(/(${locales.join('|')}))?(${publicPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})/?$`,
+        `^(/(${locales.join('|')}))?(${publicPages
+            .flatMap((p) =>
+                p === '/'
+                    ? [
+                          '',
+                          '/',
+                      ]
+                    : p,
+            )
+            .join('|')})/?$`,
         'i',
     )
     const isPublicPage = publicPathnameRegex.test(req.nextUrl.pathname)
 
     const adminPathnameRegex = RegExp(
-        `^(/(${locales.join('|')}))?(${adminPages.flatMap((p) => (p === '/' ? ['', '/'] : p)).join('|')})/?$`,
+        `^(/(${locales.join('|')}))?(${adminPages
+            .flatMap((p) =>
+                p === '/'
+                    ? [
+                          '',
+                          '/',
+                      ]
+                    : p,
+            )
+            .join('|')})/?$`,
         'i',
     )
     const isAdminPage = adminPathnameRegex.test(req.nextUrl.pathname)
@@ -78,5 +100,7 @@ export default function middleware(req: NextRequest): NextResponse | Promise<Nex
 
 export const config = {
     // Skip all paths that should not be internationalized
-    matcher: ['/((?!api|_next|.*\\..*).*)'],
+    matcher: [
+        '/((?!api|_next|.*\\..*).*)',
+    ],
 }

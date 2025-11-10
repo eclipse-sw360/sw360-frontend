@@ -25,10 +25,10 @@ ARG NEXTAUTH_URL
 ARG AUTH_SECRET
 
 RUN pnpm install
-RUN pnpm build -d
+RUN pnpm build --experimental-analyze --turbo --profile
 
 # Runtime
-ARG VARIANT=22-slim
+ARG VARIANT=24-slim
 FROM node:${VARIANT}
 WORKDIR /frontend
 

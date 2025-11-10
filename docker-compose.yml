@@ -1,0 +1,81 @@
+# syntax=docker/dockerfile:1.4
+
+# Copyright (c) Helio Chissini de Castro, 2025. Part of the SW360 Frontend Project.
+
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+
+# SPDX-License-Identifier: EPL-2.0
+# License-Filename: LICENSE
+
+services:
+  sw360:
+    image: 'ghcr.io/eclipse-sw360/sw360:${SW360_VERSION:-main}'
+    restart: unless-stopped
+    container_name: sw360
+    pull_policy: always
+    depends_on:
+      - couchdb
+    ports:
+      - '8080:8080'
+      - '11311:11311'
+    stdin_open: true
+    tty: true
+    volumes:
+      - etc:/etc/sw360
+      - ./configs/sw360:/app/sw360/configs
+
+  couchdb-nouveau:
+    image: couchdb:3.4-nouveau
+    ports:
+      - '5987:5987'
+      - '5988:5988'
+
+  couchdb:
+    image: couchdb:3.4
+    restart: unless-stopped
+    environment:
+      - COUCHDB_CREATE_DATABASE=yes
+    ports:
+      - '5984:5984'
+    depends_on:
+      - couchdb-nouveau
+    volumes:
+      - couchdb:/opt/couchdb/data
+      - ./configs/couchdb/sw360_setup.ini:/opt/couchdb/etc/local.d/sw360_setup.ini
+      - ./configs/couchdb/sw360_log.ini:/opt/couchdb/etc/local.d/sw360_log.ini
+      - ./configs/couchdb/nouveau.ini:/opt/couchdb/etc/local.d/nouveau.ini
+    healthcheck:
+      test: ['CMD-SHELL', 'curl --fail -s http://couchdb:5984/_up']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  sw360-frontend:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SW360_API_URL: https://localhost:3000
+        NEXTAUTH_URL: https://localhost:3000
+        AUTH_SECRET: <YourSecret>
+    image: ghcr.io/eclipse-sw360/sw360-frontend:latest
+    container_name: sw360-frontend
+    expose:
+      - '3000'
+    depends_on:
+      - sw360
+    environment:
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXT_PUBLIC_SW360_API_URL=http://localhost:8080
+      - SW360_API_URL=http://localhost:8080
+      - AUTH_SECRET=<YourSecret>
+
+volumes:
+  couchdb: null
+  etc: null
+
+networks:
+  default:
+    external: true
+    name: sw360
