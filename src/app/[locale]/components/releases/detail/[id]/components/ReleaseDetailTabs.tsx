@@ -9,8 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { CommonTabIds, ReleaseTabIds, UserGroupType } from '@/object-types'
 import { useSession } from 'next-auth/react'
+import { CommonTabIds, ReleaseTabIds, UserGroupType } from '@/object-types'
 
 export function ReleaseDetailTabs() {
     const { data: session } = useSession()
