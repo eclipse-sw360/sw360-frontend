@@ -83,7 +83,7 @@ function LicenseClearing({
                     MessageService.error(t('Session has expired'))
                     return signOut()
                 }
-                const response = await ApiUtils.GET('configurations', session.user.access_token)
+                const response = await ApiUtils.GET('configurations?changeable=false', session.user.access_token)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     signOut()
                 } else if (response.status !== StatusCodes.OK) {
@@ -92,7 +92,7 @@ function LicenseClearing({
                 }
                 const config = await response.json()
                 setDependencyNetworkFeatureEnabled(
-                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true',
+                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] === 'true',
                 )
             } catch {
                 setDependencyNetworkFeatureEnabled(false)

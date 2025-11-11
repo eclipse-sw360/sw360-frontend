@@ -11,28 +11,25 @@
 
 'use client'
 
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    getCoreRowModel,
+    getPaginationRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table, TableSearch } from 'next-sw360'
+import React, { useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
+import { ErrorDetails, FilterOption } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import Link from 'next/link'
-import React, { ChangeEvent, useEffect, useState, type JSX } from 'react'
-import { ButtonGroup, Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import DropdownButton from 'react-bootstrap/DropdownButton'
-import Form from 'react-bootstrap/Form'
-import { FaPencilAlt } from 'react-icons/fa'
-import { GoSingleSelect } from 'react-icons/go'
-import styles from '../detail.module.css'
 import ClearingStateBadge from './ClearingStateBadge'
-import {
-    projectClearingState,
-    projectRelations,
-    projectTypes,
-    releaseClearingStates,
-    releaseRelations,
-    releaseTypes,
-} from './LicenseClearingFilters'
 
 interface ListViewData {
     isAccessible: boolean
@@ -49,416 +46,471 @@ interface ListViewData {
     comment: string
     id: string
     projectState?: string
+    version: string
 }
 
-type RowData = (string | ListViewData | JSX.Element)[]
+const Capitalize = (text: string) =>
+    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+
+const typeFilterOptions: FilterOption[] = [
+    {
+        tag: 'OSS',
+        value: 'OSS',
+    },
+    {
+        tag: 'Internal',
+        value: 'INTERNAL',
+    },
+    {
+        tag: 'COTS',
+        value: 'COTS',
+    },
+    {
+        tag: 'Freeware',
+        value: 'FREESOFTWARE',
+    },
+    {
+        tag: 'Inner Source',
+        value: 'INNER_SOURCE',
+    },
+    {
+        tag: 'Service',
+        value: 'SERVICE',
+    },
+    {
+        tag: 'Code Snippet',
+        value: 'CODE_SNIPPET',
+    },
+    {
+        tag: 'COTS Trusted Supplier',
+        value: 'COTS_TRUESTED_SUPPLIER',
+    },
+]
+
+const relationFilterOptions: FilterOption[] = [
+    {
+        tag: 'Contained',
+        value: 'CONTAINED',
+    },
+    {
+        tag: 'Related',
+        value: 'REFERRED',
+    },
+    {
+        tag: 'Unknown',
+        value: 'UNKNOWN',
+    },
+    {
+        tag: 'Dynamically Linked',
+        value: 'DYNAMICALLY_LINKED',
+    },
+    {
+        tag: 'Statically Linked',
+        value: 'STATICALLY_LINKED',
+    },
+    {
+        tag: 'Side By Side',
+        value: 'SIDE_BY_SIDE',
+    },
+    {
+        tag: 'Standalone',
+        value: 'STANDALONE',
+    },
+    {
+        tag: 'Internal Use',
+        value: 'INTERNAL_USE',
+    },
+    {
+        tag: 'Optional',
+        value: 'OPTIONAL',
+    },
+    {
+        tag: 'To Be Replaced',
+        value: 'TO_BE_REPLACED',
+    },
+    {
+        tag: 'Code Snippet',
+        value: 'CODE_SNIPPET',
+    },
+]
+
+const stateFilterOptions: FilterOption[] = [
+    {
+        tag: 'New',
+        value: 'NEW_CLEARING',
+    },
+    {
+        tag: 'Sent To Clearing Tool',
+        value: 'SENT_TO_CLEARING_TOOL',
+    },
+    {
+        tag: 'Under Clearing',
+        value: 'UNDER_CLEARING',
+    },
+    {
+        tag: 'Report Available',
+        value: 'REPORT_AVAILABLE',
+    },
+    {
+        tag: 'Report Approved',
+        value: 'APPROVED',
+    },
+    {
+        tag: 'Scan Available',
+        value: 'SCAN_AVAILABLE',
+    },
+    {
+        tag: 'Internal Use Scan Available',
+        value: 'INTERNAL_USE_SCAN_AVAILABLE',
+    },
+]
 
 const upperCaseWithUnderscore = (text: string | undefined) => {
     return text !== undefined ? text.trim().toUpperCase().replace(/ /g, '_') : undefined
 }
 
-const nameFormatter = (name: string) => {
-    if (name.length <= 40) return <>{name}</>
-
-    return (
-        <OverlayTrigger
-            placement='bottom'
-            overlay={<Tooltip>{name}</Tooltip>}
-        >
-            <span className='d-inline-block'>{name.slice(0, 40)}...</span>
-        </OverlayTrigger>
-    )
-}
-
-const includesIgnoreCase = (array: Array<string>, element: string) => {
-    return array.some((item) => item.toLowerCase() === element.toLowerCase())
-}
-
-const filterOptions: { [k: string]: Array<string> } = {
-    types: [...Object.values(releaseTypes), ...Object.values(projectTypes)],
-    relations: [...Object.values(releaseRelations), ...Object.values(projectRelations)],
-    states: [...Object.values(releaseClearingStates), ...Object.values(projectClearingState)],
-}
-
 const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
     const t = useTranslations('default')
-    const [data, setData] = useState<Array<RowData> | undefined>(undefined)
-    const [displayedData, setDisplayedData] = useState<Array<RowData> | undefined>(undefined)
-    const [search, setSearch] = useState<{ keyword?: string | undefined } | undefined>({ keyword: '' })
-
-    const [filters, setFilters] = useState<{ [k: string]: Array<string> }>(filterOptions)
-    const language = { noRecordsFound: t('No linked releases or projects') }
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }, [status])
+    }, [
+        session,
+    ])
 
-    const updateFilters = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const filterName = event.target.name
-        if (event.target.checked === true) {
-            if (filters[filterName].length === filterOptions[filterName].length) {
-                setFilters({
-                    ...filters,
-                    [filterName]: [event.target.value],
-                })
-            } else {
-                setFilters({
-                    ...filters,
-                    [filterName]: [...filters[filterName], event.target.value],
-                })
-            }
-        } else {
-            if (filters[filterName].length === 1) {
-                setFilters({
-                    ...filters,
-                    [filterName]: [...filterOptions[filterName]],
-                })
-            } else {
-                setFilters({
-                    ...filters,
-                    [filterName]: [...filters[filterName].filter((el) => el != event.target.value)],
-                })
-            }
-        }
-    }
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [showFilter, setShowFilter] = useState<undefined | string>()
 
-    const columns = [
-        {
-            id: 'licenseClearing.name',
-            name: t('Name'),
-            width: '12%',
-            formatter: (data: ListViewData) =>
-                _(
-                    data.isRelease === 'true' ? (
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    const [listViewData, setListViewData] = useState<ListViewData[]>([])
+    const [rowData, setRowData] = useState<ListViewData[]>([])
+    const memoizedRowData = useMemo(
+        () => rowData,
+        [
+            rowData,
+        ],
+    )
+    const [search, setSearch] = useState<{
+        search: string
+    }>({
+        search: '',
+    })
+
+    const columns = useMemo<ColumnDef<ListViewData>[]>(
+        () => [
+            {
+                id: 'name',
+                header: t('Name'),
+                cell: ({ row }) => {
+                    const { id, name, version } = row.original
+                    const url = row.original.isRelease ? `/components/releases/detail/${id}` : `/projects/detail/${id}`
+                    return (
                         <Link
-                            key={data.id}
-                            href={`/components/releases/detail/${data.id}`}
-                            style={{ wordBreak: 'break-all' }}
+                            href={url}
+                            className='text-link'
                         >
-                            {nameFormatter(data.name)}
+                            {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
                         </Link>
-                    ) : (
-                        <Link
-                            key={data.id}
-                            href={`/projects/detail/${data.id}`}
-                            style={{ wordBreak: 'break-all' }}
-                        >
-                            {nameFormatter(data.name)}
-                        </Link>
-                    ),
-                ),
-            sort: {
-                compare: (data1: ListViewData, data2: ListViewData) => data1.name.localeCompare(data2.name),
+                    )
+                },
+                meta: {
+                    width: '20%',
+                },
             },
-        },
-        {
-            id: 'licenseClearing.type',
-            name: _(
-                <>
-                    <OverlayTrigger overlay={<Tooltip>{t('Component Type Filter')}</Tooltip>}>
-                        <span>{t('Type')} </span>
-                    </OverlayTrigger>
-                    <DropdownButton
-                        as={ButtonGroup}
-                        drop='down'
-                        title={<GoSingleSelect />}
-                        id='types-filter-dropdown-btn'
-                        className={`${styles['dropdown-btn']}`}
-                    >
-                        <span className='px-3'>{t('Component Type')}</span>
-                        <Dropdown.Divider />
-                        {Object.values(releaseTypes).map((releaseType: string) => (
-                            <span key={releaseType}>
-                                <Form.Check
-                                    className={`${styles.selection}`}
-                                    type='checkbox'
-                                    id={`type-${releaseType}`}
-                                    value={releaseType}
-                                    name='types'
-                                    label={releaseType}
-                                    defaultChecked={
-                                        filters.types.length !== filterOptions.types.length &&
-                                        filters.types.includes(releaseType)
-                                    }
-                                    onChange={updateFilters}
-                                />
-                            </span>
-                        ))}
-                    </DropdownButton>
-                </>,
-            ),
-            width: '7%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.projectPath',
-            name: t('Project Path'),
-            width: '11%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.releasePath',
-            name: t('Release Path'),
-            width: '14%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.relation',
-            name: _(
-                <>
-                    <OverlayTrigger overlay={<Tooltip>{t('Release Relation Filter')}</Tooltip>}>
-                        <span>{t('Relation')} </span>
-                    </OverlayTrigger>
-                    <DropdownButton
-                        as={ButtonGroup}
-                        drop='down'
-                        title={<GoSingleSelect />}
-                        id='relations-filter-dropdown-btn'
-                        className={`${styles['dropdown-btn']}`}
-                    >
-                        <span className='px-3'>{t('Release Relation')}</span>
-                        <Dropdown.Divider />
-                        {Object.values(releaseRelations).map((relation: string) => (
-                            <span key={relation}>
-                                <Form.Check
-                                    className={`${styles.selection}`}
-                                    type='checkbox'
-                                    id={`relation-${relation}`}
-                                    value={relation}
-                                    name='relations'
-                                    label={relation}
-                                    defaultChecked={
-                                        filters.relations.length !== filterOptions.relations.length &&
-                                        filters.relations.includes(relation)
-                                    }
-                                    onChange={updateFilters}
-                                />
-                            </span>
-                        ))}
-                    </DropdownButton>
-                </>,
-            ),
-            width: '8%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.mainLicenses',
-            name: t('Main licenses'),
-            width: '10%',
-            formatter: (mainLicenses: string) =>
-                _(
-                    <>
-                        {mainLicenses &&
-                            mainLicenses
-                                .split(',')
-                                .map(
-                                    (license): React.ReactNode => (
-                                        <li
-                                            key={license}
-                                            style={{ display: 'inline' }}
-                                        >
-                                            <Link
-                                                href={`/licenses/detail?id=${license}`}
-                                                className='text-link'
-                                            >
-                                                {license}
-                                            </Link>
-                                        </li>
-                                    ),
-                                )
-                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
-                    </>,
-                ),
-            sort: {
-                compare: (mainLicenses1: string, mainLicenses2: string) => mainLicenses1.localeCompare(mainLicenses2),
+            {
+                id: 'type',
+                header: () => {
+                    return (
+                        <>
+                            {t('Type')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={typeFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'type'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Component Type')}
+                                resetPaginationParams={() => table.resetPagination()}
+                            />
+                        </>
+                    )
+                },
+                cell: ({ row }) => <div className='text-center'>{Capitalize(row.original.type ?? '')}</div>,
+                meta: {
+                    width: '6%',
+                },
             },
-        },
-        {
-            id: 'licenseClearing.state',
-            name: _(
-                <>
-                    <OverlayTrigger overlay={<Tooltip>{t('Release Clearing State Filter')}</Tooltip>}>
-                        <span>{t('State')} </span>
-                    </OverlayTrigger>
-                    <DropdownButton
-                        as={ButtonGroup}
-                        drop='down'
-                        title={<GoSingleSelect />}
-                        id='states-filter-dropdown-btn'
-                        className={`${styles['dropdown-btn']}`}
-                    >
-                        <span className='px-3'>{t('Release Clearing State')}</span>
-                        <Dropdown.Divider />
-                        {Object.values(releaseClearingStates).map((state: string) => (
-                            <span key={state}>
-                                <Form.Check
-                                    className={`${styles.selection}`}
-                                    type='checkbox'
-                                    id={`state-${state}`}
-                                    value={state}
-                                    name='states'
-                                    defaultChecked={
-                                        filters.states.length !== filterOptions.states.length &&
-                                        filters.states.includes(state)
-                                    }
-                                    label={state}
-                                    onChange={updateFilters}
-                                />
-                            </span>
-                        ))}
-                    </DropdownButton>
-                </>,
-            ),
-            width: '7%',
-            formatter: (data: ListViewData) =>
-                _(
+            {
+                id: 'projectPath',
+                header: t('Project Path'),
+                cell: ({ row }) => <div className='text-center'>{row.original.projectOrigin}</div>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'releasePath',
+                header: t('Release Path'),
+                cell: ({ row }) => <div className='text-center'>{row.original.releaseOrigin}</div>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'relation',
+                header: () => {
+                    return (
+                        <>
+                            {t('Relation')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={relationFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'relation'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Release Relation')}
+                                resetPaginationParams={() => table.resetPagination()}
+                            />
+                        </>
+                    )
+                },
+                cell: ({ row }) => <div className='text-center'>{Capitalize(row.original.relation ?? '')}</div>,
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'mainLicenses',
+                header: t('Main Licenses'),
+                enableColumnFilter: false,
+                cell: ({ row }) => <div className='text-center'>{row.original.mainLicenses}</div>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'state',
+                header: () => {
+                    return (
+                        <>
+                            {t('State')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={stateFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'state'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Release Clearing State')}
+                                resetPaginationParams={() => table.resetPagination()}
+                            />
+                        </>
+                    )
+                },
+                cell: ({ row }) => (
                     <div className='text-center'>
                         <ClearingStateBadge
-                            key={data.id}
-                            isRelease={data.isRelease == 'true'}
-                            clearingState={upperCaseWithUnderscore(data.clearingState) as string}
-                            projectState={upperCaseWithUnderscore(data.projectState)}
+                            key={row.original.id}
+                            isRelease={row.original.isRelease == 'true'}
+                            clearingState={upperCaseWithUnderscore(row.original.clearingState) as string}
+                            projectState={upperCaseWithUnderscore(row.original.projectState)}
                             t={t}
                         />
-                    </div>,
+                    </div>
                 ),
-            sort: {
-                compare: (data1: ListViewData, data2: ListViewData) =>
-                    data1.clearingState.localeCompare(data2.clearingState),
+                meta: {
+                    width: '6%',
+                },
             },
-        },
-        {
-            id: 'licenseClearing.releaseMainlineState',
-            name: t('Release Mainline State'),
-            width: '8%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.projectMainlineState',
-            name: t('Project Mainline State'),
-            width: '8%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.comment',
-            name: t('Comment'),
-            width: '10%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.actions',
-            name: t('Actions'),
-            sort: false,
-            width: '5%',
-        },
-    ]
+            {
+                id: 'releaseMainlineState',
+                header: t('Release Mainline State'),
+                enableColumnFilter: false,
+                cell: ({ row }) => (
+                    <div className='text-center'>{Capitalize(row.original.releaseMainlineState ?? '')}</div>
+                ),
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'projectMainlineState',
+                header: t('Project Mainline State'),
+                enableColumnFilter: false,
+                cell: ({ row }) => (
+                    <div className='text-center'>{Capitalize(row.original.projectMainlineState ?? '')}</div>
+                ),
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'comment',
+                header: t('Comment'),
+                enableColumnFilter: false,
+                cell: ({ row }) => <div className='text-center'>{Capitalize(row.original.comment ?? '')}</div>,
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                enableColumnFilter: false,
+                cell: ({ row }) => {
+                    const { id } = row.original
+                    const url = !row.original.isRelease ? `/projects/edit/${id}` : `/components/editRelease/${id}`
 
-    useEffect(() => {
-        void (async () => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return signOut()
-            }
-            try {
-                const listViewResponse = await ApiUtils.GET(
-                    `projects/network/${projectId}/listView`,
-                    session.user.access_token,
-                )
-
-                const listViewData = (await listViewResponse.json()) as Array<ListViewData>
-                const tableData = listViewData.map((data: ListViewData) => [
-                    data,
-                    data.type,
-                    data.projectOrigin,
-                    data.releaseOrigin ? data.releaseOrigin : '',
-                    data.relation,
-                    data.mainLicenses ? data.mainLicenses : '',
-                    data,
-                    data.releaseMainlineState ? data.releaseMainlineState : '',
-                    data.projectMainlineState ? data.projectMainlineState : '',
-                    data.comment ? data.comment : '',
-                    _(
-                        <div style={{ textAlign: 'center' }}>
+                    return (
+                        <div className='text-center'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link
-                                    href={
-                                        data.isRelease === 'true'
-                                            ? `/components/editRelease/${data.id}`
-                                            : `/projects/edit/${data.id}`
-                                    }
+                                    href={url}
                                     className='overlay-trigger'
                                 >
                                     <FaPencilAlt className='btn-icon' />
                                 </Link>
                             </OverlayTrigger>
-                        </div>,
-                    ) as JSX.Element,
-                ])
-                setData(tableData)
-                filterData(tableData)
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-    }, [])
-
-    const filterData = (data: Array<RowData>) => {
-        const filteredData = data.filter(
-            (item: RowData) =>
-                includesIgnoreCase(filters.types, item[1] as string) &&
-                includesIgnoreCase(filters.relations, item[4] as string) &&
-                includesIgnoreCase(filters.states, (item[6] as ListViewData).clearingState),
-        )
-
-        setDisplayedData(filteredData)
-    }
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '6%',
+                },
+            },
+        ],
+        [
+            t,
+            columnFilters,
+            showFilter,
+        ],
+    )
 
     useEffect(() => {
-        if (data === undefined) return
-        filterData(data)
-    }, [filters])
+        const data = listViewData.filter((elem) => {
+            for (const fil of columnFilters) {
+                const vals = fil.value as string[]
+                let elemVal: string | undefined
+                if (fil.id === 'type') {
+                    elemVal = elem.type
+                } else if (fil.id === 'relation') {
+                    elemVal = elem.relation
+                } else {
+                    elemVal = elem.clearingState
+                }
+                if (vals.indexOf(elemVal) === -1) {
+                    return false
+                }
+            }
+            if (search.search !== '') {
+                if (!elem.name.toLowerCase().includes(search.search.toLowerCase())) return false
+            }
+            return true
+        })
+        setRowData(data)
+    }, [
+        search,
+        columnFilters,
+        listViewData,
+    ])
 
-    const doSearch = (event: ChangeEvent<HTMLInputElement>) => {
-        setSearch(event.target.value === '' ? undefined : { keyword: event.target.value })
+    const table = useReactTable({
+        // table state config
+        state: {
+            columnFilters,
+        },
+
+        data: rowData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // server side filtering config
+        manualFiltering: true,
+        onColumnFiltersChange: setColumnFilters,
+
+        // client side pagination
+        getPaginationRowModel: getPaginationRowModel(),
+    })
+
+    useEffect(() => {
+        if (session.status !== 'authenticated') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = memoizedRowData.length === 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                const listViewResponse = await ApiUtils.GET(
+                    `projects/network/${projectId}/listView`,
+                    session.data.user.access_token,
+                    signal,
+                )
+
+                if (listViewResponse.status !== StatusCodes.OK) {
+                    const err = (await listViewResponse.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const listViewData = (await listViewResponse.json()) as Array<ListViewData>
+                setListViewData(listViewData)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+    }, [
+        projectId,
+    ])
+
+    const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.currentTarget.value === '') {
+            setSearch({
+                search: '',
+            })
+        } else {
+            setSearch({
+                search: event.currentTarget.value,
+            })
+        }
     }
 
     return (
-        <>
-            {displayedData ? (
-                <div className='position-relative'>
-                    <div className={`position-absolute ${styles['list-view-search-box']}`}>
-                        <label className='d-inline-block'>Search:</label>
-                        <Form.Control
-                            className='d-inline-block list-view-search-input'
-                            size='sm'
-                            type='search'
-                            onChange={doSearch}
-                        />
+        <div className='mb-3'>
+            {table ? (
+                <>
+                    <div className='d-flex justify-content-end'>
+                        <TableSearch searchFunction={searchFunction} />
                     </div>
-                    <Table
-                        columns={columns}
-                        data={displayedData}
-                        selector={true}
-                        sort={false}
-                        language={language}
-                        search={search}
+                    <ClientSidePageSizeSelector table={table} />
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
                     />
-                </div>
+                    <ClientSideTableFooter table={table} />
+                </>
             ) : (
-                <div className='col-12 text-center'>
+                <div className='col-12 mt-1 text-center'>
                     <Spinner className='spinner' />
                 </div>
             )}
-        </>
+        </div>
     )
 }
 
-const compare = (preState: { projectId: string }, nextState: { projectId: string }) => {
-    return preState.projectId === nextState.projectId
-}
-
-export default React.memo(DependencyNetworkListView, compare)
+export default DependencyNetworkListView
