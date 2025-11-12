@@ -43,14 +43,12 @@ import {
     TableFooter,
     TableSearch,
 } from './Table/Components'
-import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
-import ToastMessage from './ToastContainer/Toast'
-
 // Table component
 // Strictly derived from gridjs-react with dedicated changes
 import Table from './Table/Table'
 import { _, ReactWrapper } from './Table/wrapper'
-import TreeTable from './TreeTable/TreeTable'
+import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
+import ToastMessage from './ToastContainer/Toast'
 
 export {
     AddAdditionalRoles,
@@ -90,7 +88,6 @@ export {
     TableSearch,
     ThemeSwitcher,
     ToastMessage,
-    TreeTable,
     VendorDialog,
     _,
 }
