@@ -281,6 +281,7 @@
     "Component": "요소",
     "Component Categories": "구성요소 카테고리",
     "Component Clearing Report": "구성 요소 Clearing 보고서",
+    "Component ID is missing for the target release": "대상 릴리스에 대한 구성 요소 ID가 누락되었습니다.",
     "Component License Information": "Component 라이센스 정보",
     "Component Name": "부품 이름",
     "Component Obligation": "구성요소 의무",
