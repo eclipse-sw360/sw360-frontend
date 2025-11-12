@@ -281,6 +281,7 @@
     "Component": "成分",
     "Component Categories": "组件类别",
     "Component Clearing Report": "组件清算报告",
+    "Component ID is missing for the target release": "目标版本缺少组件 ID",
     "Component License Information": "组件许可信息",
     "Component Name": "组件名称",
     "Component Obligation": "组成部分义务",

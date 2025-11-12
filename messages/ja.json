@@ -281,6 +281,7 @@
     "Component": "成分",
     "Component Categories": "コンポーネントのカテゴリ",
     "Component Clearing Report": "コンポーネントクリアリングレポート",
+    "Component ID is missing for the target release": "ターゲット リリースのコンポーネント ID がありません",
     "Component License Information": "コンポーネントライセンス情報",
     "Component Name": "コンポーネント名",
     "Component Obligation": "コンポーネントの義務",

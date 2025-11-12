@@ -281,6 +281,7 @@
     "Component": "Componente",
     "Component Categories": "Categorias de componentes",
     "Component Clearing Report": "Relatório de Compensação de Componentes",
+    "Component ID is missing for the target release": "O ID do componente está faltando na versão de destino",
     "Component License Information": "Informações de Licença de Componente",
     "Component Name": "Nome do Componente",
     "Component Obligation": "Obrigação de Componente",

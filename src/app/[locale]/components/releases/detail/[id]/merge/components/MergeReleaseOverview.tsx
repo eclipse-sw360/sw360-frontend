@@ -50,9 +50,10 @@ function MergeReleaseOverview({
     const t = useTranslations('default')
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
     const [targetRelease, setTargetRelease] = useState<null | ReleaseDetail>(null)
-    const [sourceRelease,] = useState<null | ReleaseDetail>(null)
+    const [sourceRelease, setSourceRelease] = useState<null | ReleaseDetail>(null)
+    const [componentId, setComponentId] = useState<null | string>(null)
     // const [finalReleasePayload, setFinalReleasePayload] = useState<null | ReleaseDetail>(null)
-    const [_, setErr] = useState<null | string>(null)
+    const [error, setError] = useState<null | string>(null)
     const [loading,] = useState(false)
     const { status } = useSession()
 
@@ -77,6 +78,12 @@ function MergeReleaseOverview({
                         return signOut()
                     } else if (response.status === StatusCodes.OK) {
                         const singleRelease = (await response.json()) as ReleaseDetail
+                        const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
+                        if (CommonUtils.isNullOrUndefined(compId) || compId === '') {
+                            MessageService.error(t('Component ID is missing for the target release'))
+                            router.push(`releases/${releaseId}`)
+                        }
+                        setComponentId(compId)
                         setTargetRelease(singleRelease)
                     } else {
                         const err = (await response.json()) as ErrorDetails
@@ -129,6 +136,15 @@ function MergeReleaseOverview({
                             <p>{t('Check the merged version and confirm')}</p>
                         </div>
                     </div>
+                    {error !== null && (
+                        <div
+                            className='alert alert-danger my-2'
+                            role='alert'
+                        >
+                            {error}
+                        </div>
+                    )}
+
                     <div className='d-flex justify-content-end mb-3'>
                         <div
                             className='mt-3 btn-group col-2'
@@ -163,10 +179,10 @@ function MergeReleaseOverview({
                                     onClick={() => {
                                         if (GetNextState(mergeState) !== null) {
                                             if (sourceRelease !== null && sourceRelease.id === releaseId) {
-                                                setErr(
+                                                setError(
                                                     'Please choose exactly one release, which is not the release itself!',
                                                 )
-                                                setTimeout(() => setErr(null), 5000)
+                                                setTimeout(() => setError(null), 5000)
                                             } else {
                                                 setMergeState(GetNextState(mergeState) as MergeOrSplitActionType)
                                             }
