@@ -11,31 +11,35 @@
 
 'use client'
 
-import { Attachment, Embedded } from '@/object-types'
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    ExpandedState,
+    getCoreRowModel,
+    getExpandedRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import {
+    _,
+    ClientSidePageSizeSelector,
+    ClientSideTableFooter,
+    FilterComponent,
+    PaddedCell,
+    SW360Table,
+    TableSearch,
+} from 'next-sw360'
+import React, { useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt } from 'react-icons/fa'
+import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
+import { Attachment, ErrorDetails, FilterOption, NestedRows, TypedEntity } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { EnumValueWithToolTip, TreeTable, _ } from 'next-sw360'
-import Link from 'next/link'
-import React, { ChangeEvent, useCallback, useEffect, useRef, useState, type JSX } from 'react'
-import { ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import Alert from 'react-bootstrap/Alert'
-import Form from 'react-bootstrap/Form'
-import { FaPencilAlt, FaSort } from 'react-icons/fa'
-import { GoSingleSelect } from 'react-icons/go'
-import styles from '../detail.module.css'
-import ClearingStateBadge from './ClearingStateBadge'
-import {
-    projectClearingState,
-    projectRelations,
-    projectTypes,
-    releaseClearingStates,
-    releaseRelations,
-    releaseTypes,
-} from './LicenseClearingFilters'
-import TogglerLicenseList from './TogglerLicenseList'
 
 interface Props {
     projectId: string
@@ -79,727 +83,633 @@ interface ProjectClearingState {
     isExpanded?: boolean
 }
 
-interface NodeAdditionalData {
-    node: ClearingState
-    isRelease: boolean
-    releaseIndexPath: Array<number>
-    projectOrigin: string
-}
+const typeFilterOptions: FilterOption[] = [
+    {
+        tag: 'OSS',
+        value: 'OSS',
+    },
+    {
+        tag: 'Internal',
+        value: 'INTERNAL',
+    },
+    {
+        tag: 'COTS',
+        value: 'COTS',
+    },
+    {
+        tag: 'Freeware',
+        value: 'FREESOFTWARE',
+    },
+    {
+        tag: 'Inner Source',
+        value: 'INNER_SOURCE',
+    },
+    {
+        tag: 'Service',
+        value: 'SERVICE',
+    },
+    {
+        tag: 'Code Snippet',
+        value: 'CODE_SNIPPET',
+    },
+    {
+        tag: 'COTS Trusted Supplier',
+        value: 'COTS_TRUESTED_SUPPLIER',
+    },
+]
 
-interface DependencyNetworkNodeData {
-    rowData: RowData
-    isExpanded?: boolean
-    children?: Array<DependencyNetworkNodeData>
-    isExpandable?: boolean
-    isNodeFetched?: boolean
-    additionalData?: NodeAdditionalData
-}
+const relationFilterOptions: FilterOption[] = [
+    {
+        tag: 'Contained',
+        value: 'CONTAINED',
+    },
+    {
+        tag: 'Related',
+        value: 'REFERRED',
+    },
+    {
+        tag: 'Unknown',
+        value: 'UNKNOWN',
+    },
+    {
+        tag: 'Dynamically Linked',
+        value: 'DYNAMICALLY_LINKED',
+    },
+    {
+        tag: 'Statically Linked',
+        value: 'STATICALLY_LINKED',
+    },
+    {
+        tag: 'Side By Side',
+        value: 'SIDE_BY_SIDE',
+    },
+    {
+        tag: 'Standalone',
+        value: 'STANDALONE',
+    },
+    {
+        tag: 'Internal Use',
+        value: 'INTERNAL_USE',
+    },
+    {
+        tag: 'Optional',
+        value: 'OPTIONAL',
+    },
+    {
+        tag: 'To Be Replaced',
+        value: 'TO_BE_REPLACED',
+    },
+    {
+        tag: 'Code Snippet',
+        value: 'CODE_SNIPPET',
+    },
+]
 
-type RowData = (string | JSX.Element)[]
+const stateFilterOptions: FilterOption[] = [
+    {
+        tag: 'New',
+        value: 'NEW_CLEARING',
+    },
+    {
+        tag: 'Sent To Clearing Tool',
+        value: 'SENT_TO_CLEARING_TOOL',
+    },
+    {
+        tag: 'Under Clearing',
+        value: 'UNDER_CLEARING',
+    },
+    {
+        tag: 'Report Available',
+        value: 'REPORT_AVAILABLE',
+    },
+    {
+        tag: 'Report Approved',
+        value: 'APPROVED',
+    },
+    {
+        tag: 'Scan Available',
+        value: 'SCAN_AVAILABLE',
+    },
+    {
+        tag: 'Internal Use Scan Available',
+        value: 'INTERNAL_USE_SCAN_AVAILABLE',
+    },
+]
 
-type ClearingState = ReleaseClearingState & ProjectClearingState
+const Capitalize = (text: string) =>
+    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-type EmbeddedReleaseLinks = Embedded<ReleaseClearingState, 'sw360:releaseLinks'>
+type TypedProject = TypedEntity<ProjectClearingState, 'project'>
 
-interface SortOption {
-    col: string
-    sortAscending: boolean
-}
-
-const filterOptions: { [k: string]: Array<string> } = {
-    types: [...Object.keys(releaseTypes), ...Object.keys(projectTypes)],
-    relations: [...Object.keys(releaseRelations), ...Object.keys(projectRelations)],
-    states: [...Object.keys(releaseClearingStates), ...Object.keys(projectClearingState)],
-}
-
-const nameFormatter = (name: string) => {
-    if (name.length <= 40) return <>{name}</>
-
-    return (
-        <OverlayTrigger
-            placement='right-end'
-            overlay={<Tooltip>{name}</Tooltip>}
-        >
-            <span className='d-inline-block'>{name.slice(0, 40)}...</span>
-        </OverlayTrigger>
-    )
-}
+type TypedRelease = TypedEntity<ReleaseClearingState, 'release'>
 
 const DependencyNetworkTreeView = ({ projectId }: Props) => {
     const t = useTranslations('default')
-    const [filters, setFilters] = useState<{ [k: string]: Array<string> }>(filterOptions)
-    const [sortOption, setSortOption] = useState<SortOption | undefined>(undefined)
-    const language = { noRecordsFound: t('No linked releases or projects') }
-    const [isExpandedAllMessageShow, setIsExpandedAllMessageShow] = useState(false)
-    const [search, setSearch] = useState<{ keyword?: string } | undefined>({ keyword: '' })
-    const hasExpanded = useRef(false)
 
-    const [data, setData] = useState<ProjectClearingState | undefined>(undefined)
+    const session = useSession()
+    const [expandLevel, setExpandLevel] = useState(-1)
+    const [expandedState, setExpandedState] = useState<ExpandedState>({})
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-    const [treeData, setTreeData] = useState<DependencyNetworkNodeData[]>([])
+    const [showProcessing, setShowProcessing] = useState(false)
+    const [showFilter, setShowFilter] = useState<undefined | string>()
 
-    const [noOfLinkedResources, setNoOfLinkedResources] = useState({
-        releases: 0,
-        projects: 0,
-    })
-    const { status } = useSession()
+    const [search, setSearch] = useState('')
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [status])
+    const [projectClearingState, setProjectClearingState] = useState<ProjectClearingState>()
 
-    const updateFilters = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const filterName = event.target.name
-        if (event.target.checked == true) {
-            if (filters[filterName].length === filterOptions[filterName].length) {
-                setFilters({
-                    ...filterOptions,
-                    [filterName]: [event.target.value],
-                })
-            } else {
-                setFilters({
-                    ...filterOptions,
-                    [filterName]: [...filters[filterName], event.target.value],
-                })
-            }
-        } else {
-            if (filters[filterName].length === 1) {
-                setFilters({
-                    ...filterOptions,
-                    [filterName]: [...filterOptions[filterName]],
-                })
-            } else {
-                setFilters({
-                    ...filterOptions,
-                    [filterName]: [...filters[filterName].filter((el) => el != event.target.value)],
-                })
-            }
-        }
-    }
+    const [rowData, setRowData] = useState<NestedRows<TypedProject | TypedRelease>[]>([])
+    const memoizedData = useMemo(
+        () => rowData,
+        [
+            rowData,
+        ],
+    )
 
-    const expandNextLevel = () => {
-        hasExpanded.current = false
-        Object.values(treeData).map((node: DependencyNetworkNodeData) => findNextToExpand(node))
-
-        if (!hasExpanded.current) {
-            setIsExpandedAllMessageShow(true)
-        }
-    }
-
-    const findNextToExpand = (node: DependencyNetworkNodeData) => {
-        if (node.isExpanded === true) {
-            if (node.children === undefined) return
-            Object.values(node.children).map((item) => findNextToExpand(item))
-            return
-        }
-
-        if (node.isExpandable === true) {
-            hasExpanded.current = true
-            onExpand(node).catch((err) => console.error(err))
-        }
-    }
-
-    const onExpand = async (item: DependencyNetworkNodeData) => {
-        if (data === undefined) return
-        if (item.additionalData === undefined) return
-        if (item.isNodeFetched === true) {
-            item.isExpanded = true
-            item.additionalData.node.isExpanded = true
-            setTreeData([...treeData])
-            return
-        }
-
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        if (item.additionalData.isRelease === false) {
-            const response = await ApiUtils.GET(
-                `projects/network/${item.additionalData.node.id}/linkedResources`,
-                session.user.access_token,
-            )
-            const responseData = (await response.json()) as ProjectClearingState
-            item.additionalData.node.linkedReleases = responseData.linkedReleases
-            item.additionalData.node.subprojects = responseData.subprojects
-            item.additionalData.node.isExpanded = true
-            item.isNodeFetched = true
-            setData({ ...data })
-        } else {
-            const response = await ApiUtils.GET(
-                `projects/network/${item.additionalData.node.projectId}/releases?path=${item.additionalData.releaseIndexPath.filter((el: number | undefined) => el !== undefined).join('->')}`,
-                session.user.access_token,
-            )
-            const responseData = (await response.json()) as EmbeddedReleaseLinks
-            item.additionalData.node.linkedReleases = responseData._embedded['sw360:releaseLinks']
-            item.additionalData.node.isExpanded = true
-            item.isNodeFetched = true
-            setData({ ...data })
-        }
-        return item
-    }
-
-    const collapseAll = () => {
-        const allCollapsed = Object.values(treeData).map(
-            (node: DependencyNetworkNodeData): DependencyNetworkNodeData => {
-                node.isExpanded = false
-                if (node.additionalData === undefined) return node
-                node.additionalData.node.isExpanded = false
-                return node
-            },
-        )
-        setTreeData(allCollapsed)
-        setIsExpandedAllMessageShow(false)
-    }
-
-    const sortColumn = (columnName: string) => {
-        if (sortOption === undefined || sortOption.col !== columnName) {
-            setSortOption({
-                col: columnName,
-                sortAscending: true,
-            })
-            return
-        }
-
-        setSortOption({
-            ...sortOption,
-            sortAscending: !sortOption.sortAscending,
-        })
-    }
-
-    const compareFn = (obj1: ClearingState, obj2: ClearingState) => {
-        if (sortOption === undefined) return 0
-        let propName = sortOption.col as keyof ClearingState
-        if (propName === 'releaseRelationship' && obj1[propName] === undefined) {
-            propName = 'relation'
-        }
-
-        if (propName === 'componentType' && obj1[propName] === undefined) {
-            propName = 'projectType'
-        }
-
-        let obj1Prop, obj2Prop
-
-        if (propName === 'name') {
-            obj1Prop = convertToString(obj1[propName] + obj1['version'])
-            obj2Prop = convertToString(obj2[propName] + obj2['version'])
-        } else {
-            obj1Prop = convertToString(obj1[propName])
-            obj2Prop = convertToString(obj2[propName])
-        }
-
-        if (sortOption.sortAscending) {
-            return obj1Prop.localeCompare(obj2Prop)
-        }
-        return obj2Prop.localeCompare(obj1Prop)
-    }
-
-    const convertToString = (item: unknown) => {
-        if (item === undefined || item === null) return ''
-        if (typeof item === 'string') return item
-        return JSON.stringify(item)
-    }
-
-    const sortData = (data: ProjectClearingState): ProjectClearingState => {
-        if (sortOption === undefined) return data
-
-        const sortedLinkedReleases =
-            data.linkedReleases !== undefined
-                ? ([...data.linkedReleases] as ClearingState[]).sort(compareFn)
-                : undefined
-        const sortedSubProjects =
-            data.subprojects !== undefined ? ([...data.subprojects] as ClearingState[]).sort(compareFn) : undefined
-        return { ...data, linkedReleases: sortedLinkedReleases, subprojects: sortedSubProjects }
-    }
-
-    const columns = [
-        {
-            id: 'licenseClearing.name',
-            name: _(
-                <>
-                    {isExpandedAllMessageShow && (
-                        <Alert
-                            variant='warning'
-                            onClose={() => setIsExpandedAllMessageShow(false)}
-                            className={styles['expanded-all-message']}
-                            dismissible
-                        >
-                            {t('All the levels are expanded')}!
-                        </Alert>
-                    )}
-                    <div>
-                        <span>{t('Name')}</span>
-                        <FaSort
-                            className='cursor-pointer'
-                            onClick={() => sortColumn('name')}
-                        />
-                        {(noOfLinkedResources.releases !== 0 || noOfLinkedResources.projects !== 0) && (
-                            <>
-                                {' ('}
-                                <a
-                                    href='#'
-                                    onClick={() => expandNextLevel()}
-                                    className='expand-next text-primary'
-                                >
-                                    {t('Expand Next Level')}
-                                </a>
-                                {' | '}
-                                <a
-                                    href='#'
-                                    onClick={() => collapseAll()}
-                                    className='collapse-all text-primary'
-                                >
-                                    {t('Collapse all')}
-                                </a>
-                                {') '}
-                            </>
-                        )}
-                    </div>
-                    {(noOfLinkedResources.releases !== 0 || noOfLinkedResources.projects !== 0) && (
-                        <div>
-                            <span className='linked-releases'>
-                                {t('Linked Releases')}: {noOfLinkedResources.releases}
-                            </span>
-                            ,{' '}
-                            <span className='linked-projects'>
-                                {t('Linked Projects')}: {noOfLinkedResources.projects}
-                            </span>
-                        </div>
-                    )}
-                </>,
-            ),
-            width: '26%',
-        },
-        {
-            id: 'licenseClearing.type',
-            name: _(
-                <>
-                    <OverlayTrigger overlay={<Tooltip>{t('Component Type Filter')}</Tooltip>}>
-                        <span>{t('Type')} </span>
-                    </OverlayTrigger>
-                    <DropdownButton
-                        as={ButtonGroup}
-                        drop='down'
-                        title={<GoSingleSelect />}
-                        id='types-filter-dropdown-btn'
-                        className={`${styles['dropdown-btn']}`}
-                    >
-                        <span className='px-3'>{t('Component Type')}</span>
-                        <Dropdown.Divider />
-                        {Object.keys(releaseTypes).map((releaseType: string) => (
-                            <span key={releaseType}>
-                                <Form.Check
-                                    className={`${styles.selection}`}
-                                    type='checkbox'
-                                    id={`type-${releaseType}`}
-                                    value={releaseType}
-                                    name='types'
-                                    label={releaseTypes[releaseType]}
-                                    defaultChecked={
-                                        filters.types.length !== filterOptions.types.length &&
-                                        filters.types.includes(releaseType)
-                                    }
-                                    onChange={updateFilters}
-                                />
-                            </span>
-                        ))}
-                    </DropdownButton>
-                    <FaSort
-                        className='cursor-pointer'
-                        onClick={() => sortColumn('componentType')}
-                    />
-                </>,
-            ),
-            width: '10%',
-        },
-        {
-            id: 'licenseClearing.relation',
-            name: _(
-                <>
-                    <OverlayTrigger overlay={<Tooltip>{t('Release Relation Filter')}</Tooltip>}>
-                        <span>{t('Relation')} </span>
-                    </OverlayTrigger>
-                    <DropdownButton
-                        as={ButtonGroup}
-                        drop='down'
-                        title={<GoSingleSelect />}
-                        id='relations-filter-dropdown-btn'
-                        className={`${styles['dropdown-btn']}`}
-                    >
-                        <span className='px-3'>{t('Release Relation')}</span>
-                        <Dropdown.Divider />
-                        {Object.keys(releaseRelations).map((relation: string) => (
-                            <span key={relation}>
-                                <Form.Check
-                                    className={`${styles.selection}`}
-                                    type='checkbox'
-                                    id={`relation-${relation}`}
-                                    value={relation}
-                                    name='relations'
-                                    label={releaseRelations[relation]}
-                                    defaultChecked={
-                                        filters.relations.length !== filterOptions.relations.length &&
-                                        filters.relations.includes(relation)
-                                    }
-                                    onChange={updateFilters}
-                                />
-                            </span>
-                        ))}
-                    </DropdownButton>
-                    <FaSort
-                        className='cursor-pointer'
-                        onClick={() => sortColumn('releaseRelationship')}
-                    />
-                </>,
-            ),
-            width: '10%',
-        },
-        {
-            id: 'licenseClearing.mainLicenses',
-            name: _(
-                <>
-                    {t('Main licenses')}
-                    <FaSort
-                        className='cursor-pointer'
-                        onClick={() => sortColumn('licenseIds')}
-                    />
-                </>,
-            ),
-            width: '9%',
-        },
-        {
-            id: 'licenseClearing.otherLicenses',
-            name: t('Other licenses'),
-            width: '8%',
-        },
-        {
-            id: 'licenseClearing.state',
-            name: _(
-                <>
-                    <OverlayTrigger overlay={<Tooltip>{t('Release Clearing State Filter')}</Tooltip>}>
-                        <span>{t('State')} </span>
-                    </OverlayTrigger>
-                    <DropdownButton
-                        as={ButtonGroup}
-                        drop='down'
-                        title={<GoSingleSelect />}
-                        id='states-filter-dropdown-btn'
-                        className={`${styles['dropdown-btn']}`}
-                    >
-                        <span className='px-3'>{t('Release Clearing State')}</span>
-                        <Dropdown.Divider />
-                        {Object.keys(releaseClearingStates).map((state: string) => (
-                            <span key={state}>
-                                <Form.Check
-                                    className={`${styles.selection}`}
-                                    type='checkbox'
-                                    id={`state-${state}`}
-                                    value={state}
-                                    name='states'
-                                    defaultChecked={
-                                        filters.states.length !== filterOptions.states.length &&
-                                        filters.states.includes(state)
-                                    }
-                                    label={releaseClearingStates[state]}
-                                    onChange={updateFilters}
-                                />
-                            </span>
-                        ))}
-                    </DropdownButton>
-                </>,
-            ),
-            width: '7%',
-        },
-        {
-            id: 'licenseClearing.releaseMainlineState',
-            name: _(
-                <>
-                    {t('Release Mainline State')}
-                    <FaSort
-                        className='cursor-pointer'
-                        onClick={() => sortColumn('releaseMainLineState')}
-                    />
-                </>,
-            ),
-            width: '6%',
-        },
-        {
-            id: 'licenseClearing.projectMainlineState',
-            name: _(
-                <>
-                    {t('Project Mainline State')}
-                    <FaSort
-                        className='cursor-pointer'
-                        onClick={() => sortColumn('mainlineState')}
-                    />
-                </>,
-            ),
-            width: '6%',
-        },
-        {
-            id: 'licenseClearing.comment',
-            name: t('Comment'),
-            width: '10%',
-        },
-        {
-            id: 'licenseClearing.actions',
-            name: t('Actions'),
-            width: '5%',
-        },
-    ]
-
-    const convertClearingStatusDataToTableNode = (
-        item: ClearingState,
-        isRelease: boolean,
-        releaseIndexPath?: Array<number>,
-    ): DependencyNetworkNodeData => {
-        const rowData = [
-            isRelease ? (
-                item.accessible === true ? (
-                    <Link
-                        key={item.id}
-                        href={`/components/releases/detail/${item.id}`}
-                        style={{ wordBreak: 'break-all' }}
-                    >
-                        {nameFormatter(`${item.name} ${item.version}`)}
-                    </Link>
-                ) : (
-                    (item.longName ?? '')
-                )
-            ) : (
-                <Link
-                    key={item.id}
-                    href={`/projects/detail/${item.id}`}
-                    style={{ wordBreak: 'break-all' }}
-                >
-                    {nameFormatter(`${item.name} ${item.version}`)}
-                </Link>
-            ),
-            isRelease ? releaseTypes[item.componentType] : projectTypes[item.projectType],
-            isRelease ? (
-                <EnumValueWithToolTip
-                    value={item.releaseRelationship ?? 'UNKNOWN'}
-                    t={t}
-                />
-            ) : (
-                projectRelations[item.relation ?? 'UNKNOWN']
-            ),
-            item.licenseIds ? (
-                <TogglerLicenseList
-                    licenses={item.licenseIds}
-                    releaseId={item.id}
-                    t={t}
-                />
-            ) : (
-                ''
-            ),
-            item.otherLicenseIds ? (
-                <TogglerLicenseList
-                    licenses={item.otherLicenseIds}
-                    releaseId={item.id}
-                    t={t}
-                />
-            ) : (
-                ''
-            ),
-            item.accessible === true || !isRelease ? (
-                <ClearingStateBadge
-                    key={item.id}
-                    isRelease={isRelease}
-                    clearingState={item.clearingState ?? 'OPEN'}
-                    projectState={item.state}
-                    t={t}
-                />
-            ) : (
-                ''
-            ),
-            isRelease ? (
-                <EnumValueWithToolTip
-                    key={item.releaseMainLineState}
-                    value={item.releaseMainLineState ?? 'OPEN'}
-                    t={t}
-                />
-            ) : (
-                ''
-            ),
-            isRelease ? (
-                <EnumValueWithToolTip
-                    key={item.mainlineState}
-                    value={item.mainlineState ?? 'OPEN'}
-                    t={t}
-                />
-            ) : (
-                ''
-            ),
-            CommonUtils.nullToEmptyString(item.comment),
-            item.accessible === true || !isRelease ? (
-                <div
-                    key={item.name}
-                    style={{ textAlign: 'center' }}
-                >
-                    <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+    const columns = useMemo<ColumnDef<NestedRows<TypedProject | TypedRelease>>[]>(
+        () => [
+            {
+                id: 'name',
+                enableColumnFilter: false,
+                header: () => (
+                    <>
+                        {t('Name')}
+                        {' ('}
                         <Link
-                            href={
-                                isRelease === true ? `/components/editRelease/${item.id}` : `/projects/edit/${item.id}`
-                            }
-                            className='overlay-trigger'
+                            href='#'
+                            className='table-text-link'
+                            onClick={() => setExpandLevel(expandLevel + 1)}
                         >
-                            <FaPencilAlt className='btn-icon' />
+                            {t('Expand next level')}
                         </Link>
-                    </OverlayTrigger>
-                </div>
-            ) : (
-                <></>
-            ),
-        ]
+                        {' | '}
+                        <Link
+                            href='#'
+                            className='table-text-link'
+                            onClick={() => setExpandLevel(-1)}
+                        >
+                            {t('Collapse all')}
+                        </Link>
+                        {')'}
+                    </>
+                ),
+                cell: ({ row }) => {
+                    const { id, name, version } = row.original.node.entity
+                    const url =
+                        row.original.node.type === 'project'
+                            ? `/projects/detail/${id}`
+                            : `/components/releases/detail/${id}`
+                    return (
+                        <PaddedCell row={row}>
+                            <Link
+                                href={url}
+                                className='text-link'
+                            >
+                                {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
+                            </Link>
+                        </PaddedCell>
+                    )
+                },
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'type',
+                header: () => {
+                    return (
+                        <>
+                            {t('Type')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={typeFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'type'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Component Type')}
+                            />
+                        </>
+                    )
+                },
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'project') {
+                        return (
+                            <div className='text-center'>{Capitalize(row.original.node.entity.projectType ?? '')}</div>
+                        )
+                    } else {
+                        return (
+                            <div className='text-center'>
+                                {
+                                    typeFilterOptions.filter(
+                                        (op) =>
+                                            op.value ===
+                                            (row.original.node.entity as ReleaseClearingState).componentType,
+                                    )[0].tag
+                                }
+                            </div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '6%',
+                },
+            },
+            {
+                id: 'relation',
+                header: () => {
+                    return (
+                        <>
+                            {t('Relation')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={relationFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'relation'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Release Relation')}
+                            />
+                        </>
+                    )
+                },
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'release') {
+                        return <div className='text-center'>{row.original.node.entity.releaseRelationship}</div>
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'mainLicenses',
+                header: t('Main Licenses'),
+                enableColumnFilter: false,
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'release') {
+                        return (
+                            <div className='text-center'>
+                                <ExpandableTextList list={row.original.node.entity.licenseIds ?? []} />
+                            </div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'otherLicenses',
+                header: t('Other licenses'),
+                enableColumnFilter: false,
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'release') {
+                        return (
+                            <div className='text-center'>
+                                <ExpandableTextList list={row.original.node.entity.otherLicenseIds ?? []} />
+                            </div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'state',
+                header: () => {
+                    return (
+                        <>
+                            {t('State')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={stateFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'state'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Release Clearing State')}
+                            />
+                        </>
+                    )
+                },
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'project') {
+                        const { clearingState, state } = row.original.node.entity
+                        return (
+                            <div className='text-center'>
+                                <OverlayTrigger
+                                    overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state ?? '')}`}</Tooltip>}
+                                >
+                                    {state === 'ACTIVE' ? (
+                                        <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
+                                    ) : (
+                                        <span className='badge bg-secondary capsule-left overlay-badge'>{'PS'}</span>
+                                    )}
+                                </OverlayTrigger>
+                                <OverlayTrigger
+                                    overlay={
+                                        <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
+                                            clearingState ?? '',
+                                        )}`}</Tooltip>
+                                    }
+                                >
+                                    {clearingState === 'OPEN' ? (
+                                        <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
+                                    ) : clearingState === 'IN_PROGRESS' ? (
+                                        <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
+                                    ) : (
+                                        <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
+                                    )}
+                                </OverlayTrigger>
+                            </div>
+                        )
+                    } else {
+                        const { clearingState } = row.original.node.entity
+                        return (
+                            <div className='text-center'>
+                                <OverlayTrigger
+                                    overlay={
+                                        <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
+                                            clearingState ?? '',
+                                        )}`}</Tooltip>
+                                    }
+                                >
+                                    {clearingState === 'NEW_CLEARING' ? (
+                                        <span className='badge bg-danger overlay-badge'>{'CS'}</span>
+                                    ) : clearingState === 'REPORT_AVAILABLE' ? (
+                                        <span className='badge bg-primary overlay-badge'>{'CS'}</span>
+                                    ) : (
+                                        <span className='badge bg-success overlay-badge'>{'CS'}</span>
+                                    )}
+                                </OverlayTrigger>
+                            </div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '6%',
+                },
+            },
+            {
+                id: 'releaseMainlineState',
+                header: t('Release Mainline State'),
+                enableColumnFilter: false,
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'release') {
+                        return (
+                            <div className='text-center'>
+                                {Capitalize(row.original.node.entity.mainlineState ?? '')}
+                            </div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'projectMainlineState',
+                header: t('Project Mainline State'),
+                enableColumnFilter: false,
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'release') {
+                        return <div className='text-center'></div>
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'comment',
+                header: t('Comment'),
+                enableColumnFilter: false,
+                cell: ({ row }) => {
+                    if (row.original.node.type === 'release') {
+                        return <div className='text-center'>{row.original.node.entity.comment}</div>
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                enableColumnFilter: false,
+                cell: ({ row }) => {
+                    const { id } = row.original.node.entity
+                    const url =
+                        row.original.node.type === 'project' ? `/projects/edit/${id}` : `/components/editRelease/${id}`
 
-        return {
-            rowData: rowData,
+                    return (
+                        <div className='text-center'>
+                            <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                <Link
+                                    href={url}
+                                    className='overlay-trigger'
+                                >
+                                    <FaPencilAlt className='btn-icon' />
+                                </Link>
+                            </OverlayTrigger>
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '6%',
+                },
+            },
+        ],
+        [
+            t,
+            expandLevel,
+            columnFilters,
+            showFilter,
+        ],
+    )
+
+    const table = useReactTable({
+        // table state config
+        state: {
+            expanded: expandedState,
+            columnFilters,
+        },
+
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // server side filtering config
+        manualFiltering: true,
+        onColumnFiltersChange: setColumnFilters,
+
+        // expand config
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
+        onExpandedChange: setExpandedState,
+    })
+
+    useEffect(() => {
+        if (session.status !== 'authenticated') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        setShowProcessing(true)
+
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET(
+                    `projects/network/${projectId}/linkedResources?transitive=true`,
+                    session.data.user.access_token,
+                    signal,
+                )
+
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as ProjectClearingState
+                setProjectClearingState(data)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                setShowProcessing(false)
+            }
+        })()
+    }, [
+        projectId,
+    ])
+
+    const fetchReleasesRecursive = (
+        releaseClearingStates: ReleaseClearingState[],
+    ): NestedRows<TypedProject | TypedRelease>[] => {
+        const tableData: NestedRows<TypedProject | TypedRelease>[] = releaseClearingStates
+            .filter((elem) => {
+                for (const fil of columnFilters) {
+                    const vals = fil.value as string[]
+                    let elemVal: string | undefined
+                    if (fil.id === 'type') {
+                        elemVal = elem.componentType ?? ''
+                    } else if (fil.id === 'relation') {
+                        elemVal = elem.releaseRelationship ?? ''
+                    } else {
+                        elemVal = elem.clearingState ?? ''
+                    }
+                    if (vals.indexOf(elemVal) === -1) {
+                        return false
+                    }
+                }
+                if (search !== '') {
+                    if (!elem.name.toLowerCase().includes(search.toLowerCase())) return false
+                }
+                return true
+            })
+            .map(
+                (r) =>
+                    ({
+                        node: {
+                            entity: r,
+                            type: 'release',
+                        },
+                        children: fetchReleasesRecursive(r.linkedReleases ?? []),
+                    }) as NestedRows<TypedProject | TypedRelease>,
+            )
+        return tableData
+    }
+
+    const fetchProjectsRecursive = (
+        projectClearingStates: ProjectClearingState[],
+    ): NestedRows<TypedProject | TypedRelease>[] => {
+        const tableData: NestedRows<TypedProject | TypedRelease>[] = projectClearingStates.map(
+            (p) =>
+                ({
+                    node: {
+                        entity: p,
+                        type: 'project',
+                    },
+                    children: [
+                        ...fetchProjectsRecursive(p.subprojects ?? []),
+                        ...fetchReleasesRecursive(p.linkedReleases ?? []),
+                    ],
+                }) as NestedRows<TypedProject | TypedRelease>,
+        )
+        return tableData
+    }
+
+    useEffect(() => {
+        if (projectClearingState === undefined) return
+
+        const tableData: NestedRows<TypedProject | TypedRelease>[] = []
+
+        const root: NestedRows<TypedProject | TypedRelease> = {
+            node: {
+                entity: projectClearingState,
+                type: 'project',
+            },
             children: [
-                ...(item.linkedReleases
-                    ? Object.values(item.linkedReleases).map((subItem) =>
-                          convertClearingStatusDataToTableNode(subItem as ClearingState, true, [
-                              ...(releaseIndexPath ? releaseIndexPath : []),
-                              item.index,
-                          ]),
-                      )
-                    : []),
-                ...(item.subprojects
-                    ? Object.values(item.subprojects).map((subItem) =>
-                          convertClearingStatusDataToTableNode(subItem as ClearingState, false),
-                      )
-                    : []),
+                ...fetchProjectsRecursive(projectClearingState.subprojects ?? []),
+                ...fetchReleasesRecursive(projectClearingState.linkedReleases ?? []),
             ],
-            isExpanded: item.isExpanded,
-            isExpandable: isRelease ? item.hasSubreleases : true,
-            isNodeFetched:
-                !CommonUtils.isNullEmptyOrUndefinedArray(item.linkedReleases) ||
-                !CommonUtils.isNullEmptyOrUndefinedArray(item.subprojects) ||
-                item.isExpanded,
-            additionalData: {
-                node: item.ref ? item.ref : item,
-                isRelease: isRelease,
-                releaseIndexPath: releaseIndexPath ? [...releaseIndexPath, item.index] : [],
-                projectOrigin: item.projectId,
-            } as NodeAdditionalData,
         }
-    }
-
-    function filterData(data: ProjectClearingState) {
-        const filterRelease = (release: ReleaseClearingState): ReleaseClearingState | undefined => {
-            if (!CommonUtils.isNullEmptyOrUndefinedArray(release.linkedReleases)) {
-                const subNodes: Array<ReleaseClearingState> = release.linkedReleases
-                    .map((subRelease) => filterRelease(subRelease))
-                    .filter((el): el is ReleaseClearingState => el !== undefined)
-                if (subNodes.length) return { ...release, linkedReleases: subNodes, ref: release }
-            }
-            if (
-                filters.types.includes(release.componentType) &&
-                filters.relations.includes(release.releaseRelationship ?? 'UNKNOWN') &&
-                filters.states.includes(release.clearingState ?? 'OPEN')
-            ) {
-                return { ...release, ref: release }
-            }
-            return undefined
-        }
-
-        const filterProject = (project: ProjectClearingState) => {
-            const filteredReleases = project.linkedReleases
-                ? project.linkedReleases
-                      .map((release) => filterRelease(release))
-                      .filter((el): el is ReleaseClearingState => el !== undefined)
-                : []
-            const filteredProjects: Array<ProjectClearingState> = project.subprojects
-                ? project.subprojects
-                      .map((prj) => {
-                          return filterProject(prj)
-                      })
-                      .filter(Boolean)
-                : []
-            return { ...project, subprojects: filteredProjects, linkedReleases: filteredReleases, ref: project }
-        }
-
-        return filterProject(data)
-    }
+        tableData.push(root)
+        setRowData(tableData)
+    }, [
+        projectClearingState,
+        search,
+        columnFilters,
+    ])
 
     useEffect(() => {
-        if (data === undefined) return
-
-        setNoOfLinkedResources({
-            releases: !CommonUtils.isNullEmptyOrUndefinedArray(data.linkedReleases) ? data.linkedReleases.length : 0,
-            projects: !CommonUtils.isNullEmptyOrUndefinedArray(data.subprojects) ? data.subprojects.length : 0,
-        })
-
-        const sortedData = sortData(data)
-        const filteredData =
-            filters.types.length === filterOptions.types.length &&
-            filters.relations.length === filterOptions.relations.length &&
-            filters.states.length === filterOptions.states.length
-                ? sortedData
-                : filterData(sortedData)
-
-        const treeData = [
-            ...(!CommonUtils.isNullEmptyOrUndefinedArray(filteredData.linkedReleases)
-                ? Object.values(filteredData.linkedReleases).map((item) =>
-                      convertClearingStatusDataToTableNode(item as ClearingState, true, []),
-                  )
-                : []),
-            ...(!CommonUtils.isNullEmptyOrUndefinedArray(filteredData.subprojects)
-                ? Object.values(filteredData.subprojects).map((item) =>
-                      convertClearingStatusDataToTableNode(item as ClearingState, false),
-                  )
-                : []),
-        ]
-
-        setTreeData(treeData)
-    }, [data, filters, sortOption])
-
-    const onLoadFetch = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
+        if (expandLevel === -1) {
+            return setExpandedState({})
         }
-        const response = await ApiUtils.GET(`projects/network/${projectId}/linkedResources`, session.user.access_token)
-        const responseData = (await response.json()) as ProjectClearingState
-        setData(responseData)
-    }, [projectId])
+        const _expandedState: ExpandedState = {
+            ...(expandedState as Record<string, boolean>),
+        }
+        for (const row of table.getRowModel().rows) {
+            if (row.depth <= expandLevel && row.getCanExpand()) {
+                _expandedState[row.id] = true
+            }
+        }
+        setExpandedState(_expandedState)
+    }, [
+        table,
+        expandLevel,
+    ])
 
-    useEffect(() => {
-        onLoadFetch().catch((err) => console.error(err))
-    }, [])
-
-    const doSearch = (event: ChangeEvent<HTMLInputElement>) => {
-        setSearch(event.target.value === '' ? undefined : { keyword: event.target.value })
+    const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.currentTarget.value === '') {
+            setSearch('')
+        } else {
+            setSearch(event.currentTarget.value)
+        }
     }
 
     return (
         <>
-            <div>
-                <Form.Control
-                    placeholder={t('Search')}
-                    className={`d-inline-block tree-view-search-input float-end ${styles['table-search-box']}`}
-                    size='sm'
-                    type='search'
-                    onChange={doSearch}
-                />
-            </div>
-            <div className='my-1'>
-                {data ? (
-                    <TreeTable
-                        columns={columns}
-                        data={treeData}
-                        setData={setTreeData}
-                        language={language}
-                        onExpand={(item) => {
-                            void onExpand(item as DependencyNetworkNodeData)
-                        }}
-                        search={search}
-                    />
+            <div className='mb-3'>
+                {table ? (
+                    <>
+                        <div className='d-flex justify-content-end'>
+                            <TableSearch searchFunction={searchFunction} />
+                        </div>
+                        <ClientSidePageSizeSelector table={table} />
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                        />
+                        <ClientSideTableFooter table={table} />
+                    </>
                 ) : (
-                    <div className='col-12 text-center'>
+                    <div className='col-12 mt-1 text-center'>
                         <Spinner className='spinner' />
                     </div>
                 )}
@@ -808,8 +718,4 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     )
 }
 
-const compare = (preState: { projectId: string }, nextState: { projectId: string }) => {
-    return preState.projectId === nextState.projectId
-}
-
-export default React.memo(DependencyNetworkTreeView, compare)
+export default DependencyNetworkTreeView
