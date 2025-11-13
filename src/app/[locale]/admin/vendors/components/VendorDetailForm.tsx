@@ -9,17 +9,19 @@
 
 'use client'
 
-import { Vendor } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useEffect, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
+import { Vendor } from '@/object-types'
 
 export default function VendorDetailForm({
     payload,
     setPayload,
+    tableTitle,
 }: {
     payload: Vendor
     setPayload: Dispatch<SetStateAction<Vendor | null>>
+    tableTitle: string
 }): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
@@ -28,17 +30,22 @@ export default function VendorDetailForm({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setPayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+        setPayload((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }))
     }
 
     return (
         <>
             <div className='row mb-4 mx-0'>
                 <div className='row header mb-2 pb-2 px-2'>
-                    <h6>{t('Edit Vendor')}</h6>
+                    <h6>{tableTitle}</h6>
                 </div>
                 <div className='row mb-3'>
                     <div className='col-lg-4'>
@@ -49,7 +56,9 @@ export default function VendorDetailForm({
                             {t('Full Name')}{' '}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>
@@ -73,7 +82,9 @@ export default function VendorDetailForm({
                             {t('Short Name')}{' '}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>
@@ -97,7 +108,9 @@ export default function VendorDetailForm({
                             {t('URL')}{' '}
                             <span
                                 className='text-red'
-                                style={{ color: '#F7941E' }}
+                                style={{
+                                    color: '#F7941E',
+                                }}
                             >
                                 *
                             </span>
