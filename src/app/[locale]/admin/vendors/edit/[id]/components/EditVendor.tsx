@@ -174,6 +174,7 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
                         <VendorDetailForm
                             payload={vendorData}
                             setPayload={setVendorData}
+                            tableTitle={t('Edit Vendor')}
                         />
                     </form>
                     <div className='mt-2'>

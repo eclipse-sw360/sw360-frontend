@@ -95,6 +95,7 @@ export default function AddVendor(): JSX.Element {
                     <VendorDetailForm
                         payload={vendorData as Vendor}
                         setPayload={setVendorData}
+                        tableTitle={t('Create Vendor')}
                     />
                 </form>
             </div>
