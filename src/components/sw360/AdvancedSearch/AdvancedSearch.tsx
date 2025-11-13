@@ -10,13 +10,12 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useState, type JSX } from 'react'
-import { Button, Form } from 'react-bootstrap'
-
-import CommonUtils from '@/utils/common.utils'
+import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
+import React, { type JSX, useEffect, useState } from 'react'
+import { Button, Form } from 'react-bootstrap'
+import CommonUtils from '@/utils/common.utils'
 
 interface Option {
     key: string
@@ -32,13 +31,14 @@ interface Field {
 interface Props {
     title: string
     fields?: Array<Field>
+    enableExactMatch?: boolean
 }
 
 interface SearchParams {
     [k: string]: string
 }
 
-function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Element {
+function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = true }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
     const params = Object.fromEntries(useSearchParams())
@@ -229,31 +229,33 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                     <Form onSubmit={handleSubmit}>
                         {fields?.map((field) => renderField(field))}
 
-                        <Form.Group
-                            className='mb-3'
-                            hidden={isUsersPage}
-                        >
-                            <Form.Check
-                                type='checkbox'
-                                label={t('Exact Match')}
-                                id='exactMatch'
-                                checked={searchParams.exactMatch === 'true'}
-                                onChange={(e) => {
-                                    setIsExactMatch(e.target.checked)
-                                    setSearchParam((prev) => ({
-                                        ...prev,
-                                        exactMatch: e.target.checked ? 'true' : '',
-                                    }))
-                                }}
-                                style={{
-                                    fontWeight: 'bold',
-                                    fontSize: '14px',
-                                    display: 'inline-block',
-                                    marginRight: '5px',
-                                }}
-                            />
-                            <ShowInfoOnHover text={t('Exact_Match_Info')} />
-                        </Form.Group>
+                        {enableExactMatch && (
+                            <Form.Group
+                                className='mb-3'
+                                hidden={isUsersPage}
+                            >
+                                <Form.Check
+                                    type='checkbox'
+                                    label={t('Exact Match')}
+                                    id='exactMatch'
+                                    checked={searchParams.exactMatch === 'true'}
+                                    onChange={(e) => {
+                                        setIsExactMatch(e.target.checked)
+                                        setSearchParam((prev) => ({
+                                            ...prev,
+                                            exactMatch: e.target.checked ? 'true' : '',
+                                        }))
+                                    }}
+                                    style={{
+                                        fontWeight: 'bold',
+                                        fontSize: '14px',
+                                        display: 'inline-block',
+                                        marginRight: '5px',
+                                    }}
+                                />
+                                <ShowInfoOnHover text={t('Exact_Match_Info')} />
+                            </Form.Group>
+                        )}
                         <Form.Group
                             className='mb-3'
                             hidden={!isPackagesPage}
