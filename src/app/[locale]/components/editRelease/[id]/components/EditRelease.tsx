@@ -137,30 +137,30 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     'sw360:documentCreationInformation'
                 ]
                     ? {
-                          id: release._embedded['sw360:documentCreationInformation'].id,
-                          spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
-                          spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
-                          dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
-                          SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
-                          name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
-                          documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
-                          externalDocumentRefs:
-                              release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
-                          licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
-                          creator: creators, // 6.8
-                          created: createdDate, // 6.9
-                          creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
-                          documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
-                          // Information for ModerationRequests
-                          documentState: release._embedded['sw360:documentCreationInformation'].documentState,
-                          permissions: release._embedded['sw360:documentCreationInformation'].permissions,
-                          createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
-                          moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
-                      }
+                        id: release._embedded['sw360:documentCreationInformation'].id,
+                        spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
+                        spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
+                        dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
+                        SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
+                        name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
+                        documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
+                        externalDocumentRefs:
+                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
+                        licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
+                        creator: creators, // 6.8
+                        created: createdDate, // 6.9
+                        creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
+                        documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
+                        // Information for ModerationRequests
+                        documentState: release._embedded['sw360:documentCreationInformation'].documentState,
+                        permissions: release._embedded['sw360:documentCreationInformation'].permissions,
+                        createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
+                        moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
+                    }
                     : {
-                          creator: creators, // 6.8
-                          created: createdDate, // 6.9
-                      }
+                        creator: creators, // 6.8
+                        created: createdDate, // 6.9
+                    }
 
                 const SPDXPayload: SPDX = {
                     spdxDocument: release._embedded['sw360:spdxDocument'],
@@ -441,32 +441,40 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             entityId: releaseId,
         })
         const response = await ApiUtils.POST(url, {}, session.user.access_token)
-        if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.warn(t('Unauthorized request'))
-            return false
-        } else if (response.status === StatusCodes.FORBIDDEN) {
-            MessageService.warn(t('Access Denied'))
-            return false
-        } else if (response.status === StatusCodes.BAD_REQUEST) {
-            MessageService.warn(t('Invalid input or missing required parameters'))
-            return false
-        } else if (response.status === StatusCodes.INTERNAL_SERVER_ERROR) {
-            MessageService.error(t('Internal server error'))
-            return false
-        } else if (response.status === StatusCodes.OK) {
-            MessageService.info(t('You can write to the entity'))
-            return true
-        } else if (response.status !== StatusCodes.ACCEPTED) {
-            MessageService.info(t('You are allowed to perform write with MR'))
-            setShowCommentModal(true)
-            return true
+        switch (response.status) {
+            case StatusCodes.UNAUTHORIZED:
+                MessageService.warn(t('Unauthorized request'))
+                return 'DENIED'
+            case StatusCodes.FORBIDDEN:
+                MessageService.warn(t('Access Denied'))
+                return 'DENIED'
+            case StatusCodes.BAD_REQUEST:
+                MessageService.warn(t('Invalid input or missing required parameters'))
+                return 'DENIED'
+            case StatusCodes.INTERNAL_SERVER_ERROR:
+                MessageService.error(t('Internal server error'))
+                return 'DENIED'
+            case StatusCodes.OK:
+                MessageService.info(t('You can write to the entity'))
+                return 'OK'
+            case StatusCodes.ACCEPTED:
+                MessageService.info(t('You are allowed to perform write with MR'))
+                return 'ACCEPTED'
+            default:
+                MessageService.error(t('Error when processing'))
+                return 'DENIED'
         }
     }
 
     const checkPreRequisite = async () => {
         const isEligible = await checkUpdateEligibility(releaseId)
-        if (!isEligible) return
-        await updateRelease()
+        if (isEligible === 'OK') {
+            await updateRelease()
+        } else if (isEligible === 'ACCEPTED') {
+            setShowCommentModal(true)
+        } else if (isEligible === 'DENIED') {
+            return
+        }
     }
 
     const handleDeleteRelease = () => {
