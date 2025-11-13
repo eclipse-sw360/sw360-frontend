@@ -9,14 +9,14 @@
 
 'use client'
 
-import Link from 'next/link'
-import { ReactNode, useMemo, useState } from 'react'
-import { Alert, Spinner } from 'react-bootstrap'
-
-import { PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { ReactNode, useMemo, useState } from 'react'
+import { Alert, Spinner } from 'react-bootstrap'
+import icons from '@/assets/icons/icons.svg'
+import { PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
 import KeywordSearch from './KeywordSearch'
 
 export default function Search(): ReactNode {
@@ -39,7 +39,7 @@ export default function Search(): ReactNode {
                                             height={18}
                                             width={18}
                                         >
-                                            <use href='icons.svg#project'></use>
+                                            <use href={`${icons.src}#project`}></use>
                                         </svg>
                                     )
                                 } else {
@@ -49,7 +49,7 @@ export default function Search(): ReactNode {
                                             height={18}
                                             width={18}
                                         >
-                                            <use href={`icons.svg#${type}`}></use>
+                                            <use href={`${icons.src}#${type}`}></use>
                                         </svg>
                                     )
                                 }
@@ -137,7 +137,9 @@ export default function Search(): ReactNode {
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -151,7 +153,12 @@ export default function Search(): ReactNode {
         number: 0,
     })
     const [searchData, setSearchData] = useState<SearchResult[]>(() => [])
-    const memoizedData = useMemo(() => searchData, [searchData])
+    const memoizedData = useMemo(
+        () => searchData,
+        [
+            searchData,
+        ],
+    )
     const [showProcessing, setShowProcessing] = useState(false)
 
     const table = useReactTable({
@@ -208,7 +215,7 @@ export default function Search(): ReactNode {
                     <div className='col'>
                         <div className='row d-flex justify-content-end'>
                             <div className='col text-truncate buttonheader-title'>
-                                {t('SEARCH RESULTS')} {paginationMeta?.totalElements ?? 0}
+                                {t('SEARCH RESULTS')} ({paginationMeta?.totalElements ?? 0})
                             </div>
                         </div>
                         <div className='row'>

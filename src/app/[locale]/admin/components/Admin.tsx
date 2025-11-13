@@ -20,6 +20,7 @@ import { HiOutlineDocumentDuplicate } from 'react-icons/hi'
 import { ImUsers } from 'react-icons/im'
 import { RiArrowUpDownFill, RiOrganizationChart } from 'react-icons/ri'
 import { RxCalendar } from 'react-icons/rx'
+import icons from '@/assets/icons/icons.svg'
 
 const AdminMainPage = (): JSX.Element => {
     const t = useTranslations('default')
@@ -139,7 +140,7 @@ const AdminMainPage = (): JSX.Element => {
                                 height={18}
                                 width={18}
                             >
-                                <use href='icons.svg#fossology'></use>
+                                <use href={`${icons.src}#fossology`}></use>
                             </svg>{' '}
                             {t('Fossology')}
                         </button>
