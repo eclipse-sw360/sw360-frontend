@@ -290,7 +290,7 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                                     }
                                 >
                                     <Link
-                                        href={`/requests/clearingRequest/edit/${row.original._embedded?.requestingUser?._links?.self.href.split('/').at(-1)}`}
+                                        href={`/requests/clearingRequest/edit/${row.original.id}`}
                                         className='overlay-trigger'
                                     >
                                         <FaPencilAlt className='btn-icon' />
@@ -354,16 +354,16 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                 const openClearingRequests = CommonUtils.isNullOrUndefined(data['_embedded']['sw360:clearingRequests'])
                     ? []
                     : data['_embedded']['sw360:clearingRequests'].filter(
-                          (cr) => cr.clearingState !== 'REJECTED' && cr.clearingState !== 'CLOSED',
-                      )
+                        (cr) => cr.clearingState !== 'REJECTED' && cr.clearingState !== 'CLOSED',
+                    )
 
                 const closedClearingRequests = CommonUtils.isNullOrUndefined(
                     data['_embedded']['sw360:clearingRequests'],
                 )
                     ? []
                     : data['_embedded']['sw360:clearingRequests'].filter(
-                          (cr) => cr.clearingState == 'REJECTED' || cr.clearingState === 'CLOSED',
-                      )
+                        (cr) => cr.clearingState == 'REJECTED' || cr.clearingState === 'CLOSED',
+                    )
                 setClearingRequestDataData(requestType === 'OPEN' ? openClearingRequests : closedClearingRequests)
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
