@@ -72,14 +72,14 @@ function Vulnerabilities(): ReactNode {
 
     const advancedSearch = [
         {
-            fieldName: 'CVE ID',
+            fieldName: 'External Id or Title',
             value: '',
-            paramName: 'externalId',
+            paramName: 'search',
         },
         {
-            fieldName: 'Vulnerable Configuration',
+            fieldName: 'CVE ID',
             value: '',
-            paramName: 'vulnerableConfiguration',
+            paramName: 'cveId',
         },
     ]
 
@@ -362,11 +362,10 @@ function Vulnerabilities(): ReactNode {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2 sidebar'>
-                        <QuickFilter id='vunerabilities.quickSearch' />
-                        <br />
                         <AdvancedSearch
                             title='Advanced Filter'
                             fields={advancedSearch}
+                            enableExactMatch={false}
                         />
                     </div>
                     <div className='col-lg-10'>
