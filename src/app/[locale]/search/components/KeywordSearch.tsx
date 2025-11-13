@@ -13,7 +13,9 @@ import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { PiInfoBold } from 'react-icons/pi'
+import icons from '@/assets/icons/icons.svg'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -257,11 +259,22 @@ function KeywordSearch({
                             value={searchText}
                             placeholder={t('Keyword Search')}
                             onChange={(e) => setSearchText(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
                         <div className='row mt-2 header-1 border-bottom'>
                             <h6 className='col-lg-10 fw-bold'>{t('RESTRICT TO TYPE')}</h6>
                             <h6 className='col-lg-2'>
-                                <PiInfoBold />
+                                <OverlayTrigger
+                                    overlay={
+                                        <Tooltip>
+                                            {t(
+                                                'No type restriction is the same as looking for all types even on types that are not in the list',
+                                            )}
+                                        </Tooltip>
+                                    }
+                                >
+                                    <PiInfoBold />
+                                </OverlayTrigger>
                             </h6>
                         </div>
                         <div className='form-check mt-1'>
@@ -285,7 +298,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#project'></use>
+                                    <use href={`${icons.src}#project`}></use>
                                 </svg>{' '}
                                 {'Projects'}
                             </label>
@@ -311,7 +324,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#component'></use>
+                                    <use href={`${icons.src}#component`}></use>
                                 </svg>{' '}
                                 {'Components'}
                             </label>
@@ -337,7 +350,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#license'></use>
+                                    <use href={`${icons.src}#license`}></use>
                                 </svg>{' '}
                                 {'Licenses'}
                             </label>
@@ -363,7 +376,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#release'></use>
+                                    <use href={`${icons.src}#release`}></use>
                                 </svg>{' '}
                                 {'Releases'}
                             </label>
@@ -389,7 +402,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#project'></use>
+                                    <use href={`${icons.src}#project`}></use>
                                 </svg>{' '}
                                 {'Packages'}
                             </label>
@@ -415,7 +428,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#obligation'></use>
+                                    <use href={`${icons.src}#oblig`}></use>
                                 </svg>{' '}
                                 {'Obligations'}
                             </label>
@@ -441,7 +454,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#user'></use>
+                                    <use href={`${icons.src}#user`}></use>
                                 </svg>{' '}
                                 {'Users'}
                             </label>
@@ -467,7 +480,7 @@ function KeywordSearch({
                                     height={18}
                                     width={18}
                                 >
-                                    <use href='icons.svg#vendor'></use>
+                                    <use href={`${icons.src}#vendor`}></use>
                                 </svg>{' '}
                                 {'Vendors'}
                             </label>
