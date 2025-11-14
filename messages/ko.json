@@ -815,7 +815,7 @@
     "MADE_MODERATOR": "사용자 {이메일}이 중재자 목록에 추가됩니다.",
     "MAINLINE": "제품정보",
     "MEDIUM": "의료용",
-    "MERGE_INTO_TARGET": "{name}에 합병",
+    "MERGE_INTO_TARGET": "{name}({version})(으)로 병합",
     "MODERATIONS": "조정",
     "MULTIPLE": "기타 제품",
     "Mail Configurations": "메일 구성",

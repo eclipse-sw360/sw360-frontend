@@ -815,7 +815,7 @@
     "MADE_MODERATOR": "O usuário {email} será adicionado à lista de moderadores",
     "MAINLINE": "Mainline",
     "MEDIUM": "MÉDIO",
-    "MERGE_INTO_TARGET": "Mesclar em {nome}",
+    "MERGE_INTO_TARGET": "Mesclar em {nome} ({versão})",
     "MODERATIONS": "MODERAÇÕES",
     "MULTIPLE": "MúLTIPLO",
     "Mail Configurations": "Configurações de correio",

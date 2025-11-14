@@ -815,7 +815,7 @@
     "MADE_MODERATOR": "ユーザー{電子メール}がモデレーターのリストに追加されます",
     "MAINLINE": "メインライン",
     "MEDIUM": "MEDIUM",
-    "MERGE_INTO_TARGET": "{name}にマージします",
+    "MERGE_INTO_TARGET": "{name} ({version}) にマージします",
     "MODERATIONS": "モデレーション",
     "MULTIPLE": "MULTIPLE",
     "Mail Configurations": "メール構成",

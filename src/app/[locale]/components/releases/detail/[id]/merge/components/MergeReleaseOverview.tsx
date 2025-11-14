@@ -16,9 +16,10 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ErrorDetails, MergeOrSplitActionType, ReleaseDetail, UserGroupType } from '@/object-types'
+import { ErrorDetails, MergeOrSplitActionType, ReleaseDetail, ReleaseLink, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import MergeReleaseTable from './MergeReleaseTable'
 
 
 function GetNextState(currentState: MergeOrSplitActionType): MergeOrSplitActionType | null {
@@ -50,9 +51,9 @@ function MergeReleaseOverview({
     const t = useTranslations('default')
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
     const [targetRelease, setTargetRelease] = useState<null | ReleaseDetail>(null)
-    const [sourceRelease, setSourceRelease] = useState<null | ReleaseDetail>(null)
+    const [sourceRelease, setSourceRelease] = useState<null | ReleaseLink>(null)
     const [componentId, setComponentId] = useState<null | string>(null)
-    // const [finalReleasePayload, setFinalReleasePayload] = useState<null | ReleaseDetail>(null)
+    // const [finalReleasePayload, setFinalReleasePayload] = useState<null | ReleaseLink>(null)
     const [error, setError] = useState<null | string>(null)
     const [loading,] = useState(false)
     const { status } = useSession()
@@ -64,6 +65,12 @@ function MergeReleaseOverview({
     }, [
         status,
     ])
+
+    useEffect(() => {
+        const storedComponentId = localStorage.getItem('lastVisitedComponentId')
+        const compId = storedComponentId ? storedComponentId : null
+        setComponentId(compId)
+    }, [])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -111,6 +118,7 @@ function MergeReleaseOverview({
                     <div className='col-auto buttonheader-title mb-3'>
                         {t.rich('MERGE_INTO_TARGET', {
                             name: targetRelease.name,
+                            version: targetRelease.version,
                         })}
                     </div>
                     <div className='d-flex justify-content-between text-center mb-3'>
@@ -144,7 +152,13 @@ function MergeReleaseOverview({
                             {error}
                         </div>
                     )}
-
+                    {mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && (
+                        <MergeReleaseTable
+                            release={sourceRelease}
+                            setRelease={setSourceRelease}
+                            componentId={componentId}
+                        />
+                    )}
                     <div className='d-flex justify-content-end mb-3'>
                         <div
                             className='mt-3 btn-group col-2'
