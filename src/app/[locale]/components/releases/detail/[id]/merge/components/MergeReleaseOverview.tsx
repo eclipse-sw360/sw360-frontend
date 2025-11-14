@@ -67,12 +67,6 @@ function MergeReleaseOverview({
     ])
 
     useEffect(() => {
-        const storedComponentId = localStorage.getItem('lastVisitedComponentId')
-        const compId = storedComponentId ? storedComponentId : null
-        setComponentId(compId)
-    }, [])
-
-    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
             ; (async () => {
@@ -157,6 +151,7 @@ function MergeReleaseOverview({
                             release={sourceRelease}
                             setRelease={setSourceRelease}
                             componentId={componentId}
+                            releaseId={releaseId}
                         />
                     )}
                     <div className='d-flex justify-content-end mb-3'>

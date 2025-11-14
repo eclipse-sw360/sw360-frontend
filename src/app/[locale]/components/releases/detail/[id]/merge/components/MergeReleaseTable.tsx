@@ -25,11 +25,13 @@ type EmbeddedReleases = Embedded<ReleaseLink, 'sw360:releaseLinks'>
 export default function MergeReleaseTable({
     release,
     setRelease,
-    componentId
+    componentId,
+    releaseId
 }: Readonly<{
     release: ReleaseLink | null
     setRelease: Dispatch<SetStateAction<null | ReleaseLink>>
     componentId: string | null
+    releaseId: string | null
 }>): ReactNode {
     const t = useTranslations('default')
     const session = useSession()
@@ -143,7 +145,6 @@ export default function MergeReleaseTable({
                         ]),
                     ),
                 )
-                console.log('Fetching releases with URL:', queryUrl)
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -151,10 +152,14 @@ export default function MergeReleaseTable({
                 }
 
                 const data = (await response.json()) as EmbeddedReleases
+
                 setComponentReleaseData(
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
                         ? []
-                        : data['_embedded']['sw360:releaseLinks'],
+                        : releaseId ? data['_embedded']['sw360:releaseLinks'].filter(
+                            item => item.id !== releaseId
+                        ) : []
+
                 )
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
