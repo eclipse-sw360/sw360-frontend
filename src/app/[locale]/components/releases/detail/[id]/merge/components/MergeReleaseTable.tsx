@@ -9,14 +9,14 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ClientSidePageSizeSelector, ClientSideTableFooter, PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, TableSearch } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
-import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink } from '@/object-types'
+import { Embedded, ErrorDetails, ReleaseLink } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -109,17 +109,6 @@ export default function MergeReleaseTable({
         ],
     )
 
-    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
-        page: 0,
-        page_entries: 10,
-        sort: '',
-    })
-    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
-        size: 0,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-    })
     const [componentReleaseData, setComponentReleaseData] = useState<ReleaseLink[]>(() => [])
     const memoizedData = useMemo(
         () => componentReleaseData,
@@ -147,7 +136,6 @@ export default function MergeReleaseTable({
                     Object.fromEntries(
                         Object.entries({
                             ...search,
-                            ...pageableQueryParam,
                             allDetails: true,
                         }).map(([key, value]) => [
                             key,
@@ -163,7 +151,6 @@ export default function MergeReleaseTable({
                 }
 
                 const data = (await response.json()) as EmbeddedReleases
-                setPaginationMeta(data.page)
                 setComponentReleaseData(
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
                         ? []
@@ -183,7 +170,6 @@ export default function MergeReleaseTable({
 
         return () => controller.abort()
     }, [
-        pageableQueryParam,
         session,
         search,
     ])
@@ -192,67 +178,7 @@ export default function MergeReleaseTable({
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
-
-        // table state config
-        state: {
-            pagination: {
-                pageIndex: pageableQueryParam.page,
-                pageSize: pageableQueryParam.page_entries,
-            },
-            sorting: [
-                {
-                    id: pageableQueryParam.sort.split(',')[0],
-                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
-                },
-            ],
-        },
-
-        // server side sorting config
-        manualSorting: true,
-        getSortedRowModel: getSortedRowModel(),
-        onSortingChange: (updater) => {
-            setPageableQueryParam((prev) => {
-                const prevSorting: SortingState = [
-                    {
-                        id: prev.sort.split(',')[0],
-                        desc: prev.sort.split(',')[1] === 'desc',
-                    },
-                ]
-
-                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
-
-                if (nextSorting.length > 0) {
-                    const { id, desc } = nextSorting[0]
-                    return {
-                        ...prev,
-                        sort: `${id},${desc ? 'desc' : 'asc'}`,
-                    }
-                }
-
-                return {
-                    ...prev,
-                    sort: '',
-                }
-            })
-        },
-        // server side pagination config
-        manualPagination: true,
-        pageCount: paginationMeta?.totalPages ?? 1,
-        onPaginationChange: (updater) => {
-            const next =
-                typeof updater === 'function'
-                    ? updater({
-                        pageIndex: pageableQueryParam.page,
-                        pageSize: pageableQueryParam.page_entries,
-                    })
-                    : updater
-
-            setPageableQueryParam((prev) => ({
-                ...prev,
-                page: next.pageIndex + 1,
-                page_entries: next.pageSize,
-            }))
-        },
+        getPaginationRowModel: getPaginationRowModel(),
     })
 
     return (
