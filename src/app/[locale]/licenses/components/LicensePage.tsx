@@ -118,7 +118,7 @@ function LicensePage(): ReactNode {
             {
                 id: 'licenseType',
                 header: t('License Type'),
-                cell: ({ row }) => <>{row.original.licenseType ?? '--'}</>,
+                cell: ({ row }) => <>{row.original.licenseType?.licenseType ?? '--'}</>,
                 meta: {
                     width: '10%',
                 },
