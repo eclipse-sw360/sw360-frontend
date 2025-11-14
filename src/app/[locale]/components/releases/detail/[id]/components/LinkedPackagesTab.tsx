@@ -24,6 +24,7 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
+import { packageManagers } from '@/app/[locale]/packages/components/PackageManagers'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, FilterOption, LinkedPackage } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -36,40 +37,10 @@ interface Props {
 
 type EmbeddedLinkedPackages = Embedded<LinkedPackage, 'sw360:packages'>
 
-const packageManagerFilterOptions: FilterOption[] = [
-    {
-        tag: 'NPM',
-        value: 'NPM',
-    },
-    {
-        tag: 'Maven',
-        value: 'MAVEN',
-    },
-    {
-        tag: 'Gradle',
-        value: 'GRADLE',
-    },
-    {
-        tag: 'PyPI',
-        value: 'PYPI',
-    },
-    {
-        tag: 'NuGet',
-        value: 'NUGET',
-    },
-    {
-        tag: 'Composer',
-        value: 'COMPOSER',
-    },
-    {
-        tag: 'Cargo',
-        value: 'CARGO',
-    },
-    {
-        tag: 'Go Modules',
-        value: 'GO_MODULES',
-    },
-]
+const packageManagerFilterOptions: FilterOption[] = packageManagers.map((pm: string) => ({
+    tag: pm,
+    value: pm.toUpperCase(),
+}))
 
 export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     const t = useTranslations('default')
