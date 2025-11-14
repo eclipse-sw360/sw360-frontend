@@ -815,7 +815,7 @@
     "MADE_MODERATOR": "Người dùng {email} sẽ được thêm vào danh sách người điều hành",
     "MAINLINE": "Đường chính",
     "MEDIUM": "TRUNG BÌNH",
-    "MERGE_INTO_TARGET": "Hợp nhất vào {name}",
+    "MERGE_INTO_TARGET": "Hợp nhất vào {name} ({version})",
     "MODERATIONS": "ĐIỀU CHỈNH",
     "MULTIPLE": "NHIỀU",
     "Mail Configurations": "Cấu hình thư",

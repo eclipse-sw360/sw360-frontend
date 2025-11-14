@@ -815,7 +815,7 @@
     "MADE_MODERATOR": "Der Benutzer {E -Mail} wird der Liste der Moderatoren hinzugefügt",
     "MAINLINE": "Mainline",
     "MEDIUM": "MEDIUM",
-    "MERGE_INTO_TARGET": "In {name} verschmelzen",
+    "MERGE_INTO_TARGET": "Zusammenführen mit {name} ({version})",
     "MODERATIONS": "MODERATIONEN",
     "MULTIPLE": "MULTIP",
     "Mail Configurations": "Mail -Konfigurationen",
