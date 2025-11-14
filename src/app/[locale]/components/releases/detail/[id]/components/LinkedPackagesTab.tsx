@@ -9,7 +9,14 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
@@ -17,8 +24,8 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
-import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from '@/components/sw360'
-import { Embedded, ErrorDetails, LinkedPackage } from '@/object-types'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
+import { Embedded, ErrorDetails, FilterOption, LinkedPackage } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
@@ -29,9 +36,47 @@ interface Props {
 
 type EmbeddedLinkedPackages = Embedded<LinkedPackage, 'sw360:packages'>
 
+const packageManagerFilterOptions: FilterOption[] = [
+    {
+        tag: 'NPM',
+        value: 'NPM',
+    },
+    {
+        tag: 'Maven',
+        value: 'MAVEN',
+    },
+    {
+        tag: 'Gradle',
+        value: 'GRADLE',
+    },
+    {
+        tag: 'PyPI',
+        value: 'PYPI',
+    },
+    {
+        tag: 'NuGet',
+        value: 'NUGET',
+    },
+    {
+        tag: 'Composer',
+        value: 'COMPOSER',
+    },
+    {
+        tag: 'Cargo',
+        value: 'CARGO',
+    },
+    {
+        tag: 'Go Modules',
+        value: 'GO_MODULES',
+    },
+]
+
 export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     const t = useTranslations('default')
     const session = useSession()
+
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [showFilter, setShowFilter] = useState<undefined | string>()
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -100,7 +145,20 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
             },
             {
                 id: 'packageManager',
-                header: t('Package Manager'),
+                header: () => (
+                    <div className='d-flex justify-content-between align-items-center'>
+                        <span>{t('Package Manager')}</span>
+                        <FilterComponent
+                            renderFilterOptions={packageManagerFilterOptions}
+                            setColumnFilters={setColumnFilters}
+                            columnFilters={columnFilters}
+                            id='packageManager'
+                            show={showFilter}
+                            setShow={setShowFilter}
+                            header={t('Package Manager')}
+                        />
+                    </div>
+                ),
                 accessorKey: 'packageManager',
                 enableSorting: false,
                 cell: (info) => info.getValue(),
@@ -133,6 +191,8 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         ],
         [
             t,
+            columnFilters,
+            showFilter,
         ],
     )
 
@@ -190,7 +250,13 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     const table = useReactTable({
         data: memoizedData,
         columns,
+        state: {
+            columnFilters,
+        },
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        onColumnFiltersChange: setColumnFilters,
     })
 
     return (

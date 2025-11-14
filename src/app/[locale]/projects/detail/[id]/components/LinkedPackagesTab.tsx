@@ -9,7 +9,14 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
@@ -17,8 +24,8 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
-import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from '@/components/sw360'
-import { ErrorDetails, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
+import { ErrorDetails, FilterOption, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
@@ -27,9 +34,82 @@ interface Props {
     projectId: string
 }
 
+const packageManagerFilterOptions: FilterOption[] = [
+    {
+        tag: 'NPM',
+        value: 'NPM',
+    },
+    {
+        tag: 'Maven',
+        value: 'MAVEN',
+    },
+    {
+        tag: 'Gradle',
+        value: 'GRADLE',
+    },
+    {
+        tag: 'PyPI',
+        value: 'PYPI',
+    },
+    {
+        tag: 'NuGet',
+        value: 'NUGET',
+    },
+    {
+        tag: 'Composer',
+        value: 'COMPOSER',
+    },
+    {
+        tag: 'Cargo',
+        value: 'CARGO',
+    },
+    {
+        tag: 'Go Modules',
+        value: 'GO_MODULES',
+    },
+]
+
+const clearingStateFilterOptions: FilterOption[] = [
+    {
+        tag: 'New',
+        value: 'NEW_CLEARING',
+    },
+    {
+        tag: 'New',
+        value: 'NEW',
+    },
+    {
+        tag: 'Sent To Clearing Tool',
+        value: 'SENT_TO_CLEARING_TOOL',
+    },
+    {
+        tag: 'Under Clearing',
+        value: 'UNDER_CLEARING',
+    },
+    {
+        tag: 'Report Available',
+        value: 'REPORT_AVAILABLE',
+    },
+    {
+        tag: 'Approved',
+        value: 'APPROVED',
+    },
+    {
+        tag: 'Scan Available',
+        value: 'SCAN_AVAILABLE',
+    },
+    {
+        tag: 'Internal Use Scan Available',
+        value: 'INTERNAL_USE_SCAN_AVAILABLE',
+    },
+]
+
 export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
     const t = useTranslations('default')
     const session = useSession()
+
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [showFilter, setShowFilter] = useState<undefined | string>()
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -102,7 +182,21 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             },
             {
                 id: 'releaseClearingState',
-                header: t('Release Clearing State'),
+                header: () => (
+                    <div className='d-flex justify-content-between align-items-center'>
+                        <span>{t('Release Clearing State')}</span>
+                        <FilterComponent
+                            renderFilterOptions={clearingStateFilterOptions}
+                            setColumnFilters={setColumnFilters}
+                            columnFilters={columnFilters}
+                            id='releaseClearingState'
+                            show={showFilter}
+                            setShow={setShowFilter}
+                            header={t('Release Clearing State')}
+                        />
+                    </div>
+                ),
+                accessorFn: (row) => row._embedded?.['sw360:release']?.clearingState ?? '',
                 cell: ({ row }) => {
                     const releaseClearingState = row.original._embedded?.['sw360:release']?.clearingState ?? ''
                     return (
@@ -183,7 +277,20 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
             },
             {
                 id: 'packageManager',
-                header: t('Package Manager'),
+                header: () => (
+                    <div className='d-flex justify-content-between align-items-center'>
+                        <span>{t('Package Manager')}</span>
+                        <FilterComponent
+                            renderFilterOptions={packageManagerFilterOptions}
+                            setColumnFilters={setColumnFilters}
+                            columnFilters={columnFilters}
+                            id='packageManager'
+                            show={showFilter}
+                            setShow={setShowFilter}
+                            header={t('Package Manager')}
+                        />
+                    </div>
+                ),
                 accessorKey: 'packageManager',
                 cell: (info) => info.getValue(),
                 enableSorting: false,
@@ -233,6 +340,8 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
         [
             t,
             memoizedProjectData,
+            columnFilters,
+            showFilter,
         ],
     )
 
@@ -321,9 +430,13 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
     const table = useReactTable({
         data: memoizedPackagesData,
         columns,
+        state: {
+            columnFilters,
+        },
         getCoreRowModel: getCoreRowModel(),
-
+        getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        onColumnFiltersChange: setColumnFilters,
     })
 
     return (
