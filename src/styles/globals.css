@@ -1677,3 +1677,8 @@ input[checked] + .slider:before {
     color: var(--tab-hover-foreground);
     background-color: var(--sw360-primary-hover-color);
 }
+
+.filter-button .dropdown-menu {
+    max-height: 400px;
+    overflow-y: auto;
+}
