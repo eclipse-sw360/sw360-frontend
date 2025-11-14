@@ -71,7 +71,10 @@ export default function MergeReleaseTable({
                     <Form.Check
                         type='radio'
                         checked={release !== null && row.original.id === release.id}
-                        onChange={() => setRelease(row.original)}
+                        onChange={() => {
+                            setRelease(row.original)
+                        }
+                        }
                     ></Form.Check>
                 ),
                 meta: {
