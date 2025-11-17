@@ -11,16 +11,18 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
-import { Button, Modal } from 'react-bootstrap'
-
-import { Embedded, User } from '@/object-types'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
+import { FaInfoCircle } from 'react-icons/fa'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import UsersTable from './UsersTable'
 
 interface Props {
     show: boolean
@@ -34,8 +36,6 @@ interface Props {
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
 
-type RowData = (string | User)[]
-
 const SelectUsersDialog = ({
     show,
     setShow,
@@ -44,71 +44,307 @@ const SelectUsersDialog = ({
     multiple = false,
 }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [tableData, setTableData] = useState<Array<RowData>>([])
-    const [selectingUsers, setSelectingUsers] = useState({})
-    const [searchText, setSearchText] = useState('')
-    const { status } = useSession()
+    const [selectingUsers, setSelectingUsers] = useState<{
+        [k: string]: string
+    }>({})
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [exactMatch, setExactMatch] = useState(false)
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
-    const handleCloseDialog = () => {
-        setShow(!show)
+    useEffect(() => {
         setSelectingUsers(selectedUsers)
+    }, [
+        selectedUsers,
+    ])
+
+    const handleSelectUser = (user: User) => {
+        const userEmail = user.email
+        const copiedSelectingUsers = {
+            ...selectingUsers,
+        }
+        if (Object.keys(copiedSelectingUsers).includes(userEmail)) {
+            delete copiedSelectingUsers[userEmail]
+        } else {
+            copiedSelectingUsers[userEmail] = user.fullName ?? ''
+        }
+        setSelectingUsers(copiedSelectingUsers)
     }
 
-    const searchUsers = async (text: string) => {
-        const session = await getSession()
-        const queryUrl = CommonUtils.createUrlWithParams(`users`, {
-            givenname: text,
-            luceneSearch: 'true',
+    const columns = useMemo<ColumnDef<User>[]>(
+        () => [
+            {
+                id: 'selection',
+                cell: ({ row }) => (
+                    <Form.Check
+                        name='user-selection'
+                        type={multiple ? 'checkbox' : 'radio'}
+                        defaultChecked={Object.keys(selectingUsers).includes(row.original.email)}
+                        onClick={() => {
+                            handleSelectUser(row.original)
+                        }}
+                    ></Form.Check>
+                ),
+            },
+            {
+                id: 'givenName',
+                header: t('Given Name'),
+                accessorKey: 'givenName',
+                enableSorting: false,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'lastname',
+                header: t('Last Name'),
+                accessorKey: 'lastName',
+                enableSorting: true,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'email',
+                accessorKey: 'email',
+                header: t('Email'),
+                enableSorting: true,
+                cell: ({ row }) => {
+                    return (
+                        <Link
+                            className='text-link'
+                            href={`/admin/users/details/${CommonUtils.getIdFromUrl(row.original._links?.self.href)}`}
+                        >
+                            {row.original.email}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'deactivated',
+                accessorKey: 'deactivated',
+                header: t('Active status'),
+                enableSorting: true,
+                cell: ({ row }) => {
+                    const { deactivated } = row.original
+                    return deactivated === undefined || deactivated === false ? t('Active') : t('Inactive')
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'department',
+                header: t('Primary Department'),
+                accessorKey: 'department',
+                enableSorting: true,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [
+            t,
+            selectingUsers,
+        ],
+    )
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [userData, setUserData] = useState<User[]>(() => [])
+    const memoizedData = useMemo(
+        () => userData,
+        [
+            userData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading' || searchText === undefined) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        handleSearch(signal)
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
+
+    const handleSearch = async (signal?: AbortSignal) => {
+        try {
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `users`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  searchText: searchText,
+                                  luceneSearch: !exactMatch,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
+            }
+
+            const data = (await response.json()) as EmbeddedUsers
+            setPaginationMeta(data.page)
+            setUserData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:users']) ? [] : data['_embedded']['sw360:users'],
+            )
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setShowProcessing(false)
+        }
+    }
+
+    const closeModal = () => {
+        setShow(false)
+        setUserData([])
+        setSelectingUsers({})
+        setExactMatch(false)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
         })
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        const response = await ApiUtils.GET(queryUrl, session.user.access_token)
-        if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-
-        const users = (await response.json()) as EmbeddedUsers
-        if (
-            !CommonUtils.isNullOrUndefined(users['_embedded']) &&
-            !CommonUtils.isNullOrUndefined(users['_embedded']['sw360:users'])
-        ) {
-            const data = users['_embedded']['sw360:users'].map((user: User) => [
-                user,
-                user.givenName ?? '',
-                user.lastName ?? '',
-                user.email,
-                user.department ?? '',
-            ])
-            setTableData(data)
-        }
-        setSelectingUsers(selectedUsers)
-    }
-
-    const handleClickSelectUsers = () => {
-        setShow(!show)
-        setSelectedUsers(selectingUsers)
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
     }
 
     const resetSelection = () => {
-        setSearchText('')
-        void searchUsers('')
+        setUserData([])
+        setSelectingUsers({})
+        setExactMatch(false)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
     }
 
     return (
         <Modal
             show={show}
-            onHide={handleCloseDialog}
+            onHide={closeModal}
             backdrop='static'
             centered
             size='lg'
@@ -117,42 +353,86 @@ const SelectUsersDialog = ({
                 <Modal.Title>{t('Search Users')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className='row'>
-                    <div className='col-lg-8'>
-                        <input
-                            type='text'
-                            className='form-control'
-                            value={searchText}
-                            placeholder={t('Enter search text')}
-                            aria-describedby='Search Users'
-                            onChange={(event) => setSearchText(event.target.value)}
-                        />
-                    </div>
-                    <div className='col-lg-4'>
-                        <button
-                            type='button'
-                            className='btn btn-secondary me-2'
-                            onClick={() => void searchUsers(searchText)}
-                        >
-                            {t('Search')}
-                        </button>
-                        <button
-                            type='button'
-                            className='btn btn-secondary me-2'
-                            onClick={resetSelection}
-                        >
-                            {t('Reset')}
-                        </button>
-                    </div>
-                </div>
-                <div className='mt-3'>
-                    <UsersTable
-                        tableData={tableData}
-                        setSelectingUsers={setSelectingUsers}
-                        selectingUsers={selectingUsers}
-                        multiple={multiple}
-                    />
-                </div>
+                <Form>
+                    <Col>
+                        <Row className='mb-3'>
+                            <Col xs={6}>
+                                <Form.Control
+                                    type='text'
+                                    placeholder={`${t('Enter Search Text')}...`}
+                                    name='searchValue'
+                                    onChange={(event) => {
+                                        setSearchText(event.target.value)
+                                    }}
+                                />
+                            </Col>
+                            <Col xs='auto'>
+                                <Form.Group controlId='exact-match-group'>
+                                    <Form.Check
+                                        inline
+                                        name='exact-match'
+                                        type='checkbox'
+                                        id='exact-match'
+                                        onChange={() => setExactMatch(!exactMatch)}
+                                    />
+                                    <Form.Label
+                                        className='pt-2'
+                                        value={exactMatch}
+                                    >
+                                        {t('Exact Match')}{' '}
+                                        <sup>
+                                            <FaInfoCircle />
+                                        </sup>
+                                    </Form.Label>
+                                </Form.Group>
+                            </Col>
+                            <Col xs='auto'>
+                                <Button
+                                    variant='secondary'
+                                    onClick={() => {
+                                        if (!searchText) setSearchText('')
+                                        handleSearch()
+                                    }}
+                                >
+                                    {t('Search')}
+                                </Button>
+                            </Col>
+                            <Col xs='auto'>
+                                <Button
+                                    variant='secondary'
+                                    onClick={() => resetSelection()}
+                                >
+                                    {t('Reset')}
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <div className='mb-3'>
+                                {pageableQueryParam && table && paginationMeta ? (
+                                    <>
+                                        <PageSizeSelector
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                        />
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                        <TableFooter
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                            paginationMeta={paginationMeta}
+                                        />
+                                    </>
+                                ) : (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )}
+                            </div>
+                        </Row>
+                    </Col>
+                </Form>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
@@ -160,14 +440,17 @@ const SelectUsersDialog = ({
                     data-bs-dismiss='modal'
                     variant='secondary'
                     className='me-2'
-                    onClick={handleCloseDialog}
+                    onClick={closeModal}
                 >
                     {t('Close')}
                 </Button>
                 <Button
                     type='button'
                     className='btn btn-primary'
-                    onClick={handleClickSelectUsers}
+                    onClick={() => {
+                        setSelectedUsers(selectingUsers)
+                        closeModal()
+                    }}
                 >
                     {t('Select User')}
                 </Button>
