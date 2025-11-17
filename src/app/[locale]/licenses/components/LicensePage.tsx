@@ -43,7 +43,7 @@ function LicensePage(): ReactNode {
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
         setSearch({
-            keyword: event.currentTarget.value,
+            searchText: event.currentTarget.value,
         })
     }
 
