@@ -13,15 +13,13 @@ import 'flag-icons/css/flag-icons.min.css'
 
 import '@/styles/auth.css'
 import '@/styles/globals.css'
-import '@/styles/gridjs/sw360.css'
 
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { ReactNode, type JSX } from 'react'
-
-import { UiConfigProvider } from '@/contexts'
 import { Footer, GlobalMessages, Navbar } from 'next-sw360'
+import { type JSX, ReactNode } from 'react'
+import { UiConfigProvider } from '@/contexts'
 import { Providers } from '../provider'
 
 export const metadata: Metadata = {

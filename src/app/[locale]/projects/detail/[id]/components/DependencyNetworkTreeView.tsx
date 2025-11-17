@@ -24,7 +24,6 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import {
-    _,
     ClientSidePageSizeSelector,
     ClientSideTableFooter,
     FilterComponent,

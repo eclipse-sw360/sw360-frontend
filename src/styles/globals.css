@@ -285,10 +285,6 @@ body {
     color: #fff !important;
 }
 
-.gridjs-wrapper {
-    border-radius: 0px;
-}
-
 .nav-link {
     color: var(--sw360-navlink-color) !important;
     font-size: 0.95rem !important;
@@ -819,33 +815,6 @@ input::-webkit-datetime-edit {
     left: 10px;
 }
 
-.tree-table-padding-0 {
-    padding-left: 0rem;
-}
-.tree-table-padding-1 {
-    padding-left: 2rem;
-}
-.tree-table-padding-2 {
-    padding-left: 4rem;
-}
-.tree-table-padding-3 {
-    padding-left: 6rem;
-}
-.tree-table-padding-4 {
-    padding-left: 8rem;
-}
-.tree-table-padding-5 {
-    padding-left: 10rem;
-}
-
-.gridjs-td:has(.green-cell) {
-    background-color: #edf9f0;
-}
-
-.gridjs-td:has(.orange-cell) {
-    background-color: #fff4ec;
-}
-
 td:has(.red-cell) {
     background-color: #feefef;
 }
@@ -856,15 +825,6 @@ td:has(.green-cell) {
 
 td:has(.orange-cell) {
     background-color: #fff4ec;
-}
-
-.gridjs-td:has(.red-cell) {
-    background-color: #feefef;
-}
-
-.gridjs-td:has(.border-0-cell) {
-    border-left: none;
-    border-right: none;
 }
 
 .header-underlined {

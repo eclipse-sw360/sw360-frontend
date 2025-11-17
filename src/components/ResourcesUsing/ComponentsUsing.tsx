@@ -11,12 +11,11 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, ReactNode, useEffect, useMemo, useState } from 'react'
+import { type JSX, ReactNode, useMemo } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Component } from '@/object-types'
-import { _, SW360Table, Table } from '../sw360'
+import { SW360Table } from '../sw360'
 import styles from './ResourceUsing.module.css'
 
 interface Props {

@@ -31,9 +31,6 @@ importers:
       flag-icons:
         specifier: ^7.3.2
         version: 7.5.0
-      gridjs:
-        specifier: ^6.2.0
-        version: 6.2.0
       html-react-parser:
         specifier: ^5.2.8
         version: 5.2.8(@types/react@19.0.10)(react@19.1.0)
@@ -1254,9 +1251,6 @@ packages:
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
-
-  gridjs@6.2.0:
-    resolution: {integrity: sha512-EAGGfHjyEXWh12Txs6DjTGnWTo226wbowtMrLI+yNZQaJpvs0m7yDcyM7r+D4RA7rZQVj/cfmwEaRz/rlxg8LA==}
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -3285,10 +3279,6 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
-
-  gridjs@6.2.0:
-    dependencies:
-      preact: 10.27.2
 
   has-flag@4.0.0: {}
 

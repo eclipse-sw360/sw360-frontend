@@ -23,7 +23,6 @@
     "crypto-js": "^4.2.0",
     "dotenv": "^17.2.1",
     "flag-icons": "^7.3.2",
-    "gridjs": "^6.2.0",
     "html-react-parser": "^5.2.8",
     "http-status-codes": "^2.3.0",
     "jwt-decode": "^4.0.0",

@@ -10,18 +10,14 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
-import { _, SW360Table, Table } from '@/components/sw360'
+import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { LinkedPackage, LinkedPackageData, Package, ProjectPayload } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { LinkedPackageData, ProjectPayload } from '@/object-types'
 
 interface Props {
     projectId?: string
@@ -29,7 +25,7 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-export default function LinkedPackages({ projectId, projectPayload, setProjectPayload }: Props): JSX.Element {
+export default function LinkedPackages({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
     const [newLinkedPackageData, setNewLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())

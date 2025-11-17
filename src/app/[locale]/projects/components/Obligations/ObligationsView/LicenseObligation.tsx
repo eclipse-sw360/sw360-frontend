@@ -16,7 +16,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { _, PaddedCell, PageSizeSelector, SW360Table, Table, TableFooter } from '@/components/sw360'
+import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import {
     ActionType,
     ErrorDetails,

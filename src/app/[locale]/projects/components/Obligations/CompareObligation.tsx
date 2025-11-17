@@ -12,13 +12,12 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
-import { _, PageSizeSelector, SW360Table, Table, TableFooter } from '@/components/sw360'
+import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -254,9 +253,9 @@ export default function CompareObligation({
             const next =
                 typeof updater === 'function'
                     ? updater({
-                        pageIndex: pageableQueryParam.page,
-                        pageSize: pageableQueryParam.page_entries,
-                    })
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -278,9 +277,9 @@ export default function CompareObligation({
                         ...pageableQueryParam,
                         ...(searchText && searchText !== ''
                             ? {
-                                searchText: searchText,
-                                luceneSearch: !exactMatch,
-                            }
+                                  searchText: searchText,
+                                  luceneSearch: !exactMatch,
+                              }
                             : {}),
                         allDetails: true,
                     }).map(([key, value]) => [

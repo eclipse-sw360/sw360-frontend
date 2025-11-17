@@ -16,10 +16,10 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { PiCheckBold } from 'react-icons/pi'
-import { _, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
+import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import {
     Embedded,
     ErrorDetails,
