@@ -7,14 +7,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
-import { ColumnFiltersState, Row, Table, flexRender } from '@tanstack/react-table'
+import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { RiSortAsc, RiSortDesc } from 'react-icons/ri'
+import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
 
 export function TableFooter({
     pageableQueryParam,
@@ -34,7 +34,10 @@ export function TableFooter({
     const entryEnd = Math.min(entryStart + paginationMeta.size - 1, paginationMeta.totalElements)
 
     const goToPage = (page: number) => {
-        setPageableQueryParam({ ...pageableQueryParam, page })
+        setPageableQueryParam({
+            ...pageableQueryParam,
+            page,
+        })
     }
 
     const pageNumbers = new Set<number>()
@@ -200,7 +203,11 @@ export function PageSizeSelector({
     pageableQueryParam: PageableQueryParam
     setPageableQueryParam: Dispatch<SetStateAction<PageableQueryParam>>
 }): ReactNode {
-    const setPageSize = (sz: number) => setPageableQueryParam({ ...pageableQueryParam, page_entries: sz })
+    const setPageSize = (sz: number) =>
+        setPageableQueryParam({
+            ...pageableQueryParam,
+            page_entries: sz,
+        })
     return (
         <PageSelectorUI
             pageSize={pageableQueryParam.page_entries}
@@ -258,7 +265,10 @@ export function SW360Table<K>({
         <div className='table-component position-relative'>
             <table
                 className='sw360-table table-bordered mt-3'
-                style={{ width: '100%', tableLayout: 'auto' }}
+                style={{
+                    width: '100%',
+                    tableLayout: 'auto',
+                }}
             >
                 <thead>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -346,7 +356,9 @@ export function PaddedCell<K>({ children, row }: { children?: ReactNode; row: Ro
         <div className='d-flex'>
             <span
                 className='indenter'
-                style={{ paddingLeft: `${row.depth}rem` }}
+                style={{
+                    paddingLeft: `${row.depth}rem`,
+                }}
                 role='button'
                 onClick={row.getToggleExpandedHandler()}
             >
@@ -387,14 +399,24 @@ export function FilterComponent({
         let newFilterValues: string[]
 
         if (checked) {
-            newFilterValues = [...existingValues, value]
+            newFilterValues = [
+                ...existingValues,
+                value,
+            ]
         } else {
             newFilterValues = existingValues.filter((v) => v !== value)
         }
 
         const newFilters = [
             ...columnFilters.filter((f) => f.id !== id),
-            ...(newFilterValues.length > 0 ? [{ id, value: newFilterValues }] : []),
+            ...(newFilterValues.length > 0
+                ? [
+                      {
+                          id,
+                          value: newFilterValues,
+                      },
+                  ]
+                : []),
         ]
         setColumnFilters(newFilters)
         resetPaginationParams?.()

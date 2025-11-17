@@ -11,33 +11,94 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { FaInfoCircle } from 'react-icons/fa'
-
-import { CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { ErrorDetails } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import styles from '../detail.module.css'
 
-interface Props {
-    licenseInfo: { [key: string]: string | Array<string> | number }
-    isISR: boolean
-    attachmentName?: string
+interface LicenseInfo {
+    license: string
+    otherLicense: string
+    licenseIds?: string[]
+    otherLicenseIds?: string[]
+    totalFileCount?: number
 }
 
-const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props): ReactNode => {
+interface Props {
+    isISR: boolean
+    attachmentName: string
+    attachmentId: string
+    releaseId: string
+    licenseInfo: LicenseInfo
+}
+
+interface FileList {
+    licName: string
+    srcFiles: string[]
+    licSpdxId: string
+}
+
+interface SrcFileList {
+    data: FileList[]
+}
+
+const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licenseInfo }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedLicenseId, setSelectedLicenseId] = useState<string>()
     const [modalShow, setModalShow] = useState(false)
-    const { status } = useSession()
+    const session = useSession()
+    const [fileList, setFileList] = useState<FileList[] | undefined>()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        session.status,
+    ])
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(
+                    `releases/${releaseId}/licenseFileList?attachmentId=${attachmentId}`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const fileData = (await response.json()) as SrcFileList
+                setFileList(fileData.data)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        session,
+        releaseId,
+        attachmentId,
+    ])
 
     const handleCloseDialog = () => {
         setModalShow(false)
@@ -62,7 +123,10 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props): ReactNo
                 {isISR && (
                     <FaInfoCircle
                         onClick={() => showLicenseToSrcMapping(licenseId)}
-                        style={{ marginLeft: '5px', color: 'gray' }}
+                        style={{
+                            marginLeft: '5px',
+                            color: 'gray',
+                        }}
                         className={styles.info}
                     />
                 )}
@@ -132,7 +196,9 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props): ReactNo
             >
                 <Modal.Header
                     closeButton
-                    style={{ color: '#2e5aac' }}
+                    style={{
+                        color: '#2e5aac',
+                    }}
                 >
                     <Modal.Title>
                         <b>{attachmentName}</b>
@@ -148,11 +214,13 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props): ReactNo
                                 {t('Source File List')}:
                                 <ul>
                                     {CommonUtils.isNullEmptyOrUndefinedArray(
-                                        licenseInfo[selectedLicenseId] as Array<string>,
+                                        fileList?.filter((l) => l.licName === selectedLicenseId)?.[0].srcFiles,
                                     ) ? (
                                         <li>{t('Source file information not found in ISR')}</li>
                                     ) : (
-                                        renderSourceList(licenseInfo[selectedLicenseId] as Array<string>)
+                                        renderSourceList(
+                                            fileList?.filter((l) => l.licName === selectedLicenseId)?.[0].srcFiles,
+                                        )
                                     )}
                                 </ul>
                             </div>
