@@ -9,18 +9,17 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, QuickFilter, Table, VendorDialog } from 'next-sw360'
-import React, { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
+import { PageSizeSelector, QuickFilter, SW360Table, TableFooter, VendorDialog } from 'next-sw360'
+import React, { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { GiCancel } from 'react-icons/gi'
-import { Embedded, ErrorDetails, Release, Session, Vendor } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Release, Vendor } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { SW360_API_URL } from '@/utils/env'
-
-const MemoTable = React.memo(Table, () => true)
 
 interface AlertData {
     variant: string
@@ -257,111 +256,223 @@ function UpdateReleaseModal({
 
 export default function BulkReleaseEdit(): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
 
     const [release, setRelease] = useState<Release | null>(null)
     const [reloadKey, setReloadKey] = useState(1)
     const [search, setSearch] = useState('')
 
-    const columns = [
-        {
-            id: 'releases.cpeid',
-            name: t('CPE ID'),
-            width: '20%',
-            formatter: (cpeid: string) =>
-                _(
+    const session = useSession()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
+
+    const columns = useMemo<ColumnDef<Release>[]>(
+        () => [
+            {
+                id: 'cpeid',
+                header: t('CPE ID'),
+                meta: {
+                    width: '20%',
+                },
+                cell: ({ row }) => (
                     <input
                         type='text'
                         className='form-control'
-                        value={cpeid}
+                        value={row.original.cpeid ?? ''}
                         readOnly
-                    />,
+                    />
                 ),
-            sort: true,
-        },
-        {
-            id: 'releases.vendor',
-            name: t('Vendor'),
-            formatter: (fullName: string) => {
-                return _(
-                    <input
-                        type='text'
-                        className='form-control'
-                        readOnly
-                        value={fullName}
-                    />,
-                )
             },
-            sort: true,
-        },
-        {
-            id: 'releases.name',
-            name: t('Release name'),
-            formatter: (releaseName: string) =>
-                _(
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                meta: {
+                    width: '20%',
+                },
+                cell: ({ row }) => (
                     <input
                         type='text'
                         className='form-control'
-                        value={releaseName}
                         readOnly
-                    />,
+                        value={row.original.vendor?.fullName ?? ''}
+                    />
                 ),
-            sort: true,
-        },
-        {
-            id: 'releases.version',
-            name: t('Release version'),
-            formatter: (releaseVersion: string) =>
-                _(
+            },
+            {
+                id: 'name',
+                header: t('Release name'),
+                meta: {
+                    width: '20%',
+                },
+                cell: ({ row }) => (
                     <input
                         type='text'
                         className='form-control'
-                        value={releaseVersion}
+                        value={row.original.name ?? ''}
                         readOnly
-                    />,
+                    />
                 ),
-            sort: true,
-        },
-        {
-            id: 'releases.submit',
-            name: t('Update'),
-            width: '10%',
-            formatter: (release: Release) =>
-                _(
+            },
+            {
+                id: 'version',
+                header: t('Release version'),
+                meta: {
+                    width: '20%',
+                },
+                cell: ({ row }) => (
+                    <input
+                        type='text'
+                        className='form-control'
+                        value={row.original.version ?? ''}
+                        readOnly
+                    />
+                ),
+            },
+            {
+                id: 'submit',
+                header: t('Update'),
+                meta: {
+                    width: '20%',
+                },
+                cell: ({ row }) => (
                     <div className='text-center'>
                         <button
                             type='button'
-                            onClick={() => setRelease(release)}
+                            onClick={() => setRelease(row.original)}
                             className='btn btn-primary'
                         >
                             {t('Update')}
                         </button>
-                    </div>,
+                    </div>
                 ),
-            sort: false,
-        },
-    ]
+            },
+        ],
+        [
+            t,
+        ],
+    )
 
-    const initServerPaginationConfig = (session: Session) => {
-        return {
-            url: `${SW360_API_URL}/resource/api/releases?allDetails=true${search !== '' ? `&luceneSearch=true&name=${search}` : ''}`,
-            then: (data: Embedded<Release, 'sw360:releases'>) => {
-                return data._embedded['sw360:releases'].map((release: Release) => {
-                    return [
-                        release.cpeid ?? '',
-                        release.vendor?.fullName ?? '',
-                        release.name ?? '',
-                        release.version ?? '',
-                        release,
-                    ]
-                })
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [releaseData, setReleaseData] = useState<Release[]>(() => [])
+    const memoizedData = useMemo(
+        () => releaseData,
+        [
+            releaseData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = releaseData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `releases`,
+                    Object.fromEntries(
+                        Object.entries({
+                            allDetails: true,
+                            ...(search !== ''
+                                ? {
+                                      lucenseSearch: true,
+                                      name: search,
+                                  }
+                                : {}),
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as Embedded<Release, 'sw360:releases'>
+                setPaginationMeta(data.page)
+                setReleaseData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
+                        ? []
+                        : data['_embedded']['sw360:releases'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+        search,
+        reloadKey,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
             },
-            total: (data: Embedded<Release, 'sw360:releases'>) => (data.page ? data.page.totalElements : 0),
-            headers: {
-                Authorization: `${session.user?.access_token}`,
-            },
-        }
-    }
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+    })
 
     const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
         setSearch(event.currentTarget.value)
@@ -388,21 +499,29 @@ export default function BulkReleaseEdit(): JSX.Element {
                         <div className='row d-flex justify-content-end ms-1'>
                             <div className='col-auto buttonheader-title'>{t('Release Bulk Edit')}</div>
                         </div>
-                        {status === 'authenticated' ? (
-                            <div className='ms-1'>
-                                <MemoTable
-                                    key={reloadKey}
-                                    columns={columns}
-                                    server={initServerPaginationConfig(session)}
-                                    selector={true}
-                                    sort={false}
-                                />
-                            </div>
-                        ) : (
-                            <div className='col-12 mt-1 text-center'>
-                                <Spinner className='spinner' />
-                            </div>
-                        )}
+                        <div className='mb-3'>
+                            {pageableQueryParam && table && paginationMeta ? (
+                                <>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing}
+                                    />
+                                    <TableFooter
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        paginationMeta={paginationMeta}
+                                    />
+                                </>
+                            ) : (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
