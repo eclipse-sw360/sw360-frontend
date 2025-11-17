@@ -13,10 +13,9 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { _, SW360Table, Table } from '@/components/sw360'
+import { SW360Table } from '@/components/sw360'
 import LinkedReleasesModal from '@/components/sw360/LinkedReleasesModal/LinkedReleasesModal'
 import { ProjectPayload } from '@/object-types'
-import { CommonUtils } from '@/utils'
 
 interface Props {
     projectPayload: ProjectPayload

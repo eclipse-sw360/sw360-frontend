@@ -43,10 +43,6 @@ import {
     TableFooter,
     TableSearch,
 } from './Table/Components'
-// Table component
-// Strictly derived from gridjs-react with dedicated changes
-import Table from './Table/Table'
-import { _, ReactWrapper } from './Table/wrapper'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
 import ToastMessage from './ToastContainer/Toast'
 
@@ -75,7 +71,6 @@ export {
     PillsInput,
     ProfileDropdown,
     QuickFilter,
-    ReactWrapper,
     SW360Table,
     SearchUsersModal,
     SearchVendorsModal,
@@ -83,11 +78,9 @@ export {
     SelectUsersDialog,
     ShowInfoOnHover,
     SideBar,
-    Table,
     TableFooter,
     TableSearch,
     ThemeSwitcher,
     ToastMessage,
     VendorDialog,
-    _,
 }

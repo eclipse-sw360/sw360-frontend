@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _, ClientSidePageSizeSelector, ClientSideTableFooter, ShowInfoOnHover, SW360Table } from 'next-sw360'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, ShowInfoOnHover, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
