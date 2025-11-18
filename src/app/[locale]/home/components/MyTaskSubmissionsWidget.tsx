@@ -46,10 +46,10 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 id: 'name',
                 header: t('Document Name'),
                 cell: ({ row }) => {
-                    const { documentName, documentId } = row.original
+                    const { documentName, id } = row.original
                     return (
                         <Link
-                            href={`/requests/moderationRequest/${documentId}`}
+                            href={`/requests/moderationRequest/${id}`}
                             className='text-link'
                         >
                             {documentName}
