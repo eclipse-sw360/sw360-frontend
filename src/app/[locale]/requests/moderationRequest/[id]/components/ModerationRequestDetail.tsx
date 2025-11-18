@@ -68,7 +68,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         action: '',
         comment: '',
     })
-    const toastShownRef = useRef(false)
+    const [isAssignedModerator, setIsAssignedModerator] = useState<boolean>(false)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -93,16 +93,14 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     }
 
     useEffect(() => {
-        if (!toastShownRef.current) {
-            MessageService.success(t('You have assigned yourself to this moderation request'))
-            toastShownRef.current = true
-        }
-
         void fetchData(`moderationrequest/${moderationRequestId}`).then(
             (moderationRequestDetails: ModerationRequestDetails | undefined) => {
                 setModerationRequestData(moderationRequestDetails)
             },
         )
+
+        // Call assignModerationRequest on page load
+        void assignModerationRequest()
     }, [])
 
     const handleCommentValidation = () => {
@@ -110,6 +108,34 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             return false
         }
         return true
+    }
+
+    const assignModerationRequest = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const updatedAssignPayload = {
+                ...moderationRequestPayload,
+                action: 'ASSIGN',
+            }
+            setModerationRequestPayload(updatedAssignPayload)
+            const response = await ApiUtils.PATCH(
+                `moderationrequest/${moderationRequestId}`,
+                updatedAssignPayload,
+                session.user.access_token,
+            )
+            if (response.status == StatusCodes.ACCEPTED) {
+                await response.json()
+                setIsAssignedModerator(true)
+                MessageService.success(t('You have assigned yourself to this moderation request'))
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                return notFound()
+            }
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     const handleAcceptModerationRequest = async () => {
@@ -255,6 +281,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         setOpenCardIndex((prevIndex) => (prevIndex === index ? -1 : index))
     }
 
+    // Check if user is assigned as moderator based on assignment status
+    const canShowModerationActions = () => {
+        return isAssignedModerator
+    }
+
     return (
         <>
             <Breadcrumb className='container page-content'>
@@ -291,47 +322,49 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                             </Col>
                         </Row>
                         <Col className='ps-2 me-3 mt-3'>
-                            <Row className='d-flex justify-content-between'>
-                                <Col lg={6}>
-                                    <Row>
-                                        <Button
-                                            variant='success'
-                                            className='me-2 col-auto'
-                                            onClick={handleAcceptModerationRequest}
-                                        >
-                                            {t('Accept Request')}
-                                        </Button>
-                                        <Button
-                                            variant='danger'
-                                            className='me-2 col-auto'
-                                            onClick={handleRejectModerationRequest}
-                                        >
-                                            {t('Decline Request')}
-                                        </Button>
-                                        <Button
-                                            variant='secondary'
-                                            className='me-2 col-auto'
-                                            onClick={handlePostponeModerationRequest}
-                                        >
-                                            {t('Postpone Request')}
-                                        </Button>
-                                        <Button
-                                            variant='secondary'
-                                            className='me-2 col-auto'
-                                            onClick={handleUnassignModerationRequest}
-                                        >
-                                            {t('Remove Me From Moderators')}
-                                        </Button>
-                                        <Button
-                                            variant='dark'
-                                            className='me-2 col-auto'
-                                            onClick={handleCancel}
-                                        >
-                                            {t('Cancel')}
-                                        </Button>
-                                    </Row>
-                                </Col>
-                            </Row>
+                            {canShowModerationActions() && (
+                                <Row className='d-flex justify-content-between'>
+                                    <Col lg={6}>
+                                        <Row>
+                                            <Button
+                                                variant='success'
+                                                className='me-2 col-auto'
+                                                onClick={handleAcceptModerationRequest}
+                                            >
+                                                {t('Accept Request')}
+                                            </Button>
+                                            <Button
+                                                variant='danger'
+                                                className='me-2 col-auto'
+                                                onClick={handleRejectModerationRequest}
+                                            >
+                                                {t('Decline Request')}
+                                            </Button>
+                                            <Button
+                                                variant='secondary'
+                                                className='me-2 col-auto'
+                                                onClick={handlePostponeModerationRequest}
+                                            >
+                                                {t('Postpone Request')}
+                                            </Button>
+                                            <Button
+                                                variant='secondary'
+                                                className='me-2 col-auto'
+                                                onClick={handleUnassignModerationRequest}
+                                            >
+                                                {t('Remove Me From Moderators')}
+                                            </Button>
+                                            <Button
+                                                variant='dark'
+                                                className='me-2 col-auto'
+                                                onClick={handleCancel}
+                                            >
+                                                {t('Cancel')}
+                                            </Button>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            )}
                             <Row className='mt-3'>
                                 <Card className={`${styles['card']}`}>
                                     <div
