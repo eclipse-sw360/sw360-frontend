@@ -26,7 +26,7 @@ export default function MergeReleaseTable({
     release,
     setRelease,
     componentId,
-    releaseId
+    releaseId,
 }: Readonly<{
     release: ReleaseLink | null
     setRelease: Dispatch<SetStateAction<null | ReleaseLink>>
@@ -37,7 +37,7 @@ export default function MergeReleaseTable({
     const session = useSession()
     const [search, setSearch] = useState<{
         name: string
-        lucenseSearch?: boolean
+        luceneSearch?: boolean
     }>({
         name: '',
     })
@@ -50,7 +50,7 @@ export default function MergeReleaseTable({
         } else {
             setSearch({
                 name: event.currentTarget.value,
-                lucenseSearch: true,
+                luceneSearch: true,
             })
         }
     }
@@ -73,8 +73,7 @@ export default function MergeReleaseTable({
                         checked={release !== null && row.original.id === release.id}
                         onChange={() => {
                             setRelease(row.original)
-                        }
-                        }
+                        }}
                     ></Form.Check>
                 ),
                 meta: {
@@ -159,10 +158,9 @@ export default function MergeReleaseTable({
                 setComponentReleaseData(
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
                         ? []
-                        : releaseId ? data['_embedded']['sw360:releaseLinks'].filter(
-                            item => item.id !== releaseId
-                        ) : []
-
+                        : releaseId
+                          ? data['_embedded']['sw360:releaseLinks'].filter((item) => item.id !== releaseId)
+                          : [],
                 )
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
