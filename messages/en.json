@@ -822,6 +822,7 @@
     "MADE_MODERATOR": "The user {email} will be added to the list of moderators",
     "MAINLINE": "Mainline",
     "MEDIUM": "MEDIUM",
+    "MERGE_INTO": "Merge into {name}",
     "MERGE_INTO_TARGET": "Merge into {name} ({version})",
     "MODERATIONS": "MODERATIONS",
     "MULTIPLE": "MULTIPLE",

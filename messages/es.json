@@ -822,6 +822,7 @@
     "MADE_MODERATOR": "El usuario {correo electrónico} se agregará a la lista de moderadores",
     "MAINLINE": "Mainline",
     "MEDIUM": "MEDIO",
+    "MERGE_INTO": "Fusionar con {nombre}",
     "MERGE_INTO_TARGET": "Fusionarse con {nombre} ({versión})",
     "MODERATIONS": "MODERACIONES",
     "MULTIPLE": "MULTIPLE",

@@ -822,6 +822,7 @@
     "MADE_MODERATOR": "用户{电子邮件}将添加到主持人列表中",
     "MAINLINE": "主线",
     "MEDIUM": "中等的",
+    "MERGE_INTO": "合并到 {name}",
     "MERGE_INTO_TARGET": "合并到 {name} ({version})",
     "MODERATIONS": "适度",
     "MULTIPLE": "多种的",
