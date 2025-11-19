@@ -38,10 +38,8 @@ const UserAccessToken = (): ReactNode => {
     const { status } = useSession()
 
     // Config values from backend
-    const writeAuthorityAllowed =
-        useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE) === null
-            ? true
-            : (useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE) as boolean)
+    const apiTokenGenerator = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE)
+    const writeAuthorityAllowed = apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
