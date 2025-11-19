@@ -136,7 +136,7 @@ function MergeOverview({
             {targetComponent ? (
                 <>
                     <div className='col-auto buttonheader-title mb-3'>
-                        {t.rich('MERGE_INTO_TARGET', {
+                        {t.rich('MERGE_INTO', {
                             name: targetComponent.name,
                         })}
                     </div>
