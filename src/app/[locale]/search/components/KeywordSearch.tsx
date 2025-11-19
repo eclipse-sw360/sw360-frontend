@@ -191,6 +191,17 @@ function KeywordSearch({
         session,
     ])
 
+    function appendTypeMasksToParams(searchOptions: SEARCH_STATE, params = new URLSearchParams()) {
+        const entries = Object.entries(searchOptions)
+        entries
+            .filter(([key, value]) => key !== 'entireDocument' && value === true)
+            .forEach(([key]) => params.append('typeMasks', key))
+        if (searchOptions.entireDocument) {
+            params.append('typeMasks', 'document')
+        }
+        return params
+    }
+
     const handleSearch = async () => {
         const timeout = setTimeout(() => {
             setShowProcessing(true)
@@ -198,28 +209,18 @@ function KeywordSearch({
 
         try {
             if (session.status !== 'authenticated') return
-            const queryUrl = CommonUtils.createUrlWithParams('search', {
-                searchText: String(searchText),
-                ...Object.fromEntries([
-                    ...Object.entries(searchOptions)
-                        .filter(([, v]) => v !== false)
-                        .map(([key]) =>
-                            key === 'entireDocument'
-                                ? [
-                                      'typeMasks',
-                                      'document',
-                                  ]
-                                : [
-                                      'typeMasks',
-                                      key,
-                                  ],
-                        ),
-                    ...Object.entries(pageableQueryParam).map(([key, value]) => [
-                        key,
-                        String(value),
-                    ]),
-                ]),
-            } as Record<string, string>)
+
+            const params = appendTypeMasksToParams(
+                searchOptions,
+                new URLSearchParams({
+                    searchText: String(searchText),
+                }),
+            )
+            Object.entries(pageableQueryParam)
+                .filter(([k]) => k != 'sort')
+                .map(([key, value]) => params.append(key, String(value)))
+
+            const queryUrl = `search?${params.toString()}`
 
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token)
             if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
@@ -228,7 +229,7 @@ function KeywordSearch({
             }
 
             const data = (await response.json()) as EmbeddedSearchResults
-            if (!CommonUtils.isNullEmptyOrUndefinedArray(data['_embedded']['sw360:searchResults'])) {
+            if (!CommonUtils.isNullOrUndefined(data['_embedded']['sw360:searchResults'])) {
                 setData(data['_embedded']['sw360:searchResults'])
                 setPaginationMeta(data.page)
             }
