@@ -276,6 +276,7 @@ export default function GeneralInformation({
                             {projectDomains &&
                                 projectDomains.map((domain) => (
                                     <option
+                                        key={domain}
                                         value={domain}
                                         selected={projectPayload.domain === domain}
                                     >

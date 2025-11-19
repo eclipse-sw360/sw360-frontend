@@ -736,7 +736,9 @@ body {
 }
 
 .form-check-input[disabled] ~ .form-check-label,
-.form-check-input:disabled ~ .form-check-label {
+.form-check-input:disabled ~ .form-check-label,
+.form-control[readonly],
+.form-control[disabled] {
     cursor: not-allowed !important;
 }
 
