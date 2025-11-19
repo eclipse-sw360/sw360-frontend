@@ -33,7 +33,7 @@ export default function ComponentTable({
     const session = useSession()
     const [search, setSearch] = useState<{
         name: string
-        lucenseSearch?: boolean
+        luceneSearch?: boolean
     }>({
         name: '',
     })
@@ -46,7 +46,7 @@ export default function ComponentTable({
         } else {
             setSearch({
                 name: event.currentTarget.value,
-                lucenseSearch: true,
+                luceneSearch: true,
             })
         }
     }

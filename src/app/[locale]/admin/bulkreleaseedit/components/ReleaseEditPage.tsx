@@ -397,7 +397,7 @@ export default function BulkReleaseEdit(): JSX.Element {
                             allDetails: true,
                             ...(search !== ''
                                 ? {
-                                      lucenseSearch: true,
+                                      luceneSearch: true,
                                       name: search,
                                   }
                                 : {}),
