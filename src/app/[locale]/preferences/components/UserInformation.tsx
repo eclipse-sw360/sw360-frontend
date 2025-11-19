@@ -8,14 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-
-import { User } from '@/object-types'
+import { useTranslations } from 'next-intl'
 import { Gravatar } from 'next-sw360'
-
 import { ReactNode } from 'react'
+import { User } from '@/object-types'
 import styles from '../preferences.module.css'
 
 interface Props {
@@ -24,21 +21,6 @@ interface Props {
 
 const UserInformation = ({ user }: Props): ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
-    let user_data: Record<string, string> | null = null
-
-    if (session) {
-        try {
-            const tokenPayloadBase64 = session.user.access_token.split('.')[1]
-            const decodedPayload = Buffer.from(tokenPayloadBase64, 'base64').toString()
-            user_data = JSON.parse(decodedPayload) as Record<string, string>
-        } catch (error) {
-            console.error('Failed to decode token payload:', error)
-            user_data = null
-        }
-    }
-
-    const email_by_token: string = user_data ? user_data.user_name : 'admin@sw360.org'
 
     return (
         <table className='table summary-table'>
@@ -87,11 +69,13 @@ const UserInformation = ({ user }: Props): ReactNode => {
                         </ul>
                     </td>
                 </tr>
-                <tr>
-                    <td colSpan={2}>
-                        <Gravatar email={email_by_token} />
-                    </td>
-                </tr>
+                {user && (
+                    <tr>
+                        <td colSpan={2}>
+                            <Gravatar email={user.email ? user.email : 'admin@sw360.org'} />
+                        </td>
+                    </tr>
+                )}
             </tbody>
         </table>
     )
