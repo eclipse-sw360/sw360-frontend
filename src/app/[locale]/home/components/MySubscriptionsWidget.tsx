@@ -140,7 +140,7 @@ function MySubscriptionsWidget(): ReactNode {
                             </ul>
                         </>
                     )}
-                    {releaseData.length === 0 && componentData.length === 0 && (
+                    {releaseData.length === 0 && componentData.length === 0 && loading === false && (
                         <>
                             <div className='subscriptionBox'>{t('No subscriptions available')}</div>
                         </>

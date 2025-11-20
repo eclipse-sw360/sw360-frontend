@@ -197,6 +197,10 @@ export default function VendorTable({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

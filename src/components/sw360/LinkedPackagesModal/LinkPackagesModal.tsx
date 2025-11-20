@@ -205,6 +205,10 @@ export default function LinkPackagesModal({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleSearch = async (signal?: AbortSignal) => {

@@ -460,16 +460,12 @@ export default function ProposedChanges({
         data: memoizedAddedAttachmentsData,
         columns: addedAttachmentsColumns,
         getCoreRowModel: getCoreRowModel(),
-
-        getPaginationRowModel: getPaginationRowModel(),
     })
 
     const removedAttachmentTable = useReactTable({
         data: memoizedRemovedAttachmentsData,
         columns: removedAttachmentsColumns,
         getCoreRowModel: getCoreRowModel(),
-
-        getPaginationRowModel: getPaginationRowModel(),
     })
 
     return (
@@ -488,14 +484,10 @@ export default function ProposedChanges({
                             <TableHeader title={dafaultTitle} />
                             <div className='mb-3'>
                                 {table ? (
-                                    <>
-                                        <ClientSidePageSizeSelector table={table} />
-                                        <SW360Table
-                                            table={table}
-                                            showProcessing={showProcessing}
-                                        />
-                                        <ClientSideTableFooter table={table} />
-                                    </>
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing}
+                                    />
                                 ) : (
                                     <div className='col-12 mt-1 text-center'>
                                         <Spinner className='spinner' />
@@ -509,14 +501,10 @@ export default function ProposedChanges({
                                 <>
                                     <div className='mb-3'>
                                         {addedAttachmentTable ? (
-                                            <>
-                                                <ClientSidePageSizeSelector table={addedAttachmentTable} />
-                                                <SW360Table
-                                                    table={addedAttachmentTable}
-                                                    showProcessing={showProcessing}
-                                                />
-                                                <ClientSideTableFooter table={addedAttachmentTable} />
-                                            </>
+                                            <SW360Table
+                                                table={addedAttachmentTable}
+                                                showProcessing={showProcessing}
+                                            />
                                         ) : (
                                             <div className='col-12 mt-1 text-center'>
                                                 <Spinner className='spinner' />
@@ -525,14 +513,10 @@ export default function ProposedChanges({
                                     </div>
                                     <div className='mb-3'>
                                         {removedAttachmentTable ? (
-                                            <>
-                                                <ClientSidePageSizeSelector table={removedAttachmentTable} />
-                                                <SW360Table
-                                                    table={removedAttachmentTable}
-                                                    showProcessing={showProcessing}
-                                                />
-                                                <ClientSideTableFooter table={removedAttachmentTable} />
-                                            </>
+                                            <SW360Table
+                                                table={removedAttachmentTable}
+                                                showProcessing={showProcessing}
+                                            />
                                         ) : (
                                             <div className='col-12 mt-1 text-center'>
                                                 <Spinner className='spinner' />

@@ -217,6 +217,10 @@ export default function LinkedReleasesModal({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleSearch = async (signal?: AbortSignal) => {

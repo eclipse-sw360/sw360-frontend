@@ -319,6 +319,10 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

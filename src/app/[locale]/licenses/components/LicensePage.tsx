@@ -236,6 +236,10 @@ function LicensePage(): ReactNode {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const headerButtons = {

@@ -391,6 +391,10 @@ export default function UserAdminstration(): JSX.Element {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const advancedSearch = [

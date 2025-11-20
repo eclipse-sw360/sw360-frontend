@@ -348,6 +348,10 @@ function Vulnerabilities(): ReactNode {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

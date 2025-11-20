@@ -387,6 +387,10 @@ export default function LicenseDbObligationsModal({
             }
             return row.depth === 0
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     table.getRowModel().rows.forEach((row) => {

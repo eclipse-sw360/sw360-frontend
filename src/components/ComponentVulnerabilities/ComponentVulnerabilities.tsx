@@ -227,6 +227,10 @@ const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
         getCoreRowModel: getCoreRowModel(),
 
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

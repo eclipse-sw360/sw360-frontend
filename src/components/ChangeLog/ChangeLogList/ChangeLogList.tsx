@@ -152,6 +152,10 @@ const ChangeLogList = ({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

@@ -213,6 +213,10 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleDeleteProject = (id: string) => {

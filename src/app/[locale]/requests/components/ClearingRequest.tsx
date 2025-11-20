@@ -390,6 +390,10 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
         getCoreRowModel: getCoreRowModel(),
 
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (
