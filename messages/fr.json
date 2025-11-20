@@ -1345,6 +1345,7 @@
     "The following duplicate identifiers were found": "Les identifiants en double suivants ont été trouvés.",
     "The license type cannot be deleted": "Le type de licence <strong> {name} </strong> ne peut pas être supprimé, car il est utilisé dans <strong> {UsageCount} </strong> licence (s). \nVeuillez d'abord révoquer la licence.",
     "The new Component and new Release will be created, do you want to import?": "Le nouveau composant et la nouvelle version seront créés, voulez-vous importer?",
+    "The Package cannot be deleted, Since it is used by other project Please unlink it before deleting": "Le paquet ne peut pas être supprimé car il est utilisé par un autre projet. Veuillez le dissocier avant de le supprimer.",
     "The project cannot be deleted": "Le projet ne peut pas être supprimé, car il est utilisé par un autre projet!",
     "The projects have been successfully linked to project": "Les projets ont été liés avec succès au projet",
     "The release has been successfully linked to project": "La libération <strong>{releaseName}</strong> a été lié avec succès au projet <strong>{nom du projet}</strong>",
