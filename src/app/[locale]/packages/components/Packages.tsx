@@ -414,6 +414,10 @@ function Packages(): ReactNode {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const advancedSearch = [

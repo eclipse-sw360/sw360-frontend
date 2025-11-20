@@ -228,6 +228,10 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onColumnFiltersChange: setColumnFilters,
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

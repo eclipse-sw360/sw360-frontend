@@ -458,6 +458,10 @@ function Project(): JSX.Element {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const exportProjectSpreadsheet = async ({ withLinkedRelease }: { withLinkedRelease: boolean }) => {

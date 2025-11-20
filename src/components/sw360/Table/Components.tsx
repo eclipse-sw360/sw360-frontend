@@ -309,7 +309,7 @@ export function SW360Table<K>({
                     {!showProcessing && table.getRowModel().rows.length === 0 && (
                         <tr>
                             <td colSpan={table.getVisibleFlatColumns().length}>
-                                <div className='restrict-row-height text-center'>
+                                <div className='text-center'>
                                     {noRecordsFoundMessage ?? t('No data available in table')}
                                 </div>
                             </td>
@@ -319,7 +319,7 @@ export function SW360Table<K>({
                         row.meta?.isFullSpanRow ? (
                             <tr key={row.id}>
                                 <td colSpan={table.getVisibleLeafColumns().length}>
-                                    <div className='restrict-row-height'>
+                                    <div className={table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''}>
                                         {row.getVisibleCells()?.[0] &&
                                             flexRender(
                                                 row.getVisibleCells()[0].column.columnDef.cell,
@@ -332,7 +332,11 @@ export function SW360Table<K>({
                             <tr key={row.id}>
                                 {row.getVisibleCells().map((cell) => (
                                     <td key={cell.id}>
-                                        <div className='restrict-row-height'>
+                                        <div
+                                            className={
+                                                table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''
+                                            }
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </div>
                                     </td>

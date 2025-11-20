@@ -264,6 +264,10 @@ export default function CompareObligation({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleSearch = async (signal?: AbortSignal) => {

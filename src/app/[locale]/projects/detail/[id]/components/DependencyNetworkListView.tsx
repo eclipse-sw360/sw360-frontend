@@ -436,6 +436,10 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
 
         // client side pagination
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     useEffect(() => {

@@ -586,6 +586,10 @@ export default function ListView({
 
         // client side pagination
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     useEffect(() => {

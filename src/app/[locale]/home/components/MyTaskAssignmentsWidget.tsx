@@ -189,6 +189,10 @@ function MyTaskAssignmentsWidget(): ReactNode {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

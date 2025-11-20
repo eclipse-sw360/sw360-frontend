@@ -250,6 +250,10 @@ export default function ComponentTable({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

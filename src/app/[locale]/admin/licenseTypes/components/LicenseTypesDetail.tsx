@@ -153,6 +153,10 @@ export default function LicenseTypesDetail(): ReactNode {
         getCoreRowModel: getCoreRowModel(),
 
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleAddLicenseType = () => {

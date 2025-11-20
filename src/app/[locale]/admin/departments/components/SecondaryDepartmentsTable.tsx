@@ -146,6 +146,10 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
         getCoreRowModel: getCoreRowModel(),
 
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

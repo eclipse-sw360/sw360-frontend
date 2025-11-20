@@ -190,6 +190,10 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleClickSelectVendor = () => {
