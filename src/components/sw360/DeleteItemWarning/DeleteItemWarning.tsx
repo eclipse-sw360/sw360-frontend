@@ -9,13 +9,13 @@
 
 'use client'
 
-import { AddtionalDataType, RolesType } from '@/object-types'
-import MessageService from '@/services/message.service'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useEffect, type JSX } from 'react'
+import React, { type JSX, useEffect } from 'react'
 import { Modal } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
+import { AddtionalDataType, RolesType } from '@/object-types'
+import MessageService from '@/services/message.service'
 
 interface Input {
     key: string
@@ -47,7 +47,9 @@ const DeleteItemWarning = ({
 
     const deleteItem = () => {
         try {
-            const list: Input[] = [...inputList]
+            const list: Input[] = [
+                ...inputList,
+            ]
             list.splice(index, 1)
             setInputList(list)
             if (setData) {
@@ -83,7 +85,9 @@ const DeleteItemWarning = ({
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'red' }}
+                style={{
+                    color: 'red',
+                }}
             >
                 <Modal.Title>
                     <FaRegQuestionCircle /> {t('Delete Item')} ?

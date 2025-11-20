@@ -10,9 +10,9 @@
 
 'use client'
 
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import React, { JSX, useEffect } from 'react'
 import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
@@ -32,7 +32,9 @@ const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const Clipboard = ({ text }: { text: string }) => {
         return (
@@ -42,7 +44,9 @@ const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element
                         onClick={() => {
                             void navigator.clipboard.writeText(text)
                         }}
-                        style={{ cursor: 'pointer' }}
+                        style={{
+                            cursor: 'pointer',
+                        }}
                     />
                 </span>
             </OverlayTrigger>

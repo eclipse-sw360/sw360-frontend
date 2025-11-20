@@ -8,16 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
-import { ConfigKeys, Configuration } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
 import { getServerSession } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { ReactNode } from 'react'
+import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
+import { ConfigKeys, Configuration } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import DetailOverview from './components/DetailOverview'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const Detail = async (props: Context): Promise<ReactNode> => {

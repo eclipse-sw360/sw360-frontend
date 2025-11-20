@@ -8,12 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import type { JSX } from 'react'
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 
-import type { JSX } from 'react'
-
-const MainlineStates: { [k: string]: string } = {
+const MainlineStates: {
+    [k: string]: string
+} = {
     OPEN: 'mainline_state_open_tooltip',
     MAINLINE: 'mainline_state_mainline_tooltip',
     SPECIFIC: 'mainline_state_specific_tooltip',
@@ -21,7 +22,9 @@ const MainlineStates: { [k: string]: string } = {
     DENIED: 'mainline_state_denied_tooltip',
 }
 
-const ReleaseRelations: { [k: string]: string } = {
+const ReleaseRelations: {
+    [k: string]: string
+} = {
     UNKNOWN: 'release_relation_unknown_tooltip',
     CONTAINED: 'release_relation_contained_tooltip',
     REFERRED: 'release_relation_referred_tooltip',
@@ -35,7 +38,9 @@ const ReleaseRelations: { [k: string]: string } = {
     CODE_SNIPPET: 'release_relation_code_snippest_tooltip',
 }
 
-const EnumValues: { [k: string]: string } = {
+const EnumValues: {
+    [k: string]: string
+} = {
     ...MainlineStates,
     ...ReleaseRelations,
 }

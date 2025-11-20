@@ -8,15 +8,23 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
 import authOptions from '../auth/[...nextauth]/authOptions'
 
 export async function GET(): Promise<NextResponse> {
     const session = await getServerSession(authOptions)
 
     if (!session) {
-        return new NextResponse(JSON.stringify({ status: 'fail', message: 'You are not logged in' }), { status: 401 })
+        return new NextResponse(
+            JSON.stringify({
+                status: 'fail',
+                message: 'You are not logged in',
+            }),
+            {
+                status: 401,
+            },
+        )
     }
 
     return NextResponse.json({

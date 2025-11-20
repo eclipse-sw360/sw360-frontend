@@ -10,9 +10,8 @@
 
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { Table } from 'react-bootstrap'
-
 import type { JSX } from 'react'
+import { Table } from 'react-bootstrap'
 
 const LinkedReleasesTable = ({ children }: { children: React.ReactNode }): JSX.Element => {
     return (
@@ -30,7 +29,11 @@ const TableHeader = () => {
             <tr>
                 <th className='text-capitalize'>{t('Release name')}</th>
                 <th className='text-capitalize'>{t('Release version')}</th>
-                <th style={{ width: '5%' }}>
+                <th
+                    style={{
+                        width: '5%',
+                    }}
+                >
                     <div>
                         <span>{t('Reload Info')}</span> <ShowInfoOnHover text={t('Load default child releases')} />
                     </div>
@@ -88,7 +91,13 @@ const TableHeader = () => {
                     </div>
                 </th>
                 <th>{t('Comments')}</th>
-                <th style={{ width: '5%' }}>{''}</th>
+                <th
+                    style={{
+                        width: '5%',
+                    }}
+                >
+                    {''}
+                </th>
             </tr>
         </thead>
     )

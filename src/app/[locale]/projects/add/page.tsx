@@ -103,7 +103,7 @@ function AddProjects(): JSX.Element {
     ])
 
     useEffect(() => {
-        ; (async () => {
+        ;(async () => {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) {
@@ -162,8 +162,7 @@ function AddProjects(): JSX.Element {
                 const data = (await response.json()) as Project
                 MessageService.success(t('Your project is created'))
                 router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
-            }
-            else if (response.status === StatusCodes.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 const body = await response.json().catch(() => ({}))
                 const msg = body?.message ?? t('SW360 project already exists')
                 MessageService.error(`${msg}`)
@@ -177,7 +176,7 @@ function AddProjects(): JSX.Element {
                 try {
                     const body = await res.json()
                     msg = body?.message ?? msg
-                } catch { }
+                } catch {}
                 MessageService.error(`${msg}`)
                 return
             }

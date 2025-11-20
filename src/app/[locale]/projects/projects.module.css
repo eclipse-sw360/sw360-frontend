@@ -1,17 +1,17 @@
 .modal-body-first {
     border: 3px dashed #ddd;
     padding: 30px;
-  }
-  
-  .modal-body-second {
+}
+
+.modal-body-second {
     text-align: center;
-  }
-  
-  .input {
+}
+
+.input {
     display: none;
-  }
-  
-  .button-browse {
+}
+
+.button-browse {
     border-radius: 0.25rem;
     border-style: solid;
     border-color: #cdced9;
@@ -20,4 +20,4 @@
     padding-left: 0.9375rem;
     padding-right: 0.9375rem;
     padding-top: 0.4375rem;
-  }
+}

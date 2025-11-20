@@ -9,7 +9,7 @@
 
 'use client'
 
-import { useState, type JSX } from 'react'
+import { type JSX, useState } from 'react'
 import { Badge, Stack } from 'react-bootstrap'
 import CloseButton from 'react-bootstrap/CloseButton'
 

@@ -9,7 +9,7 @@
 
 'use client'
 
-import React, { useState, type JSX } from 'react'
+import React, { type JSX, useState } from 'react'
 import { Vendor } from './Vendor'
 
 interface Props {

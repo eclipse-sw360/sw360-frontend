@@ -9,10 +9,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect } from 'react'
+import { InputKeyValue } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     dataPackageSupplier: InputKeyValue
@@ -35,7 +35,9 @@ function PackageSupplier({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
@@ -79,8 +81,19 @@ function PackageSupplier({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>7.5 Package supplier</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             type='radio'
@@ -91,7 +104,10 @@ function PackageSupplier({
                         />
                         <select
                             id='supplierType'
-                            style={{ flex: 2, marginRight: '1rem' }}
+                            style={{
+                                flex: 2,
+                                marginRight: '1rem',
+                            }}
                             className='form-control form-select'
                             disabled={!isPackageSupplier}
                             value={dataPackageSupplier.key}
@@ -103,7 +119,10 @@ function PackageSupplier({
                         </select>
                         <input
                             disabled={!isPackageSupplier}
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='supplierValue'
                             className='form-control'
                             type='text'
@@ -113,7 +132,11 @@ function PackageSupplier({
                             value={dataPackageSupplier.value}
                         />
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio lableSPDX'
                             id='supplierNoAssertion'

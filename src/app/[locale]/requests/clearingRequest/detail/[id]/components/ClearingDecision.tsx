@@ -9,11 +9,11 @@
 
 'use client'
 
-import { ClearingRequestDetails } from '@/object-types'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { ReactNode, useEffect } from 'react'
+import { ClearingRequestDetails } from '@/object-types'
 
 interface ClearingRequestDataMap {
     [key: string]: string
@@ -31,7 +31,9 @@ export default function ClearingDecision({ data }: Readonly<Props>): ReactNode |
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const clearingRequestStatus: ClearingRequestDataMap = {
         NEW: t('New'),
@@ -124,11 +126,17 @@ export default function ClearingDecision({ data }: Readonly<Props>): ReactNode |
                                                   aria-valuenow={percentage}
                                                   aria-valuemin={0}
                                                   aria-valuemax={100}
-                                                  style={{ width: `${percentage}%` }}
+                                                  style={{
+                                                      width: `${percentage}%`,
+                                                  }}
                                               ></div>
                                               <span
                                                   className='position-absolute w-100 text-center'
-                                                  style={{ color: 'black', fontWeight: 'bold', left: 0 }}
+                                                  style={{
+                                                      color: 'black',
+                                                      fontWeight: 'bold',
+                                                      left: 0,
+                                                  }}
                                               >
                                                   {percentage.toFixed(2)}%
                                               </span>

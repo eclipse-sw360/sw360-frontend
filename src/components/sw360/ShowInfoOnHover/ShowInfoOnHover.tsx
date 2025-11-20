@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ReactNode, type JSX } from 'react'
+import { type JSX, ReactNode } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 

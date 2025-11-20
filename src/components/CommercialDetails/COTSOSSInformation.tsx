@@ -9,10 +9,9 @@
 // License-Filename: LICENSE
 
 'use client'
-import { Release } from '@/object-types'
 import { useTranslations } from 'next-intl'
-
 import type { JSX } from 'react'
+import { Release } from '@/object-types'
 
 interface Props {
     releasePayload: Release
@@ -46,7 +45,9 @@ const COTSOSSInformation = ({ releasePayload, setReleasePayload }: Props): JSX.E
         <>
             <div
                 className='col'
-                style={{ padding: '0px 12px' }}
+                style={{
+                    padding: '0px 12px',
+                }}
             >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>

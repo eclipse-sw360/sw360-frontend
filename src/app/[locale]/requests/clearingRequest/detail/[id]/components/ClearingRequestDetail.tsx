@@ -112,146 +112,145 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             <div className='ms-5 mt-2'>
                 <Tab.Container>
                     <Row>
-                        {
-                            clearingRequestData ? (
-                                <>
-                                    <Row>
-                                        <Col
-                                            lg={12}
-                                            className='text-truncate buttonheader-title me-3'
-                                        >
-                                            {clearingRequestData && `${clearingRequestData.id}`}
+                        {clearingRequestData ? (
+                            <>
+                                <Row>
+                                    <Col
+                                        lg={12}
+                                        className='text-truncate buttonheader-title me-3'
+                                    >
+                                        {clearingRequestData && `${clearingRequestData.id}`}
+                                    </Col>
+                                </Row>
+                                <Col className='ps-2 me-3 mt-3'>
+                                    <Row className='d-flex justify-content-between'>
+                                        <Col lg={6}>
+                                            <Row>
+                                                <Button
+                                                    variant='btn btn-primary'
+                                                    className='me-2 col-auto'
+                                                    onClick={() => {
+                                                        if (isReopenClosedCR) {
+                                                            setShowReopenClearingRequestModal(true)
+                                                        } else {
+                                                            handleEditClearingRequest(clearingRequestData?.id)
+                                                        }
+                                                    }}
+                                                    hidden={isProjectDeleted}
+                                                >
+                                                    {isReopenClosedCR ? t('Reopen Request') : t('Edit Request')}
+                                                </Button>
+                                            </Row>
                                         </Col>
                                     </Row>
-                                    <Col className='ps-2 me-3 mt-3'>
-                                        <Row className='d-flex justify-content-between'>
-                                            <Col lg={6}>
-                                                <Row>
-                                                    <Button
-                                                        variant='btn btn-primary'
-                                                        className='me-2 col-auto'
-                                                        onClick={() => {
-                                                            if (isReopenClosedCR) {
-                                                                setShowReopenClearingRequestModal(true)
-                                                            } else {
-                                                                handleEditClearingRequest(clearingRequestData?.id)
-                                                            }
-                                                        }}
-                                                        hidden={isProjectDeleted}
-                                                    >
-                                                        {isReopenClosedCR ? t('Reopen Request') : t('Edit Request')}
-                                                    </Button>
-                                                </Row>
-                                            </Col>
-                                        </Row>
-                                        <Row className='mt-3'>
-                                            <Card className={`${styles['card']}`}>
-                                                <div
-                                                    onClick={() => toggleCollapse(0)}
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        padding: '0',
-                                                    }}
-                                                >
-                                                    <Card.Header
-                                                        className={`
+                                    <Row className='mt-3'>
+                                        <Card className={`${styles['card']}`}>
+                                            <div
+                                                onClick={() => toggleCollapse(0)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    padding: '0',
+                                                }}
+                                            >
+                                                <Card.Header
+                                                    className={`
                                                         ${openCardIndex === 0 ? styles['cardHeader-expanded'] : ''}`}
-                                                        id={`${styles['cardHeader']}`}
+                                                    id={`${styles['cardHeader']}`}
+                                                >
+                                                    <Button
+                                                        variant='button'
+                                                        className={`p-0 border-0 ${styles['header-button']}`}
+                                                        aria-controls='example-collapse-text-1'
+                                                        aria-expanded={openCardIndex === 0}
                                                     >
-                                                        <Button
-                                                            variant='button'
-                                                            className={`p-0 border-0 ${styles['header-button']}`}
-                                                            aria-controls='example-collapse-text-1'
-                                                            aria-expanded={openCardIndex === 0}
-                                                        >
-                                                            <div>
-                                                                <ShowInfoOnHover text={''} />{' '}
-                                                                {isProjectDeleted ? (
-                                                                    t('Clearing Request Information For DELETED Project')
-                                                                ) : (
-                                                                    <>
-                                                                        {t('Clearing Request Information For Project') + ` `}
-                                                                        {clearingRequestData?._embedded !== undefined && (
-                                                                            <Link
-                                                                                href={`/projects/detail/${clearingRequestData.projectId}`}
-                                                                                className='text-link'
-                                                                            >
-                                                                                {`${clearingRequestData._embedded['sw360:project']?.name ?? ''}(${clearingRequestData._embedded['sw360:project']?.version ?? ''})`}
-                                                                            </Link>
-                                                                        )}
-                                                                    </>
+                                                        <div>
+                                                            <ShowInfoOnHover text={''} />{' '}
+                                                            {isProjectDeleted ? (
+                                                                t('Clearing Request Information For DELETED Project')
+                                                            ) : (
+                                                                <>
+                                                                    {t('Clearing Request Information For Project') +
+                                                                        ` `}
+                                                                    {clearingRequestData?._embedded !== undefined && (
+                                                                        <Link
+                                                                            href={`/projects/detail/${clearingRequestData.projectId}`}
+                                                                            className='text-link'
+                                                                        >
+                                                                            {`${clearingRequestData._embedded['sw360:project']?.name ?? ''}(${clearingRequestData._embedded['sw360:project']?.version ?? ''})`}
+                                                                        </Link>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </Button>
+                                                </Card.Header>
+                                            </div>
+                                            <Collapse in={openCardIndex === 0}>
+                                                <div id='example-collapse-text-1'>
+                                                    <Card.Body className={`${styles['card-body']}`}>
+                                                        <div className='row'>
+                                                            <div className='col'>
+                                                                <ClearingRequestInfo data={clearingRequestData} />
+                                                            </div>
+                                                            <div className='col'>
+                                                                <ClearingDecision data={clearingRequestData} />
+                                                            </div>
+                                                        </div>
+                                                    </Card.Body>
+                                                </div>
+                                            </Collapse>
+                                        </Card>
+                                    </Row>
+                                    <Row>
+                                        <Card className={`${styles['card']}`}>
+                                            <div
+                                                onClick={() => toggleCollapse(1)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    padding: '0',
+                                                }}
+                                            >
+                                                <Card.Header
+                                                    className={`
+                                                        ${openCardIndex === 1 ? styles['cardHeader-expanded'] : ''}`}
+                                                    id={`${styles['cardHeader']}`}
+                                                >
+                                                    <Button
+                                                        variant='button'
+                                                        className={`p-0 border-0 ${styles['header-button']}`}
+                                                        aria-controls='example-collapse-text-2'
+                                                        aria-expanded={openCardIndex === 1}
+                                                    >
+                                                        {t('Clearing Request Comments') +
+                                                            ' ' +
+                                                            `(${clearingRequestData?.comments?.length ?? 0})`}
+                                                    </Button>
+                                                </Card.Header>
+                                            </div>
+                                            <Collapse in={openCardIndex === 1}>
+                                                <div id='example-collapse-text-2'>
+                                                    <Card.Body className={`${styles['card-body']}`}>
+                                                        <div>
+                                                            <div className='col'>
+                                                                {openCardIndex === 1 && (
+                                                                    <ClearingComments
+                                                                        clearingRequestId={clearingRequestData?.id}
+                                                                    />
                                                                 )}
                                                             </div>
-                                                        </Button>
-                                                    </Card.Header>
+                                                        </div>
+                                                    </Card.Body>
                                                 </div>
-                                                <Collapse in={openCardIndex === 0}>
-                                                    <div id='example-collapse-text-1'>
-                                                        <Card.Body className={`${styles['card-body']}`}>
-                                                            <div className='row'>
-                                                                <div className='col'>
-                                                                    <ClearingRequestInfo data={clearingRequestData} />
-                                                                </div>
-                                                                <div className='col'>
-                                                                    <ClearingDecision data={clearingRequestData} />
-                                                                </div>
-                                                            </div>
-                                                        </Card.Body>
-                                                    </div>
-                                                </Collapse>
-                                            </Card>
-                                        </Row>
-                                        <Row>
-                                            <Card className={`${styles['card']}`}>
-                                                <div
-                                                    onClick={() => toggleCollapse(1)}
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        padding: '0',
-                                                    }}
-                                                >
-                                                    <Card.Header
-                                                        className={`
-                                                        ${openCardIndex === 1 ? styles['cardHeader-expanded'] : ''}`}
-                                                        id={`${styles['cardHeader']}`}
-                                                    >
-                                                        <Button
-                                                            variant='button'
-                                                            className={`p-0 border-0 ${styles['header-button']}`}
-                                                            aria-controls='example-collapse-text-2'
-                                                            aria-expanded={openCardIndex === 1}
-                                                        >
-                                                            {t('Clearing Request Comments') +
-                                                                ' ' +
-                                                                `(${clearingRequestData?.comments?.length ?? 0})`}
-                                                        </Button>
-                                                    </Card.Header>
-                                                </div>
-                                                <Collapse in={openCardIndex === 1}>
-                                                    <div id='example-collapse-text-2'>
-                                                        <Card.Body className={`${styles['card-body']}`}>
-                                                            <div>
-                                                                <div className='col'>
-                                                                    {openCardIndex === 1 && (
-                                                                        <ClearingComments
-                                                                            clearingRequestId={clearingRequestData?.id}
-                                                                        />
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </Card.Body>
-                                                    </div>
-                                                </Collapse>
-                                            </Card>
-                                        </Row>
-                                    </Col>
-                                </>
-                            ) : (
-                                <div className='col-12 mt-1 text-center'>
-                                    <Spinner className='spinner' />
-                                </div>
-                            )
-                        }
+                                            </Collapse>
+                                        </Card>
+                                    </Row>
+                                </Col>
+                            </>
+                        ) : (
+                            <div className='col-12 mt-1 text-center'>
+                                <Spinner className='spinner' />
+                            </div>
+                        )}
                     </Row>
                 </Tab.Container>
             </div>

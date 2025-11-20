@@ -9,13 +9,13 @@
 
 'use client'
 
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
-import { CommonUtils } from '@/utils'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
+import styles from '@/app/[locale]/requests/requestDetail.module.css'
+import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails | undefined
@@ -36,13 +36,17 @@ export default function EditClearingRequestInfo({
     const { data: session, status } = useSession()
     const [, setMinDate] = useState('')
     const [dialogOpenRequestingUser, setDialogOpenRequestingUser] = useState(false)
-    const [requestingUserData, setRequestingUserData] = useState<{ [k: string]: string }>({})
+    const [requestingUserData, setRequestingUserData] = useState<{
+        [k: string]: string
+    }>({})
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         const currentDate = new Date()

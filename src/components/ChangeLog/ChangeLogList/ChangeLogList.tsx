@@ -9,14 +9,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useMemo, type JSX } from 'react'
-import { FaFileAlt } from 'react-icons/fa'
-
-import { Changelogs, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { Dispatch, type JSX, SetStateAction, useMemo } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaFileAlt } from 'react-icons/fa'
+import { Changelogs, PageableQueryParam, PaginationMeta } from '@/object-types'
 
 interface Props {
     documentId: string
@@ -97,7 +96,10 @@ const ChangeLogList = ({
                                 <OverlayTrigger overlay={<Tooltip>{t('View Change Logs')}</Tooltip>}>
                                     <div className='cursor-pointer'>
                                         <FaFileAlt
-                                            style={{ color: '#F7941E', fontSize: '18px' }}
+                                            style={{
+                                                color: '#F7941E',
+                                                fontSize: '18px',
+                                            }}
                                             onClick={() => {
                                                 setChangeLogId(id)
                                                 setChangesLogTab('view-log')
@@ -114,7 +116,9 @@ const ChangeLogList = ({
                 },
             },
         ],
-        [t],
+        [
+            t,
+        ],
     )
 
     const table = useReactTable({

@@ -9,8 +9,8 @@
 // License-Filename: LICENSE
 
 'use client'
-import { OtherLicensingInformationDetected, SPDXDocument } from '@/object-types'
 import { ReactNode, useState } from 'react'
+import { OtherLicensingInformationDetected, SPDXDocument } from '@/object-types'
 
 interface Props {
     spdxDocument?: SPDXDocument
@@ -48,12 +48,18 @@ const OtherLicensingInformationDetectedDetail = ({
             <tbody hidden={!show}>
                 <tr>
                     <td className='spdx-label-index'>Index</td>
-                    <td style={{ height: '50px' }}>
+                    <td
+                        style={{
+                            height: '50px',
+                        }}
+                    >
                         <select
                             id='otherLicensingSelect'
                             className='spdx-col-2'
                             onChange={displayIndex}
-                            style={{ width: '100%' }}
+                            style={{
+                                width: '100%',
+                            }}
                             disabled={spdxDocument?.otherLicensingInformationDetecteds.length == 0}
                         >
                             {spdxDocument?.otherLicensingInformationDetecteds
@@ -87,7 +93,9 @@ const OtherLicensingInformationDetectedDetail = ({
                                     <p
                                         className='spdx-col-2 '
                                         id={`extractedText-${otherLicensingInformationDetecteds[indexOtherLicense].index}`}
-                                        style={{ whiteSpace: 'pre-wrap' }}
+                                        style={{
+                                            whiteSpace: 'pre-wrap',
+                                        }}
                                     >
                                         {otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
                                             .trim()

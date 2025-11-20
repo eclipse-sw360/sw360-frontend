@@ -11,15 +11,16 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { ReactNode } from 'react'
 import { Alert } from 'react-bootstrap'
 import styles from '../preferences.module.css'
-
-import { ReactNode } from 'react'
 import NotificationSettings from './NotificationSettings'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
-    notificationPreferences: { [key: string]: boolean }
+    notificationPreferences: {
+        [key: string]: boolean
+    }
 }
 
 interface Props {

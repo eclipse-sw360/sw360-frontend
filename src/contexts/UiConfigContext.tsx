@@ -8,9 +8,9 @@
 // License-Filename: LICENSE
 
 'use client'
+import { createContext, ReactNode, useContext } from 'react'
 import { useUiConfig } from '@/hooks'
 import { ProcessedUiConfig, UIConfigKeys } from '@/object-types'
-import { createContext, ReactNode, useContext } from 'react'
 
 interface UiConfigContextType {
     config: ProcessedUiConfig | null

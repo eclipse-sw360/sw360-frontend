@@ -12,7 +12,9 @@ import { ReactNode } from 'react'
 import PackageDetailTab from './components/PackageDetailTab'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 export const metadata: Metadata = {

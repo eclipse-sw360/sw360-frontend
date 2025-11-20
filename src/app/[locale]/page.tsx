@@ -9,9 +9,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
-import { AuthScreen } from '@/components/sw360'
 import { ReactNode } from 'react'
+import { AuthScreen } from '@/components/sw360'
 
 export const metadata: Metadata = {
     title: 'Welcome - SW360',

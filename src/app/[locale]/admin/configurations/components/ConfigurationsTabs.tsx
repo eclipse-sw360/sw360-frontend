@@ -9,8 +9,8 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 

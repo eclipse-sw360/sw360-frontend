@@ -11,11 +11,11 @@
 
 'use client'
 
-import { ReleaseClearingStateMapping } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import type { useTranslations } from 'next-intl'
-import { useEffect, type JSX } from 'react'
+import { type JSX, useEffect } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { ReleaseClearingStateMapping } from '@/object-types'
 
 interface Props {
     isRelease: boolean
@@ -40,7 +40,9 @@ function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <div className='text-center'>

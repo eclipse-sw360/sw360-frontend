@@ -10,6 +10,9 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
+import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
+import { FaTrashAlt } from 'react-icons/fa'
 import {
     CheckSum,
     ExternalReference,
@@ -19,9 +22,6 @@ import {
     SPDX,
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { signOut, useSession } from 'next-auth/react'
-import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
 import BuiltDate from './PackageInformation/BuiltDate'
 import CheckSums from './PackageInformation/CheckSums'
 import PackageOriginator from './PackageInformation/PackageOriginator'
@@ -72,7 +72,9 @@ const EditPackageInformation = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handlePackageSupplier = (data: string) => {
         if (data === 'NOASSERTION') {
@@ -186,10 +188,23 @@ const EditPackageInformation = ({
         let type = ''
         if (referenceCategory === 'SECURITY') {
             type = 'cpe22Type'
-            setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
+            setTypeCategory([
+                'cpe22Type',
+                'cpe23Type',
+                'advisory',
+                'fix',
+                'url',
+                'swid',
+            ])
             setIsTypeCateGoryEmpty(false)
         } else if (referenceCategory === 'PACKAGE-MANAGER') {
-            setTypeCategory(['maven-central', 'npm', 'nuget', 'bower', 'purl'])
+            setTypeCategory([
+                'maven-central',
+                'npm',
+                'nuget',
+                'bower',
+                'purl',
+            ])
             setIsTypeCateGoryEmpty(false)
             type = 'maven-central'
         } else {
@@ -250,10 +265,23 @@ const EditPackageInformation = ({
         setIndexExternalRefsData(parseInt(index))
         setNumberIndex(parseInt(index))
         if (externalRefsDatas[parseInt(index)].referenceCategory === 'SECURITY') {
-            setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
+            setTypeCategory([
+                'cpe22Type',
+                'cpe23Type',
+                'advisory',
+                'fix',
+                'url',
+                'swid',
+            ])
             setIsTypeCateGoryEmpty(false)
         } else if (externalRefsDatas[parseInt(index)].referenceCategory === 'PACKAGE-MANAGER') {
-            setTypeCategory(['maven-central', 'npm', 'nuget', 'bower', 'purl'])
+            setTypeCategory([
+                'maven-central',
+                'npm',
+                'nuget',
+                'bower',
+                'purl',
+            ])
             setIsTypeCateGoryEmpty(false)
         } else {
             setIsTypeCateGoryEmpty(true)
@@ -262,7 +290,9 @@ const EditPackageInformation = ({
     }
 
     const addReferences = () => {
-        const arrayExternals: ExternalReference[] = [...externalRefsDatas]
+        const arrayExternals: ExternalReference[] = [
+            ...externalRefsDatas,
+        ]
         setIncreIndex(externalRefsDatas.length)
         setNumberIndex(externalRefsDatas.length)
         setIsAdd(true)
@@ -396,10 +426,23 @@ const EditPackageInformation = ({
 
         if (!CommonUtils.isNullEmptyOrUndefinedString(externalRefsDatas[indexExternalRefsData]?.referenceCategory)) {
             if (externalRefsDatas[indexExternalRefsData].referenceCategory === 'SECURITY') {
-                setTypeCategory(['cpe22Type', 'cpe23Type', 'advisory', 'fix', 'url', 'swid'])
+                setTypeCategory([
+                    'cpe22Type',
+                    'cpe23Type',
+                    'advisory',
+                    'fix',
+                    'url',
+                    'swid',
+                ])
                 setIsTypeCateGoryEmpty(false)
             } else if (externalRefsDatas[indexExternalRefsData].referenceCategory === 'PACKAGE-MANAGER') {
-                setTypeCategory(['maven-central', 'npm', 'nuget', 'bower', 'purl'])
+                setTypeCategory([
+                    'maven-central',
+                    'npm',
+                    'nuget',
+                    'bower',
+                    'purl',
+                ])
                 setIsTypeCateGoryEmpty(false)
             } else {
                 setIsTypeCateGoryEmpty(true)
@@ -924,7 +967,11 @@ const EditPackageInformation = ({
                                 >
                                     7.1 Package name
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <input
                                         id='packageName'
                                         className='form-control needs-validation'
@@ -945,7 +992,11 @@ const EditPackageInformation = ({
                                 >
                                     7.2 Package SPDX identifier
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <label className='sub-label'>SPDXRef-</label>
                                     <input
                                         id='packageSPDXId'
@@ -977,7 +1028,11 @@ const EditPackageInformation = ({
                                 >
                                     7.3 Package version
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <input
                                         id='versionInfo'
                                         className='form-control'
@@ -998,7 +1053,11 @@ const EditPackageInformation = ({
                                 >
                                     7.4 Package file name
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <input
                                         id='packageFileName'
                                         className='form-control'
@@ -1039,8 +1098,19 @@ const EditPackageInformation = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>7.7 Package download location</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            flex: 3,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             type='radio'
@@ -1051,7 +1121,10 @@ const EditPackageInformation = ({
                                             checked={packageDownloadLocationExist}
                                         />
                                         <input
-                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            style={{
+                                                flex: 6,
+                                                marginRight: '1rem',
+                                            }}
                                             id='downloadLocation'
                                             className='form-control'
                                             type='text'
@@ -1072,7 +1145,11 @@ const EditPackageInformation = ({
                                             }
                                         />
                                     </div>
-                                    <div style={{ flex: 2 }}>
+                                    <div
+                                        style={{
+                                            flex: 2,
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='downloadLocationNone'
@@ -1083,7 +1160,9 @@ const EditPackageInformation = ({
                                             checked={packageDownloadLocationNone}
                                         />
                                         <label
-                                            style={{ marginRight: '2rem' }}
+                                            style={{
+                                                marginRight: '2rem',
+                                            }}
                                             className='form-check-label radio-label lableSPDX'
                                             htmlFor='packageDownloadLocationNone'
                                         >
@@ -1113,7 +1192,12 @@ const EditPackageInformation = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>7.8 Files analyzed</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
                                     <div>
                                         <input
                                             className='spdx-radio'
@@ -1129,7 +1213,9 @@ const EditPackageInformation = ({
                                             }
                                         />
                                         <label
-                                            style={{ marginRight: '2rem' }}
+                                            style={{
+                                                marginRight: '2rem',
+                                            }}
                                             className='form-check-label radio-label lableSPDX'
                                             htmlFor='FilesAnalyzedTrue'
                                         >
@@ -1172,7 +1258,9 @@ const EditPackageInformation = ({
                                         </label>
                                         <div>
                                             <input
-                                                style={{ marginBottom: '0.75rem' }}
+                                                style={{
+                                                    marginBottom: '0.75rem',
+                                                }}
                                                 className='form-control'
                                                 id='verificationCodeValue'
                                                 name='value'
@@ -1217,7 +1305,11 @@ const EditPackageInformation = ({
                                 <td colSpan={3}>
                                     <div className='form-group'>
                                         <label className='lableSPDX'>7.10 Package checksum</label>
-                                        <div style={{ display: 'flex' }}>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                            }}
+                                        >
                                             <label className='sub-title lableSPDX'>Checksum</label>
                                             <CheckSums
                                                 inputList={checkSums}
@@ -1234,8 +1326,19 @@ const EditPackageInformation = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>7.11 Package home page</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            flex: 3,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='packageHomepageExist'
@@ -1246,7 +1349,10 @@ const EditPackageInformation = ({
                                             checked={packageHomePageExist}
                                         />
                                         <input
-                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            style={{
+                                                flex: 6,
+                                                marginRight: '1rem',
+                                            }}
                                             id='packageHomePage'
                                             className='form-control'
                                             type='text'
@@ -1263,7 +1369,11 @@ const EditPackageInformation = ({
                                             disabled={packageHomePageNone || packageHomePageNoasserttion}
                                         />
                                     </div>
-                                    <div style={{ flex: 2 }}>
+                                    <div
+                                        style={{
+                                            flex: 2,
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='packageHomepageNone'
@@ -1274,7 +1384,9 @@ const EditPackageInformation = ({
                                             checked={packageHomePageNone}
                                         />
                                         <label
-                                            style={{ marginRight: '2rem' }}
+                                            style={{
+                                                marginRight: '2rem',
+                                            }}
                                             className='form-check-label radio-label lableSPDX'
                                             htmlFor='packageHomePageNone'
                                         >
@@ -1329,8 +1441,19 @@ const EditPackageInformation = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>7.13 Concluded license</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            flex: 3,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseConcludedExist'
@@ -1341,7 +1464,10 @@ const EditPackageInformation = ({
                                             checked={concludedLicenseExist}
                                         />
                                         <input
-                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            style={{
+                                                flex: 6,
+                                                marginRight: '1rem',
+                                            }}
                                             id='licenseConcluded'
                                             className='form-control'
                                             type='text'
@@ -1360,7 +1486,11 @@ const EditPackageInformation = ({
                                             disabled={concludedLicenseNone || concludedLicenseNoasserttion}
                                         />
                                     </div>
-                                    <div style={{ flex: 2 }}>
+                                    <div
+                                        style={{
+                                            flex: 2,
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseConcludedNone'
@@ -1371,7 +1501,9 @@ const EditPackageInformation = ({
                                             checked={concludedLicenseNone}
                                         />
                                         <label
-                                            style={{ marginRight: '2rem' }}
+                                            style={{
+                                                marginRight: '2rem',
+                                            }}
                                             className='form-check-label radio-label lableSPDX'
                                             htmlFor='licenseConcludedNone'
                                         >
@@ -1402,8 +1534,19 @@ const EditPackageInformation = ({
                             <td colSpan={3}>
                                 <div className='form-group'>
                                     <label className='lableSPDX'>7.14 All licenses information from files</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: 'inline-flex',
+                                                flex: 3,
+                                                marginRight: '1rem',
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='licenseInfoFromFilesExist'
@@ -1419,7 +1562,10 @@ const EditPackageInformation = ({
                                                 }
                                             />
                                             <textarea
-                                                style={{ flex: 6, marginRight: '1rem' }}
+                                                style={{
+                                                    flex: 6,
+                                                    marginRight: '1rem',
+                                                }}
                                                 id='licenseInfoInFileValue'
                                                 rows={5}
                                                 className='form-control'
@@ -1446,7 +1592,11 @@ const EditPackageInformation = ({
                                                 }
                                             ></textarea>
                                         </div>
-                                        <div style={{ flex: 2 }}>
+                                        <div
+                                            style={{
+                                                flex: 2,
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='licenseInfoInFileNone'
@@ -1462,7 +1612,9 @@ const EditPackageInformation = ({
                                                 }
                                             />
                                             <label
-                                                style={{ marginRight: '2rem' }}
+                                                style={{
+                                                    marginRight: '2rem',
+                                                }}
                                                 className='form-check-label radio-label lableSPDX'
                                                 htmlFor='licenseInfoInFileNone'
                                             >
@@ -1498,8 +1650,19 @@ const EditPackageInformation = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>7.15 Declared license</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            flex: 3,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseDeclaredExist'
@@ -1510,7 +1673,10 @@ const EditPackageInformation = ({
                                             checked={declaredLicenseExist}
                                         />
                                         <input
-                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            style={{
+                                                flex: 6,
+                                                marginRight: '1rem',
+                                            }}
                                             id='licenseDeclared'
                                             className='form-control'
                                             type='text'
@@ -1529,7 +1695,11 @@ const EditPackageInformation = ({
                                             disabled={declaredLicenseNone || declaredLicenseNoasserttion}
                                         />
                                     </div>
-                                    <div style={{ flex: 2 }}>
+                                    <div
+                                        style={{
+                                            flex: 2,
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseDeclaredNone'
@@ -1540,7 +1710,9 @@ const EditPackageInformation = ({
                                             checked={declaredLicenseNone}
                                         />
                                         <label
-                                            style={{ marginRight: '2rem' }}
+                                            style={{
+                                                marginRight: '2rem',
+                                            }}
                                             className='form-check-label radio-label lableSPDX'
                                             htmlFor='licenseDeclaredNone'
                                         >
@@ -1593,8 +1765,19 @@ const EditPackageInformation = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>7.17 Copyright text</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            flex: 3,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='copyrightTextExist'
@@ -1605,7 +1788,10 @@ const EditPackageInformation = ({
                                             checked={copyrightTextExist}
                                         />
                                         <textarea
-                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            style={{
+                                                flex: 6,
+                                                marginRight: '1rem',
+                                            }}
                                             id='copyrightText'
                                             rows={5}
                                             className='form-control'
@@ -1624,7 +1810,11 @@ const EditPackageInformation = ({
                                             disabled={copyrightTextNone || copyrightTextNoasserttion}
                                         ></textarea>
                                     </div>
-                                    <div style={{ flex: 2 }}>
+                                    <div
+                                        style={{
+                                            flex: 2,
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='copyrightTextNone'
@@ -1635,7 +1825,9 @@ const EditPackageInformation = ({
                                             checked={copyrightTextNone}
                                         />
                                         <label
-                                            style={{ marginRight: '2rem' }}
+                                            style={{
+                                                marginRight: '2rem',
+                                            }}
                                             className='form-check-label radio-label lableSPDX'
                                             htmlFor='copyrightTextNone'
                                         >
@@ -1810,7 +2002,10 @@ const EditPackageInformation = ({
                                                     >
                                                         <label className='sub-title lableSPDX'>Category</label>
                                                         <select
-                                                            style={{ width: 'auto', flex: 'auto' }}
+                                                            style={{
+                                                                width: 'auto',
+                                                                flex: 'auto',
+                                                            }}
                                                             id='referenceCategory'
                                                             className='form-control form-select'
                                                             name='referenceCategory'
@@ -1859,7 +2054,10 @@ const EditPackageInformation = ({
                                                             />
                                                         ) : (
                                                             <select
-                                                                style={{ width: 'auto', flex: 'auto' }}
+                                                                style={{
+                                                                    width: 'auto',
+                                                                    flex: 'auto',
+                                                                }}
                                                                 id='referenceType-1'
                                                                 className='form-control form-select'
                                                                 name='referenceType'
@@ -1892,7 +2090,10 @@ const EditPackageInformation = ({
                                                     >
                                                         <label className='sub-title lableSPDX'>Locator</label>
                                                         <input
-                                                            style={{ width: 'auto', flex: 'auto' }}
+                                                            style={{
+                                                                width: 'auto',
+                                                                flex: 'auto',
+                                                            }}
                                                             type='text'
                                                             className='form-control'
                                                             id='externalReferencesLocator'
@@ -1908,10 +2109,18 @@ const EditPackageInformation = ({
                                                             )}
                                                         />
                                                     </div>
-                                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            flexDirection: 'row',
+                                                        }}
+                                                    >
                                                         <label className='sub-title lableSPDX'>7.22 Comment</label>
                                                         <textarea
-                                                            style={{ width: 'auto', flex: 'auto' }}
+                                                            style={{
+                                                                width: 'auto',
+                                                                flex: 'auto',
+                                                            }}
                                                             rows={5}
                                                             className='form-control'
                                                             id='externalReferencesComment'

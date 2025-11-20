@@ -10,9 +10,9 @@
 
 'use client'
 
-import CommonUtils from '@/utils/common.utils'
 import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode } from 'react'
+import CommonUtils from '@/utils/common.utils'
 import LicenseDetailOverview from './components/LicenseDetailOverview'
 
 const Detail = (): ReactNode => {

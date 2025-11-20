@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { DocumentTypes, ReleaseDetail } from '@/object-types'
-import { ReactNode } from 'react'
 import ReleaseGeneral from './ReleaseGeneral'
 import ReleaseVendor from './ReleaseVendor'
 

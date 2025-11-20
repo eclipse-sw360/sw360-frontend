@@ -38,7 +38,9 @@ function PageButtonHeader({
                     <button
                         key={key}
                         className={`btn btn-${value.type}`}
-                        style={{ marginRight: '10px' }}
+                        style={{
+                            marginRight: '10px',
+                        }}
                         disabled
                     >
                         {value.name}
@@ -55,7 +57,9 @@ function PageButtonHeader({
                     <button
                         key={key}
                         className={`btn btn-${value['type']}`}
-                        style={{ marginRight: '10px' }}
+                        style={{
+                            marginRight: '10px',
+                        }}
                         onClick={value.onClick}
                     >
                         {value.name}
@@ -69,7 +73,9 @@ function PageButtonHeader({
     return (
         <div
             className={`row ${styles['buttonheader-toolbar']}`}
-            style={{ display: 'flex' }}
+            style={{
+                display: 'flex',
+            }}
         >
             <div className='col-auto'>
                 <div
@@ -108,7 +114,9 @@ function PageButtonHeader({
                         className='nav nav-pills justify-content-center bg-light font-weight-bold'
                         id='pills-tab'
                         role='tablist'
-                        style={{ marginRight: '0px' }}
+                        style={{
+                            marginRight: '0px',
+                        }}
                     >
                         <div>
                             <a

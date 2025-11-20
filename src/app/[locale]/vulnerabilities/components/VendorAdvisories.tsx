@@ -9,12 +9,11 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
-
 import { VendorAdvisory, Vulnerability } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 
 function AddVendorAdvisory({
     payload,
@@ -30,11 +29,23 @@ function AddVendorAdvisory({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const addAdvisory = () => {
         setPayload((prev: Vulnerability) => {
-            return { ...prev, vendorAdvisories: [...(prev.vendorAdvisories ?? []), { vendor: '', name: '', url: '' }] }
+            return {
+                ...prev,
+                vendorAdvisories: [
+                    ...(prev.vendorAdvisories ?? []),
+                    {
+                        vendor: '',
+                        name: '',
+                        url: '',
+                    },
+                ],
+            }
         })
     }
 
@@ -45,7 +56,10 @@ function AddVendorAdvisory({
         setPayload((prev: Vulnerability) => {
             const refs = prev.vendorAdvisories ?? []
             refs[i][e.target.name as keyof VendorAdvisory] = e.target.value
-            return { ...prev, vendorAdvisories: refs }
+            return {
+                ...prev,
+                vendorAdvisories: refs,
+            }
         })
     }
 
@@ -53,7 +67,10 @@ function AddVendorAdvisory({
         setPayload((prev: Vulnerability) => {
             const refs = (prev.vendorAdvisories ?? []).slice()
             refs.splice(i, 1)
-            return { ...prev, vendorAdvisories: refs }
+            return {
+                ...prev,
+                vendorAdvisories: refs,
+            }
         })
     }
 
@@ -76,7 +93,9 @@ function AddVendorAdvisory({
                                 {t('Advisory Vendor')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -102,7 +121,9 @@ function AddVendorAdvisory({
                                 {t('Advisory Name')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -128,7 +149,9 @@ function AddVendorAdvisory({
                                 {t('Advisory Url')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>

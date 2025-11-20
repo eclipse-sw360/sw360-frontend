@@ -8,9 +8,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import FossologyOverview from './components/FossologyOverview'
-
 import type { JSX } from 'react'
+import FossologyOverview from './components/FossologyOverview'
 
 export const metadata: Metadata = {
     title: 'Admin - Fossology',

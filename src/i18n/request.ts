@@ -19,6 +19,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
     return {
         locale,
-        messages: ((await import(`../../messages/${locale}.json`)) as { default: Record<string, string> }).default,
+        messages: (
+            (await import(`../../messages/${locale}.json`)) as {
+                default: Record<string, string>
+            }
+        ).default,
     }
 })

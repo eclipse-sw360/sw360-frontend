@@ -56,8 +56,19 @@ function SnippetCopyrightText({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>9.8 Snippet copyright text</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='snippetCopyrightText'
@@ -68,7 +79,10 @@ function SnippetCopyrightText({
                             checked={snippetCopyrightTextExist}
                         />
                         <textarea
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='copyrightTextValueSnippet'
                             rows={5}
                             className='form-control'
@@ -79,7 +93,11 @@ function SnippetCopyrightText({
                             disabled={snippetCopyrightTextNone || snippetCopyrightTextNoasserttion}
                         ></textarea>
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='snippetCopyrightTextNone'
@@ -90,7 +108,9 @@ function SnippetCopyrightText({
                             checked={snippetCopyrightTextNone}
                         />
                         <label
-                            style={{ marginRight: '2rem' }}
+                            style={{
+                                marginRight: '2rem',
+                            }}
                             className='form-check-label radio-label lableSPDX'
                             htmlFor='snippetCopyrightTextNone'
                         >

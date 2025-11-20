@@ -11,12 +11,11 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState, type JSX } from 'react'
-
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
 import styles from './LinkedReases.module.css'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
@@ -44,7 +43,9 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const setReleaseIdToRelationshipsToReleasePayLoad = (releaseIdToRelationships: Map<string, string>) => {
         const obj = Object.fromEntries(releaseIdToRelationships)
@@ -61,17 +62,24 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:releaseLinks'])
             ) {
                 const linkedReleases: ReleaseLink[] = []
-                release['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [linkedReleases.push(item)])
+                release['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
+                    linkedReleases.push(item),
+                ])
                 setReleaseLinks(linkedReleases)
             }
         }
-    }, [actionType, release])
+    }, [
+        actionType,
+        release,
+    ])
 
     return (
         <>
             <div
                 className='col'
-                style={{ fontSize: '0.875rem' }}
+                style={{
+                    fontSize: '0.875rem',
+                }}
             >
                 <LinkedReleasesDialog
                     show={linkedReleasesDiaglog}
@@ -84,7 +92,11 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 />
                 <div
                     className={`row ${styles['attachment-table']}`}
-                    style={{ padding: '25px', fontSize: '0.875rem', paddingTop: '1px' }}
+                    style={{
+                        padding: '25px',
+                        fontSize: '0.875rem',
+                        paddingTop: '1px',
+                    }}
                 >
                     <TitleLinkedReleases />
                     <TableLinkedReleases

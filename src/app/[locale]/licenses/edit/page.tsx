@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 'use client'
-import { CommonUtils } from '@/utils'
 import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode } from 'react'
+import { CommonUtils } from '@/utils'
 import EditLicense from './components/EditLicense'
 
 const LicenseEditPage = (): ReactNode => {

@@ -1,24 +1,24 @@
 .expand:before {
-  content: "▼";
+    content: '▼';
 }
 
 .collapse:before {
-  content: "►";
+    content: '►';
 }
 
 .expand:hover {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .collapse:hover {
-  cursor: pointer;
+    cursor: pointer;
 }
 
-.attachment-table table:first-child tr td:first-child div{
-  text-align: center;
+.attachment-table table:first-child tr td:first-child div {
+    text-align: center;
 }
 
 .download-btn:hover {
-  color: #f7941e;
-  cursor: pointer;
+    color: #f7941e;
+    cursor: pointer;
 }

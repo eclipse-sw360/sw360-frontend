@@ -11,7 +11,14 @@
 
 import { type JSX } from 'react'
 
-export function DisplayMap({ mapElement }: { mapElement: [string, string][] }): JSX.Element {
+export function DisplayMap({
+    mapElement,
+}: {
+    mapElement: [
+        string,
+        string,
+    ][]
+}): JSX.Element {
     return (
         <>
             <ul className='px-3 mapDisplayRootItem'>

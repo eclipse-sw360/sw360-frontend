@@ -39,8 +39,19 @@ function OtherLicenseName({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>10.3 License name</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseNameExist'
@@ -51,7 +62,10 @@ function OtherLicenseName({
                             checked={isLicenseName}
                         />
                         <input
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='licenseName'
                             className='form-control needs-validation'
                             type='text'
@@ -62,7 +76,11 @@ function OtherLicenseName({
                             disabled={!isLicenseName}
                         />
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseNameNoAssertion'

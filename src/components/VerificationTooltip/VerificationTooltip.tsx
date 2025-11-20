@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { type JSX, ReactNode, useState } from 'react'
 import { VerificationStateInfo } from '@/object-types'
-import { ReactNode, useState, type JSX } from 'react'
 import styles from './VerificationTooltip.module.css'
 
 interface Props {

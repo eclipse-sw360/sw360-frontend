@@ -8,12 +8,12 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import type { JSX } from 'react'
 import { ProjectPayload } from '@/object-types'
 import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
-
-import type { JSX } from 'react'
 
 interface Props {
     projectId?: string

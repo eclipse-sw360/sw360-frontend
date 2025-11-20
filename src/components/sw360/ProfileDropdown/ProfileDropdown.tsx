@@ -12,7 +12,7 @@
 
 import { signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { Image, NavDropdown } from 'react-bootstrap'
 
 import sw360ProfileIcon from '@/assets/images/profile.svg'
@@ -30,7 +30,10 @@ function ProfileDropdown(): JSX.Element {
         } else {
             setProfileImage(sw360ProfileIcon?.src as string)
         }
-    }, [gravatarImage, useGravatar])
+    }, [
+        gravatarImage,
+        useGravatar,
+    ])
 
     return (
         <NavDropdown
@@ -50,7 +53,11 @@ function ProfileDropdown(): JSX.Element {
             <NavDropdown.Divider />
             <NavDropdown.Item
                 href=''
-                onClick={() => void signOut({ callbackUrl: '/' })}
+                onClick={() =>
+                    void signOut({
+                        callbackUrl: '/',
+                    })
+                }
             >
                 {t('Logout')}
             </NavDropdown.Item>

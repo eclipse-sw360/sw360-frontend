@@ -8,15 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import React, { useState, type JSX } from 'react'
-
 import { useTranslations } from 'next-intl'
-import { FaTrashAlt } from 'react-icons/fa'
-
-import { AttachmentTypes } from '@/object-types'
+import React, { type JSX, useState } from 'react'
 import { Modal } from 'react-bootstrap'
-import { FaRegQuestionCircle } from 'react-icons/fa'
+import { FaRegQuestionCircle, FaTrashAlt } from 'react-icons/fa'
 import { IoWarningOutline } from 'react-icons/io5'
+import { AttachmentTypes } from '@/object-types'
 import AttachmentRowData from '../AttachmentRowData'
 
 interface Props {
@@ -39,7 +36,9 @@ function TableAttachment({
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
-        const list: Array<AttachmentRowData> = [...attachmentsData]
+        const list: Array<AttachmentRowData> = [
+            ...attachmentsData,
+        ]
         // @ts-expect-error: value is a valid
         list[index][name as keyof Attachment] = value
         setAttachmentsData(list)
@@ -51,11 +50,15 @@ function TableAttachment({
             return
         }
 
-        const list: Array<AttachmentRowData> = [...attachmentsData]
+        const list: Array<AttachmentRowData> = [
+            ...attachmentsData,
+        ]
         list.splice(deletingAttachmentIndex, 1)
         setAttachmentsData(list)
 
-        const statusList = [...beforeUpdateAttachmentsCheckStatus]
+        const statusList = [
+            ...beforeUpdateAttachmentsCheckStatus,
+        ]
         statusList.splice(deletingAttachmentIndex, 1)
         setBeforeUpdateAttachmentsCheckStatus(statusList)
         closeDeleteModal()

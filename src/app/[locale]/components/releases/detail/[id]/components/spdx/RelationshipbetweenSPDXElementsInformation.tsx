@@ -9,13 +9,21 @@
 // License-Filename: LICENSE
 
 'use client'
+import { ReactNode, useState } from 'react'
 import { RelationshipsBetweenSPDXElements } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ReactNode, useState } from 'react'
 
 interface Props {
-    relationshipSelection: { index: number; isSPDXDocument: boolean }
-    setRelationshipSelection: React.Dispatch<React.SetStateAction<{ index: number; isSPDXDocument: boolean }>>
+    relationshipSelection: {
+        index: number
+        isSPDXDocument: boolean
+    }
+    setRelationshipSelection: React.Dispatch<
+        React.SetStateAction<{
+            index: number
+            isSPDXDocument: boolean
+        }>
+    >
     relationshipsBetweenSPDXElementSPDXs: RelationshipsBetweenSPDXElements[]
     setRelationshipsBetweenSPDXElementSPDXs: React.Dispatch<React.SetStateAction<RelationshipsBetweenSPDXElements[]>>
     relationshipsBetweenSPDXElementPackages: RelationshipsBetweenSPDXElements[]
@@ -85,7 +93,9 @@ const RelationshipbetweenSPDXElementsInformation = ({
                     <td className='spdx-label-index'>Source</td>
                     <td
                         className='spdx-flex-row'
-                        style={{ height: '50.5px' }}
+                        style={{
+                            height: '50.5px',
+                        }}
                     >
                         <select
                             id='relationshipSourceSelect'
@@ -109,12 +119,18 @@ const RelationshipbetweenSPDXElementsInformation = ({
                 </tr>
                 <tr>
                     <td className='spdx-label-index'>Index</td>
-                    <td style={{ height: '50.5px' }}>
+                    <td
+                        style={{
+                            height: '50.5px',
+                        }}
+                    >
                         <select
                             id='relationshipSelect'
                             className='spdx-col-2'
                             onChange={displayIndex}
-                            style={{ width: '100%' }}
+                            style={{
+                                width: '100%',
+                            }}
                             value={changeSource ? 0 : relationshipSelection.index}
                             disabled={
                                 relationshipSelection.isSPDXDocument

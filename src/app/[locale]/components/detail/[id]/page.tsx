@@ -12,7 +12,9 @@ import { ReactNode } from 'react'
 import DetailOverview from './components/DetailOverview'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const Detail = async (props: Context): Promise<ReactNode> => {

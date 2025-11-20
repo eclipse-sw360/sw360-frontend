@@ -11,7 +11,9 @@ import { ReactNode } from 'react'
 import MergeOverview from './components/MergeOverview'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const Detail = async (props: Context): Promise<ReactNode> => {

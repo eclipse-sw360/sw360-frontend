@@ -9,14 +9,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
-
 import { COTSDetails } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 
 const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
     const t = useTranslations('default')
@@ -27,7 +26,9 @@ const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDet
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <table className='table summary-table'>
@@ -46,11 +47,19 @@ const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDet
                     <td>{t('Usage Right Available')}:</td>
                     <td>
                         {costDetails && costDetails.usageRightAvailable == true ? (
-                            <span style={{ color: '#287d3c' }}>
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
                                 <FiCheckCircle /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
                                 <CiCircleRemove /> {t('No')}
                             </span>
                         )}

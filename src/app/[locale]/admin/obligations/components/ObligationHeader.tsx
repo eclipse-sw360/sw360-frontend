@@ -38,7 +38,9 @@ export default function ObligationHeader({
                     <label
                         htmlFor='title'
                         className='form-label'
-                        style={{ fontWeight: 'bold' }}
+                        style={{
+                            fontWeight: 'bold',
+                        }}
                     >
                         {t('Title')}
                     </label>
@@ -56,7 +58,9 @@ export default function ObligationHeader({
                     <label
                         htmlFor='obligationType'
                         className='form-label'
-                        style={{ fontWeight: 'bold' }}
+                        style={{
+                            fontWeight: 'bold',
+                        }}
                     >
                         {t('Obligation Type')}
                     </label>
@@ -87,7 +91,9 @@ export default function ObligationHeader({
                     <label
                         htmlFor='obligationLevel'
                         className='form-label'
-                        style={{ fontWeight: 'bold' }}
+                        style={{
+                            fontWeight: 'bold',
+                        }}
                     >
                         t{'Obligation Level'}
                     </label>

@@ -10,15 +10,14 @@
 
 'use client'
 
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useState } from 'react'
 import { FaCopy } from 'react-icons/fa'
-
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { Component } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import Link from 'next/link'
 
 interface Props {
     component: Component
@@ -52,7 +51,12 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                             data-toggle='tooltip'
                             title='Copy to clipboard'
                         >
-                            <FaCopy style={{ color: 'gray', width: '20px' }} />
+                            <FaCopy
+                                style={{
+                                    color: 'gray',
+                                    width: '20px',
+                                }}
+                            />
                         </button>
                     </td>
                 </tr>

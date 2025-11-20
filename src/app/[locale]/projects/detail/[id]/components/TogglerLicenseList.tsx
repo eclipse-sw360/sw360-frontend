@@ -11,15 +11,15 @@
 
 'use client'
 
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import type { useTranslations } from 'next-intl'
-import React, { useCallback, useEffect, useState, type JSX } from 'react'
+import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { IoMdInformationCircleOutline } from 'react-icons/io'
 import { TiWarningOutline } from 'react-icons/ti'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 import ViewFileListIcon from './ViewFileListIcon'
 
 interface LicenseData {
@@ -39,7 +39,11 @@ interface LicensesToSourcesMapping {
 }
 
 const sortIgnoreCase = (array: Array<string>) =>
-    array.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+    array.sort((a, b) =>
+        a.localeCompare(b, undefined, {
+            sensitivity: 'base',
+        }),
+    )
 
 const TogglerLicenseList = ({
     licenses,
@@ -59,14 +63,20 @@ const TogglerLicenseList = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return !CommonUtils.isNullEmptyOrUndefinedArray(licenses) ? (
         <div className='d-flex'>
             {licenses.length > 1 ? (
                 toggle ? (
                     <>
-                        <div style={{ marginRight: '0.25rem' }}>
+                        <div
+                            style={{
+                                marginRight: '0.25rem',
+                            }}
+                        >
                             <BsCaretDownFill
                                 className='cursor'
                                 size='13'
@@ -102,7 +112,11 @@ const TogglerLicenseList = ({
                     </>
                 ) : (
                     <>
-                        <div style={{ marginRight: '0.25rem' }}>
+                        <div
+                            style={{
+                                marginRight: '0.25rem',
+                            }}
+                        >
                             <BsCaretRightFill
                                 className='cursor'
                                 size='13'
@@ -196,12 +210,18 @@ const FileListModal = ({
                 }
             }
         }
-    }, [releaseId, license])
+    }, [
+        releaseId,
+        license,
+    ])
 
     useEffect(() => {
         if (!isFileModalOpen) return
         void fetchReleasesToFilesMapping()
-    }, [isFileModalOpen, fetchReleasesToFilesMapping])
+    }, [
+        isFileModalOpen,
+        fetchReleasesToFilesMapping,
+    ])
 
     return licensesToSourceFilesMapping ? (
         <Modal

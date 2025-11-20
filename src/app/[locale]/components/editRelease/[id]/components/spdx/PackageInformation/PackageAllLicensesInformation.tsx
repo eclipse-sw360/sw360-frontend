@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
 import { PackageInformation } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ReactNode } from 'react'
 
 interface Props {
     packageInformation: PackageInformation
@@ -61,8 +61,19 @@ function PackageAllLicensesInformation({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>7.14 All licenses information from files</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseInfoFromFilesExist'
@@ -78,7 +89,10 @@ function PackageAllLicensesInformation({
                             }
                         />
                         <textarea
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='licenseInfoInFileValue'
                             rows={5}
                             className='form-control'
@@ -95,7 +109,11 @@ function PackageAllLicensesInformation({
                             }
                         ></textarea>
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseInfoInFileNone'
@@ -111,7 +129,9 @@ function PackageAllLicensesInformation({
                             }
                         />
                         <label
-                            style={{ marginRight: '2rem' }}
+                            style={{
+                                marginRight: '2rem',
+                            }}
                             className='form-check-label radio-label lableSPDX'
                             htmlFor='licenseInfoInFileNone'
                         >

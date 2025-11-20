@@ -11,54 +11,54 @@
 */
 
 .components tr th:last-child {
-  width: 6%;
+    width: 6%;
 }
 
 .components tr th:nth-child(4) {
-  width: 13%;
+    width: 13%;
 }
 
 .components tr th:nth-child(3) {
-  max-width: 30%;
+    max-width: 30%;
 }
 
 .components tr th:first-child {
-  width: 12%;
+    width: 12%;
 }
 
 .components tr td {
-  word-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .delete-btn {
-  color: gray;
-  font-size: 14px;
+    color: gray;
+    font-size: 14px;
 }
 
 .delete-btn:hover {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .modal-body-first {
-  border: 3px dashed #ddd;
-  padding: 30px;
+    border: 3px dashed #ddd;
+    padding: 30px;
 }
 
 .modal-body-second {
-  text-align: center;
+    text-align: center;
 }
 
 .input {
-  display: none;
+    display: none;
 }
 
 .button-browse {
-  border-radius: 0.25rem;
-  border-style: solid;
-  border-color: #cdced9;
-  color: #6b6c7e;
-  padding-bottom: 0.4375rem;
-  padding-left: 0.9375rem;
-  padding-right: 0.9375rem;
-  padding-top: 0.4375rem;
+    border-radius: 0.25rem;
+    border-style: solid;
+    border-color: #cdced9;
+    color: #6b6c7e;
+    padding-bottom: 0.4375rem;
+    padding-left: 0.9375rem;
+    padding-right: 0.9375rem;
+    padding-top: 0.4375rem;
 }

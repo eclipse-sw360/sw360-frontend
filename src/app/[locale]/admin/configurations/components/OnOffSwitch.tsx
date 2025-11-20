@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Dispatch, type JSX, SetStateAction } from 'react'
 import { Configuration, UiConfiguration } from '@/object-types'
-import { Dispatch, SetStateAction, type JSX } from 'react'
 
 interface SwitchProps {
     size: number
@@ -25,7 +25,10 @@ const OnOffSwitch = ({ size, checked, setCurrentConfig, setCurrentUiConfig, prop
             <span className='align-middle fw-bold p-2'>OFF</span>
             <label
                 className='switch'
-                style={{ height: size, width: size * 2 }}
+                style={{
+                    height: size,
+                    width: size * 2,
+                }}
             >
                 <input
                     type='checkbox'
@@ -51,7 +54,9 @@ const OnOffSwitch = ({ size, checked, setCurrentConfig, setCurrentUiConfig, prop
                 />
                 <span
                     className='slider round'
-                    style={{ borderRadius: size }}
+                    style={{
+                        borderRadius: size,
+                    }}
                 ></span>
             </label>
             <span className='align-middle fw-bold p-2'>ON</span>

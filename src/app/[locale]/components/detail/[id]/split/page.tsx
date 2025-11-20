@@ -11,7 +11,9 @@ import { ReactNode } from 'react'
 import SplitOverview from './components/SplitOverview'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const Detail = async (props: Context): Promise<ReactNode> => {

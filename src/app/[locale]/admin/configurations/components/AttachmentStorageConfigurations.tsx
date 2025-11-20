@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 'use client'
-import { ConfigKeys, Configuration } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction } from 'react'
+import { ConfigKeys, Configuration } from '@/object-types'
 import OnOffSwitch from './OnOffSwitch'
 
 interface Props {
@@ -35,7 +35,9 @@ const AttachmentStorageConfigurations = ({ currentConfig, setCurrentConfig }: Pr
         <>
             <h6
                 className='fw-bold text-uppercase'
-                style={{ color: '#5D8EA9' }}
+                style={{
+                    color: '#5D8EA9',
+                }}
             >
                 {t('Attachment Storage Configurations')}
                 <hr className='my-2 mb-2' />

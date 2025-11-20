@@ -9,11 +9,9 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-
-import { ProjectPayload } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
-
 import type { JSX } from 'react'
+import { ProjectPayload } from '@/object-types'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -40,7 +38,14 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                             htmlFor='addProjects.projectState'
                             className='form-label fw-bold'
                         >
-                            {t('Project State')} <span style={{ color: 'red' }}>*</span>
+                            {t('Project State')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <select
                             className='form-select'

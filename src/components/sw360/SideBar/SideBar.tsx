@@ -12,11 +12,10 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
-import styles from './SideBar.module.css'
-
+import { type JSX, useEffect, useState } from 'react'
 import { CommonTabIds, LinkedVulnerability, ReleaseTabIds, VulnerabilitiesVerificationState } from '@/object-types'
 import { CommonUtils } from '@/utils'
+import styles from './SideBar.module.css'
 
 interface Tab {
     name: string
@@ -56,18 +55,54 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
             setNumberOfCheckedOrUncheckedVulnerabilities(numberOfCheckOrUnchecked)
             setNumberOfIncorrectVulnerabilities(numberOfIncorrect)
         }
-    }, [numberOfCheckedOrUncheckedVulnerabilities, numberOfIncorrectVulnerabilities, vulnerabilities])
+    }, [
+        numberOfCheckedOrUncheckedVulnerabilities,
+        numberOfIncorrectVulnerabilities,
+        vulnerabilities,
+    ])
 
     const handleSelectTab = (event: React.MouseEvent<HTMLElement>) => {
         setSelectedTab(event.currentTarget.id)
     }
 
     const createMenuBar = () => {
-        const elements: (JSX.Element | null)[] = Object.entries(tabList).map(([index, tab]: [string, Tab]) => {
-            if (tab.hidden) {
-                return null
-            }
-            if (tab.id === CommonTabIds.VULNERABILITIES) {
+        const elements: (JSX.Element | null)[] = Object.entries(tabList).map(
+            ([index, tab]: [
+                string,
+                Tab,
+            ]) => {
+                if (tab.hidden) {
+                    return null
+                }
+                if (tab.id === CommonTabIds.VULNERABILITIES) {
+                    return (
+                        <a
+                            key={index}
+                            className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
+                            id={tab.id}
+                            onClick={handleSelectTab}
+                        >
+                            {t(tab.name as never)}
+                            <span
+                                id={styles.numberOfVulnerabilitiesDiv}
+                                className='badge badge-light'
+                            >
+                                {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
+                            </span>
+                        </a>
+                    )
+                } else if (tab.id === ReleaseTabIds.ECC_DETAILS) {
+                    return (
+                        <a
+                            key={index}
+                            className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
+                            id={tab.id}
+                            onClick={handleSelectTab}
+                        >
+                            {tab.name} <span className={`${styles[eccStatus ?? '']}`}></span>
+                        </a>
+                    )
+                }
                 return (
                     <a
                         key={index}
@@ -76,37 +111,10 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                         onClick={handleSelectTab}
                     >
                         {t(tab.name as never)}
-                        <span
-                            id={styles.numberOfVulnerabilitiesDiv}
-                            className='badge badge-light'
-                        >
-                            {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
-                        </span>
                     </a>
                 )
-            } else if (tab.id === ReleaseTabIds.ECC_DETAILS) {
-                return (
-                    <a
-                        key={index}
-                        className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
-                        id={tab.id}
-                        onClick={handleSelectTab}
-                    >
-                        {tab.name} <span className={`${styles[eccStatus ?? '']}`}></span>
-                    </a>
-                )
-            }
-            return (
-                <a
-                    key={index}
-                    className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
-                    id={tab.id}
-                    onClick={handleSelectTab}
-                >
-                    {t(tab.name as never)}
-                </a>
-            )
-        })
+            },
+        )
 
         return elements
     }

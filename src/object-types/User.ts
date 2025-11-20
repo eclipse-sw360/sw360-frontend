@@ -19,8 +19,12 @@ export interface User {
     givenName?: string
     lastName?: string
     wantsMailNotification?: boolean
-    notificationPreferences?: { [key: string]: boolean }
-    secondaryDepartmentsAndRoles?: { [key: string]: Array<string> }
+    notificationPreferences?: {
+        [key: string]: boolean
+    }
+    secondaryDepartmentsAndRoles?: {
+        [key: string]: Array<string>
+    }
     externalid?: string
     userGroup?: string
     _links?: Links
@@ -35,5 +39,7 @@ export interface UserPayload {
     password?: string
     department?: string
     externalid?: string
-    secondaryDepartmentsAndRoles?: { [key: string]: Array<string> }
+    secondaryDepartmentsAndRoles?: {
+        [key: string]: Array<string>
+    }
 }

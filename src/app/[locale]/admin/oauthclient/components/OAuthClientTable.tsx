@@ -8,11 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { OAuthClient } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import React, { useMemo, useState, type JSX } from 'react'
+import React, { type JSX, useMemo, useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
 import { FaCaretDown, FaCaretRight, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { OAuthClient } from '@/object-types'
 
 interface TableData {
     description: string
@@ -37,7 +37,10 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
     const [sortConfig, setSortConfig] = useState<{
         key: keyof (typeof tableData)[0] | null
         direction: 'ascending' | 'descending' | null
-    }>({ key: null, direction: null })
+    }>({
+        key: null,
+        direction: null,
+    })
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10)
 
@@ -67,7 +70,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
         key: keyof (typeof tableData)[0],
         direction: 'ascending' | 'descending',
     ) => {
-        return [...data].sort((a, b) => {
+        return [
+            ...data,
+        ].sort((a, b) => {
             if (a[key] === b[key]) return 0
             if (direction === 'ascending') {
                 return a[key] > b[key] ? 1 : -1
@@ -82,7 +87,10 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
         if (sortConfig.key === key) {
             direction = sortConfig.direction === 'ascending' ? 'descending' : 'ascending'
         }
-        setSortConfig({ key, direction })
+        setSortConfig({
+            key,
+            direction,
+        })
     }
 
     const totalItems = clients.length
@@ -108,7 +116,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
     }
 
     const tableData: TableData[] = useMemo(() => {
-        let sortedData = [...clients].map((client) => ({
+        let sortedData = [
+            ...clients,
+        ].map((client) => ({
             description: client.description,
             clientId: client.client_id,
             authorities: client.authorities.join(', '),
@@ -145,7 +155,14 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
         }
 
         return sortedData.slice(indexOfFirstItem, indexOfLastItem)
-    }, [clients, sortConfig, currentPage, itemsPerPage, indexOfFirstItem, indexOfLastItem])
+    }, [
+        clients,
+        sortConfig,
+        currentPage,
+        itemsPerPage,
+        indexOfFirstItem,
+        indexOfLastItem,
+    ])
 
     return (
         <div className='table-container'>
@@ -194,7 +211,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </button>
                         </th>
                         <th
-                            style={{ width: '30%' }}
+                            style={{
+                                width: '30%',
+                            }}
                             onClick={() => handleSort('description')}
                             className='text-start align-middle'
                         >
@@ -223,7 +242,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </span>
                         </th>
                         <th
-                            style={{ width: '25%' }}
+                            style={{
+                                width: '25%',
+                            }}
                             onClick={() => handleSort('clientId')}
                             className='text-start align-middle'
                         >
@@ -252,7 +273,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </span>
                         </th>
                         <th
-                            style={{ width: '15%' }}
+                            style={{
+                                width: '15%',
+                            }}
                             onClick={() => handleSort('authorities')}
                             className='text-start align-middle'
                         >
@@ -281,7 +304,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </span>
                         </th>
                         <th
-                            style={{ width: '15%' }}
+                            style={{
+                                width: '15%',
+                            }}
                             onClick={() => handleSort('scope')}
                             className='text-start align-middle'
                         >
@@ -310,7 +335,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </span>
                         </th>
                         <th
-                            style={{ width: '10%' }}
+                            style={{
+                                width: '10%',
+                            }}
                             className='align-middle'
                         >
                             {t('Actions')}
@@ -360,7 +387,9 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                                     <tr>
                                         <td
                                             colSpan={6}
-                                            dangerouslySetInnerHTML={{ __html: row.details }}
+                                            dangerouslySetInnerHTML={{
+                                                __html: row.details,
+                                            }}
                                         />
                                     </tr>
                                 )}

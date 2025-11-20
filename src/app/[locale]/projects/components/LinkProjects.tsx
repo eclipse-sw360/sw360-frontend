@@ -262,9 +262,9 @@ export default function LinkProjects({
             const next =
                 typeof updater === 'function'
                     ? updater({
-                        pageIndex: pageableQueryParam.page,
-                        pageSize: pageableQueryParam.page_entries,
-                    })
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -318,9 +318,9 @@ export default function LinkProjects({
                         ...(CommonUtils.isNullEmptyOrUndefinedString(searchValue)
                             ? {}
                             : {
-                                name: searchValue,
-                                luceneSearch: !exactMatch,
-                            }),
+                                  name: searchValue,
+                                  luceneSearch: !exactMatch,
+                              }),
                     }).map(([key, value]) => [
                         key,
                         String(value),

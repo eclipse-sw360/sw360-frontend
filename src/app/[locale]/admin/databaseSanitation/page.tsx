@@ -8,9 +8,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import DatabaseSanitation from './components/DatabaseSanitation'
-
 import type { JSX } from 'react'
+import DatabaseSanitation from './components/DatabaseSanitation'
 
 export const metadata: Metadata = {
     title: 'Admin',

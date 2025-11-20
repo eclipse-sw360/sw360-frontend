@@ -9,13 +9,13 @@
 
 'use client'
 
-import { Component, ListFieldProcessComponent, Vendor } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BiInfoCircle } from 'react-icons/bi'
 import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
 import { TiTick } from 'react-icons/ti'
+import { Component, ListFieldProcessComponent, Vendor } from '@/object-types'
 
 export default function GeneralSection({
     targetComponent,
@@ -37,7 +37,9 @@ export default function GeneralSection({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         setDefaultVendor(targetComponent?._embedded?.defaultVendor ?? {})
@@ -45,17 +47,35 @@ export default function GeneralSection({
         setCategoryMergeList([
             ...(targetComponent?.categories ?? ([] as string[]))
                 .filter((c) => (sourceComponent?.categories ?? ([] as string[])).indexOf(c) !== -1)
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...(targetComponent?.categories ?? ([] as string[]))
                 .filter((c) => (sourceComponent?.categories ?? ([] as string[])).indexOf(c) === -1)
-                .map((c) => ({ value: c, presentInSource: false, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...(sourceComponent?.categories ?? ([] as string[]))
                 .filter((c) => (targetComponent?.categories ?? ([] as string[])).indexOf(c) === -1)
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: false, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
         ])
-    }, [targetComponent, sourceComponent])
+    }, [
+        targetComponent,
+        sourceComponent,
+    ])
 
     return (
         <>

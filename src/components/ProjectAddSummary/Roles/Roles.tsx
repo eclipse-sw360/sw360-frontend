@@ -10,28 +10,63 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useState, type JSX } from 'react'
-import { GiCancel } from 'react-icons/gi'
-
-import { ProjectPayload } from '@/object-types'
 import { SelectCountry, SelectUsersDialog } from 'next-sw360'
+import { type JSX, useState } from 'react'
+import { GiCancel } from 'react-icons/gi'
+import { ProjectPayload } from '@/object-types'
 import DepartmentModal from './DepartmentModal'
 
 interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
-    moderators: { [k: string]: string }
-    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributors: { [k: string]: string }
-    setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    securityResponsibles: { [k: string]: string }
-    setSecurityResponsibles: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    projectOwner: { [k: string]: string }
-    setProjectOwner: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    projectManager: { [k: string]: string }
-    setProjectManager: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    leadArchitect: { [k: string]: string }
-    setLeadArchitect: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    moderators: {
+        [k: string]: string
+    }
+    setModerators: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    contributors: {
+        [k: string]: string
+    }
+    setContributors: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    securityResponsibles: {
+        [k: string]: string
+    }
+    setSecurityResponsibles: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    projectOwner: {
+        [k: string]: string
+    }
+    setProjectOwner: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    projectManager: {
+        [k: string]: string
+    }
+    setProjectManager: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    leadArchitect: {
+        [k: string]: string
+    }
+    setLeadArchitect: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 export default function Roles({
@@ -221,7 +256,14 @@ export default function Roles({
                             htmlFor='addProjects.group'
                             className='form-label fw-medium'
                         >
-                            {t('Group')} <span style={{ color: 'red' }}>*</span>
+                            {t('Group')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <input
                             type='text'

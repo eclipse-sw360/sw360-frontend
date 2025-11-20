@@ -11,7 +11,7 @@
 // app/components/ThemeSwitcher.tsx
 'use client'
 
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { Nav } from 'react-bootstrap'
 import { BsSun, BsSunFill } from 'react-icons/bs'
 

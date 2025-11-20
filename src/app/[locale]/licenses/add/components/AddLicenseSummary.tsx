@@ -11,9 +11,9 @@
 
 'use client'
 
-import { LicensePayload } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect } from 'react'
+import { LicensePayload } from '@/object-types'
 import AddLicenseDetail from './AddLicenseDetail'
 import AddLicenseText from './AddLicenseText'
 
@@ -42,7 +42,9 @@ export default function AddLicenseSummary({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
     return (
         <div className='col'>
             <AddLicenseDetail

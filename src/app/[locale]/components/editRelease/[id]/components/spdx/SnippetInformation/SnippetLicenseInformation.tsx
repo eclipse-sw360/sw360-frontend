@@ -58,8 +58,19 @@ function SnippetLicenseInformation({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>9.6 License information in snippet</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseInfoInFile'
@@ -70,7 +81,10 @@ function SnippetLicenseInformation({
                             checked={licenseInfoInSnippetsExist}
                         />
                         <textarea
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='licenseInfoInFileValue'
                             rows={5}
                             className='form-control'
@@ -81,7 +95,11 @@ function SnippetLicenseInformation({
                             disabled={licenseInfoInSnippetsNone || licenseInfoInSnippetsNoasserttion}
                         ></textarea>
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseInfoInFileNone'
@@ -92,7 +110,9 @@ function SnippetLicenseInformation({
                             checked={licenseInfoInSnippetsNone}
                         />
                         <label
-                            style={{ marginRight: '2rem' }}
+                            style={{
+                                marginRight: '2rem',
+                            }}
                             className='form-check-label radio-label lableSPDX'
                             htmlFor='licenseInfoInFileNone'
                         >

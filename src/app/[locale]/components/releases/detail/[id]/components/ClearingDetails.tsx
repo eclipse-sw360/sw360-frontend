@@ -11,16 +11,15 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { FossologyClearing } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-
 import fossologyIcon from '@/assets/images/fossology.svg'
 import { Attachment, ReleaseDetail } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
-import { FossologyClearing } from 'next-sw360'
-import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 import ClearingInformationStatus from './ClearingInformationStatus'
 import RequestInformation from './RequestInformation'
@@ -43,7 +42,9 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props): Re
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <div className='col'>
@@ -72,7 +73,9 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props): Re
                                 src={fossologyIcon as StaticImport}
                                 width={15}
                                 height={15}
-                                style={{ marginLeft: '5px' }}
+                                style={{
+                                    marginLeft: '5px',
+                                }}
                                 alt='Fossology'
                                 onClick={() => setShow(true)}
                             />

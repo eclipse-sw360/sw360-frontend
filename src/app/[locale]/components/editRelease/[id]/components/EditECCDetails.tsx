@@ -11,13 +11,12 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useEffect } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiInfoCircle } from 'react-icons/bi'
-
 import { Release } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 
 interface Props {
     releasePayload: Release
@@ -44,7 +43,9 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setReleasePayload({
@@ -60,11 +61,18 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
         <>
             <div
                 className='container'
-                style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}
+                style={{
+                    maxWidth: '98vw',
+                    marginTop: '10px',
+                    fontSize: '0.875rem',
+                }}
             >
                 <div
                     className='col'
-                    style={{ padding: '0px 12px', fontSize: '0.875rem' }}
+                    style={{
+                        padding: '0px 12px',
+                        fontSize: '0.875rem',
+                    }}
                 >
                     <div className='row mb-4'>
                         <div className='section-header mb-2'>

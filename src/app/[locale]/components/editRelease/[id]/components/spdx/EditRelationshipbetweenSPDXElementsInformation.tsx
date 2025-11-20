@@ -10,12 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
-
 import { PackageInformation, RelationshipsBetweenSPDXElements, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { signOut, useSession } from 'next-auth/react'
 
 interface Props {
     indexRelation: number
@@ -47,7 +46,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const relationTypes: Array<string> = [
         'DESCRIBES',
@@ -172,7 +173,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
 
     const addRelationshipsBetweenSPDXElementsSPDX = () => {
         setChangeSource(false)
-        const arrayExternals: RelationshipsBetweenSPDXElements[] = [...relationshipsBetweenSPDXElementSPDXs]
+        const arrayExternals: RelationshipsBetweenSPDXElements[] = [
+            ...relationshipsBetweenSPDXElementSPDXs,
+        ]
         if (CommonUtils.isNullEmptyOrUndefinedArray(relationshipsBetweenSPDXElementSPDXs)) {
             setIndexRelation(0)
         }
@@ -200,7 +203,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
 
     const addRelationshipsBetweenSPDXElementsPackage = () => {
         setChangeSource(false)
-        const arrayExternals: RelationshipsBetweenSPDXElements[] = [...relationshipsBetweenSPDXElementPackages]
+        const arrayExternals: RelationshipsBetweenSPDXElements[] = [
+            ...relationshipsBetweenSPDXElementPackages,
+        ]
         if (CommonUtils.isNullEmptyOrUndefinedArray(relationshipsBetweenSPDXElementPackages)) {
             setIndexRelation(0)
         }
@@ -378,7 +383,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                         >
                             <label
                                 htmlFor='selectRelationshipSource'
-                                style={{ textDecoration: 'underline' }}
+                                style={{
+                                    textDecoration: 'underline',
+                                }}
                                 className='sub-title lableSPDX'
                             >
                                 Select Source
@@ -386,18 +393,34 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                             <select
                                 id='selectRelationshipSource'
                                 className='form-control spdx-select always-enable form-select'
-                                style={{ marginRight: '4rem' }}
+                                style={{
+                                    marginRight: '4rem',
+                                }}
                                 onChange={changeRelationshipSource}
                             >
                                 <option value='spdxDoucument'>SPDX Document</option>
                                 <option value='package'>Package</option>
                             </select>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                paddingLeft: '1rem',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginBottom: '0.75rem',
+                                }}
+                            >
                                 <label
                                     htmlFor='selectRelationship'
-                                    style={{ textDecoration: 'underline' }}
+                                    style={{
+                                        textDecoration: 'underline',
+                                    }}
                                     className='sub-title lableSPDX'
                                 >
                                     Select Relationship
@@ -470,9 +493,15 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                                 >
                                     11.1 Relationship
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <input
-                                        style={{ marginRight: '1rem' }}
+                                        style={{
+                                            marginRight: '1rem',
+                                        }}
                                         id='spdxElement'
                                         className='form-control'
                                         name='spdxElementId'
@@ -491,7 +520,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                                         className='form-control form-select'
                                         id='relationshipType'
                                         name='relationshipType'
-                                        style={{ marginRight: '1rem' }}
+                                        style={{
+                                            marginRight: '1rem',
+                                        }}
                                         onChange={updateField}
                                         value={
                                             isSourceSPDXDocument

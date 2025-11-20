@@ -9,10 +9,10 @@
 
 'use client'
 
-import { AdministrationDataType, ClearingDetailsCount } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
+import { AdministrationDataType, ClearingDetailsCount } from '@/object-types'
 
 const Capitalize = (text: string) => {
     return text
@@ -36,7 +36,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <>
@@ -58,11 +60,13 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                     </tr>
                     <tr>
                         <td>{t('Clearing Details')}:</td>
-                        <td>{t('New Releases')}: {clearingDetailCount?.newClearing},&nbsp;
-                            {t('Under Clearing')}: {clearingDetailCount?.underClearing},&nbsp;
-                            ({t('And')} {clearingDetailCount?.sentToClearingTool} {t('Already uploaded')}),&nbsp;
+                        <td>
+                            {t('New Releases')}: {clearingDetailCount?.newClearing},&nbsp;
+                            {t('Under Clearing')}: {clearingDetailCount?.underClearing},&nbsp; ({t('And')}{' '}
+                            {clearingDetailCount?.sentToClearingTool} {t('Already uploaded')}),&nbsp;
                             {t('Report Available')}: {clearingDetailCount?.reportAvailable},&nbsp;
-                            {t('Approved')}: {clearingDetailCount?.approved}</td>
+                            {t('Approved')}: {clearingDetailCount?.approved}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Team')}:</td>
@@ -79,7 +83,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 className='form-control'
                                 id='administration.clearingSummary'
                                 aria-describedby={t('Clearing summary')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={data.clearingSummary}
                                 readOnly
                             />
@@ -92,7 +98,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 className='form-control'
                                 id='administration.specialRiskOSS'
                                 aria-describedby={t('Special risk Open Source Software')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={data.specialRisksOSS}
                                 readOnly
                             />
@@ -105,7 +113,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 className='form-control'
                                 id='administration.generalRisks3rdPartySoftware'
                                 aria-describedby={t('General risks 3rd party software')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={data.generalRisks3rdParty}
                                 readOnly
                             />
@@ -118,7 +128,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 className='form-control'
                                 id='administration.specialRisks3rdPartySoftware'
                                 aria-describedby={t('Special risks 3rd party software')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={data.specialRisks3rdParty}
                                 readOnly
                             />
@@ -131,7 +143,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 className='form-control'
                                 id='administration.salesAndDeliveryChannels'
                                 aria-describedby={t('Sales and delivery channels')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={data.deliveryChannels}
                                 readOnly
                             />
@@ -144,7 +158,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 className='form-control'
                                 id='administration.remarksAdditionalRequirements'
                                 aria-describedby={t('Remarks additional requirements')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={data.remarksAdditionalRequirements}
                                 readOnly
                             />
@@ -204,7 +220,9 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 className='form-control'
                                 id='administration.licenseInfoHeader'
                                 aria-describedby={t('License Info Header')}
-                                style={{ height: '600px' }}
+                                style={{
+                                    height: '600px',
+                                }}
                                 value={data.licenseInfoHeaderText}
                                 readOnly
                             />

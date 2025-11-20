@@ -9,12 +9,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { COTSDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { CiCircleRemove } from 'react-icons/ci'
 import { FiCheckCircle } from 'react-icons/fi'
+import { COTSDetails } from '@/object-types'
 
 const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
     const t = useTranslations('default')
@@ -25,7 +25,9 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <table className='table summary-table'>
@@ -50,11 +52,19 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                     <td>{t('Contains Open Source Software')}:</td>
                     <td>
                         {costDetails && costDetails.containsOSS == true ? (
-                            <span style={{ color: '#287d3c' }}>
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
                                 <FiCheckCircle /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
                                 <CiCircleRemove /> {t('No')}
                             </span>
                         )}
@@ -64,11 +74,19 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                     <td>{t('OSS Contract Signed')}:</td>
                     <td>
                         {costDetails && costDetails.ossContractSigned == true ? (
-                            <span style={{ color: '#287d3c' }}>
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
                                 <FiCheckCircle /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
                                 <CiCircleRemove /> {t('No')}
                             </span>
                         )}
@@ -86,11 +104,19 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                     <td>{t('Source Code Available')}:</td>
                     <td>
                         {costDetails && costDetails.sourceCodeAvailable == true ? (
-                            <span style={{ color: '#287d3c' }}>
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
                                 <FiCheckCircle /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
                                 <CiCircleRemove /> {t('No')}
                             </span>
                         )}

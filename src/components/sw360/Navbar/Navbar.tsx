@@ -10,13 +10,12 @@
 
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useParams, useRouter, useSelectedLayoutSegment } from 'next/navigation'
-import { useState, type JSX } from 'react'
-import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
-
-import { NavList } from '@/object-types'
+import { useSession } from 'next-auth/react'
 import { LocaleSwitcher, Logo, ProfileDropdown } from 'next-sw360'
+import { type JSX, useState } from 'react'
+import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
+import { NavList } from '@/object-types'
 
 function Navbar(): JSX.Element {
     const router = useRouter()

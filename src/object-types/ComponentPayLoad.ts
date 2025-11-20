@@ -22,9 +22,15 @@ export default interface ComponentPayload {
     ownerAccountingUnit?: string
     ownerGroup?: string
     ownerCountry?: string
-    roles?: { [k: string]: Array<string> } | null
-    externalIds?: { [k: string]: string } | null
-    additionalData?: { [k: string]: string } | null
+    roles?: {
+        [k: string]: Array<string>
+    } | null
+    externalIds?: {
+        [k: string]: string
+    } | null
+    additionalData?: {
+        [k: string]: string
+    } | null
     defaultVendorId?: string
     categories?: Array<string> | null
     homepage?: string

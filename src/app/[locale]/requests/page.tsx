@@ -8,10 +8,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
-import Requests from './components/Requests'
-
 import type { JSX } from 'react'
+import Requests from './components/Requests'
 
 export const metadata: Metadata = {
     title: 'Requests',

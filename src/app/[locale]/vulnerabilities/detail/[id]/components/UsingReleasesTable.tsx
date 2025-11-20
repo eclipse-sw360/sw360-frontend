@@ -9,11 +9,11 @@
 
 'use client'
 
-import { Vulnerability } from '@/object-types'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { ReactNode, useEffect } from 'react'
+import { Vulnerability } from '@/object-types'
 
 export default function UsingReleasesTable({ summaryData }: { summaryData: Vulnerability }): ReactNode {
     const t = useTranslations('default')
@@ -23,7 +23,9 @@ export default function UsingReleasesTable({ summaryData }: { summaryData: Vulne
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <>

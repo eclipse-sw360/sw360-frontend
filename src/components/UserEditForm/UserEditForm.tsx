@@ -9,12 +9,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { UserGroupType, UserPayload } from '@/object-types'
 import { useTranslations } from 'next-intl'
+import type { JSX } from 'react'
+import { UserGroupType, UserPayload } from '@/object-types'
 import SecondaryDepartmentsAndRoles from './SecondaryDepartmentsAndRoles'
 import UserOperationType from './UserOperationType'
-
-import type { JSX } from 'react'
 
 interface Props {
     userPayload: UserPayload

@@ -10,8 +10,8 @@
 
 'use client'
 
-import { LicensePayload } from '@/object-types'
 import { ReactNode } from 'react'
+import { LicensePayload } from '@/object-types'
 import EditLicenseDetail from './EditLicenseDetail'
 import EditLicenseText from './EditLicenseText'
 

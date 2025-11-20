@@ -9,11 +9,11 @@
 
 'use client'
 
+import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { ReactNode } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ModerationRequestDetails, UserGroupType } from '@/object-types'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { ReactNode } from 'react'
 
 function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | undefined }): ReactNode {
     const t = useTranslations('default')
@@ -59,7 +59,9 @@ function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | unde
                                 className='form-control'
                                 id='moderationRequest.commentRequestingUser'
                                 aria-describedby={t('Comment on Moderation Request')}
-                                style={{ height: '120px' }}
+                                style={{
+                                    height: '120px',
+                                }}
                                 value={data?.commentRequestingUser ?? ''}
                                 readOnly
                             />
@@ -72,4 +74,6 @@ function ModerationRequestInfo({ data }: { data: ModerationRequestDetails | unde
 }
 
 // Pass notAllowedUserGroups to AccessControl to restrict access
-export default AccessControl(ModerationRequestInfo, [UserGroupType.SECURITY_USER])
+export default AccessControl(ModerationRequestInfo, [
+    UserGroupType.SECURITY_USER,
+])

@@ -11,7 +11,7 @@
 'use client'
 
 import { MD5 } from 'crypto-js'
-import { useCallback, useEffect, type JSX } from 'react'
+import { type JSX, useCallback, useEffect } from 'react'
 import { Form, Image } from 'react-bootstrap'
 import { BsArrowCounterclockwise } from 'react-icons/bs'
 
@@ -43,7 +43,10 @@ function Gravatar({ email }: { email: string }): JSX.Element {
                 console.log(imageUrl)
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
-    }, [email, setGravatarImage])
+    }, [
+        email,
+        setGravatarImage,
+    ])
 
     useEffect(() => {
         if (useGravatar) {
@@ -51,7 +54,12 @@ function Gravatar({ email }: { email: string }): JSX.Element {
                 downloadGravatarImage()
             }
         }
-    }, [useGravatar, gravatarImage, setGravatarImage, downloadGravatarImage])
+    }, [
+        useGravatar,
+        gravatarImage,
+        setGravatarImage,
+        downloadGravatarImage,
+    ])
 
     const iconSize = 64
 

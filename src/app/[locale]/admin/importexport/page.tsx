@@ -8,10 +8,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
-import ImportExportComponent from './components/ImportExport'
-
 import type { ReactNode } from 'react'
+import ImportExportComponent from './components/ImportExport'
 
 export const metadata: Metadata = {
     title: 'Admin - Import-Export',

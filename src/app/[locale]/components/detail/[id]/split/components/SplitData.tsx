@@ -9,11 +9,11 @@
 
 'use client'
 
-import { Attachment, Component, ListFieldProcessComponent } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { FaLongArrowAltRight, FaUndo } from 'react-icons/fa'
+import { Attachment, Component, ListFieldProcessComponent } from '@/object-types'
 
 export default function SplitComponent({
     targetComponent,
@@ -35,7 +35,9 @@ export default function SplitComponent({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
     useEffect(() => {
         if (!sourceComponent || !targetComponent) return
         sourceComponent.releaseIds = (sourceComponent._embedded?.['sw360:releases'] ?? []).map((rel) => rel.id ?? '')

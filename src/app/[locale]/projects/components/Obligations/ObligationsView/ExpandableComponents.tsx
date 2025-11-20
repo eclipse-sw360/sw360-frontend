@@ -9,11 +9,11 @@
 
 'use client'
 
-import { ObligationRelease } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
 import { JSX, useEffect, useState } from 'react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
+import { ObligationRelease } from '@/object-types'
 
 export function ShowObligationTextOnExpand({
     id,
@@ -31,7 +31,9 @@ export function ShowObligationTextOnExpand({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         if (isExpanded) {
@@ -54,7 +56,9 @@ export function ShowObligationTextOnExpand({
                 el.remove()
             }
         }
-    }, [isExpanded])
+    }, [
+        isExpanded,
+    ])
 
     return (
         <>
@@ -91,7 +95,9 @@ export function ExpandableList({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
     return (
         <>
             {isExpanded ? (
@@ -107,12 +113,16 @@ export function ExpandableList({
                         return (
                             <li
                                 key={release.id}
-                                style={{ display: 'inline' }}
+                                style={{
+                                    display: 'inline',
+                                }}
                             >
                                 <Link
                                     href={`/components/releases/detail/${release.id}`}
                                     className='text-link'
-                                    style={{ color: isCommon ? 'green' : 'neon carrot' }}
+                                    style={{
+                                        color: isCommon ? 'green' : 'neon carrot',
+                                    }}
                                 >
                                     {`${release.name} ${release.version}`}
                                 </Link>

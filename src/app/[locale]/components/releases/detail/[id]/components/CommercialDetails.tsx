@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { COTSDetails } from '@/object-types'
 import { ReactNode } from 'react'
+import { COTSDetails } from '@/object-types'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 import CotsOssInformation from './CotsOssInformation'
 

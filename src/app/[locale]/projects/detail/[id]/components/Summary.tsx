@@ -9,14 +9,14 @@
 
 'use client'
 
-import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
-import { DocumentTypes, SummaryDataType } from '@/object-types'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useEffect, useState, type JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
+import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
+import { DocumentTypes, SummaryDataType } from '@/object-types'
 
 const Capitalize = (text: string) => {
     return text
@@ -35,7 +35,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const Clipboard = ({ text }: { text: string }) => {
         const [copied, setCopied] = useState(false)
@@ -49,15 +51,19 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
             }
         }
         return (
-            <OverlayTrigger trigger={['hover', 'focus']} placement="top" overlay={(props) => (<Tooltip{...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>)}
+            <OverlayTrigger
+                trigger={[
+                    'hover',
+                    'focus',
+                ]}
+                placement='top'
+                overlay={(props) => <Tooltip {...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>}
                 onToggle={(show) => {
                     if (show) setCopied(false)
                 }}
             >
                 <span className='d-inline-block'>
-                    <BiClipboard
-                        onClick={handleCopy}
-                    />
+                    <BiClipboard onClick={handleCopy} />
                 </span>
             </OverlayTrigger>
         )
@@ -233,7 +239,14 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>{t('Owner Country')}:</td>
                         <td>
                             {summaryData.ownerCountry != null && /^[A-Z]{2}$/.test(summaryData.ownerCountry)
-                                ? new Intl.DisplayNames(['en'], { type: 'region' }).of(summaryData.ownerCountry)
+                                ? new Intl.DisplayNames(
+                                      [
+                                          'en',
+                                      ],
+                                      {
+                                          type: 'region',
+                                      },
+                                  ).of(summaryData.ownerCountry)
                                 : ''}
                         </td>
                     </tr>
@@ -254,7 +267,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                             {summaryData._embedded?.['sw360:moderators']?.map((elem, i) => (
                                 <li
                                     key={elem.email}
-                                    style={{ display: 'inline' }}
+                                    style={{
+                                        display: 'inline',
+                                    }}
                                 >
                                     <Link
                                         className='text-link'
@@ -264,7 +279,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:moderators']?.length !== undefined &&
-                                        i === summaryData._embedded['sw360:moderators'].length - 1
+                                    i === summaryData._embedded['sw360:moderators'].length - 1
                                         ? ''
                                         : ','}{' '}
                                 </li>
@@ -277,7 +292,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                             {summaryData._embedded?.['sw360:contributors']?.map((elem, i) => (
                                 <li
                                     key={elem.email}
-                                    style={{ display: 'inline' }}
+                                    style={{
+                                        display: 'inline',
+                                    }}
                                 >
                                     <Link
                                         className='text-link'
@@ -287,7 +304,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:contributors']?.length !== undefined &&
-                                        i === summaryData._embedded['sw360:contributors'].length - 1
+                                    i === summaryData._embedded['sw360:contributors'].length - 1
                                         ? ''
                                         : ','}{' '}
                                 </li>
@@ -300,7 +317,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                             {summaryData._embedded?.securityResponsibles?.map((elem, i) => (
                                 <li
                                     key={elem.email}
-                                    style={{ display: 'inline' }}
+                                    style={{
+                                        display: 'inline',
+                                    }}
                                 >
                                     <Link
                                         className='text-link'
@@ -310,7 +329,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.securityResponsibles?.length !== undefined &&
-                                        i === summaryData._embedded.securityResponsibles.length - 1
+                                    i === summaryData._embedded.securityResponsibles.length - 1
                                         ? ''
                                         : ','}{' '}
                                 </li>
@@ -320,22 +339,27 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     <tr>
                         <td>{t('Additional Roles')}:</td>
                         <td>
-                            {Object.entries(summaryData.roles ?? {}).map(([name, value]: [string, string[]]) => (
-                                <li key={name}>
-                                    <span className='fw-bold'>{name}</span>{' '}
-                                    {value.map((v: string, i: number) => (
-                                        <span key={v}>
-                                            <Link
-                                                className='text-link'
-                                                href={`mailto:${v}`}
-                                            >
-                                                {v}
-                                            </Link>
-                                            {i === value.length - 1 ? '' : ','}{' '}
-                                        </span>
-                                    ))}
-                                </li>
-                            ))}
+                            {Object.entries(summaryData.roles ?? {}).map(
+                                ([name, value]: [
+                                    string,
+                                    string[],
+                                ]) => (
+                                    <li key={name}>
+                                        <span className='fw-bold'>{name}</span>{' '}
+                                        {value.map((v: string, i: number) => (
+                                            <span key={v}>
+                                                <Link
+                                                    className='text-link'
+                                                    href={`mailto:${v}`}
+                                                >
+                                                    {v}
+                                                </Link>
+                                                {i === value.length - 1 ? '' : ','}{' '}
+                                            </span>
+                                        ))}
+                                    </li>
+                                ),
+                            )}
                         </td>
                     </tr>
                 </tbody>

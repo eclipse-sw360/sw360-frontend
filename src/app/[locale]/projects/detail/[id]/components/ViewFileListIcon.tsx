@@ -10,11 +10,10 @@
 
 'use client'
 
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { IoMdInformationCircle } from 'react-icons/io'
-
 import type { useTranslations } from 'next-intl'
 import type { JSX } from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { IoMdInformationCircle } from 'react-icons/io'
 
 interface Props {
     license: string

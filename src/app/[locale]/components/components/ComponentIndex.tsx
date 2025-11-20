@@ -31,7 +31,9 @@ const ComponentIndex = (): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleClickImportSBOM = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault()
@@ -181,7 +183,9 @@ const ComponentIndex = (): ReactNode => {
                         buttons={headerbuttons}
                     >
                         <div
-                            style={{ marginLeft: '5px' }}
+                            style={{
+                                marginLeft: '5px',
+                            }}
                             className='btn-group'
                             role='group'
                         >
@@ -205,7 +209,9 @@ const ComponentIndex = (): ReactNode => {
                     </PageButtonHeader>
                     <div
                         className='row'
-                        style={{ marginBottom: '20px' }}
+                        style={{
+                            marginBottom: '20px',
+                        }}
                     >
                         <ComponentsTable setNumberOfComponent={setNumberOfComponent} />
                     </div>

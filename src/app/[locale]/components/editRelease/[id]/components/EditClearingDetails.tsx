@@ -9,9 +9,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Release } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect } from 'react'
+import { Release } from '@/object-types'
 import ClearingDetails from './ClearingDetails'
 import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'
@@ -28,12 +28,18 @@ const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props): Reac
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
     return (
         <>
             <div
                 className='container'
-                style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}
+                style={{
+                    maxWidth: '98vw',
+                    marginTop: '10px',
+                    fontSize: '0.875rem',
+                }}
             >
                 <ClearingDetails
                     releasePayload={releasePayload}

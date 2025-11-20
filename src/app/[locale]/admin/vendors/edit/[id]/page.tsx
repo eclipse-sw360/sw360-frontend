@@ -8,17 +8,17 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
-import EditVendor from './components/EditVendor'
-
 import { ReactNode } from 'react'
+import EditVendor from './components/EditVendor'
 
 export const metadata: Metadata = {
     title: 'Admin - Vendors',
 }
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const EditVendorPage = async (props: Context): Promise<ReactNode> => {

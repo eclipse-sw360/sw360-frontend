@@ -7,13 +7,19 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Spinner } from 'react-bootstrap'
-
 import type { JSX } from 'react'
+import { Spinner } from 'react-bootstrap'
 
 function PageSpinner(): JSX.Element {
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '80vh',
+            }}
+        >
             <Spinner className='spinner'>
                 <span className='visually-hidden'>Loading...</span>
             </Spinner>

@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ConfigKeys, Configuration } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, type JSX } from 'react'
+import { Dispatch, type JSX, SetStateAction } from 'react'
+import { ConfigKeys, Configuration } from '@/object-types'
 import OnOffSwitch from './OnOffSwitch'
 import SelectUserGroup from './SelectUserGroup'
 
@@ -35,7 +35,9 @@ const PackageManagementConfigurations = ({ currentConfig, setCurrentConfig }: Pr
         <>
             <h6
                 className='fw-bold text-uppercase'
-                style={{ color: '#5D8EA9' }}
+                style={{
+                    color: '#5D8EA9',
+                }}
             >
                 {t('Package Management Configurations')}
                 <hr className='my-2 mb-2' />

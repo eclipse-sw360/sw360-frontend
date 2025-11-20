@@ -13,15 +13,45 @@ export const CREDENTIALS = 'credentials'
 export const KEYCLOAK_PROVIDER = 'keycloak'
 export const SW360OAUTH_PROVIDER = 'sw360-backend'
 export const LOCALES = [
-    { i18n: 'en', flag: 'gb' },
-    { i18n: 'ja', flag: 'jp' },
-    { i18n: 'vi', flag: 'vn' },
-    { i18n: 'zh-CN', flag: 'cn' },
-    { i18n: 'pt-BR', flag: 'br' },
-    { i18n: 'ko', flag: 'kr' },
-    { i18n: 'de', flag: 'de' },
-    { i18n: 'es', flag: 'es' },
-    { i18n: 'fr', flag: 'fr' },
-    { i18n: 'zh-TW', flag: 'tw' },
+    {
+        i18n: 'en',
+        flag: 'gb',
+    },
+    {
+        i18n: 'ja',
+        flag: 'jp',
+    },
+    {
+        i18n: 'vi',
+        flag: 'vn',
+    },
+    {
+        i18n: 'zh-CN',
+        flag: 'cn',
+    },
+    {
+        i18n: 'pt-BR',
+        flag: 'br',
+    },
+    {
+        i18n: 'ko',
+        flag: 'kr',
+    },
+    {
+        i18n: 'de',
+        flag: 'de',
+    },
+    {
+        i18n: 'es',
+        flag: 'es',
+    },
+    {
+        i18n: 'fr',
+        flag: 'fr',
+    },
+    {
+        i18n: 'zh-TW',
+        flag: 'tw',
+    },
 ]
 export const locales = LOCALES.map((locale) => locale.i18n)
