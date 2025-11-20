@@ -400,7 +400,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 try {
                     const body = await res.json()
                     msg = body?.message ?? msg
-                } catch {}
+                } catch {
+                    // No action needed if parsing fails
+                }
                 MessageService.error(`${msg}`)
                 return
             }
