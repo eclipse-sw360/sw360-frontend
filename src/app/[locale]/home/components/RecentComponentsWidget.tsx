@@ -104,7 +104,7 @@ function RecentComponentsWidget(): ReactNode {
                     <Spinner className='spinner' />
                 </div>
             )}
-            {recentComponent.length === 0 && (
+            {recentComponent.length === 0 && loading === false && (
                 <>
                     <div className='subscriptionBox'>{t('No recent components available')}</div>
                 </>
