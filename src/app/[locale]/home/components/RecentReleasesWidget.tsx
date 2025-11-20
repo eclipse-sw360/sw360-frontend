@@ -106,7 +106,7 @@ function RecentReleasesWidget(): ReactNode {
                     <Spinner className='spinner' />
                 </div>
             )}
-            {recentRelease.length === 0 && (
+            {recentRelease.length === 0 && loading === false && (
                 <>
                     <div className='subscriptionBox'>{t('No recent releases available')}</div>
                 </>
