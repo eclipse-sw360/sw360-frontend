@@ -312,6 +312,10 @@ export default function VendorsList(): JSX.Element {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleExportSpreadsheet = async () => {

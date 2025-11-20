@@ -1554,16 +1554,14 @@ input[checked] + .slider:before {
 }
 
 .restrict-row-height {
-    overflow: hidden;
-    text-overflow: ellipsis;
-
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 
-    white-space: normal;
-    max-height: 84px;
+    overflow: hidden;
+
+    height: calc(2 * 1lh); /* exactly 2 lines, always */
 }
 
 .table-text-link {

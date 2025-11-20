@@ -227,6 +227,10 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleSearch = async (signal?: AbortSignal) => {

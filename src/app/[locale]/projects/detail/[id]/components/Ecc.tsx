@@ -228,6 +228,10 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const exportSpreadsheet = () => {

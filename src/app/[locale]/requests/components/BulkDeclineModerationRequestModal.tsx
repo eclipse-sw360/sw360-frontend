@@ -400,6 +400,10 @@ export default function BulkDeclineModerationRequestModal({
         getCoreRowModel: getCoreRowModel(),
 
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

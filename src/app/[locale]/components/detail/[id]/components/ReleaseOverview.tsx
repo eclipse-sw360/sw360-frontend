@@ -264,6 +264,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
 
         // client side pagination
         getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

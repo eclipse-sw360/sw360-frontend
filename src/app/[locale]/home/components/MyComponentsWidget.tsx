@@ -202,6 +202,10 @@ export default function MyComponentsWidget(): ReactNode {
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     return (

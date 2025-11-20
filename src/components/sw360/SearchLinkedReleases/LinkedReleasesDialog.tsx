@@ -217,6 +217,10 @@ const LinkedReleasesDialog = ({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleClickSelectLinkedReleases = () => {

@@ -23,14 +23,7 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import {
-    ClientSidePageSizeSelector,
-    ClientSideTableFooter,
-    FilterComponent,
-    PaddedCell,
-    SW360Table,
-    TableSearch,
-} from 'next-sw360'
+import { FilterComponent, PaddedCell, SW360Table, TableSearch } from 'next-sw360'
 import React, { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
@@ -700,12 +693,10 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                         <div className='d-flex justify-content-end'>
                             <TableSearch searchFunction={searchFunction} />
                         </div>
-                        <ClientSidePageSizeSelector table={table} />
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
                         />
-                        <ClientSideTableFooter table={table} />
                     </>
                 ) : (
                     <div className='col-12 mt-1 text-center'>

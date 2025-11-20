@@ -203,6 +203,10 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     const handleCloseDialog = () => {

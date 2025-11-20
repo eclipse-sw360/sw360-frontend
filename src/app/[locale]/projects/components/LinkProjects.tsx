@@ -273,6 +273,10 @@ export default function LinkProjects({
                 page_entries: next.pageSize,
             }))
         },
+
+        meta: {
+            rowHeightConstant: true,
+        },
     })
 
     useEffect(() => {

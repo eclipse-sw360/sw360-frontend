@@ -18,4 +18,8 @@ declare module '@tanstack/react-table' {
       isFullSpanRow?: boolean
     }
   }
+
+  interface TableMeta<TData extends RowData> {
+    rowHeightConstant?: boolean
+  }
 }
