@@ -8,9 +8,9 @@
 // License-Filename: LICENSE
 
 'use client'
-import { UiConfigProvider } from '@/contexts'
 import { useSession } from 'next-auth/react'
 import type { JSX } from 'react'
+import { UiConfigProvider } from '@/contexts'
 
 type Props = {
     children?: React.ReactNode

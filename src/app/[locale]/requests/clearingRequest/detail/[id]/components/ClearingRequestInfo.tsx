@@ -9,15 +9,17 @@
 
 'use client'
 
-import { ClearingRequestDetails } from '@/object-types'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { ReactNode } from 'react'
+import { ClearingRequestDetails } from '@/object-types'
 
 export default function ClearingRequestInfo({
     data,
-}: Readonly<{ data: ClearingRequestDetails | undefined }>): ReactNode | undefined {
+}: Readonly<{
+    data: ClearingRequestDetails | undefined
+}>): ReactNode | undefined {
     const t = useTranslations('default')
     const { status } = useSession()
 

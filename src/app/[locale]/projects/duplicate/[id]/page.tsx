@@ -7,16 +7,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import DuplicateProject from './components/DuplicateProject'
-
+import { getServerSession } from 'next-auth/next'
+import type { JSX } from 'react'
 import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
 import { ConfigKeys, Configuration } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getServerSession } from 'next-auth/next'
-import type { JSX } from 'react'
+import DuplicateProject from './components/DuplicateProject'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const ProjectDuplicatePage = async (props: Context): Promise<JSX.Element> => {

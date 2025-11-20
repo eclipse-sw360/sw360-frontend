@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ConfigKeys, Configuration, UserGroupType } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction } from 'react'
+import { ConfigKeys, Configuration, UserGroupType } from '@/object-types'
 
 interface Props {
     configKey: ConfigKeys

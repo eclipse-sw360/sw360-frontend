@@ -8,9 +8,9 @@
 // License-Filename: LICENSE
 
 'use client'
-import styles from './TableLinkedObligations.module.css'
 
 import type { JSX } from 'react'
+import styles from './TableLinkedObligations.module.css'
 
 interface Props {
     title?: string

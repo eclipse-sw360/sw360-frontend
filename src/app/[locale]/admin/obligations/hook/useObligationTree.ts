@@ -59,10 +59,22 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
             parentId != null
                 ? tree.map((node) =>
                       node.id === parentId
-                          ? { ...node, children: [...node.children, newNode] }
-                          : { ...node, children: updateChildren(node.children, parentId, newNode) },
+                          ? {
+                                ...node,
+                                children: [
+                                    ...node.children,
+                                    newNode,
+                                ],
+                            }
+                          : {
+                                ...node,
+                                children: updateChildren(node.children, parentId, newNode),
+                            },
                   )
-                : [...tree, newNode]
+                : [
+                      ...tree,
+                      newNode,
+                  ]
         setTree(updatedTree)
         setTreeText(getTreeAsText(updatedTree))
     }
@@ -70,8 +82,17 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
     const updateChildren = (children: TreeNode[], parentId: string, newNode: TreeNode): TreeNode[] => {
         return children.map((child) =>
             child.id === parentId
-                ? { ...child, children: [...child.children, newNode] }
-                : { ...child, children: updateChildren(child.children, parentId, newNode) },
+                ? {
+                      ...child,
+                      children: [
+                          ...child.children,
+                          newNode,
+                      ],
+                  }
+                : {
+                      ...child,
+                      children: updateChildren(child.children, parentId, newNode),
+                  },
         )
     }
 
@@ -87,10 +108,22 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
             parentId != null
                 ? tree.map((node) =>
                       node.id === parentId
-                          ? { ...node, children: [...node.children, newNode] }
-                          : { ...node, children: updateChildren(node.children, parentId, newNode) },
+                          ? {
+                                ...node,
+                                children: [
+                                    ...node.children,
+                                    newNode,
+                                ],
+                            }
+                          : {
+                                ...node,
+                                children: updateChildren(node.children, parentId, newNode),
+                            },
                   )
-                : [...tree, newNode]
+                : [
+                      ...tree,
+                      newNode,
+                  ]
         setTree(updatedTree)
         setTreeText(getTreeAsText(updatedTree))
     }
@@ -100,8 +133,14 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
             parentId != null
                 ? tree.map((node) =>
                       node.id === parentId
-                          ? { ...node, children: node.children.filter((child) => child.id !== nodeId) }
-                          : { ...node, children: deleteFromChildren(node.children, nodeId) },
+                          ? {
+                                ...node,
+                                children: node.children.filter((child) => child.id !== nodeId),
+                            }
+                          : {
+                                ...node,
+                                children: deleteFromChildren(node.children, nodeId),
+                            },
                   )
                 : tree.filter((node) => node.id !== nodeId)
         setTree(updatedTree)
@@ -125,9 +164,15 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
         const updateNodeInTree = (nodes: TreeNode[]): TreeNode[] => {
             return nodes.map((node) => {
                 if (node.id === nodeId) {
-                    return { ...node, [field]: value }
+                    return {
+                        ...node,
+                        [field]: value,
+                    }
                 }
-                return { ...node, children: updateNodeInTree(node.children) }
+                return {
+                    ...node,
+                    children: updateNodeInTree(node.children),
+                }
             })
         }
         const updatedTree = updateNodeInTree(tree)
@@ -146,7 +191,10 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
                         ['object']: element.object,
                     }
                 }
-                return { ...node, children: updateNodeInTree(node.children) }
+                return {
+                    ...node,
+                    children: updateNodeInTree(node.children),
+                }
             })
         }
         const updatedTree = updateNodeInTree(tree)
@@ -170,12 +218,21 @@ export function useObligationTree(initialText?: string): ObligationTreeReturn {
             let newNode: TreeNode
 
             if (parts.length >= 3) {
-                const imperatives = ['YOU MUST', 'YOU MUST NOT', 'YOU MAY', 'YOU SHOULD']
+                const imperatives = [
+                    'YOU MUST',
+                    'YOU MUST NOT',
+                    'YOU MAY',
+                    'YOU SHOULD',
+                ]
                 const foundImperative = imperatives.find((imp) => trimmedLine.toUpperCase().startsWith(imp))
 
                 if (foundImperative != undefined) {
                     const remainingText = trimmedLine.substring(foundImperative.length).trim()
-                    const [action = '', ...objectParts] = remainingText ? remainingText.split(' ') : ['']
+                    const [action = '', ...objectParts] = remainingText
+                        ? remainingText.split(' ')
+                        : [
+                              '',
+                          ]
                     newNode = {
                         id: generateId(),
                         type: '',

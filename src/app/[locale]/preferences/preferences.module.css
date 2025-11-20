@@ -72,7 +72,7 @@
     box-shadow: none !important;
 }
 
-.accordion-header button{
+.accordion-header button {
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 15px;
@@ -95,7 +95,7 @@
 .accordion-body {
     background-color: white;
     padding: 1rem 1rem 1.5rem 1rem;
-    font-size: 0.910rem;
+    font-size: 0.91rem;
 }
 
 .accordion-item {

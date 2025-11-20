@@ -7,11 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ObligationEntry } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
+import { ObligationEntry } from '@/object-types'
 
 interface UpdateCommentModalMetadata {
     obligation: string
@@ -41,11 +41,15 @@ export default function UpdateCommentModal({
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         setCommentText(modalMetaData?.comment ?? '')
-    }, [modalMetaData])
+    }, [
+        modalMetaData,
+    ])
     return (
         <Modal
             show={modalMetaData ? true : false}

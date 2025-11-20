@@ -10,18 +10,24 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import { signOut, useSession } from 'next-auth/react'
+import { type JSX, useEffect } from 'react'
 import { Release } from '@/object-types'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 
-import { signOut, useSession } from 'next-auth/react'
-import { useEffect, type JSX } from 'react'
-
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
-    cotsResponsible: { [k: string]: string }
-    setCotsResponsible: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    cotsResponsible: {
+        [k: string]: string
+    }
+    setCotsResponsible: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 function AddCommercialDetails({
@@ -36,13 +42,19 @@ function AddCommercialDetails({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <>
             <div
                 className='container'
-                style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}
+                style={{
+                    maxWidth: '98vw',
+                    marginTop: '10px',
+                    fontSize: '0.875rem',
+                }}
             >
                 <CommercialDetailsAdministration
                     releasePayload={releasePayload}

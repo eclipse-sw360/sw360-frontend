@@ -76,7 +76,11 @@ const SummaryRole = ({ component }: { component: Component }): ReactNode => {
                                                 </a>
                                             ),
                                         )
-                                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                        .reduce((prev, curr): React.ReactNode[] => [
+                                            prev,
+                                            ', ',
+                                            curr,
+                                        ])}
                             </>
                         )}
                     </td>
@@ -105,7 +109,11 @@ const SummaryRole = ({ component }: { component: Component }): ReactNode => {
                                                         </a>
                                                     ),
                                                 )
-                                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                                .reduce((prev, curr): React.ReactNode[] => [
+                                                    prev,
+                                                    ', ',
+                                                    curr,
+                                                ])}
                                     </span>
                                 </li>
                             ))}

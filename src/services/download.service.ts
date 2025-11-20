@@ -9,16 +9,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ApiUtils, CommonUtils } from '@/utils'
 import { Session } from 'next-auth'
 import { signOut } from 'next-auth/react'
+import { ApiUtils, CommonUtils } from '@/utils'
 import MessageService from './message.service'
 
 const download = async (
     url: string,
     session: Session | null,
     fileName: string,
-    headers?: { [key: string]: string },
+    headers?: {
+        [key: string]: string
+    },
 ): Promise<number | undefined> => {
     if (CommonUtils.isNullOrUndefined(session)) {
         return signOut()

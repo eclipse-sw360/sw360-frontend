@@ -9,12 +9,11 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
-
 import { Vulnerability } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 
 export default function AddValues({
     componentName,
@@ -36,11 +35,19 @@ export default function AddValues({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const addValue = () => {
         setPayload((prev: Vulnerability) => {
-            return { ...prev, [payloadKeyName]: [...(prev[payloadKeyName] as Array<string>), ''] }
+            return {
+                ...prev,
+                [payloadKeyName]: [
+                    ...(prev[payloadKeyName] as Array<string>),
+                    '',
+                ],
+            }
         })
     }
 
@@ -51,7 +58,10 @@ export default function AddValues({
         setPayload((prev: Vulnerability) => {
             const refs = prev[payloadKeyName] as string[]
             refs[i] = e.target.value
-            return { ...prev, [payloadKeyName]: refs }
+            return {
+                ...prev,
+                [payloadKeyName]: refs,
+            }
         })
     }
 
@@ -59,7 +69,10 @@ export default function AddValues({
         setPayload((prev: Vulnerability) => {
             const refs = (prev[payloadKeyName] as string[]).slice()
             refs.splice(i, 1)
-            return { ...prev, [payloadKeyName]: refs }
+            return {
+                ...prev,
+                [payloadKeyName]: refs,
+            }
         })
     }
 
@@ -82,7 +95,9 @@ export default function AddValues({
                                     handleChange(e, i)
                                 }}
                                 className='form-control'
-                                placeholder={t('Enter_Args', { args: entityName })}
+                                placeholder={t('Enter_Args', {
+                                    args: entityName,
+                                })}
                             />
                         </div>
                         <div className='col-lg-1 d-flex align-items-end pb-2'>
@@ -100,7 +115,9 @@ export default function AddValues({
                         onClick={addValue}
                         className={`fw-bold btn btn-secondary`}
                     >
-                        {t('Click to add', { args: entityName })}
+                        {t('Click to add', {
+                            args: entityName,
+                        })}
                     </button>
                 </div>
             </div>

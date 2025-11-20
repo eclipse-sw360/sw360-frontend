@@ -9,7 +9,7 @@
 
 'use client'
 
-import React, { SetStateAction, type JSX } from 'react'
+import React, { type JSX, SetStateAction } from 'react'
 import Toast from 'react-bootstrap/Toast'
 
 import { ToastData } from '@/object-types'

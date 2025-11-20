@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
 import { ReactNode } from 'react'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     setAnnotationDate: (input: InputKeyValue) => void
@@ -30,7 +30,10 @@ function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotati
         dataAnnotationDate && (
             <div
                 className='form-group'
-                style={{ flex: 1, marginLeft: '1.5rem' }}
+                style={{
+                    flex: 1,
+                    marginLeft: '1.5rem',
+                }}
             >
                 <label
                     className='lableSPDX'
@@ -38,11 +41,18 @@ function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotati
                 >
                     12.2 Annotation date{' '}
                 </label>
-                <div style={{ display: 'flex' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                    }}
+                >
                     <div>
                         <input
                             id='annotationCreatedDate'
-                            style={{ width: '12rem', textAlign: 'center' }}
+                            style={{
+                                width: '12rem',
+                                textAlign: 'center',
+                            }}
                             type='date'
                             name='key'
                             className='form-control needs-validation'
@@ -54,7 +64,11 @@ function AnnotationDate({ dataAnnotationDate, setDataAnnotationDate, setAnnotati
                     <div>
                         <input
                             id='annotationCreatedTime'
-                            style={{ width: '12rem', textAlign: 'center', marginLeft: '10px' }}
+                            style={{
+                                width: '12rem',
+                                textAlign: 'center',
+                                marginLeft: '10px',
+                            }}
                             type='time'
                             step='1'
                             name='value'

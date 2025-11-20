@@ -9,12 +9,12 @@
 
 'use client'
 
-import { Component, ListFieldProcessComponent } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
 import { TiTick } from 'react-icons/ti'
+import { Component, ListFieldProcessComponent } from '@/object-types'
 
 export default function RolesSection({
     targetComponent,
@@ -35,23 +35,43 @@ export default function RolesSection({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         setModeratorsMergeList([
             ...(targetComponent?.moderators ?? ([] as string[]))
                 .filter((c) => (sourceComponent?.moderators ?? ([] as string[])).indexOf(c) !== -1)
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...(targetComponent?.moderators ?? ([] as string[]))
                 .filter((c) => (sourceComponent?.moderators ?? ([] as string[])).indexOf(c) === -1)
-                .map((c) => ({ value: c, presentInSource: false, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...(sourceComponent?.moderators ?? ([] as string[]))
                 .filter((c) => (targetComponent?.moderators ?? ([] as string[])).indexOf(c) === -1)
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: false, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
         ])
-    }, [targetComponent, sourceComponent])
+    }, [
+        targetComponent,
+        sourceComponent,
+    ])
 
     return (
         <>

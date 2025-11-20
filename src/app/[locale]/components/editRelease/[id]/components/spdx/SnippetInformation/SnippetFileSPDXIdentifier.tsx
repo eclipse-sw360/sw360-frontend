@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
 import { ReactNode } from 'react'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     dataSnippetFromFile: InputKeyValue
@@ -34,7 +34,9 @@ function SnippetFileSPDXIdentifier({
         <td>
             <div
                 className='form-group'
-                style={{ flex: 1 }}
+                style={{
+                    flex: 1,
+                }}
             >
                 <label
                     className='lableSPDX'
@@ -42,11 +44,17 @@ function SnippetFileSPDXIdentifier({
                 >
                     9.2 Snippet from file SPDX identifier
                 </label>
-                <div style={{ display: 'flex' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                    }}
+                >
                     <select
                         id='snippetFromFile'
                         className='form-control form-select'
-                        style={{ flex: 1 }}
+                        style={{
+                            flex: 1,
+                        }}
                         name='key'
                         onChange={handleInputChange}
                         value={dataSnippetFromFile.key}
@@ -54,9 +62,17 @@ function SnippetFileSPDXIdentifier({
                         <option value='SPDXRef'>SPDXRef</option>
                         <option value='DocumentRef'>DocumentRef</option>
                     </select>
-                    <div style={{ margin: '0.5rem' }}>-</div>
+                    <div
+                        style={{
+                            margin: '0.5rem',
+                        }}
+                    >
+                        -
+                    </div>
                     <input
-                        style={{ flex: 3 }}
+                        style={{
+                            flex: 3,
+                        }}
                         id='snippetFromFileValue'
                         className='form-control'
                         name='value'

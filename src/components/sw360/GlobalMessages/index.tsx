@@ -10,14 +10,14 @@
 
 'use client'
 
-import { Message } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { CommonUtils } from '@/utils'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState, type JSX } from 'react'
+import { type JSX, useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-bootstrap'
 import { FaInfoCircle } from 'react-icons/fa'
 import { IoMdCheckmarkCircle } from 'react-icons/io'
+import { Message } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     id?: string
@@ -56,7 +56,10 @@ function GlobalMessages({ id = 'default-message' }: Props): JSX.Element {
             } else {
                 // add message to array with unique id
                 message.itemId = Math.random()
-                setMessages((messages) => [...messages, message])
+                setMessages((messages) => [
+                    ...messages,
+                    message,
+                ])
 
                 // auto close message if required
                 if (message.autoClose === true) {
@@ -73,11 +76,16 @@ function GlobalMessages({ id = 'default-message' }: Props): JSX.Element {
             subscription.unsubscribe()
             MessageService.clear(id)
         }
-    }, [pathname])
+    }, [
+        pathname,
+    ])
 
     function omit(arr: Array<Message>, key: keyof Message) {
         return arr.map((obj: Message) => {
-            return { ...obj, [key]: undefined }
+            return {
+                ...obj,
+                [key]: undefined,
+            }
         })
     }
 

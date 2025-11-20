@@ -11,7 +11,9 @@
 import type { JSX } from 'react'
 
 interface Props {
-    externalIds: { [k: string]: string }
+    externalIds: {
+        [k: string]: string
+    }
 }
 
 const ExternalIds = ({ externalIds }: Props): JSX.Element => {

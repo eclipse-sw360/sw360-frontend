@@ -9,18 +9,18 @@
   License-Filename: LICENSE
 */
 
-.dropdown-btn button{
+.dropdown-btn button {
     background: none !important;
     border: 0px !important;
     padding: 0px !important;
 }
 
-.dropdown-btn button:focus{
+.dropdown-btn button:focus {
     background: none !important;
     border: 0px !important;
 }
 
-.dropdown-btn button:hover{
+.dropdown-btn button:hover {
     background: none !important;
     border: 0px !important;
 }
@@ -46,11 +46,11 @@
     width: 15%;
 }
 
-.table-search-box label{
+.table-search-box label {
     width: 60px;
 }
 
-.table-search-box input{
+.table-search-box input {
     line-height: 1.2rem !important;
 }
 
@@ -68,11 +68,11 @@
     right: 0px;
 }
 
-.list-view-search-box label{
+.list-view-search-box label {
     width: 60px;
 }
 
-.list-view-search-box input{
+.list-view-search-box input {
     width: 83%;
     line-height: 1.2rem !important;
 }

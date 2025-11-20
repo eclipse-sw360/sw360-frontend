@@ -390,8 +390,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                         className={styles['dropdown-item']}
                                                     >
                                                         <span
-                                                            className={`${styles['badge-circle']} ${styles[item.clearingState ?? 'NEW']
-                                                                }`}
+                                                            className={`${styles['badge-circle']} ${
+                                                                styles[item.clearingState ?? 'NEW']
+                                                            }`}
                                                         ></span>
                                                         <Link href={`/components/releases/detail/${item.id}`}>
                                                             {`${t('Version')} ${item.version}`}

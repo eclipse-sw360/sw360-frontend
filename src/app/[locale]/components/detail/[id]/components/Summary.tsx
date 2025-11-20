@@ -9,10 +9,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ResourcesUsing from '@/components/ResourcesUsing/ResourcesUsing'
-import { Component, DocumentTypes } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect } from 'react'
+import ResourcesUsing from '@/components/ResourcesUsing/ResourcesUsing'
+import { Component, DocumentTypes } from '@/object-types'
 import ComponentGeneral from './ComponentGeneral'
 import ReleaseAgrregateData from './ReleaseAggregate'
 import SummaryRole from './SummaryRole'
@@ -29,7 +29,9 @@ const Summary = ({ component, componentId }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <div className='col'>

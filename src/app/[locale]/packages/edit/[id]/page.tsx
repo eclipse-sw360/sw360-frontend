@@ -13,7 +13,9 @@ import { ReactNode } from 'react'
 import EditPackage from './components/EditPackage'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 export const metadata: Metadata = {

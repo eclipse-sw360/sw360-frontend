@@ -11,11 +11,10 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-
-import { Release } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect } from 'react'
+import { Release } from '@/object-types'
 
 interface Props {
     releasePayload: Release
@@ -30,7 +29,9 @@ const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props): 
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReleasePayload({
@@ -46,7 +47,9 @@ const SupplementalInformation = ({ releasePayload, setReleasePayload }: Props): 
         <>
             <div
                 className='col'
-                style={{ padding: '0px 12px' }}
+                style={{
+                    padding: '0px 12px',
+                }}
             >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>

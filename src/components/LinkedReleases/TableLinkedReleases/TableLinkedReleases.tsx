@@ -29,7 +29,9 @@ export default function TableLinkedReleases({
     const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
-        const list = [...releaseLinks]
+        const list = [
+            ...releaseLinks,
+        ]
         list[index][name as keyof ReleaseLink] = value as never
         const map = new Map<string, string>()
         list.forEach((item) => {
@@ -40,7 +42,9 @@ export default function TableLinkedReleases({
     }
 
     const handleClickDelete = (index: number) => {
-        const list: ReleaseLink[] = [...releaseLinks]
+        const list: ReleaseLink[] = [
+            ...releaseLinks,
+        ]
         list.splice(index, 1)
         const map = new Map<string, string>()
         list.forEach((item) => {
@@ -102,7 +106,9 @@ export default function TableLinkedReleases({
                                 <button
                                     type='button'
                                     onClick={() => handleClickDelete(index)}
-                                    style={{ border: 'none' }}
+                                    style={{
+                                        border: 'none',
+                                    }}
                                     className={`fw-bold btn btn-secondary`}
                                 >
                                     <FaTrashAlt className='bi bi-trash3-fill' />

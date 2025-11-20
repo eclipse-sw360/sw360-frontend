@@ -9,10 +9,10 @@
 
 'use client'
 
-import { Attachment, Component } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect } from 'react'
+import { Attachment, Component } from '@/object-types'
 
 export default function MergeComponentConfirmation({
     finalComponentPayload,
@@ -30,7 +30,9 @@ export default function MergeComponentConfirmation({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <>

@@ -10,16 +10,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { FaCopy, FaInfoCircle } from 'react-icons/fa'
-
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
 import styles from '../detail.module.css'
 
 interface Props {
@@ -36,12 +35,17 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const renderArrayOfUsers = (users: Array<User>) => {
         return Object.entries(users)
             .map(
-                ([index, item]: [string, User]): React.ReactNode => (
+                ([index, item]: [
+                    string,
+                    User,
+                ]): React.ReactNode => (
                     <Link
                         key={index}
                         className='link'
@@ -51,13 +55,26 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                     </Link>
                 ),
             )
-            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
+            .reduce((prev, curr): React.ReactNode[] => [
+                prev,
+                ', ',
+                curr,
+            ])
     }
 
     const renderArrayOfTexts = (texts: Array<string>) => {
         return Object.entries(texts)
-            .map(([index, item]: [string, string]): React.ReactNode => <span key={index}>{item}</span>)
-            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
+            .map(
+                ([index, item]: [
+                    string,
+                    string,
+                ]): React.ReactNode => <span key={index}>{item}</span>,
+            )
+            .reduce((prev, curr): React.ReactNode[] => [
+                prev,
+                ', ',
+                curr,
+            ])
     }
 
     return (
@@ -87,7 +104,12 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                 navigator.clipboard.writeText(releaseId).catch((err) => console.log(err))
                             }}
                         >
-                            <FaCopy style={{ color: 'gray', width: '20px' }} />
+                            <FaCopy
+                                style={{
+                                    color: 'gray',
+                                    width: '20px',
+                                }}
+                            />
                         </button>
                     </td>
                 </tr>
@@ -174,7 +196,11 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                                         </a>
                                                     ),
                                                 )
-                                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                                .reduce((prev, curr): React.ReactNode[] => [
+                                                    prev,
+                                                    ', ',
+                                                    curr,
+                                                ])}
                                     </span>
                                 </li>
                             ))}
@@ -210,11 +236,17 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:licenses']) &&
                             Object.entries(release._embedded['sw360:licenses'])
                                 .map(
-                                    ([index, item]: [string, LicenseDetail]): React.ReactNode => (
+                                    ([index, item]: [
+                                        string,
+                                        LicenseDetail,
+                                    ]): React.ReactNode => (
                                         <span key={index}>
                                             {item.shortName}
                                             <FaInfoCircle
-                                                style={{ marginLeft: '5px', color: 'gray' }}
+                                                style={{
+                                                    marginLeft: '5px',
+                                                    color: 'gray',
+                                                }}
                                                 className={styles.info}
                                             />
                                         </span>
@@ -235,17 +267,27 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release.otherLicenseIds) &&
                             Object.entries(release.otherLicenseIds)
                                 .map(
-                                    ([index, item]: [string, string]): React.ReactNode => (
+                                    ([index, item]: [
+                                        string,
+                                        string,
+                                    ]): React.ReactNode => (
                                         <span key={index}>
                                             {item}
                                             <FaInfoCircle
-                                                style={{ marginLeft: '5px', color: 'gray' }}
+                                                style={{
+                                                    marginLeft: '5px',
+                                                    color: 'gray',
+                                                }}
                                                 className={styles.info}
                                             />
                                         </span>
                                     ),
                                 )
-                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                .reduce((prev, curr): React.ReactNode[] => [
+                                    prev,
+                                    ', ',
+                                    curr,
+                                ])}
                     </td>
                 </tr>
                 <tr>

@@ -26,7 +26,11 @@ export default function Breadcrumb({ name }: BreadcrumbProps) {
         const label = index === 1 && name ? name : formatSegment(segment)
         const isLast = index === visibleSegments.length - 1
 
-        return { label, href, isLast }
+        return {
+            label,
+            href,
+            isLast,
+        }
     })
 
     return (

@@ -11,4 +11,6 @@ import { createNavigation } from 'next-intl/navigation'
 
 import { locales } from '@/constants'
 
-export const { Link, redirect, usePathname, useRouter } = createNavigation({ locales })
+export const { Link, redirect, usePathname, useRouter } = createNavigation({
+    locales,
+})

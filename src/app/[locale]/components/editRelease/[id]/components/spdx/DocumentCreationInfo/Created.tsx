@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
 import { ReactNode } from 'react'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     setCreated: (input: InputKeyValue) => void
@@ -29,7 +29,9 @@ function Created({ dataCreated, setDataCreated, setCreated }: Props): ReactNode 
     return (
         dataCreated && (
             <td
-                style={{ flexDirection: 'column' }}
+                style={{
+                    flexDirection: 'column',
+                }}
                 colSpan={3}
             >
                 <div className='form-group'>
@@ -39,7 +41,13 @@ function Created({ dataCreated, setDataCreated, setCreated }: Props): ReactNode 
                     >
                         6.9 Created
                     </label>
-                    <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            marginBottom: '0.75rem',
+                        }}
+                    >
                         <div>
                             <input
                                 id='createdDate'

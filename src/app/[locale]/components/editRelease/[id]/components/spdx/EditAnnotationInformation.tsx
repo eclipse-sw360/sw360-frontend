@@ -10,11 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
-import { Annotations, InputKeyValue, PackageInformation, SPDX, SPDXDocument } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
+import { Annotations, InputKeyValue, PackageInformation, SPDX, SPDXDocument } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 import AnnotationDate from './AnnotationInformation/AnnotationDate'
 import Annotator from './AnnotationInformation/Annotator'
 
@@ -53,7 +53,9 @@ const EditAnnotationInformation = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const setAnnotatorToAnnotation = (input: InputKeyValue) => {
         if (isSourceSPDXDocument) {
@@ -236,7 +238,9 @@ const EditAnnotationInformation = ({
 
     const addAnnotationsSPDXsSPDX = () => {
         setChangeSource(false)
-        const arrayExternals: Annotations[] = [...annotationsSPDXs]
+        const arrayExternals: Annotations[] = [
+            ...annotationsSPDXs,
+        ]
         setIncreIndex(annotationsSPDXs.length)
         setNumberIndexSPDX(annotationsSPDXs.length)
         setIsAdd(true)
@@ -269,7 +273,9 @@ const EditAnnotationInformation = ({
 
     const addAnnotationsSPDXsPackage = () => {
         setChangeSource(false)
-        const arrayExternals: Annotations[] = [...annotationsPackages]
+        const arrayExternals: Annotations[] = [
+            ...annotationsPackages,
+        ]
         setIncreIndex(annotationsPackages.length)
         setIsAdd(true)
         setNumberIndexPackage(annotationsPackages.length)
@@ -501,7 +507,9 @@ const EditAnnotationInformation = ({
                         >
                             <label
                                 htmlFor='selectAnnotationSource'
-                                style={{ textDecoration: 'underline' }}
+                                style={{
+                                    textDecoration: 'underline',
+                                }}
                                 className='sub-title lableSPDX'
                             >
                                 Select Source
@@ -509,18 +517,34 @@ const EditAnnotationInformation = ({
                             <select
                                 id='selectAnnotationSource'
                                 className='form-control spdx-select always-enable form-select'
-                                style={{ marginRight: '4rem' }}
+                                style={{
+                                    marginRight: '4rem',
+                                }}
                                 onChange={changeAnnotationSource}
                             >
                                 <option value='spdxDocument'>SPDX Document</option>
                                 <option value='package'>Package</option>
                             </select>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                paddingLeft: '1rem',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginBottom: '0.75rem',
+                                }}
+                            >
                                 <label
                                     htmlFor='selectAnnotation'
-                                    style={{ textDecoration: 'underline' }}
+                                    style={{
+                                        textDecoration: 'underline',
+                                    }}
                                     className='sub-title lableSPDX'
                                 >
                                     Select Annotation
@@ -583,7 +607,11 @@ const EditAnnotationInformation = ({
                     <>
                         <tr>
                             <td>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <Annotator
                                         dataAnnotator={dataAnnotator}
                                         setDataAnnotator={setDataAnnotator}
@@ -599,10 +627,17 @@ const EditAnnotationInformation = ({
                         </tr>
                         <tr>
                             <td>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <div
                                         className='form-group'
-                                        style={{ flex: 1, marginRight: '1rem' }}
+                                        style={{
+                                            flex: 1,
+                                            marginRight: '1rem',
+                                        }}
                                     >
                                         <label
                                             htmlFor='annotationType'
@@ -626,7 +661,9 @@ const EditAnnotationInformation = ({
                                     </div>
                                     <div
                                         className='form-group'
-                                        style={{ flex: 1 }}
+                                        style={{
+                                            flex: 1,
+                                        }}
                                     >
                                         <label
                                             htmlFor='spdxIdRef'

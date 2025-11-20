@@ -10,12 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-
 import { Component, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
 
 const ReleaseAgrregate = ({ component }: { component: Component }): ReactNode => {
     const [toggle, setToggle] = useState(false)
@@ -26,7 +25,9 @@ const ReleaseAgrregate = ({ component }: { component: Component }): ReactNode =>
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <table className='table summary-table'>
@@ -53,7 +54,11 @@ const ReleaseAgrregate = ({ component }: { component: Component }): ReactNode =>
                                                 <span key={vendor.fullName}>{vendor.fullName}</span>
                                             ),
                                         )
-                                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                        .reduce((prev, curr): React.ReactNode[] => [
+                                            prev,
+                                            ', ',
+                                            curr,
+                                        ])}
                             </>
                         )}
                     </td>

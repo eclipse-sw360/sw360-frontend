@@ -9,13 +9,13 @@
 
 'use client'
 
-import { Package } from '@/object-types'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { ReactNode, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BiClipboard } from 'react-icons/bi'
+import { Package } from '@/object-types'
 
 const Capitalize = (text: string) => {
     return text
@@ -32,7 +32,9 @@ export default function Summary({ summaryData }: { summaryData: Package }): Reac
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const Clipboard = ({ text }: { text: string }) => {
         return (
@@ -131,7 +133,9 @@ export default function Summary({ summaryData }: { summaryData: Package }): Reac
                             {summaryData.licenseIds?.map((elem, i) => (
                                 <li
                                     key={elem}
-                                    style={{ display: 'inline' }}
+                                    style={{
+                                        display: 'inline',
+                                    }}
                                 >
                                     <Link
                                         className='text-link'

@@ -8,9 +8,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import UserAdministration from './components/UserAdministration'
-
 import type { JSX } from 'react'
+import UserAdministration from './components/UserAdministration'
 
 export const metadata: Metadata = {
     title: 'Admin',

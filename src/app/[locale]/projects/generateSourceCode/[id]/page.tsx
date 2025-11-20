@@ -8,12 +8,13 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import GenerateSourceCodeBundle from './components/GenerateSourceCodeBundle'
 
-import type { JSX } from 'react'
-
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 export const metadata: Metadata = {

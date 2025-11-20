@@ -16,7 +16,9 @@ export const metadata: Metadata = {
 }
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const MergeVendor = async (props: Context): Promise<ReactNode> => {

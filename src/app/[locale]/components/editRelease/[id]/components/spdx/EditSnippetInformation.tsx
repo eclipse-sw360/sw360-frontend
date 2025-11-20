@@ -10,11 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
-import { InputKeyValue, SPDX, SPDXDocument, SnippetInformation, SnippetRange } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
+import { InputKeyValue, SnippetInformation, SnippetRange, SPDX, SPDXDocument } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 import SnippetFileSPDXIdentifier from './SnippetInformation/SnippetFileSPDXIdentifier'
 import SnippetRanges from './SnippetInformation/SnippetRanges'
 
@@ -48,7 +48,9 @@ const EditSnippetInformation = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const setDataSnippetRanges = (inputs: SnippetRange[]) => {
         const snippets: SnippetInformation[] = snippetInformations.map((snippet, index) => {
@@ -141,7 +143,9 @@ const EditSnippetInformation = ({
     }
 
     const addSnippet = () => {
-        const arrayExternals: SnippetInformation[] = [...snippetInformations]
+        const arrayExternals: SnippetInformation[] = [
+            ...snippetInformations,
+        ]
         setIncreIndex(snippetInformations.length)
         setNumberIndex(snippetInformations.length)
         setIsAdd(true)
@@ -301,7 +305,10 @@ const EditSnippetInformation = ({
                 setSnippetCopyrightText(snippetInformations[indexSnippetInformation]?.copyrightText)
             }
         }
-    }, [indexSnippetInformation, snippetInformations])
+    }, [
+        indexSnippetInformation,
+        snippetInformations,
+    ])
 
     const convertSnippetRanges = (snippetRanges: SnippetRange[]) => {
         const inputs: SnippetRange[] = []
@@ -541,11 +548,25 @@ const EditSnippetInformation = ({
             <tbody hidden={toggle}>
                 <tr>
                     <td colSpan={3}>
-                        <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                paddingLeft: '1rem',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginBottom: '0.75rem',
+                                }}
+                            >
                                 <label
                                     htmlFor='selectSnippet'
-                                    style={{ textDecoration: 'underline' }}
+                                    style={{
+                                        textDecoration: 'underline',
+                                    }}
                                     className='sub-title lableSPDX'
                                 >
                                     Select Snippet
@@ -586,10 +607,16 @@ const EditSnippetInformation = ({
                 {!CommonUtils.isNullOrUndefined(snippetInformations[indexSnippetInformation]) && (
                     <>
                         <tr>
-                            <td style={{ width: '600px' }}>
+                            <td
+                                style={{
+                                    width: '600px',
+                                }}
+                            >
                                 <div
                                     className='form-group'
-                                    style={{ flex: 1 }}
+                                    style={{
+                                        flex: 1,
+                                    }}
                                 >
                                     <label
                                         className='lableSPDX'
@@ -597,7 +624,11 @@ const EditSnippetInformation = ({
                                     >
                                         9.1 Snippet SPDX identifier
                                     </label>
-                                    <div style={{ display: 'flex' }}>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                        }}
+                                    >
                                         <label className='sub-label lableSPDX'>SPDXRef-</label>
                                         <input
                                             id='snippetSpdxIdentifier'
@@ -643,8 +674,19 @@ const EditSnippetInformation = ({
                             <td colSpan={3}>
                                 <div className='form-group'>
                                     <label className='lableSPDX'>9.5 Snippet concluded license</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: 'inline-flex',
+                                                flex: 3,
+                                                marginRight: '1rem',
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='spdxConcludedLicenseExist'
@@ -655,7 +697,10 @@ const EditSnippetInformation = ({
                                                 checked={snippetConcludedLicenseExist}
                                             />
                                             <input
-                                                style={{ flex: 6, marginRight: '1rem' }}
+                                                style={{
+                                                    flex: 6,
+                                                    marginRight: '1rem',
+                                                }}
                                                 id='spdxConcludedLicenseValue'
                                                 className='form-control'
                                                 type='text'
@@ -674,7 +719,11 @@ const EditSnippetInformation = ({
                                                 }
                                             />
                                         </div>
-                                        <div style={{ flex: 2 }}>
+                                        <div
+                                            style={{
+                                                flex: 2,
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='spdxConcludedLicenseNone'
@@ -685,7 +734,9 @@ const EditSnippetInformation = ({
                                                 checked={snippetConcludedLicenseNone}
                                             />
                                             <label
-                                                style={{ marginRight: '2rem' }}
+                                                style={{
+                                                    marginRight: '2rem',
+                                                }}
                                                 className='form-check-label radio-label lableSPDX'
                                                 htmlFor='spdxConcludedLicenseNone'
                                             >
@@ -715,8 +766,19 @@ const EditSnippetInformation = ({
                             <td colSpan={3}>
                                 <div className='form-group'>
                                     <label className='lableSPDX'>9.6 License information in snippet</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: 'inline-flex',
+                                                flex: 3,
+                                                marginRight: '1rem',
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='licenseInfoInFile'
@@ -727,7 +789,10 @@ const EditSnippetInformation = ({
                                                 checked={licenseInfoInSnippetsExist}
                                             />
                                             <textarea
-                                                style={{ flex: 6, marginRight: '1rem' }}
+                                                style={{
+                                                    flex: 6,
+                                                    marginRight: '1rem',
+                                                }}
                                                 id='licenseInfoInFileValue'
                                                 rows={5}
                                                 className='form-control'
@@ -744,7 +809,11 @@ const EditSnippetInformation = ({
                                                 }
                                             ></textarea>
                                         </div>
-                                        <div style={{ flex: 2 }}>
+                                        <div
+                                            style={{
+                                                flex: 2,
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='licenseInfoInFileNone'
@@ -755,7 +824,9 @@ const EditSnippetInformation = ({
                                                 checked={licenseInfoInSnippetsNone}
                                             />
                                             <label
-                                                style={{ marginRight: '2rem' }}
+                                                style={{
+                                                    marginRight: '2rem',
+                                                }}
                                                 className='form-check-label radio-label lableSPDX'
                                                 htmlFor='licenseInfoInFileNone'
                                             >
@@ -806,8 +877,19 @@ const EditSnippetInformation = ({
                             <td colSpan={3}>
                                 <div className='form-group'>
                                     <label className='lableSPDX'>9.8 Snippet copyright text</label>
-                                    <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                        <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: 'inline-flex',
+                                                flex: 3,
+                                                marginRight: '1rem',
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='snippetCopyrightText'
@@ -818,7 +900,10 @@ const EditSnippetInformation = ({
                                                 checked={snippetCopyrightTextExist}
                                             />
                                             <textarea
-                                                style={{ flex: 6, marginRight: '1rem' }}
+                                                style={{
+                                                    flex: 6,
+                                                    marginRight: '1rem',
+                                                }}
                                                 id='copyrightTextValueSnippet'
                                                 rows={5}
                                                 className='form-control'
@@ -829,7 +914,11 @@ const EditSnippetInformation = ({
                                                 disabled={snippetCopyrightTextNone || snippetCopyrightTextNoasserttion}
                                             ></textarea>
                                         </div>
-                                        <div style={{ flex: 2 }}>
+                                        <div
+                                            style={{
+                                                flex: 2,
+                                            }}
+                                        >
                                             <input
                                                 className='spdx-radio'
                                                 id='snippetCopyrightTextNone'
@@ -840,7 +929,9 @@ const EditSnippetInformation = ({
                                                 checked={snippetCopyrightTextNone}
                                             />
                                             <label
-                                                style={{ marginRight: '2rem' }}
+                                                style={{
+                                                    marginRight: '2rem',
+                                                }}
                                                 className='form-check-label radio-label lableSPDX'
                                                 htmlFor='snippetCopyrightTextNone'
                                             >

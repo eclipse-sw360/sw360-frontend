@@ -8,9 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Message, MessageOptions } from '@/object-types'
 import { Observable, Subject } from 'rxjs'
 import { filter } from 'rxjs/operators'
+import { Message, MessageOptions } from '@/object-types'
 
 const MessageType = {
     Success: 'success',
@@ -58,7 +58,9 @@ function showMessage(type: string, text: string, lead: string, options?: Message
 }
 
 function clear(id = defaultId): void {
-    messageSubject.next({ id })
+    messageSubject.next({
+        id,
+    })
 }
 
 const MessageService = {

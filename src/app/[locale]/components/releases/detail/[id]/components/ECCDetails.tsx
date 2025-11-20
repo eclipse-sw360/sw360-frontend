@@ -10,11 +10,10 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-
 import { ReleaseDetail } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
 
 interface Props {
     release: ReleaseDetail
@@ -29,7 +28,9 @@ const ECCDetails = ({ release }: Props): ReactNode => {
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <div className='col'>

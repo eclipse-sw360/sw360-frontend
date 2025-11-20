@@ -10,10 +10,10 @@
 // License-Filename: LICENSE
 
 'use client'
-import { LicensePayload } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect } from 'react'
+import { LicensePayload } from '@/object-types'
 import styles from './LicenseDetails.module.css'
 
 interface Props {
@@ -30,7 +30,9 @@ const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const updateField = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setLicensePayload({
@@ -42,27 +44,43 @@ const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props
     return (
         <div
             className='row mb-4'
-            style={{ padding: '0px 12px' }}
+            style={{
+                padding: '0px 12px',
+            }}
         >
             <div
                 className={`${styles['header']} mb-1`}
-                style={{ paddingTop: '0.5rem', height: '45px' }}
+                style={{
+                    paddingTop: '0.5rem',
+                    height: '45px',
+                }}
             >
                 <p
                     className='fw-bold mt-1'
-                    style={{ fontSize: '0.875rem' }}
+                    style={{
+                        fontSize: '0.875rem',
+                    }}
                 >
                     {t('License Text')}
                 </p>
             </div>
-            <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
+            <div
+                style={{
+                    backgroundColor: '#FFF',
+                    borderBottom: '1px solid #DCDCDC',
+                }}
+            >
                 <div
                     className='row'
-                    style={{ paddingBottom: '0.7rem' }}
+                    style={{
+                        paddingBottom: '0.7rem',
+                    }}
                 >
                     <div className='col-12'>
                         <textarea
-                            style={{ height: '500px' }}
+                            style={{
+                                height: '500px',
+                            }}
                             className={`form-control ${inputValid ? 'is-valid' : ''}`}
                             placeholder='Enter the License-Text here...'
                             id='text'

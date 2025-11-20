@@ -12,11 +12,11 @@
     font-size: 14px;
     position: sticky;
     top: 0;
-    z-index: 999 
+    z-index: 999;
 }
 
 .title {
-    color: #5D8EA9;
+    color: #5d8ea9;
     padding-left: 0px;
     padding-right: 0px;
 }

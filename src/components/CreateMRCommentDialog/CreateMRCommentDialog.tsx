@@ -11,7 +11,7 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, useEffect, useState, type JSX } from 'react'
+import { ChangeEvent, type JSX, useEffect, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { FaPencilAlt } from 'react-icons/fa'
 
@@ -37,7 +37,9 @@ export default function CreateMRCommentDialog<T>({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleCloseDialog = () => {
         setShow(!show)
@@ -53,10 +55,12 @@ export default function CreateMRCommentDialog<T>({
         let updatedPayload: T | undefined
         setEntityPayload((prev) => {
             if (!prev) return prev
-                updatedPayload = { ...prev, comment: userComment }
-                return updatedPayload
+            updatedPayload = {
+                ...prev,
+                comment: userComment,
             }
-        )
+            return updatedPayload
+        })
 
         if (updatedPayload) {
             await updateEntity(updatedPayload)
@@ -76,10 +80,16 @@ export default function CreateMRCommentDialog<T>({
         >
             <Modal.Header
                 closeButton
-                style={{ color: 'blue' }}
+                style={{
+                    color: 'blue',
+                }}
             >
                 <Modal.Title>
-                    <FaPencilAlt style={{ marginBottom: '5px' }} />
+                    <FaPencilAlt
+                        style={{
+                            marginBottom: '5px',
+                        }}
+                    />
                     &nbsp;&nbsp;{t('Create moderation request')}
                 </Modal.Title>
             </Modal.Header>
@@ -87,7 +97,13 @@ export default function CreateMRCommentDialog<T>({
                 <>
                     <Form>
                         <Form.Group className='mb-3'>
-                            <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
+                            <Form.Label
+                                style={{
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                {t('Please comment your changes')}
+                            </Form.Label>
                             <Form.Control
                                 as='textarea'
                                 aria-label='With textarea'

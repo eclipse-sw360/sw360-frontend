@@ -9,12 +9,12 @@
 
 'use client'
 
-import { Attachment, Component, ListFieldProcessComponent } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
 import { TiTick } from 'react-icons/ti'
+import { Attachment, Component, ListFieldProcessComponent } from '@/object-types'
 import GeneralSection from './GeneralSection'
 import RolesSection from './RolesSection'
 
@@ -44,7 +44,9 @@ export default function MergeComponent({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         setFinalComponentPayload({
@@ -61,7 +63,12 @@ export default function MergeComponent({
                             (sourceElem) => sourceElem === targetElem,
                         ).length !== 0,
                 )
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...Object.keys(targetComponent?.externalIds ?? {})
                 .filter(
@@ -70,7 +77,12 @@ export default function MergeComponent({
                             (sourceElem) => sourceElem === targetElem,
                         ).length === 0,
                 )
-                .map((c) => ({ value: c, presentInSource: false, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...Object.keys(sourceComponent?.externalIds ?? {})
                 .filter(
@@ -79,7 +91,12 @@ export default function MergeComponent({
                             (targetElem) => sourceElem === targetElem,
                         ).length === 0,
                 )
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: false, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
         ])
 
         setAdditionalDataMergeList([
@@ -90,7 +107,12 @@ export default function MergeComponent({
                             (sourceElem) => sourceElem === targetElem,
                         ).length !== 0,
                 )
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...Object.keys(targetComponent?.additionalData ?? {})
                 .filter(
@@ -99,7 +121,12 @@ export default function MergeComponent({
                             (sourceElem) => sourceElem === targetElem,
                         ).length === 0,
                 )
-                .map((c) => ({ value: c, presentInSource: false, presentInTarget: true, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
 
             ...Object.keys(sourceComponent?.additionalData ?? {})
                 .filter(
@@ -108,7 +135,12 @@ export default function MergeComponent({
                             (targetElem) => sourceElem === targetElem,
                         ).length === 0,
                 )
-                .map((c) => ({ value: c, presentInSource: true, presentInTarget: false, overWritten: false })),
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
         ])
 
         setAttachmentsMergeList([
@@ -133,8 +165,18 @@ export default function MergeComponent({
                 mergeLists[role] = targetComponent.roles[role].map((targetElem) =>
                     (sourceComponent?.roles?.[role] ?? []).filter((sourceElem) => sourceElem === targetElem).length ===
                     0
-                        ? { value: targetElem, presentInSource: false, presentInTarget: true, overWritten: false }
-                        : { value: targetElem, presentInSource: true, presentInTarget: true, overWritten: false },
+                        ? {
+                              value: targetElem,
+                              presentInSource: false,
+                              presentInTarget: true,
+                              overWritten: false,
+                          }
+                        : {
+                              value: targetElem,
+                              presentInSource: true,
+                              presentInTarget: true,
+                              overWritten: false,
+                          },
                 )
             }
         }
@@ -163,7 +205,10 @@ export default function MergeComponent({
         }
 
         setAdditionalRolesMergeLists(mergeLists)
-    }, [targetComponent, sourceComponent])
+    }, [
+        targetComponent,
+        sourceComponent,
+    ])
 
     return (
         <>

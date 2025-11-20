@@ -9,7 +9,13 @@
 
 import { useEffect, useState } from 'react'
 
-function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
+function useLocalStorage<T>(
+    key: string,
+    initialValue: T,
+): [
+    T,
+    (value: T | ((val: T) => T)) => void,
+] {
     const [storedValue, setStoredValue] = useState<T>(initialValue)
 
     const setValue = (value: T | ((val: T) => T)) => {
@@ -33,9 +39,15 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
 
         window.addEventListener('storage', handleStorageChange)
         return () => window.removeEventListener('storage', handleStorageChange)
-    }, [initialValue, key])
+    }, [
+        initialValue,
+        key,
+    ])
 
-    return [storedValue, setValue]
+    return [
+        storedValue,
+        setValue,
+    ]
 }
 
 export default useLocalStorage

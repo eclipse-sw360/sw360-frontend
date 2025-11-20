@@ -9,14 +9,14 @@
 
 'use client'
 
-import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     show: boolean
@@ -52,7 +52,9 @@ export default function ExportProjectSbomModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value, type } = event.target
@@ -115,7 +117,10 @@ export default function ExportProjectSbomModal({
                 scrollable
             >
                 <Modal.Header
-                    style={{ backgroundColor: '#eef2fa', color: '#2e5aac' }}
+                    style={{
+                        backgroundColor: '#eef2fa',
+                        color: '#2e5aac',
+                    }}
                     closeButton
                 >
                     <Modal.Title id='export-project-sbom-modal'>
@@ -156,11 +161,17 @@ export default function ExportProjectSbomModal({
                     <div className='mb-3'>{t('Currently only CycloneDX SBOM export is supported')}</div>
                     <Form>
                         <Form.Group className='mb-4'>
-                            <Form.Label style={{ fontWeight: 'bold' }}>
+                            <Form.Label
+                                style={{
+                                    fontWeight: 'bold',
+                                }}
+                            >
                                 {t('Select SBOM format')} :
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -183,7 +194,10 @@ export default function ExportProjectSbomModal({
                         </Form.Group>
                         <Form.Group
                             className='mb-2'
-                            style={{ display: 'flex', alignItems: 'left' }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'left',
+                            }}
                         >
                             <Form.Check
                                 type='checkbox'
@@ -192,7 +206,11 @@ export default function ExportProjectSbomModal({
                                 checked={includeSubProjectReleases}
                                 onChange={updateInputField}
                             />
-                            <Form.Label style={{ marginLeft: '10px' }}>
+                            <Form.Label
+                                style={{
+                                    marginLeft: '10px',
+                                }}
+                            >
                                 {t('Include releases from sub projects')}
                             </Form.Label>
                         </Form.Group>

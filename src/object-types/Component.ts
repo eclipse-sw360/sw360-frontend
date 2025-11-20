@@ -23,9 +23,13 @@ interface Component {
     ownerGroup?: string
     ownerCountry?: string
     visbility?: string
-    externalIds?: { [k: string]: string }
+    externalIds?: {
+        [k: string]: string
+    }
     releaseIds?: string[]
-    additionalData?: { [k: string]: string }
+    additionalData?: {
+        [k: string]: string
+    }
     mainLicenseIds?: Array<string>
     defaultVendorId?: string
     categories?: Array<string>
@@ -40,7 +44,9 @@ interface Component {
     modifiedBy?: string
     createdBy?: string
     attachments?: Attachment[]
-    roles?: { [k: string]: Array<string> }
+    roles?: {
+        [k: string]: Array<string>
+    }
     setBusinessUnit?: boolean
     setVisbility?: boolean
     defaultVendor?: Vendor

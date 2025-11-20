@@ -29,7 +29,9 @@ export default function LicenseInfoDownloadConfirmationModal({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <>
@@ -41,7 +43,10 @@ export default function LicenseInfoDownloadConfirmationModal({
                 scrollable
             >
                 <Modal.Header
-                    style={{ backgroundColor: '#eef2fa', color: '#2e5aac' }}
+                    style={{
+                        backgroundColor: '#eef2fa',
+                        color: '#2e5aac',
+                    }}
                     closeButton
                 >
                     <Modal.Title id='delete-all-license-info-modal'>

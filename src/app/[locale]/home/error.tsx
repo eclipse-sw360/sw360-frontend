@@ -17,7 +17,9 @@ export default function ErrorPage({
     error,
     reset,
 }: {
-    error: Error & { digest?: string }
+    error: Error & {
+        digest?: string
+    }
     reset: () => void
 }): JSX.Element {
     const [isVisible, setIsVisible] = useState(true)

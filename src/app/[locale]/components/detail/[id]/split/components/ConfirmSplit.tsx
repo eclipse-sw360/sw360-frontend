@@ -9,10 +9,10 @@
 
 'use client'
 
-import { Component } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect } from 'react'
+import { Component } from '@/object-types'
 
 export default function SplitComponentConfirmation({
     targetComponent,
@@ -28,7 +28,9 @@ export default function SplitComponentConfirmation({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <>

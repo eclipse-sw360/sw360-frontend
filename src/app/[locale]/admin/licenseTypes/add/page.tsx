@@ -8,9 +8,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import AddLicenseTypes from './components/AddLicenseTypes'
-
 import type { JSX } from 'react'
+import AddLicenseTypes from './components/AddLicenseTypes'
 
 export const metadata: Metadata = {
     title: 'Admin - License Types',

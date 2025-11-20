@@ -9,11 +9,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect, useState } from 'react'
 import PrettyFormatData from '@/components/PrettyFormatData/PrettyFormatData'
 import { Changelogs } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, type JSX } from 'react'
 import createChangesCards from '../CreateChangeCard'
 
 interface Props {
@@ -31,7 +31,10 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
         } else {
             createChangesCards([], t('Field Name'))
         }
-    }, [changeLogData, t])
+    }, [
+        changeLogData,
+        t,
+    ])
 
     const handleReferenceDoc = () => {
         if (
@@ -72,7 +75,9 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
                     <td className='text-justify col-2 p-3'>{t('Reference Doc')}: </td>
                     <td
                         className='text-justify col-4 p-3'
-                        style={{ borderRight: '1px solid lightgrey' }}
+                        style={{
+                            borderRight: '1px solid lightgrey',
+                        }}
                     >
                         <PrettyFormatData data={changeLogData.referenceDoc} />
                     </td>
@@ -87,7 +92,9 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
                 <>
                     <table
                         className='table label-value-table'
-                        style={{ marginBottom: '2rem' }}
+                        style={{
+                            marginBottom: '2rem',
+                        }}
                     >
                         <thead
                             title='Click to expand or collapse'
@@ -106,12 +113,16 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
                         >
                             <tr
                                 className='row'
-                                style={{ margin: '0px' }}
+                                style={{
+                                    margin: '0px',
+                                }}
                             >
                                 <td className='text-justify col-2 p-3'>{t('User')}:</td>
                                 <td
                                     className='text-justify col-4 p-3'
-                                    style={{ borderRight: '1px solid lightgrey' }}
+                                    style={{
+                                        borderRight: '1px solid lightgrey',
+                                    }}
                                 >
                                     {changeLogData.userEdited}
                                 </td>
@@ -120,12 +131,16 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
                             </tr>
                             <tr
                                 className='row'
-                                style={{ margin: '0px' }}
+                                style={{
+                                    margin: '0px',
+                                }}
                             >
                                 <td className='text-justify col-2 p-3'>{t('Date')}:</td>
                                 <td
                                     className='text-justify col-4 p-3'
-                                    style={{ borderRight: '1px solid lightgrey' }}
+                                    style={{
+                                        borderRight: '1px solid lightgrey',
+                                    }}
                                 >
                                     {changeLogData.changeTimestamp}
                                 </td>
@@ -134,12 +149,16 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
                             </tr>
                             <tr
                                 className='row'
-                                style={{ margin: '0px' }}
+                                style={{
+                                    margin: '0px',
+                                }}
                             >
                                 <td className='text-justify col-2 p-3'>{t('Operation')}:</td>
                                 <td
                                     className='text-justify col-4 p-3'
-                                    style={{ borderRight: '1px solid lightgrey' }}
+                                    style={{
+                                        borderRight: '1px solid lightgrey',
+                                    }}
                                 >
                                     {changeLogData.operation}
                                 </td>

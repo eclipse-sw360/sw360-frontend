@@ -11,7 +11,11 @@
 import type { JSX } from 'react'
 
 interface Props {
-    additionalData: { [k: string]: string } | undefined
+    additionalData:
+        | {
+              [k: string]: string
+          }
+        | undefined
 }
 
 const AdditionalData = ({ additionalData }: Props): JSX.Element => {
@@ -28,7 +32,10 @@ const AdditionalData = ({ additionalData }: Props): JSX.Element => {
                                 <span>
                                     {' '}
                                     <a
-                                        style={{ textDecoration: 'none', color: '#F7941E' }}
+                                        style={{
+                                            textDecoration: 'none',
+                                            color: '#F7941E',
+                                        }}
                                         href={`mailto:${additionalData[key]}`}
                                     >
                                         {additionalData[key]}
@@ -43,7 +50,10 @@ const AdditionalData = ({ additionalData }: Props): JSX.Element => {
                                 <span>
                                     {' '}
                                     <a
-                                        style={{ textDecoration: 'none', color: '#F7941E' }}
+                                        style={{
+                                            textDecoration: 'none',
+                                            color: '#F7941E',
+                                        }}
                                         href={additionalData[key]}
                                     >
                                         {additionalData[key]}

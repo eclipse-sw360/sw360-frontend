@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 'use client'
-import { LicenseDetail } from '@/object-types'
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
+import { LicenseDetail } from '@/object-types'
 import styles from '../detail.module.css'
 
 interface Props {

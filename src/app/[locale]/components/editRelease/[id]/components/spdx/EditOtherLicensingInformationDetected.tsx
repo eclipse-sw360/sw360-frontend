@@ -10,11 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
-import { OtherLicensingInformationDetected, SPDX, SPDXDocument } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
+import { OtherLicensingInformationDetected, SPDX, SPDXDocument } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     isModeFull: boolean
@@ -57,7 +57,9 @@ const EditOtherLicensingInformationDetected = ({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (
@@ -124,7 +126,9 @@ const EditOtherLicensingInformationDetected = ({
                 setErrorExtractedText(true)
             }
         } else {
-            const arrayExternals: OtherLicensingInformationDetected[] = [...otherLicensingInformationDetecteds]
+            const arrayExternals: OtherLicensingInformationDetected[] = [
+                ...otherLicensingInformationDetecteds,
+            ]
             setIncreIndex(otherLicensingInformationDetecteds.length)
             setNumberIndex(otherLicensingInformationDetecteds.length)
             setIsAdd(true)
@@ -277,7 +281,10 @@ const EditOtherLicensingInformationDetected = ({
                 setLicenseName(otherLicensingInformationDetecteds[indexOtherLicense].licenseName)
             }
         }
-    }, [indexOtherLicense, otherLicensingInformationDetecteds])
+    }, [
+        indexOtherLicense,
+        otherLicensingInformationDetecteds,
+    ])
 
     const [licenseName, setLicenseName] = useState('')
     const [hasLicenseName, setHasLicenseName] = useState(true)
@@ -336,11 +343,26 @@ const EditOtherLicensingInformationDetected = ({
             <tbody hidden={toggleOther}>
                 <tr>
                     <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginBottom: '0.75rem',
+                                }}
+                            >
                                 <label
                                     htmlFor='selectOtherLicensing'
-                                    style={{ textDecoration: 'underline', width: '175px', marginRight: 'auto' }}
+                                    style={{
+                                        textDecoration: 'underline',
+                                        width: '175px',
+                                        marginRight: 'auto',
+                                    }}
                                     className='sub-title lableSPDX'
                                 >
                                     Select Other Licensing
@@ -389,12 +411,18 @@ const EditOtherLicensingInformationDetected = ({
                                     10.1 License identifier
                                     <span
                                         className='text-red'
-                                        style={{ color: '#F7941E' }}
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
                                     >
                                         *
                                     </span>
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <label className='sub-label'>LicenseRef-</label>
                                     <input
                                         id='licenseId'
@@ -402,7 +430,9 @@ const EditOtherLicensingInformationDetected = ({
                                             !errorLicenseIdentifier && inputValid ? 'is-valid' : ''
                                         }`}
                                         type='text'
-                                        style={{ backgroundColor: errorLicenseIdentifier ? '#feefef' : '' }}
+                                        style={{
+                                            backgroundColor: errorLicenseIdentifier ? '#feefef' : '',
+                                        }}
                                         placeholder='Enter license identifier'
                                         name='licenseId'
                                         onChange={updateFieldLicenseIdentifier}
@@ -442,7 +472,9 @@ const EditOtherLicensingInformationDetected = ({
                                     10.2 Extracted text
                                     <span
                                         className='text-red'
-                                        style={{ color: '#F7941E' }}
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
                                     >
                                         *
                                     </span>
@@ -451,7 +483,9 @@ const EditOtherLicensingInformationDetected = ({
                                     className={`form-control ${errorExtractedText ? 'is-invalid ' : ''} ${
                                         !errorExtractedText && inputValid ? 'is-valid' : ''
                                     }`}
-                                    style={{ backgroundColor: errorExtractedText ? '#feefef' : '' }}
+                                    style={{
+                                        backgroundColor: errorExtractedText ? '#feefef' : '',
+                                    }}
                                     id='extractedText'
                                     rows={5}
                                     name='extractedText'
@@ -478,8 +512,19 @@ const EditOtherLicensingInformationDetected = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>10.3 License name</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            flex: 3,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseNameExist'
@@ -490,7 +535,10 @@ const EditOtherLicensingInformationDetected = ({
                                             checked={hasLicenseName}
                                         />
                                         <input
-                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            style={{
+                                                flex: 6,
+                                                marginRight: '1rem',
+                                            }}
                                             id='licenseName'
                                             className='form-control needs-validation'
                                             type='text'
@@ -507,7 +555,11 @@ const EditOtherLicensingInformationDetected = ({
                                             disabled={!hasLicenseName}
                                         />
                                     </div>
-                                    <div style={{ flex: 2 }}>
+                                    <div
+                                        style={{
+                                            flex: 2,
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseNameNoAssertion'

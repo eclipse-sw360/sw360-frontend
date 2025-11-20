@@ -35,7 +35,9 @@ export function ObligationTree({
         return nodes.map((node) => (
             <div
                 key={node.id}
-                style={{ marginLeft: `${level * 20}px` }}
+                style={{
+                    marginLeft: `${level * 20}px`,
+                }}
                 className='tree-row'
             >
                 {node.languageElement != null ? (
@@ -78,7 +80,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     onAddChild(node.id)
@@ -90,7 +95,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     onAddSibling(node.id, node.parentId)
@@ -102,7 +110,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     onDeleteNode(node.id, node.parentId)
@@ -114,7 +125,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     setSelectedNodeId(node.id)
@@ -150,7 +164,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     onAddChild(node.id)
@@ -162,7 +179,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     onAddSibling(node.id, node.parentId)
@@ -174,7 +194,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     onDeleteNode(node.id, node.parentId)
@@ -186,7 +209,10 @@ export function ObligationTree({
                             <a
                                 href='#'
                                 className='mx-2'
-                                style={{ color: 'blue', textDecoration: 'none' }}
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none',
+                                }}
                                 onClick={(e) => {
                                     e.preventDefault()
                                     setSelectedNodeId(node.id)
@@ -217,7 +243,9 @@ export function ObligationTree({
             <div className='col-12'>
                 <label
                     className='form-label'
-                    style={{ fontWeight: 'bold' }}
+                    style={{
+                        fontWeight: 'bold',
+                    }}
                 >
                     {t('Text')}
                 </label>
@@ -240,7 +268,10 @@ export function ObligationTree({
                                 e.preventDefault()
                                 onAddChild()
                             }}
-                            style={{ color: 'blue', textDecoration: 'none' }}
+                            style={{
+                                color: 'blue',
+                                textDecoration: 'none',
+                            }}
                         >
                             +Child
                         </a>

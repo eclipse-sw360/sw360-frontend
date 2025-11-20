@@ -9,13 +9,21 @@
 // License-Filename: LICENSE
 
 'use client'
+import { ReactNode, useState } from 'react'
 import { Annotations } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ReactNode, useState } from 'react'
 
 interface Props {
-    annotationsSelection: { index: number; isSPDXDocument: boolean }
-    setAnnotationsSelection: React.Dispatch<React.SetStateAction<{ index: number; isSPDXDocument: boolean }>>
+    annotationsSelection: {
+        index: number
+        isSPDXDocument: boolean
+    }
+    setAnnotationsSelection: React.Dispatch<
+        React.SetStateAction<{
+            index: number
+            isSPDXDocument: boolean
+        }>
+    >
     annotationsSPDXs?: Annotations[]
     setAnnotationsSPDXs: React.Dispatch<React.SetStateAction<Annotations[]>>
     annotationsPackages?: Annotations[]
@@ -83,12 +91,18 @@ const AnnotationInformation = ({
             <tbody hidden={toggle}>
                 <tr>
                     <td className='spdx-label-index'>Source</td>
-                    <td style={{ height: '50px' }}>
+                    <td
+                        style={{
+                            height: '50px',
+                        }}
+                    >
                         <select
                             id='annotationSourceSelect'
                             className='spdx-col-2'
                             onChange={changeAnnotationSource}
-                            style={{ width: '100%' }}
+                            style={{
+                                width: '100%',
+                            }}
                         >
                             <option
                                 value='spdxDocument'
@@ -107,12 +121,18 @@ const AnnotationInformation = ({
                 </tr>
                 <tr>
                     <td className='spdx-label-index'>Index</td>
-                    <td style={{ height: '50px' }}>
+                    <td
+                        style={{
+                            height: '50px',
+                        }}
+                    >
                         <select
                             id='annotationSelect'
                             className='spdx-col-2'
                             onChange={displayIndex}
-                            style={{ width: '100%' }}
+                            style={{
+                                width: '100%',
+                            }}
                             value={changeSource ? 0 : annotationsSelection.index}
                             disabled={
                                 annotationsSelection.isSPDXDocument

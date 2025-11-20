@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
 import React from 'react'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     setBuiltDate: (inputs: InputKeyValue) => void

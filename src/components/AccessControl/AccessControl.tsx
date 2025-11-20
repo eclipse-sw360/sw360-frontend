@@ -7,10 +7,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { UserGroupType } from '@/object-types'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Spinner } from 'react-bootstrap'
+import { UserGroupType } from '@/object-types'
 
 export function AccessControl<P extends object>(
     WrappedComponent: React.ComponentType<P>,

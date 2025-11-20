@@ -58,8 +58,19 @@ function PackageConcludedLicense({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>7.13 Concluded license</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseConcludedExist'
@@ -70,7 +81,10 @@ function PackageConcludedLicense({
                             checked={concludedLicenseExist}
                         />
                         <input
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='licenseConcluded'
                             className='form-control'
                             type='text'
@@ -81,7 +95,11 @@ function PackageConcludedLicense({
                             disabled={concludedLicenseNone || concludedLicenseNoasserttion}
                         />
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='licenseConcludedNone'
@@ -92,7 +110,9 @@ function PackageConcludedLicense({
                             checked={concludedLicenseNone}
                         />
                         <label
-                            style={{ marginRight: '2rem' }}
+                            style={{
+                                marginRight: '2rem',
+                            }}
                             className='form-check-label radio-label lableSPDX'
                             htmlFor='licenseConcludedNone'
                         >

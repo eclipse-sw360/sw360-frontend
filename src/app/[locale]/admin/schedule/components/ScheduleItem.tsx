@@ -38,7 +38,9 @@ export const ScheduleItem = ({
                         <td className='p-3 text-white fw-bold w-50 sw360-background'>{t('Schedule Offset')}</td>
                         <td
                             className='p-3'
-                            style={{ width: '60%' }}
+                            style={{
+                                width: '60%',
+                            }}
                         >
                             00:00:00 (hh:mm:ss)
                         </td>

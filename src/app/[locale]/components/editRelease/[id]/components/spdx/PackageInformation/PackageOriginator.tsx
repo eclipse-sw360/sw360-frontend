@@ -9,10 +9,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect } from 'react'
+import { InputKeyValue } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     dataPackageOriginator: InputKeyValue
@@ -35,7 +35,9 @@ function PackageOriginator({
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
@@ -79,8 +81,19 @@ function PackageOriginator({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>7.6 Package originator</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             type='radio'
@@ -91,7 +104,10 @@ function PackageOriginator({
                         />
                         <select
                             id='originatorType'
-                            style={{ flex: 2, marginRight: '1rem' }}
+                            style={{
+                                flex: 2,
+                                marginRight: '1rem',
+                            }}
                             className='form-control form-select'
                             disabled={!isPackageOriginator}
                             name='key'
@@ -102,7 +118,10 @@ function PackageOriginator({
                             <option value='Person'>Person</option>
                         </select>
                         <input
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             className='form-control'
                             id='originatorValue'
                             type='text'
@@ -113,7 +132,11 @@ function PackageOriginator({
                             disabled={!isPackageOriginator}
                         />
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='originatorNoAssertion'

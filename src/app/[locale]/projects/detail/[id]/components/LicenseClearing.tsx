@@ -22,11 +22,11 @@ import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
+import DependencyNetworkListView from './DependencyNetworkListView'
+import DependencyNetworkTreeView from './DependencyNetworkTreeView'
 import ListView from './ListView'
 import TreeView from './TreeView'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
-import DependencyNetworkListView from './DependencyNetworkListView'
-import DependencyNetworkTreeView from './DependencyNetworkTreeView'
 
 function LicenseClearing({
     projectId,

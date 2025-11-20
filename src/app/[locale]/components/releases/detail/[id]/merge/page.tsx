@@ -11,7 +11,9 @@ import { ReactNode } from 'react'
 import MergeReleaseOverview from './components/MergeReleaseOverview'
 
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const MergeReleaseDetail = async (props: Context): Promise<ReactNode> => {

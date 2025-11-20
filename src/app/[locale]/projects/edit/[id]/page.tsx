@@ -7,15 +7,17 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import EditProject from './components/EditProject'
-
+import { getServerSession } from 'next-auth/next'
+import type { JSX } from 'react'
 import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
 import { ConfigKeys, Configuration } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { getServerSession } from 'next-auth/next'
-import type { JSX } from 'react'
+import EditProject from './components/EditProject'
+
 interface Context {
-    params: Promise<{ id: string }>
+    params: Promise<{
+        id: string
+    }>
 }
 
 const ProjectEditPage = async (props: Context): Promise<JSX.Element> => {

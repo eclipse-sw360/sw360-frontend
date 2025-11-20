@@ -9,12 +9,12 @@
 
 'use client'
 
-import { Vendor } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
 import { TiTick } from 'react-icons/ti'
+import { Vendor } from '@/object-types'
 
 export default function MergeVendor({
     targetVendor,
@@ -34,11 +34,15 @@ export default function MergeVendor({
         if (status === 'unauthenticated') {
             void signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         setFinalVendorPayload(targetVendor)
-    }, [targetVendor])
+    }, [
+        targetVendor,
+    ])
 
     return (
         <>
@@ -137,7 +141,10 @@ export default function MergeVendor({
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
-                                            setFinalVendorPayload({ ...finalVendorPayload, url: sourceVendor.url })
+                                            setFinalVendorPayload({
+                                                ...finalVendorPayload,
+                                                url: sourceVendor.url,
+                                            })
                                         }
                                     >
                                         <FaLongArrowAltLeft />
@@ -146,7 +153,10 @@ export default function MergeVendor({
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
-                                            setFinalVendorPayload({ ...finalVendorPayload, url: targetVendor.url })
+                                            setFinalVendorPayload({
+                                                ...finalVendorPayload,
+                                                url: targetVendor.url,
+                                            })
                                         }
                                     >
                                         <FaUndo />

@@ -9,10 +9,8 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
-import Projects from './components/Projects'
-
 import type { JSX } from 'react'
+import Projects from './components/Projects'
 
 export const metadata: Metadata = {
     title: 'Projects',

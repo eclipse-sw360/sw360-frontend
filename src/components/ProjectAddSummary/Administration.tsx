@@ -8,12 +8,12 @@
 // License-Filename: LICENSE
 
 'use client'
+
+import type { JSX } from 'react'
 import { ProjectPayload } from '@/object-types'
 import Clearing from './component/Administration/Clearing'
 import LicenseInfoHeader from './component/Administration/LicenseInfoHeader'
 import Lifecycle from './component/Administration/LifeCycle'
-
-import type { JSX } from 'react'
 
 interface Props {
     projectPayload: ProjectPayload

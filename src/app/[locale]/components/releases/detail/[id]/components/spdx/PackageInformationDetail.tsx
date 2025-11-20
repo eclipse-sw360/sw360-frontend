@@ -9,9 +9,9 @@
 // License-Filename: LICENSE
 
 'use client'
+import { ReactNode, useState } from 'react'
 import { ExternalReference, PackageInformation } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ReactNode, useState } from 'react'
 
 interface Props {
     packageInformation?: PackageInformation

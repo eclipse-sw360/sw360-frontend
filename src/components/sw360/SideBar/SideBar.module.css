@@ -11,71 +11,71 @@
 */
 
 .active {
-  background-color: rgba(247, 148, 30, 0.4) !important;
-  font-weight: 600;
-  color: black !important;
+    background-color: rgba(247, 148, 30, 0.4) !important;
+    font-weight: 600;
+    color: black !important;
 }
 
 .tab {
-  border-radius: 0px !important;
-  padding: 15px;
-  color: #6b6c7e;
+    border-radius: 0px !important;
+    padding: 15px;
+    color: #6b6c7e;
 }
 
 .tab:hover {
-  background-color: rgba(247, 148, 30, 0.12);
-  color: #495057;
-  text-decoration: none;
-  z-index: 1;
+    background-color: rgba(247, 148, 30, 0.12);
+    color: #495057;
+    text-decoration: none;
+    z-index: 1;
 }
 
 #numberOfVulnerabilitiesDiv {
-  background-color: #f1f2f5;
-  color: #272833;
-  font-size: 100%;
-  margin-left: 0.5rem;
-  border-radius: 10rem;
+    background-color: #f1f2f5;
+    color: #272833;
+    font-size: 100%;
+    margin-left: 0.5rem;
+    border-radius: 10rem;
 }
 
 .APPROVED {
-  background-color: #287d3c;
-  width: 24px;
-  height: 24px;
-  border-radius: 0.2rem;
-  margin: 0 0.5rem;
-  display: inline-block;
+    background-color: #287d3c;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
 }
 
 .OPEN {
-  background-color: red;
-  width: 24px;
-  height: 24px;
-  border-radius: 0.2rem;
-  margin: 0 0.5rem;
-  display: inline-block;
+    background-color: red;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
 }
 
 .IN_PROGRESS {
-  background-color: #b95000;
-  width: 24px;
-  height: 24px;
-  border-radius: 0.2rem;
-  margin: 0 0.5rem;
-  display: inline-block;
+    background-color: #b95000;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
 }
 
 .REJECTED::before {
-  content: '!'
+    content: '!';
 }
 
 .REJECTED {
-  background-color: red;
-  width: 24px;
-  height: 24px;
-  border-radius: 0.2rem;
-  margin: 0 0.5rem;
-  display: inline-block;
-  color: white;
-  padding-left: 5px;
-  font-weight: bold;
+    background-color: red;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
+    color: white;
+    padding-left: 5px;
+    font-weight: bold;
 }

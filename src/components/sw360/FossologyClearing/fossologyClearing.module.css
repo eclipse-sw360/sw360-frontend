@@ -10,12 +10,12 @@
 */
 
 .guide {
-	background-color: #eef2fa;
-	border: 1px solid #89a7e0;
-	padding: 0.9375rem 1rem;
-  border-width: 0.0625rem;
-  border-radius: 0.25rem;
-	white-space: normal;
-	margin-bottom: 1rem;
-  font-weight: bold;
+    background-color: #eef2fa;
+    border: 1px solid #89a7e0;
+    padding: 0.9375rem 1rem;
+    border-width: 0.0625rem;
+    border-radius: 0.25rem;
+    white-space: normal;
+    margin-bottom: 1rem;
+    font-weight: bold;
 }

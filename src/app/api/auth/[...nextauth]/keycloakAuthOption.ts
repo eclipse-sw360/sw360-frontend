@@ -7,22 +7,28 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { UserGroupType } from '@/object-types'
-import { AUTH_ISSUER, SW360_KEYCLOAK_CLIENT_ID, SW360_KEYCLOAK_CLIENT_SECRET } from '@/utils/env'
 import { jwtDecode } from 'jwt-decode'
 import { NextAuthOptions } from 'next-auth'
 import KeycloakProvider from 'next-auth/providers/keycloak'
+import { UserGroupType } from '@/object-types'
+import { AUTH_ISSUER, SW360_KEYCLOAK_CLIENT_ID, SW360_KEYCLOAK_CLIENT_SECRET } from '@/utils/env'
 
 const keycloakProvider = KeycloakProvider({
     clientId: SW360_KEYCLOAK_CLIENT_ID,
     clientSecret: SW360_KEYCLOAK_CLIENT_SECRET,
     issuer: AUTH_ISSUER,
     checks: 'state',
-    authorization: { params: { scope: 'openid READ WRITE' } },
+    authorization: {
+        params: {
+            scope: 'openid READ WRITE',
+        },
+    },
 })
 
 const keycloakAuthOption: NextAuthOptions = {
-    providers: [keycloakProvider],
+    providers: [
+        keycloakProvider,
+    ],
 
     session: {
         strategy: 'jwt',
@@ -41,7 +47,9 @@ const keycloakAuthOption: NextAuthOptions = {
                 token.access_token = 'Bearer ' + account.id_token
                 token.expires_in = account.expires_at
                 token.refresh_token = account.refresh_token
-                const tokenDetails = JSON.parse(JSON.stringify(token.decoded)) as { userGroup?: string[] }
+                const tokenDetails = JSON.parse(JSON.stringify(token.decoded)) as {
+                    userGroup?: string[]
+                }
                 const userGroup = getUserGroup(tokenDetails)
                 token.userGroup = userGroup[0]
             }
@@ -51,7 +59,9 @@ const keycloakAuthOption: NextAuthOptions = {
             // Send properties to the client, like an access_token from a provider.
             session.user.access_token = token.access_token
             const decodedToken = jwtDecode(token.access_token)
-            const tokenDetails = JSON.parse(JSON.stringify(decodedToken)) as { userGroup?: string[] }
+            const tokenDetails = JSON.parse(JSON.stringify(decodedToken)) as {
+                userGroup?: string[]
+            }
             const userGroup = getUserGroup(tokenDetails)
             session.user.userGroup = userGroup[0]
             return session
@@ -82,7 +92,9 @@ function getUserGroup(tokenDetails: { userGroup?: string[] }): UserGroupType[] {
                   return UserGroupType.USER
               }
           })
-        : [UserGroupType.USER]
+        : [
+              UserGroupType.USER,
+          ]
 }
 
 export default keycloakAuthOption

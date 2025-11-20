@@ -11,17 +11,21 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-
-import { useCallback, useState, type JSX } from 'react'
-
-import { Release } from '@/object-types'
 import { SelectUsersDialog } from 'next-sw360'
+import { type JSX, useCallback, useState } from 'react'
+import { Release } from '@/object-types'
 
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
-    cotsResponsible: { [k: string]: string }
-    setCotsResponsible: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    cotsResponsible: {
+        [k: string]: string
+    }
+    setCotsResponsible: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 const CommercialDetailsAdministration = ({
@@ -69,7 +73,9 @@ const CommercialDetailsAdministration = ({
         <>
             <div
                 className='col'
-                style={{ padding: '0px 12px' }}
+                style={{
+                    padding: '0px 12px',
+                }}
             >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>

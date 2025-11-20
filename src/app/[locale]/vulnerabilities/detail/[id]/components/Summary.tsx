@@ -9,12 +9,12 @@
 
 'use client'
 
-import { DisplayMap } from '@/components/DisplayMap/DisplayMap'
-import { Vulnerability } from '@/object-types'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { ReactNode, useEffect, useState } from 'react'
+import { DisplayMap } from '@/components/DisplayMap/DisplayMap'
+import { Vulnerability } from '@/object-types'
 import UsingReleasesTable from './UsingReleasesTable'
 
 export default function Summary({ summaryData }: { summaryData: Vulnerability }): ReactNode {
@@ -26,7 +26,9 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
         if (status === 'unauthenticated') {
             signOut()
         }
-    }, [status])
+    }, [
+        status,
+    ])
 
     return (
         <>
@@ -90,7 +92,9 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                                     return (
                                         <li
                                             key={i}
-                                            style={{ display: 'inline' }}
+                                            style={{
+                                                display: 'inline',
+                                            }}
                                         >
                                             {elem}
                                             {i === (summaryData.assignedExtComponentIds?.length ?? 0) - 1
@@ -110,7 +114,9 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                                     return (
                                         <li
                                             key={i}
-                                            style={{ display: 'inline' }}
+                                            style={{
+                                                display: 'inline',
+                                            }}
                                         >
                                             {`CVE-${elem}`}
                                             {i === (summaryData.cveReferences?.length ?? 0) - 1 ? '' : ', '}{' '}

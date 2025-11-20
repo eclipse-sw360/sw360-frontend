@@ -11,18 +11,29 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useState } from 'react'
-
-import { ComponentPayload } from '@/object-types'
 import { SelectCountry, SelectUsersDialog } from 'next-sw360'
+import React, { useCallback, useState } from 'react'
+import { ComponentPayload } from '@/object-types'
 
 interface Props {
     componentPayload: ComponentPayload
     setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    componentOwner: { [k: string]: string }
-    setComponentOwner: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    moderators: { [k: string]: string }
-    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    componentOwner: {
+        [k: string]: string
+    }
+    setComponentOwner: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    moderators: {
+        [k: string]: string
+    }
+    setModerators: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 const RolesInformation = ({
@@ -91,7 +102,9 @@ const RolesInformation = ({
         <>
             <div
                 className='row mb-4'
-                style={{ padding: '0px 12px' }}
+                style={{
+                    padding: '0px 12px',
+                }}
             >
                 <div className='section-header mb-2'>
                     <span className='fw-bold'>{t('Roles')}</span>

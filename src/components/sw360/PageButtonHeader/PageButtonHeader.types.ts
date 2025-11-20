@@ -12,7 +12,9 @@ import { ReactNode } from 'react'
 
 export interface PageButtonHeaderProps {
     title?: string
-    buttons?: { [key: string]: ButtonProps }
+    buttons?: {
+        [key: string]: ButtonProps
+    }
     children?: ReactNode
     checked?: boolean
     changesLogTab?: string
