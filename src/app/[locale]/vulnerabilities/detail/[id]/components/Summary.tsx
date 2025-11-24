@@ -14,13 +14,15 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { DisplayMap } from '@/components/DisplayMap/DisplayMap'
-import { Vulnerability } from '@/object-types'
+import { useConfigValue } from '@/contexts'
+import { UIConfigKeys, Vulnerability } from '@/object-types'
 import UsingReleasesTable from './UsingReleasesTable'
 
 export default function Summary({ summaryData }: { summaryData: Vulnerability }): ReactNode {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const { status } = useSession()
+    const svmNotificationUrl = useConfigValue(UIConfigKeys.UI_SVM_NOTIFICATION_URL) as string | null
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -54,7 +56,29 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     </tr>
                     <tr>
                         <td>{t('External Id')}:</td>
-                        <td>{(summaryData.externalId ?? '') && (summaryData.externalId ?? '')}</td>
+                        <td>
+                            {(() => {
+                                const externalId = summaryData.externalId
+                                if (!externalId) return ''
+
+                                const urlString = String(svmNotificationUrl || '').trim()
+                                if (urlString && urlString.length > 0) {
+                                    const fullUrl = `${urlString}${externalId}`
+                                    return (
+                                        <a
+                                            href={fullUrl}
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                            className='text-link'
+                                        >
+                                            {externalId}
+                                        </a>
+                                    )
+                                }
+
+                                return externalId
+                            })()}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Publish Date')}:</td>

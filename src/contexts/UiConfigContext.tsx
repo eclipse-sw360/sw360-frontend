@@ -34,7 +34,7 @@ export function useUiConfigContext() {
     return context
 }
 
-export function useConfigValue(key: UIConfigKeys): boolean | string[] | null {
+export function useConfigValue(key: UIConfigKeys): boolean | string[] | string | null {
     const { config } = useUiConfigContext()
 
     if (!config || !(key in config)) {
