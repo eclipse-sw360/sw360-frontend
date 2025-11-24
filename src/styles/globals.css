@@ -1645,3 +1645,20 @@ input[checked] + .slider:before {
     max-height: 400px;
     overflow-y: auto;
 }
+
+.linked-packages-table td {
+    vertical-align: middle;
+}
+
+.linked-packages-table td,
+.linked-packages-table th {
+    font-size: 15px;
+}
+
+.linked-packages-table .delete-icon {
+    cursor: pointer;
+}
+
+.linked-packages-table .delete-icon:hover {
+    color: #f39c12;
+}
