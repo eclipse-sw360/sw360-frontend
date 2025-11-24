@@ -20,6 +20,10 @@ const WITHOUT_COMMERCIAL_DETAILS_AND_SPDX = [
         name: 'Linked Releases',
     },
     {
+        id: ReleaseTabIds.LINKED_PACKAGES,
+        name: 'Linked Packages',
+    },
+    {
         id: ReleaseTabIds.CLEARING_DETAILS,
         name: 'Clearing Details',
     },
@@ -49,6 +53,10 @@ const WITH_COMMERCIAL_DETAILS = [
     {
         id: ReleaseTabIds.LINKED_RELEASES,
         name: 'Linked Releases',
+    },
+    {
+        id: ReleaseTabIds.LINKED_PACKAGES,
+        name: 'Linked Packages',
     },
     {
         id: ReleaseTabIds.CLEARING_DETAILS,
@@ -90,6 +98,10 @@ const WITH_SPDX = [
         name: 'Linked Releases',
     },
     {
+        id: ReleaseTabIds.LINKED_PACKAGES,
+        name: 'Linked Packages',
+    },
+    {
         id: ReleaseTabIds.CLEARING_DETAILS,
         name: 'Clearing Details',
     },
@@ -123,6 +135,10 @@ const WITH_COMMERCIAL_DETAILS_AND_SPDX = [
     {
         id: ReleaseTabIds.LINKED_RELEASES,
         name: 'Linked Releases',
+    },
+    {
+        id: ReleaseTabIds.LINKED_PACKAGES,
+        name: 'Linked Packages',
     },
     {
         id: ReleaseTabIds.CLEARING_DETAILS,

@@ -2471,3 +2471,20 @@ input[checked] + .slider:before {
 .auth-modal-width {
     width: 70%;
 }
+
+.linked-packages-table td {
+    vertical-align: middle;
+}
+
+.linked-packages-table td,
+.linked-packages-table th {
+    font-size: 15px;
+}
+
+.linked-packages-table .delete-icon {
+    cursor: pointer;
+}
+
+.linked-packages-table .delete-icon:hover {
+    color: #f39c12;
+}

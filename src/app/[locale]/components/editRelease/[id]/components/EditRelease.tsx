@@ -48,6 +48,7 @@ import EditECCDetails from './EditECCDetails'
 import EditSPDXDocument from './EditSPDXDocument'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
+import EditLinkedPackages from './EditLinkedPackage'
 
 interface Props {
     releaseId: string
@@ -62,6 +63,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const initialTab = !CommonUtils.isNullEmptyOrUndefinedString(tabParam) ? tabParam : CommonTabIds.SUMMARY
     const [selectedTab, setSelectedTab] = useState<string>(initialTab)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
+    const [originalLinkedPackageIds, setOriginalLinkedPackageIds] = useState<string[]>([])
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
@@ -137,30 +139,30 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     'sw360:documentCreationInformation'
                 ]
                     ? {
-                          id: release._embedded['sw360:documentCreationInformation'].id,
-                          spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
-                          spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
-                          dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
-                          SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
-                          name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
-                          documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
-                          externalDocumentRefs:
-                              release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
-                          licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
-                          creator: creators, // 6.8
-                          created: createdDate, // 6.9
-                          creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
-                          documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
-                          // Information for ModerationRequests
-                          documentState: release._embedded['sw360:documentCreationInformation'].documentState,
-                          permissions: release._embedded['sw360:documentCreationInformation'].permissions,
-                          createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
-                          moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
-                      }
+                        id: release._embedded['sw360:documentCreationInformation'].id,
+                        spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
+                        spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
+                        dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
+                        SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
+                        name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
+                        documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
+                        externalDocumentRefs:
+                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
+                        licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
+                        creator: creators, // 6.8
+                        created: createdDate, // 6.9
+                        creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
+                        documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
+                        // Information for ModerationRequests
+                        documentState: release._embedded['sw360:documentCreationInformation'].documentState,
+                        permissions: release._embedded['sw360:documentCreationInformation'].permissions,
+                        createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
+                        moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
+                    }
                     : {
-                          creator: creators, // 6.8
-                          created: createdDate, // 6.9
-                      }
+                        creator: creators, // 6.8
+                        created: createdDate, // 6.9
+                    }
 
                 const SPDXPayload: SPDX = {
                     spdxDocument: release._embedded['sw360:spdxDocument'],
@@ -171,6 +173,16 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 setRelease(release)
                 setDeletingRelease(releaseId)
                 setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
+                try {
+                    const pkgResponse = await ApiUtils.GET(`releases/${releaseId}?embed=packages`, session.user.access_token)
+                    if (pkgResponse.status === StatusCodes.OK) {
+                        const pkgJson = await pkgResponse.json()
+                        const embeddedPkgs = pkgJson?._embedded?.['sw360:packages'] ?? []
+                        setOriginalLinkedPackageIds(embeddedPkgs.map((p: any) => p.id))
+                    }
+                } catch (error) {
+                    console.error("Failed to load original linked packages", error)
+                }
 
                 if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
                     setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
@@ -418,8 +430,81 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 }
             }
         }
+        try {
+            const current = (releasePayload as any).linkedPackages as
+                | { packageId?: string }[]
+                | undefined;
+            if (!current) {
+            } else {
+                const currentIds = new Set(
+                    (current ?? [])
+                        .map(p => (p.packageId ?? "").trim())
+                        .filter(id => id !== "")
+                );
 
-        const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
+                const originalIds = new Set(
+                    originalLinkedPackageIds
+                        .map(id => (id ?? "").trim())
+                        .filter(id => id !== "")
+                );
+                const toLink: string[] = [];
+                const toUnlink: string[] = [];
+
+                currentIds.forEach(id => {
+                    if (!originalIds.has(id)) toLink.push(id);
+                });
+
+                originalIds.forEach(id => {
+                    if (!currentIds.has(id)) toUnlink.push(id);
+                });
+                if (toLink.length > 0) {
+                    const resp = await ApiUtils.PATCH(
+                        `releases/${releaseId}/link/packages`,
+                        toLink,
+                        session.user.access_token
+                    );
+                    if (![200, 201, 202].includes(resp.status)) {
+                        const data = await resp.json().catch(() => undefined);
+                        MessageService.error(data?.message ?? t("Error when processing"));
+                        return;
+                    }
+                }
+                if (toUnlink.length > 0) {
+                    const resp = await ApiUtils.PATCH(
+                        `releases/${releaseId}/unlink/packages`,
+                        toUnlink,
+                        session.user.access_token
+                    );
+                    if (![200, 201, 202].includes(resp.status)) {
+                        const data = await resp.json().catch(() => undefined);
+                        MessageService.error(data?.message ?? t("Error when processing"));
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            MessageService.error(msg);
+            return;
+        }
+        const eccInfo = (releasePayload as unknown as { eccInformation?: ECCInformation }).eccInformation
+        const sanitizedEccInformation: ECCInformation | undefined = eccInfo
+            ? {
+                ...eccInfo,
+                eccStatus:
+                    eccInfo.eccStatus && eccInfo.eccStatus.trim() !== ''
+                        ? eccInfo.eccStatus
+                        : undefined,
+            }
+            : undefined
+        const { linkedPackages, ...payloadWithoutLinked } = releasePayload as Release & {
+            linkedPackages?: unknown
+        }
+        const finalPayload: Release = {
+            ...payloadWithoutLinked,
+            eccInformation: sanitizedEccInformation,
+        }
+        const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload, session.user.access_token)
         if (response.status === StatusCodes.OK) {
             const release = (await response.json()) as ReleaseDetail
             MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
@@ -585,6 +670,16 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                 <LinkedReleases
                                     actionType={ActionType.EDIT}
                                     release={release}
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ReleaseTabIds.LINKED_PACKAGES ? true : false}
+                            >
+                                <EditLinkedPackages
+                                    releaseId={releaseId}
                                     releasePayload={releasePayload}
                                     setReleasePayload={setReleasePayload}
                                 />
