@@ -45,7 +45,7 @@
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^24.10.0",
     "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
+    "@types/react-dom": "19.2.3",
     "bootstrap": "^5.3.8",
     "classnames": "^2.3.2",
     "commitlint": "^19.8.0",
@@ -91,7 +91,7 @@
   "pnpm": {
     "overrides": {
       "@types/react": "19.2.2",
-      "@types/react-dom": "19.2.2",
+      "@types/react-dom": "19.2.3",
       "@eslint/plugin-kit": "^0.3.3"
     },
     "ignoredBuiltDependencies": [
