@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ArrayTypeUIConfigKeys, UIConfigKeys } from './enums/UIConfigKeys'
+import { ArrayTypeUIConfigKeys, StringTypeUIConfigKeys, UIConfigKeys } from './enums/UIConfigKeys'
 
 export type UiConfiguration = {
     [key in UIConfigKeys]: string
@@ -15,11 +15,15 @@ export type UiConfiguration = {
 
 // Extended type for processed configuration after parsing
 export type ProcessedUiConfig = {
-    [key in UIConfigKeys]: key extends (typeof ArrayTypeUIConfigKeys)[number] ? string[] : boolean
+    [key in UIConfigKeys]: key extends (typeof ArrayTypeUIConfigKeys)[number]
+        ? string[]
+        : key extends (typeof StringTypeUIConfigKeys)[number]
+          ? string
+          : boolean
 }
 
 // Helper functions to process raw configuration
-export function parseConfigValue(key: UIConfigKeys, value: string): string[] | boolean {
+export function parseConfigValue(key: UIConfigKeys, value: string): string[] | string | boolean {
     if (ArrayTypeUIConfigKeys.includes(key)) {
         if (value === undefined) {
             return []
@@ -31,12 +35,12 @@ export function parseConfigValue(key: UIConfigKeys, value: string): string[] | b
             parsedValues = []
         }
         return parsedValues.map((item) => item.trim()).filter(Boolean)
+    } else if (StringTypeUIConfigKeys.includes(key)) {
+        // Handle string type configurations
+        return value || ''
     } else {
-        if (value) {
-            return value.toLowerCase() === 'true'
-        } else {
-            return false
-        }
+        // Handle boolean type configurations
+        return value ? value.toLowerCase() === 'true' : false
     }
 }
 

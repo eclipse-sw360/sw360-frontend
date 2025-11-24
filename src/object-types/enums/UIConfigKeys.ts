@@ -30,6 +30,7 @@ export enum UIConfigKeys {
     UI_CUSTOMMAP_PROJECT_ROLES = 'ui.custommap.project.roles',
     UI_ENABLE_SECURITY_VULNERABILITY_MONITORING = 'ui.enable.security.vulnerability.monitoring',
     UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE = 'ui.rest.apitoken.write.generator.enable',
+    UI_SVM_NOTIFICATION_URL = 'svm.notification.url',
 }
 
 export const ArrayTypeUIConfigKeys: UIConfigKeys[] = [
@@ -50,4 +51,8 @@ export const ArrayTypeUIConfigKeys: UIConfigKeys[] = [
     UIConfigKeys.UI_PROGRAMMING_LANGUAGES,
     UIConfigKeys.UI_SOFTWARE_PLATFORMS,
     UIConfigKeys.UI_CUSTOMMAP_RELEASE_ROLES,
+]
+
+export const StringTypeUIConfigKeys: UIConfigKeys[] = [
+    UIConfigKeys.UI_SVM_NOTIFICATION_URL,
 ]
