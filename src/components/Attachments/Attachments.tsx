@@ -283,7 +283,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
 
                 const data = (await response.json()) as EmbeddedAttachments
                 setAttachmentData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:attachments'])
+                    CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:attachments'])
                         ? []
                         : data['_embedded']['sw360:attachments'].map(
                               (att) =>
