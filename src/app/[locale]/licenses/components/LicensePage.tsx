@@ -41,9 +41,19 @@ function LicensePage(): ReactNode {
     const { data: session, status } = useSession()
     const deleteLicense = params.get('delete')
 
-    const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        search,
+    ])
+
+    const doSearch = (value: string) => {
         setSearch({
-            searchText: event.currentTarget.value,
+            searchText: value,
         })
     }
 

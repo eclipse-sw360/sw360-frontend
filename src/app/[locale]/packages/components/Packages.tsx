@@ -358,6 +358,16 @@ function Packages(): ReactNode {
         status,
     ])
 
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        params.toString(),
+    ])
+
     const table = useReactTable({
         data: memoizedData,
         columns,

@@ -409,6 +409,10 @@ export default function BulkReleaseEdit(): JSX.Element {
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status === StatusCodes.NO_CONTENT) {
+                    setReleaseData([])
+                    return
+                }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
@@ -439,6 +443,16 @@ export default function BulkReleaseEdit(): JSX.Element {
         session,
         search,
         reloadKey,
+    ])
+
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        search,
     ])
 
     const table = useReactTable({
@@ -474,8 +488,8 @@ export default function BulkReleaseEdit(): JSX.Element {
         },
     })
 
-    const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        setSearch(event.currentTarget.value)
+    const doSearch = (value: string) => {
+        setSearch(value)
         setReloadKey(reloadKey + 1)
     }
 

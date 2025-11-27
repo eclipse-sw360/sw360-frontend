@@ -9,11 +9,25 @@
 
 'use client'
 
-import React, { type JSX } from 'react'
+import React, { type JSX, useRef } from 'react'
 import { Form } from 'react-bootstrap'
 import { QuickFilterProps } from './QuickFilter.types'
 
 function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilterProps): JSX.Element {
+    const debounceRef = useRef<NodeJS.Timeout | null>(null)
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current)
+        }
+
+        debounceRef.current = setTimeout(() => {
+            searchFunction?.(value)
+        }, 700)
+    }
+
     return (
         <div className='card-deck'>
             <div
@@ -33,7 +47,7 @@ function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilter
                                 type='text'
                                 size='sm'
                                 name={title}
-                                onKeyUp={searchFunction}
+                                onChange={handleChange}
                             />
                         </Form.Group>
                     </Form>
