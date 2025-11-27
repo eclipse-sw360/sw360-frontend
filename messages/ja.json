@@ -1345,6 +1345,7 @@
     "The following duplicate identifiers were found": "次の重複した識別子が見つかりました。",
     "The license type cannot be deleted": "ライセンスタイプ<strong> {name} </strong>は、<strong> {usagecount} </strong>ライセンスで使用されているため、削除できません。\n最初にライセンスを取り消してください。",
     "The new Component and new Release will be created, do you want to import?": "The new Component and new Release will be created, do you want to import?",
+    "The Package cannot be deleted, Since it is used by other project Please unlink it before deleting": "このパッケージは別のプロジェクトで使用されているため削除できません。削除する前にリンクを解除してください.",
     "The project cannot be deleted": "別のプロジェクトで使用されているため、プロジェクトは削除することはできません！",
     "The projects have been successfully linked to project": "The projects have been successfully linked to project",
     "The release has been successfully linked to project": "The release <strong>{releaseName}</strong> has been successfully linked to project <strong>{projectName}</strong>",

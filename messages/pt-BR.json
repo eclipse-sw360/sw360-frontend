@@ -1345,6 +1345,7 @@
     "The following duplicate identifiers were found": "Os seguintes identificadores duplicados foram encontrados.",
     "The license type cannot be deleted": "O tipo de licença <strong> {nome} </strong> não pode ser excluído, pois está sendo usado em <strong> {useGecount} </strong> licença (s). \nPor favor, revoge a licença primeiro.",
     "The new Component and new Release will be created, do you want to import?": "O novo Componente e a nova Versão serão criados, deseja importar?",
+    "The Package cannot be deleted, Since it is used by other project Please unlink it before deleting": "O pacote não pode ser excluído, pois está sendo usado por outro projeto. Desvincule-o antes de excluí-lo.",
     "The project cannot be deleted": "O projeto não pode ser excluído, pois é usado por outro projeto!",
     "The projects have been successfully linked to project": "Os projetos foram vinculados com sucesso ao projeto",
     "The release has been successfully linked to project": "A versão <strong>{releaseName}</strong> foi vinculada com sucesso ao projeto <strong>{projectName}</strong>",
