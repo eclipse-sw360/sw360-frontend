@@ -241,7 +241,7 @@ export default function CompareObligation({
 
                 return {
                     ...prev,
-                    sort: '',
+                    sort: 'name,asc',
                 }
             })
         },
