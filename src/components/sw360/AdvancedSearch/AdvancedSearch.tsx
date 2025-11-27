@@ -46,7 +46,6 @@ function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = 
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')
     const [isUsersPage, setIsUsersPage] = useState(false)
     const [isPackagesPage, setIsPackagesPage] = useState(false)
-    const [isExactMatch, setIsExactMatch] = useState<boolean>(false)
 
     const handleSearchParam = (event: React.ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         setSearchParam((prev: SearchParams) => ({
@@ -72,9 +71,6 @@ function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = 
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)
         const searchUrl = new URL(currentUrl.origin + currentUrl.pathname)
-        searchUrl.searchParams.append('allDetails', 'true')
-        if (isExactMatch) searchUrl.searchParams.append('luceneSearch', 'false')
-        else searchUrl.searchParams.append('luceneSearch', 'true')
         Object.entries(searchParams).forEach(([key, value]: Array<string>) => {
             if (!CommonUtils.isNullEmptyOrUndefinedString(value)) {
                 searchUrl.searchParams.append(key, value)
@@ -240,7 +236,6 @@ function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = 
                                     id='exactMatch'
                                     checked={searchParams.exactMatch === 'true'}
                                     onChange={(e) => {
-                                        setIsExactMatch(e.target.checked)
                                         setSearchParam((prev) => ({
                                             ...prev,
                                             exactMatch: e.target.checked ? 'true' : '',

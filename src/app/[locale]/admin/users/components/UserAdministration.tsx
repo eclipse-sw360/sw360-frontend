@@ -326,6 +326,16 @@ export default function UserAdminstration(): JSX.Element {
         session,
     ])
 
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        params.toString(),
+    ])
+
     const table = useReactTable({
         data: memoizedData,
         columns,

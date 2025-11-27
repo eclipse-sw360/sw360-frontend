@@ -291,9 +291,19 @@ function Obligations(): ReactNode {
         },
     })
 
-    const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        search,
+    ])
+
+    const doSearch = (value: string) => {
         setSearch({
-            search: event.currentTarget.value,
+            search: value,
         })
     }
 

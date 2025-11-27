@@ -165,9 +165,9 @@ export default function LicenseTypesDetail(): ReactNode {
         setLicenseTypeName(licenseTypeName)
     }
 
-    const doSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const doSearch = (value: string) => {
         setQuickFilter({
-            search: event.currentTarget.value,
+            search: value,
         })
     }
 
