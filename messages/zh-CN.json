@@ -1602,7 +1602,7 @@
     "sha1": "沙1",
     "showing page entries": "显示{entrystart}到{entryEnd}的{entryend} {totallements}条目",
     "spdx_feature_description": "此配置允许打开/关闭 SPDX 文档功能（发布详细信息页面中的 SPDX 文档选项卡）",
-    "the_component_cannot_be_deleted_contains_releases": "组件 <strong>{name}<strong> 无法删除，因为它包含 <strong>{releaseCount}<strong> 个版本。请先删除这些版本。",
+    "the_component_cannot_be_deleted_contains_releases": "无法删除组件 <strong>{name}</strong>，因为它包含 <strong>{releaseCount}</strong> 版本。\n请先删除版本。",
     "to edit the project relation": "编辑项目关系",
     "ui_clearing_team_unknown_enabled": "允许“未知”作为项目中的清算团队",
     "ui_clearing_teams": "项目清算组名单",

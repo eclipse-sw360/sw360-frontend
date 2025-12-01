@@ -1602,7 +1602,7 @@
     "sha1": "しゃ1",
     "showing page entries": "{EntryStart}から{EntryEnd}の{TotalElements}エントリを表示します",
     "spdx_feature_description": "この設定により、SPDX ドキュメント機能をオン/オフにすることができます (リリース詳細ページの SPDX ドキュメント タブ)",
-    "the_component_cannot_be_deleted_contains_releases": "コンポーネント <strong>{name}<strong> は <strong>{releaseCount}<strong> 個のリリースが含まれているため削除できません。まずリリースを削除してください。",
+    "the_component_cannot_be_deleted_contains_releases": "コンポーネント <strong>{name}</strong> は、<strong>{releaseCount}</strong> 個のリリースが含まれているため、削除できません。\nまずリリースを削除してください。",
     "to edit the project relation": "プロジェクト関係を編集するには",
     "ui_clearing_team_unknown_enabled": "プロジェクトの清算チームとして「不明」を許可する",
     "ui_clearing_teams": "プロジェクトの清算チーム一覧",

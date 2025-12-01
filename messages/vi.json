@@ -1602,7 +1602,7 @@
     "sha1": "sha1",
     "showing page entries": "Hiển thị {EntryStart} đến {Entryend} của {TotalErements}",
     "spdx_feature_description": "Cấu hình này cho phép BẬT/TẮT tính năng tài liệu SPDX (Tab Tài liệu SPDX trong trang chi tiết phát hành)",
-    "the_component_cannot_be_deleted_contains_releases": "Không thể xóa <strong>{name}<strong> thành phần vì nó chứa <strong>{releaseCount}<strong>. Vui lòng xóa các bản phát hành trước.",
+    "the_component_cannot_be_deleted_contains_releases": "Không thể xóa thành phần <strong>{name</strong> vì nó chứa các bản phát hành <strong>{releaseCount</strong>. \nVui lòng xóa các bản phát hành trước.",
     "to edit the project relation": "để chỉnh sửa mối quan hệ dự án",
     "ui_clearing_team_unknown_enabled": "Cho phép 'Không xác định' làm Nhóm thanh toán bù trừ trong Dự án",
     "ui_clearing_teams": "Danh sách các nhóm thanh toán bù trừ cho dự án",

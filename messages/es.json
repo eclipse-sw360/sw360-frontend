@@ -1602,7 +1602,7 @@
     "sha1": "sha1",
     "showing page entries": "Mostrando {EntryStart} a {Entryend} de {TotalElements} Entradas",
     "spdx_feature_description": "Esta configuración permite activar/desactivar la función de documento SPDX (pestaña Documento SPDX en la página de detalles de la versión)",
-    "the_component_cannot_be_deleted_contains_releases": "El componente <strong>{name}<strong> no se puede eliminar, ya que contiene <strong>{releaseCount}<strong> versiones. Elimine las versiones primero.",
+    "the_component_cannot_be_deleted_contains_releases": "El componente <strong>{name}</strong> no se puede eliminar porque contiene versiones <strong>{releaseCount}</strong>. \nPrimero elimine las versiones.",
     "to edit the project relation": "para editar la relación del proyecto",
     "ui_clearing_team_unknown_enabled": "Permitir 'Desconocido' como equipo de compensación en proyectos",
     "ui_clearing_teams": "Lista de equipos de compensación para proyectos",
