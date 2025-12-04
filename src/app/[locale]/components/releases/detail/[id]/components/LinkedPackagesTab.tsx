@@ -22,8 +22,8 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { Alert, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { packageManagers } from '@/app/[locale]/packages/components/PackageManagers'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, FilterOption, LinkedPackage } from '@/object-types'
@@ -48,6 +48,17 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [selectedPkg, setSelectedPkg] = useState<{
+        id: string
+        name: string
+        version: string
+    } | null>(null)
+    const [deleting, setDeleting] = useState(false)
+    const [alert, setAlert] = useState<{
+        variant: string
+        message: JSX.Element
+    } | null>(null)
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -141,7 +152,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                 id: 'actions',
                 header: t('Actions'),
                 cell: ({ row }) => {
-                    const { id } = row.original
+                    const { id, name, version } = row.original
                     return (
                         <span className='d-flex justify-content-evenly'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit Package')}</Tooltip>}>
@@ -151,6 +162,30 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                                 >
                                     <FaPencilAlt className='btn-icon' />
                                 </Link>
+                            </OverlayTrigger>
+                            <OverlayTrigger overlay={<Tooltip>{t('Delete Package')}</Tooltip>}>
+                                <span
+                                    className='d-inline-block'
+                                    style={{
+                                        cursor: 'pointer',
+                                    }}
+                                    onClick={() => {
+                                        setSelectedPkg({
+                                            id,
+                                            name: name ?? '',
+                                            version: version ?? '',
+                                        })
+                                        setAlert(null)
+                                        setShowDeleteModal(true)
+                                    }}
+                                >
+                                    <FaTrashAlt
+                                        className='btn-icon'
+                                        style={{
+                                            fontSize: '18px',
+                                        }}
+                                    />
+                                </span>
                             </OverlayTrigger>
                         </span>
                     )
@@ -168,6 +203,47 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     )
 
     const [packagesData, setPackagesData] = useState<LinkedPackage[]>(() => [])
+    const deleteLinkedPackage = async () => {
+        if (!selectedPkg || !session.data) return
+
+        try {
+            setDeleting(true)
+
+            const response = await ApiUtils.DELETE(`packages/${selectedPkg.id}`, session.data.user.access_token)
+            if (response.status === StatusCodes.OK || response.status === StatusCodes.NO_CONTENT) {
+                MessageService.success(t('Package deleted successfully'))
+                setPackagesData((prev) => prev.filter((pkg) => pkg.id !== selectedPkg.id))
+
+                setShowDeleteModal(false)
+                setSelectedPkg(null)
+                setAlert(null)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                setAlert({
+                    variant: 'warning',
+                    message: (
+                        <>
+                            {t(
+                                'The Package cannot be deleted, Since it is used by other project Please unlink it before deleting',
+                            )}
+                        </>
+                    ),
+                })
+            } else {
+                setAlert({
+                    variant: 'warning',
+                    message: <>{t('Package cannot be deleted')}</>,
+                })
+            }
+        } catch (error) {
+            console.error(error)
+            setAlert({
+                variant: 'warning',
+                message: <>{t('Package cannot be deleted')}</>,
+            })
+        } finally {
+            setDeleting(false)
+        }
+    }
     const memoizedData = useMemo(
         () => packagesData,
         [
@@ -235,21 +311,109 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     })
 
     return (
-        <div className='mb-3'>
-            {table ? (
-                <>
-                    <ClientSidePageSizeSelector table={table} />
-                    <SW360Table
-                        table={table}
-                        showProcessing={showProcessing}
-                    />
-                    <ClientSideTableFooter table={table} />
-                </>
-            ) : (
-                <div className='col-12 mt-1 text-center'>
-                    <Spinner className='spinner' />
-                </div>
-            )}
-        </div>
+        <>
+            <div className='mb-3'>
+                {table ? (
+                    <>
+                        <ClientSidePageSizeSelector table={table} />
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                        />
+                        <ClientSideTableFooter table={table} />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
+            <Modal
+                size='lg'
+                centered
+                show={showDeleteModal}
+                onHide={() => {
+                    setShowDeleteModal(false)
+                    setSelectedPkg(null)
+                    setAlert(null)
+                    setDeleting(false)
+                }}
+                aria-labelledby='delete-package-modal'
+                scrollable
+            >
+                <Modal.Header
+                    style={{
+                        backgroundColor: '#feefef',
+                        color: '#da1414',
+                    }}
+                    closeButton
+                >
+                    <Modal.Title id='delete-package-modal'>{t('Delete Package')}?</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    {alert && (
+                        <Alert
+                            variant={alert.variant}
+                            className='mb-3'
+                        >
+                            {alert.message}
+                        </Alert>
+                    )}
+                    {!alert && selectedPkg && (
+                        <p>
+                            {t('Do you really want to delete the package')}{' '}
+                            <strong>
+                                {selectedPkg.name}
+                                {selectedPkg.version ? ` (${selectedPkg.version})` : ''}
+                            </strong>
+                            ?
+                        </p>
+                    )}
+                </Modal.Body>
+
+                <Modal.Footer>
+                    {alert ? (
+                        <button
+                            className='btn btn-dark'
+                            onClick={() => {
+                                setShowDeleteModal(false)
+                                setSelectedPkg(null)
+                                setAlert(null)
+                                setDeleting(false)
+                            }}
+                        >
+                            {t('Close')}
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                className='btn btn-dark'
+                                onClick={() => {
+                                    setShowDeleteModal(false)
+                                    setSelectedPkg(null)
+                                }}
+                                disabled={deleting}
+                            >
+                                {t('Cancel')}
+                            </button>
+                            <button
+                                className='btn btn-danger'
+                                onClick={() => void deleteLinkedPackage()}
+                                disabled={deleting}
+                            >
+                                {t('Delete Package')}
+                                {deleting && (
+                                    <Spinner
+                                        size='sm'
+                                        className='ms-1 spinner'
+                                    />
+                                )}
+                            </button>
+                        </>
+                    )}
+                </Modal.Footer>
+            </Modal>
+        </>
     )
 }

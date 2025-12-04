@@ -1345,6 +1345,7 @@
     "The following duplicate identifiers were found": "다음과 같은 중복 식별자가 발견되었습니다.",
     "The license type cannot be deleted": "라이센스 유형 <strong> {name} </strong>는 <strong> {UsageCount} </strong> 라이센스에 사용되므로 삭제할 수 없습니다. \n라이센스를 먼저 취소하십시오.",
     "The new Component and new Release will be created, do you want to import?": "새로운 구성 요소와 새로운 릴리스를 만들 것입니다, 당신은 가져올 원?",
+    "The Package cannot be deleted, Since it is used by other project Please unlink it before deleting": "이 패키지는 다른 프로젝트에서 사용 중이므로 삭제할 수 없습니다. 삭제하기 전에 연결을 해제하십시오.",
     "The project cannot be deleted": "프로젝트는 다른 프로젝트에서 사용되므로 삭제할 수 없습니다!",
     "The projects have been successfully linked to project": "프로젝트는 성공적으로 프로젝트에 연결되었습니다.",
     "The release has been successfully linked to project": "공지사항 <strong>이름 *</strong> 프로젝트에 성공적으로 연결되었습니다. <strong>프로젝트 이름</strong>",

@@ -1345,6 +1345,7 @@
     "The following duplicate identifiers were found": "The following duplicate identifiers were found.",
     "The license type cannot be deleted": "The license type <strong>{name}</strong> cannot be deleted, since it is being used in <strong>{usageCount}</strong> license(s). Please revoke the license first.",
     "The new Component and new Release will be created, do you want to import?": "The new Component and new Release will be created, do you want to import?",
+    "The Package cannot be deleted, Since it is used by other project Please unlink it before deleting": "The Package cannot be deleted, Since it is used by other project. Please unlink it before deleting.",
     "The project cannot be deleted": "The project cannot be deleted, since it is used by another project!",
     "The projects have been successfully linked to project": "The projects have been successfully linked to project",
     "The release has been successfully linked to project": "The release <strong>{releaseName}</strong> has been successfully linked to project <strong>{projectName}</strong>",
