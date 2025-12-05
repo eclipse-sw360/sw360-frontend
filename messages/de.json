@@ -1603,7 +1603,7 @@
     "sha1": "sha1",
     "showing page entries": "{entryStart} zu {entryEnd} von {totalElements} Einträgen anzeigen",
     "spdx_feature_description": "Diese Konfiguration ermöglicht das Ein-/Ausschalten der SPDX-Dokumentfunktion (Registerkarte „SPDX-Dokument“ auf der Release-Detailseite).",
-    "the_component_cannot_be_deleted_contains_releases": "Die Komponente <strong>{name}<strong> kann nicht gelöscht werden, da sie <strong>{releaseCount}<strong> Releases enthält. Bitte löschen Sie zuerst die Releases.",
+    "the_component_cannot_be_deleted_contains_releases": "Die Komponente <strong>{name}</strong> kann nicht gelöscht werden, da sie <strong>{releaseCount}</strong> Releases enthält. \nBitte löschen Sie zunächst die Veröffentlichungen.",
     "to edit the project relation": "zur Bearbeitung der Projektbeziehung",
     "ui_clearing_team_unknown_enabled": "„Unbekannt“ als Clearing-Team in Projekten zulassen",
     "ui_clearing_teams": "Liste der Clearing-Teams für Projekte",

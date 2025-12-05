@@ -1603,7 +1603,7 @@
     "sha1": "sha1",
     "showing page entries": "Showing {entryStart} to {entryEnd} of {totalElements} entries",
     "spdx_feature_description": "This configuration allow to turn ON/OFF SPDX document feature (SPDX Document Tab in release detail page)",
-    "the_component_cannot_be_deleted_contains_releases": "The component <strong>{name}<strong> cannot be deleted, since it contains <strong>{releaseCount}<strong> releases. Please delete the releases first.",
+    "the_component_cannot_be_deleted_contains_releases": "The component <strong>{name}</strong> cannot be deleted, since it contains <strong>{releaseCount}</strong> releases. Please delete the releases first.",
     "to edit the project relation": "to edit the project relation",
     "ui_clearing_team_unknown_enabled": "Allow 'Unknown' as Clearing Team in Projects",
     "ui_clearing_teams": "List of Clearing Teams for Projects",
