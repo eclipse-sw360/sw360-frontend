@@ -19,7 +19,7 @@ import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { ErrorDetails, LinkedPackage, LinkedPackageData, ProjectPayload, Release } from '@/object-types'
+import { ErrorDetails, LinkedPackage, LinkedPackageData, Release } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -35,6 +35,12 @@ type ReleaseWithLinked = Release & {
 interface Props {
     releaseId?: string
     setReleasePayload: React.Dispatch<React.SetStateAction<ReleaseWithLinked>>
+}
+
+interface GenericPayload {
+    id?: string
+    name?: string
+    packageIds: Record<string, LinkedPackageData>
 }
 
 interface DeleteMetaData {
@@ -56,11 +62,15 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
         packageVersion: '',
     })
     const [showProcessing, setShowProcessing] = useState(false)
-    const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
-        id: '',
-        name: '',
+    const [payload, setPayload] = useState<GenericPayload>({
         packageIds: {},
     })
+    const openLinkPackagesModal = () => {
+        setPayload({
+            packageIds: Object.fromEntries(linkedPackageData),
+        })
+        setShowLinkPackagesModal(true)
+    }
 
     const fetchLinkedPackages = useCallback(async () => {
         if (!releaseId) return
@@ -125,6 +135,15 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
         linkedPackageData,
         setReleasePayload,
     ])
+    useEffect(() => {
+        if (!payload.packageIds) return
+
+        const next = new Map<string, LinkedPackageData>(Object.entries(payload.packageIds))
+
+        setLinkedPackageData(next)
+    }, [
+        payload,
+    ])
 
     const openDeleteModal = useCallback((pkg: LinkedPackageData) => {
         setDeleteMeta({
@@ -148,12 +167,6 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             packageName: '',
             packageVersion: '',
         })
-        setShowProcessing(false)
-        setProjectPayload({
-            id: '',
-            name: '',
-            packageIds: {},
-        })
     }
 
     const handleCancelDelete = () => {
@@ -162,12 +175,6 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             packageId: '',
             packageName: '',
             packageVersion: '',
-        })
-        setShowProcessing(false)
-        setProjectPayload({
-            id: '',
-            name: '',
-            packageIds: {},
         })
     }
 
@@ -256,9 +263,8 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             <LinkPackagesModal
                 show={showLinkPackagesModal}
                 setShow={setShowLinkPackagesModal}
-                setLinkedPackageData={setLinkedPackageData}
-                projectPayload={projectPayload}
-                setProjectPayload={setProjectPayload}
+                payload={payload}
+                setPayload={setPayload}
             />
 
             <Modal
@@ -318,7 +324,7 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
                                         <button
                                             type='button'
                                             className='btn btn-secondary'
-                                            onClick={() => setShowLinkPackagesModal(true)}
+                                            onClick={openLinkPackagesModal}
                                         >
                                             {t('Add Packages')}
                                         </button>
