@@ -17,28 +17,28 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
-import { BsInfoCircle } from 'react-icons/bs'
-import {
-    Embedded,
-    ErrorDetails,
-    LinkedPackageData,
-    Package,
-    PageableQueryParam,
-    PaginationMeta,
-    ProjectPayload,
-} from '@/object-types'
+import { FaInfoCircle } from 'react-icons/fa'
+import { Embedded, ErrorDetails, LinkedPackageData, Package, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
-interface Props {
-    projectPayload: ProjectPayload
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+interface HasLinkedPackages {
+    packageIds?: Record<string, LinkedPackageData>
+}
+interface Props<T extends HasLinkedPackages> {
+    payload: T
+    setPayload: React.Dispatch<React.SetStateAction<T>>
     show: boolean
     setShow: (show: boolean) => void
 }
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
 
-export default function LinkPackagesModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
+export default function LinkPackagesModal<T extends HasLinkedPackages>({
+    payload,
+    setPayload,
+    show,
+    setShow,
+}: Props<T>): JSX.Element {
     const t = useTranslations('default')
     const [linkPackages, setLinkPackages] = useState<Map<string, LinkedPackageData>>(new Map())
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
@@ -55,9 +55,9 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
     ])
 
     useEffect(() => {
-        setLinkPackages(new Map(Object.entries(projectPayload.packageIds ?? {})))
+        setLinkPackages(new Map(Object.entries(payload.packageIds ?? {})))
     }, [
-        projectPayload,
+        payload,
     ])
 
     const columns = useMemo<ColumnDef<Package>[]>(
@@ -254,9 +254,9 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
         }
     }
 
-    const projectPayloadSetter = () => {
-        setProjectPayload({
-            ...projectPayload,
+    const payloadSetter = () => {
+        setPayload({
+            ...payload,
             packageIds: Object.fromEntries(linkPackages),
         })
     }
@@ -338,7 +338,7 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
                                     <Form.Label className='pt-2'>
                                         {t('Exact Match')}{' '}
                                         <sup>
-                                            <BsInfoCircle size={20} />
+                                            <FaInfoCircle size={20} />
                                         </sup>
                                     </Form.Label>
                                 </Form.Group>
@@ -395,7 +395,7 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
                 <Button
                     variant='primary'
                     onClick={() => {
-                        projectPayloadSetter()
+                        payloadSetter()
                         closeModal()
                     }}
                     disabled={linkPackages.size === 0}

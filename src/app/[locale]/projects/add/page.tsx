@@ -313,8 +313,8 @@ function AddProjects(): JSX.Element {
                                             </Tab.Pane>
                                             <Tab.Pane eventKey='linkedPackages'>
                                                 <LinkedPackages
-                                                    projectPayload={projectPayload}
-                                                    setProjectPayload={setProjectPayload}
+                                                    payload={projectPayload}
+                                                    setPayload={setProjectPayload}
                                                 />
                                             </Tab.Pane>
                                         </Tab.Content>
