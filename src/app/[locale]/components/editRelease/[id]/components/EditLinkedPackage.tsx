@@ -34,7 +34,8 @@ type ReleaseWithLinked = Release & {
 
 interface Props {
     releaseId?: string
-    setReleasePayload: React.Dispatch<React.SetStateAction<ReleaseWithLinked>>
+    Payload: ProjectPayload
+    setPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
 interface DeleteMetaData {
@@ -44,7 +45,7 @@ interface DeleteMetaData {
     packageVersion: string
 }
 
-export default function EditLinkedPackages({ releaseId, setReleasePayload }: Props): JSX.Element {
+export default function EditLinkedPackages({ releaseId, Payload, setPayload }: Props): JSX.Element {
     const t = useTranslations('default')
 
     const [linkedPackageData, setLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
@@ -56,11 +57,6 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
         packageVersion: '',
     })
     const [showProcessing, setShowProcessing] = useState(false)
-    const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
-        id: '',
-        name: '',
-        packageIds: {},
-    })
 
     const fetchLinkedPackages = useCallback(async () => {
         if (!releaseId) return
@@ -117,13 +113,13 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             version: pkg.version ?? '',
             packageManager: pkg.packageManager ?? '',
         }))
-        setReleasePayload((prev) => ({
+        setPayload((prev) => ({
             ...(prev as ReleaseWithLinked),
             linkedPackages,
         }))
     }, [
         linkedPackageData,
-        setReleasePayload,
+        setPayload,
     ])
 
     const openDeleteModal = useCallback((pkg: LinkedPackageData) => {
@@ -148,12 +144,6 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             packageName: '',
             packageVersion: '',
         })
-        setShowProcessing(false)
-        setProjectPayload({
-            id: '',
-            name: '',
-            packageIds: {},
-        })
     }
 
     const handleCancelDelete = () => {
@@ -162,12 +152,6 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             packageId: '',
             packageName: '',
             packageVersion: '',
-        })
-        setShowProcessing(false)
-        setProjectPayload({
-            id: '',
-            name: '',
-            packageIds: {},
         })
     }
 
@@ -257,8 +241,8 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
                 show={showLinkPackagesModal}
                 setShow={setShowLinkPackagesModal}
                 setLinkedPackageData={setLinkedPackageData}
-                projectPayload={projectPayload}
-                setProjectPayload={setProjectPayload}
+                projectPayload={Payload}
+                setProjectPayload={setPayload}
             />
 
             <Modal
