@@ -9,25 +9,21 @@
 
 'use client'
 
-import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
 import { TiTick } from 'react-icons/ti'
-import { ErrorDetails, ListFieldProcessComponent, ReleaseDetail, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { ListFieldProcessComponent, ReleaseDetail, Vendor } from '@/object-types'
 
 export default function GeneralSection({
     targetRelease,
-    sourceRelease,
+    sourceReleaseDetail,
     finalReleasePayload,
     setFinalReleasePayload,
 }: {
     targetRelease: ReleaseDetail | null
-    sourceRelease: ReleaseDetail | null
+    sourceReleaseDetail: ReleaseDetail | null
     finalReleasePayload: ReleaseDetail | null
     setFinalReleasePayload: Dispatch<SetStateAction<null | ReleaseDetail>>
 }): ReactNode {
@@ -40,7 +36,6 @@ export default function GeneralSection({
     const [contributorMergeList, setContributorMergeList] = useState<ListFieldProcessComponent[]>([])
     const [subscriberMergeList, setSubscriberMergeList] = useState<ListFieldProcessComponent[]>([])
     const [vendor, setVendor] = useState<Vendor>({})
-    const [sourceReleaseDetail, setSourceReleaseDetail] = useState<ReleaseDetail | null>()
     const session = useSession()
 
     useEffect(() => {
@@ -49,47 +44,6 @@ export default function GeneralSection({
         }
     }, [
         session,
-    ])
-
-    useEffect(() => {
-        if (session.status === 'loading') return
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        void (async () => {
-            try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const queryUrl = CommonUtils.createUrlWithParams(`releases/${sourceRelease?.id}`, {
-                    allDetails: 'true',
-                })
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
-                }
-
-                const data = (await response.json()) as ReleaseDetail
-                console.log('data------', data)
-
-                setSourceReleaseDetail(
-                    CommonUtils.isNullOrUndefined(data)
-                        ? null
-                        : data
-                )
-            } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
-            }
-        })()
-
-        console.log('sourceReleaseDetail------', sourceReleaseDetail)
-        return () => controller.abort()
-
-    }, [
-        session, sourceRelease?.id,
     ])
 
     useEffect(() => {
@@ -121,12 +75,7 @@ export default function GeneralSection({
                     overWritten: false,
                 })),
         ])
-    }, [
-        targetRelease,
-        sourceReleaseDetail,
-    ])
 
-    useEffect(() => {
         setOperatingSystemMergeList([
             ...(targetRelease?.operatingSystems ?? ([] as string[]))
                 .filter((c) => (sourceReleaseDetail?.operatingSystems ?? ([] as string[])).indexOf(c) !== -1)
@@ -155,12 +104,7 @@ export default function GeneralSection({
                     overWritten: false,
                 })),
         ])
-    }, [
-        targetRelease,
-        sourceReleaseDetail,
-    ])
 
-    useEffect(() => {
         setSoftwarePlatformMergeList([
             ...(targetRelease?.softwarePlatforms ?? ([] as string[]))
                 .filter((c) => (sourceReleaseDetail?.softwarePlatforms ?? ([] as string[])).indexOf(c) !== -1)
@@ -189,14 +133,9 @@ export default function GeneralSection({
                     overWritten: false,
                 })),
         ])
-    }, [
-        targetRelease,
-        sourceReleaseDetail,
-    ])
-
-    useEffect(() => {
 
         setVendor(targetRelease?._embedded?.['sw360:vendors']?.[0] ?? {})
+
         setMainLicenseMergeList([
             ...(targetRelease?.mainLicenseIds ?? ([] as string[]))
                 .filter((c) => (sourceReleaseDetail?.mainLicenseIds ?? ([] as string[])).indexOf(c) !== -1)
@@ -225,19 +164,19 @@ export default function GeneralSection({
                     overWritten: false,
                 })),
         ])
-    }, [
-        targetRelease,
-        sourceReleaseDetail,
-    ])
 
-    useEffect(() => {
         setModeratorMergeList([
             ...(targetRelease?._embedded['sw360:moderators']
                 ? targetRelease._embedded['sw360:moderators'].map((mod) => mod.email)
-                : ([] as string[]))
-                .filter((c) => (sourceReleaseDetail?._embedded['sw360:moderators']
-                    ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
-                    : ([] as string[])).indexOf(c) !== -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (sourceReleaseDetail?._embedded['sw360:moderators']
+                            ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
+                            : ([] as string[])
+                        ).indexOf(c) !== -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: true,
@@ -247,10 +186,15 @@ export default function GeneralSection({
 
             ...(targetRelease?._embedded['sw360:moderators']
                 ? targetRelease._embedded['sw360:moderators'].map((mod) => mod.email)
-                : ([] as string[]))
-                .filter((c) => (sourceReleaseDetail?._embedded['sw360:moderators']
-                    ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
-                    : ([] as string[])).indexOf(c) === -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (sourceReleaseDetail?._embedded['sw360:moderators']
+                            ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
+                            : ([] as string[])
+                        ).indexOf(c) === -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: false,
@@ -260,10 +204,15 @@ export default function GeneralSection({
 
             ...(sourceReleaseDetail?._embedded['sw360:moderators']
                 ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
-                : ([] as string[]))
-                .filter((c) => (targetRelease?._embedded['sw360:moderators']
-                    ? targetRelease._embedded['sw360:moderators'].map((mod) => mod.email)
-                    : ([] as string[])).indexOf(c) === -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (targetRelease?._embedded['sw360:moderators']
+                            ? targetRelease._embedded['sw360:moderators'].map((mod) => mod.email)
+                            : ([] as string[])
+                        ).indexOf(c) === -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: true,
@@ -271,19 +220,19 @@ export default function GeneralSection({
                     overWritten: false,
                 })),
         ])
-    }, [
-        targetRelease,
-        sourceReleaseDetail,
-    ])
 
-    useEffect(() => {
         setContributorMergeList([
             ...(targetRelease?._embedded['sw360:contributors']
                 ? targetRelease._embedded['sw360:contributors'].map((con) => con.email)
-                : ([] as string[]))
-                .filter((c) => (sourceReleaseDetail?._embedded['sw360:contributors']
-                    ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
-                    : ([] as string[])).indexOf(c) !== -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (sourceReleaseDetail?._embedded['sw360:contributors']
+                            ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
+                            : ([] as string[])
+                        ).indexOf(c) !== -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: true,
@@ -293,10 +242,15 @@ export default function GeneralSection({
 
             ...(targetRelease?._embedded['sw360:contributors']
                 ? targetRelease._embedded['sw360:contributors'].map((con) => con.email)
-                : ([] as string[]))
-                .filter((c) => (sourceReleaseDetail?._embedded['sw360:contributors']
-                    ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
-                    : ([] as string[])).indexOf(c) === -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (sourceReleaseDetail?._embedded['sw360:contributors']
+                            ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
+                            : ([] as string[])
+                        ).indexOf(c) === -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: false,
@@ -306,10 +260,15 @@ export default function GeneralSection({
 
             ...(sourceReleaseDetail?._embedded['sw360:contributors']
                 ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
-                : ([] as string[]))
-                .filter((c) => (targetRelease?._embedded['sw360:contributors']
-                    ? targetRelease._embedded['sw360:contributors'].map((con) => con.email)
-                    : ([] as string[])).indexOf(c) === -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (targetRelease?._embedded['sw360:contributors']
+                            ? targetRelease._embedded['sw360:contributors'].map((con) => con.email)
+                            : ([] as string[])
+                        ).indexOf(c) === -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: true,
@@ -317,19 +276,19 @@ export default function GeneralSection({
                     overWritten: false,
                 })),
         ])
-    }, [
-        targetRelease,
-        sourceReleaseDetail,
-    ])
 
-    useEffect(() => {
         setSubscriberMergeList([
             ...(targetRelease?._embedded['sw360:subscribers']
                 ? targetRelease._embedded['sw360:subscribers'].map((sub) => sub.email)
-                : ([] as string[]))
-                .filter((c) => (sourceReleaseDetail?._embedded['sw360:subscribers']
-                    ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
-                    : ([] as string[])).indexOf(c) !== -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (sourceReleaseDetail?._embedded['sw360:subscribers']
+                            ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
+                            : ([] as string[])
+                        ).indexOf(c) !== -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: true,
@@ -339,10 +298,15 @@ export default function GeneralSection({
 
             ...(targetRelease?._embedded['sw360:subscribers']
                 ? targetRelease._embedded['sw360:subscribers'].map((sub) => sub.email)
-                : ([] as string[]))
-                .filter((c) => (sourceReleaseDetail?._embedded['sw360:subscribers']
-                    ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
-                    : ([] as string[])).indexOf(c) === -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (sourceReleaseDetail?._embedded['sw360:subscribers']
+                            ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
+                            : ([] as string[])
+                        ).indexOf(c) === -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: false,
@@ -352,10 +316,15 @@ export default function GeneralSection({
 
             ...(sourceReleaseDetail?._embedded['sw360:subscribers']
                 ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
-                : ([] as string[]))
-                .filter((c) => (targetRelease?._embedded['sw360:subscribers']
-                    ? targetRelease._embedded['sw360:subscribers'].map((sub) => sub.email)
-                    : ([] as string[])).indexOf(c) === -1)
+                : ([] as string[])
+            )
+                .filter(
+                    (c) =>
+                        (targetRelease?._embedded['sw360:subscribers']
+                            ? targetRelease._embedded['sw360:subscribers'].map((sub) => sub.email)
+                            : ([] as string[])
+                        ).indexOf(c) === -1,
+                )
                 .map((c) => ({
                     value: c,
                     presentInSource: true,
@@ -568,8 +537,8 @@ export default function GeneralSection({
                                                             languages: newProgrammingLanguages,
                                                         })
 
-                                                        const updatedProgrammingLanguageMergeList = programmingMergeList.map(
-                                                            (lang) => {
+                                                        const updatedProgrammingLanguageMergeList =
+                                                            programmingMergeList.map((lang) => {
                                                                 if (lang.value === c.value) {
                                                                     return {
                                                                         ...lang,
@@ -577,8 +546,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return lang
-                                                            },
-                                                        )
+                                                            })
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
@@ -595,8 +563,8 @@ export default function GeneralSection({
                                                             languages: programmingLanguages,
                                                         })
 
-                                                        const updatedProgrammingLanguageMergeList = programmingMergeList.map(
-                                                            (lang) => {
+                                                        const updatedProgrammingLanguageMergeList =
+                                                            programmingMergeList.map((lang) => {
                                                                 if (lang.value === c.value) {
                                                                     return {
                                                                         ...lang,
@@ -604,8 +572,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return lang
-                                                            },
-                                                        )
+                                                            })
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
@@ -635,8 +602,8 @@ export default function GeneralSection({
                                                             languages: programmingLanguages,
                                                         })
 
-                                                        const updatedProgrammingLanguageMergeList = programmingMergeList.map(
-                                                            (lang) => {
+                                                        const updatedProgrammingLanguageMergeList =
+                                                            programmingMergeList.map((lang) => {
                                                                 if (lang.value === c.value) {
                                                                     return {
                                                                         ...lang,
@@ -644,8 +611,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return lang
-                                                            },
-                                                        )
+                                                            })
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
@@ -663,8 +629,8 @@ export default function GeneralSection({
                                                             languages: programmingLanguages,
                                                         })
 
-                                                        const updatedProgrammingLanguageMergeList = programmingMergeList.map(
-                                                            (lang) => {
+                                                        const updatedProgrammingLanguageMergeList =
+                                                            programmingMergeList.map((lang) => {
                                                                 if (lang.value === c.value) {
                                                                     return {
                                                                         ...lang,
@@ -672,8 +638,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return lang
-                                                            },
-                                                        )
+                                                            })
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
@@ -726,8 +691,8 @@ export default function GeneralSection({
                                                             operatingSystems: newOperatingSystemList,
                                                         })
 
-                                                        const updatedOPeratingSystemMergeList = operatingSystemMergeList.map(
-                                                            (os) => {
+                                                        const updatedOPeratingSystemMergeList =
+                                                            operatingSystemMergeList.map((os) => {
                                                                 if (os.value === c.value) {
                                                                     return {
                                                                         ...os,
@@ -735,8 +700,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return os
-                                                            },
-                                                        )
+                                                            })
                                                         setOperatingSystemMergeList(updatedOPeratingSystemMergeList)
                                                     }}
                                                 >
@@ -746,15 +710,16 @@ export default function GeneralSection({
                                                 <button
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
-                                                        const operatingSystems = finalReleasePayload.operatingSystems ?? []
+                                                        const operatingSystems =
+                                                            finalReleasePayload.operatingSystems ?? []
                                                         operatingSystems.push(c.value)
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             operatingSystems: operatingSystems,
                                                         })
 
-                                                        const updatedOperatingSystemMergeList = operatingSystemMergeList.map(
-                                                            (os) => {
+                                                        const updatedOperatingSystemMergeList =
+                                                            operatingSystemMergeList.map((os) => {
                                                                 if (os.value === c.value) {
                                                                     return {
                                                                         ...os,
@@ -762,8 +727,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return os
-                                                            },
-                                                        )
+                                                            })
                                                         setOperatingSystemMergeList(updatedOperatingSystemMergeList)
                                                     }}
                                                 >
@@ -786,15 +750,16 @@ export default function GeneralSection({
                                                 <button
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
-                                                        const operatingSystems = finalReleasePayload.operatingSystems ?? []
+                                                        const operatingSystems =
+                                                            finalReleasePayload.operatingSystems ?? []
                                                         operatingSystems.push(c.value)
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             operatingSystems: operatingSystems,
                                                         })
 
-                                                        const updatedOperatingSystemsMergeList = operatingSystemMergeList.map(
-                                                            (os) => {
+                                                        const updatedOperatingSystemsMergeList =
+                                                            operatingSystemMergeList.map((os) => {
                                                                 if (os.value === c.value) {
                                                                     return {
                                                                         ...os,
@@ -802,8 +767,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return os
-                                                            },
-                                                        )
+                                                            })
                                                         setOperatingSystemMergeList(updatedOperatingSystemsMergeList)
                                                     }}
                                                 >
@@ -821,8 +785,8 @@ export default function GeneralSection({
                                                             operatingSystems: operatingSystems,
                                                         })
 
-                                                        const updatedOperatingSystemMergeList = operatingSystemMergeList.map(
-                                                            (os) => {
+                                                        const updatedOperatingSystemMergeList =
+                                                            operatingSystemMergeList.map((os) => {
                                                                 if (os.value === c.value) {
                                                                     return {
                                                                         ...os,
@@ -830,8 +794,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return os
-                                                            },
-                                                        )
+                                                            })
                                                         setOperatingSystemMergeList(updatedOperatingSystemMergeList)
                                                     }}
                                                 >
@@ -884,8 +847,8 @@ export default function GeneralSection({
                                                             softwarePlatforms: newSoftwarePlatforms,
                                                         })
 
-                                                        const updatedSoftwarePlatformMergeList = softwarePlatformMergeList.map(
-                                                            (sp) => {
+                                                        const updatedSoftwarePlatformMergeList =
+                                                            softwarePlatformMergeList.map((sp) => {
                                                                 if (sp.value === c.value) {
                                                                     return {
                                                                         ...sp,
@@ -893,8 +856,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return sp
-                                                            },
-                                                        )
+                                                            })
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformMergeList)
                                                     }}
                                                 >
@@ -904,15 +866,16 @@ export default function GeneralSection({
                                                 <button
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
-                                                        const softwarePlatforms = finalReleasePayload.softwarePlatforms ?? []
+                                                        const softwarePlatforms =
+                                                            finalReleasePayload.softwarePlatforms ?? []
                                                         softwarePlatforms.push(c.value)
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             softwarePlatforms: softwarePlatforms,
                                                         })
 
-                                                        const updatedSoftwarePlatformMergeList = softwarePlatformMergeList.map(
-                                                            (sp) => {
+                                                        const updatedSoftwarePlatformMergeList =
+                                                            softwarePlatformMergeList.map((sp) => {
                                                                 if (sp.value === c.value) {
                                                                     return {
                                                                         ...sp,
@@ -920,8 +883,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return sp
-                                                            },
-                                                        )
+                                                            })
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformMergeList)
                                                     }}
                                                 >
@@ -944,15 +906,16 @@ export default function GeneralSection({
                                                 <button
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
-                                                        const softwarePlatforms = finalReleasePayload.softwarePlatforms ?? []
+                                                        const softwarePlatforms =
+                                                            finalReleasePayload.softwarePlatforms ?? []
                                                         softwarePlatforms.push(c.value)
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             softwarePlatforms: softwarePlatforms,
                                                         })
 
-                                                        const updatedSoftwarePlatformsMergeList = softwarePlatformMergeList.map(
-                                                            (sp) => {
+                                                        const updatedSoftwarePlatformsMergeList =
+                                                            softwarePlatformMergeList.map((sp) => {
                                                                 if (sp.value === c.value) {
                                                                     return {
                                                                         ...sp,
@@ -960,8 +923,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return sp
-                                                            },
-                                                        )
+                                                            })
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformsMergeList)
                                                     }}
                                                 >
@@ -979,8 +941,8 @@ export default function GeneralSection({
                                                             softwarePlatforms: softwarePlatforms,
                                                         })
 
-                                                        const updatedSoftwarePlatformMergeList = softwarePlatformMergeList.map(
-                                                            (sp) => {
+                                                        const updatedSoftwarePlatformMergeList =
+                                                            softwarePlatformMergeList.map((sp) => {
                                                                 if (sp.value === c.value) {
                                                                     return {
                                                                         ...sp,
@@ -988,8 +950,7 @@ export default function GeneralSection({
                                                                     }
                                                                 }
                                                                 return sp
-                                                            },
-                                                        )
+                                                            })
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformMergeList)
                                                     }}
                                                 >
@@ -1249,7 +1210,8 @@ export default function GeneralSection({
                                         size={40}
                                         className='green'
                                     />
-                                ) : finalReleasePayload.sourceCodeDownloadurl === targetRelease.sourceCodeDownloadurl ? (
+                                ) : finalReleasePayload.sourceCodeDownloadurl ===
+                                    targetRelease.sourceCodeDownloadurl ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -1359,14 +1321,17 @@ export default function GeneralSection({
                     <div className='border border-top-0 border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('Vendor')}</div>
                         <div className='d-flex row'>
-                            <div className='mt-2 col text-end'>{vendor
-                                ? `${vendor.fullName ?? ''}
+                            <div className='mt-2 col text-end'>
+                                {vendor
+                                    ? `${vendor.fullName ?? ''}
                                        ${vendor.shortName ? ` (${vendor.shortName})` : ''}
                                        ${vendor.url ? `: ${vendor.url}` : ''}`
-                                : ''}
+                                    : ''}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
-                                {sourceReleaseDetail._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ===
+                                {sourceReleaseDetail._embedded['sw360:vendors']?.[0]._links?.self.href
+                                    .split('/')
+                                    .at(-1) ===
                                     targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
                                     <TiTick
                                         size={25}
@@ -1379,7 +1344,11 @@ export default function GeneralSection({
                                         onClick={() => {
                                             setFinalReleasePayload({
                                                 ...finalReleasePayload,
-                                                vendorId: sourceReleaseDetail._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1),
+                                                vendorId: sourceReleaseDetail._embedded[
+                                                    'sw360:vendors'
+                                                ]?.[0]._links?.self.href
+                                                    .split('/')
+                                                    .at(-1),
                                                 vendor: sourceReleaseDetail._embedded?.['sw360:vendors']?.[0],
                                             })
                                             setVendor(sourceReleaseDetail._embedded?.['sw360:vendors']?.[0] ?? {})
@@ -1393,7 +1362,11 @@ export default function GeneralSection({
                                         onClick={() => {
                                             setFinalReleasePayload({
                                                 ...finalReleasePayload,
-                                                vendorId: targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1),
+                                                vendorId: targetRelease._embedded[
+                                                    'sw360:vendors'
+                                                ]?.[0]._links?.self.href
+                                                    .split('/')
+                                                    .at(-1),
                                                 vendor: targetRelease._embedded?.['sw360:vendors']?.[0],
                                             })
                                             setVendor(targetRelease._embedded?.['sw360:vendors']?.[0] ?? {})
@@ -1406,10 +1379,14 @@ export default function GeneralSection({
                             <div className='mt-2 col text-start'>
                                 {sourceReleaseDetail._embedded['sw360:vendors']?.[0]
                                     ? `${sourceReleaseDetail._embedded['sw360:vendors']?.[0].fullName ?? ''}
-                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName ?
-                                        ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})` : ''}
-                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url ?
-                                        `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}` : ''}`
+                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName
+                                        ? ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})`
+                                        : ''
+                                    }
+                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url
+                                        ? `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}`
+                                        : ''
+                                    }`
                                     : ''}
                             </div>
                         </div>
@@ -1417,11 +1394,9 @@ export default function GeneralSection({
                     <div className='border border-top-0 border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('Repository')}</div>
                         <div className='d-flex row'>
-                            <div className='mt-2 col text-end'>{
-                                finalReleasePayload.repository
-                                    ? `${finalReleasePayload.repository?.url
-                                        ? finalReleasePayload.repository?.url
-                                        : ''}
+                            <div className='mt-2 col text-end'>
+                                {finalReleasePayload.repository
+                                    ? `${finalReleasePayload.repository?.url ? finalReleasePayload.repository?.url : ''}
                                     ${finalReleasePayload.repository?.repositorytype
                                         ? `(${finalReleasePayload.repository?.repositorytype})`
                                         : ''
@@ -1461,16 +1436,13 @@ export default function GeneralSection({
                                 )}
                             </div>
                             <div className='mt-2 col text-start'>
-                                {
-                                    sourceReleaseDetail.repository
-                                        ? `${sourceReleaseDetail.repository?.url
-                                            ? sourceReleaseDetail.repository?.url
-                                            : ''}
+                                {sourceReleaseDetail.repository
+                                    ? `${sourceReleaseDetail.repository?.url ? sourceReleaseDetail.repository?.url : ''}
                                     ${sourceReleaseDetail.repository?.repositorytype
-                                            ? `(${sourceReleaseDetail.repository?.repositorytype})`
-                                            : ''}`
+                                        ? `(${sourceReleaseDetail.repository?.repositorytype})`
                                         : ''
-                                }
+                                    }`
+                                    : ''}
                             </div>
                         </div>
                     </div>
