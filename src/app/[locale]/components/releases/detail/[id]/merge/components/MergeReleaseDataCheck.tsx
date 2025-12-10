@@ -11,12 +11,12 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Attachment, ErrorDetails, ListFieldProcessComponent, ReleaseDetail } from '@/object-types'
+import { Attachment, ErrorDetails, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import ExternalIdsSection from './ExternalIdsSection'
 import GeneralSection from './GeneralSection'
 
 export default function MergeReleaseDataCheck({
@@ -93,6 +93,12 @@ export default function MergeReleaseDataCheck({
             {targetRelease && sourceReleaseDetail && finalReleasePayload && (
                 <>
                     <GeneralSection
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <ExternalIdsSection
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
