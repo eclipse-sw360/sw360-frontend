@@ -13,7 +13,6 @@ import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-// import { BiInfoCircle } from 'react-icons/bi'
 import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
 import { TiTick } from 'react-icons/ti'
 import { ErrorDetails, ListFieldProcessComponent, ReleaseDetail, Vendor } from '@/object-types'
@@ -36,8 +35,11 @@ export default function GeneralSection({
     const [programmingMergeList, setProgrammingMergeList] = useState<ListFieldProcessComponent[]>([])
     const [operatingSystemMergeList, setOperatingSystemMergeList] = useState<ListFieldProcessComponent[]>([])
     const [softwarePlatformMergeList, setSoftwarePlatformMergeList] = useState<ListFieldProcessComponent[]>([])
-    // const [defaultVendor, setDefaultVendor] = useState<Vendor>({})
-    // const [categoryMergeList, setCategoryMergeList] = useState<ListFieldProcessComponent[]>([])
+    const [mainLicenseMergeList, setMainLicenseMergeList] = useState<ListFieldProcessComponent[]>([])
+    const [moderatorMergeList, setModeratorMergeList] = useState<ListFieldProcessComponent[]>([])
+    const [contributorMergeList, setContributorMergeList] = useState<ListFieldProcessComponent[]>([])
+    const [subscriberMergeList, setSubscriberMergeList] = useState<ListFieldProcessComponent[]>([])
+    const [vendor, setVendor] = useState<Vendor>({})
     const [sourceReleaseDetail, setSourceReleaseDetail] = useState<ReleaseDetail | null>()
     const session = useSession()
 
@@ -180,6 +182,180 @@ export default function GeneralSection({
 
             ...(sourceReleaseDetail?.softwarePlatforms ?? ([] as string[]))
                 .filter((c) => (targetRelease?.softwarePlatforms ?? ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
+        ])
+    }, [
+        targetRelease,
+        sourceReleaseDetail,
+    ])
+
+    useEffect(() => {
+
+        setVendor(targetRelease?._embedded?.['sw360:vendors']?.[0] ?? {})
+        setMainLicenseMergeList([
+            ...(targetRelease?.mainLicenseIds ?? ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?.mainLicenseIds ?? ([] as string[])).indexOf(c) !== -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(targetRelease?.mainLicenseIds ?? ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?.mainLicenseIds ?? ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(sourceReleaseDetail?.mainLicenseIds ?? ([] as string[]))
+                .filter((c) => (targetRelease?.mainLicenseIds ?? ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
+        ])
+    }, [
+        targetRelease,
+        sourceReleaseDetail,
+    ])
+
+    useEffect(() => {
+        setModeratorMergeList([
+            ...(targetRelease?._embedded['sw360:moderators']
+                ? targetRelease._embedded['sw360:moderators'].map((mod) => mod.email)
+                : ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?._embedded['sw360:moderators']
+                    ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
+                    : ([] as string[])).indexOf(c) !== -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(targetRelease?._embedded['sw360:moderators']
+                ? targetRelease._embedded['sw360:moderators'].map((mod) => mod.email)
+                : ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?._embedded['sw360:moderators']
+                    ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
+                    : ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(sourceReleaseDetail?._embedded['sw360:moderators']
+                ? sourceReleaseDetail._embedded['sw360:moderators'].map((mod) => mod.email)
+                : ([] as string[]))
+                .filter((c) => (targetRelease?._embedded['sw360:moderators']
+                    ? targetRelease._embedded['sw360:moderators'].map((mod) => mod.email)
+                    : ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
+        ])
+    }, [
+        targetRelease,
+        sourceReleaseDetail,
+    ])
+
+    useEffect(() => {
+        setContributorMergeList([
+            ...(targetRelease?._embedded['sw360:contributors']
+                ? targetRelease._embedded['sw360:contributors'].map((con) => con.email)
+                : ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?._embedded['sw360:contributors']
+                    ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
+                    : ([] as string[])).indexOf(c) !== -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(targetRelease?._embedded['sw360:contributors']
+                ? targetRelease._embedded['sw360:contributors'].map((con) => con.email)
+                : ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?._embedded['sw360:contributors']
+                    ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
+                    : ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(sourceReleaseDetail?._embedded['sw360:contributors']
+                ? sourceReleaseDetail._embedded['sw360:contributors'].map((con) => con.email)
+                : ([] as string[]))
+                .filter((c) => (targetRelease?._embedded['sw360:contributors']
+                    ? targetRelease._embedded['sw360:contributors'].map((con) => con.email)
+                    : ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
+        ])
+    }, [
+        targetRelease,
+        sourceReleaseDetail,
+    ])
+
+    useEffect(() => {
+        setSubscriberMergeList([
+            ...(targetRelease?._embedded['sw360:subscribers']
+                ? targetRelease._embedded['sw360:subscribers'].map((sub) => sub.email)
+                : ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?._embedded['sw360:subscribers']
+                    ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
+                    : ([] as string[])).indexOf(c) !== -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: true,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(targetRelease?._embedded['sw360:subscribers']
+                ? targetRelease._embedded['sw360:subscribers'].map((sub) => sub.email)
+                : ([] as string[]))
+                .filter((c) => (sourceReleaseDetail?._embedded['sw360:subscribers']
+                    ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
+                    : ([] as string[])).indexOf(c) === -1)
+                .map((c) => ({
+                    value: c,
+                    presentInSource: false,
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            ...(sourceReleaseDetail?._embedded['sw360:subscribers']
+                ? sourceReleaseDetail._embedded['sw360:subscribers'].map((sub) => sub.email)
+                : ([] as string[]))
+                .filter((c) => (targetRelease?._embedded['sw360:subscribers']
+                    ? targetRelease._embedded['sw360:subscribers'].map((sub) => sub.email)
+                    : ([] as string[])).indexOf(c) === -1)
                 .map((c) => ({
                     value: c,
                     presentInSource: true,
@@ -904,6 +1080,873 @@ export default function GeneralSection({
                             </div>
                             <div className='mt-2 col text-start'>{sourceReleaseDetail.releaseDate}</div>
                         </div>
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Main Licenses')}</div>
+                        {mainLicenseMergeList.map((c) => {
+                            if (c.presentInSource && c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            <TiTick
+                                                size={25}
+                                                className='green'
+                                            />
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            } else if (c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const newMainLicenses = (
+                                                            finalReleasePayload.mainLicenseIds ?? []
+                                                        ).filter((ml) => ml !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            mainLicenseIds: newMainLicenses,
+                                                        })
+
+                                                        const updatedMainLicenseMergeList = mainLicenseMergeList.map(
+                                                            (ml) => {
+                                                                if (ml.value === c.value) {
+                                                                    return {
+                                                                        ...ml,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return ml
+                                                            },
+                                                        )
+                                                        setMainLicenseMergeList(updatedMainLicenseMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const mainLicenseIds = finalReleasePayload.mainLicenseIds ?? []
+                                                        mainLicenseIds.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            mainLicenseIds: mainLicenseIds,
+                                                        })
+
+                                                        const updatedMainLicenseMergeList = mainLicenseMergeList.map(
+                                                            (ml) => {
+                                                                if (ml.value === c.value) {
+                                                                    return {
+                                                                        ...ml,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return ml
+                                                            },
+                                                        )
+                                                        setMainLicenseMergeList(updatedMainLicenseMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'></div>
+                                    </div>
+                                )
+                            } else {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{!c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const mainLicenseIds = finalReleasePayload.mainLicenseIds ?? []
+                                                        mainLicenseIds.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            mainLicenseIds: mainLicenseIds,
+                                                        })
+
+                                                        const updatedMainLicenseMergeList = mainLicenseMergeList.map(
+                                                            (ml) => {
+                                                                if (ml.value === c.value) {
+                                                                    return {
+                                                                        ...ml,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return ml
+                                                            },
+                                                        )
+                                                        setMainLicenseMergeList(updatedMainLicenseMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const mainLicenseIds = (
+                                                            finalReleasePayload.mainLicenseIds ?? []
+                                                        ).filter((ml) => ml !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            mainLicenseIds: mainLicenseIds,
+                                                        })
+
+                                                        const updatedMinLicenseMergeList = mainLicenseMergeList.map(
+                                                            (ml) => {
+                                                                if (ml.value === c.value) {
+                                                                    return {
+                                                                        ...ml,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return ml
+                                                            },
+                                                        )
+                                                        setMainLicenseMergeList(updatedMinLicenseMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            }
+                        })}
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Source Code Download URL')}</div>
+                        <div className='d-flex row'>
+                            <div className='mt-2 col text-end'>{finalReleasePayload.sourceCodeDownloadurl}</div>
+                            <div className='col-12 col-md-2 mx-5 text-center'>
+                                {sourceReleaseDetail.sourceCodeDownloadurl === targetRelease.sourceCodeDownloadurl ? (
+                                    <TiTick
+                                        size={40}
+                                        className='green'
+                                    />
+                                ) : finalReleasePayload.sourceCodeDownloadurl === targetRelease.sourceCodeDownloadurl ? (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                sourceCodeDownloadurl: sourceReleaseDetail.sourceCodeDownloadurl,
+                                            })
+                                        }
+                                    >
+                                        <FaLongArrowAltLeft />
+                                    </button>
+                                ) : (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                sourceCodeDownloadurl: targetRelease.sourceCodeDownloadurl,
+                                            })
+                                        }
+                                    >
+                                        <FaUndo />
+                                    </button>
+                                )}
+                            </div>
+                            <div className='mt-2 col text-start'>{sourceReleaseDetail.sourceCodeDownloadurl}</div>
+                        </div>
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Binary Download URL')}</div>
+                        <div className='d-flex row'>
+                            <div className='mt-2 col text-end'>{finalReleasePayload.binaryDownloadurl}</div>
+                            <div className='col-12 col-md-2 mx-5 text-center'>
+                                {sourceReleaseDetail.binaryDownloadurl === targetRelease.binaryDownloadurl ? (
+                                    <TiTick
+                                        size={40}
+                                        className='green'
+                                    />
+                                ) : finalReleasePayload.binaryDownloadurl === targetRelease.binaryDownloadurl ? (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                binaryDownloadurl: sourceReleaseDetail.binaryDownloadurl,
+                                            })
+                                        }
+                                    >
+                                        <FaLongArrowAltLeft />
+                                    </button>
+                                ) : (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                binaryDownloadurl: targetRelease.binaryDownloadurl,
+                                            })
+                                        }
+                                    >
+                                        <FaUndo />
+                                    </button>
+                                )}
+                            </div>
+                            <div className='mt-2 col text-start'>{sourceReleaseDetail.binaryDownloadurl}</div>
+                        </div>
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Release Mainline State')}</div>
+                        <div className='d-flex row'>
+                            <div className='mt-2 col text-end'>{finalReleasePayload.mainlineState}</div>
+                            <div className='col-12 col-md-2 mx-5 text-center'>
+                                {sourceReleaseDetail.mainlineState === targetRelease.mainlineState ? (
+                                    <TiTick
+                                        size={40}
+                                        className='green'
+                                    />
+                                ) : finalReleasePayload.mainlineState === targetRelease.mainlineState ? (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                mainlineState: sourceReleaseDetail.mainlineState,
+                                            })
+                                        }
+                                    >
+                                        <FaLongArrowAltLeft />
+                                    </button>
+                                ) : (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                mainlineState: targetRelease.mainlineState,
+                                            })
+                                        }
+                                    >
+                                        <FaUndo />
+                                    </button>
+                                )}
+                            </div>
+                            <div className='mt-2 col text-start'>{sourceReleaseDetail.mainlineState}</div>
+                        </div>
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Vendor')}</div>
+                        <div className='d-flex row'>
+                            <div className='mt-2 col text-end'>{vendor
+                                ? `${vendor.fullName ?? ''}
+                                       ${vendor.shortName ? ` (${vendor.shortName})` : ''}
+                                       ${vendor.url ? `: ${vendor.url}` : ''}`
+                                : ''}
+                            </div>
+                            <div className='col-12 col-md-2 mx-5 text-center'>
+                                {sourceReleaseDetail._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ===
+                                    targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
+                                    <TiTick
+                                        size={25}
+                                        className='green'
+                                    />
+                                ) : (vendor._links?.self.href.split('/').at(-1) ?? undefined) ===
+                                    targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() => {
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                vendorId: sourceReleaseDetail._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1),
+                                                vendor: sourceReleaseDetail._embedded?.['sw360:vendors']?.[0],
+                                            })
+                                            setVendor(sourceReleaseDetail._embedded?.['sw360:vendors']?.[0] ?? {})
+                                        }}
+                                    >
+                                        <FaLongArrowAltLeft />
+                                    </button>
+                                ) : (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() => {
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                vendorId: targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1),
+                                                vendor: targetRelease._embedded?.['sw360:vendors']?.[0],
+                                            })
+                                            setVendor(targetRelease._embedded?.['sw360:vendors']?.[0] ?? {})
+                                        }}
+                                    >
+                                        <FaUndo />
+                                    </button>
+                                )}
+                            </div>
+                            <div className='mt-2 col text-start'>
+                                {sourceReleaseDetail._embedded['sw360:vendors']?.[0]
+                                    ? `${sourceReleaseDetail._embedded['sw360:vendors']?.[0].fullName ?? ''}
+                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName ?
+                                        ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})` : ''}
+                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url ?
+                                        `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}` : ''}`
+                                    : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Repository')}</div>
+                        <div className='d-flex row'>
+                            <div className='mt-2 col text-end'>{
+                                finalReleasePayload.repository
+                                    ? `${finalReleasePayload.repository?.url
+                                        ? finalReleasePayload.repository?.url
+                                        : ''}
+                                    ${finalReleasePayload.repository?.repositorytype
+                                        ? `(${finalReleasePayload.repository?.repositorytype})`
+                                        : ''
+                                    }`
+                                    : ''}
+                            </div>
+                            <div className='col-12 col-md-2 mx-5 text-center'>
+                                {sourceReleaseDetail.repository?.url === targetRelease.repository?.url ? (
+                                    <TiTick
+                                        size={40}
+                                        className='green'
+                                    />
+                                ) : finalReleasePayload.repository?.url === targetRelease.repository?.url ? (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                repository: sourceReleaseDetail.repository,
+                                            })
+                                        }
+                                    >
+                                        <FaLongArrowAltLeft />
+                                    </button>
+                                ) : (
+                                    <button
+                                        className='btn btn-secondary px-2'
+                                        onClick={() =>
+                                            setFinalReleasePayload({
+                                                ...finalReleasePayload,
+                                                repository: targetRelease.repository,
+                                            })
+                                        }
+                                    >
+                                        <FaUndo />
+                                    </button>
+                                )}
+                            </div>
+                            <div className='mt-2 col text-start'>
+                                {
+                                    sourceReleaseDetail.repository
+                                        ? `${sourceReleaseDetail.repository?.url
+                                            ? sourceReleaseDetail.repository?.url
+                                            : ''}
+                                    ${sourceReleaseDetail.repository?.repositorytype
+                                            ? `(${sourceReleaseDetail.repository?.repositorytype})`
+                                            : ''}`
+                                        : ''
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Moderators')}</div>
+                        {moderatorMergeList.map((c) => {
+                            if (c.presentInSource && c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            <TiTick
+                                                size={25}
+                                                className='green'
+                                            />
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            } else if (c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const newModeratorList = (
+                                                            finalReleasePayload.moderators ?? []
+                                                        ).filter((mod) => mod !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            moderators: newModeratorList,
+                                                        })
+
+                                                        const updatedModeratorMergeList = moderatorMergeList.map(
+                                                            (mod) => {
+                                                                if (mod.value === c.value) {
+                                                                    return {
+                                                                        ...mod,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return mod
+                                                            },
+                                                        )
+                                                        setModeratorMergeList(updatedModeratorMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const moderatorsData = finalReleasePayload.moderators ?? []
+                                                        moderatorsData.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            moderators: moderatorsData,
+                                                        })
+
+                                                        const updatedModeratorsMergeList = moderatorMergeList.map(
+                                                            (mod) => {
+                                                                if (mod.value === c.value) {
+                                                                    return {
+                                                                        ...mod,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return mod
+                                                            },
+                                                        )
+                                                        setModeratorMergeList(updatedModeratorsMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'></div>
+                                    </div>
+                                )
+                            } else {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{!c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const moderatorList = finalReleasePayload.moderators ?? []
+                                                        moderatorList.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            moderators: moderatorList,
+                                                        })
+
+                                                        const updatedModeratorsMergeList = moderatorMergeList.map(
+                                                            (mod) => {
+                                                                if (mod.value === c.value) {
+                                                                    return {
+                                                                        ...mod,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return mod
+                                                            },
+                                                        )
+                                                        setModeratorMergeList(updatedModeratorsMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const moderatorList = (
+                                                            finalReleasePayload.moderators ?? []
+                                                        ).filter((mod) => mod !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            moderators: moderatorList,
+                                                        })
+
+                                                        const updatedModeratorMergeList = moderatorMergeList.map(
+                                                            (mod) => {
+                                                                if (mod.value === c.value) {
+                                                                    return {
+                                                                        ...mod,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return mod
+                                                            },
+                                                        )
+                                                        setModeratorMergeList(updatedModeratorMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            }
+                        })}
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Contributors')}</div>
+                        {contributorMergeList.map((c) => {
+                            if (c.presentInSource && c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            <TiTick
+                                                size={25}
+                                                className='green'
+                                            />
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            } else if (c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const newContributorList = (
+                                                            finalReleasePayload.contributors ?? []
+                                                        ).filter((con) => con !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            contributors: newContributorList,
+                                                        })
+
+                                                        const updatedContributorMergeList = contributorMergeList.map(
+                                                            (con) => {
+                                                                if (con.value === c.value) {
+                                                                    return {
+                                                                        ...con,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return con
+                                                            },
+                                                        )
+                                                        setContributorMergeList(updatedContributorMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const contributorsData = finalReleasePayload.contributors ?? []
+                                                        contributorsData.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            contributors: contributorsData,
+                                                        })
+
+                                                        const updatedContributorsMergeList = contributorMergeList.map(
+                                                            (con) => {
+                                                                if (con.value === c.value) {
+                                                                    return {
+                                                                        ...con,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return con
+                                                            },
+                                                        )
+                                                        setContributorMergeList(updatedContributorsMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'></div>
+                                    </div>
+                                )
+                            } else {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{!c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const contributorList = finalReleasePayload.contributors ?? []
+                                                        contributorList.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            contributors: contributorList,
+                                                        })
+
+                                                        const updatedContributorsMergeList = contributorMergeList.map(
+                                                            (con) => {
+                                                                if (con.value === c.value) {
+                                                                    return {
+                                                                        ...con,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return con
+                                                            },
+                                                        )
+                                                        setContributorMergeList(updatedContributorsMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const contributorList = (
+                                                            finalReleasePayload.contributors ?? []
+                                                        ).filter((con) => con !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            contributors: contributorList,
+                                                        })
+
+                                                        const updatedContributorMergeList = contributorMergeList.map(
+                                                            (con) => {
+                                                                if (con.value === c.value) {
+                                                                    return {
+                                                                        ...con,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return con
+                                                            },
+                                                        )
+                                                        setContributorMergeList(updatedContributorMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            }
+                        })}
+                    </div>
+                    <div className='border border-top-0 border-blue p-2'>
+                        <div className='fw-bold text-blue'>{t('Subscribers')}</div>
+                        {subscriberMergeList.map((c) => {
+                            if (c.presentInSource && c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            <TiTick
+                                                size={25}
+                                                className='green'
+                                            />
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            } else if (c.presentInTarget) {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const newSubscriberList = (
+                                                            finalReleasePayload.subscribers ?? []
+                                                        ).filter((sub) => sub !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            subscribers: newSubscriberList,
+                                                        })
+
+                                                        const updatedSubscriberMergeList = subscriberMergeList.map(
+                                                            (sub) => {
+                                                                if (sub.value === c.value) {
+                                                                    return {
+                                                                        ...sub,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return sub
+                                                            },
+                                                        )
+                                                        setSubscriberMergeList(updatedSubscriberMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const subscribersData = finalReleasePayload.subscribers ?? []
+                                                        subscribersData.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            subscribers: subscribersData,
+                                                        })
+
+                                                        const updatedSubscribersMergeList = subscriberMergeList.map(
+                                                            (sub) => {
+                                                                if (sub.value === c.value) {
+                                                                    return {
+                                                                        ...sub,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return sub
+                                                            },
+                                                        )
+                                                        setSubscriberMergeList(updatedSubscribersMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'></div>
+                                    </div>
+                                )
+                            } else {
+                                return (
+                                    <div
+                                        className='d-flex row mb-1'
+                                        key={c.value}
+                                    >
+                                        <div className='mt-2 col text-end'>{!c.overWritten ? '' : c.value}</div>
+                                        <div className='col-12 col-md-2 mx-5 text-center'>
+                                            {!c.overWritten ? (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const subscribersList = finalReleasePayload.subscribers ?? []
+                                                        subscribersList.push(c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            subscribers: subscribersList,
+                                                        })
+
+                                                        const updatedSubscribersMergeList = subscriberMergeList.map(
+                                                            (sub) => {
+                                                                if (sub.value === c.value) {
+                                                                    return {
+                                                                        ...sub,
+                                                                        overWritten: true,
+                                                                    }
+                                                                }
+                                                                return sub
+                                                            },
+                                                        )
+                                                        setSubscriberMergeList(updatedSubscribersMergeList)
+                                                    }}
+                                                >
+                                                    <FaLongArrowAltLeft />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className='btn btn-secondary px-2'
+                                                    onClick={() => {
+                                                        const subscriberList = (
+                                                            finalReleasePayload.subscribers ?? []
+                                                        ).filter((sub) => sub !== c.value)
+                                                        setFinalReleasePayload({
+                                                            ...finalReleasePayload,
+                                                            subscribers: subscriberList,
+                                                        })
+
+                                                        const updatedSubscriberMergeList = subscriberMergeList.map(
+                                                            (sub) => {
+                                                                if (sub.value === c.value) {
+                                                                    return {
+                                                                        ...sub,
+                                                                        overWritten: false,
+                                                                    }
+                                                                }
+                                                                return sub
+                                                            },
+                                                        )
+                                                        setSubscriberMergeList(updatedSubscriberMergeList)
+                                                    }}
+                                                >
+                                                    <FaUndo />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className='mt-2 col text-start'>{c.value}</div>
+                                    </div>
+                                )
+                            }
+                        })}
                     </div>
                 </div>
             )}
