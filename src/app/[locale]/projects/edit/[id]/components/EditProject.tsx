@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
@@ -29,8 +29,10 @@ import {
     InputKeyValue,
     LinkedPackageData,
     LinkedProjectData,
+    LinkedReleaseData,
     ObligationEntry,
     Project,
+    ProjectLinkedRelease,
     ProjectPayload,
     ReleaseDetail,
     User,
@@ -42,22 +44,6 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
-
-interface LinkedReleaseProps {
-    release?: string
-    relation?: string
-    mainlineState?: string
-    releaseRelation?: string
-    comment?: string
-}
-
-interface LinkedReleaseData {
-    comment: string
-    mainlineState: string
-    name: string
-    releaseRelation: string
-    version: string
-}
 
 function EditProject({
     projectId,
@@ -80,20 +66,21 @@ function EditProject({
         'linkedProjectsAndReleases',
         'attachments',
         'obligations',
+        'linkedPackages',
     ]
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     const handleDeleteProject = () => {
@@ -143,7 +130,6 @@ function EditProject({
     const [leadArchitect, setLeadArchitect] = useState<{
         [k: string]: string
     }>({})
-    const [existingReleaseData, setExistingReleaseData] = useState<Map<string, LinkedReleaseData>>()
     const [obligations, setObligations] = useState<ObligationEntry>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
@@ -221,31 +207,23 @@ function EditProject({
         })
     }
 
-    const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
+    const setObjectToMap = async (linkedReleases: ProjectLinkedRelease[]) => {
         try {
-            const map = new Map<string, LinkedReleaseData>()
             const linkedReleasesObject: {
-                [key: string]: LinkedReleaseProps
+                [key: string]: LinkedReleaseData
             } = {}
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             for (const l of linkedReleases) {
                 const releaseId = l['release']?.split('/').pop()
                 if (releaseId === undefined) continue
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token)
                 const releaseData = (await response.json()) as ReleaseDetail
-                map.set(releaseId, {
+                linkedReleasesObject[releaseId] = {
                     name: releaseData.name,
                     version: releaseData.version,
                     releaseRelation: l.relation ?? '',
                     mainlineState: l.mainlineState ?? '',
                     comment: l.comment ?? '',
-                })
-                setExistingReleaseData(map)
-                linkedReleasesObject[releaseId] = {
-                    releaseRelation: l.relation,
-                    mainlineState: l.mainlineState,
-                    comment: l.comment,
                 }
             }
             setProjectPayload((prevProjectPayload) => ({
@@ -258,9 +236,8 @@ function EditProject({
     }
 
     const fetchUserData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        const response = await ApiUtils.GET(url, session.data.user.access_token)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as User
             return data
@@ -273,11 +250,11 @@ function EditProject({
     }, [])
 
     useEffect(() => {
+        if (session.status === 'loading') return
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token)
                 if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -457,16 +434,16 @@ function EditProject({
     }, [
         projectId,
         setProjectPayload,
+        session,
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'PROJECT',
             entityId: projectId,
         })
-        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        const response = await ApiUtils.POST(url, {}, session.data.user.access_token)
         switch (response.status) {
             case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))
@@ -494,8 +471,7 @@ function EditProject({
 
     const updateProject = async (payload?: ProjectPayload) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             const dataToUpdate = payload ?? projectPayload
             const requests = [
                 ApiUtils.PATCH(
@@ -503,7 +479,7 @@ function EditProject({
                         ? `projects/network/${projectId}`
                         : `projects/${projectId}`,
                     dataToUpdate,
-                    session.user.access_token,
+                    session.data.user.access_token,
                 ),
             ]
             if (Object.keys(obligations).length !== 0) {
@@ -516,7 +492,7 @@ function EditProject({
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateLicenseObligation`,
                                 obligations,
-                                session.user.access_token,
+                                session.data.user.access_token,
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.COMPONENT_OBLIGATION) {
@@ -527,7 +503,7 @@ function EditProject({
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=component`,
                                 obligations,
-                                session.user.access_token,
+                                session.data.user.access_token,
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.PROJECT_OBLIGATION) {
@@ -538,7 +514,7 @@ function EditProject({
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=project`,
                                 obligations,
-                                session.user.access_token,
+                                session.data.user.access_token,
                             ),
                         )
                     } else if (obligations[key]?.obligationType === ObligationLevels.ORGANISATION_OBLIGATION) {
@@ -549,7 +525,7 @@ function EditProject({
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=organization`,
                                 obligations,
-                                session.user.access_token,
+                                session.data.user.access_token,
                             ),
                         )
                     }
@@ -764,7 +740,6 @@ function EditProject({
                                                         projectId={projectId}
                                                         projectPayload={projectPayload}
                                                         setProjectPayload={setProjectPayload}
-                                                        existingReleaseData={existingReleaseData}
                                                         isDependencyNetworkFeatureEnabled={
                                                             isDependencyNetworkFeatureEnabled
                                                         }

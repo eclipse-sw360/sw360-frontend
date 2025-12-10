@@ -36,7 +36,6 @@ interface AlertData {
 }
 
 interface Props {
-    setLinkedProjectData: React.Dispatch<React.SetStateAction<Map<string, LinkedProjectData>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
@@ -48,13 +47,7 @@ type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function LinkProjectsModal({
-    setLinkedProjectData,
-    projectPayload,
-    setProjectPayload,
-    show,
-    setShow,
-}: Props): JSX.Element {
+export default function LinkProjectsModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
@@ -68,6 +61,12 @@ export default function LinkProjectsModal({
         }
     }, [
         session,
+    ])
+
+    useEffect(() => {
+        setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
+    }, [
+        projectPayload,
     ])
 
     const columns = useMemo<ColumnDef<Project>[]>(
@@ -340,24 +339,11 @@ export default function LinkProjectsModal({
         }
     }
 
-    const projectPayloadSetter = (projectPayloadData: Map<string, LinkedProjectData>) => {
-        if (projectPayloadData.size > 0) {
-            const updatedProjectPayload = {
-                ...projectPayload,
-            }
-            if (updatedProjectPayload.linkedProjects === undefined) {
-                updatedProjectPayload.linkedProjects = {}
-            }
-            for (const [projectId, linkedProject] of projectPayloadData) {
-                updatedProjectPayload.linkedProjects[projectId] = {
-                    projectRelationship: linkedProject.projectRelationship,
-                    enableSvm: linkedProject.enableSvm,
-                    name: linkedProject.name,
-                    version: linkedProject.version,
-                }
-            }
-            setProjectPayload(updatedProjectPayload)
-        }
+    const projectPayloadSetter = () => {
+        setProjectPayload({
+            ...projectPayload,
+            linkedProjects: Object.fromEntries(linkProjects),
+        })
     }
 
     const handleCheckboxes = (project: Project) => {
@@ -379,7 +365,6 @@ export default function LinkProjectsModal({
         setShow(false)
         setProjectData([])
         setAlert(null)
-        setLinkProjects(new Map())
         setExactMatch(false)
         setPaginationMeta({
             size: 0,
@@ -503,9 +488,8 @@ export default function LinkProjectsModal({
                 <Button
                     variant='primary'
                     onClick={() => {
-                        setLinkedProjectData(linkProjects)
-                        setShow(false)
-                        projectPayloadSetter(linkProjects)
+                        projectPayloadSetter()
+                        closeModal()
                     }}
                     disabled={linkProjects.size === 0}
                 >

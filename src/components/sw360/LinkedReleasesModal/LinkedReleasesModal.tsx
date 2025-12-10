@@ -31,7 +31,6 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
-    setLinkedReleaseData: React.Dispatch<React.SetStateAction<Map<string, LinkedReleaseData>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
@@ -43,13 +42,7 @@ const Capitalize = (text: string) =>
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
-export default function LinkedReleasesModal({
-    setLinkedReleaseData,
-    projectPayload,
-    setProjectPayload,
-    show,
-    setShow,
-}: Props): JSX.Element {
+export default function LinkedReleasesModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkReleases, setLinkReleases] = useState<Map<string, LinkedReleaseData>>(new Map())
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
@@ -62,6 +55,12 @@ export default function LinkedReleasesModal({
         }
     }, [
         session,
+    ])
+
+    useEffect(() => {
+        setLinkReleases(new Map(Object.entries(projectPayload.linkedReleases ?? {})))
+    }, [
+        projectPayload,
     ])
 
     const columns = useMemo<ColumnDef<ReleaseDetail>[]>(
@@ -269,23 +268,11 @@ export default function LinkedReleasesModal({
         }
     }
 
-    const projectPayloadSetter = (projectPayloadData: Map<string, LinkedReleaseData>) => {
-        if (projectPayloadData.size > 0) {
-            const updatedProjectPayload = {
-                ...projectPayload,
-            }
-            if (updatedProjectPayload.linkedReleases === undefined) {
-                updatedProjectPayload.linkedReleases = {}
-            }
-            for (const [releaseId, relationship] of projectPayloadData) {
-                updatedProjectPayload.linkedReleases[releaseId] = {
-                    releaseRelation: relationship.releaseRelation,
-                    mainlineState: relationship.mainlineState,
-                    comment: relationship.comment,
-                }
-            }
-            setProjectPayload(updatedProjectPayload)
-        }
+    const projectPayloadSetter = () => {
+        setProjectPayload({
+            ...projectPayload,
+            linkedReleases: Object.fromEntries(linkReleases),
+        })
     }
 
     const handleCheckboxes = (release: ReleaseDetail) => {
@@ -307,7 +294,6 @@ export default function LinkedReleasesModal({
     const closeModal = () => {
         setShow(false)
         setReleaseData([])
-        setLinkReleases(new Map())
         setExactMatch(false)
         setPaginationMeta({
             size: 0,
@@ -428,9 +414,8 @@ export default function LinkedReleasesModal({
                 <Button
                     variant='primary'
                     onClick={() => {
-                        setLinkedReleaseData(linkReleases)
-                        projectPayloadSetter(linkReleases)
-                        setShow(false)
+                        projectPayloadSetter()
+                        closeModal()
                     }}
                     disabled={linkReleases.size === 0}
                 >
