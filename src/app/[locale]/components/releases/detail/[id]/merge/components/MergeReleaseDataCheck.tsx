@@ -16,6 +16,7 @@ import { Attachment, ErrorDetails, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import AdditionalDataSection from './AdditionalDataSection'
 import ExternalIdsSection from './ExternalIdsSection'
 import GeneralSection from './GeneralSection'
 
@@ -99,6 +100,12 @@ export default function MergeReleaseDataCheck({
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
                     <ExternalIdsSection
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <AdditionalDataSection
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
