@@ -46,6 +46,9 @@ export default interface ReleaseDetail {
     roles?: {
         [k: string]: Array<string>
     }
+    contributors?: Array<string>
+    subscribers?: Array<string>
+    moderators?: Array<string>
     mainLicenseIds?: string[]
     otherLicenseIds?: string[]
     clearingInformation?: ClearingInformation
@@ -61,6 +64,7 @@ export default interface ReleaseDetail {
     cpeId?: string
     eccInformation?: ECCInformation
     spdxId?: string
+    vendorId?: string
     vendor?: Vendor
     _links: {
         'sw360:component': {
