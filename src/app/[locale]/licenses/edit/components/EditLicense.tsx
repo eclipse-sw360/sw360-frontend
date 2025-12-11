@@ -116,12 +116,13 @@ function EditLicense({ licenseId }: Props): ReactNode {
             return signOut()
         }
         const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
+        const responseMessage = await response.text()
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as LicensePayload
             MessageService.success(t('License updated successfully'))
             router.push(`/licenses/detail?id=${data.shortName}`)
         } else {
-            MessageService.error(t('License update failed'))
+            MessageService.error(responseMessage)
         }
     }
 
