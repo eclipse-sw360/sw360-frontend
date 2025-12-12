@@ -18,6 +18,7 @@ import { ApiError, ApiUtils } from '@/utils/index'
 import AdditionalDataSection from './AdditionalDataSection'
 import ExternalIdsSection from './ExternalIdsSection'
 import GeneralSection from './GeneralSection'
+import LinkedReleasesSection from './LinkedReleasesSection'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
@@ -103,6 +104,12 @@ export default function MergeReleaseDataCheck({
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
                     <AdditionalDataSection
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <LinkedReleasesSection
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
