@@ -190,7 +190,7 @@ export default function LinkProjects({
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: '',
+        sort: 'name,asc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -250,7 +250,7 @@ export default function LinkProjects({
 
                 return {
                     ...prev,
-                    sort: '',
+                    sort: 'name,asc',
                 }
             })
         },

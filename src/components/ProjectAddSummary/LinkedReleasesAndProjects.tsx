@@ -35,7 +35,6 @@ export default function LinkedReleasesAndProjects({
     projectId,
     projectPayload,
     setProjectPayload,
-    existingReleaseData,
     isDependencyNetworkFeatureEnabled,
 }: Props): JSX.Element {
     return (
@@ -55,7 +54,6 @@ export default function LinkedReleasesAndProjects({
                     <LinkedReleases
                         projectPayload={projectPayload}
                         setProjectPayload={setProjectPayload}
-                        existingReleaseData={existingReleaseData}
                     />
                 )}
             </div>

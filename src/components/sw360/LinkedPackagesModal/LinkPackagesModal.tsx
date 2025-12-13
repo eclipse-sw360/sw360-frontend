@@ -31,7 +31,6 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
-    setLinkedPackageData: React.Dispatch<React.SetStateAction<Map<string, LinkedPackageData>>>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
@@ -40,13 +39,7 @@ interface Props {
 
 type EmbeddedPackages = Embedded<Package, 'sw360:packages'>
 
-export default function LinkPackagesModal({
-    setLinkedPackageData,
-    projectPayload,
-    setProjectPayload,
-    show,
-    setShow,
-}: Props): JSX.Element {
+export default function LinkPackagesModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkPackages, setLinkPackages] = useState<Map<string, LinkedPackageData>>(new Map())
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
@@ -55,10 +48,17 @@ export default function LinkPackagesModal({
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
+            console.log('hello')
             void signOut()
         }
     }, [
         session,
+    ])
+
+    useEffect(() => {
+        setLinkPackages(new Map(Object.entries(projectPayload.packageIds ?? {})))
+    }, [
+        projectPayload,
     ])
 
     const columns = useMemo<ColumnDef<Package>[]>(
@@ -257,24 +257,11 @@ export default function LinkPackagesModal({
         }
     }
 
-    const projectPayloadSetter = (linkedPackagePayloadData: Map<string, LinkedPackageData>) => {
-        if (linkedPackagePayloadData.size > 0) {
-            const updatedProjectPayload = {
-                ...projectPayload,
-            }
-            if (updatedProjectPayload.packageIds === undefined) {
-                updatedProjectPayload.packageIds = {}
-            }
-            for (const [packageId, packageData] of linkedPackagePayloadData) {
-                if (!updatedProjectPayload.packageIds[packageId]) {
-                    updatedProjectPayload.packageIds[packageId] = {
-                        ...packageData,
-                        comment: packageData.comment || '',
-                    }
-                }
-            }
-            setProjectPayload(updatedProjectPayload)
-        }
+    const projectPayloadSetter = () => {
+        setProjectPayload({
+            ...projectPayload,
+            packageIds: Object.fromEntries(linkPackages),
+        })
     }
 
     const handleCheckboxes = (pkg: Package) => {
@@ -300,7 +287,6 @@ export default function LinkPackagesModal({
     const closeModal = () => {
         setShow(false)
         setPackagesData([])
-        setLinkPackages(new Map())
         setExactMatch(false)
         setPaginationMeta({
             size: 0,
@@ -412,23 +398,8 @@ export default function LinkPackagesModal({
                 <Button
                     variant='primary'
                     onClick={() => {
-                        setLinkedPackageData((prevMap) => {
-                            const updatedMap = new Map(prevMap)
-                            linkPackages.forEach((item, key) => {
-                                if (!updatedMap.has(key)) {
-                                    updatedMap.set(key, {
-                                        packageId: key,
-                                        name: item.name,
-                                        version: item.version,
-                                        licenseIds: item.licenseIds,
-                                        packageManager: item.packageManager,
-                                    })
-                                }
-                            })
-                            return updatedMap
-                        })
-                        setShow(false)
-                        projectPayloadSetter(linkPackages)
+                        projectPayloadSetter()
+                        closeModal()
                     }}
                     disabled={linkPackages.size === 0}
                 >

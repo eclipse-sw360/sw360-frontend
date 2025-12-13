@@ -25,7 +25,6 @@ interface Props {
 export default function LinkedProjects({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
-    const [linkedProjectData, setLinkedProjectData] = useState<Map<string, LinkedProjectData>>(new Map())
     const [tableData, setTableData] = useState<
         [
             string,
@@ -34,40 +33,49 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
     >([])
 
     const updateProjectData = (projectId: string, updatedProjectRelationship: string) => {
-        const _linkedProjectData = new Map(linkedProjectData)
+        const _linkedProjectData: {
+            [key: string]: LinkedProjectData
+        } = {}
 
-        const existing = _linkedProjectData.get(projectId)
-        if (existing) {
-            _linkedProjectData.set(projectId, {
-                ...existing,
-                projectRelationship: updatedProjectRelationship,
-            })
+        for (const [pid, p] of Object.entries(projectPayload.linkedProjects ?? {})) {
+            if (pid === projectId) {
+                _linkedProjectData[pid] = {
+                    ...p,
+                    projectRelationship: updatedProjectRelationship,
+                }
+            } else {
+                _linkedProjectData[pid] = {
+                    ...p,
+                }
+            }
         }
-
-        setLinkedProjectData(_linkedProjectData)
-
         setProjectPayload({
             ...projectPayload,
-            linkedProjects: Object.fromEntries(linkedProjectData),
+            linkedProjects: _linkedProjectData,
         })
     }
 
     const handleEnableSvm = (projectId: string) => {
-        const _linkedProjectData = new Map(linkedProjectData)
+        const _linkedProjectData: {
+            [key: string]: LinkedProjectData
+        } = {}
 
-        const existing = _linkedProjectData.get(projectId)
-        if (existing) {
-            _linkedProjectData.set(projectId, {
-                ...existing,
-                enableSvm: !existing.enableSvm,
-            })
+        for (const [pid, p] of Object.entries(projectPayload.linkedProjects ?? {})) {
+            if (pid === projectId) {
+                _linkedProjectData[pid] = {
+                    ...p,
+                    enableSvm: !p.enableSvm,
+                }
+            } else {
+                _linkedProjectData[pid] = {
+                    ...p,
+                }
+            }
         }
-
-        setLinkedProjectData(_linkedProjectData)
 
         setProjectPayload({
             ...projectPayload,
-            linkedProjects: Object.fromEntries(linkedProjectData),
+            linkedProjects: _linkedProjectData,
         })
     }
 
@@ -104,10 +112,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                         <div className='form-dropdown'>
                             <select
                                 className='form-select'
-                                value={
-                                    linkedProjectData.get(row.original[0])?.projectRelationship ??
-                                    row.original[1].projectRelationship
-                                }
+                                value={row.original[1].projectRelationship}
                                 onChange={(event) => {
                                     const updatedProjectRelationship = event.target.value
                                     updateProjectData(row.original[0], updatedProjectRelationship)
@@ -136,9 +141,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                                 <input
                                     className='form-check-input'
                                     type='checkbox'
-                                    checked={
-                                        linkedProjectData.get(row.original[0])?.enableSvm ?? row.original[1].enableSvm
-                                    }
+                                    checked={row.original[1].enableSvm}
                                     onChange={() => handleEnableSvm(row.original[0])}
                                 />
                             </div>
@@ -152,7 +155,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
         ],
         [
             t,
-            linkedProjectData,
+            projectPayload,
         ],
     )
 
@@ -169,24 +172,15 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
     })
 
     useEffect(() => {
-        if (projectPayload.linkedProjects !== undefined && linkedProjectData.size === 0) {
-            const data = Object.entries(projectPayload.linkedProjects ?? {})
-            setTableData(data)
-        } else {
-            const data = [
-                ...linkedProjectData,
-            ]
-            setTableData(data)
-        }
+        const data = Object.entries(projectPayload.linkedProjects ?? {})
+        setTableData(data)
     }, [
         projectPayload,
-        linkedProjectData,
     ])
 
     return (
         <>
             <LinkProjectsModal
-                setLinkedProjectData={setLinkedProjectData}
                 projectPayload={projectPayload}
                 setProjectPayload={setProjectPayload}
                 show={showLinkedProjectsModal}

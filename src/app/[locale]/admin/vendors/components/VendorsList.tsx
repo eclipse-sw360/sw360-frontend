@@ -110,6 +110,7 @@ export default function VendorsList(): JSX.Element {
     const [numVendors, setNumVendors] = useState<null | number>(null)
     const [delVendor, setDelVendor] = useState<Vendor | null>(null)
     const session = useSession()
+    const [search, setSearch] = useState({})
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -243,7 +244,10 @@ export default function VendorsList(): JSX.Element {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vendors`,
                     Object.fromEntries(
-                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                        Object.entries({
+                            ...pageableQueryParam,
+                            ...search,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
@@ -318,6 +322,22 @@ export default function VendorsList(): JSX.Element {
         },
     })
 
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        search,
+    ])
+
+    const doSearch = (value: string) => {
+        setSearch({
+            searchText: value,
+        })
+    }
+
     const handleExportSpreadsheet = async () => {
         try {
             const session = await getSession()
@@ -343,7 +363,10 @@ export default function VendorsList(): JSX.Element {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
-                        <QuickFilter id='vendorSearch' />
+                        <QuickFilter
+                            id='vendorSearch'
+                            searchFunction={doSearch}
+                        />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between'>

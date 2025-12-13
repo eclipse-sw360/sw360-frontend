@@ -1345,6 +1345,7 @@
     "The following duplicate identifiers were found": "發現以下重複標識符。",
     "The license type cannot be deleted": "許可類型<strong> {name} </strong>無法刪除，因為它在<strong> {usageCount} </strong> license中使用。請先撤銷許可證。",
     "The new Component and new Release will be created, do you want to import?": "您要匯入嗎 ?",
+    "The Package cannot be deleted, Since it is used by other project Please unlink it before deleting": "無法刪除此套件，因為它正被其他專案使用。請在刪除前解除關聯。",
     "The project cannot be deleted": "由於另一個項目使用該項目，因此無法刪除該項目！",
     "The projects have been successfully linked to project": "專案已成功連結到專案",
     "The release has been successfully linked to project": "釋放 <strong>{放出Name</strong> 已成功連結到專案 <strong>{專案名稱}</strong>",

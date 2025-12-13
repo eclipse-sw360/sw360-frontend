@@ -21,6 +21,7 @@ import {
     ActionType,
     AdministrationDataType,
     ClearingDetailsCount,
+    ErrorDetails,
     SummaryDataType,
     UserGroupType,
 } from '@/object-types'
@@ -43,7 +44,7 @@ import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const session = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
@@ -59,11 +60,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     })
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     useEffect(() => {
@@ -79,30 +80,33 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }
 
     useEffect(() => {
+        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
-                    session.user.access_token,
+                    session.data.user.access_token,
                     signal,
                 )
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
 
                 const data = (await response.json()) as SummaryDataType | AdministrationDataType
 
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
 
@@ -110,25 +114,24 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }, [
         projectId,
         session,
-        status,
+        session,
     ])
 
     useEffect(() => {
+        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/clearingDetailsCount`,
-                    session.user.access_token,
+                    session.data.user.access_token,
                     signal,
                 )
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
                 const data = (await response.json()) as ClearingDetailsCount
                 setClearingDetailCount(data)
@@ -147,8 +150,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     ])
 
     const handleEditProject = (projectId: string) => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        if (session.user.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (session?.data.user.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
         } else {
@@ -205,8 +208,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='licenseClearing'
                                     hidden={
-                                        status === 'authenticated' &&
-                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
@@ -221,8 +224,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='obligations'
                                     hidden={
-                                        status === 'authenticated' &&
-                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
                                     <div className='my-2'>{t('Obligations')}</div>
@@ -231,8 +234,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='ecc'
                                     hidden={
-                                        status === 'authenticated' &&
-                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
                                     <div className='my-2'>{t('ECC')}</div>
@@ -247,8 +250,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='attachments'
                                     hidden={
-                                        status === 'authenticated' &&
-                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
@@ -257,8 +260,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='attachmentUsages'
                                     hidden={
-                                        status === 'authenticated' &&
-                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
                                     <div className='my-2'>{t('Attachment Usages')}</div>
@@ -273,8 +276,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='changeLog'
                                     hidden={
-                                        status === 'authenticated' &&
-                                        session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>
@@ -290,8 +293,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             className='me-2 col-auto'
                                             onClick={() => handleEditProject(projectId)}
                                             disabled={
-                                                status === 'authenticated' &&
-                                                session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                session.status === 'authenticated' &&
+                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                             }
                                         >
                                             {t('Edit Projects')}
@@ -301,8 +304,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             className='col-auto'
                                             onClick={() => setShow(true)}
                                             disabled={
-                                                status === 'authenticated' &&
-                                                session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                session.status === 'authenticated' &&
+                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                             }
                                         >
                                             {t('Link to Projects')}
@@ -313,8 +316,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 id='exportSBOM'
                                                 className='px-2'
                                                 hidden={
-                                                    status === 'authenticated' &&
-                                                    session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    session.status === 'authenticated' &&
+                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                                 }
                                             >
                                                 {t('Import SBOM')}
@@ -378,8 +381,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 id='exportSBOM'
                                                 className='px-2'
                                                 hidden={
-                                                    status === 'authenticated' &&
-                                                    session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    session.status === 'authenticated' &&
+                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                                 }
                                             >
                                                 {t('Export SBOM')}
