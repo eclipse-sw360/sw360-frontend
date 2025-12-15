@@ -16,11 +16,11 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, TableSearch } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
-import { Embedded, ErrorDetails, ReleaseLink } from '@/object-types'
+import { Embedded, ErrorDetails, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
-type EmbeddedReleases = Embedded<ReleaseLink, 'sw360:releaseLinks'>
+type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releaseLinks'>
 
 export default function MergeReleaseTable({
     release,
@@ -28,8 +28,8 @@ export default function MergeReleaseTable({
     componentId,
     releaseId,
 }: Readonly<{
-    release: ReleaseLink | null
-    setRelease: Dispatch<SetStateAction<null | ReleaseLink>>
+    release: ReleaseDetail | null
+    setRelease: Dispatch<SetStateAction<null | ReleaseDetail>>
     componentId: string | null
     releaseId: string | null
 }>): ReactNode {
@@ -63,7 +63,7 @@ export default function MergeReleaseTable({
         session,
     ])
 
-    const columns = useMemo<ColumnDef<ReleaseLink>[]>(
+    const columns = useMemo<ColumnDef<ReleaseDetail>[]>(
         () => [
             {
                 id: 'select',
@@ -113,7 +113,7 @@ export default function MergeReleaseTable({
         ],
     )
 
-    const [componentReleaseData, setComponentReleaseData] = useState<ReleaseLink[]>(() => [])
+    const [componentReleaseData, setComponentReleaseData] = useState<ReleaseDetail[]>(() => [])
     const memoizedData = useMemo(
         () => componentReleaseData,
         [
@@ -159,8 +159,8 @@ export default function MergeReleaseTable({
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
                         ? []
                         : releaseId
-                          ? data['_embedded']['sw360:releaseLinks'].filter((item) => item.id !== releaseId)
-                          : [],
+                            ? data['_embedded']['sw360:releaseLinks'].filter((item) => item.id !== releaseId)
+                            : [],
                 )
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
