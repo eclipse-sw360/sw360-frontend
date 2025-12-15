@@ -15,26 +15,16 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { SW360Table } from '@/components/sw360'
 import LinkedReleasesModal from '@/components/sw360/LinkedReleasesModal/LinkedReleasesModal'
-import { ProjectPayload } from '@/object-types'
+import { LinkedReleaseData, ProjectPayload } from '@/object-types'
 
 interface Props {
     projectPayload: ProjectPayload
-    existingReleaseData: Map<string, LinkedReleaseData> | undefined
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-interface LinkedReleaseData {
-    comment?: string
-    mainlineState: string
-    name: string
-    releaseRelation: string
-    version: string
-}
-
-export default function LinkedReleases({ projectPayload, existingReleaseData, setProjectPayload }: Props): JSX.Element {
+export default function LinkedReleases({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
-    const [linkedReleaseData, setLinkedReleaseData] = useState<Map<string, LinkedReleaseData>>(new Map())
     const [tableData, setTableData] = useState<
         [
             string,
@@ -42,80 +32,80 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
         ][]
     >([])
 
-    const updateReleaseRelation = (
-        releaseId: string,
-        updatedReleaseRelation: string,
-        linkedReleaseData: Map<string, LinkedReleaseData>,
-    ) => {
-        const _linkedReleaseData = new Map(linkedReleaseData)
+    const updateReleaseRelation = (releaseId: string, updatedReleaseRelation: string) => {
+        const _linkedReleaseData: {
+            [key: string]: LinkedReleaseData
+        } = {}
 
-        const existing = _linkedReleaseData.get(releaseId)
-        if (existing) {
-            _linkedReleaseData.set(releaseId, {
-                ...existing,
-                releaseRelation: updatedReleaseRelation,
-            })
+        for (const [rid, r] of Object.entries(projectPayload.linkedReleases ?? {})) {
+            if (rid === releaseId) {
+                _linkedReleaseData[rid] = {
+                    ...r,
+                    releaseRelation: updatedReleaseRelation,
+                }
+            } else {
+                _linkedReleaseData[rid] = {
+                    ...r,
+                }
+            }
         }
-
-        setLinkedReleaseData(_linkedReleaseData)
+        setProjectPayload({
+            ...projectPayload,
+            linkedReleases: _linkedReleaseData,
+        })
     }
 
-    const updateProjectMainlineState = (
-        releaseId: string,
-        updatedProjectMainlineState: string,
-        linkedReleaseData: Map<string, LinkedReleaseData>,
-    ) => {
-        const _linkedReleaseData = new Map(linkedReleaseData)
+    const updateProjectMainlineState = (releaseId: string, updatedProjectMainlineState: string) => {
+        const _linkedReleaseData: {
+            [key: string]: LinkedReleaseData
+        } = {}
 
-        const existing = _linkedReleaseData.get(releaseId)
-        if (existing) {
-            _linkedReleaseData.set(releaseId, {
-                ...existing,
-                mainlineState: updatedProjectMainlineState,
-            })
+        for (const [rid, r] of Object.entries(projectPayload.linkedReleases ?? {})) {
+            if (rid === releaseId) {
+                _linkedReleaseData[rid] = {
+                    ...r,
+                    mainlineState: updatedProjectMainlineState,
+                }
+            } else {
+                _linkedReleaseData[rid] = {
+                    ...r,
+                }
+            }
         }
-
-        setLinkedReleaseData(_linkedReleaseData)
+        setProjectPayload({
+            ...projectPayload,
+            linkedReleases: _linkedReleaseData,
+        })
     }
 
-    const handleComments = (
-        releaseId: string,
-        updatedComment: string,
-        linkedReleaseData: Map<string, LinkedReleaseData>,
-    ) => {
-        const _linkedReleaseData = new Map(linkedReleaseData)
+    const handleComments = (releaseId: string, updatedComment: string) => {
+        const _linkedReleaseData: {
+            [key: string]: LinkedReleaseData
+        } = {}
 
-        const existing = _linkedReleaseData.get(releaseId)
-        if (existing) {
-            _linkedReleaseData.set(releaseId, {
-                ...existing,
-                comment: updatedComment,
-            })
+        for (const [rid, r] of Object.entries(projectPayload.linkedReleases ?? {})) {
+            if (rid === releaseId) {
+                _linkedReleaseData[rid] = {
+                    ...r,
+                    comment: updatedComment,
+                }
+            } else {
+                _linkedReleaseData[rid] = {
+                    ...r,
+                }
+            }
         }
-
-        setLinkedReleaseData(_linkedReleaseData)
+        setProjectPayload({
+            ...projectPayload,
+            linkedReleases: _linkedReleaseData,
+        })
     }
 
     useEffect(() => {
-        if (existingReleaseData !== undefined && linkedReleaseData.size === 0) {
-            const data = [
-                ...existingReleaseData,
-            ]
-            setTableData(data)
-            setLinkedReleaseData(existingReleaseData)
-        } else {
-            const data = [
-                ...linkedReleaseData,
-            ]
-            setTableData(data)
-            setProjectPayload({
-                ...projectPayload,
-                linkedReleases: Object.fromEntries(linkedReleaseData),
-            })
-        }
+        const data = Object.entries(projectPayload.linkedReleases ?? {})
+        setTableData(data)
     }, [
-        existingReleaseData,
-        linkedReleaseData,
+        projectPayload,
     ])
 
     const columns = useMemo<
@@ -144,13 +134,10 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                     <div className='form-dropdown'>
                         <select
                             className='form-select'
-                            value={
-                                linkedReleaseData.get(row.original[0])?.releaseRelation ??
-                                row.original[1].releaseRelation
-                            }
+                            value={row.original[1].releaseRelation}
                             onChange={(event) => {
                                 const updatedReleaseRelationStatus = event.target.value
-                                updateReleaseRelation(row.original[0], updatedReleaseRelationStatus, linkedReleaseData)
+                                updateReleaseRelation(row.original[0], updatedReleaseRelationStatus)
                             }}
                             required
                         >
@@ -176,16 +163,10 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                     <div className='form-dropdown'>
                         <select
                             className='form-select'
-                            value={
-                                linkedReleaseData.get(row.original[0])?.mainlineState ?? row.original[1].mainlineState
-                            }
+                            value={row.original[1].mainlineState}
                             onChange={(event) => {
                                 const updatedProjectMainlineState = event.target.value
-                                updateProjectMainlineState(
-                                    row.original[0],
-                                    updatedProjectMainlineState,
-                                    linkedReleaseData,
-                                )
+                                updateProjectMainlineState(row.original[0], updatedProjectMainlineState)
                             }}
                             required
                         >
@@ -207,10 +188,10 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                             type='text'
                             className='form-control'
                             placeholder='Enter Comments'
-                            value={linkedReleaseData.get(row.original[0])?.comment ?? row.original[1].comment}
+                            value={row.original[1].comment}
                             onChange={(event) => {
                                 const updatedComment = event.target.value
-                                handleComments(row.original[0], updatedComment, linkedReleaseData)
+                                handleComments(row.original[0], updatedComment)
                             }}
                         />
                     </div>
@@ -219,7 +200,7 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
         ],
         [
             t,
-            linkedReleaseData,
+            projectPayload,
         ],
     )
 
@@ -238,7 +219,6 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
     return (
         <>
             <LinkedReleasesModal
-                setLinkedReleaseData={setLinkedReleaseData}
                 projectPayload={projectPayload}
                 setProjectPayload={setProjectPayload}
                 show={showLinkedReleasesModal}
