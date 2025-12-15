@@ -59,7 +59,6 @@ jobs:
 
       - name: Run linting
         shell: bash
-        continue-on-error: true
         run: |
           pnpm biome ci --reporter=github | tee biome_output.txt
 
