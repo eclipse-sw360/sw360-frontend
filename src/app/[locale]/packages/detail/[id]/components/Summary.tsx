@@ -14,7 +14,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiClipboard } from 'react-icons/bi'
+import { BsClipboard } from 'react-icons/bs'
 import { Package } from '@/object-types'
 
 const Capitalize = (text: string) => {
@@ -41,10 +41,11 @@ export default function Summary({ summaryData }: { summaryData: Package }): Reac
             <>
                 <OverlayTrigger overlay={<Tooltip>{t('Copy to Clipboard')}</Tooltip>}>
                     <span className='d-inline-block'>
-                        <BiClipboard
+                        <BsClipboard
                             onClick={() => {
                                 navigator.clipboard.writeText(text).catch((e) => console.error(e))
                             }}
+                            size={20}
                         />
                     </span>
                 </OverlayTrigger>

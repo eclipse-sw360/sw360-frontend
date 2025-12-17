@@ -18,9 +18,7 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
-import { IoMdGitMerge } from 'react-icons/io'
+import { BsFillTrashFill, BsGit, BsPencil, BsQuestionCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -70,7 +68,7 @@ function DeletionModal({
                 closeButton
             >
                 <Modal.Title className='fw-bold'>
-                    <AiOutlineQuestionCircle /> {t('Delete Vendor')} ?
+                    <BsQuestionCircle size={20} /> {t('Delete Vendor')} ?
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body className='fs-5'>
@@ -173,9 +171,9 @@ export default function VendorsList(): JSX.Element {
                                         href={`/admin/vendors/edit/${row.original._links?.self.href.split('/').at(-1)}`}
                                         className='text-link'
                                     >
-                                        <FaPencilAlt
+                                        <BsPencil
                                             className='btn-icon'
-                                            size={18}
+                                            size={20}
                                         />
                                     </Link>
                                 </OverlayTrigger>
@@ -184,7 +182,10 @@ export default function VendorsList(): JSX.Element {
                                         href={`vendors/merge/${row.original._links?.self.href.split('/').at(-1)}`}
                                         className='text-link'
                                     >
-                                        <IoMdGitMerge className='btn-icon' />
+                                        <BsGit
+                                            className='btn-icon'
+                                            size={20}
+                                        />
                                     </Link>
                                 </OverlayTrigger>
                                 <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
@@ -192,7 +193,10 @@ export default function VendorsList(): JSX.Element {
                                         className='d-inline-block'
                                         onClick={() => setDelVendor(row.original)}
                                     >
-                                        <FaTrashAlt className='btn-icon' />
+                                        <BsFillTrashFill
+                                            className='btn-icon'
+                                            size={20}
+                                        />
                                     </span>
                                 </OverlayTrigger>
                             </span>

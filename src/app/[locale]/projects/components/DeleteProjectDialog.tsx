@@ -15,7 +15,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
 import { Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -180,10 +180,11 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
                 }}
             >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle
+                    <BsQuestionCircle
                         style={{
                             marginBottom: '5px',
                         }}
+                        size={20}
                     />
                     {t('Delete Project')} ?
                 </Modal.Title>

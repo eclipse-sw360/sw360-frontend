@@ -16,7 +16,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -385,7 +385,7 @@ export default function CompareObligation({
                                     >
                                         {t('Exact Match')}{' '}
                                         <sup>
-                                            <FaInfoCircle />
+                                            <BsInfoCircle size={20} />
                                         </sup>
                                     </Form.Label>
                                 </Form.Group>

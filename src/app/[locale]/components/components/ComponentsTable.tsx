@@ -20,8 +20,7 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
-import { MdDeleteOutline } from 'react-icons/md'
+import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -142,18 +141,18 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                                             className='d-inline-block'
                                             onClick={() => handleEditComponent(id)}
                                         >
-                                            <FaPencilAlt
+                                            <BsPencil
                                                 className='btn-icon'
-                                                size={18}
+                                                size={20}
                                             />
                                         </span>
                                     </OverlayTrigger>
 
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span className='d-inline-block'>
-                                            <MdDeleteOutline
+                                            <BsFillTrashFill
                                                 className='btn-icon'
-                                                size={25}
+                                                size={20}
                                                 onClick={() => handleClickDelete(id)}
                                             />
                                         </span>

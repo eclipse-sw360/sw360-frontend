@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
-import { GiCancel } from 'react-icons/gi'
+import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
 import { ProjectPayload, UIConfigKeys, Vendor } from '@/object-types'
@@ -308,7 +308,10 @@ export default function GeneralInformation({
                             vendor={vendor}
                         />
                         <div className='form-text'>
-                            <GiCancel onClick={handleClearVendorData} />
+                            <BsXCircle
+                                onClick={handleClearVendorData}
+                                size={20}
+                            />
                         </div>
                     </div>
                 </div>

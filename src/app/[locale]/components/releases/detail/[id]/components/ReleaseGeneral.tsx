@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-import { FaCopy, FaInfoCircle } from 'react-icons/fa'
+import { BsClipboard, BsInfoCircle } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
@@ -104,11 +104,12 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                 navigator.clipboard.writeText(releaseId).catch((err) => console.log(err))
                             }}
                         >
-                            <FaCopy
+                            <BsClipboard
                                 style={{
                                     color: 'gray',
                                     width: '20px',
                                 }}
+                                size={20}
                             />
                         </button>
                     </td>
@@ -242,11 +243,12 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                     ]): React.ReactNode => (
                                         <span key={index}>
                                             {item.shortName}
-                                            <FaInfoCircle
+                                            <BsInfoCircle
                                                 style={{
                                                     marginLeft: '5px',
                                                     color: 'gray',
                                                 }}
+                                                size={20}
                                                 className={styles.info}
                                             />
                                         </span>
@@ -273,11 +275,12 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                     ]): React.ReactNode => (
                                         <span key={index}>
                                             {item}
-                                            <FaInfoCircle
+                                            <BsInfoCircle
                                                 style={{
                                                     marginLeft: '5px',
                                                     color: 'gray',
                                                 }}
+                                                size={20}
                                                 className={styles.info}
                                             />
                                         </span>

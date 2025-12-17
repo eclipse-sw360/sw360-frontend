@@ -67,12 +67,14 @@ export function ShowObligationTextOnExpand({
                     color='gray'
                     id={id}
                     onClick={() => setIsExpanded(!isExpanded)}
+                    size={20}
                 />
             ) : (
                 <BsCaretRightFill
                     color='gray'
                     id={id}
                     onClick={() => setIsExpanded(!isExpanded)}
+                    size={20}
                 />
             )}
         </>
@@ -103,7 +105,10 @@ export function ExpandableList({
             {isExpanded ? (
                 <div>
                     <span>
-                        <BsCaretDownFill onClick={() => setExpanded(false)} />{' '}
+                        <BsCaretDownFill
+                            onClick={() => setExpanded(false)}
+                            size={20}
+                        />{' '}
                     </span>
                     {releases.map((release: ObligationRelease, index: number) => {
                         const isCommon = commonReleases.some(
@@ -135,7 +140,11 @@ export function ExpandableList({
                 <div>
                     {releases.length !== 0 && (
                         <div>
-                            <BsCaretRightFill onClick={() => setExpanded(true)} /> {previewString}
+                            <BsCaretRightFill
+                                onClick={() => setExpanded(true)}
+                                size={20}
+                            />{' '}
+                            {previewString}
                         </div>
                     )}
                 </div>

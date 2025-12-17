@@ -23,7 +23,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { packageManagers } from '@/app/[locale]/packages/components/PackageManagers'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, FilterOption, LinkedPackage } from '@/object-types'
@@ -160,7 +160,10 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                                     href={`/packages/edit/${id}`}
                                     className='overlay-trigger'
                                 >
-                                    <FaPencilAlt className='btn-icon' />
+                                    <BsPencil
+                                        className='btn-icon'
+                                        size={20}
+                                    />
                                 </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Delete Package')}</Tooltip>}>
@@ -179,11 +182,12 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                                         setShowDeleteModal(true)
                                     }}
                                 >
-                                    <FaTrashAlt
+                                    <BsFillTrashFill
                                         className='btn-icon'
                                         style={{
                                             fontSize: '18px',
                                         }}
+                                        size={20}
                                     />
                                 </span>
                             </OverlayTrigger>

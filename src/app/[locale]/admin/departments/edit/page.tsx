@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from 'react-bootstrap'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Embedded, User } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -219,7 +219,7 @@ const EditDepartmentPage = (): JSX.Element => {
                                         />
                                     </td>
                                     <td className='col-6'>
-                                        <FaTrashAlt
+                                        <BsFillTrashFill
                                             size={20}
                                             className='btn-icon mt-2 cursor-pointer'
                                             onClick={() => deleteEmail(parseInt(index))}

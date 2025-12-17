@@ -23,7 +23,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { BsPencil } from 'react-icons/bs'
 import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -552,7 +552,10 @@ export default function ListView({
                                     href={url}
                                     className='overlay-trigger'
                                 >
-                                    <FaPencilAlt className='btn-icon' />
+                                    <BsPencil
+                                        className='btn-icon'
+                                        size={20}
+                                    />
                                 </Link>
                             </OverlayTrigger>
                         </div>

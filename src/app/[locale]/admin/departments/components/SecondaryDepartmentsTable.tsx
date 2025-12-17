@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { BsPencil } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -77,7 +77,10 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
                     return (
                         <div className='d-flex align-items-center justify-content-center'>
                             <Link href={`/admin/departments/edit?name=${row.original[0]}`}>
-                                <FaPencilAlt className='btn-icon' />
+                                <BsPencil
+                                    className='btn-icon'
+                                    size={20}
+                                />
                             </Link>
                         </div>
                     )

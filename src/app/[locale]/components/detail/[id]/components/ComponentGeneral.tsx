@@ -13,7 +13,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useState } from 'react'
-import { FaCopy } from 'react-icons/fa'
+import { BsClipboard } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { Component } from '@/object-types'
@@ -51,11 +51,12 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                             data-toggle='tooltip'
                             title='Copy to clipboard'
                         >
-                            <FaCopy
+                            <BsClipboard
                                 style={{
                                     color: 'gray',
                                     width: '20px',
                                 }}
+                                size={20}
                             />
                         </button>
                     </td>

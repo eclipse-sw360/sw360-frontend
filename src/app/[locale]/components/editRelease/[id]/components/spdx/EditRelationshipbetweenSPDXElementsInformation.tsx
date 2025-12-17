@@ -12,7 +12,7 @@
 'use client'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { PackageInformation, RelationshipsBetweenSPDXElements, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 
@@ -468,9 +468,10 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                                               </option>
                                           ))}
                                 </select>
-                                <FaTrashAlt
+                                <BsFillTrashFill
                                     className='spdx-delete-icon-main-index'
                                     onClick={deleteRelation}
+                                    size={20}
                                 />
                             </div>
                             <button

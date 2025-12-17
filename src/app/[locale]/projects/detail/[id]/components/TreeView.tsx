@@ -24,7 +24,7 @@ import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 import { useConfigValue } from '@/contexts'
 import {
@@ -591,7 +591,10 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                                     href={url}
                                     className='overlay-trigger'
                                 >
-                                    <FaPencilAlt className='btn-icon' />
+                                    <BsPencil
+                                        className='btn-icon'
+                                        size={20}
+                                    />
                                 </Link>
                             </OverlayTrigger>
                         </div>

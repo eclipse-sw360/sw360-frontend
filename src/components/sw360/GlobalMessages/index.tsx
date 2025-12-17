@@ -13,8 +13,7 @@
 import { usePathname } from 'next/navigation'
 import { type JSX, useEffect, useRef, useState } from 'react'
 import { Alert } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
-import { IoMdCheckmarkCircle } from 'react-icons/io'
+import { BsCheck2Circle, BsInfoCircle } from 'react-icons/bs'
 import { Message } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
@@ -26,11 +25,11 @@ interface Props {
 const MessageIcon = ({ messageType }: { messageType: string | undefined }) => {
     switch (messageType) {
         case 'success':
-            return <IoMdCheckmarkCircle />
+            return <BsCheck2Circle size={20} />
         case 'danger':
-            return <FaInfoCircle />
+            return <BsInfoCircle size={20} />
         default:
-            return <FaInfoCircle />
+            return <BsInfoCircle size={20} />
     }
 }
 

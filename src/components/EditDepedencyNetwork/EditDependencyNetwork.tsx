@@ -15,9 +15,7 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { type JSX, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Tooltip as BootstrapTooltip, Button, Form, Modal, OverlayTrigger, Spinner } from 'react-bootstrap'
-import { FaInfoCircle, FaRegQuestionCircle, FaRegTrashAlt } from 'react-icons/fa'
-import { FaPlus } from 'react-icons/fa6'
-import { ImSpinner11 } from 'react-icons/im'
+import { BsArrowCounterclockwise, BsFillTrashFill, BsInfoCircle, BsPlusLg, BsQuestionCircle } from 'react-icons/bs'
 import { Embedded, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -158,7 +156,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                                     text='Add child releases'
                                     className='float-end'
                                 >
-                                    <FaPlus
+                                    <BsPlusLg
                                         className='float-end cursor-pointer'
                                         size={20}
                                         onClick={() => addChildrenNode(release, pathIdToNode)}
@@ -203,8 +201,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                                 className='align-middle text-center'
                             >
                                 <Tooltip text={t('Load default child releases')}>
-                                    <ImSpinner11
-                                        size={19}
+                                    <BsArrowCounterclockwise
+                                        size={20}
                                         className='cursor-pointer'
                                         onClick={() => void loadDefaultNetwork(release)}
                                     />
@@ -253,8 +251,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                             </td>
                             <td className='align-middle text-center'>
                                 <Tooltip text={t('Delete')}>
-                                    <FaRegTrashAlt
-                                        size={19}
+                                    <BsFillTrashFill
+                                        size={20}
                                         className='cursor-pointer'
                                         onClick={() => removeNode(parentNode, release)}
                                     />
@@ -753,7 +751,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                             className={`${styles['message']}`}
                         >
                             <b>
-                                <FaInfoCircle size={13} /> {message.variant === 'danger' ? t('Warning') : t('Success')}:
+                                <BsInfoCircle size={20} /> {message.variant === 'danger' ? t('Warning') : t('Success')}:
                             </b>
                             {message.variant === 'danger' ? (
                                 <p>
@@ -815,7 +813,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                 >
                     <Modal.Header closeButton>
                         <Modal.Title>
-                            <FaRegQuestionCircle /> {t('Delete link to release')}?
+                            <BsQuestionCircle size={20} /> {t('Delete link to release')}?
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>

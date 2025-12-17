@@ -83,7 +83,12 @@ function Gravatar({ email }: { email: string }): JSX.Element {
                         alt='Gravatar'
                         roundedCircle
                     />
-                    {useGravatar && <BsArrowCounterclockwise onClick={downloadGravatarImage} />}
+                    {useGravatar && (
+                        <BsArrowCounterclockwise
+                            size={20}
+                            onClick={downloadGravatarImage}
+                        />
+                    )}
                 </div>
             </div>
         </>

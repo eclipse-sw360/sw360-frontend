@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, ShowInfoOnHover, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
 import { LinkedVulnerability, VulnerabilitiesVerificationState } from '@/object-types'
 import ChangeStateDialog from './ChangeStateDialog'
@@ -192,13 +192,14 @@ const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
                     if (verificationStateInfos.length > 0) {
                         return (
                             <VerificationTooltip verificationStateInfos={verificationStateInfos}>
-                                <FaInfoCircle
+                                <BsInfoCircle
                                     style={{
                                         marginRight: '5px',
                                         color: 'gray',
                                         width: '15px',
                                         height: '15px',
                                     }}
+                                    size={20}
                                 />
                                 {verificationStateInfos.at(-1)?.verificationState}
                             </VerificationTooltip>

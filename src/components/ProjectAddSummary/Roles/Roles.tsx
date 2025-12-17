@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import { SelectCountry, SelectUsersDialog } from 'next-sw360'
 import { type JSX, useState } from 'react'
-import { GiCancel } from 'react-icons/gi'
+import { BsXCircle } from 'react-icons/bs'
 import { ProjectPayload } from '@/object-types'
 import DepartmentModal from './DepartmentModal'
 
@@ -281,7 +281,7 @@ export default function Roles({
                             onClick={handleClearDepartment}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -314,7 +314,7 @@ export default function Roles({
                             onClick={handleClearProjectManager}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -347,7 +347,7 @@ export default function Roles({
                             onClick={handleClearProjectOwner}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                 </div>
@@ -428,7 +428,7 @@ export default function Roles({
                             onClick={handleClearLeadArchitect}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -461,7 +461,7 @@ export default function Roles({
                             onClick={handleClearModerators}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                     <div className='col-lg-4 mb-3'>
@@ -494,7 +494,7 @@ export default function Roles({
                             onClick={handleClearContributors}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                 </div>
@@ -530,7 +530,7 @@ export default function Roles({
                             onClick={handleClearSecurityResponsibles}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                 </div>
