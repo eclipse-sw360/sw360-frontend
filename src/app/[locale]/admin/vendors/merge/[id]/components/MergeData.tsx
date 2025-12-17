@@ -12,8 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
-import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
-import { TiTick } from 'react-icons/ti'
+import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
 import { Vendor } from '@/object-types'
 
 export default function MergeVendor({
@@ -55,8 +54,8 @@ export default function MergeVendor({
                             <div className='mt-2 col text-end'>{finalVendorPayload.fullName}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceVendor.fullName === targetVendor.fullName ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalVendorPayload.fullName === targetVendor.fullName ? (
@@ -69,7 +68,7 @@ export default function MergeVendor({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -81,7 +80,7 @@ export default function MergeVendor({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -94,8 +93,8 @@ export default function MergeVendor({
                             <div className='mt-2 col text-end'>{finalVendorPayload.shortName}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceVendor.shortName === targetVendor.shortName ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalVendorPayload.shortName === targetVendor.shortName ? (
@@ -108,7 +107,7 @@ export default function MergeVendor({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -120,7 +119,7 @@ export default function MergeVendor({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -133,8 +132,8 @@ export default function MergeVendor({
                             <div className='mt-2 col text-end'>{finalVendorPayload.url}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceVendor.url === targetVendor.url ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalVendorPayload.url === targetVendor.url ? (
@@ -147,7 +146,7 @@ export default function MergeVendor({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -159,7 +158,7 @@ export default function MergeVendor({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>

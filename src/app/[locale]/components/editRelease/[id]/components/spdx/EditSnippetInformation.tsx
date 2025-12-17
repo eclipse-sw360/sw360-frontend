@@ -12,7 +12,7 @@
 'use client'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { InputKeyValue, SnippetInformation, SnippetRange, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import SnippetFileSPDXIdentifier from './SnippetInformation/SnippetFileSPDXIdentifier'
@@ -589,9 +589,10 @@ const EditSnippetInformation = ({
                                         </option>
                                     ))}
                                 </select>
-                                <FaTrashAlt
+                                <BsFillTrashFill
                                     className='spdx-delete-icon-main-index'
                                     onClick={deleteSnippetInformations}
+                                    size={20}
                                 />
                             </div>
                             <button

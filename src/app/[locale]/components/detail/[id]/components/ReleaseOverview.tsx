@@ -21,10 +21,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaClipboard, FaPencilAlt } from 'react-icons/fa'
-import { HiOutlineLink } from 'react-icons/hi'
-import { IoMdGitMerge } from 'react-icons/io'
-import { MdDeleteOutline } from 'react-icons/md'
+import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
@@ -144,34 +141,34 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                             />
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link href={`/components/editRelease/${id}`}>
-                                    <FaPencilAlt
-                                        size={16}
+                                    <BsPencil
+                                        size={20}
                                         className='btn-icon'
                                     />
                                 </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
-                                <FaClipboard
+                                <BsClipboard
                                     className='btn-icon'
-                                    size={18}
+                                    size={20}
                                 />
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Link Project')}</Tooltip>}>
-                                <HiOutlineLink
+                                <BsLink45Deg
                                     className='btn-icon'
-                                    size={18}
+                                    size={20}
                                     onClick={() => handleLinkToProject(id)}
                                 />
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
-                                <IoMdGitMerge
-                                    size={18}
+                                <BsGit
+                                    size={20}
                                     className='btn-icon'
                                 />
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                 <span className='d-inline-block'>
-                                    <MdDeleteOutline
+                                    <BsFillTrashFill
                                         className='btn-icon'
                                         size={20}
                                         onClick={() => handleClickDelete(id)}

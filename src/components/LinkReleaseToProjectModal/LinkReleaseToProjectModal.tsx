@@ -18,17 +18,9 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
-import { PiCheckBold } from 'react-icons/pi'
+import { BsCheck2 } from 'react-icons/bs'
 import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
-import {
-    Embedded,
-    ErrorDetails,
-    PageableQueryParam,
-    PaginationMeta,
-    Project,
-    Release,
-    ReleaseDetail,
-} from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -70,7 +62,12 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                         withLinkedProject &&
                         selectedProjectIds.indexOf(row.original._links.self.href.split('/').at(-1) ?? '') !== -1
                     ) {
-                        return <PiCheckBold color='green' />
+                        return (
+                            <BsCheck2
+                                color='green'
+                                size={20}
+                            />
+                        )
                     } else {
                         return (
                             <div className='form-check'>

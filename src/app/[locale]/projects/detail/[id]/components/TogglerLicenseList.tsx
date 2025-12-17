@@ -15,9 +15,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import type { useTranslations } from 'next-intl'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
-import { IoMdInformationCircleOutline } from 'react-icons/io'
-import { TiWarningOutline } from 'react-icons/ti'
+import { BsCaretDownFill, BsCaretRightFill, BsExclamationTriangle, BsInfoCircle } from 'react-icons/bs'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 import ViewFileListIcon from './ViewFileListIcon'
@@ -79,7 +77,7 @@ const TogglerLicenseList = ({
                         >
                             <BsCaretDownFill
                                 className='cursor'
-                                size='13'
+                                size={20}
                                 onClick={() => setToggle(!toggle)}
                             />
                         </div>
@@ -119,7 +117,7 @@ const TogglerLicenseList = ({
                         >
                             <BsCaretRightFill
                                 className='cursor'
-                                size='13'
+                                size={20}
                                 onClick={() => setToggle(!toggle)}
                             />
                         </div>
@@ -238,11 +236,11 @@ const FileListModal = ({
                 <Modal.Title>
                     {licensesToSourceFilesMapping.status === 'failure' ? (
                         <>
-                            <TiWarningOutline size={24} /> {t('Warning')}
+                            <BsExclamationTriangle size={20} /> {t('Warning')}
                         </>
                     ) : (
                         <>
-                            <IoMdInformationCircleOutline size={24} /> {licensesToSourceFilesMapping.releaseName}
+                            <BsInfoCircle size={20} /> {licensesToSourceFilesMapping.releaseName}
                         </>
                     )}
                 </Modal.Title>

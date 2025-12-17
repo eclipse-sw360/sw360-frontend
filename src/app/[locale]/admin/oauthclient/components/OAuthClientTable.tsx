@@ -11,7 +11,7 @@
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useMemo, useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
-import { FaCaretDown, FaCaretRight, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
+import { BsCaretDownFill, BsCaretRightFill, BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { OAuthClient } from '@/object-types'
 
 interface TableData {
@@ -126,17 +126,17 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
             actions: (
                 <span className='d-flex justify-content-evenly'>
                     <span className='d-inline-block'>
-                        <FaPencilAlt
+                        <BsPencil
                             className='btn-icon overlay-trigger text-muted cursor-pointer'
                             onClick={() => updateClient(client)}
-                            size={15}
+                            size={20}
                         />
                     </span>
                     <span className='d-inline-block'>
-                        <FaTrashAlt
+                        <BsFillTrashFill
                             className='btn-icon overlay-trigger text-muted cursor-pointer'
                             onClick={() => deleteClient(client)}
-                            size={15}
+                            size={20}
                         />
                     </span>
                 </span>
@@ -198,14 +198,14 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                                 aria-label='Toggle all rows'
                             >
                                 {allRowsExpanded ? (
-                                    <FaCaretDown
+                                    <BsCaretDownFill
                                         className='text-white'
-                                        size={15}
+                                        size={20}
                                     />
                                 ) : (
-                                    <FaCaretRight
+                                    <BsCaretRightFill
                                         className='text-white'
-                                        size={15}
+                                        size={20}
                                     />
                                 )}
                             </button>
@@ -365,14 +365,14 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                                             aria-label={`Toggle row for ${row.description}`}
                                         >
                                             {expandedRows[row.clientId] ? (
-                                                <FaCaretDown
+                                                <BsCaretDownFill
                                                     className='text-muted'
                                                     size={15}
                                                 />
                                             ) : (
-                                                <FaCaretRight
+                                                <BsCaretRightFill
                                                     className='text-muted'
-                                                    size={15}
+                                                    size={20}
                                                 />
                                             )}
                                         </button>

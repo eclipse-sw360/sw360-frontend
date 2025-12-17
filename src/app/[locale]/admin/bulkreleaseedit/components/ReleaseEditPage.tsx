@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter, VendorDialog } from 'next-sw360'
 import React, { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
-import { GiCancel } from 'react-icons/gi'
+import { BsXCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Release, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -180,7 +180,7 @@ function UpdateReleaseModal({
                                     value={vendor.fullName ?? ''}
                                 />
                                 <div className='form-text'>
-                                    <GiCancel
+                                    <BsXCircle
                                         onClick={() => {
                                             setVendor({})
                                             setRelease({
@@ -188,6 +188,7 @@ function UpdateReleaseModal({
                                                 vendorId: '',
                                             })
                                         }}
+                                        size={20}
                                     />
                                 </div>
                                 <VendorDialog

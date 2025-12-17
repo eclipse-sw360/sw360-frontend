@@ -15,7 +15,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { JSX, useEffect } from 'react'
 import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiClipboard } from 'react-icons/bi'
+import { BsClipboard } from 'react-icons/bs'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
 
 interface Props {
@@ -40,13 +40,14 @@ const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element
         return (
             <OverlayTrigger overlay={<Tooltip>{t('Copy to Clipboard')}</Tooltip>}>
                 <span className='d-inline-block'>
-                    <BiClipboard
+                    <BsClipboard
                         onClick={() => {
                             void navigator.clipboard.writeText(text)
                         }}
                         style={{
                             cursor: 'pointer',
                         }}
+                        size={20}
                     />
                 </span>
             </OverlayTrigger>

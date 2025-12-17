@@ -15,7 +15,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
@@ -101,10 +101,11 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
                 }}
             >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle
+                    <BsQuestionCircle
                         style={{
                             marginBottom: '5px',
                         }}
+                        size={20}
                     />
                     {t('Add License Info to Release')} ?
                 </Modal.Title>

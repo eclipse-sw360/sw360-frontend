@@ -19,8 +19,7 @@ import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
-import { LuDownload } from 'react-icons/lu'
+import { BsDownload, BsInfoCircle } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@/object-types'
@@ -134,7 +133,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                                 onClick={() => void handleImportStatusView(attachmentContentId ?? '')}
                                 title={t('Click to view SBOM import result')}
                             >
-                                <FaInfoCircle size={14} />
+                                <BsInfoCircle size={20} />
                             </span>
                         </span>
                     )
@@ -232,9 +231,9 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                     if (row.depth > 0) return
                     const { attachmentContentId, filename } = row.original.node
                     return (
-                        <LuDownload
+                        <BsDownload
                             className='btn-icon text-center w-100'
-                            size={18}
+                            size={20}
                             onClick={() => void handleAttachmentDownload(attachmentContentId ?? '', filename)}
                         />
                     )

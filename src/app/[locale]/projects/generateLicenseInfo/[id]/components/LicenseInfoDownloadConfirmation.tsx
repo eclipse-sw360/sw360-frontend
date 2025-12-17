@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { Modal } from 'react-bootstrap'
-import { AiOutlineInfoCircle } from 'react-icons/ai'
+import { BsInfoCircle } from 'react-icons/bs'
 
 export default function LicenseInfoDownloadConfirmationModal({
     show,
@@ -50,7 +50,7 @@ export default function LicenseInfoDownloadConfirmationModal({
                     closeButton
                 >
                     <Modal.Title id='delete-all-license-info-modal'>
-                        <AiOutlineInfoCircle /> {t('Info')}
+                        <BsInfoCircle size={20} /> {t('Info')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

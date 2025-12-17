@@ -35,9 +35,15 @@ function ThemeSwitcher(): JSX.Element {
     return (
         <Nav.Item>
             {userTheme === 'dark' ? (
-                <BsSunFill onClick={() => setTheme('light')} />
+                <BsSunFill
+                    onClick={() => setTheme('light')}
+                    size={20}
+                />
             ) : (
-                <BsSun onClick={() => setTheme('dark')} />
+                <BsSun
+                    onClick={() => setTheme('dark')}
+                    size={20}
+                />
             )}
         </Nav.Item>
     )

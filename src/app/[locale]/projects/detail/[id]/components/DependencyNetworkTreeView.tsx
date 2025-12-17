@@ -26,7 +26,7 @@ import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table, TableSearch } from 'next-sw360'
 import React, { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 import { Attachment, ErrorDetails, FilterOption, NestedRows, TypedEntity } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -503,7 +503,10 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                                     href={url}
                                     className='overlay-trigger'
                                 >
-                                    <FaPencilAlt className='btn-icon' />
+                                    <BsPencil
+                                        className='btn-icon'
+                                        size={20}
+                                    />
                                 </Link>
                             </OverlayTrigger>
                         </div>

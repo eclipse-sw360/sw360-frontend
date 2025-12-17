@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Spinner } from 'react-bootstrap'
-import { FiAlertTriangle } from 'react-icons/fi'
+import { BsExclamationTriangle } from 'react-icons/bs'
 import { Attachment, AttachmentTypes, Embedded, ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -83,12 +83,13 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                             {row.original.attachment.attachmentType === AttachmentTypes.INITIAL_SCAN_REPORT ? (
                                 <>
                                     {row.original.attachment.filename}{' '}
-                                    <FiAlertTriangle
+                                    <BsExclamationTriangle
                                         style={{
                                             color: 'red',
                                             fontSize: '20px',
                                         }}
                                         className='mb-1'
+                                        size={20}
                                     />
                                 </>
                             ) : (

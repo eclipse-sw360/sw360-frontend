@@ -16,7 +16,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
-import { FaRegQuestionCircle } from 'react-icons/fa'
+import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import ViewLogsModal from './ViewLogsModal'
@@ -394,7 +394,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
             >
                 <Modal.Header>
                     <Modal.Title>
-                        <FaRegQuestionCircle /> {t('Import Departments')}?{' '}
+                        <BsQuestionCircle size={20} /> {t('Import Departments')}?{' '}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>{renderImportManualModalBody()}</Modal.Body>

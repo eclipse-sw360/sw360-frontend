@@ -114,10 +114,13 @@ function LicensePage(): ReactNode {
                         {row.original.checked === true ? (
                             <BsCheck2Circle
                                 color='#287d3c'
-                                size='16'
+                                size={20}
                             />
                         ) : (
-                            <BsXCircle color='#da1414' />
+                            <BsXCircle
+                                color='#da1414'
+                                size={20}
+                            />
                         )}
                     </div>
                 ),

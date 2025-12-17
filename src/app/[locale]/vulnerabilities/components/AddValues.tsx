@@ -12,7 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Vulnerability } from '@/object-types'
 
 export default function AddValues({
@@ -101,9 +101,9 @@ export default function AddValues({
                             />
                         </div>
                         <div className='col-lg-1 d-flex align-items-end pb-2'>
-                            <FaTrashAlt
+                            <BsFillTrashFill
                                 className='btn-icon'
-                                size={22}
+                                size={20}
                                 onClick={() => deleteValue(i)}
                             />
                         </div>
