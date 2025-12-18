@@ -159,8 +159,8 @@ export default function MergeReleaseTable({
                     CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
                         ? []
                         : releaseId
-                            ? data['_embedded']['sw360:releaseLinks'].filter((item) => item.id !== releaseId)
-                            : [],
+                          ? data['_embedded']['sw360:releaseLinks'].filter((item) => item.id !== releaseId)
+                          : [],
                 )
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {

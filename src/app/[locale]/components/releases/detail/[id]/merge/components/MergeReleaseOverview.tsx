@@ -78,36 +78,36 @@ function MergeReleaseOverview({
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-            ; (async () => {
-                try {
-                    const session = await getSession()
-                    if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                    const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
 
-                    if (response.status === StatusCodes.UNAUTHORIZED) {
-                        return signOut()
-                    } else if (response.status === StatusCodes.OK) {
-                        const singleRelease = (await response.json()) as ReleaseDetail
-                        const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
-                        if (CommonUtils.isNullOrUndefined(compId) || compId === '') {
-                            MessageService.error(t('Component ID is missing for the target release'))
-                            router.push(`releases/${releaseId}`)
-                        }
-                        setComponentId(compId)
-                        setTargetRelease(singleRelease)
-                    } else {
-                        const err = (await response.json()) as ErrorDetails
-                        throw new Error(err.message)
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status === StatusCodes.OK) {
+                    const singleRelease = (await response.json()) as ReleaseDetail
+                    const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
+                    if (CommonUtils.isNullOrUndefined(compId) || compId === '') {
+                        MessageService.error(t('Component ID is missing for the target release'))
+                        router.push(`releases/${releaseId}`)
                     }
-                } catch (error) {
-                    if (error instanceof DOMException && error.name === 'AbortError') {
-                        return
-                    }
-                    const message = error instanceof Error ? error.message : String(error)
-                    MessageService.error(message)
-                    router.push(`releases/${releaseId}`)
+                    setComponentId(compId)
+                    setTargetRelease(singleRelease)
+                } else {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-            })()
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+                router.push(`releases/${releaseId}`)
+            }
+        })()
 
         return () => controller.abort()
     }, [
