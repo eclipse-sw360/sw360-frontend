@@ -317,7 +317,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             link: `/components/releases/detail/${releaseId}/merge`,
             type: 'secondary',
             name: t('Merge'),
-            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
+            hidden:
+                session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
                 session?.data?.user?.userGroup === UserGroupType.USER,
         },
         Subscribe: {
@@ -391,8 +392,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                         className={styles['dropdown-item']}
                                                     >
                                                         <span
-                                                            className={`${styles['badge-circle']} ${styles[item.clearingState ?? 'NEW']
-                                                                }`}
+                                                            className={`${styles['badge-circle']} ${
+                                                                styles[item.clearingState ?? 'NEW']
+                                                            }`}
                                                         ></span>
                                                         <Link href={`/components/releases/detail/${item.id}`}>
                                                             {`${t('Version')} ${item.version}`}

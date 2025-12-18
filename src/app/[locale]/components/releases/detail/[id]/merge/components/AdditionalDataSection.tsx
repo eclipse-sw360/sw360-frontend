@@ -72,8 +72,9 @@ export default function AdditionalDataSection({
             ...Object.keys(sourceReleaseDetail?.additionalData ?? {})
                 .filter(
                     (sourceElem) =>
-                        Object.keys(targetRelease?.additionalData ?? {}).filter((targetElem) => sourceElem === targetElem)
-                            .length === 0,
+                        Object.keys(targetRelease?.additionalData ?? {}).filter(
+                            (targetElem) => sourceElem === targetElem,
+                        ).length === 0,
                 )
                 .map((c) => ({
                     value: c,
@@ -121,7 +122,7 @@ export default function AdditionalDataSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.additionalData?.[id.value] ===
-                                            targetRelease.additionalData?.[id.value] ? (
+                                        targetRelease.additionalData?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {
@@ -165,13 +166,14 @@ export default function AdditionalDataSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.additionalData?.[id.value] !==
-                                            sourceReleaseDetail.additionalData?.[id.value] ? (
+                                        sourceReleaseDetail.additionalData?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {
                                                     const additionalData = {
                                                         ...(finalReleasePayload.additionalData ?? {}),
-                                                        [id.value]: sourceReleaseDetail.additionalData?.[id.value] ?? '',
+                                                        [id.value]:
+                                                            sourceReleaseDetail.additionalData?.[id.value] ?? '',
                                                     }
                                                     setFinalReleasePayload({
                                                         ...finalReleasePayload,
