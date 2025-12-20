@@ -1705,3 +1705,44 @@ input[checked] + .slider:before {
 .table-bordered thead th {
     border-bottom-width: calc(2 * 0.0625rem);
 }
+
+.list-group-item-action #obligationsCount,
+#obligationsCount,
+.list-group-item-action .obligations-badge,
+.obligations-badge,
+.obligations-badge--danger {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem !important;
+    font-weight: 500;
+    height: 22px !important;
+    padding: 3px 10px !important;
+    border-radius: 10px !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+    min-width: 34px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.obligations-badge--danger,
+.list-group-item-action #obligationsCount.badge.obligations-badge--danger {
+    background-color: #da1414 !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.obligations-badge,
+.list-group-item-action #obligationsCount.obligations-badge {
+    background-color: #ffffff !important;
+    color: #464040 !important;
+    border: 1px solid #b5b5b9 !important;
+}
+
+.obligations-badge--success,
+.list-group-item-action #obligationsCount.badge.obligations-badge--success {
+    background-color: #2e7d32 !important;
+    color: #ffffff !important;
+    border: none !important;
+}

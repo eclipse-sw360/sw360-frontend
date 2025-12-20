@@ -47,6 +47,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const session = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
+    const [obligationsTotal, setObligationsTotal] = useState<number>(0)
+    const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
+    const [obligationsLoading, setObligationsLoading] = useState<boolean>(false)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
     const router = useRouter()
@@ -160,6 +163,74 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         }
     }
 
+    useEffect(() => {
+        if (session.status === 'loading') return
+
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const isOpen = (s?: string | null) => (s ?? '').trim().toUpperCase() === 'OPEN'
+
+        const fetchCounts = async () => {
+            setObligationsLoading(true)
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) {
+                    void signOut()
+                    return
+                }
+
+                const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
+                    page: '0',
+                    page_entries: '9999',
+                })
+
+                const resp = await ApiUtils.GET(url, session.data.user.access_token, signal)
+                const body = (await resp.json().catch(() => ({}))) as {
+                    obligations?: Record<
+                        string,
+                        {
+                            status?: string
+                        }
+                    >
+                    page?: {
+                        totalElements?: number
+                    }
+                    message?: string
+                    error?: string
+                }
+
+                if (resp.status !== StatusCodes.OK) {
+                    throw new Error(body?.message ?? body?.error ?? `Status ${resp.status}`)
+                }
+
+                const obligations = body?.obligations ?? {}
+                const entries = Object.values(obligations) as Array<{
+                    status?: string
+                }>
+
+                const serverTotal = body?.page?.totalElements
+                const total = typeof serverTotal === 'number' ? serverTotal : entries.length
+
+                const nonOpen = entries.filter((e) => !isOpen(e?.status)).length
+
+                setObligationsTotal(total)
+                setObligationsNonOpenCount(nonOpen)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') return
+                MessageService.error(error instanceof Error ? error.message : String(error))
+            } finally {
+                setObligationsLoading(false)
+            }
+        }
+
+        void fetchCounts()
+        return () => controller.abort()
+    }, [
+        projectId,
+        session.status,
+        session.data?.user?.access_token,
+    ])
+
     return (
         <>
             <ImportSBOMModal
@@ -228,7 +299,31 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
-                                    <div className='my-2'>{t('Obligations')}</div>
+                                    <div className='my-2 d-flex align-items-center'>
+                                        <span className='me-2'>{t('Obligations')}</span>
+
+                                        <span
+                                            id='obligationsCount'
+                                            className={`badge ${
+                                                obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
+                                                    ? 'obligations-badge--success'
+                                                    : obligationsNonOpenCount === 0
+                                                      ? 'obligations-badge--danger'
+                                                      : 'obligations-badge'
+                                            }`}
+                                            aria-live='polite'
+                                        >
+                                            {obligationsLoading ? (
+                                                <span
+                                                    className='spinner-border spinner-border-sm'
+                                                    role='status'
+                                                    aria-hidden='true'
+                                                ></span>
+                                            ) : (
+                                                `${obligationsNonOpenCount} / ${obligationsTotal}`
+                                            )}
+                                        </span>
+                                    </div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
