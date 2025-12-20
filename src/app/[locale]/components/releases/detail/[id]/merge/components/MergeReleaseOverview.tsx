@@ -22,11 +22,11 @@ import {
     ErrorDetails,
     MergeOrSplitActionType,
     ReleaseDetail,
-    ReleaseLink,
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import MergeReleaseDataCheck from './MergeReleaseDataCheck'
 import MergeReleaseTable from './MergeReleaseTable'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
@@ -60,9 +60,9 @@ function MergeReleaseOverview({
     const t = useTranslations('default')
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
     const [targetRelease, setTargetRelease] = useState<null | ReleaseDetail>(null)
-    const [sourceRelease, setSourceRelease] = useState<null | ReleaseLink>(null)
+    const [sourceRelease, setSourceRelease] = useState<null | ReleaseDetail>(null)
     const [componentId, setComponentId] = useState<null | string>(null)
-    // const [finalReleasePayload, setFinalReleasePayload] = useState<null | ReleaseLink>(null)
+    const [finalReleasePayload, setFinalReleasePayload] = useState<null | ReleaseDetail>(null)
     const [error, setError] = useState<null | string>(null)
     const [loading] = useState(false)
     const { status, data: session } = useSession()
@@ -222,6 +222,14 @@ function MergeReleaseOverview({
                             setRelease={setSourceRelease}
                             componentId={componentId}
                             releaseId={releaseId}
+                        />
+                    )}
+                    {mergeState === MergeOrSplitActionType.PROCESS_DATA && (
+                        <MergeReleaseDataCheck
+                            targetRelease={targetRelease}
+                            sourceRelease={sourceRelease}
+                            finalReleasePayload={finalReleasePayload}
+                            setFinalReleasePayload={setFinalReleasePayload}
                         />
                     )}
                     <div className='d-flex justify-content-end mb-3'>

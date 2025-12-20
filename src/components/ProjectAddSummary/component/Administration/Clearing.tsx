@@ -50,10 +50,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         <select
                             className='form-select'
                             id='addProjects.clearingState'
-                            defaultValue='OPEN'
                             aria-describedby='addProjects.clearingState.HelpBlock'
                             name='clearingState'
-                            value={projectPayload.clearingState}
+                            value={projectPayload.clearingState ?? 'OPEN'}
                             onChange={updateInputField}
                         >
                             <option value='OPEN'>{t('Open')}</option>
@@ -80,26 +79,15 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                             id='addProjects.clearingTeam'
                             aria-label='Clearing Team'
                             name='clearingTeam'
-                            value={projectPayload.clearingTeam}
+                            value={projectPayload.clearingTeam ?? 'UNKNOWN'}
                             onChange={updateInputField}
                         >
-                            {unknownClearingTeamEnabled && (
-                                <option
-                                    value={'Unknown'}
-                                    selected={
-                                        projectPayload.clearingTeam === undefined ||
-                                        projectPayload.clearingTeam === null ||
-                                        projectPayload.clearingTeam.length < 1
-                                    }
-                                >
-                                    {t('Unknown')}
-                                </option>
-                            )}
+                            {unknownClearingTeamEnabled && <option value={'Unknown'}>{t('Unknown')}</option>}
                             {projectClearingTeams &&
                                 projectClearingTeams.map((team) => (
                                     <option
                                         value={team}
-                                        selected={projectPayload.clearingTeam === team}
+                                        key={team}
                                     >
                                         {team}
                                     </option>

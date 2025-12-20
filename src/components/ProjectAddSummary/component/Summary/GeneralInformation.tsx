@@ -142,7 +142,7 @@ export default function GeneralInformation({
                             id='addProjects.visibility'
                             aria-describedby='addProjects.visibility.HelpBlock'
                             name='visibility'
-                            value={projectPayload.visibility}
+                            value={projectPayload.visibility ?? 'EVERYONE'}
                             onChange={updateInputField}
                             required
                         >
@@ -197,7 +197,7 @@ export default function GeneralInformation({
                             id='addProjects.projectType'
                             aria-describedby='addProjects.projectType.HelpBlock'
                             name='projectType'
-                            value={projectPayload.projectType}
+                            value={projectPayload.projectType ?? 'PRODUCT'}
                             onChange={updateInputField}
                             required
                         >
@@ -269,7 +269,7 @@ export default function GeneralInformation({
                             id='addProjects.domain'
                             aria-label={t('Enter Domain')}
                             name='domain'
-                            value={projectPayload.domain}
+                            value={projectPayload.domain ?? ''}
                             onChange={updateInputField}
                         >
                             <option value=''>-- {t('Select Domain')} --</option>
@@ -278,7 +278,6 @@ export default function GeneralInformation({
                                     <option
                                         key={domain}
                                         value={domain}
-                                        selected={projectPayload.domain === domain}
                                     >
                                         {domain}
                                     </option>

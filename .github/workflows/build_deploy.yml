@@ -23,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
       - name: Checkout source code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: pnpm-setup
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
@@ -41,7 +41,7 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           # See here for caching with `yarn`, `bun` or other package managers https://github.com/actions/cache/blob/main/examples.md or you can leverage caching with actions/setup-node https://github.com/actions/setup-node
           path: |
@@ -59,7 +59,6 @@ jobs:
 
       - name: Run linting
         shell: bash
-        continue-on-error: true
         run: |
           pnpm biome ci --reporter=github | tee biome_output.txt
 
@@ -83,7 +82,7 @@ jobs:
           pnpm pack --pack-destination dist
 
       - name: Create GH release
-        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -33,12 +33,12 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
       - name: Checkout main repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Set environment variables
         run: |
@@ -69,7 +69,7 @@ jobs:
       # SW360 Frontend
       - name: Extract components metadata (tags, labels) runtime image
         id: meta_runtime
-        uses: docker/metadata-action@318604b99e75e41977312d83839a89be02ca4893 # v5.9.0
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: |
             ${{ env.REGISTRY }}/${{ env.ORG_BASE_NAME }}

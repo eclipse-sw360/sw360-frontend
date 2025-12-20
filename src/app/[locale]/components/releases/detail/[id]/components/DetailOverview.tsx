@@ -317,7 +317,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             link: `/components/releases/detail/${releaseId}/merge`,
             type: 'secondary',
             name: t('Merge'),
-            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden:
+                session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
+                session?.data?.user?.userGroup === UserGroupType.USER,
         },
         Subscribe: {
             link: '',
