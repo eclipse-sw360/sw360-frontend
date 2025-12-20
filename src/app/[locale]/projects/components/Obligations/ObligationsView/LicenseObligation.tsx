@@ -340,8 +340,9 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                 let obligationValue = payload?.[row.original.node[0]] ?? {}
                                 obligationValue = {
                                     ...obligationValue,
+                                    id: row.original.node[1].id,
                                     status: e.target.value,
-                                    obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                                    obligationType: ObligationLevels.LICENSE_OBLIGATION,
                                 }
                                 setPayload((payload: ObligationEntry) => ({
                                     ...payload,

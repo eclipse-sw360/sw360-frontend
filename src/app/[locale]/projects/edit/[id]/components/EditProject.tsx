@@ -11,10 +11,10 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -131,6 +131,48 @@ function EditProject({
         [k: string]: string
     }>({})
     const [obligations, setObligations] = useState<ObligationEntry>({})
+    const [serverObl, setServerObl] = useState<
+        Record<
+            string,
+            {
+                status?: string
+            }
+        >
+    >({})
+    const [serverTotal, setServerTotal] = useState<number>(0)
+
+    const { obligationsTotal, obligationsNonOpenCount } = useMemo(() => {
+        const isOpen = (s?: string | null) => (s ?? '').trim().toUpperCase() === 'OPEN'
+
+        const total = serverTotal
+
+        const merged: Record<
+            string,
+            {
+                status?: string
+            }
+        > = {
+            ...serverObl,
+        }
+
+        for (const k of Object.keys(obligations ?? {})) {
+            merged[k] = {
+                status: obligations[k]?.status,
+            }
+        }
+
+        const list = Object.values(merged)
+        const nonOpen = list.filter((o) => !isOpen(o?.status)).length
+
+        return {
+            obligationsTotal: total,
+            obligationsNonOpenCount: nonOpen,
+        }
+    }, [
+        serverObl,
+        serverTotal,
+        obligations,
+    ])
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -251,6 +293,53 @@ function EditProject({
 
     useEffect(() => {
         if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const loadServerObligations = async () => {
+            try {
+                const s = await getSession()
+                if (CommonUtils.isNullOrUndefined(s)) return signOut()
+
+                const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
+                    page: '0',
+                    page_entries: '9999',
+                })
+
+                const resp = await ApiUtils.GET(url, s.user.access_token, signal)
+                const body = (await resp.json().catch(() => ({}))) as {
+                    obligations?: Record<
+                        string,
+                        {
+                            status?: string
+                        }
+                    >
+                    page?: {
+                        totalElements?: number
+                    }
+                }
+
+                if (resp.status !== StatusCodes.OK) return
+
+                const obl = body?.obligations ?? {}
+                const total =
+                    typeof body?.page?.totalElements === 'number' ? body.page.totalElements : Object.keys(obl).length
+
+                setServerObl(obl)
+                setServerTotal(total)
+            } catch (_e) {
+                /* ignore */
+            }
+        }
+
+        void loadServerObligations()
+        return () => controller.abort()
+    }, [
+        projectId,
+        session.status,
+    ])
+
+    useEffect(() => {
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
@@ -654,7 +743,20 @@ function EditProject({
                                             action
                                             eventKey='obligations'
                                         >
-                                            <div className='my-2'>{t('Obligations')}</div>
+                                            <div className='d-flex align-items-center my-2'>
+                                                <span className='me-2'>{t('Obligations')}</span>
+                                                <span
+                                                    id='obligationsCount'
+                                                    className={
+                                                        obligationsNonOpenCount === 0
+                                                            ? 'badge obligations-badge--danger'
+                                                            : 'obligations-badge'
+                                                    }
+                                                    aria-live='polite'
+                                                >
+                                                    {`${obligationsNonOpenCount} / ${obligationsTotal}`}
+                                                </span>
+                                            </div>
                                         </ListGroup.Item>
                                     </ListGroup>
                                 </Col>
