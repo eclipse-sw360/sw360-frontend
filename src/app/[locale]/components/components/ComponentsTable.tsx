@@ -175,7 +175,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: '',
+        sort: 'name,asc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -249,6 +249,16 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
         pageableQueryParam,
         params.toString(),
         session,
+    ])
+
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        params.toString(),
     ])
 
     const table = useReactTable({

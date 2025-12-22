@@ -52,6 +52,9 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
                     session.data.user.access_token,
                     signal,
                 )
+                if (response.status === StatusCodes.NO_CONTENT) {
+                    return
+                }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)

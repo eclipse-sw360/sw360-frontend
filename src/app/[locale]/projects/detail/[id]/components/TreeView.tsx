@@ -268,6 +268,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     )
 
     const [rowData, setRowData] = useState<NestedRows<TypedProject | TypedRelease>[]>([])
+    const [searchTerm, setSearchTerm] = useState('')
 
     // Configs from backend
     const showAddLicenseButton = useConfigValue(UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON) as
@@ -640,6 +641,107 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     ])
 
     useEffect(() => {
+        if (!searchTerm || !searchTerm.trim()) {
+            if (memoizedLicenseClearing !== undefined && memoizedLinkedProjects !== undefined) {
+                buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
+            }
+            return
+        }
+
+        const lower = searchTerm.trim().toLowerCase()
+
+        type SearchNode = NestedRows<TypedProject | TypedRelease>
+
+        const matches = (value: unknown): boolean => {
+            if (value === undefined || value === null) return false
+            return String(value).toLowerCase().includes(lower)
+        }
+        const extractFields = (entity: unknown): (string | number)[] => {
+            if (!entity || typeof entity !== 'object') return []
+            const anyEntity = entity as Record<string, unknown>
+
+            const mainLicenseIds = Array.isArray(anyEntity.mainLicenseIds) ? anyEntity.mainLicenseIds : []
+            const otherLicenseIds = Array.isArray(anyEntity.otherLicenseIds) ? anyEntity.otherLicenseIds : []
+            const comment = anyEntity.comment
+            const projectType = anyEntity.projectType
+            const componentType = anyEntity.componentType
+            const clearingState = anyEntity.clearingState
+            const state = anyEntity.state
+            const mainlineState = anyEntity.mainlineState
+            const name = anyEntity.name
+            const version = anyEntity.version
+
+            return [
+                name,
+                version,
+                projectType,
+                componentType,
+                clearingState,
+                state,
+                mainlineState,
+                comment,
+                ...mainLicenseIds,
+                ...otherLicenseIds,
+            ].filter(Boolean) as (string | number)[]
+        }
+        const buildFullTree = (): SearchNode[] => {
+            if (memoizedLicenseClearing === undefined) return []
+
+            const releaseEmbed = (memoizedLicenseClearing as LicenseClearing)['_embedded']?.['sw360:release'] ?? []
+            const linked = extractLinkedProjectsAndTheirLinkedReleases(
+                releaseEmbed as Release[],
+                memoizedLinkedProjects,
+            )
+
+            const releaseRows: SearchNode[] = []
+            for (const l of (memoizedLicenseClearing as LicenseClearing)['linkedReleases'] ?? []) {
+                const release = (memoizedLicenseClearing as LicenseClearing)['_embedded']?.['sw360:release']?.filter(
+                    (r: Release) => r.id === l.release.split('/').at(-1),
+                )?.[0]
+                if (!release) continue
+                releaseRows.push({
+                    node: {
+                        type: 'release',
+                        entity: release,
+                    },
+                    children: [],
+                } as SearchNode)
+            }
+
+            return [
+                ...linked,
+                ...releaseRows,
+            ]
+        }
+
+        const fullTree: SearchNode[] = buildFullTree()
+        const filterRecursive = (nodes: SearchNode[]): SearchNode[] => {
+            const result: SearchNode[] = []
+            for (const node of nodes) {
+                const fields = extractFields(node.node.entity)
+                const selfMatches = fields.some((f) => matches(f))
+                let filteredChildren: SearchNode[] = []
+                if (Array.isArray(node.children) && node.children.length > 0) {
+                    filteredChildren = filterRecursive(node.children)
+                }
+                if (selfMatches || filteredChildren.length > 0) {
+                    result.push({
+                        ...node,
+                        children: filteredChildren,
+                    })
+                }
+            }
+            return result
+        }
+        const filtered = filterRecursive(fullTree)
+        setRowData(filtered)
+    }, [
+        searchTerm,
+        memoizedLicenseClearing,
+        memoizedLinkedProjects,
+    ])
+
+    useEffect(() => {
         if (expandLevel === -1) {
             return setExpandedState({})
         }
@@ -754,7 +856,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                         show={show}
                         setShow={setShow}
                     />
-                    <div className='col ps-0'>
+                    <div className='d-flex justify-content-between align-items-center mb-3'>
                         <Button
                             variant='secondary'
                             className='me-2 col-auto'
@@ -769,6 +871,16 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                         >
                             {t('Add License Info to Release')}
                         </Button>
+                        <input
+                            type='search'
+                            placeholder={t('Search')}
+                            className='form-control form-control-sm'
+                            style={{
+                                width: '250px',
+                            }}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </>
             ) : (

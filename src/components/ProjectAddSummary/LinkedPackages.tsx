@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
@@ -28,7 +28,6 @@ interface Props {
 export default function LinkedPackages({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
-    const [newLinkedPackageData, setNewLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
     const [tableData, setTableData] = useState<
         [
             string,
@@ -37,17 +36,26 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
     >([])
 
     const handleComments = (packageId: string, updatedComment: string) => {
-        const _newLinkedPackageData = new Map(newLinkedPackageData)
+        const _newLinkedPackageData: {
+            [key: string]: LinkedPackageData
+        } = {}
 
-        const existing = _newLinkedPackageData.get(packageId)
-        if (existing) {
-            _newLinkedPackageData.set(packageId, {
-                ...existing,
-                comment: updatedComment,
-            })
+        for (const [pid, p] of Object.entries(projectPayload.packageIds ?? {})) {
+            if (pid === packageId) {
+                _newLinkedPackageData[pid] = {
+                    ...p,
+                    comment: updatedComment,
+                }
+            } else {
+                _newLinkedPackageData[pid] = {
+                    ...p,
+                }
+            }
         }
-
-        setNewLinkedPackageData(_newLinkedPackageData)
+        setProjectPayload({
+            ...projectPayload,
+            packageIds: _newLinkedPackageData,
+        })
     }
 
     const columns = useMemo<
@@ -114,7 +122,7 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
                         <input
                             type='text'
                             className='form-control'
-                            value={newLinkedPackageData.get(row.original[0])?.comment ?? ''}
+                            value={row.original[1]?.comment ?? ''}
                             onChange={(event) => {
                                 const updatedComment = event.target.value
                                 handleComments(row.original[0], updatedComment)
@@ -144,28 +152,30 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
         ],
         [
             t,
-            newLinkedPackageData,
+            projectPayload,
         ],
     )
 
     const handleDeletePackage = (packageId: string) => {
-        const _newLinkedPackageData = new Map(newLinkedPackageData)
-        _newLinkedPackageData.delete(packageId)
-        console.log(_newLinkedPackageData)
-        setNewLinkedPackageData(_newLinkedPackageData)
+        const _newLinkedPackageData: {
+            [key: string]: LinkedPackageData
+        } = {}
+
+        for (const [pid, p] of Object.entries(projectPayload.packageIds ?? {})) {
+            if (pid !== packageId) {
+                _newLinkedPackageData[pid] = p
+            }
+        }
+        setProjectPayload({
+            ...projectPayload,
+            packageIds: _newLinkedPackageData,
+        })
     }
 
     useEffect(() => {
-        if (projectPayload.packageIds !== undefined && newLinkedPackageData.size === 0) {
-            setNewLinkedPackageData(new Map(Object.entries(projectPayload.packageIds ?? {})))
-        } else {
-            const data = [
-                ...newLinkedPackageData,
-            ]
-            setTableData(data)
-        }
+        const data = Object.entries(projectPayload.packageIds ?? {})
+        setTableData(data)
     }, [
-        newLinkedPackageData,
         projectPayload,
     ])
 
@@ -184,7 +194,6 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
     return (
         <>
             <LinkPackagesModal
-                setLinkedPackageData={setNewLinkedPackageData}
                 projectPayload={projectPayload}
                 setProjectPayload={setProjectPayload}
                 show={showLinkedPackagesModal}
