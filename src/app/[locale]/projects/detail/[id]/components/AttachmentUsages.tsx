@@ -52,25 +52,96 @@ function isLicenseInfoEnabled(type: string): boolean {
         'CLX',
         'ISR',
     ]
-    if (types.indexOf(type) !== -1) {
-        return true
-    }
-    return false
+    return types.indexOf(type) !== -1
 }
 
 function isSourceCodeBundleEnabled(type: string): boolean {
     const types = [
         'SOURCE',
-        'SRS',
+        'SRC',
     ]
-    if (types.indexOf(type) !== -1) {
-        return true
-    }
-    return false
+    return types.indexOf(type) !== -1
 }
 
 interface ExtendedNestedRows<K> extends NestedRows<K> {
     projectPath?: string
+}
+const releaseMatchesFilter = (release: Release, filter: string): boolean => {
+    if (!filter) return true
+    const attachments = release.attachments ?? []
+    switch (filter) {
+        case 'withCli':
+            return attachments.some((att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX')
+        case 'withAttachments':
+            return attachments.length > 0
+        case 'withoutSrc':
+            return !attachments.some((att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC')
+        case 'withoutAttachments':
+            return attachments.length === 0
+        default:
+            return true
+    }
+}
+const rowMatchesSearch = (
+    row: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>,
+    term: string,
+): boolean => {
+    const trimmed = term.trim().toLocaleLowerCase()
+    if (!trimmed) return true
+    const tokens = trimmed.split(/\s+/).filter(Boolean)
+    if (tokens.length === 0) return true
+
+    const node = row.node
+    let haystack = ''
+
+    if (node.type === 'project') {
+        haystack = (node.entity.name ?? '').toLocaleLowerCase()
+    } else if (node.type === 'release') {
+        const name = node.entity.name ?? ''
+        const version = node.entity.version ?? ''
+        haystack = `${name} ${version}`.toLocaleLowerCase()
+    } else if (node.type === 'attachment') {
+        haystack = (node.entity.filename ?? '').toLocaleLowerCase()
+    }
+
+    return tokens.every((token) => haystack.includes(token))
+}
+
+const filterRows = (
+    rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
+    filter: string,
+    term: string,
+): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] => {
+    const result: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
+    for (const row of rows) {
+        const node = row.node
+        const filteredChildren =
+            row.children && row.children.length > 0
+                ? filterRows(
+                      row.children as ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
+                      filter,
+                      term,
+                  )
+                : []
+        let matchesFilter = true
+        if (node.type === 'release') {
+            matchesFilter = releaseMatchesFilter(node.entity as Release, filter)
+        }
+        const matchesSearch = rowMatchesSearch(row, term)
+        let keepRow = false
+        if (node.type === 'project') {
+            keepRow = matchesSearch || filteredChildren.length > 0
+        } else {
+            keepRow = matchesFilter && matchesSearch
+        }
+        if (keepRow) {
+            result.push({
+                ...row,
+                children: filteredChildren,
+            })
+        }
+    }
+    return result
 }
 
 function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
@@ -105,8 +176,17 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [data, setData] = useState<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
-
+    const [releaseFilter, setReleaseFilter] = useState<string>('')
+    const [searchTerm, setSearchTerm] = useState<string>('')
     const session = useSession()
+    const filteredData = useMemo(
+        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm) : data),
+        [
+            data,
+            releaseFilter,
+            searchTerm,
+        ],
+    )
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -276,24 +356,70 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
             {
                 id: 'linkedReleasesAndProjects',
                 header: () => (
-                    <>
-                        {t('Linked Releases And Projects')}
-                        {' ('}
-                        <Link
-                            href='#'
-                            className='table-text-link'
+                    <div className='d-flex justify-content-between align-items-center w-100'>
+                        <div
+                            className='d-flex align-items-center me-3'
+                            style={{
+                                gap: '6px',
+                            }}
                         >
-                            {t('Expand next level')}
-                        </Link>
-                        {' | '}
-                        <Link
-                            href='#'
-                            className='table-text-link'
+                            <span className='fw-bold'>
+                                {t('Linked Releases And Projects')}
+                                {' ('}
+                                <Link
+                                    href='#'
+                                    className='table-text-link'
+                                >
+                                    {t('Expand next level')}
+                                </Link>
+                                {' | '}
+                                <Link
+                                    href='#'
+                                    className='table-text-link'
+                                >
+                                    {t('Collapse all')}
+                                </Link>
+                                {')'}
+                            </span>
+                        </div>
+
+                        <div
+                            className='d-flex align-items-center'
+                            style={{
+                                gap: '12px',
+                                marginLeft: 'auto',
+                                width: '1060px',
+                                justifyContent: 'space-between',
+                            }}
                         >
-                            {t('Collapse all')}
-                        </Link>
-                        {')'}
-                    </>
+                            <select
+                                className='form-select form-select-sm'
+                                style={{
+                                    width: '200px',
+                                    height: '40px',
+                                }}
+                                value={releaseFilter}
+                                onChange={(e) => setReleaseFilter(e.target.value)}
+                            >
+                                <option value=''>-- Release Filter --</option>
+
+                                <option value='withCli'>With CLI Attachments</option>
+                                <option value='withAttachments'>With Attachments</option>
+                                <option value='withoutSrc'>Without Source Attachments</option>
+                                <option value='withoutAttachments'>Without Attachments</option>
+                            </select>
+
+                            <input
+                                type='text'
+                                className='form-control form-control-sm'
+                                style={{
+                                    width: '230px',
+                                }}
+                                placeholder={t('Search')}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
                 ),
                 columns: [
                     {
@@ -302,14 +428,41 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                         cell: ({ row }) => {
                             if (row.original.node.type === 'attachment') {
                                 return <div className='text-center'>{row.original.node.entity.filename}</div>
-                            } else if (row.original.node.type === 'release') {
-                                const { name, version } = row.original.node.entity
+                            }
+                            if (row.original.node.type === 'release') {
+                                const release = row.original.node.entity
+                                const { name, version } = release
+
+                                const cliCount = (release.attachments ?? []).filter(
+                                    (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX',
+                                ).length
+                                const badgeClass =
+                                    cliCount === 0
+                                        ? 'cli-badge cli-badge--red'
+                                        : cliCount === 1
+                                          ? 'cli-badge cli-badge--green'
+                                          : 'cli-badge cli-badge--orange'
+
                                 return (
                                     <PaddedCell row={row}>
                                         <Link
                                             className='text-link'
                                             href={`/components/releases/detail/${row.original.node.entity._links?.self.href.split('/').at(-1)}`}
                                         >{`${name} ${version}`}</Link>
+                                        <span
+                                            className='cli-badge-container'
+                                            style={{
+                                                marginLeft: 8,
+                                            }}
+                                        >
+                                            <span
+                                                className={badgeClass}
+                                                aria-label={`CLI count ${cliCount}`}
+                                            >
+                                                {cliCount}
+                                            </span>
+                                            <span className='cli-tooltip'>CLI count</span>
+                                        </span>
                                     </PaddedCell>
                                 )
                             } else {
@@ -575,6 +728,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
             t,
             memoizedAttachmentUsages,
             saveUsagesPayload,
+            releaseFilter,
         ],
     )
 
@@ -584,7 +738,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
             expanded: expandedState,
         },
 
-        data: data,
+        data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
 
@@ -713,6 +867,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         memoizedAttachmentUsages,
         memoizedLinkedProjects,
         saveUsagesPayload,
+        projectId,
     ])
 
     return (
