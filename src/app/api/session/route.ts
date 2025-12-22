@@ -23,12 +23,28 @@ export async function GET(): Promise<NextResponse> {
             }),
             {
                 status: 401,
+                headers: {
+                    // Prevent caching of unauthorized response
+                    'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
+                },
             },
         )
     }
 
-    return NextResponse.json({
-        authenticated: true,
-        session,
-    })
+    return NextResponse.json(
+        {
+            authenticated: true,
+            session,
+        },
+        {
+            headers: {
+                // This ensures that after logout, the back button won't return cached session
+                'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            },
+        }
+    )
 }

@@ -68,9 +68,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
-    }, [
-        session,
-    ])
+    }, [session])
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -85,9 +83,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 return undefined
             }
         },
-        [
-            session,
-        ],
+        [session],
     )
 
     const downloadBundle = async () => {
@@ -129,10 +125,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 }
             })
             .catch((err) => console.error(err))
-    }, [
-        componentId,
-        fetchData,
-    ])
+    }, [componentId, fetchData])
 
     const getSubcribersEmail = (component: Component) => {
         return component._embedded !== undefined && component._embedded['sw360:subscribers'] !== undefined
@@ -222,12 +215,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         number: 0,
     })
     const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
-    const memoizedData = useMemo(
-        () => changeLogList,
-        [
-            changeLogList,
-        ],
-    )
+    const memoizedData = useMemo(() => changeLogList, [changeLogList])
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -246,10 +234,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${componentId}`,
                     Object.fromEntries(
-                        Object.entries(pageableQueryParam).map(([key, value]) => [
-                            key,
-                            String(value),
-                        ]),
+                        Object.entries(pageableQueryParam).map(([key, value]) => [key, String(value)]),
                     ),
                 )
 
@@ -284,11 +269,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         })()
 
         return () => controller.abort()
-    }, [
-        pageableQueryParam,
-        componentId,
-        session,
-    ])
+    }, [pageableQueryParam, componentId, session])
 
     const param = useParams()
     const locale = (param.locale as string) || 'en'
@@ -393,6 +374,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                 )}
                             </PageButtonHeader>
                         </div>
+
                         <div
                             className='row'
                             hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
@@ -408,6 +390,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                         >
                             <ReleaseOverview componentId={componentId} />
                         </div>
+
                         <div
                             className='row'
                             hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
@@ -423,6 +406,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                         >
                             <ComponentVulnerabilities vulnerData={vulnerData} />
                         </div>
+
                         <div
                             className='row'
                             hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}
@@ -443,6 +427,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                         paginationMeta={paginationMeta}
                                     />
                                 </div>
+
                                 <div
                                     className='row'
                                     hidden={changelogTab !== 'view-log' ? true : false}
