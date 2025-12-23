@@ -10,6 +10,17 @@
 import { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 const withNextIntl = createNextIntlPlugin()
+const isDev = process.env.NODE_ENV === 'development'
+
+const csp = `
+  default-src 'self';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https:;
+  font-src 'self' data:;
+  connect-src 'self' https:${isDev ? ' http://localhost:8080' : ''};
+`.replace(/\s{2,}/g, ' ').trim()
+
 
 const config: NextConfig = {
     productionBrowserSourceMaps: true,
@@ -52,7 +63,7 @@ const config: NextConfig = {
                     {
                         // Content Security Policy
                         key: 'Content-Security-Policy',
-                        value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;",
+                        value: csp,
                     },
                     {
                         // Permissions Policy (formerly Feature-Policy)
