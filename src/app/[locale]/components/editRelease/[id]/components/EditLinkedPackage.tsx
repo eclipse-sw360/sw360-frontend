@@ -19,7 +19,7 @@ import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { ErrorDetails, LinkedPackage, LinkedPackageData, ProjectPayload, Release } from '@/object-types'
+import { ErrorDetails, LinkedPackage, LinkedPackageData, Release } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -34,8 +34,13 @@ type ReleaseWithLinked = Release & {
 
 interface Props {
     releaseId?: string
-    Payload: ProjectPayload
-    setPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    setReleasePayload: React.Dispatch<React.SetStateAction<ReleaseWithLinked>>
+}
+
+interface GenericPayload {
+    id?: string
+    name?: string
+    packageIds: Record<string, LinkedPackageData>
 }
 
 interface DeleteMetaData {
@@ -45,7 +50,7 @@ interface DeleteMetaData {
     packageVersion: string
 }
 
-export default function EditLinkedPackages({ releaseId, Payload, setPayload }: Props): JSX.Element {
+export default function EditLinkedPackages({ releaseId, setReleasePayload }: Props): JSX.Element {
     const t = useTranslations('default')
 
     const [linkedPackageData, setLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
@@ -57,6 +62,15 @@ export default function EditLinkedPackages({ releaseId, Payload, setPayload }: P
         packageVersion: '',
     })
     const [showProcessing, setShowProcessing] = useState(false)
+    const [payload, setPayload] = useState<GenericPayload>({
+        packageIds: {},
+    })
+    const openLinkPackagesModal = () => {
+        setPayload({
+            packageIds: Object.fromEntries(linkedPackageData),
+        })
+        setShowLinkPackagesModal(true)
+    }
 
     const fetchLinkedPackages = useCallback(async () => {
         if (!releaseId) return
@@ -113,13 +127,22 @@ export default function EditLinkedPackages({ releaseId, Payload, setPayload }: P
             version: pkg.version ?? '',
             packageManager: pkg.packageManager ?? '',
         }))
-        setPayload((prev) => ({
+        setReleasePayload((prev) => ({
             ...(prev as ReleaseWithLinked),
             linkedPackages,
         }))
     }, [
         linkedPackageData,
-        setPayload,
+        setReleasePayload,
+    ])
+    useEffect(() => {
+        if (!payload.packageIds) return
+
+        const next = new Map<string, LinkedPackageData>(Object.entries(payload.packageIds))
+
+        setLinkedPackageData(next)
+    }, [
+        payload,
     ])
 
     const openDeleteModal = useCallback((pkg: LinkedPackageData) => {
@@ -240,9 +263,8 @@ export default function EditLinkedPackages({ releaseId, Payload, setPayload }: P
             <LinkPackagesModal
                 show={showLinkPackagesModal}
                 setShow={setShowLinkPackagesModal}
-                setLinkedPackageData={setLinkedPackageData}
-                projectPayload={Payload}
-                setProjectPayload={setPayload}
+                payload={payload}
+                setPayload={setPayload}
             />
 
             <Modal
@@ -302,7 +324,7 @@ export default function EditLinkedPackages({ releaseId, Payload, setPayload }: P
                                         <button
                                             type='button'
                                             className='btn btn-secondary'
-                                            onClick={() => setShowLinkPackagesModal(true)}
+                                            onClick={openLinkPackagesModal}
                                         >
                                             {t('Add Packages')}
                                         </button>
