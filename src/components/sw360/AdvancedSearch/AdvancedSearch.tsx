@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import React, { type JSX, useEffect, useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import CommonUtils from '@/utils/common.utils'
 
 interface Option {
@@ -26,6 +27,8 @@ interface Field {
     fieldName: string
     value: string | Array<Option>
     paramName: string
+    enableAutocomplete: boolean
+    autocompleteSuggestions?: string[]
 }
 
 interface Props {
@@ -162,6 +165,34 @@ function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = 
 
             default:
                 if (typeof field.value === 'string') {
+                    if (field.enableAutocomplete && field.autocompleteSuggestions) {
+                        return (
+                            <Form.Group
+                                key={field.paramName}
+                                className='mb-3'
+                                controlId={field.paramName}
+                            >
+                                <Form.Label className='label'>{fieldLabel}</Form.Label>
+                                <SuggestionBox
+                                    initialValue={searchParams[field.paramName] || ''}
+                                    possibleValues={field.autocompleteSuggestions}
+                                    inputProps={{
+                                        id: field.paramName,
+                                        name: field.paramName,
+                                        placeHolder: `${t('Enter')} ${fieldLabel}`,
+                                    }}
+                                    onValueChange={(value) => {
+                                        setSearchParam((prev: SearchParams) => ({
+                                            ...prev,
+                                            [field.paramName]: value,
+                                        }))
+                                    }}
+                                    isMultiValue={true}
+                                />
+                            </Form.Group>
+                        )
+                    }
+
                     return (
                         <Form.Group
                             key={field.paramName}
