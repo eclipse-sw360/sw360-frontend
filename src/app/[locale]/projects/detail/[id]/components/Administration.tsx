@@ -19,6 +19,20 @@ const Capitalize = (text: string) => {
         ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
         : undefined
 }
+const unescapeHtml = (str: string | undefined): string => {
+    if (!str) return ''
+
+    const htmlEntities: Record<string, string> = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#039;': "'",
+        '&#39;': "'",
+    }
+
+    return str.replace(/&amp;|&lt;|&gt;|&quot;|&#0?39;/g, (match) => htmlEntities[match] || match)
+}
 
 interface Props {
     clearingDetailCount?: ClearingDetailsCount
@@ -86,7 +100,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.clearingSummary}
+                                value={unescapeHtml(data.clearingSummary)}
                                 readOnly
                             />
                         </td>
@@ -101,7 +115,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.specialRisksOSS}
+                                value={unescapeHtml(data.specialRisksOSS)}
                                 readOnly
                             />
                         </td>
@@ -116,7 +130,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.generalRisks3rdParty}
+                                value={unescapeHtml(data.generalRisks3rdParty)}
                                 readOnly
                             />
                         </td>
@@ -131,7 +145,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.specialRisks3rdParty}
+                                value={unescapeHtml(data.specialRisks3rdParty)}
                                 readOnly
                             />
                         </td>
@@ -146,7 +160,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.deliveryChannels}
+                                value={unescapeHtml(data.deliveryChannels)}
                                 readOnly
                             />
                         </td>
@@ -161,7 +175,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.remarksAdditionalRequirements}
+                                value={unescapeHtml(data.remarksAdditionalRequirements)}
                                 readOnly
                             />
                         </td>
@@ -223,7 +237,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '600px',
                                 }}
-                                value={data.licenseInfoHeaderText}
+                                value={unescapeHtml(data.licenseInfoHeaderText)}
                                 readOnly
                             />
                         </td>
