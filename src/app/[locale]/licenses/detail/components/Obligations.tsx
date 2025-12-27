@@ -11,7 +11,13 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    getCoreRowModel,
+    getExpandedRowModel,
+    getFilteredRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
@@ -34,6 +40,8 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     const t = useTranslations('default')
     const params = useSearchParams()
     const session = useSession()
+
+    const [globalFilter, setGlobalFilter] = useState('')
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -208,9 +216,12 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     const table = useReactTable({
         data: memoizedData,
         columns,
+        state: {
+            globalFilter,
+        },
+        onGlobalFilterChange: setGlobalFilter,
         getCoreRowModel: getCoreRowModel(),
-
-        // expand config
+        getFilteredRowModel: getFilteredRowModel(),
         getExpandedRowModel: getExpandedRowModel(),
         getSubRows: (row) => row.children ?? [],
         getRowCanExpand: (row) => {
@@ -234,11 +245,28 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     const whiteListTable = useReactTable({
         data: memoizedWhitelistData,
         columns: columnEditWhitelists,
+        state: {
+            globalFilter,
+        },
+        onGlobalFilterChange: setGlobalFilter,
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
     })
 
     return (
         <div className='mb-3'>
+            <div className='row mb-3'>
+                <div className='col-lg-4'>
+                    <input
+                        type='text'
+                        className='form-control'
+                        placeholder={t('Search obligations...')}
+                        value={globalFilter ?? ''}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                    />
+                </div>
+            </div>
+
             {isEditWhitelist ? (
                 whiteListTable ? (
                     <SW360Table
