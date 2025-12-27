@@ -52,7 +52,6 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     const params = useSearchParams()
     const session = useSession()
 
-    // ADD THIS: State for search filtering
     const [globalFilter, setGlobalFilter] = useState('')
 
     useEffect(() => {
@@ -228,14 +227,12 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     const table = useReactTable({
         data: memoizedData,
         columns,
-        // ADD THIS: Enable filtering
         state: {
             globalFilter,
         },
         onGlobalFilterChange: setGlobalFilter,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        // expand config
         getExpandedRowModel: getExpandedRowModel(),
         getSubRows: (row) => row.children ?? [],
         getRowCanExpand: (row) => {
@@ -259,7 +256,6 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     const whiteListTable = useReactTable({
         data: memoizedWhitelistData,
         columns: columnEditWhitelists,
-        // ADD THIS: Enable filtering for whitelist table too
         state: {
             globalFilter,
         },
@@ -270,7 +266,6 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
 
     return (
         <div className='mb-3'>
-            {/* ADD THIS: Search input */}
             <div className='row mb-3'>
                 <div className='col-lg-4'>
                     <input
