@@ -120,8 +120,8 @@ importers:
         specifier: ^5.5.0
         version: 5.5.0(react@19.2.1)
       systeminformation:
-        specifier: ^5.27.14
-        version: 5.27.14
+        specifier: ^5.28.3
+        version: 5.28.3
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.4(@swc/helpers@0.5.18))(@types/node@25.0.3)(typescript@5.9.3)
@@ -2085,8 +2085,8 @@ packages:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
 
-  systeminformation@5.27.14:
-    resolution: {integrity: sha512-3DoNDYSZBLxBwaJtQGWNpq0fonga/VZ47HY1+7/G3YoIPaPz93Df6egSzzTKbEMmlzUpy3eQ0nR9REuYIycXGg==}
+  systeminformation@5.28.3:
+    resolution: {integrity: sha512-crbaZrBH3TpTbqc0PKFqnUFHdAJOxV9UhF3KCGSrf+YP+SkoMHmxU2Nr9yIG2xgCr4645Z9Ec4GHQQQ7kGX/HA==}
     engines: {node: '>=8.0.0'}
     os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
     hasBin: true
@@ -3226,7 +3226,7 @@ snapshots:
       proxy-from-env: 1.0.0
       request-progress: 3.0.0
       supports-color: 8.1.1
-      systeminformation: 5.27.14
+      systeminformation: 5.28.3
       tmp: 0.2.5
       tree-kill: 1.2.2
       untildify: 4.0.0
@@ -4187,7 +4187,7 @@ snapshots:
     dependencies:
       has-flag: 4.0.0
 
-  systeminformation@5.27.14: {}
+  systeminformation@5.28.3: {}
 
   text-extensions@2.4.0: {}
 
