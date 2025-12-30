@@ -43,20 +43,31 @@ const ComponentIndex = (): ReactNode => {
 
     useEffect(() => {
         const controller = new AbortController()
+        const controller = new AbortController()
 
         const fetchVendors = async () => {
-            const response = await ApiUtils.GET('vendors', session?.user?.access_token || '')
-            if (!controller.signal.aborted && response.ok) {
-                const data = await response.json()
-                const names = data._embedded?.['sw360:vendors']?.map((v: { fullName: string }) => v.fullName) || []
+            try {
+                const response = await ApiUtils.GET('vendors', session?.user?.access_token || '')
+                if (!controller.signal.aborted && response.status === 200) {
+                    const data = await response.json()
+                    const names = data._embedded?.['sw360:vendors']?.map((v: { fullName: string }) => v.fullName) || []
+                    if (!controller.signal.aborted) {
+                        setVendorsSuggestions(names)
+                    }
+                }
+            } catch (error) {
                 if (!controller.signal.aborted) {
-                    setVendorsSuggestions(names)
+                    console.error('Failed to fetch vendors:', error)
                 }
             }
         }
 
         if (session) {
             fetchVendors()
+        }
+
+        return () => {
+            controller.abort()
         }
 
         return () => {
