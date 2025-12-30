@@ -9,6 +9,7 @@
 
 'use client'
 
+import { decode } from 'he'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
@@ -18,20 +19,6 @@ const Capitalize = (text: string) => {
     return text
         ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
         : undefined
-}
-const unescapeHtml = (str: string | undefined): string => {
-    if (!str) return ''
-
-    const htmlEntities: Record<string, string> = {
-        '&amp;': '&',
-        '&lt;': '<',
-        '&gt;': '>',
-        '&quot;': '"',
-        '&#039;': "'",
-        '&#39;': "'",
-    }
-
-    return str.replace(/&amp;|&lt;|&gt;|&quot;|&#0?39;/g, (match) => htmlEntities[match] || match)
 }
 
 interface Props {
@@ -100,7 +87,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={unescapeHtml(data.clearingSummary)}
+                                value={data.clearingSummary?.trim() ? decode(data.clearingSummary) : ''}
                                 readOnly
                             />
                         </td>
@@ -115,7 +102,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={unescapeHtml(data.specialRisksOSS)}
+                                value={data.specialRisksOSS?.trim() ? decode(data.specialRisksOSS) : ''}
                                 readOnly
                             />
                         </td>
@@ -130,7 +117,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={unescapeHtml(data.generalRisks3rdParty)}
+                                value={data.generalRisks3rdParty?.trim() ? decode(data.generalRisks3rdParty) : ''}
                                 readOnly
                             />
                         </td>
@@ -145,7 +132,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={unescapeHtml(data.specialRisks3rdParty)}
+                                value={data.specialRisks3rdParty?.trim() ? decode(data.specialRisks3rdParty) : ''}
                                 readOnly
                             />
                         </td>
@@ -160,7 +147,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={unescapeHtml(data.deliveryChannels)}
+                                value={data.deliveryChannels?.trim() ? decode(data.deliveryChannels) : ''}
                                 readOnly
                             />
                         </td>
@@ -175,7 +162,11 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={unescapeHtml(data.remarksAdditionalRequirements)}
+                                value={
+                                    data.remarksAdditionalRequirements?.trim()
+                                        ? decode(data.remarksAdditionalRequirements)
+                                        : ''
+                                }
                                 readOnly
                             />
                         </td>
@@ -237,7 +228,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '600px',
                                 }}
-                                value={unescapeHtml(data.licenseInfoHeaderText)}
+                                value={data.licenseInfoHeaderText?.trim() ? decode(data.licenseInfoHeaderText) : ''}
                                 readOnly
                             />
                         </td>

@@ -9,6 +9,7 @@
 
 'use client'
 
+import { decode } from 'he'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
@@ -71,7 +72,9 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
 
     return (
         <>
-            <p className='mt-3 mb-4 px-0 mx-0'>{summaryData.description}</p>
+            <p className='mt-3 mb-4 px-0 mx-0'>
+                {summaryData.description?.trim() ? decode(summaryData.description) : ''}
+            </p>
             <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
