@@ -9,6 +9,7 @@
 
 'use client'
 
+import { decode } from 'he'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
@@ -86,7 +87,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.clearingSummary}
+                                value={data.clearingSummary?.trim() ? decode(data.clearingSummary) : ''}
                                 readOnly
                             />
                         </td>
@@ -101,7 +102,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.specialRisksOSS}
+                                value={data.specialRisksOSS?.trim() ? decode(data.specialRisksOSS) : ''}
                                 readOnly
                             />
                         </td>
@@ -116,7 +117,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.generalRisks3rdParty}
+                                value={data.generalRisks3rdParty?.trim() ? decode(data.generalRisks3rdParty) : ''}
                                 readOnly
                             />
                         </td>
@@ -131,7 +132,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.specialRisks3rdParty}
+                                value={data.specialRisks3rdParty?.trim() ? decode(data.specialRisks3rdParty) : ''}
                                 readOnly
                             />
                         </td>
@@ -146,7 +147,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.deliveryChannels}
+                                value={data.deliveryChannels?.trim() ? decode(data.deliveryChannels) : ''}
                                 readOnly
                             />
                         </td>
@@ -161,7 +162,11 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '120px',
                                 }}
-                                value={data.remarksAdditionalRequirements}
+                                value={
+                                    data.remarksAdditionalRequirements?.trim()
+                                        ? decode(data.remarksAdditionalRequirements)
+                                        : ''
+                                }
                                 readOnly
                             />
                         </td>
@@ -223,7 +228,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                                 style={{
                                     height: '600px',
                                 }}
-                                value={data.licenseInfoHeaderText}
+                                value={data.licenseInfoHeaderText?.trim() ? decode(data.licenseInfoHeaderText) : ''}
                                 readOnly
                             />
                         </td>
