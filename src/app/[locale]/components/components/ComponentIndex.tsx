@@ -16,8 +16,10 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
-import { UserGroupType } from '@/object-types'
+import { useConfigValue } from '@/contexts'
+import { UIConfigKeys, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import { ApiUtils } from '@/utils'
 import ComponentsTable from './ComponentsTable'
 import ImportSBOMModal from './ImportSBOMModal'
 
@@ -25,7 +27,11 @@ const ComponentIndex = (): ReactNode => {
     const t = useTranslations('default')
     const [numberOfComponent, setNumberOfComponent] = useState(0)
     const [importModalOpen, setImportModalOpen] = useState(false)
+    const [vendorsSuggestions, setVendorsSuggestions] = useState<string[]>([])
     const { data: session, status } = useSession()
+    const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
+    const platformsSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
+    const osSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -33,6 +39,31 @@ const ComponentIndex = (): ReactNode => {
         }
     }, [
         status,
+    ])
+
+    useEffect(() => {
+        const controller = new AbortController()
+
+        const fetchVendors = async () => {
+            const response = await ApiUtils.GET('vendors', session?.user?.access_token || '')
+            if (!controller.signal.aborted && response.ok) {
+                const data = await response.json()
+                const names = data._embedded?.['sw360:vendors']?.map((v: { fullName: string }) => v.fullName) || []
+                if (!controller.signal.aborted) {
+                    setVendorsSuggestions(names)
+                }
+            }
+        }
+
+        if (session) {
+            fetchVendors()
+        }
+
+        return () => {
+            controller.abort()
+        }
+    }, [
+        session,
     ])
 
     const handleClickImportSBOM = (e: React.MouseEvent<HTMLElement>) => {
@@ -61,11 +92,13 @@ const ComponentIndex = (): ReactNode => {
             fieldName: t('Component Name'),
             value: '',
             paramName: 'name',
+            enableAutocomplete: false,
         },
         {
             fieldName: t('Categories'),
             value: '',
             paramName: 'categories',
+            enableAutocomplete: false,
         },
         {
             fieldName: t('Component Type'),
@@ -104,36 +137,47 @@ const ComponentIndex = (): ReactNode => {
                 },
             ],
             paramName: 'type',
+            enableAutocomplete: false,
         },
         {
             fieldName: t('Languages'),
             value: '',
             paramName: 'languages',
+            enableAutocomplete: true,
+            autocompleteSuggestions: languagesSuggestions || [],
         },
         {
             fieldName: t('Software Platforms'),
             value: '',
             paramName: 'softwarePlatforms',
+            enableAutocomplete: true,
+            autocompleteSuggestions: platformsSuggestions || [],
         },
         {
             fieldName: t('Vendors'),
             value: '',
             paramName: 'vendors',
+            enableAutocomplete: true,
+            autocompleteSuggestions: vendorsSuggestions,
         },
         {
             fieldName: t('Operating Systems'),
             value: '',
             paramName: 'operatingSystems',
+            enableAutocomplete: true,
+            autocompleteSuggestions: osSuggestions || [],
         },
         {
             fieldName: t('Main Licenses'),
             value: '',
             paramName: 'mainLicenses',
+            enableAutocomplete: false,
         },
         {
             fieldName: t('Created By (Email)'),
             value: '',
             paramName: 'createdBy',
+            enableAutocomplete: false,
         },
         {
             fieldName: t('Created On'),
@@ -156,6 +200,7 @@ const ComponentIndex = (): ReactNode => {
                 },
             ],
             paramName: 'createdOn',
+            enableAutocomplete: false,
         },
     ]
 
