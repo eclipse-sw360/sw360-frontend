@@ -45,6 +45,7 @@ const keycloakAuthOption: NextAuthOptions = {
             ) {
                 token.decoded = jwtDecode(account.access_token)
                 token.access_token = 'Bearer ' + account.id_token
+                token.id_token = account.id_token
                 token.expires_in = account.expires_at
                 token.refresh_token = account.refresh_token
                 const tokenDetails = JSON.parse(JSON.stringify(token.decoded)) as {
@@ -65,6 +66,27 @@ const keycloakAuthOption: NextAuthOptions = {
             const userGroup = getUserGroup(tokenDetails)
             session.user.userGroup = userGroup[0]
             return session
+        },
+    },
+
+    events: {
+        async signOut({ token }) {
+            // Invalidate Keycloak session when user logs out
+            if (token?.id_token) {
+                try {
+                    const logoutUrl = `${AUTH_ISSUER}/protocol/openid-connect/logout`
+                    const params = new URLSearchParams({
+                        id_token_hint: token.id_token as string,
+                        client_id: SW360_KEYCLOAK_CLIENT_ID,
+                    })
+
+                    await fetch(`${logoutUrl}?${params.toString()}`, {
+                        method: 'GET',
+                    })
+                } catch (error) {
+                    console.error('Error during Keycloak logout:', error)
+                }
+            }
         },
     },
 
