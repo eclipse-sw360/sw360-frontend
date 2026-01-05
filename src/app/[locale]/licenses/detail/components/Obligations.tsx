@@ -121,20 +121,25 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
 
     const handlerRadioButton = useCallback(
         (item: Obligation) => {
-            if (whitelist === undefined) return
             const id: string = CommonUtils.getIdFromUrl(item._links?.self.href)
-            const newWhitelist = new Map(whitelist)
 
-            if (newWhitelist.has(id)) {
-                newWhitelist.set(id, !newWhitelist.get(id))
-            } else {
-                newWhitelist.set(id, true)
-            }
+            setWhitelist((prevWhitelist) => {
+                if (prevWhitelist === undefined) {
+                    return prevWhitelist
+                }
 
-            setWhitelist(newWhitelist)
+                const newWhitelist = new Map(prevWhitelist)
+
+                if (newWhitelist.has(id)) {
+                    newWhitelist.set(id, !newWhitelist.get(id))
+                } else {
+                    newWhitelist.set(id, true)
+                }
+
+                return newWhitelist
+            })
         },
         [
-            whitelist,
             setWhitelist,
         ],
     )
