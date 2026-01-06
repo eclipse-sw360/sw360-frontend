@@ -66,6 +66,7 @@ function GenerateLicenseInfo({
         deselectedConcludedUsages: [],
     })
     const [show, setShow] = useState(false)
+    const [hideWithUsage, setHideWithUsage] = useState(false)
     const [key, setKey] = useState<string>('show_all')
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
@@ -99,6 +100,24 @@ function GenerateLicenseInfo({
             attachmentUsages,
         ],
     )
+    const hasCliUsageSet = (release: Release, projectPath: string): boolean => {
+        const cliAttachments =
+            release.attachments?.filter(
+                (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
+            ) ?? []
+
+        if (cliAttachments.length === 0) return false
+
+        const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
+
+        // Check if ANY CLI attachment has license info usage set
+        return cliAttachments.some((att) =>
+            saveUsagesPayload.selected.some((sel) => {
+                const pathPrefix = projectPath ? `${projectPath}-` : ''
+                return sel.includes(`${pathPrefix}${releaseId}_licenseInfo_${att.attachmentContentId}`)
+            }),
+        )
+    }
 
     const columns = useMemo<ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>>[]>(
         () => [
@@ -407,7 +426,12 @@ function GenerateLicenseInfo({
         release: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>,
         projectPath: string[],
         approvedOnly: boolean,
+        filterWithoutUsage: boolean,
     ) => {
+        if (filterWithoutUsage && hasCliUsageSet(r, projectPath.join(':'))) {
+            return
+        }
+
         for (const att of r.attachments ?? []) {
             if (approvedOnly) {
                 if (att.checkStatus === undefined || att.checkStatus !== 'ACCEPTED') break
@@ -430,6 +454,7 @@ function GenerateLicenseInfo({
         project: Project,
         projectPath: string[],
         approvedOnly: boolean,
+        filterWithoutUsage: boolean,
     ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] => {
         const rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
 
@@ -440,7 +465,13 @@ function GenerateLicenseInfo({
                     type: 'project',
                     entity: p,
                 },
-                children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, p, projectPath, approvedOnly),
+                children: extractLinkedProjectsAndTheirLinkedReleases(
+                    attachmentUsages,
+                    p,
+                    projectPath,
+                    approvedOnly,
+                    filterWithoutUsage,
+                ),
             }
             projectPath.pop()
             if (nodeProject.children && nodeProject.children.length !== 0) {
@@ -461,7 +492,13 @@ function GenerateLicenseInfo({
                         },
                         children: [],
                     }
-                    formatReleaseAttachmentDataToTableData(r, nodeRelease, projectPath, approvedOnly)
+                    formatReleaseAttachmentDataToTableData(
+                        r,
+                        nodeRelease,
+                        projectPath,
+                        approvedOnly,
+                        filterWithoutUsage,
+                    )
                     if (nodeRelease.children && nodeRelease.children.length !== 0) {
                         rows.push(nodeRelease)
                     }
@@ -477,6 +514,7 @@ function GenerateLicenseInfo({
         attachmentUsages: AttachmentUsages,
         linkedProjects: Project[],
         approvedOnly: boolean,
+        filterWithoutUsage: boolean,
     ) => {
         const tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
         const projectPath: string[] = []
@@ -494,7 +532,13 @@ function GenerateLicenseInfo({
                         },
                         children: [],
                     }
-                    formatReleaseAttachmentDataToTableData(r, nodeRelease, projectPath, approvedOnly)
+                    formatReleaseAttachmentDataToTableData(
+                        r,
+                        nodeRelease,
+                        projectPath,
+                        approvedOnly,
+                        filterWithoutUsage,
+                    )
                     if (nodeRelease.children && nodeRelease.children.length !== 0) {
                         tableData.push(nodeRelease)
                     }
@@ -524,6 +568,7 @@ function GenerateLicenseInfo({
                     project,
                     projectPath,
                     approvedOnly,
+                    filterWithoutUsage,
                 ),
             }
             projectPath.pop()
@@ -642,11 +687,13 @@ function GenerateLicenseInfo({
 
     useEffect(() => {
         if (memoizedAttachmentUsages === undefined || memoizedLinkedProjects === undefined) return
-        buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects, key === 'only_approved')
+        buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects, key === 'only_approved', hideWithUsage)
     }, [
         key,
         memoizedLinkedProjects,
         memoizedAttachmentUsages,
+        hideWithUsage,
+        saveUsagesPayload,
     ])
 
     if (project === undefined) {
@@ -697,6 +744,17 @@ function GenerateLicenseInfo({
                                                     onClick={() => setShow(true)}
                                                 >
                                                     {t('Download')}{' '}
+                                                </Button>
+                                            </Nav.Item>
+                                            <Nav.Item>
+                                                <Button
+                                                    variant={hideWithUsage ? 'secondary' : 'outline-secondary'}
+                                                    className='me-2 py-2 col-auto'
+                                                    onClick={() => setHideWithUsage(!hideWithUsage)}
+                                                >
+                                                    {hideWithUsage
+                                                        ? t('Show All Releases')
+                                                        : t('Hide Releases With Usage Set')}
                                                 </Button>
                                             </Nav.Item>
                                             <Nav.Item>

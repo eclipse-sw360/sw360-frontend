@@ -74,7 +74,12 @@ function isSourceCodeBundleEnabled(type: string): boolean {
 interface ExtendedNestedRows<K> extends NestedRows<K> {
     projectPath?: string
 }
-const releaseMatchesFilter = (release: Release, filter: string): boolean => {
+const releaseMatchesFilter = (
+    release: Release,
+    filter: string,
+    saveUsagesPayload?: SaveUsagesPayload,
+    releaseId?: string,
+): boolean => {
     if (!filter) return true
     const attachments = release.attachments ?? []
     switch (filter) {
@@ -86,6 +91,36 @@ const releaseMatchesFilter = (release: Release, filter: string): boolean => {
             return !attachments.some((att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC')
         case 'withoutAttachments':
             return attachments.length === 0
+        case 'withoutCliUsage': {
+            // Check if release has CLI/CLX attachments but none are marked for license info usage
+            if (!saveUsagesPayload || !releaseId) return true
+            const cliAttachments = attachments.filter(
+                (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
+            )
+            if (cliAttachments.length === 0) return false
+
+            // Check if ANY CLI attachment has license info usage set
+            return !cliAttachments.some((att) =>
+                saveUsagesPayload.selected.some((sel) =>
+                    sel.includes(`${releaseId}_licenseInfo_${att.attachmentContentId}`),
+                ),
+            )
+        }
+        case 'withoutSourceUsage': {
+            // Check if release has SOURCE/SRC attachments but none are marked for source package usage
+            if (!saveUsagesPayload || !releaseId) return true
+            const sourceAttachments = attachments.filter(
+                (att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC',
+            )
+            if (sourceAttachments.length === 0) return false
+
+            // Check if ANY source attachment has source package usage set
+            return !sourceAttachments.some((att) =>
+                saveUsagesPayload.selected.some((sel) =>
+                    sel.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`),
+                ),
+            )
+        }
         default:
             return true
     }
@@ -119,6 +154,7 @@ const filterRows = (
     rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
     filter: string,
     term: string,
+    saveUsagesPayload?: SaveUsagesPayload,
 ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] => {
     const result: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
     for (const row of rows) {
@@ -129,11 +165,14 @@ const filterRows = (
                       row.children as ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
                       filter,
                       term,
+                      saveUsagesPayload,
                   )
                 : []
         let matchesFilter = true
         if (node.type === 'release') {
-            matchesFilter = releaseMatchesFilter(node.entity as Release, filter)
+            const releaseEntity = node.entity as Release
+            const releaseId = releaseEntity._links?.self.href.split('/').at(-1) ?? ''
+            matchesFilter = releaseMatchesFilter(releaseEntity, filter, saveUsagesPayload, releaseId)
         }
         const matchesSearch = rowMatchesSearch(row, term)
         let keepRow = false
@@ -189,11 +228,12 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [searchTerm, setSearchTerm] = useState<string>('')
     const session = useSession()
     const filteredData = useMemo(
-        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm) : data),
+        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm, saveUsagesPayload) : data),
         [
             data,
             releaseFilter,
             searchTerm,
+            saveUsagesPayload,
         ],
     )
 
@@ -447,6 +487,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 <option value='withAttachments'>With Attachments</option>
                                 <option value='withoutSrc'>Without Source Attachments</option>
                                 <option value='withoutAttachments'>Without Attachments</option>
+                                <option value='withoutCliUsage'>Without CLI Usage Set</option>
+                                <option value='withoutSourceUsage'>Without Source Usage Set</option>
                             </select>
 
                             <input
