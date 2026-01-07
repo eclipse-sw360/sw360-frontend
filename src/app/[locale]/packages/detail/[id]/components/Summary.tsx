@@ -140,7 +140,7 @@ export default function Summary({ summaryData }: { summaryData: Package }): Reac
                                 >
                                     <Link
                                         className='text-link'
-                                        href={`/licenses/${elem}`}
+                                        href={`/licenses/detail?id=${elem}`}
                                         key={elem}
                                     >
                                         {elem}
