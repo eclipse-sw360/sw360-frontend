@@ -9,17 +9,25 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
-import { ClearingRequest, Embedded, ErrorDetails, RequestType, UserGroupType } from '@/object-types'
+import {
+    ClearingRequest,
+    Embedded,
+    ErrorDetails,
+    PageableQueryParam,
+    PaginationMeta,
+    RequestType,
+    UserGroupType,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
@@ -29,6 +37,18 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
     const t = useTranslations('default')
     const session = useSession()
     const params = useSearchParams()
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -57,11 +77,7 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                 header: t('BA-BL/Group'),
                 cell: ({ row }) => <>{row.original.projectBU ?? t('Not Available')}</>,
             },
-            {
-                id: 'tag',
-                header: t('Tag'),
-                cell: ({ row }) => <>{row.original._embedded?.['sw360:project']?.tag ?? t('Not Available')}</>,
-            },
+
             {
                 id: 'project',
                 header: t('Project'),
@@ -74,7 +90,7 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                                 href={`/projects/detail/${row.original.projectId}`}
                                 className='text-link'
                             >
-                                {row.original._embedded?.['sw360:project']?.name}
+                                {row.original._embedded?.['sw360:projectDTOs']?.[0]?.name}
                             </Link>
                         )
                     }
@@ -336,11 +352,18 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const searchParams = Object.fromEntries(params.entries())
+                const statusFilter =
+                    requestType === 'OPEN'
+                        ? 'NEW,ACCEPTED,IN_PROGRESS,PENDING_INPUT,SANITY_CHECK,IN_QUEUE,AWAITING_RESPONSE,ON_HOLD'
+                        : 'CLOSED,REJECTED'
+
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `clearingrequests`,
                     Object.fromEntries(
                         Object.entries({
                             ...searchParams,
+                            ...pageableQueryParam,
+                            status: statusFilter,
                         }).map(([key, value]) => [
                             key,
                             String(value),
@@ -354,20 +377,11 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                 }
 
                 const data = (await response.json()) as EmbeddedClearingRequest
-                const openClearingRequests = CommonUtils.isNullOrUndefined(data['_embedded']['sw360:clearingRequests'])
+                setPaginationMeta(data.page)
+                const clearingRequests = CommonUtils.isNullOrUndefined(data['_embedded']['sw360:clearingRequests'])
                     ? []
-                    : data['_embedded']['sw360:clearingRequests'].filter(
-                          (cr) => cr.clearingState !== 'REJECTED' && cr.clearingState !== 'CLOSED',
-                      )
-
-                const closedClearingRequests = CommonUtils.isNullOrUndefined(
-                    data['_embedded']['sw360:clearingRequests'],
-                )
-                    ? []
-                    : data['_embedded']['sw360:clearingRequests'].filter(
-                          (cr) => cr.clearingState == 'REJECTED' || cr.clearingState === 'CLOSED',
-                      )
-                setClearingRequestDataData(requestType === 'OPEN' ? openClearingRequests : closedClearingRequests)
+                    : data['_embedded']['sw360:clearingRequests']
+                setClearingRequestDataData(clearingRequests)
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
@@ -382,9 +396,20 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
 
         return () => controller.abort()
     }, [
+        pageableQueryParam,
         params.toString(),
         session,
         requestType,
+    ])
+
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        params.toString(),
     ])
 
     const table = useReactTable({
@@ -392,7 +417,32 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
         columns,
         getCoreRowModel: getCoreRowModel(),
 
-        getPaginationRowModel: getPaginationRowModel(),
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
 
         meta: {
             rowHeightConstant: true,
@@ -403,14 +453,21 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
         <div className='row mb-4'>
             <div className='col d-flex justify-content-center align-items-center'>
                 <div className='mb-3'>
-                    {table ? (
+                    {pageableQueryParam && table && paginationMeta ? (
                         <>
-                            <ClientSidePageSizeSelector table={table} />
+                            <PageSizeSelector
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                            />
                             <SW360Table
                                 table={table}
                                 showProcessing={showProcessing}
                             />
-                            <ClientSideTableFooter table={table} />
+                            <TableFooter
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                                paginationMeta={paginationMeta}
+                            />
                         </>
                     ) : (
                         <div className='col-12 mt-1 text-center'>

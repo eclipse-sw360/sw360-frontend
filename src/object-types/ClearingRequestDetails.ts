@@ -42,7 +42,7 @@ export default interface ClearingRequestDetails {
         createdOn?: string
         clearingTeam?: User
         requestingUser?: User
-        'sw360:project'?: Project
+        'sw360:projectDTOs'?: Project[]
         requestClosedOn?: string
         lastUpdatedOn?: string
         totalRelease?: number
