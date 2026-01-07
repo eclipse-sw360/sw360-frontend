@@ -284,7 +284,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
                 const data = (await response.json()) as Embedded<Attachment, 'sw360:attachments'>
 
-                const attachments = CommonUtils.isNullOrUndefined(data['_embedded']['sw360:attachments'])
+                const attachments = CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:attachments'])
                     ? []
                     : data['_embedded']['sw360:attachments']
                 const isrAttachments = filterAttachmentByType(attachments, [
