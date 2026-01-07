@@ -125,8 +125,8 @@ function Packages(): ReactNode {
                 enableSorting: false,
                 cell: ({ row }) => {
                     const { releaseId, releaseName, releaseVersion } = row.original
-                    if (!releaseId) {
-                        return <span className='text-muted'>No Linked Release</span>
+                    if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) {
+                        return <span className='text-muted'>{t('No Linked Release')}</span>
                     }
                     return (
                         <Link
@@ -145,10 +145,10 @@ function Packages(): ReactNode {
                 enableSorting: false,
                 cell: ({ row }) => {
                     const { releaseId, releaseClearingState } = row.original
-                    if (!releaseId) {
+                    if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) {
                         return (
                             <div className='text-center'>
-                                <span className='text-muted'>Not Applicable</span>
+                                <span className='text-muted'>{t('Not Applicable')}</span>
                             </div>
                         )
                     }
