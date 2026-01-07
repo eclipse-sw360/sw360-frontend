@@ -250,8 +250,8 @@ export default function Roles({
             />
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Roles')}</h6>
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.group'
                             className='form-label fw-medium'
@@ -284,7 +284,7 @@ export default function Roles({
                             <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.projectManager'
                             className='form-label fw-medium'
@@ -317,7 +317,7 @@ export default function Roles({
                             <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.projectOwner'
                             className='form-label fw-medium'
@@ -351,9 +351,8 @@ export default function Roles({
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.ownerAccountingUnit'
                             className='form-label fw-medium'
@@ -371,7 +370,7 @@ export default function Roles({
                             value={projectPayload.ownerAccountingUnit ?? ''}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.ownerBillingGroup'
                             className='form-label fw-medium'
@@ -389,16 +388,15 @@ export default function Roles({
                             value={projectPayload.ownerGroup ?? ''}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <SelectCountry
                             selectCountry={updateField}
                             value={projectPayload.ownerCountry ?? ''}
                         />
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.leadArchitect'
                             className='form-label fw-medium'
@@ -431,7 +429,7 @@ export default function Roles({
                             <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.moderators'
                             className='form-label fw-medium'
@@ -464,7 +462,7 @@ export default function Roles({
                             <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.contributors'
                             className='form-label fw-medium'
@@ -498,9 +496,8 @@ export default function Roles({
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.securityResponsibles'
                             className='form-label fw-medium'
