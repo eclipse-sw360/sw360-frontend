@@ -32,8 +32,8 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
         <>
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Lifecycle')}</h6>
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.projectState'
                             className='form-label fw-bold'
@@ -67,7 +67,7 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                             <ShowInfoOnHover text={PROJECT_STATE_INFO} /> {t('Learn more about project state')}
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.systemTestBeginDate'
                             className='form-label fw-bold'
@@ -91,7 +91,7 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                             onChange={updateInputField}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.systemTestEndDate'
                             className='form-label fw-bold'
@@ -116,9 +116,8 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                         />
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.systemTestBeginDate'
                             className='form-label fw-bold'
@@ -142,7 +141,7 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                             onChange={updateInputField}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.phaseOutDate'
                             className='form-label fw-bold'
