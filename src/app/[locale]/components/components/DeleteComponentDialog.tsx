@@ -46,7 +46,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     const router = useRouter()
     const [component, setComponent] = useState<Component>(DEFAULT_COMPONENT_INFO)
     const [variant, setVariant] = useState('success')
-    const [message, setMessage] = useState('')
+    const [message, setMessage] = useState<ReactNode>(null)
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
     const [dependencies, setDependencies] = useState({
@@ -64,7 +64,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         status,
     ])
 
-    const displayMessage = (variant: string, message: string) => {
+    const displayMessage = (variant: string, message: ReactNode) => {
         setVariant(variant)
         setMessage(message)
         setShowMessage(true)
@@ -98,8 +98,13 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 } else if (deleteStatus === StatusCodes.CONFLICT) {
                     displayMessage(
                         'danger',
-                        t(
+                        t.rich(
                             'The component cannot be deleted, since it contains releases Please delete the releases first',
+                            {
+                                name: component.name,
+                                releaseCount: dependencies.releases,
+                                strong: (chunks) => <strong>{chunks}</strong>,
+                            },
                         ),
                     )
                 } else if (deleteStatus === StatusCodes.ACCEPTED) {
