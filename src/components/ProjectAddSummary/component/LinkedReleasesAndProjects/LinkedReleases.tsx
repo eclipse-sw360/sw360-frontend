@@ -11,8 +11,9 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import LinkedReleasesModal from '@/components/sw360/LinkedReleasesModal/LinkedReleasesModal'
 import { LinkedReleaseData, ProjectPayload } from '@/object-types'
@@ -32,80 +33,95 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
         ][]
     >([])
 
-    const updateReleaseRelation = (releaseId: string, updatedReleaseRelation: string) => {
-        const _linkedReleaseData: {
-            [key: string]: LinkedReleaseData
-        } = {}
+    const updateReleaseRelation = useCallback(
+        (releaseId: string, updatedReleaseRelation: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
 
-        for (const [rid, r] of Object.entries(projectPayload.linkedReleases ?? {})) {
-            if (rid === releaseId) {
-                _linkedReleaseData[rid] = {
-                    ...r,
-                    releaseRelation: updatedReleaseRelation,
+                return {
+                    ...prev,
+                    linkedReleases: {
+                        ...prev.linkedReleases,
+                        [releaseId]: {
+                            ...prev.linkedReleases[releaseId],
+                            releaseRelation: updatedReleaseRelation,
+                        },
+                    },
                 }
-            } else {
-                _linkedReleaseData[rid] = {
-                    ...r,
-                }
-            }
-        }
-        setProjectPayload({
-            ...projectPayload,
-            linkedReleases: _linkedReleaseData,
-        })
-    }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
 
-    const updateProjectMainlineState = (releaseId: string, updatedProjectMainlineState: string) => {
-        const _linkedReleaseData: {
-            [key: string]: LinkedReleaseData
-        } = {}
+    const updateProjectMainlineState = useCallback(
+        (releaseId: string, updatedProjectMainlineState: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
 
-        for (const [rid, r] of Object.entries(projectPayload.linkedReleases ?? {})) {
-            if (rid === releaseId) {
-                _linkedReleaseData[rid] = {
-                    ...r,
-                    mainlineState: updatedProjectMainlineState,
+                return {
+                    ...prev,
+                    linkedReleases: {
+                        ...prev.linkedReleases,
+                        [releaseId]: {
+                            ...prev.linkedReleases[releaseId],
+                            mainlineState: updatedProjectMainlineState,
+                        },
+                    },
                 }
-            } else {
-                _linkedReleaseData[rid] = {
-                    ...r,
-                }
-            }
-        }
-        setProjectPayload({
-            ...projectPayload,
-            linkedReleases: _linkedReleaseData,
-        })
-    }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
 
-    const handleComments = (releaseId: string, updatedComment: string) => {
-        const _linkedReleaseData: {
-            [key: string]: LinkedReleaseData
-        } = {}
+    const handleComments = useCallback(
+        (releaseId: string, updatedComment: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
 
-        for (const [rid, r] of Object.entries(projectPayload.linkedReleases ?? {})) {
-            if (rid === releaseId) {
-                _linkedReleaseData[rid] = {
-                    ...r,
-                    comment: updatedComment,
+                return {
+                    ...prev,
+                    linkedReleases: {
+                        ...prev.linkedReleases,
+                        [releaseId]: {
+                            ...prev.linkedReleases[releaseId],
+                            comment: updatedComment,
+                        },
+                    },
                 }
-            } else {
-                _linkedReleaseData[rid] = {
-                    ...r,
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
+
+    const handleClickDelete = useCallback(
+        (releaseId: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
+
+                const { [releaseId]: _, ...remainingReleases } = prev.linkedReleases
+
+                return {
+                    ...prev,
+                    linkedReleases: remainingReleases,
                 }
-            }
-        }
-        setProjectPayload({
-            ...projectPayload,
-            linkedReleases: _linkedReleaseData,
-        })
-    }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
 
     useEffect(() => {
         const data = Object.entries(projectPayload.linkedReleases ?? {})
         setTableData(data)
     }, [
-        projectPayload,
+        projectPayload.linkedReleases,
     ])
 
     const columns = useMemo<
@@ -136,8 +152,7 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
                             className='form-select'
                             value={row.original[1].releaseRelation}
                             onChange={(event) => {
-                                const updatedReleaseRelationStatus = event.target.value
-                                updateReleaseRelation(row.original[0], updatedReleaseRelationStatus)
+                                updateReleaseRelation(row.original[0], event.target.value)
                             }}
                             required
                         >
@@ -165,8 +180,7 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
                             className='form-select'
                             value={row.original[1].mainlineState}
                             onChange={(event) => {
-                                const updatedProjectMainlineState = event.target.value
-                                updateProjectMainlineState(row.original[0], updatedProjectMainlineState)
+                                updateProjectMainlineState(row.original[0], event.target.value)
                             }}
                             required
                         >
@@ -181,26 +195,41 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
             },
             {
                 id: 'comment',
-                name: t('Comments'),
+                header: t('Comments'),
                 cell: ({ row }) => (
-                    <div className='col-lg-9'>
+                    <div className='d-flex align-items-center'>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control me-2'
                             placeholder='Enter Comments'
-                            value={row.original[1].comment}
+                            value={row.original[1].comment ?? ''}
                             onChange={(event) => {
-                                const updatedComment = event.target.value
-                                handleComments(row.original[0], updatedComment)
+                                handleComments(row.original[0], event.target.value)
                             }}
                         />
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            style={{
+                                border: 'none',
+                                minWidth: 'fit-content',
+                            }}
+                            onClick={() => handleClickDelete(row.original[0])}
+                            title={t('Delete')}
+                            aria-label={t('Delete linked release')}
+                        >
+                            <FaTrashAlt />
+                        </button>
                     </div>
                 ),
             },
         ],
         [
             t,
-            projectPayload,
+            updateReleaseRelation,
+            updateProjectMainlineState,
+            handleComments,
+            handleClickDelete,
         ],
     )
 
