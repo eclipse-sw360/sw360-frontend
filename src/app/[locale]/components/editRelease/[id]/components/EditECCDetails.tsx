@@ -15,7 +15,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { useEffect } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiInfoCircle } from 'react-icons/bi'
+import { BsInfoCircle } from 'react-icons/bs'
 import { Release } from '@/object-types'
 
 interface Props {
@@ -28,7 +28,7 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
         <>
             <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
                 <span className='d-inline-block'>
-                    <BiInfoCircle />
+                    <BsInfoCircle size={20} />
                 </span>
             </OverlayTrigger>
         </>

@@ -15,11 +15,10 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { AdvancedSearch, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
+import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
-import { MdDeleteOutline } from 'react-icons/md'
+import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import {
     Embedded,
     ErrorDetails,
@@ -182,15 +181,15 @@ function Vulnerabilities(): ReactNode {
                                                 fontSize: '14px',
                                             }}
                                         >
-                                            <FaPencilAlt className='btn-icon' />
+                                            <BsPencil className='btn-icon' />
                                         </Link>
                                     </OverlayTrigger>
 
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span className='d-inline-block'>
-                                            <MdDeleteOutline
+                                            <BsFillTrashFill
                                                 className='btn-icon'
-                                                size={25}
+                                                size={20}
                                                 onClick={() => onDeleteClick(externalId)}
                                             />
                                         </span>

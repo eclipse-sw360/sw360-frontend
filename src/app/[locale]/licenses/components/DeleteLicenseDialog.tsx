@@ -112,7 +112,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
                 }}
             >
                 <Modal.Title>
-                    <BsQuestionCircle />
+                    <BsQuestionCircle size={20} />
                     &nbsp;
                     {t('Delete License')}?
                 </Modal.Title>

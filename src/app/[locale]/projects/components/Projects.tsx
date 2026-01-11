@@ -19,9 +19,7 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
-import { IoMdClipboard } from 'react-icons/io'
-import { MdDeleteOutline, MdOutlineTask } from 'react-icons/md'
+import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import LicenseClearing from '@/components/LicenseClearing'
 import { useConfigValue } from '@/contexts'
 import {
@@ -225,7 +223,10 @@ function Project(): JSX.Element {
                                             className='d-inline-block'
                                             onClick={() => handleEditProject(id)}
                                         >
-                                            <FaPencilAlt className='btn-icon' />
+                                            <BsPencil
+                                                className='btn-icon'
+                                                size={20}
+                                            />
                                         </span>
                                     </OverlayTrigger>
                                     {projectClearingRequestId && projectClearingRequestId !== '' ? (
@@ -237,8 +238,8 @@ function Project(): JSX.Element {
                                                     setShowViewCRModal(true)
                                                 }}
                                             >
-                                                <MdOutlineTask
-                                                    size={25}
+                                                <BsCheck2Square
+                                                    size={20}
                                                     className={`btn-icon overlay-trigger ${isOpenClearingRequest ? 'cr-icon-highlighted' : ''}`}
                                                 />
                                             </span>
@@ -252,8 +253,8 @@ function Project(): JSX.Element {
                                                     setShowCreateCRModal(true)
                                                 }}
                                             >
-                                                <MdOutlineTask
-                                                    size={25}
+                                                <BsCheck2Square
+                                                    size={20}
                                                     className='btn-icon overlay-trigger'
                                                 />
                                             </span>
@@ -269,8 +270,8 @@ function Project(): JSX.Element {
                                             }
                                         >
                                             <span className={'d-inline-block'}>
-                                                <MdOutlineTask
-                                                    size={25}
+                                                <BsCheck2Square
+                                                    size={20}
                                                     className='btn-icon overlay-trigger'
                                                 />
                                             </span>
@@ -281,18 +282,18 @@ function Project(): JSX.Element {
                                             href={`/projects/duplicate/${id}`}
                                             className='overlay-trigger'
                                         >
-                                            <IoMdClipboard
-                                                className='btn-icon'
-                                                size={25}
+                                            <BsClipboard
+                                                className='btn-icon mt-0'
+                                                size={20}
                                             />
                                         </Link>
                                     </OverlayTrigger>
 
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span className='d-inline-block'>
-                                            <MdDeleteOutline
+                                            <BsFillTrashFill
                                                 className='btn-icon'
-                                                size={25}
+                                                size={20}
                                                 onClick={() => handleDeleteProject(id)}
                                             />
                                         </span>

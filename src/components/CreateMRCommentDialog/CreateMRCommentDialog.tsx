@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, type JSX, useEffect, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { BsPencil } from 'react-icons/bs'
 
 interface Props<T> {
     show: boolean
@@ -85,10 +85,11 @@ export default function CreateMRCommentDialog<T>({
                 }}
             >
                 <Modal.Title>
-                    <FaPencilAlt
+                    <BsPencil
                         style={{
                             marginBottom: '5px',
                         }}
+                        size={20}
                     />
                     &nbsp;&nbsp;{t('Create moderation request')}
                 </Modal.Title>

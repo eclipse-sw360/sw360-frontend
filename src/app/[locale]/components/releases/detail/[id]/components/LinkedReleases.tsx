@@ -20,6 +20,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { PaddedCell, SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, NestedRows, ReleaseLink } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
@@ -89,7 +90,7 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
                 const releaseData = (await response.json()) as EmbeddedReleaseLinks
 
                 const convertedTreeData: NestedRows<ReleaseLink>[] = []
-                releaseData._embedded['sw360:releaseLinks'].forEach((r: ReleaseLink) => {
+                releaseData._embedded?.['sw360:releaseLinks'].forEach((r: ReleaseLink) => {
                     const convertedNode: NestedRows<ReleaseLink> = {
                         node: r,
                         children: r._embedded ? convertNodeData(r._embedded['sw360:releaseLinks']) : [],
@@ -102,7 +103,7 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

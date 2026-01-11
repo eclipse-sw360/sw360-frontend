@@ -52,14 +52,14 @@ function EditLicense({ licenseId }: Props): ReactNode {
         checked: false,
         licenseTypeDatabaseId: '',
     })
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
@@ -70,10 +70,9 @@ function EditLicense({ licenseId }: Props): ReactNode {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
                 } else if (response.status !== StatusCodes.OK) {
@@ -81,8 +80,12 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 }
                 const license = (await response.json()) as LicenseDetail
                 setLicensePayload(license)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         return () => controller.abort()

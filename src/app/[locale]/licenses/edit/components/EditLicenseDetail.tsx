@@ -12,11 +12,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-import { Embedded, LicensePayload, LicenseType } from '@/object-types'
+import { Embedded, ErrorDetails, LicensePayload, LicenseType } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import styles from './LicenseDetails.module.css'
 
@@ -40,14 +41,14 @@ const EditLicenseDetail = ({
     const t = useTranslations('default')
     const params = useSearchParams()
     const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
@@ -73,18 +74,20 @@ const EditLicenseDetail = ({
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`licenseTypes`, session.user.access_token, signal)
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(`licenseTypes`, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
                 const licenses = (await response.json()) as EmbeddedLicenseTypes
-                setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
-            } catch (e) {
-                console.error(e)
+                setLicenseTypes(licenses._embedded?.['sw360:licenseTypes'] ?? [])
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         return () => controller.abort()

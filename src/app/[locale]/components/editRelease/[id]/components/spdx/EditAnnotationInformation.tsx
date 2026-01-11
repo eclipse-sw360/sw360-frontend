@@ -12,7 +12,7 @@
 'use client'
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Annotations, InputKeyValue, PackageInformation, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import AnnotationDate from './AnnotationInformation/AnnotationDate'
@@ -588,9 +588,10 @@ const EditAnnotationInformation = ({
                                               </option>
                                           ))}
                                 </select>
-                                <FaTrashAlt
+                                <BsFillTrashFill
                                     className='spdx-delete-icon-main-index'
                                     onClick={deleteAnnotation}
+                                    size={20}
                                 />
                             </div>
                             <button

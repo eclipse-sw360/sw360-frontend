@@ -103,19 +103,10 @@ const AnnotationInformation = ({
                             style={{
                                 width: '100%',
                             }}
+                            value={annotationsSelection.isSPDXDocument ? 'spdxDocument' : 'package'}
                         >
-                            <option
-                                value='spdxDocument'
-                                selected={annotationsSelection.isSPDXDocument}
-                            >
-                                SPDX Document
-                            </option>
-                            <option
-                                value='package'
-                                selected={!annotationsSelection.isSPDXDocument}
-                            >
-                                Package
-                            </option>
+                            <option value='spdxDocument'>SPDX Document</option>
+                            <option value='package'>Package</option>
                         </select>
                     </td>
                 </tr>

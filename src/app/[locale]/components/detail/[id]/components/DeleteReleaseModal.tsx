@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl'
 import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { ActionType, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
@@ -152,7 +153,13 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-        fetchData(signal).catch((err) => console.error(err))
+        fetchData(signal).catch((error) => {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        })
 
         return () => {
             controller.abort()

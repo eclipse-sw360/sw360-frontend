@@ -156,7 +156,7 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
 
                 const data = (await response.json()) as EmbeddedAccessTokens
                 setComponentData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:restApiTokens'])
+                    CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:restApiTokens'])
                         ? []
                         : data['_embedded']['sw360:restApiTokens'],
                 )

@@ -15,7 +15,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { IoIosClose } from 'react-icons/io'
+import { BsXCircle } from 'react-icons/bs'
 import { ErrorDetails, Package } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -420,7 +420,7 @@ export default function CreateOrEditPackage({
                                         }))
                                     }}
                                 >
-                                    <IoIosClose />
+                                    <BsXCircle size={20} />
                                 </span>
                             </div>
                         </div>

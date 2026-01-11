@@ -15,7 +15,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiClipboard } from 'react-icons/bi'
+import { BsClipboard } from 'react-icons/bs'
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { DocumentTypes, SummaryDataType } from '@/object-types'
 
@@ -64,7 +64,10 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                 }}
             >
                 <span className='d-inline-block'>
-                    <BiClipboard onClick={handleCopy} />
+                    <BsClipboard
+                        onClick={handleCopy}
+                        size={20}
+                    />
                 </span>
             </OverlayTrigger>
         )

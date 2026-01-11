@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 import {
     Embedded,
     ErrorDetails,
@@ -431,7 +431,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                     >
                                         {t('Exact Match')}{' '}
                                         <sup>
-                                            <FaInfoCircle />
+                                            <BsInfoCircle size={20} />
                                         </sup>
                                     </Form.Label>
                                 </Form.Group>

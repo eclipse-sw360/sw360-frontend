@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, QuickFilter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LicenseType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
@@ -63,8 +63,9 @@ export default function LicenseTypesDetail(): ReactNode {
                         <div className='d-flex justify-content-between'>
                             <OverlayTrigger overlay={<Tooltip>{t('Delete License Type')}</Tooltip>}>
                                 <span className='d-inline-block'>
-                                    <FaTrashAlt
+                                    <BsFillTrashFill
                                         className='btn-icon'
+                                        size={20}
                                         onClick={() => {
                                             handleDeleteLicenseType(row.original.id, row.original.licenseType)
                                         }}

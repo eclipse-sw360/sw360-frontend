@@ -12,8 +12,7 @@ import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
-import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
-import { RiSortAsc, RiSortDesc } from 'react-icons/ri'
+import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
 import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
 
 export function TableFooter({
@@ -290,11 +289,11 @@ export function SW360Table<K>({
                                             {header.column.getCanSort() && (
                                                 <span onClick={header.column.getToggleSortingHandler()}>
                                                     {header.column.getIsSorted() === 'asc' ? (
-                                                        <RiSortAsc />
+                                                        <BsSortDownAlt size={20} />
                                                     ) : header.column.getIsSorted() === 'desc' ? (
-                                                        <RiSortDesc />
+                                                        <BsSortDown size={20} />
                                                     ) : (
-                                                        <BiSort />
+                                                        <BiSort size={20} />
                                                     )}
                                                 </span>
                                             )}
@@ -367,7 +366,17 @@ export function PaddedCell<K>({ children, row }: { children?: ReactNode; row: Ro
                 onClick={row.getToggleExpandedHandler()}
             >
                 {row.getCanExpand() &&
-                    (row.getIsExpanded() ? <BsCaretDownFill color='gray' /> : <BsCaretRightFill color='gray' />)}{' '}
+                    (row.getIsExpanded() ? (
+                        <BsCaretDownFill
+                            color='gray'
+                            size={20}
+                        />
+                    ) : (
+                        <BsCaretRightFill
+                            color='gray'
+                            size={20}
+                        />
+                    ))}{' '}
             </span>
             {children}
         </div>

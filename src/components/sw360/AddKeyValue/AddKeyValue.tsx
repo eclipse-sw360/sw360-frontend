@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import DeleteItemWarning from '@/components/sw360/DeleteItemWarning/DeleteItemWarning'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { AddtionalDataType } from '@/object-types'
@@ -159,8 +159,8 @@ function AddKeyValue(props: Props): JSX.Element {
                             <div className='col-lg-1'>
                                 <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                     <span className='d-inline-block'>
-                                        <FaTrashAlt
-                                            size={22}
+                                        <BsFillTrashFill
+                                            size={20}
                                             className='ms-2 btn-icon'
                                             onClick={() => handleRemoveClick(j)}
                                         />

@@ -41,15 +41,22 @@ const generateToken = async (userData: UserCredentialInfo): Promise<null | AuthT
         credentials = Buffer.from(`${oAuthClient.client_id}:${oAuthClient.client_secret}`, `binary`).toString('base64')
 
         opts.headers['Authorization'] = `Basic ${credentials}`
-        const authorizationURL: string =
-            SW360_API_URL +
-            '/authorization/oauth/token?grant_type=password&username=' +
-            userData.username +
-            '&password=' +
-            userData.password
+        opts.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
+        const authorizationURL: string = SW360_API_URL + '/authorization/oauth/token'
+
+        const tokenRequestBody = new URLSearchParams({
+            grant_type: 'password',
+            username: userData.username,
+            password: userData.password,
+        })
 
         let sw360token: AuthToken | null = null
-        const tokenResponse = await fetch(authorizationURL, opts)
+        const tokenResponse = await fetch(authorizationURL, {
+            method: 'POST',
+            headers: opts.headers,
+            body: tokenRequestBody,
+        })
         if (tokenResponse.status == StatusCodes.OK) {
             sw360token = (await tokenResponse.json()) as AuthToken
         }

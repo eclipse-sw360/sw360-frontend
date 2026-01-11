@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useMemo } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaFileAlt } from 'react-icons/fa'
+import { BsFileEarmarkFill } from 'react-icons/bs'
 import { Changelogs, PageableQueryParam, PaginationMeta } from '@/object-types'
 
 interface Props {
@@ -95,7 +95,7 @@ const ChangeLogList = ({
                             {id && (
                                 <OverlayTrigger overlay={<Tooltip>{t('View Change Logs')}</Tooltip>}>
                                     <div className='cursor-pointer'>
-                                        <FaFileAlt
+                                        <BsFileEarmarkFill
                                             style={{
                                                 color: '#F7941E',
                                                 fontSize: '18px',
@@ -104,6 +104,7 @@ const ChangeLogList = ({
                                                 setChangeLogId(id)
                                                 setChangesLogTab('view-log')
                                             }}
+                                            size={20}
                                         />
                                     </div>
                                 </OverlayTrigger>

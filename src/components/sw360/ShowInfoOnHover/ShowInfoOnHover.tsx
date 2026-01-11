@@ -9,7 +9,7 @@
 
 import { type JSX, ReactNode } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 
 const ShowInfoOnHover = ({ text }: { text: string | ReactNode }): JSX.Element => {
     return (
@@ -19,7 +19,7 @@ const ShowInfoOnHover = ({ text }: { text: string | ReactNode }): JSX.Element =>
                 placement='bottom'
             >
                 <span className='d-inline-block'>
-                    <FaInfoCircle size={13} />
+                    <BsInfoCircle size={20} />
                 </span>
             </OverlayTrigger>
         </>

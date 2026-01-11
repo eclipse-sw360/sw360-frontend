@@ -24,7 +24,7 @@ import {
 } from 'next-sw360'
 import React, { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -391,7 +391,7 @@ const SearchReleasesModal = ({ projectId, show, setShow, setSelectedReleases }: 
                                 <Form.Label className='pt-2'>
                                     {t('Exact Match')}{' '}
                                     <sup>
-                                        <FaInfoCircle />
+                                        <BsInfoCircle size={20} />
                                     </sup>
                                 </Form.Label>
                             </Form.Group>

@@ -205,6 +205,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                                 color: '#2E5AAC',
                                 fontSize: '23px',
                             }}
+                            size={20}
                         />{' '}
                         {t('create clearing request')}
                     </Modal.Title>

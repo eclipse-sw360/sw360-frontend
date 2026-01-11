@@ -13,8 +13,7 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-import { CiCircleRemove } from 'react-icons/ci'
-import { FiCheckCircle } from 'react-icons/fi'
+import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import { COTSDetails } from '@/object-types'
 
 const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
@@ -52,7 +51,7 @@ const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDet
                                     color: '#287d3c',
                                 }}
                             >
-                                <FiCheckCircle /> {t('Yes')}
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
                             <span
@@ -60,7 +59,7 @@ const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDet
                                     color: 'red',
                                 }}
                             >
-                                <CiCircleRemove /> {t('No')}
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>

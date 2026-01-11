@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -476,7 +476,7 @@ export default function LinkProjects({
                                     >
                                         {t('Exact Match')}{' '}
                                         <sup>
-                                            <FaInfoCircle />
+                                            <BsInfoCircle size={20} />
                                         </sup>
                                     </Form.Label>
                                 </Form.Group>

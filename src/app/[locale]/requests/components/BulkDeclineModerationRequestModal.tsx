@@ -17,8 +17,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import { BiInfoCircle } from 'react-icons/bi'
+import { BsInfoCircle, BsQuestionCircle } from 'react-icons/bs'
 import { ModerationRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -114,8 +113,8 @@ export default function BulkDeclineModerationRequestModal({
                                                 overlay={<Tooltip>{t('Request processed successfully')}</Tooltip>}
                                             >
                                                 <span className='d-inline-block'>
-                                                    <BiInfoCircle
-                                                        size={18}
+                                                    <BsInfoCircle
+                                                        size={20}
                                                         style={{
                                                             color: 'black',
                                                         }}
@@ -138,8 +137,8 @@ export default function BulkDeclineModerationRequestModal({
                                             overlay={<Tooltip>{t('Moderation request is already closed')}</Tooltip>}
                                         >
                                             <span className='d-inline-block'>
-                                                <BiInfoCircle
-                                                    size={18}
+                                                <BsInfoCircle
+                                                    size={20}
                                                     style={{
                                                         color: 'black',
                                                     }}
@@ -161,8 +160,8 @@ export default function BulkDeclineModerationRequestModal({
                                             overlay={<Tooltip>{t('There are internal server error')}</Tooltip>}
                                         >
                                             <span className='d-inline-block'>
-                                                <BiInfoCircle
-                                                    size={18}
+                                                <BsInfoCircle
+                                                    size={20}
                                                     style={{
                                                         color: 'black',
                                                     }}
@@ -429,7 +428,7 @@ export default function BulkDeclineModerationRequestModal({
                     closeButton
                 >
                     <Modal.Title id='delete-all-license-info-modal'>
-                        <AiOutlineQuestionCircle />
+                        <BsQuestionCircle size={20} />
                         {t('Accept Decline All Selected Moderation Requests')}
                     </Modal.Title>
                 </Modal.Header>

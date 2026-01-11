@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-import { FaCopy, FaInfoCircle } from 'react-icons/fa'
+import { BsClipboard, BsInfoCircle } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
@@ -104,11 +104,12 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                 navigator.clipboard.writeText(releaseId).catch((err) => console.log(err))
                             }}
                         >
-                            <FaCopy
+                            <BsClipboard
                                 style={{
                                     color: 'gray',
                                     width: '20px',
                                 }}
+                                size={20}
                             />
                         </button>
                     </td>
@@ -234,31 +235,25 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                     <td>{t('Main Licenses')}:</td>
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:licenses']) &&
-                            Object.entries(release._embedded['sw360:licenses'])
-                                .map(
-                                    ([index, item]: [
-                                        string,
-                                        LicenseDetail,
-                                    ]): React.ReactNode => (
-                                        <span key={index}>
-                                            {item.shortName}
-                                            <FaInfoCircle
-                                                style={{
-                                                    marginLeft: '5px',
-                                                    color: 'gray',
-                                                }}
-                                                className={styles.info}
-                                            />
-                                        </span>
-                                    ),
-                                )
-                                .reduce((prev, curr): React.ReactNode[] => [
-                                    prev,
-                                    <>
-                                        , <br />
-                                    </>,
-                                    curr,
-                                ])}
+                            Object.entries(release._embedded['sw360:licenses']).map(
+                                ([index, item]: [
+                                    string,
+                                    LicenseDetail,
+                                ]): React.ReactNode => (
+                                    <span key={index}>
+                                        {index !== '0' && <span className='me-2 ms-1'>{','}</span>}
+                                        {item.shortName}
+                                        <BsInfoCircle
+                                            style={{
+                                                marginLeft: '5px',
+                                                color: 'gray',
+                                            }}
+                                            size={20}
+                                            className={styles.info}
+                                        />
+                                    </span>
+                                ),
+                            )}
                     </td>
                 </tr>
                 <tr>
@@ -273,11 +268,12 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                     ]): React.ReactNode => (
                                         <span key={index}>
                                             {item}
-                                            <FaInfoCircle
+                                            <BsInfoCircle
                                                 style={{
                                                     marginLeft: '5px',
                                                     color: 'gray',
                                                 }}
+                                                size={20}
                                                 className={styles.info}
                                             />
                                         </span>

@@ -15,7 +15,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 
@@ -159,7 +159,7 @@ export default function DeletePackageModal({
                 closeButton
             >
                 <Modal.Title id='delete-all-license-info-modal'>
-                    <AiOutlineQuestionCircle /> {t('Delete Package')}?
+                    <BsQuestionCircle size={20} /> {t('Delete Package')}?
                 </Modal.Title>
             </Modal.Header>
 

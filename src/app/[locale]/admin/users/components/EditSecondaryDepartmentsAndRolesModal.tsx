@@ -14,7 +14,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
-import { HiUsers } from 'react-icons/hi2'
+import { BsPeopleFill } from 'react-icons/bs'
 import SecondaryDepartmentsAndRoles from '@/components/UserEditForm/SecondaryDepartmentsAndRoles'
 import { User, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -136,7 +136,7 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
                     >
                         <Modal.Header closeButton>
                             <Modal.Title>
-                                <HiUsers /> {t('Edit User Secondary Departments And Role')}
+                                <BsPeopleFill size={20} /> {t('Edit User Secondary Departments And Role')}
                             </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>

@@ -12,8 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
-import { TiTick } from 'react-icons/ti'
+import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
 import { ListFieldProcessComponent, ReleaseDetail } from '@/object-types'
 
 export default function ExternalIdsSection({
@@ -104,8 +103,8 @@ export default function ExternalIdsSection({
                                 <div className='d-flex row'>
                                     <div className='mt-2 col text-end'>{targetRelease.externalIds?.[id.value]}</div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
-                                        <TiTick
-                                            size={40}
+                                        <BsCheck2
+                                            size={20}
                                             className='green'
                                         />
                                     </div>
@@ -135,7 +134,7 @@ export default function ExternalIdsSection({
                                                     })
                                                 }}
                                             >
-                                                <FaLongArrowAltLeft />
+                                                <BsArrowLeft size={20} />
                                             </button>
                                         ) : (
                                             <button
@@ -151,7 +150,7 @@ export default function ExternalIdsSection({
                                                     })
                                                 }}
                                             >
-                                                <FaUndo />
+                                                <BsArrowCounterclockwise size={20} />
                                             </button>
                                         )}
                                     </div>
@@ -179,7 +178,7 @@ export default function ExternalIdsSection({
                                                     })
                                                 }}
                                             >
-                                                <FaLongArrowAltLeft />
+                                                <BsArrowLeft size={20} />
                                             </button>
                                         ) : (
                                             <button
@@ -195,7 +194,7 @@ export default function ExternalIdsSection({
                                                     })
                                                 }}
                                             >
-                                                <FaUndo />
+                                                <BsArrowCounterclockwise size={20} />
                                             </button>
                                         )}
                                     </div>

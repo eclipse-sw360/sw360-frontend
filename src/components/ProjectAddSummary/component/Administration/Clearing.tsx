@@ -39,8 +39,8 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
         <>
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Clearing')}</h6>
-                <div className='row mb-2'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.clearingState'
                             className='form-label fw-bold'
@@ -67,7 +67,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                             {t('Learn more about project clearing state')}
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.clearingTeam'
                             className='form-label fw-bold'
@@ -94,7 +94,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                                 ))}
                         </select>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.deadlinePreEvaluation'
                             className='form-label fw-bold'
@@ -119,8 +119,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         />
                     </div>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
+                <div className='row with-divider py-3'>
                     <label
                         htmlFor='addProjects.clearingSummary'
                         className='form-label fw-bold'
@@ -139,8 +138,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
+                <div className='row with-divider py-3'>
                     <label
                         htmlFor='addProjects.specialRiskOpenSourceSoftware'
                         className='form-label fw-bold'
@@ -159,8 +157,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
+                <div className='row with-divider py-3'>
                     <label
                         htmlFor='addProjects.generalRiskThirdPartySoftware'
                         className='form-label fw-bold'
@@ -179,8 +176,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
+                <div className='row with-divider py-3'>
                     <label
                         htmlFor='addProjects.specialRiskThirdPartySoftware'
                         className='form-label fw-bold'
@@ -199,8 +195,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
+                <div className='row with-divider py-3'>
                     <label
                         htmlFor='addProjects.salesAndDeliveryChannels'
                         className='form-label fw-bold'
@@ -219,8 +214,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
+                <div className='row with-divider py-3'>
                     <label
                         htmlFor='addProjects.remarksAdditionalRequirements'
                         className='form-label fw-bold'

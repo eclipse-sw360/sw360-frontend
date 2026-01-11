@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { BsPencil } from 'react-icons/bs'
 import { ClearingRequest, Embedded, ErrorDetails, RequestType, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -293,7 +293,10 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                                         href={`/requests/clearingRequest/edit/${row.original.id}`}
                                         className='overlay-trigger'
                                     >
-                                        <FaPencilAlt className='btn-icon' />
+                                        <BsPencil
+                                            className='btn-icon'
+                                            size={20}
+                                        />
                                     </Link>
                                 </Button>
                             </OverlayTrigger>

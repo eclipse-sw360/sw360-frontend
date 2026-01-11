@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { ReactNode } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { InputKeyValue } from '@/object-types'
 
 interface Props {
@@ -95,9 +95,10 @@ function Creators({ inputList, setInputList, isAnonymous, setDataCreators }: Pro
                             onChange={(e) => handleInputChange(e, j)}
                             disabled={isAnonymous && (elem.key === 'Organization' || elem.key === 'Person')}
                         />
-                        <FaTrashAlt
+                        <BsFillTrashFill
                             className='spdx-delete-icon-main'
                             onClick={() => handleRemoveClick(j)}
+                            size={20}
                         />
                     </div>
                 )

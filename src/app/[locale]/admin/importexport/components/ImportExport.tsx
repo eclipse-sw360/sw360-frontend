@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, RefObject, useEffect, useRef } from 'react'
-import { MdOutlineFileDownload, MdOutlineFileUpload } from 'react-icons/md'
+import { BsDownload, BsUpload } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -106,7 +106,7 @@ export default function ImportExportComponent(): ReactNode {
                                 })
                             }
                         >
-                            <MdOutlineFileDownload size={25} /> {t('Download Component CSV')}
+                            <BsDownload size={20} /> {t('Download Component CSV')}
                         </button>
                     </div>
                     <div className='mb-2'>
@@ -118,7 +118,7 @@ export default function ImportExportComponent(): ReactNode {
                                 })
                             }
                         >
-                            <MdOutlineFileDownload size={25} /> {t('Download CSV template for Component upload')}
+                            <BsDownload size={20} /> {t('Download CSV template for Component upload')}
                         </button>
                     </div>
                     <div className='mb-2'>
@@ -130,7 +130,7 @@ export default function ImportExportComponent(): ReactNode {
                                 })
                             }
                         >
-                            <MdOutlineFileDownload size={25} /> {t('Download Attachment sample information')}
+                            <BsDownload size={20} /> {t('Download Attachment sample information')}
                         </button>
                     </div>
                     <div className='mb-2'>
@@ -142,7 +142,7 @@ export default function ImportExportComponent(): ReactNode {
                                 })
                             }
                         >
-                            <MdOutlineFileDownload size={25} /> {t('Download Attachment information')}
+                            <BsDownload size={20} /> {t('Download Attachment information')}
                         </button>
                     </div>
                     <div className='mb-2'>
@@ -154,7 +154,7 @@ export default function ImportExportComponent(): ReactNode {
                                 })
                             }
                         >
-                            <MdOutlineFileDownload size={25} /> {t('Download Release Link sample information')}
+                            <BsDownload size={20} /> {t('Download Release Link sample information')}
                         </button>
                     </div>
                     <div className='mb-2'>
@@ -166,7 +166,7 @@ export default function ImportExportComponent(): ReactNode {
                                 })
                             }
                         >
-                            <MdOutlineFileDownload size={25} /> {t('Download Release Link information')}
+                            <BsDownload size={20} /> {t('Download Release Link information')}
                         </button>
                     </div>
                     <div className='mb-2'>
@@ -178,7 +178,7 @@ export default function ImportExportComponent(): ReactNode {
                                 })
                             }
                         >
-                            <MdOutlineFileDownload size={25} /> {t('Download License Archive')}
+                            <BsDownload size={20} /> {t('Download License Archive')}
                         </button>
                     </div>
                 </div>
@@ -195,7 +195,7 @@ export default function ImportExportComponent(): ReactNode {
                                 handleUpload('importExport/uploadComponent', 'componentFile', componentCsvFile)
                             }
                         >
-                            <MdOutlineFileUpload size={25} /> {t('Upload Component CSV')}
+                            <BsUpload size={20} /> {t('Upload Component CSV')}
                         </button>
                     </div>
                     <div className='mb-2 d-flex justify-content-between'>
@@ -213,7 +213,7 @@ export default function ImportExportComponent(): ReactNode {
                                 )
                             }
                         >
-                            <MdOutlineFileUpload size={25} /> {t('Upload Component Attachments')}
+                            <BsUpload size={20} /> {t('Upload Component Attachments')}
                         </button>
                     </div>
                     <div className='mb-2 d-flex justify-content-between'>
@@ -225,7 +225,7 @@ export default function ImportExportComponent(): ReactNode {
                             className='btn btn-secondary w-50 text-start'
                             onClick={() => handleUpload('importExport/uploadRelease', 'releaseFile', releaseLinksFile)}
                         >
-                            <MdOutlineFileUpload size={25} /> {t('Upload Release Links')}
+                            <BsUpload size={20} /> {t('Upload Release Links')}
                         </button>
                     </div>
                     <div className='mb-2 d-flex justify-content-between'>
@@ -237,7 +237,7 @@ export default function ImportExportComponent(): ReactNode {
                             className='btn btn-secondary w-50 text-start'
                             onClick={() => handleUpload('licenses/upload', 'licenseFile', licenseArchiveFile)}
                         >
-                            <MdOutlineFileUpload size={25} /> {t('Upload License Archive')}
+                            <BsUpload size={20} /> {t('Upload License Archive')}
                         </button>
                     </div>
                 </div>

@@ -11,8 +11,7 @@
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useState } from 'react'
 import { Modal } from 'react-bootstrap'
-import { FaRegQuestionCircle, FaTrashAlt } from 'react-icons/fa'
-import { IoWarningOutline } from 'react-icons/io5'
+import { BsExclamationTriangle, BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 import { AttachmentTypes } from '@/object-types'
 import AttachmentRowData from '../AttachmentRowData'
 
@@ -95,12 +94,12 @@ function TableAttachment({
                         <Modal.Title>
                             {beforeUpdateAttachmentsCheckStatus[deletingAttachmentIndex] === 'ACCEPTED' ? (
                                 <>
-                                    <IoWarningOutline />
+                                    <BsExclamationTriangle size={20} />
                                     {t('Warning')}
                                 </>
                             ) : (
                                 <>
-                                    <FaRegQuestionCircle /> {t('Delete Attachment')}?
+                                    <BsQuestionCircle size={20} /> {t('Delete Attachment')}?
                                 </>
                             )}
                         </Modal.Title>
@@ -247,7 +246,7 @@ function TableAttachment({
                             className='align-middle action delete cursor-pointer'
                             onClick={() => openDeleteModal(attachment, index)}
                         >
-                            <FaTrashAlt size={23} />
+                            <BsFillTrashFill size={20} />
                         </td>
                     </tr>
                 ))}

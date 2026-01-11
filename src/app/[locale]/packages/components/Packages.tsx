@@ -18,8 +18,7 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
-import { MdDeleteOutline } from 'react-icons/md'
+import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -126,8 +125,8 @@ function Packages(): ReactNode {
                 enableSorting: false,
                 cell: ({ row }) => {
                     const { releaseId, releaseName, releaseVersion } = row.original
-                    if (!releaseId) {
-                        return <span className='text-muted'>No Linked Release</span>
+                    if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) {
+                        return <span className='text-muted'>{t('No Linked Release')}</span>
                     }
                     return (
                         <Link
@@ -146,10 +145,10 @@ function Packages(): ReactNode {
                 enableSorting: false,
                 cell: ({ row }) => {
                     const { releaseId, releaseClearingState } = row.original
-                    if (!releaseId) {
+                    if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) {
                         return (
                             <div className='text-center'>
-                                <span className='text-muted'>Not Applicable</span>
+                                <span className='text-muted'>{t('Not Applicable')}</span>
                             </div>
                         )
                     }
@@ -222,18 +221,18 @@ function Packages(): ReactNode {
                                             className='d-inline-block'
                                             onClick={() => handleEditPackage(id)}
                                         >
-                                            <FaPencilAlt
+                                            <BsPencil
                                                 className='btn-icon'
-                                                size={18}
+                                                size={20}
                                             />
                                         </span>
                                     </OverlayTrigger>
 
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span className='d-inline-block'>
-                                            <MdDeleteOutline
+                                            <BsFillTrashFill
                                                 className='btn-icon'
-                                                size={25}
+                                                size={20}
                                                 onClick={() =>
                                                     setDeletePackageModalMetaData({
                                                         show: true,

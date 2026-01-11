@@ -18,7 +18,7 @@ import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
-import { UIConfigKeys } from '@/object-types'
+import { ErrorDetails, UIConfigKeys } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import styles from '../preferences.module.css'
@@ -77,11 +77,15 @@ const UserAccessToken = (): ReactNode => {
                         ],
                     })
                 } else {
-                    const errorData: Record<string, string> = (await response.json()) as Record<string, string>
-                    MessageService.error(errorData.string)
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
             } catch (error) {
-                console.error('An error occurred:', error)
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         }
     }

@@ -97,3 +97,45 @@ Any other header will be caught on CI, and build will fail.
 - You shall never try to commit image files except as SVG
 - You shall use NPM. Yarn and pnpm are as good, but we need deal with one only. You can use on your dev environment, but the default reference for testing is npm
 - You shall NEVER remove the copytright lines from NOTICE unless you are the owner
+
+## Icons
+
+To ensure visual harmony and immediate recognition, we primarily use a predefined set of icons for common actions and concepts. Please prioritize using these icons whenever their meaning aligns with your feature.
+
+Here's a list of commonly used icons and their intended contexts:
+
+*   **`BsPencil`**: Editing items, records, or content.
+*   **`BsFillTrashFill`**: Deleting items, records, or content.
+*   **`BsXCircle`**: Canceling an action, closing a modal/dialog, or dismissing a notification.
+*   **`BsQuestionCircle`**: Indicating help, providing more information, or linking to FAQs.
+*   **`BsUpload`**: Initiating the upload of files or documents.
+*   **`BsDownload`**: Initiating the download of files or data.
+*   **`BsCaretDownFill`**: Expanding/collapsing sections, indicating a dropdown menu.
+*   **`BsCaretRightFill`**: Navigating forward, expanding/collapsing sub-sections.
+*   **`BsClipboard`**: Copying content to the clipboard.
+*   **`BsCheck2Square`**: Marking a task as complete, indicating a checked state in a list.
+*   **`BsPeopleFill`**: Representing user management, user lists, or groups.
+*   **`BsFiles`**: Managing user-related documents, roles, or complex configurations.
+*   **`BsGit`**: Merging code branches, data sets, or configurations.
+*   **`BsArrowLeft`**: Navigating back to a previous page or step.
+*   **`BsArrowCounterclockwise`**: Reverting the last action.
+*   **`BsCheck2`**: General confirmation, selection, or a small indicator of success.
+*   **`BsLink45Deg`**: Creating or indicating an external or internal link.
+*   **`BsInfoCircle`**: Providing contextual information or details.
+*   **`BsArrowRight`**: Navigating forward to the next page or step.
+*   **`BsXCircle`**: Clearing input fields, removing an item from a selection. (Note: Also used for 'Cancel' depending on context.)
+*   **`BsCheck2Circle`**: Indicating successful completion, a selected state, or validation.
+*   **`BsExclamationTriangle`**: Highlighting warnings, caution, or important alerts.
+*   **`BsArrowRepeat`**: Refreshing data, content, or a page.
+*   **`BsFileEarmarkFill`**: Representing a generic document or file.
+*   **`BsPLusLg`**: Adding a new item, expanding a section, or creating a new entry.
+*   **`BiSort`**: General sorting action. (Note: For specific ascending/descending, please refer to the dedicated icons below.)
+*   **`BsSortDown`**: Sorting data in ascending order (e.g., A-Z, 1-9).
+*   **`BsSortDownAlt`**: Sorting data in descending order (e.g., Z-A, 9-1).
+*   **`BsSun`**: Toggling the application theme to light mode.
+*   **`BsSunFill`**: Toggling the application theme to dark mode.
+
+When an existing standardized icon doesn't quite fit the need for a new feature or concept, you might need to introduce a new icon. Please use icons of class ``` Bootstrap icons ``` from the library react-icons.
+
+Please keep the size of all icons to 20 for style consistency.
+

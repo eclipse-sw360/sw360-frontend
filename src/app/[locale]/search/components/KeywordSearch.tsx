@@ -14,7 +14,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { PiInfoBold } from 'react-icons/pi'
+import { BsInfoCircle } from 'react-icons/bs'
 import icons from '@/assets/icons/icons.svg'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -274,7 +274,7 @@ function KeywordSearch({
                                         </Tooltip>
                                     }
                                 >
-                                    <PiInfoBold />
+                                    <BsInfoCircle size={20} />
                                 </OverlayTrigger>
                             </h6>
                         </div>

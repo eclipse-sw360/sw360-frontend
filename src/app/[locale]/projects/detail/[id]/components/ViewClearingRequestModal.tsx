@@ -114,6 +114,7 @@ export default function ViewClearingRequestModal({
                             color: '#2E5AAC',
                             fontSize: '23px',
                         }}
+                        size={20}
                     />{' '}
                     {t('View Clearing Request')}
                 </Modal.Title>

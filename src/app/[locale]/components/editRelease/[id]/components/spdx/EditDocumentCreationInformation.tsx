@@ -12,7 +12,7 @@
 'use client'
 import { signOut, useSession } from 'next-auth/react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Creator, DocumentCreationInformation, ExternalDocumentReferences, InputKeyValue, SPDX } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import Created from './DocumentCreationInfo/Created'
@@ -587,9 +587,10 @@ const EditDocumentCreationInformation = ({
                                                             </option>
                                                         ))}
                                                 </select>
-                                                <FaTrashAlt
+                                                <BsFillTrashFill
                                                     className='spdx-delete-icon-main-index'
                                                     onClick={deleteExternalReference}
+                                                    size={20}
                                                 />
                                             </div>
                                             <button

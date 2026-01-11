@@ -16,7 +16,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
@@ -93,10 +93,11 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
                 }}
             >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle
+                    <BsQuestionCircle
                         style={{
                             marginBottom: '5px',
                         }}
+                        size={20}
                     />
                     {t('Delete Client')} ?
                 </Modal.Title>

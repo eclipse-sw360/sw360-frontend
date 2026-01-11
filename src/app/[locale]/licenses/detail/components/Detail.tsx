@@ -18,7 +18,7 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { Button } from 'react-bootstrap'
 import { BiXCircle } from 'react-icons/bi'
-import { FiCheckCircle } from 'react-icons/fi'
+import { BsCheck2Circle } from 'react-icons/bs'
 import { LicenseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -97,7 +97,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                                         color: '#287d3c',
                                     }}
                                 >
-                                    <FiCheckCircle />
+                                    <BsCheck2Circle size={20} />
                                 </span>
                             ) : (
                                 <span
@@ -124,7 +124,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                                         color: '#287d3c',
                                     }}
                                 >
-                                    <FiCheckCircle /> {t('Yes')}
+                                    <BsCheck2Circle size={20} /> {t('Yes')}
                                 </span>
                             ) : (
                                 <span
@@ -147,7 +147,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                                         color: '#287d3c',
                                     }}
                                 >
-                                    <FiCheckCircle /> {t('Yes')}
+                                    <BsCheck2Circle size={20} /> {t('Yes')}
                                 </span>
                             ) : (
                                 <span

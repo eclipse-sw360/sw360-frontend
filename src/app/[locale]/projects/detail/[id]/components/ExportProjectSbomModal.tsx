@@ -13,7 +13,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
@@ -124,7 +124,7 @@ export default function ExportProjectSbomModal({
                     closeButton
                 >
                     <Modal.Title id='export-project-sbom-modal'>
-                        <AiOutlineQuestionCircle />
+                        <BsQuestionCircle size={20} />
                         {t('Export Project SBOM')}
                     </Modal.Title>
                 </Modal.Header>

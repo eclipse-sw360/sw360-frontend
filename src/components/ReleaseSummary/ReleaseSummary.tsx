@@ -15,7 +15,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
-import { GiCancel } from 'react-icons/gi'
+import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
 import { ActionType, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
@@ -228,7 +228,7 @@ const ReleaseSummary = ({
                                     onClick={handleClearVendor}
                                 >
                                     {' '}
-                                    <GiCancel />
+                                    <BsXCircle size={20} />
                                 </div>
                             </div>
                             <div className='col-lg-4'>

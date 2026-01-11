@@ -12,7 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { FaLongArrowAltRight, FaUndo } from 'react-icons/fa'
+import { BsArrowCounterclockwise, BsArrowRight } from 'react-icons/bs'
 import { Attachment, Component, ListFieldProcessComponent } from '@/object-types'
 
 export default function SplitComponent({
@@ -170,7 +170,7 @@ export default function SplitComponent({
                                                         setReleaseIdsSplitList(updatedReleaseIdsSplitList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltRight />
+                                                    <BsArrowRight size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -207,7 +207,7 @@ export default function SplitComponent({
                                                         setReleaseIdsSplitList(updatedReleaseIdsSplitList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -284,7 +284,7 @@ export default function SplitComponent({
                                                         setAttachmentsSplitList(updatedAttachmentsSplitList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltRight />
+                                                    <BsArrowRight size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -321,7 +321,7 @@ export default function SplitComponent({
                                                         setAttachmentsSplitList(updatedAttachmentsSplitList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>

@@ -190,11 +190,20 @@ export default function ReleaseView({
                 header: () => (
                     <>
                         {t('Release')}
-                        <BsCaretRightFill className='mx-1' />
+                        <BsCaretRightFill
+                            className='mx-1'
+                            size={20}
+                        />
                         {t('License Type')}
-                        <BsCaretRightFill className='mx-1' />
+                        <BsCaretRightFill
+                            className='mx-1'
+                            size={20}
+                        />
                         {t('Release')}
-                        <BsCaretRightFill className='mx-1' />
+                        <BsCaretRightFill
+                            className='mx-1'
+                            size={20}
+                        />
                         {t('Obligation')}
                     </>
                 ),

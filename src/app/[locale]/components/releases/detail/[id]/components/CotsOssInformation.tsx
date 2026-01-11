@@ -12,8 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-import { CiCircleRemove } from 'react-icons/ci'
-import { FiCheckCircle } from 'react-icons/fi'
+import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import { COTSDetails } from '@/object-types'
 
 const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
@@ -57,7 +56,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                                     color: '#287d3c',
                                 }}
                             >
-                                <FiCheckCircle /> {t('Yes')}
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
                             <span
@@ -65,7 +64,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                                     color: 'red',
                                 }}
                             >
-                                <CiCircleRemove /> {t('No')}
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>
@@ -79,7 +78,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                                     color: '#287d3c',
                                 }}
                             >
-                                <FiCheckCircle /> {t('Yes')}
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
                             <span
@@ -87,7 +86,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                                     color: 'red',
                                 }}
                             >
-                                <CiCircleRemove /> {t('No')}
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>
@@ -109,7 +108,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                                     color: '#287d3c',
                                 }}
                             >
-                                <FiCheckCircle /> {t('Yes')}
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
                             <span
@@ -117,7 +116,7 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                                     color: 'red',
                                 }}
                             >
-                                <CiCircleRemove /> {t('No')}
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>

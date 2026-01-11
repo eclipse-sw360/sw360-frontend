@@ -16,7 +16,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
-import { GrCheckboxSelected } from 'react-icons/gr'
+import { BsCheck2Square } from 'react-icons/bs'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import {
     ErrorDetails,
@@ -433,7 +433,7 @@ export default function LicenseDbObligationsModal({
                 closeButton
             >
                 <Modal.Title id='delete-all-license-info-modal'>
-                    <GrCheckboxSelected /> {t('Select License Obligations to be added')}.
+                    <BsCheck2Square size={20} /> {t('Select License Obligations to be added')}.
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

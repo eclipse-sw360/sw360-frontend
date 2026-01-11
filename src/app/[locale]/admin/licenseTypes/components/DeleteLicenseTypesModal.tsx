@@ -134,7 +134,7 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
                                 fontWeight: '700',
                             }}
                         >
-                            <BsQuestionCircle />
+                            <BsQuestionCircle size={20} />
                             &nbsp;
                             {t('Delete License Type')}?
                         </Modal.Title>

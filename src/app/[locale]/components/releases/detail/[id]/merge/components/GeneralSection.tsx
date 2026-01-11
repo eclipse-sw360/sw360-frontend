@@ -12,8 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
-import { TiTick } from 'react-icons/ti'
+import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
 import { ListFieldProcessComponent, ReleaseDetail, Vendor } from '@/object-types'
 
 export default function GeneralSection({
@@ -348,8 +347,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.name}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.name === targetRelease.name ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.name === targetRelease.name ? (
@@ -362,7 +361,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -374,7 +373,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -387,8 +386,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.version}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.version === targetRelease.version ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.version === targetRelease.version ? (
@@ -401,7 +400,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -413,7 +412,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -426,8 +425,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.createdOn}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.createdOn === targetRelease.createdOn ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.createdOn === targetRelease.createdOn ? (
@@ -440,7 +439,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -452,7 +451,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -465,8 +464,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.createdBy}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.createdBy === targetRelease.createdBy ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.createdBy === targetRelease.createdBy ? (
@@ -479,7 +478,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -491,7 +490,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -509,8 +508,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -550,7 +549,7 @@ export default function GeneralSection({
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -576,7 +575,7 @@ export default function GeneralSection({
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -615,7 +614,7 @@ export default function GeneralSection({
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -642,7 +641,7 @@ export default function GeneralSection({
                                                         setProgrammingMergeList(updatedProgrammingLanguageMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -663,8 +662,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -704,7 +703,7 @@ export default function GeneralSection({
                                                         setOperatingSystemMergeList(updatedOPeratingSystemMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -731,7 +730,7 @@ export default function GeneralSection({
                                                         setOperatingSystemMergeList(updatedOperatingSystemMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -771,7 +770,7 @@ export default function GeneralSection({
                                                         setOperatingSystemMergeList(updatedOperatingSystemsMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -798,7 +797,7 @@ export default function GeneralSection({
                                                         setOperatingSystemMergeList(updatedOperatingSystemMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -819,8 +818,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -860,7 +859,7 @@ export default function GeneralSection({
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -887,7 +886,7 @@ export default function GeneralSection({
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -927,7 +926,7 @@ export default function GeneralSection({
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformsMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -954,7 +953,7 @@ export default function GeneralSection({
                                                         setSoftwarePlatformMergeList(updatedSoftwarePlatformMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -970,8 +969,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.cpeId}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.cpeId === targetRelease.cpeId ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.cpeId === targetRelease.cpeId ? (
@@ -984,7 +983,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -996,7 +995,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -1009,8 +1008,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.releaseDate}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.releaseDate === targetRelease.releaseDate ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.releaseDate === targetRelease.releaseDate ? (
@@ -1023,7 +1022,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -1035,7 +1034,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -1053,8 +1052,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -1095,7 +1094,7 @@ export default function GeneralSection({
                                                         setMainLicenseMergeList(updatedMainLicenseMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1122,7 +1121,7 @@ export default function GeneralSection({
                                                         setMainLicenseMergeList(updatedMainLicenseMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -1162,7 +1161,7 @@ export default function GeneralSection({
                                                         setMainLicenseMergeList(updatedMainLicenseMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1190,7 +1189,7 @@ export default function GeneralSection({
                                                         setMainLicenseMergeList(updatedMinLicenseMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -1206,8 +1205,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.sourceCodeDownloadurl}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.sourceCodeDownloadurl === targetRelease.sourceCodeDownloadurl ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.sourceCodeDownloadurl ===
@@ -1221,7 +1220,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -1233,7 +1232,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -1246,8 +1245,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.binaryDownloadurl}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.binaryDownloadurl === targetRelease.binaryDownloadurl ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.binaryDownloadurl === targetRelease.binaryDownloadurl ? (
@@ -1260,7 +1259,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -1272,7 +1271,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -1285,8 +1284,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalReleasePayload.mainlineState}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.mainlineState === targetRelease.mainlineState ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.mainlineState === targetRelease.mainlineState ? (
@@ -1299,7 +1298,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -1311,7 +1310,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -1333,8 +1332,8 @@ export default function GeneralSection({
                                     .split('/')
                                     .at(-1) ===
                                 targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : (vendor._links?.self.href.split('/').at(-1) ?? undefined) ===
@@ -1354,7 +1353,7 @@ export default function GeneralSection({
                                             setVendor(sourceReleaseDetail._embedded?.['sw360:vendors']?.[0] ?? {})
                                         }}
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -1372,7 +1371,7 @@ export default function GeneralSection({
                                             setVendor(targetRelease._embedded?.['sw360:vendors']?.[0] ?? {})
                                         }}
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -1408,8 +1407,8 @@ export default function GeneralSection({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.repository?.url === targetRelease.repository?.url ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload.repository?.url === targetRelease.repository?.url ? (
@@ -1422,7 +1421,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -1434,7 +1433,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -1461,8 +1460,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -1503,7 +1502,7 @@ export default function GeneralSection({
                                                         setModeratorMergeList(updatedModeratorMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1530,7 +1529,7 @@ export default function GeneralSection({
                                                         setModeratorMergeList(updatedModeratorsMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -1570,7 +1569,7 @@ export default function GeneralSection({
                                                         setModeratorMergeList(updatedModeratorsMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1598,7 +1597,7 @@ export default function GeneralSection({
                                                         setModeratorMergeList(updatedModeratorMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -1619,8 +1618,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -1661,7 +1660,7 @@ export default function GeneralSection({
                                                         setContributorMergeList(updatedContributorMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1688,7 +1687,7 @@ export default function GeneralSection({
                                                         setContributorMergeList(updatedContributorsMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -1728,7 +1727,7 @@ export default function GeneralSection({
                                                         setContributorMergeList(updatedContributorsMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1756,7 +1755,7 @@ export default function GeneralSection({
                                                         setContributorMergeList(updatedContributorMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -1777,8 +1776,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -1819,7 +1818,7 @@ export default function GeneralSection({
                                                         setSubscriberMergeList(updatedSubscriberMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1846,7 +1845,7 @@ export default function GeneralSection({
                                                         setSubscriberMergeList(updatedSubscribersMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -1886,7 +1885,7 @@ export default function GeneralSection({
                                                         setSubscriberMergeList(updatedSubscribersMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -1914,7 +1913,7 @@ export default function GeneralSection({
                                                         setSubscriberMergeList(updatedSubscriberMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>

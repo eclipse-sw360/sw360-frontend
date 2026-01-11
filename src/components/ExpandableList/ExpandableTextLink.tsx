@@ -20,13 +20,21 @@ export default function ExpandableTextList({ list }: { list: string[] }): JSX.El
         <>
             {isExpanded ? (
                 <div>
-                    <BsCaretDownFill onClick={() => setExpanded(false)} /> {fullString}
+                    <BsCaretDownFill
+                        onClick={() => setExpanded(false)}
+                        size={20}
+                    />{' '}
+                    {fullString}
                 </div>
             ) : (
                 <div>
                     {list.length !== 0 && (
                         <div>
-                            <BsCaretRightFill onClick={() => setExpanded(true)} /> {previewString}
+                            <BsCaretRightFill
+                                onClick={() => setExpanded(true)}
+                                size={20}
+                            />{' '}
+                            {previewString}
                         </div>
                     )}
                 </div>

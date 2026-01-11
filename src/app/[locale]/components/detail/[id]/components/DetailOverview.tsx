@@ -125,7 +125,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 if (data === undefined) return
 
                 if (!CommonUtils.isNullOrUndefined(data)) {
-                    setVulnerData(data['_embedded']['sw360:vulnerabilityDTOes'])
+                    setVulnerData(data['_embedded']?.['sw360:vulnerabilityDTOes'] ?? [])
                 }
             })
             .catch((err) => console.error(err))
@@ -300,7 +300,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             <div className='container page-content'>
                 <div className='col-12 mt-5 text-center'>
                     <Spinner className='spinner' />
-                    <p className='mt-3'>{t('Loading component details...')}</p>
                 </div>
             </div>
         )

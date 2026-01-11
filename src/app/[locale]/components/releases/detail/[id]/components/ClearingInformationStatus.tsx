@@ -10,8 +10,7 @@
 
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
-import { CiCircleRemove } from 'react-icons/ci'
-import { FiCheckCircle } from 'react-icons/fi'
+import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import CommonUtils from '@/utils/common.utils'
 
 const ClearingInformationStatus = ({ status }: { status: boolean | undefined }): ReactNode => {
@@ -24,7 +23,7 @@ const ClearingInformationStatus = ({ status }: { status: boolean | undefined }):
                         color: '#287d3c',
                     }}
                 >
-                    <FiCheckCircle /> {t('Yes')}
+                    <BsCheck2Circle size={20} /> {t('Yes')}
                 </span>
             ) : (
                 <span
@@ -32,7 +31,7 @@ const ClearingInformationStatus = ({ status }: { status: boolean | undefined }):
                         color: 'red',
                     }}
                 >
-                    <CiCircleRemove /> {t('No')}
+                    <BsXCircle size={20} /> {t('No')}
                 </span>
             )}
         </>

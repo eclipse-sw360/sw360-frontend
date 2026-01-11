@@ -10,8 +10,7 @@
 
 import { useTranslations } from 'next-intl'
 import React, { type JSX } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
-
+import { BsFillTrashFill } from 'react-icons/bs'
 import { ReleaseLink } from '@/object-types'
 import styles from './TableLinkedReleases.module.css'
 
@@ -111,7 +110,10 @@ export default function TableLinkedReleases({
                                     }}
                                     className={`fw-bold btn btn-secondary`}
                                 >
-                                    <FaTrashAlt className='bi bi-trash3-fill' />
+                                    <BsFillTrashFill
+                                        className='bi bi-trash3-fill'
+                                        size={20}
+                                    />
                                 </button>
                             </div>
                             <hr className={`${styles['hr']}`} />

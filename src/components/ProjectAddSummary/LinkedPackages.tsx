@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
 import { LinkedPackageData, ProjectPayload } from '@/object-types'
@@ -137,13 +137,14 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
                 cell: ({ row }) => (
                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                         <span className='d-inline-block'>
-                            <FaTrashAlt
+                            <BsFillTrashFill
                                 className='btn-icon'
                                 onClick={() => handleDeletePackage(row.original[0])}
                                 style={{
                                     color: 'gray',
                                     fontSize: '18px',
                                 }}
+                                size={20}
                             />
                         </span>
                     </OverlayTrigger>
