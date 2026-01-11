@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { useTranslations } from 'next-intl'
 import type { JSX } from 'react'
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 
 const MainlineStates: {
@@ -45,8 +45,7 @@ const EnumValues: {
     ...ReleaseRelations,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const EnumValueWithToolTip = ({ value, t }: { value: string; t: any }): JSX.Element => {
+const EnumValueWithToolTip = ({ value, t }: { value: string; t: ReturnType<typeof useTranslations> }): JSX.Element => {
     return (
         <OverlayTrigger overlay={<Tooltip>{t(EnumValues[value] as never)}</Tooltip>}>
             <span>{t(value as never)}</span>
