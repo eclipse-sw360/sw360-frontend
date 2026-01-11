@@ -8,24 +8,29 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+type JsonValue =
+    | string
+    | number
+    | boolean
+    | null
+    | {
+          [key: string]: JsonValue
+      }
+    | JsonValue[]
 
 import { Changes } from '../../object-types/Changelogs'
 
-function convertToJsonObject(fieldValue: any) {
+function convertToJsonObject(fieldValue: unknown): JsonValue {
     if (fieldValue !== null && fieldValue !== undefined) {
         if (typeof fieldValue === 'object') {
-            return fieldValue
-        } else if (typeof fieldValue == 'string') {
-            return fieldValue
-        } else {
-            return JSON.parse(fieldValue)
+            return fieldValue as JsonValue
+        }
+        if (typeof fieldValue === 'string') {
+            try {
+                return JSON.parse(fieldValue) as JsonValue
+            } catch {
+                return fieldValue
+            }
         }
     }
     return null
@@ -123,10 +128,10 @@ function createChangesCards(changes: Changes[] | undefined | null, transFieldNam
 }
 
 function changeLogObjDifferentiator(
-    fieldValueOld: any,
+    fieldValueOld: JsonValue,
     oldChangesCard: HTMLElement,
     oldChangesCardTextColor: string,
-    fieldValueNew: any,
+    fieldValueNew: JsonValue,
     newChangesCard: HTMLElement,
     newChangesCardTextColor: string,
     indentlevel: number,
@@ -158,8 +163,25 @@ function changeLogObjDifferentiator(
                 .replace(/\\"/g, '"')
                 .replace(/\\n/g, '\n')
                 .replace(/\\r/g, '\r')
-        } else if (typeof fieldValueOld === 'object' && typeof fieldValueNew === 'object') {
-            diffObject(fieldValueOld, fieldValueNew, leftSpanHightlighter, rightSpanHighlighter, indentlevel)
+        } else if (
+            typeof fieldValueOld === 'object' &&
+            fieldValueOld !== null &&
+            !Array.isArray(fieldValueOld) &&
+            typeof fieldValueNew === 'object' &&
+            fieldValueNew !== null &&
+            !Array.isArray(fieldValueNew)
+        ) {
+            diffObject(
+                fieldValueOld as {
+                    [key: string]: JsonValue
+                },
+                fieldValueNew as {
+                    [key: string]: JsonValue
+                },
+                leftSpanHightlighter,
+                rightSpanHighlighter,
+                indentlevel,
+            )
             jsonStrOld = JSON.stringify(fieldValueOld, undefined, 5 * indentlevel)
                 .replace(/\\"/g, '"')
                 .replace(/\\n/g, '\n')
@@ -208,14 +230,14 @@ function changeLogObjDifferentiator(
 }
 
 function diffArray(
-    fieldValueOld: any,
-    fieldValueNew: any,
-    leftSpanHightlighter: any,
-    rightSpanHighlighter: any,
+    fieldValueOld: JsonValue[],
+    fieldValueNew: JsonValue[],
+    leftSpanHightlighter: string,
+    rightSpanHighlighter: string,
     indentlevel: number,
 ) {
-    const fieldValueOldTmp: Array<any> = [],
-        fieldValueNewTmp: Array<any> = [],
+    const fieldValueOldTmp: JsonValue[] = [],
+        fieldValueNewTmp: JsonValue[] = [],
         selector = 'attachmentContentId'
     let spaceForClosingBraces = ''
 
@@ -254,16 +276,16 @@ function diffArray(
 }
 
 function highlightArray(
-    primaryField: any,
-    primaryFieldTmp: Array<any>,
-    secondaryField: any,
-    secondaryFieldTmp: Array<any>,
+    primaryField: JsonValue[],
+    primaryFieldTmp: JsonValue[],
+    secondaryField: JsonValue[],
+    secondaryFieldTmp: JsonValue[],
     primarySpanHightlighter: string,
     secondarySpanHighlighter: string,
-    spaceForClosingBraces: any,
-    selector: any,
-    differentiateObject: any,
-    indentlevel: any,
+    spaceForClosingBraces: string,
+    selector: string,
+    differentiateObject: boolean,
+    indentlevel: number,
 ) {
     for (const primaryValue of primaryField) {
         if (typeof primaryValue === 'object') {
@@ -273,15 +295,15 @@ function highlightArray(
                 if (isEqualObject(secondaryValue, primaryValue, selector, indexKey)) {
                     matched = true
                     if (differentiateObject) {
-                        delete primaryValue[indexKey]
-                        delete secondaryValue[indexKey]
-                        diffObject(
-                            primaryValue,
-                            secondaryValue,
-                            primarySpanHightlighter,
-                            secondarySpanHighlighter,
-                            indentlevel,
-                        )
+                        const pObj = primaryValue as {
+                            [key: string]: JsonValue
+                        }
+                        const sObj = secondaryValue as {
+                            [key: string]: JsonValue
+                        }
+                        delete pObj[indexKey]
+                        delete sObj[indexKey]
+                        diffObject(pObj, sObj, primarySpanHightlighter, secondarySpanHighlighter, indentlevel)
                         primaryFieldTmp.push(primaryValue)
                         secondaryFieldTmp.push(secondaryValue)
                     }
@@ -295,46 +317,62 @@ function highlightArray(
                     jsonString.substring(0, jsonString.length - 1) +
                     spaceForClosingBraces +
                     jsonString.substring(jsonString.length - 1)
-                primaryFieldTmp.push(primarySpanHightlighter + jsonString + '</span>')
+                primaryFieldTmp.push((primarySpanHightlighter + jsonString + '</span>') as JsonValue)
             }
         } else {
             if (secondaryField.includes(primaryValue)) {
                 primaryFieldTmp.push(primaryValue)
             } else {
-                primaryFieldTmp.push(primarySpanHightlighter + primaryValue + '</span>')
+                primaryFieldTmp.push((primarySpanHightlighter + primaryValue + '</span>') as JsonValue)
             }
         }
     }
 }
 
-function isEqualObject(secondaryValue: any, primaryValue: any, selector: any, indexKey: any) {
-    if (primaryValue[selector] === secondaryValue[selector] && typeof primaryValue[indexKey] === 'undefined') {
-        return true
-    }
-    if (primaryValue[indexKey] === secondaryValue[indexKey] && typeof primaryValue[selector] === 'undefined') {
-        return true
+function isEqualObject(secondaryValue: JsonValue, primaryValue: JsonValue, selector: string, indexKey: string) {
+    if (
+        typeof primaryValue === 'object' &&
+        primaryValue !== null &&
+        typeof secondaryValue === 'object' &&
+        secondaryValue !== null
+    ) {
+        const pObj = primaryValue as {
+            [key: string]: JsonValue
+        }
+        const sObj = secondaryValue as {
+            [key: string]: JsonValue
+        }
+        if (pObj[selector] === sObj[selector] && typeof pObj[indexKey] === 'undefined') {
+            return true
+        }
+        if (pObj[indexKey] === sObj[indexKey] && typeof pObj[selector] === 'undefined') {
+            return true
+        }
     }
     return false
 }
 
-function removeIndexFields(object: any) {
+function removeIndexFields(object: JsonValue) {
     if (Array.isArray(object)) {
         for (const objectValue of object) {
             removeIndexFields(objectValue)
         }
-    } else if (typeof object === 'object') {
-        for (const key in object) {
+    } else if (typeof object === 'object' && object !== null) {
+        const obj = object as {
+            [key: string]: JsonValue
+        }
+        for (const key in obj) {
             if (key === 'index') {
-                delete object[key]
+                delete obj[key]
             }
-            if (typeof object[key] === 'object') {
-                removeIndexFields(object[key])
+            if (typeof obj[key] === 'object') {
+                removeIndexFields(obj[key])
             }
         }
     }
 }
 
-function copyFromSourceToDestinationArray(srcArr: Array<any>, destArr: Array<any>) {
+function copyFromSourceToDestinationArray(srcArr: JsonValue[], destArr: JsonValue[]) {
     destArr.length = 0
     for (const obj of srcArr) {
         destArr.push(obj)
@@ -342,11 +380,15 @@ function copyFromSourceToDestinationArray(srcArr: Array<any>, destArr: Array<any
 }
 
 function diffObject(
-    fieldValueOld: any,
-    fieldValueNew: any,
-    leftSpanHightlighter: any,
-    rightSpanHighlighter: any,
-    indentlevel: any,
+    fieldValueOld: {
+        [key: string]: JsonValue
+    },
+    fieldValueNew: {
+        [key: string]: JsonValue
+    },
+    leftSpanHightlighter: string,
+    rightSpanHighlighter: string,
+    indentlevel: number,
 ) {
     let spaceForClosingBraces = ''
     for (let i = 0; i < indentlevel; i++) {
@@ -373,13 +415,17 @@ function diffObject(
 }
 
 function highlightObject(
-    fieldValuePrimary: any,
-    fieldValueSecondary: any,
-    primarySpanHightlighter: any,
-    secondarySpanHighlighter: any,
-    differentiateCommonObject: any,
-    spaceForClosingBraces: any,
-    indentlevel: any,
+    fieldValuePrimary: {
+        [key: string]: JsonValue
+    },
+    fieldValueSecondary: {
+        [key: string]: JsonValue
+    },
+    primarySpanHightlighter: string,
+    secondarySpanHighlighter: string,
+    differentiateCommonObject: boolean,
+    spaceForClosingBraces: string,
+    indentlevel: number,
 ) {
     for (const key in fieldValuePrimary) {
         if (key === 'index') {
@@ -414,16 +460,20 @@ function highlightObject(
                 )
             } else if (Array.isArray(fieldValuePrimary[key]) && Array.isArray(fieldValueSecondary[key])) {
                 diffArray(
-                    fieldValuePrimary[key],
-                    fieldValueSecondary[key],
+                    fieldValuePrimary[key] as JsonValue[],
+                    fieldValueSecondary[key] as JsonValue[],
                     primarySpanHightlighter,
                     secondarySpanHighlighter,
                     1,
                 )
             } else {
                 diffObject(
-                    fieldValuePrimary[key],
-                    fieldValueSecondary[key],
+                    fieldValuePrimary[key] as {
+                        [key: string]: JsonValue
+                    },
+                    fieldValueSecondary[key] as {
+                        [key: string]: JsonValue
+                    },
                     primarySpanHightlighter,
                     secondarySpanHighlighter,
                     indentlevel + 1,
@@ -433,7 +483,7 @@ function highlightObject(
     }
 }
 
-function prepareDiffString(changesArrTmp: any, result: string, highLighter: any, val: any) {
+function prepareDiffString(changesArrTmp: string[], result: string, highLighter: string, val: string) {
     if (changesArrTmp.length !== 0) {
         if (result.length != 0) {
             result += ' '
@@ -450,14 +500,14 @@ function prepareDiffString(changesArrTmp: any, result: string, highLighter: any,
     return result
 }
 
-function diffString(fieldValuePrimary: any, fieldValueSecondary: any, highLighter: any) {
+function diffString(fieldValuePrimary: string, fieldValueSecondary: string, highLighter: string) {
     if (fieldValuePrimary === fieldValueSecondary) {
         return escapeHTML(fieldValuePrimary)
     }
 
     const fieldValuePrimaryArr = fieldValuePrimary.split(' '),
         fieldValueSecondaryArr = fieldValueSecondary.split(' '),
-        changesArrTmp: Array<any> = []
+        changesArrTmp: string[] = []
     let i = 0,
         j = 0,
         result = ''
