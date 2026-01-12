@@ -187,6 +187,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         deselected: [],
         selectedConcludedUsages: [],
         deselectedConcludedUsages: [],
+        ignoredLicenses: {},
     })
     const [saveUsagesLoading, setSaveUsagesLoading] = useState(false)
 
@@ -332,6 +333,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     deselected: [],
                     selectedConcludedUsages: [],
                     deselectedConcludedUsages: [],
+                    ignoredLicenses: {},
                 }
 
                 for (const r of usages['_embedded']['sw360:release']) {
