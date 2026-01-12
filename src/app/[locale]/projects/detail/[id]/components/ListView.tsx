@@ -14,6 +14,8 @@ import {
     ColumnFiltersState,
     getCoreRowModel,
     getPaginationRowModel,
+    getSortedRowModel,
+    SortingState,
     useReactTable,
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
@@ -21,9 +23,9 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
-import { type JSX, useEffect, useMemo, useState } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { BsPencil } from 'react-icons/bs'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaFile, FaPencilAlt } from 'react-icons/fa'
 import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -276,9 +278,12 @@ export default function ListView({
     ])
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [sorting, setSorting] = useState<SortingState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
-
     const [showProcessing, setShowProcessing] = useState(false)
+    const [showModal, setShowModal] = useState(false)
+    const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
+    const [licenseFiles, setLicenseFiles] = useState<string[]>([])
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const memoizedLinkedProjects = useMemo(
@@ -298,11 +303,41 @@ export default function ListView({
 
     const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
 
+    const handleShowLicenseFiles = useCallback(
+        async (release: Release) => {
+            setSelectedRelease(release)
+            setShowModal(true)
+            setLicenseFiles([])
+
+            if (status === 'authenticated' && session) {
+                try {
+                    const response = await ApiUtils.GET(`releases/${release.id}/attachments`, session.user.access_token)
+
+                    if (response.status === StatusCodes.OK) {
+                        const data = await response.json()
+                        const files =
+                            data._embedded?.['sw360:attachments']
+                                ?.filter((att: any) => att.attachmentType === 'LICENSE')
+                                ?.map((att: any) => att.filename) || []
+                        setLicenseFiles(files)
+                    }
+                } catch (error) {
+                    console.error('Error fetching license files:', error)
+                }
+            }
+        },
+        [
+            status,
+            session,
+        ],
+    )
+
     const columns = useMemo<ColumnDef<TypedProject | TypedRelease>[]>(
         () => [
             {
                 id: 'name',
                 header: t('Name'),
+                accessorFn: (row) => row.entity.name,
                 cell: ({ row }) => {
                     const { id, name, version } = row.original.entity
                     const url =
@@ -334,24 +369,25 @@ export default function ListView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Component Type')}
-                                resetPaginationParams={() => table.resetPagination()}
                             />
                         </>
                     )
+                },
+                accessorFn: (row) => {
+                    if (row.type === 'project') {
+                        return row.entity.projectType ?? ''
+                    } else {
+                        return (row.entity as Release).componentType
+                    }
                 },
                 cell: ({ row }) => {
                     if (row.original.type === 'project') {
                         return <div className='text-center'>{Capitalize(row.original.entity.projectType ?? '')}</div>
                     } else {
-                        return (
-                            <div className='text-center'>
-                                {
-                                    typeFilterOptions.filter(
-                                        (op) => op.value === (row.original.entity as Release).componentType,
-                                    )[0].tag
-                                }
-                            </div>
+                        const matchedOption = typeFilterOptions.find(
+                            (op) => op.value === (row.original.entity as Release).componentType,
                         )
+                        return <div className='text-center'>{matchedOption?.tag ?? ''}</div>
                     }
                 },
                 meta: {
@@ -361,6 +397,7 @@ export default function ListView({
             {
                 id: 'path',
                 header: t('Project Path'),
+                accessorFn: (row) => row.entity.path,
                 cell: ({ row }) => <div className='text-center'>{row.original.entity.path}</div>,
                 meta: {
                     width: '12%',
@@ -380,10 +417,15 @@ export default function ListView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Release Relation')}
-                                resetPaginationParams={() => table.resetPagination()}
                             />
                         </>
                     )
+                },
+                accessorFn: (row) => {
+                    if (row.type === 'release') {
+                        return (row.entity as ListViewRelease).releaseRelation ?? ''
+                    }
+                    return ''
                 },
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
@@ -400,6 +442,7 @@ export default function ListView({
                 id: 'mainLicenses',
                 header: t('Main Licenses'),
                 enableColumnFilter: false,
+                enableSorting: false,
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
                         return (
@@ -425,11 +468,11 @@ export default function ListView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Release Clearing State')}
-                                resetPaginationParams={() => table.resetPagination()}
                             />
                         </>
                     )
                 },
+                accessorFn: (row) => row.entity.clearingState ?? '',
                 cell: ({ row }) => {
                     if (row.original.type === 'project') {
                         const { clearingState, state } = row.original.entity
@@ -492,6 +535,12 @@ export default function ListView({
                 id: 'releaseMainlineState',
                 header: t('Release Mainline State'),
                 enableColumnFilter: false,
+                accessorFn: (row) => {
+                    if (row.type === 'release') {
+                        return row.entity.mainlineState ?? ''
+                    }
+                    return ''
+                },
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
                         return <div className='text-center'>{Capitalize(row.original.entity.mainlineState ?? '')}</div>
@@ -505,6 +554,7 @@ export default function ListView({
                 id: 'projectMainlineState',
                 header: t('Project Mainline State'),
                 enableColumnFilter: false,
+                enableSorting: false,
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
                         return <div className='text-center'></div>
@@ -518,6 +568,7 @@ export default function ListView({
                 id: 'comment',
                 header: t('Comment'),
                 enableColumnFilter: false,
+                enableSorting: false,
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
                         const { id: releaseId } = row.original.entity
@@ -540,6 +591,7 @@ export default function ListView({
                 id: 'actions',
                 header: t('Actions'),
                 enableColumnFilter: false,
+                enableSorting: false,
                 cell: ({ row }) => {
                     const { id } = row.original.entity
                     const url =
@@ -552,12 +604,22 @@ export default function ListView({
                                     href={url}
                                     className='overlay-trigger'
                                 >
-                                    <BsPencil
-                                        className='btn-icon'
-                                        size={20}
-                                    />
+                                    <FaPencilAlt className='btn-icon' />
                                 </Link>
                             </OverlayTrigger>
+                            {row.original.type === 'release' && (
+                                <OverlayTrigger overlay={<Tooltip>{t('License Files')}</Tooltip>}>
+                                    <span
+                                        className='overlay-trigger ms-2'
+                                        onClick={() => handleShowLicenseFiles(row.original.entity as Release)}
+                                        style={{
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <FaFile className='btn-icon' />
+                                    </span>
+                                </OverlayTrigger>
+                            )}
                         </div>
                     )
                 },
@@ -570,26 +632,23 @@ export default function ListView({
             t,
             columnFilters,
             showFilter,
+            handleShowLicenseFiles,
         ],
     )
 
     const table = useReactTable({
-        // table state config
         state: {
             columnFilters,
+            sorting,
         },
-
         data: rowData,
         columns,
         getCoreRowModel: getCoreRowModel(),
-
-        // server side filtering config
         manualFiltering: true,
         onColumnFiltersChange: setColumnFilters,
-
-        // client side pagination
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-
         meta: {
             rowHeightConstant: true,
         },
@@ -607,9 +666,12 @@ export default function ListView({
 
         void (async () => {
             try {
-                const url = `projects/${projectId}/licenseClearing?transitive=true&${columnFilters
+                const filterParams = columnFilters
                     .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
-                    .join('&')}`
+                    .filter((param) => param !== '')
+                    .join('&')
+
+                const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? '&' + filterParams : ''}`
                 const response = await ApiUtils.GET(url, session.user.access_token, signal)
 
                 if (response.status !== StatusCodes.OK) {
@@ -637,6 +699,7 @@ export default function ListView({
         projectId,
         session,
         columnFilters,
+        memoizedLicenseClearing,
     ])
 
     useEffect(() => {
@@ -695,21 +758,54 @@ export default function ListView({
     ])
 
     return (
-        <div className='mb-3'>
-            {table ? (
-                <>
-                    <ClientSidePageSizeSelector table={table} />
-                    <SW360Table
-                        table={table}
-                        showProcessing={showProcessing}
-                    />
-                    <ClientSideTableFooter table={table} />
-                </>
-            ) : (
-                <div className='col-12 mt-1 text-center'>
-                    <Spinner className='spinner' />
-                </div>
-            )}
-        </div>
+        <>
+            <div className='mb-3'>
+                {table ? (
+                    <>
+                        <ClientSidePageSizeSelector table={table} />
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                        />
+                        <ClientSideTableFooter table={table} />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
+
+            <Modal
+                show={showModal}
+                onHide={() => setShowModal(false)}
+                size='lg'
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        {t('License Files')} - {selectedRelease?.name} ({selectedRelease?.version})
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {licenseFiles.length > 0 ? (
+                        <ul>
+                            {licenseFiles.map((file, index) => (
+                                <li key={index}>{file}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>{t('No license files available')}</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant='secondary'
+                        onClick={() => setShowModal(false)}
+                    >
+                        {t('Close')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     )
 }
