@@ -109,7 +109,7 @@ export default function DownloadLicenseInfoModal({
                             type='checkbox'
                             className='form-check-input'
                             name='unknown'
-                            checked={true}
+                            checked
                         />
                         <label
                             className='form-label fw-bold'

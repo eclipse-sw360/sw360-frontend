@@ -59,6 +59,7 @@ function GenerateSourceCodeBundle({
         deselected: [],
         selectedConcludedUsages: [],
         deselectedConcludedUsages: [],
+        ignoredLicenses: {},
     })
     const [loading, setLoading] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
@@ -191,6 +192,7 @@ function GenerateSourceCodeBundle({
                     deselected: [],
                     selectedConcludedUsages: [],
                     deselectedConcludedUsages: [],
+                    ignoredLicenses: {},
                 }
 
                 for (const r of attachmentUsages['_embedded']['sw360:release']) {
