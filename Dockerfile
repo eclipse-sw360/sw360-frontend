@@ -1,41 +1,41 @@
-# syntax=docker/dockerfile:1.4
+# Dependencies stage
+FROM node:18-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-# Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+COPY package*.json ./
+RUN npm ci
 
-# This program and the accompanying materials are made
-# available under the terms of the Eclipse Public License 2.0
-# which is available at https://www.eclipse.org/legal/epl-2.0/
-
-# SPDX-License-Identifier: EPL-2.0
-# License-Filename: LICENSE
-
-ARG VARIANT=24-slim
-FROM node:${VARIANT} AS build
-
-RUN npm install -g pnpm
-
-WORKDIR /frontend
-
-# Prepare the build environment
+# Builder stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# define build-time args
-ARG NEXT_PUBLIC_SW360_API_URL
-ARG NEXTAUTH_URL
-ARG AUTH_SECRET
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_PUBLIC_SW360_API_URL=http://localhost:8091
 
-RUN pnpm install
-RUN pnpm build --experimental-analyze --turbo --profile
+RUN npm run build
 
-# Runtime
-ARG VARIANT=24-slim
-FROM node:${VARIANT}
-WORKDIR /frontend
+# Runner stage
+FROM node:18-alpine AS runner
+WORKDIR /app
 
-COPY --from=build /frontend/next.config.ts .
-COPY --from=build /frontend/public ./public
-COPY --from=build /frontend/.next/standalone ./
-COPY --from=build /frontend/.next/static ./.next/static
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]
-EXPOSE 3000
