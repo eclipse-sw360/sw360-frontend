@@ -15,7 +15,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
 import { SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -98,7 +98,7 @@ export default function DownloadLicenseInfoModal({
                     closeButton
                 >
                     <Modal.Title id='generate-license-info-modal'>
-                        <AiOutlineQuestionCircle /> {t('Select Other Options')}
+                        <BsQuestionCircle size={20} /> {t('Select Other Options')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

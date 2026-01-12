@@ -18,6 +18,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import ClearingRequestComponent from './ClearingRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
@@ -152,11 +153,11 @@ function Requests(): ReactNode | undefined {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const moderationRequestsPrmosies = ApiUtils.GET('moderationrequest', session.user.access_token, signal)
+                const moderationRequestsPromsies = ApiUtils.GET('moderationrequest', session.user.access_token, signal)
                 const clearingRequestsPromises = ApiUtils.GET('clearingrequests', session.user.access_token, signal)
 
                 const responses = await Promise.all([
-                    moderationRequestsPrmosies,
+                    moderationRequestsPromsies,
                     clearingRequestsPromises,
                 ])
                 if (responses[0].status !== StatusCodes.OK || responses[1].status !== StatusCodes.OK) {
@@ -197,8 +198,12 @@ function Requests(): ReactNode | undefined {
                 })
                 setOpenClearingRequestCount(openCRCount)
                 setClosedClearingRequestCount(closedCRCount)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         return () => {

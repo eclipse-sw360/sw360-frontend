@@ -72,7 +72,7 @@ const AdminMainPage = (): JSX.Element => {
                             <BsBag /> {t('Vendors')}
                         </button>
                     </Link>
-                    <Link href='#'>
+                    <Link href='/admin/bulkreleaseedit'>
                         <button
                             type='button'
                             className='btn btn-secondary mb-2 mx-2'

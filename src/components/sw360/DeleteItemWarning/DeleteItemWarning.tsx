@@ -9,11 +9,10 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { type JSX, useEffect } from 'react'
+import React, { type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
-import { FaRegQuestionCircle } from 'react-icons/fa'
+import { BsQuestionCircle } from 'react-icons/bs'
 import { AddtionalDataType, RolesType } from '@/object-types'
 import MessageService from '@/services/message.service'
 
@@ -90,7 +89,7 @@ const DeleteItemWarning = ({
                 }}
             >
                 <Modal.Title>
-                    <FaRegQuestionCircle /> {t('Delete Item')} ?
+                    <BsQuestionCircle size={20} /> {t('Delete Item')} ?
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

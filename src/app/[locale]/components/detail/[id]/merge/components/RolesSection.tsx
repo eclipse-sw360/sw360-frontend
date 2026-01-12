@@ -12,8 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
-import { TiTick } from 'react-icons/ti'
+import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
 import { Component, ListFieldProcessComponent } from '@/object-types'
 
 export default function RolesSection({
@@ -84,8 +83,8 @@ export default function RolesSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.componentOwner}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.componentOwner === targetComponent.componentOwner ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.componentOwner === targetComponent.componentOwner ? (
@@ -98,7 +97,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -110,7 +109,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -123,8 +122,8 @@ export default function RolesSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.ownerAccountingUnit}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.ownerAccountingUnit === targetComponent.ownerAccountingUnit ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.ownerAccountingUnit ===
@@ -138,7 +137,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -150,7 +149,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -163,8 +162,8 @@ export default function RolesSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.ownerGroup}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.ownerGroup === targetComponent.ownerGroup ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.ownerGroup === targetComponent.ownerGroup ? (
@@ -177,7 +176,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -189,7 +188,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -202,8 +201,8 @@ export default function RolesSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.ownerCountry}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.ownerCountry === targetComponent.ownerCountry ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.ownerCountry === targetComponent.ownerCountry ? (
@@ -216,7 +215,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -228,7 +227,7 @@ export default function RolesSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -246,8 +245,8 @@ export default function RolesSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -288,7 +287,7 @@ export default function RolesSection({
                                                         setModeratorsMergeList(updatedModeratorsMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -315,7 +314,7 @@ export default function RolesSection({
                                                         setModeratorsMergeList(updatedModeratorsMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -355,7 +354,7 @@ export default function RolesSection({
                                                         setModeratorsMergeList(updatedModeratorsMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -383,7 +382,7 @@ export default function RolesSection({
                                                         setModeratorsMergeList(updatedModeratorsMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>

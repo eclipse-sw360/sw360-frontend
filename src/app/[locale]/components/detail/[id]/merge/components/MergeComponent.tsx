@@ -12,8 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
-import { TiTick } from 'react-icons/ti'
+import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
 import { Attachment, Component, ListFieldProcessComponent } from '@/object-types'
 import GeneralSection from './GeneralSection'
 import RolesSection from './RolesSection'
@@ -236,8 +235,8 @@ export default function MergeComponent({
                                             {targetComponent.externalIds?.[id.value]}
                                         </div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={40}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -267,7 +266,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -283,7 +282,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -311,7 +310,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -327,7 +326,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -355,8 +354,8 @@ export default function MergeComponent({
                                             {targetComponent.additionalData?.[id.value]}
                                         </div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={40}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -386,7 +385,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -403,7 +402,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -432,7 +431,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -448,7 +447,7 @@ export default function MergeComponent({
                                                         })
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -486,8 +485,8 @@ export default function MergeComponent({
                                                 >
                                                     <div className='mt-2 col text-end'>{assignee.value}</div>
                                                     <div className='col-12 col-md-2 mx-5 text-center'>
-                                                        <TiTick
-                                                            size={25}
+                                                        <BsCheck2
+                                                            size={20}
                                                             className='green'
                                                         />
                                                     </div>
@@ -534,7 +533,7 @@ export default function MergeComponent({
                                                                     })
                                                                 }}
                                                             >
-                                                                <FaLongArrowAltLeft />
+                                                                <BsArrowLeft size={20} />
                                                             </button>
                                                         ) : (
                                                             <button
@@ -566,7 +565,7 @@ export default function MergeComponent({
                                                                     })
                                                                 }}
                                                             >
-                                                                <FaUndo />
+                                                                <BsArrowCounterclockwise size={20} />
                                                             </button>
                                                         )}
                                                     </div>
@@ -613,7 +612,7 @@ export default function MergeComponent({
                                                                     })
                                                                 }}
                                                             >
-                                                                <FaLongArrowAltLeft />
+                                                                <BsArrowLeft size={20} />
                                                             </button>
                                                         ) : (
                                                             <button
@@ -645,7 +644,7 @@ export default function MergeComponent({
                                                                     })
                                                                 }}
                                                             >
-                                                                <FaUndo />
+                                                                <BsArrowCounterclockwise size={20} />
                                                             </button>
                                                         )}
                                                     </div>
@@ -674,7 +673,7 @@ export default function MergeComponent({
                                             className='btn btn-secondary px-2'
                                             disabled
                                         >
-                                            <FaLongArrowAltLeft />
+                                            <BsArrowLeft size={20} />
                                         </button>
                                     </div>
                                     <div className='mt-2 col text-start'></div>
@@ -692,7 +691,7 @@ export default function MergeComponent({
                                                 className='btn btn-secondary px-2'
                                                 disabled
                                             >
-                                                <FaUndo />
+                                                <BsArrowCounterclockwise size={20} />
                                             </button>
                                         </div>
                                         <div className='mt-2 col text-start'>{release.name}</div>
@@ -745,7 +744,7 @@ export default function MergeComponent({
                                                             setAttachmentsMergeList(updatedAttachmentsMergeList)
                                                         }}
                                                     >
-                                                        <FaLongArrowAltLeft />
+                                                        <BsArrowLeft size={20} />
                                                     </button>
                                                 ) : (
                                                     <button
@@ -773,7 +772,7 @@ export default function MergeComponent({
                                                             setAttachmentsMergeList(updatedAttachmentsMergeList)
                                                         }}
                                                     >
-                                                        <FaUndo />
+                                                        <BsArrowCounterclockwise size={20} />
                                                     </button>
                                                 )}
                                             </div>
@@ -821,7 +820,7 @@ export default function MergeComponent({
                                                             setAttachmentsMergeList(updatedAttachmentsMergeList)
                                                         }}
                                                     >
-                                                        <FaLongArrowAltLeft />
+                                                        <BsArrowLeft size={20} />
                                                     </button>
                                                 ) : (
                                                     <button
@@ -848,7 +847,7 @@ export default function MergeComponent({
                                                             setAttachmentsMergeList(updatedAttachmentsMergeList)
                                                         }}
                                                     >
-                                                        <FaUndo />
+                                                        <BsArrowCounterclockwise size={20} />
                                                     </button>
                                                 )}
                                             </div>

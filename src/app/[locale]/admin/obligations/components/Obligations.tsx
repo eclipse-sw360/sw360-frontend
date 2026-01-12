@@ -17,10 +17,9 @@ import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaClipboard, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
-import { MdOutlineTask } from 'react-icons/md'
+import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { Embedded, ErrorDetails, Obligation, PageableQueryParam, PaginationMeta } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -120,13 +119,14 @@ function Obligations(): ReactNode {
                         <span className='d-flex justify-content-evenly'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <span className='d-inline-block btn-overlay cursor-pointer'>
-                                    <FaPencilAlt
+                                    <BsPencil
                                         onClick={() => {
                                             router.push(
                                                 `obligations/edit/detail?id=${extractObligationId(row.original)}`,
                                             )
                                         }}
                                         className='btn-icon'
+                                        size={20}
                                     />
                                 </span>
                             </OverlayTrigger>
@@ -137,26 +137,30 @@ function Obligations(): ReactNode {
                                         router.push(`obligations/changelog/${extractObligationId(row.original)}`)
                                     }
                                 >
-                                    <MdOutlineTask className='btn-icon overlay-trigger' />
+                                    <BsCheck2Square
+                                        className='btn-icon overlay-trigger'
+                                        size={20}
+                                    />
                                 </span>
                             </OverlayTrigger>
 
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
                                 <span className='d-inline-block btn-overlay cursor-pointer'>
-                                    <FaClipboard
+                                    <BsClipboard
                                         className='btn-icon'
                                         onClick={() => {
                                             router.push(
                                                 `obligations/duplicate/detail?id=${extractObligationId(row.original)}`,
                                             )
                                         }}
+                                        size={20}
                                     />
                                 </span>
                             </OverlayTrigger>
 
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                 <span className='d-inline-block btn-overlay cursor-pointer'>
-                                    <FaTrashAlt
+                                    <BsFillTrashFill
                                         className='btn-icon'
                                         onClick={() => {
                                             openDeleteDialog(extractObligationId(row.original))
@@ -165,6 +169,7 @@ function Obligations(): ReactNode {
                                             color: 'gray',
                                             fontSize: '18px',
                                         }}
+                                        size={20}
                                     />
                                 </span>
                             </OverlayTrigger>

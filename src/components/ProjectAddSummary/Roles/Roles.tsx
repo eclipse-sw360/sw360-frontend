@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import { SelectCountry, SelectUsersDialog } from 'next-sw360'
 import { type JSX, useState } from 'react'
-import { GiCancel } from 'react-icons/gi'
+import { BsXCircle } from 'react-icons/bs'
 import { ProjectPayload } from '@/object-types'
 import DepartmentModal from './DepartmentModal'
 
@@ -250,8 +250,8 @@ export default function Roles({
             />
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Roles')}</h6>
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.group'
                             className='form-label fw-medium'
@@ -281,10 +281,10 @@ export default function Roles({
                             onClick={handleClearDepartment}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.projectManager'
                             className='form-label fw-medium'
@@ -314,10 +314,10 @@ export default function Roles({
                             onClick={handleClearProjectManager}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.projectOwner'
                             className='form-label fw-medium'
@@ -347,13 +347,12 @@ export default function Roles({
                             onClick={handleClearProjectOwner}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.ownerAccountingUnit'
                             className='form-label fw-medium'
@@ -371,7 +370,7 @@ export default function Roles({
                             value={projectPayload.ownerAccountingUnit ?? ''}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.ownerBillingGroup'
                             className='form-label fw-medium'
@@ -389,16 +388,15 @@ export default function Roles({
                             value={projectPayload.ownerGroup ?? ''}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <SelectCountry
                             selectCountry={updateField}
                             value={projectPayload.ownerCountry ?? ''}
                         />
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.leadArchitect'
                             className='form-label fw-medium'
@@ -428,10 +426,10 @@ export default function Roles({
                             onClick={handleClearLeadArchitect}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.moderators'
                             className='form-label fw-medium'
@@ -461,10 +459,10 @@ export default function Roles({
                             onClick={handleClearModerators}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.contributors'
                             className='form-label fw-medium'
@@ -494,13 +492,12 @@ export default function Roles({
                             onClick={handleClearContributors}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.securityResponsibles'
                             className='form-label fw-medium'
@@ -530,7 +527,7 @@ export default function Roles({
                             onClick={handleClearSecurityResponsibles}
                         >
                             {' '}
-                            <GiCancel />
+                            <BsXCircle size={20} />
                         </div>
                     </div>
                 </div>

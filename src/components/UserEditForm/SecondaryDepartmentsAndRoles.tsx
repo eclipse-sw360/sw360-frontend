@@ -12,7 +12,7 @@ import { StatusCodes } from 'http-status-codes'
 import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { UserGroupType, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
@@ -168,8 +168,8 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
                         </select>
                     </div>
                     <div className='col-sm-1 cursor-pointer pt-2 px-4'>
-                        <FaTrashAlt
-                            size={21}
+                        <BsFillTrashFill
+                            size={20}
                             className='icon action'
                             onClick={() => onDeleteRow(index)}
                         />

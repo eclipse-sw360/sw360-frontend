@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -121,12 +121,13 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
             <li key={licenseId}>
                 {licenseId}
                 {isISR && (
-                    <FaInfoCircle
+                    <BsInfoCircle
                         onClick={() => showLicenseToSrcMapping(licenseId)}
                         style={{
                             marginLeft: '5px',
                             color: 'gray',
                         }}
+                        size={20}
                         className={styles.info}
                     />
                 )}

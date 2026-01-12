@@ -27,7 +27,7 @@ function HomeTableHeader({ title = '', setReload }: HomeTableHeaderProps): React
                         setReload((prevState) => !prevState)
                     }}
                 >
-                    <BsArrowRepeat />
+                    <BsArrowRepeat size={20} />
                 </a>
             </div>
             <hr></hr>

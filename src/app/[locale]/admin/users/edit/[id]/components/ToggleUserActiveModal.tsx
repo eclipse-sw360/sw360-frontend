@@ -15,7 +15,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useEffect } from 'react'
 import { Modal } from 'react-bootstrap'
-import { FaRegQuestionCircle } from 'react-icons/fa'
+import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 
@@ -88,7 +88,8 @@ const ToggleUserActiveModal = ({
                 }}
             >
                 <Modal.Title>
-                    <FaRegQuestionCircle /> {isUserDeactived === true ? t('Activate User') : t('Deactivate User')} ?
+                    <BsQuestionCircle size={20} />{' '}
+                    {isUserDeactived === true ? t('Activate User') : t('Deactivate User')} ?
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

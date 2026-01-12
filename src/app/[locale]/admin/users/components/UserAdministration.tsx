@@ -11,16 +11,14 @@
 
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import React, { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
-import { TfiFiles } from 'react-icons/tfi'
+import { BsFiles, BsPencil } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -216,7 +214,10 @@ export default function UserAdminstration(): JSX.Element {
                                     href={`/admin/users/edit/${CommonUtils.getIdFromUrl(row.original._links?.self.href)}`}
                                     className='overlay-trigger'
                                 >
-                                    <FaPencilAlt className='btn-icon' />
+                                    <BsPencil
+                                        className='btn-icon'
+                                        size={20}
+                                    />
                                 </Link>
                             </OverlayTrigger>
 
@@ -232,7 +233,10 @@ export default function UserAdminstration(): JSX.Element {
                                         )
                                     }
                                 >
-                                    <TfiFiles className='btn-icon overlay-trigger cursor-pointer' />
+                                    <BsFiles
+                                        className='btn-icon overlay-trigger cursor-pointer'
+                                        size={20}
+                                    />
                                 </span>
                             </OverlayTrigger>
                         </span>

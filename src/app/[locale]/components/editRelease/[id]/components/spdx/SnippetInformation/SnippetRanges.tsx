@@ -11,7 +11,7 @@
 
 import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { SnippetRange } from '@/object-types'
 
 interface Props {
@@ -142,9 +142,10 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
                             value={elem.reference}
                             onChange={(e) => handleInputChange(e, j)}
                         />
-                        <FaTrashAlt
+                        <BsFillTrashFill
                             className='spdx-delete-icon-main'
                             onClick={() => handleRemoveClick(j)}
+                            size={20}
                         />
                     </div>
                 )

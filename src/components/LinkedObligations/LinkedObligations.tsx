@@ -12,9 +12,9 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { MdDeleteOutline } from 'react-icons/md'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { LicensePayload, NestedRows, Obligation } from '@/object-types'
 import DeleteObligationDialog from './TableLinkedObligations/DeleteObligationDialog'
 
@@ -61,9 +61,9 @@ const LinkedObligations = ({ licensePayload, setLicensePayload }: Props): JSX.El
                     return (
                         <span className='d-flex justify-content-evenly'>
                             <span className='d-inline-block'>
-                                <MdDeleteOutline
+                                <BsFillTrashFill
                                     className='btn-icon'
-                                    size={25}
+                                    size={20}
                                     onClick={() => setObligationToBeRemoved(row.original.node)}
                                 />
                             </span>

@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { MdDeleteOutline } from 'react-icons/md'
+import { BsFillTrashFill } from 'react-icons/bs'
 import type { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -81,9 +81,9 @@ function MyTaskSubmissionsWidget(): ReactNode {
                             {documentId && (
                                 <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                     <span className='d-inline-block'>
-                                        <MdDeleteOutline
+                                        <BsFillTrashFill
                                             className='btn-icon'
-                                            size={25}
+                                            size={20}
                                             onClick={() => handleDeleteProject(documentId)}
                                         />
                                     </span>

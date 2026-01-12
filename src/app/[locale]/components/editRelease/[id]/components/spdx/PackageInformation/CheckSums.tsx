@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { ReactNode } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { InputKeyValue } from '@/object-types'
 
 interface Props {
@@ -89,9 +89,10 @@ function CheckSums({ inputList, setInputList, setDataCheckSums }: Props): ReactN
                             placeholder='Enter value'
                             onChange={(e) => handleInputChange(e, j)}
                         />
-                        <FaTrashAlt
+                        <BsFillTrashFill
                             className='spdx-delete-icon-main'
                             onClick={() => handleRemoveClick(j)}
+                            size={20}
                         />
                     </div>
                 )

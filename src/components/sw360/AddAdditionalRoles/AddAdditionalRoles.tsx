@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { MdDeleteOutline } from 'react-icons/md'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { useConfigValue } from '@/contexts'
 import { DocumentTypes, InputKeyValue, RolesType, UIConfigKeys } from '@/object-types'
 import { CommonUtils } from '@/utils'
@@ -215,8 +215,8 @@ function AddAdditionalRoles({
                             <div className='col-lg-2'>
                                 <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                     <span className='d-inline-block'>
-                                        <MdDeleteOutline
-                                            size={25}
+                                        <BsFillTrashFill
+                                            size={20}
                                             className='ms-2 btn-icon'
                                             onClick={() => handleRemoveClick(j)}
                                         />

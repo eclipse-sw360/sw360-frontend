@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
-import { GiCancel } from 'react-icons/gi'
+import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
 import { ProjectPayload, UIConfigKeys, Vendor } from '@/object-types'
@@ -80,8 +80,8 @@ export default function GeneralInformation({
         <>
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('General Information')}</h6>
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.name'
                             className='form-label fw-medium'
@@ -106,7 +106,7 @@ export default function GeneralInformation({
                             onChange={updateInputField}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.version'
                             className='form-label fw-medium'
@@ -123,7 +123,7 @@ export default function GeneralInformation({
                             onChange={updateInputField}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.visibility'
                             className='form-label fw-medium'
@@ -160,9 +160,8 @@ export default function GeneralInformation({
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.createdBy'
                             className='form-label fw-medium'
@@ -178,7 +177,7 @@ export default function GeneralInformation({
                             value={projectPayload.createdBy}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.projectType'
                             className='form-label fw-medium'
@@ -215,7 +214,7 @@ export default function GeneralInformation({
                             <ShowInfoOnHover text={t('PROJECT_TYPE_INFO')} /> {t('Learn more about project types')}.
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.tag'
                             className='form-label fw-medium'
@@ -236,9 +235,8 @@ export default function GeneralInformation({
                         />
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.description'
                             className='form-label fw-medium'
@@ -257,7 +255,7 @@ export default function GeneralInformation({
                             onChange={updateInputField}
                         ></textarea>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.domain'
                             className='form-label fw-medium'
@@ -284,7 +282,7 @@ export default function GeneralInformation({
                                 ))}
                         </select>
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.vendor'
                             className='form-label fw-medium'
@@ -308,13 +306,15 @@ export default function GeneralInformation({
                             vendor={vendor}
                         />
                         <div className='form-text'>
-                            <GiCancel onClick={handleClearVendorData} />
+                            <BsXCircle
+                                onClick={handleClearVendorData}
+                                size={20}
+                            />
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.modifiedOn'
                             className='form-label fw-medium'
@@ -329,7 +329,7 @@ export default function GeneralInformation({
                             value={projectPayload.modifiedOn ?? ''}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
+                    <div className='col-lg-4'>
                         <label
                             htmlFor='addProjects.modifiedBy'
                             className='form-label fw-medium'
@@ -346,8 +346,7 @@ export default function GeneralInformation({
                         />
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
+                <div className='row with-divider py-3'>
                     <div className='col-lg-4'>
                         <input
                             className='form-check-input'

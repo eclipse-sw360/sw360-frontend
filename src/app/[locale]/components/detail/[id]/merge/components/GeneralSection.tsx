@@ -12,9 +12,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { BiInfoCircle } from 'react-icons/bi'
-import { FaLongArrowAltLeft, FaUndo } from 'react-icons/fa'
-import { TiTick } from 'react-icons/ti'
+import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2, BsInfoCircle } from 'react-icons/bs'
 import { Component, ListFieldProcessComponent, Vendor } from '@/object-types'
 
 export default function GeneralSection({
@@ -88,8 +86,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.name}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.name === targetComponent.name ? (
-                                    <TiTick
-                                        size={40}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.name === targetComponent.name ? (
@@ -102,7 +100,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -114,7 +112,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -127,8 +125,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.createdOn}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.createdOn === targetComponent.createdOn ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.createdOn === targetComponent.createdOn ? (
@@ -141,7 +139,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -153,7 +151,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -167,8 +165,8 @@ export default function GeneralSection({
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent._embedded?.createdBy?.email ===
                                 targetComponent._embedded?.createdBy?.email ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.createdBy === targetComponent._embedded?.createdBy?.email ? (
@@ -181,7 +179,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -193,7 +191,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -201,7 +199,7 @@ export default function GeneralSection({
                             {sourceComponent._embedded?.createdBy?.email !==
                                 targetComponent._embedded?.createdBy?.email && (
                                 <div className='mt-2 text-center fw-medium text-secondary'>
-                                    <BiInfoCircle />{' '}
+                                    <BsInfoCircle size={20} />{' '}
                                     {t.rich('MADE_MODERATOR', {
                                         email: sourceComponent._embedded?.createdBy?.email ?? '',
                                     })}
@@ -221,8 +219,8 @@ export default function GeneralSection({
                                     >
                                         <div className='mt-2 col text-end'>{c.value}</div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
-                                            <TiTick
-                                                size={25}
+                                            <BsCheck2
+                                                size={20}
                                                 className='green'
                                             />
                                         </div>
@@ -263,7 +261,7 @@ export default function GeneralSection({
                                                         setCategoryMergeList(updatedCategoryMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -290,7 +288,7 @@ export default function GeneralSection({
                                                         setCategoryMergeList(updatedCategoryMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -330,7 +328,7 @@ export default function GeneralSection({
                                                         setCategoryMergeList(updatedCategoryMergeList)
                                                     }}
                                                 >
-                                                    <FaLongArrowAltLeft />
+                                                    <BsArrowLeft size={20} />
                                                 </button>
                                             ) : (
                                                 <button
@@ -358,7 +356,7 @@ export default function GeneralSection({
                                                         setCategoryMergeList(updatedCategoryMergeList)
                                                     }}
                                                 >
-                                                    <FaUndo />
+                                                    <BsArrowCounterclockwise size={20} />
                                                 </button>
                                             )}
                                         </div>
@@ -374,8 +372,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.componentType}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.componentType === targetComponent.componentType ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.componentType === targetComponent.componentType ? (
@@ -388,7 +386,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -400,7 +398,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -413,8 +411,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{defaultVendor.fullName}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.defaultVendorId === targetComponent.defaultVendorId ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : (defaultVendor._links?.self.href.split('/').at(-1) ?? undefined) ===
@@ -430,7 +428,7 @@ export default function GeneralSection({
                                             setDefaultVendor(sourceComponent._embedded?.defaultVendor ?? {})
                                         }}
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -444,7 +442,7 @@ export default function GeneralSection({
                                             setDefaultVendor(targetComponent._embedded?.defaultVendor ?? {})
                                         }}
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -459,8 +457,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.homepage}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.homepage === targetComponent.homepage ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.homepage === targetComponent.homepage ? (
@@ -473,7 +471,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -485,7 +483,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -498,8 +496,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.blog}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.blog === targetComponent.blog ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.blog === targetComponent.blog ? (
@@ -512,7 +510,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -524,7 +522,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -537,8 +535,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.wiki}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.wiki === targetComponent.wiki ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.wiki === targetComponent.wiki ? (
@@ -551,7 +549,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -563,7 +561,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -576,8 +574,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.mailinglist}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.mailinglist === targetComponent.mailinglist ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.mailinglist === targetComponent.mailinglist ? (
@@ -590,7 +588,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -602,7 +600,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>
@@ -615,8 +613,8 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>{finalComponentPayload.description}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceComponent.description === targetComponent.description ? (
-                                    <TiTick
-                                        size={25}
+                                    <BsCheck2
+                                        size={20}
                                         className='green'
                                     />
                                 ) : finalComponentPayload.description === targetComponent.description ? (
@@ -629,7 +627,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaLongArrowAltLeft />
+                                        <BsArrowLeft size={20} />
                                     </button>
                                 ) : (
                                     <button
@@ -641,7 +639,7 @@ export default function GeneralSection({
                                             })
                                         }
                                     >
-                                        <FaUndo />
+                                        <BsArrowCounterclockwise size={20} />
                                     </button>
                                 )}
                             </div>

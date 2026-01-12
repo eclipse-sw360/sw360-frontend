@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
-import { FaRegQuestionCircle } from 'react-icons/fa'
+import { BsQuestionCircle } from 'react-icons/bs'
 import { CreateClearingRequestPayload } from '@/object-types'
 
 interface Props {
@@ -143,12 +143,13 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
                     }}
                 >
                     <Modal.Title id='reopen-clearing-request-modal'>
-                        <FaRegQuestionCircle
+                        <BsQuestionCircle
                             style={{
                                 marginBottom: '5px',
                                 color: '#2E5AAC',
                                 fontSize: '19px',
                             }}
+                            size={20}
                         />{' '}
                         {t('reopen clearing request')}
                     </Modal.Title>

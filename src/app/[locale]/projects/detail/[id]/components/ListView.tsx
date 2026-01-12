@@ -23,9 +23,15 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
+
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
+
+
+
+
+
 import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
@@ -604,7 +610,10 @@ export default function ListView({
                                     href={url}
                                     className='overlay-trigger'
                                 >
-                                    <FaPencilAlt className='btn-icon' />
+                                    <BsPencil
+                                        className='btn-icon'
+                                        size={20}
+                                    />
                                 </Link>
                             </OverlayTrigger>
                             {row.original.type === 'release' && (

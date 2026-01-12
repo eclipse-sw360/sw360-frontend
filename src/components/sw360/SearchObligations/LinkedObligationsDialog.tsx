@@ -286,7 +286,7 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
                             fontWeight: '700',
                         }}
                     >
-                        <BsCheck2Square />
+                        <BsCheck2Square size={20} />
                         &nbsp;
                         {t('Select License Obligations to be added')}
                     </Modal.Title>

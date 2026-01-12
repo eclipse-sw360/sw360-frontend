@@ -12,7 +12,7 @@
 'use client'
 import { signOut, useSession } from 'next-auth/react'
 import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
 import {
     CheckSum,
     ExternalReference,
@@ -1981,9 +1981,10 @@ const EditPackageInformation = ({
                                                                 </option>
                                                             ))}
                                                         </select>
-                                                        <FaTrashAlt
+                                                        <BsFillTrashFill
                                                             className='spdx-delete-icon-main-index'
                                                             onClick={deleteExternalRefsDatas}
+                                                            size={20}
                                                         />
                                                     </div>
                                                     <button
