@@ -9,14 +9,22 @@
 
 'use client'
 
-import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    ExpandedState,
+    getCoreRowModel,
+    getExpandedRowModel,
+    type Row,
+    type Table,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
-import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
@@ -146,6 +154,7 @@ const filterRows = (
 
 function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
+    const tableRef = useRef<Table<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>> | null>(null)
     const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
         selected: [],
         deselected: [],
@@ -366,19 +375,50 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                             <span className='fw-bold'>
                                 {t('Linked Releases And Projects')}
                                 {' ('}
-                                <Link
-                                    href='#'
-                                    className='table-text-link'
+                                <button
+                                    type='button'
+                                    className='btn-reset table-text-link'
+                                    onClick={() => {
+                                        setExpandedState((prev) => {
+                                            const next =
+                                                typeof prev === 'object'
+                                                    ? {
+                                                          ...prev,
+                                                      }
+                                                    : {}
+                                            if (!tableRef.current) return next
+
+                                            const expandNextLevel = (
+                                                rows: Row<
+                                                    ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>
+                                                >[],
+                                            ) => {
+                                                for (const row of rows) {
+                                                    if (!row.getCanExpand()) continue
+
+                                                    if (!next[row.id]) {
+                                                        next[row.id] = true
+                                                    } else {
+                                                        expandNextLevel(row.subRows ?? [])
+                                                    }
+                                                }
+                                            }
+
+                                            expandNextLevel(tableRef.current.getRowModel().rows)
+                                            return next
+                                        })
+                                    }}
                                 >
                                     {t('Expand next level')}
-                                </Link>
+                                </button>
                                 {' | '}
-                                <Link
-                                    href='#'
-                                    className='table-text-link'
+                                <button
+                                    type='button'
+                                    className='btn-reset table-text-link'
+                                    onClick={() => setExpandedState({})}
                                 >
                                     {t('Collapse all')}
-                                </Link>
+                                </button>
                                 {')'}
                             </span>
                         </div>
@@ -748,6 +788,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
         onExpandedChange: setExpandedState,
     })
+
+    tableRef.current = table
 
     // function to add attachments to a release
     const formatReleaseAttachmentDataToTableData = (

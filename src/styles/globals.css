@@ -1579,6 +1579,14 @@ input[checked] + .slider:before {
     color: var(--sw360-primary-hover-color);
 }
 
+.btn-reset {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+}
+
 .filter-button {
     .btn {
         color: inherit !important;
