@@ -297,7 +297,7 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                                                 <tbody>
                                                     {vendors.map((vendor, index) => (
                                                         <tr
-                                                            key={vendor.id || vendor.fullName || index}
+                                                            key={vendor.fullName || index}
                                                             onClick={() => handleSelectVendor(vendor)}
                                                             style={{
                                                                 cursor: 'pointer',
