@@ -10,6 +10,7 @@
 
 'use client'
 
+import Link from 'next/link'
 import { useParams, useRouter, useSelectedLayoutSegment } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { LocaleSwitcher, Logo, ProfileDropdown } from 'next-sw360'
@@ -106,7 +107,10 @@ function Navbar(): JSX.Element {
                 className='bg-body-tertiary'
             >
                 <Container fluid>
-                    <BSNavbar.Brand href='/'>
+                    <BSNavbar.Brand
+                        as={Link}
+                        href={`/${locale ?? 'en'}`}
+                    >
                         <Logo
                             src={process.env.NEXT_PUBLIC_CUSTOM_LOGO ?? undefined}
                             alt='SW360 Logo'
