@@ -13,11 +13,11 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-import { Dropdown } from 'react-bootstrap'
+import { Alert, Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
 import { useConfigValue } from '@/contexts'
-import { UIConfigKeys, UserGroupType } from '@/object-types'
+import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils } from '@/utils'
 import ComponentsTable from './ComponentsTable'
@@ -32,6 +32,9 @@ const ComponentIndex = (): ReactNode => {
     const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
     const platformsSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
     const osSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
+    const [showExportMessage, setShowExportMessage] = useState(false)
+    const [showExportError, setShowExportError] = useState(false)
+    const [exportViaMail, setExportViaMail] = useState<boolean>(false)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -62,6 +65,30 @@ const ComponentIndex = (): ReactNode => {
         return () => {
             controller.abort()
         }
+    }, [
+        session,
+    ])
+
+    useEffect(() => {
+        const fetchExportConfig = async () => {
+            try {
+                if (!session) return
+
+                const response = await ApiUtils.GET('configurations', session.user.access_token)
+
+                if (response.ok) {
+                    const configs = await response.json()
+
+                    const mailEnabled = configs[ConfigKeys.MAIL_REQUEST_FOR_COMPONENT_REPORT] === 'true'
+
+                    setExportViaMail(mailEnabled)
+                }
+            } catch {
+                setExportViaMail(false)
+            }
+        }
+
+        fetchExportConfig()
     }, [
         session,
     ])
@@ -204,13 +231,20 @@ const ComponentIndex = (): ReactNode => {
         },
     ]
 
-    const handleExportComponent = (withLinkedReleases: string) => {
+    const handleExportComponent = async (withLinkedReleases: string) => {
         const currentDate = new Date().toISOString().split('T')[0]
-        DownloadService.download(
-            `reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=false&module=components`,
+        const response = await DownloadService.download(
+            `reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=${exportViaMail ?? false}&module=components`,
             session,
             `components-${currentDate}.xlsx`,
         )
+        if (response === 200) {
+            setShowExportMessage(true)
+            setShowExportError(false)
+        } else {
+            setShowExportError(true)
+            setShowExportMessage(false)
+        }
     }
 
     return (
@@ -252,6 +286,26 @@ const ComponentIndex = (): ReactNode => {
                             </Dropdown>
                         </div>
                     </PageButtonHeader>
+                    {showExportMessage && (
+                        <Alert
+                            variant='success'
+                            onClose={() => setShowExportMessage(false)}
+                            dismissible
+                        >
+                            {exportViaMail
+                                ? t('Excel report generation has started')
+                                : t('Spreadsheet download is successful')}
+                        </Alert>
+                    )}
+                    {showExportError && (
+                        <Alert
+                            variant='danger'
+                            onClose={() => setShowExportError(false)}
+                            dismissible
+                        >
+                            {t('Export report generation has failed')}
+                        </Alert>
+                    )}
                     <div
                         className='row'
                         style={{
