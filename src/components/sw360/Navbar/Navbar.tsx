@@ -23,7 +23,7 @@ function Navbar(): JSX.Element {
     const param = useParams()
     const locale = (param.locale as string) || 'en'
 
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const [show, setShow] = useState(false)
     const selectedLayoutSegment = useSelectedLayoutSegment()
     const pathname = selectedLayoutSegment !== null ? `/${selectedLayoutSegment}` : '/'
@@ -109,7 +109,7 @@ function Navbar(): JSX.Element {
                 <Container fluid>
                     <BSNavbar.Brand
                         as={Link}
-                        href={`/${locale ?? 'en'}`}
+                        href={status === 'authenticated' ? `/${locale ?? 'en'}/home` : `/${locale ?? 'en'}`}
                     >
                         <Logo
                             src={process.env.NEXT_PUBLIC_CUSTOM_LOGO ?? undefined}
