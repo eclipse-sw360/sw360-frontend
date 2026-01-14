@@ -322,7 +322,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                     project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
                                         ?.enableSvm === 'true',
                                 projectRelationship:
-                                    proj.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
                                         ?.relation ?? '',
                             }
                             return acc
