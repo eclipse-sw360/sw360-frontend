@@ -74,12 +74,9 @@ function isSourceCodeBundleEnabled(type: string): boolean {
 interface ExtendedNestedRows<K> extends NestedRows<K> {
     projectPath?: string
 }
-const releaseMatchesFilter = (
-    release: Release,
-    filter: string,
-    saveUsagesPayload?: SaveUsagesPayload,
-    releaseId?: string,
-): boolean => {
+const releaseMatchesFilter = (release: Release, filter: string, saveUsagesPayload?: SaveUsagesPayload): boolean => {
+    const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
+
     if (!filter) return true
     const attachments = release.attachments ?? []
     switch (filter) {
@@ -92,33 +89,25 @@ const releaseMatchesFilter = (
         case 'withoutAttachments':
             return attachments.length === 0
         case 'withoutCliUsage': {
-            // Check if release has CLI/CLX attachments but none are marked for license info usage
             if (!saveUsagesPayload || !releaseId) return true
             const cliAttachments = attachments.filter(
                 (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
             )
             if (cliAttachments.length === 0) return false
 
-            // Check if ANY CLI attachment has license info usage set
             return !cliAttachments.some((att) =>
-                saveUsagesPayload.selected.some((sel) =>
-                    sel.includes(`${releaseId}_licenseInfo_${att.attachmentContentId}`),
-                ),
+                saveUsagesPayload.selected.includes(`${releaseId}_licenseInfo_${att.attachmentContentId}`),
             )
         }
         case 'withoutSourceUsage': {
-            // Check if release has SOURCE/SRC attachments but none are marked for source package usage
             if (!saveUsagesPayload || !releaseId) return true
             const sourceAttachments = attachments.filter(
                 (att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC',
             )
             if (sourceAttachments.length === 0) return false
 
-            // Check if ANY source attachment has source package usage set
             return !sourceAttachments.some((att) =>
-                saveUsagesPayload.selected.some((sel) =>
-                    sel.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`),
-                ),
+                saveUsagesPayload.selected.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`),
             )
         }
         default:
@@ -171,8 +160,7 @@ const filterRows = (
         let matchesFilter = true
         if (node.type === 'release') {
             const releaseEntity = node.entity as Release
-            const releaseId = releaseEntity._links?.self.href.split('/').at(-1) ?? ''
-            matchesFilter = releaseMatchesFilter(releaseEntity, filter, saveUsagesPayload, releaseId)
+            matchesFilter = releaseMatchesFilter(releaseEntity, filter, saveUsagesPayload)
         }
         const matchesSearch = rowMatchesSearch(row, term)
         let keepRow = false
