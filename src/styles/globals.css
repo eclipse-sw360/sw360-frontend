@@ -389,6 +389,12 @@ body {
     color: var(--sw360-primary-color) !important;
 }
 
+.icon-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    color: #6c757d;
+}
+
 .btn-light {
     background-color: #f1f2f5 !important;
     border-color: #f1f2f5 !important;
