@@ -19,7 +19,6 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
@@ -38,7 +37,6 @@ interface Props {
 
 const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props): ReactNode => {
     const t = useTranslations('default')
-    const params = useSearchParams()
     const session = useSession()
 
     const [globalFilter, setGlobalFilter] = useState('')
@@ -91,6 +89,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
+
                 const data = (await response.json()) as LicenseDetail
                 const obligations = data['_embedded']?.['sw360:obligations'] ?? []
                 setObligationData(obligations)
@@ -110,12 +109,11 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                 setShowProcessing(false)
             }
         })()
-
         return () => controller.abort()
     }, [
-        params,
         licenseId,
         session.data,
+        isEditWhitelist,
         setWhitelist,
     ])
 
@@ -125,11 +123,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             const id: string = CommonUtils.getIdFromUrl(item._links?.self.href)
             const newWhitelist = new Map(whitelist)
 
-            if (newWhitelist.has(id)) {
-                newWhitelist.set(id, !newWhitelist.get(id))
-            } else {
-                newWhitelist.set(id, true)
-            }
+            newWhitelist.set(id, !newWhitelist.get(id))
 
             setWhitelist(newWhitelist)
         },
@@ -157,16 +151,20 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             {
                 id: 'obligation',
                 header: t('Obligation'),
+                accessorFn: (row) => row.node.title,
                 cell: ({ row }) => <>{row.original.node.title}</>,
             },
             {
                 id: 'obligationType',
                 header: t('Obligation Type'),
+                accessorFn: (row) => row.node.obligationType,
                 cell: ({ row }) => <>{row.original.node.obligationType}</>,
             },
             {
                 id: 'furtherProperties',
                 header: t('Further properties'),
+                accessorFn: (row) =>
+                    row.node.customPropertyToValue ? JSON.stringify(row.node.customPropertyToValue) : '',
                 cell: ({ row }) => (
                     <>
                         {!CommonUtils.isNullOrUndefined(row.original.node.customPropertyToValue)
@@ -201,11 +199,13 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             {
                 id: 'text',
                 header: t('Obligation'),
+                accessorKey: 'text',
                 cell: ({ row }) => <>{row.original.text}</>,
             },
             {
                 id: 'furtherProperties',
                 header: t('Further properties'),
+                accessorFn: (row) => (row.customPropertyToValue ? JSON.stringify(row.customPropertyToValue) : ''),
                 cell: ({ row }) => (
                     <>
                         {!CommonUtils.isNullOrUndefined(row.original.customPropertyToValue)
@@ -230,8 +230,8 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         onGlobalFilterChange: setGlobalFilter,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getExpandedRowModel: getExpandedRowModel(),
         globalFilterFn: 'includesString',
+        getExpandedRowModel: getExpandedRowModel(),
         getSubRows: (row) => row.children ?? [],
         getRowCanExpand: (row) => {
             if (row.depth === 1) {
@@ -270,7 +270,8 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                     <input
                         type='text'
                         className='form-control'
-                        placeholder={t('Search obligations...')}
+                        placeholder='Search obligations...'
+                        aria-label='Search obligations'
                         value={globalFilter ?? ''}
                         onChange={(e) => setGlobalFilter(e.target.value)}
                     />
