@@ -17,14 +17,25 @@ import { ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
-interface LicenseClearingData {
+export interface LicenseClearingData {
     'Release Count': number
     'Approved Count': number
 }
 
-export default function LicenseClearing({ projectId }: { projectId: string }): ReactNode {
-    const [lcData, setLcData] = useState<LicenseClearingData | null>(null)
+interface LicenseClearingProps {
+    projectId: string
+    data?: LicenseClearingData
+}
+
+export default function LicenseClearing({ projectId, data }: LicenseClearingProps): ReactNode {
+    const [lcData, setLcData] = useState<LicenseClearingData | null>(data ?? null)
+
     useEffect(() => {
+        if (data) {
+            setLcData(data)
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
         void (async () => {
@@ -56,6 +67,7 @@ export default function LicenseClearing({ projectId }: { projectId: string }): R
         return () => controller.abort()
     }, [
         projectId,
+        data,
     ])
 
     return (
