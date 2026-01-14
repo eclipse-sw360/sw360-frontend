@@ -112,6 +112,16 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                     </td>
                 </tr>
                 <tr>
+                    <td>{t('CycloneDX Component Type')}:</td>
+                    <td>
+                        {!CommonUtils.isNullEmptyOrUndefinedString(
+                            component.cycloneDxComponentType
+                        )
+                            ? component.cycloneDxComponentType
+                            : '-'}
+                    </td>
+                </tr>
+                <tr>
                     <td>{t('Default vendor')}:</td>
                     <td>
                         {component['_embedded'] &&
@@ -129,6 +139,23 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                             >
                                 {component.homepage}
                             </Link>
+                        )}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{t('VCS / Repository URL')}:</td>
+                    <td>
+                        {!CommonUtils.isNullEmptyOrUndefinedString(component.vcsUrl) ? (
+                            <Link
+                                className='text-link'
+                                href={component.vcsUrl}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                            >
+                                {component.vcsUrl}
+                            </Link>
+                        ) : (
+                            '-'
                         )}
                     </td>
                 </tr>
