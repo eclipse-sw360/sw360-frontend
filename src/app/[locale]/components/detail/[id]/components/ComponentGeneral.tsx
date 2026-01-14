@@ -114,7 +114,9 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                 <tr>
                     <td>{t('CycloneDX Component Type')}:</td>
                     <td>
-                        {!CommonUtils.isNullEmptyOrUndefinedString(component.cycloneDxComponentType)
+                        {!CommonUtils.isNullEmptyOrUndefinedString(
+                            component.cycloneDxComponentType
+                        )
                             ? component.cycloneDxComponentType
                             : '-'}
                     </td>
