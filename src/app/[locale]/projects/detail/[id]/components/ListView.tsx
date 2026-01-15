@@ -278,7 +278,13 @@ export default function ListView({
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
-    const [showProcessing, setShowProcessing] = useState(false)
+    // Track loading state for each API call separately
+    const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState(true)
+    const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState(true)
+    const [isDataReady, setIsDataReady] = useState(false)
+
+    // Show processing until both API calls complete AND data is ready to render
+    const showProcessing = isLoadingLicenseClearing || isLoadingLinkedProjects || !isDataReady
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const memoizedLinkedProjects = useMemo(
@@ -600,10 +606,9 @@ export default function ListView({
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        // Reset data ready state when starting new fetch
+        setIsLoadingLicenseClearing(true)
+        setIsDataReady(false)
 
         void (async () => {
             try {
@@ -626,8 +631,7 @@ export default function ListView({
                 const message = error instanceof Error ? error.message : String(error)
                 throw new Error(message)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLicenseClearing(false)
             }
         })()
 
@@ -644,10 +648,7 @@ export default function ListView({
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        setIsLoadingLinkedProjects(true)
 
         void (async () => {
             try {
@@ -671,8 +672,7 @@ export default function ListView({
                 const message = error instanceof Error ? error.message : String(error)
                 throw new Error(message)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLinkedProjects(false)
             }
         })()
 
@@ -687,6 +687,8 @@ export default function ListView({
         if (memoizedLicenseClearing === undefined) return
         const data = buildTable(memoizedLicenseClearing, memoizedLinkedProjects, projectName, projectVersion)
         setRowData(data)
+        // Mark data as ready only after setting row data
+        setIsDataReady(true)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,

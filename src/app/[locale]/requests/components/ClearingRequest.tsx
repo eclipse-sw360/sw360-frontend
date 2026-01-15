@@ -290,7 +290,7 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                 },
             },
             {
-                id: 'ctions',
+                id: 'actions',
                 header: t('Actions'),
                 cell: ({ row }) => {
                     return (
@@ -306,7 +306,7 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                                     }
                                 >
                                     <Link
-                                        href={`/requests/clearingRequest/edit/${row.original.id}`}
+                                        href={`/requests/clearingRequest/detail/${row.original.id}`}
                                         className='overlay-trigger'
                                     >
                                         <BsPencil
