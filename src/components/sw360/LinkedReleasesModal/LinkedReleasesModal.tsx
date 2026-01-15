@@ -16,7 +16,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
+import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import {
     Embedded,
@@ -324,16 +324,6 @@ export default function LinkedReleasesModal({ projectPayload, setProjectPayload,
                 <Modal.Title id='linked-projects-modal'>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {showProcessing && (
-                    <Alert
-                        variant='info'
-                        className='mb-3'
-                        role='status'
-                    >
-                        {t('Processing')}...
-                    </Alert>
-                )}
-
                 <Form>
                     <Col>
                         <Row className='mb-3'>
