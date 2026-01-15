@@ -111,12 +111,12 @@ function GenerateLicenseInfo({
         const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
 
         // Check if ANY CLI attachment has license info usage set
-        return cliAttachments.some((att) =>
-            saveUsagesPayload.selected.some((sel) => {
-                const pathPrefix = projectPath ? `${projectPath}-` : ''
-                return sel.includes(`${pathPrefix}${releaseId}_licenseInfo_${att.attachmentContentId}`)
-            }),
-        )
+        return cliAttachments.some((att) => {
+            const pathPrefix = projectPath ? `${projectPath}-` : ''
+            return saveUsagesPayload.selected.includes(
+                `${pathPrefix}${releaseId}_licenseInfo_${att.attachmentContentId}`,
+            )
+        })
     }
 
     const columns = useMemo<ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>>[]>(
