@@ -424,11 +424,6 @@ body {
     border-color: #5d8ea9 !important;
 }
 
-.header {
-    background-color: #5d8ea9;
-    color: white;
-}
-
 .text-link {
     text-decoration: none;
     color: var(--sw360-primary-color);
@@ -453,10 +448,6 @@ body {
     background-color: #fcba76 !important;
     border-color: lightgray !important;
     color: black !important;
-}
-
-.list-group-item-action:hover {
-    background-color: #f4e4d5 !important;
 }
 
 .list-group-item-action:hover.active {
@@ -545,13 +536,17 @@ body {
 }
 
 .capsule-left {
-    border-top-right-radius: 0%;
-    border-bottom-right-radius: 0%;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .capsule-right {
-    border-top-left-radius: 0%;
-    border-bottom-left-radius: 0%;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .bg-success {
@@ -652,26 +647,10 @@ body {
     border-radius: 5px;
 }
 
-.link-sidebar {
-    background-color: white !important;
-    color: #6b6c7e !important;
-}
-
-.list-group-item-action {
-    background-color: white !important;
-    color: #6b6c7e !important;
-}
-
 .list-group-item-action:hover {
     border-color: #dbdce4 !important;
     color: #6b6c7e !important;
     background-color: #edcaa0 !important;
-}
-
-.sidebar-active {
-    border-color: #dbdce4 !important;
-    color: #6b6c7e !important;
-    background-color: #e89734 !important;
 }
 
 .page-content {
@@ -869,6 +848,7 @@ td:has(.orange-cell) {
 .modal-info .modal-header {
     background-color: #eef2fa !important;
     border-color: #89a7e0 !important;
+    color: #2e5aac !important;
 }
 
 .section-header {
@@ -878,10 +858,12 @@ td:has(.orange-cell) {
     border-top-width: 0px;
     vertical-align: bottom;
     padding: 0.75rem;
+    font-size: 0.875rem;
 }
 
 .with-divider {
     border-bottom: 1px solid #e7e7ed;
+    font-size: 0.875rem;
 }
 
 .alert-success {
@@ -916,36 +898,6 @@ td:has(.orange-cell) {
 
 .global-message .alert span {
     font-size: 15px;
-}
-
-.form-check-input:hover {
-    cursor: pointer;
-}
-
-.modal-title {
-    flex-grow: 1 !important;
-    font-size: 1.25rem !important;
-    font-weight: 700 !important;
-    line-height: 1.5 !important;
-    margin-bottom: 0 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-}
-
-.section-header {
-    color: #fff;
-    background-color: #5d8ea9;
-    border-bottom: 1px solid #e7e7ed;
-    border-top-width: 0px;
-    vertical-align: bottom;
-    padding: 0.75rem;
-    font-size: 0.875rem;
-}
-
-.with-divider {
-    border-bottom: 1px solid #e7e7ed;
-    font-size: 0.875rem;
 }
 
 .spdx-col-1 {
@@ -1044,14 +996,6 @@ td:has(.orange-cell) {
 .label-select {
     flex: 1;
     text-decoration: underline;
-}
-.spdx-delete-icon-main {
-    margin-top: 0.3rem;
-    margin-right: 1rem;
-    width: 1rem;
-    height: auto;
-
-    cursor: pointer;
 }
 .spdx-delete-icon-sub {
     margin-top: 0.3rem;
@@ -1166,16 +1110,6 @@ input[type='date'] {
     padding-left: 0px !important;
 }
 
-.capsule-left {
-    border-bottom-left-radius: 5px;
-    border-top-left-radius: 5px;
-}
-
-.capsule-right {
-    border-bottom-right-radius: 5px;
-    border-top-right-radius: 5px;
-}
-
 .projectStateActive {
     background-color: rgba(40, 167, 69, 0.7);
 }
@@ -1207,12 +1141,6 @@ svg.cursor {
     background-color: #fff4ec;
     border-color: #ff8f39;
     color: #b95000;
-}
-
-.modal-info .modal-header {
-    background-color: #eef2fa;
-    border-color: #89a7e0;
-    color: #2e5aac;
 }
 
 a.text-primary:hover,
@@ -1278,10 +1206,6 @@ a.text-primary {
     background-color: #ffffff !important;
     border-color: #ffffff !important;
     color: #000000 !important;
-}
-
-.cursor-pointer {
-    cursor: pointer;
 }
 
 .modal-danger .modal-header {
@@ -1350,14 +1274,6 @@ svg.action:hover {
 .tree-row > .row:hover > .action-buttons {
     opacity: 1 !important;
     transition: opacity 0.2s;
-}
-
-.header-underlined {
-    color: #5d8ea9;
-    border-bottom: 1px solid #5d8ea9;
-    font-size: 1rem;
-    font-weight: bold;
-    text-transform: uppercase;
 }
 
 .table-header {
