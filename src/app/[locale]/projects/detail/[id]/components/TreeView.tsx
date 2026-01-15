@@ -248,7 +248,13 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
     const [show, setShow] = useState<boolean>(false)
-    const [showProcessing, setShowProcessing] = useState(false)
+    // Track loading state for each API call separately
+    const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState(true)
+    const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState(true)
+    const [isDataReady, setIsDataReady] = useState(false)
+
+    // Show processing until both API calls complete AND data is ready to render
+    const showProcessing = isLoadingLicenseClearing || isLoadingLinkedProjects || !isDataReady
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
@@ -638,6 +644,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) return
         buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
+        // Mark data as ready only after setting row data
+        setIsDataReady(true)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,
@@ -767,10 +775,9 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        // Reset data ready state when starting new fetch
+        setIsLoadingLicenseClearing(true)
+        setIsDataReady(false)
 
         void (async () => {
             try {
@@ -793,8 +800,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 const message = error instanceof Error ? error.message : String(error)
                 throw new Error(message)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLicenseClearing(false)
             }
         })()
 
@@ -811,10 +817,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        setIsLoadingLinkedProjects(true)
 
         void (async () => {
             try {
@@ -838,8 +841,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 const message = error instanceof Error ? error.message : String(error)
                 throw new Error(message)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLinkedProjects(false)
             }
         })()
 
