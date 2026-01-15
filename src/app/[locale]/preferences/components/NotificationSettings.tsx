@@ -13,7 +13,7 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { Accordion, Form } from 'react-bootstrap'
 import { Preferences } from '@/object-types'
-import styles from '../preferences.module.css'
+
 
 interface NotificationSetting {
     wantsMailNotification: boolean
@@ -54,12 +54,12 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
                         <Accordion.Item
                             eventKey={value.key}
                             key={value.key}
-                            className={styles['accordion-item']}
+                            className='preferences-accordion-item'
                         >
-                            <Accordion.Header className={styles['accordion-header']}>
+                            <Accordion.Header className='preferences-accordion-header'>
                                 {value.documentType}
                             </Accordion.Header>
-                            <Accordion.Body className={styles['accordion-body']}>
+                            <Accordion.Body className='preferences-accordion-body'>
                                 {value.entries.map((entry) => (
                                     <Form.Check
                                         type='checkbox'

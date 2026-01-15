@@ -20,7 +20,7 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 
 import { Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from '../components.module.css'
+
 
 interface Props {
     show: boolean
@@ -178,9 +178,9 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                             {t('wrong_spdx_information')}.
                         </div>
                         <div>
-                            <div className={`${styles['modal-body-first']}`}>
+                            <div className='modal-body-first'>
                                 <div
-                                    className={`${styles['modal-body-second']}`}
+                                    className='modal-body-second'
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
                                 >
@@ -189,7 +189,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                                     {t('Or')}
                                     <br />
                                     <input
-                                        className={`${styles['input']}`}
+                                        className='sbom-input'
                                         ref={inputRef as React.Ref<HTMLInputElement>}
                                         type='file'
                                         accept='.rdf,.spdx'
@@ -197,7 +197,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                                         placeholder={t('Drop a File Here')}
                                     />
                                     <button
-                                        className={`${styles['button-browse']}`}
+                                        className='button-browse'
                                         onClick={handleBrowseFile}
                                     >
                                         {t('Browse')}

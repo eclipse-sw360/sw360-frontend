@@ -13,16 +13,15 @@ import '@/styles/globals.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import Link from 'next/link'
 import type { JSX } from 'react'
-import styles from './footer.module.css'
 
 function Footer(): JSX.Element {
     return (
         <>
-            <footer className={`${styles.sw360footer} footer d-flex flex-column`}>
-                <div className={`${styles.poweredBy} "pt-3"`}>
+            <footer className='sw360-footer footer d-flex flex-column'>
+                <div className='powered-by pt-3'>
                     Powered-by
                     <Link
-                        className={styles.footerHref}
+                        className='footer-href'
                         href='http://www.github.com/eclipse/sw360'
                         rel='noopener noreferrer'
                         target='_blank'
@@ -32,7 +31,7 @@ function Footer(): JSX.Element {
                     </Link>{' '}
                     |
                     <Link
-                        className={styles.footerHref}
+                        className='footer-href'
                         href='/resource/mkdocs/index.html'
                         rel='noopener noreferrer'
                         target='_blank'
@@ -42,7 +41,7 @@ function Footer(): JSX.Element {
                     </Link>{' '}
                     |
                     <Link
-                        className={styles.footerHref}
+                        className='footer-href'
                         href='/resource/docs/api-guide.html'
                         rel='noopener noreferrer'
                         target='_blank'
@@ -52,7 +51,7 @@ function Footer(): JSX.Element {
                     </Link>{' '}
                     |
                     <Link
-                        className={styles.footerHref}
+                        className='footer-href'
                         href='https://github.com/eclipse/sw360/issues'
                         rel='noopener noreferrer'
                         target='_blank'
@@ -61,7 +60,7 @@ function Footer(): JSX.Element {
                         Public Issue Tracker
                     </Link>
                 </div>
-                <div className={styles.footerVersion}>
+                <div className='footer-version'>
                     Version: 17.0.0-SNAPSHOT | Branch: main (f69a224) | Build time: 2023-01-29T14:25:37Z
                 </div>
             </footer>

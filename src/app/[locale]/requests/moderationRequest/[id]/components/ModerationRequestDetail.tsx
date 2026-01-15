@@ -16,7 +16,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
+
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -366,7 +366,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Row>
                             )}
                             <Row className='mt-3'>
-                                <Card className={`${styles['card']}`}>
+                                <Card className='request-card'>
                                     <div
                                         onClick={() => toggleCollapse(0)}
                                         style={{
@@ -375,15 +375,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         }}
                                     >
                                         <Card.Header
-                                            className={`
-                                                            ${
-                                                                openCardIndex === 0 ? styles['cardHeader-expanded'] : ''
-                                                            }`}
-                                            id={`${styles['cardHeader']}`}
+                                            className={openCardIndex === 0 ? 'request-card-header-expanded' : ''}
+                                            id='request-card-header'
                                         >
                                             <Button
                                                 variant='button'
-                                                className={`p-0 border-0 ${styles['header-button']}`}
+                                                className='p-0 border-0 request-header-button'
                                                 aria-controls='example-collapse-text-1'
                                                 aria-expanded={openCardIndex === 0}
                                             >
@@ -393,7 +390,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                     </div>
                                     <Collapse in={openCardIndex === 0}>
                                         <div id='example-collapse-text-1'>
-                                            <Card.Body className={`${styles['card-body']}`}>
+                                            <Card.Body className='request-card-body'>
                                                 <div className='row'>
                                                     <div className='col'>
                                                         <ModerationRequestInfo data={moderationRequestData} />
@@ -412,7 +409,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Card>
                             </Row>
                             <Row>
-                                <Card className={`${styles['card']}`}>
+                                <Card className='request-card'>
                                     <div
                                         onClick={() => toggleCollapse(1)}
                                         style={{
@@ -421,15 +418,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         }}
                                     >
                                         <Card.Header
-                                            className={`
-                                                            ${
-                                                                openCardIndex === 1 ? styles['cardHeader-expanded'] : ''
-                                                            }`}
-                                            id={`${styles['cardHeader']}`}
+                                            className={openCardIndex === 1 ? 'request-card-header-expanded' : ''}
+                                            id='request-card-header'
                                         >
                                             <Button
                                                 variant='button'
-                                                className={`p-0 border-0 ${styles['header-button']}`}
+                                                className='p-0 border-0 request-header-button'
                                                 aria-controls='example-collapse-text-2'
                                                 aria-expanded={openCardIndex === 1}
                                             >
@@ -439,7 +433,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                     </div>
                                     <Collapse in={openCardIndex === 1}>
                                         <div id='example-collapse-text-2'>
-                                            <Card.Body className={`${styles['card-body']}`}>
+                                            <Card.Body className='request-card-body'>
                                                 <div className='row'>
                                                     <div className='col'>
                                                         <ProposedChanges
@@ -453,7 +447,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Card>
                             </Row>
                             <Row>
-                                <Card className={`${styles['card']}`}>
+                                <Card className='request-card'>
                                     <div
                                         onClick={() => toggleCollapse(2)}
                                         style={{
@@ -462,15 +456,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                         }}
                                     >
                                         <Card.Header
-                                            className={`
-                                                            ${
-                                                                openCardIndex === 2 ? styles['cardHeader-expanded'] : ''
-                                                            }`}
-                                            id={`${styles['cardHeader']}`}
+                                            className={openCardIndex === 2 ? 'request-card-header-expanded' : ''}
+                                            id='request-card-header'
                                         >
                                             <Button
                                                 variant='button'
-                                                className={`p-0 border-0 ${styles['header-button']}`}
+                                                className='p-0 border-0 request-header-button'
                                                 aria-controls='example-collapse-text-3'
                                                 aria-expanded={openCardIndex === 2}
                                             >
@@ -487,7 +478,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                     </div>
                                     <Collapse in={openCardIndex === 2}>
                                         <div id='example-collapse-text-3'>
-                                            <Card.Body className={`${styles['card-body']}`}>
+                                            <Card.Body className='request-card-body'>
                                                 {(moderationRequestData?.documentType === 'COMPONENT' && (
                                                     <CurrentComponentDetail
                                                         componentId={moderationRequestData.documentId}

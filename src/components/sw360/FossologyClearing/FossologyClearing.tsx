@@ -19,7 +19,6 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 import { Attachment, FossologyProcessInfo, FossologyProcessStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from './fossologyClearing.module.css'
 
 interface Props {
     show: boolean
@@ -390,7 +389,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     >
                         {message.content}
                     </Alert>
-                    <div className={`${styles.guide} form-text`}>
+                    <div className='fossology-guide form-text'>
                         <h3>{t('How it works')}:</h3>
                         <p>{t('basic_fossology_process')}:</p>
                         <ol>

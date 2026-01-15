@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Spinner, Tab } from 'react-bootstrap'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
+
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -169,7 +169,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                         </Col>
                                     </Row>
                                     <Row className='mt-3'>
-                                        <Card className={`${styles['card']}`}>
+                                        <Card className='request-card'>
                                             <div
                                                 onClick={() => toggleCollapse(0)}
                                                 style={{
@@ -178,15 +178,12 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={`
-                                                            ${
-                                                                openCardIndex === 0 ? styles['cardHeader-expanded'] : ''
-                                                            }`}
-                                                    id={`${styles['cardHeader']}`}
+                                                    className={openCardIndex === 0 ? 'request-card-header-expanded' : ''}
+                                                    id='request-card-header'
                                                 >
                                                     <Button
                                                         variant='button'
-                                                        className={`p-0 border-0 ${styles['header-button']}`}
+                                                        className='p-0 border-0 request-header-button'
                                                         aria-controls='example-collapse-text-1'
                                                         aria-expanded={openCardIndex === 0}
                                                     >
@@ -209,7 +206,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                             </div>
                                             <Collapse in={openCardIndex === 0}>
                                                 <div id='example-collapse-text-1'>
-                                                    <Card.Body className={`${styles['card-body']}`}>
+                                                    <Card.Body className='request-card-body'>
                                                         <div className='row'>
                                                             <div className='col'>
                                                                 <EditClearingRequestInfo
@@ -240,7 +237,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                         </Card>
                                     </Row>
                                     <Row>
-                                        <Card className={`${styles['card']}`}>
+                                        <Card className='request-card'>
                                             <div
                                                 onClick={() => toggleCollapse(1)}
                                                 style={{
@@ -249,15 +246,12 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={`
-                                                            ${
-                                                                openCardIndex === 1 ? styles['cardHeader-expanded'] : ''
-                                                            }`}
-                                                    id={`${styles['cardHeader']}`}
+                                                    className={openCardIndex === 1 ? 'request-card-header-expanded' : ''}
+                                                    id='request-card-header'
                                                 >
                                                     <Button
                                                         variant='button'
-                                                        className={`p-0 border-0 ${styles['header-button']}`}
+                                                        className='p-0 border-0 request-header-button'
                                                         aria-controls='example-collapse-text-2'
                                                         aria-expanded={openCardIndex === 1}
                                                     >
@@ -269,7 +263,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                             </div>
                                             <Collapse in={openCardIndex === 1}>
                                                 <div id='example-collapse-text-2'>
-                                                    <Card.Body className={`${styles['card-body']}`}>
+                                                    <Card.Body className='request-card-body'>
                                                         <div>
                                                             <div className='col'>
                                                                 {openCardIndex === 1 && (
