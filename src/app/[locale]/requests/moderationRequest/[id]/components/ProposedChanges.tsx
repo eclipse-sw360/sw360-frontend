@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
+import { SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Attachment, ErrorDetails, ModerationRequestDetails, RequestDocumentTypes } from '@/object-types'

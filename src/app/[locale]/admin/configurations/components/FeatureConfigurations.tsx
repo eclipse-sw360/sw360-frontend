@@ -76,8 +76,8 @@ const FeatureConfigurations = (): JSX.Element => {
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
-            const message = await response.json()
-            MessageService.error(message)
+            const responseData = await response.json()
+            MessageService.error(responseData.message)
         }
     }
 

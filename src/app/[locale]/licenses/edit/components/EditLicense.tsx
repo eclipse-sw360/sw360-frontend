@@ -20,7 +20,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { LicenseDetail, LicensePayload, LicenseTabIds, Obligation, UserGroupType } from '@/object-types'
+import { LicenseDetail, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
@@ -118,17 +118,26 @@ function EditLicense({ licenseId }: Props): ReactNode {
             MessageService.error(t('Session has expired'))
             return signOut()
         }
-        const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
-        const responseMessage = await response.text()
-        if (response.status == StatusCodes.OK) {
-            const data = (await response.json()) as LicensePayload
-            MessageService.success(t('License updated successfully'))
-            router.push(`/licenses/detail?id=${data.shortName}`)
-        } else {
-            MessageService.error(responseMessage)
+
+        try {
+            const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
+
+            if (response.status === StatusCodes.OK) {
+                const data = (await response.json()) as LicensePayload
+                MessageService.success(t('License updated successfully'))
+                router.push(`/licenses/detail?id=${data.shortName}`)
+            } else if (response.status === StatusCodes.ACCEPTED) {
+                MessageService.success(t('License update sent for moderation'))
+                router.push(`/licenses/detail?id=${licensePayload.shortName}`)
+            } else {
+                const responseMessage = await response.text()
+                MessageService.error(responseMessage)
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
-
     const deleteLicense = () => {
         setDeleteDialogOpen(true)
     }

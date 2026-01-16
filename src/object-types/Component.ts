@@ -16,12 +16,14 @@ interface Component {
     description?: string
     createdOn?: string
     componentType?: string
+    cycloneDxComponentType?: string
     subscribers?: Array<string>
     moderators?: Array<string>
     componentOwner?: string
     ownerAccountingUnit?: string
     ownerGroup?: string
     ownerCountry?: string
+    vcsUrl?: string
     visbility?: string
     externalIds?: {
         [k: string]: string

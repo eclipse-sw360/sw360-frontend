@@ -9,14 +9,22 @@
 
 'use client'
 
-import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    ExpandedState,
+    getCoreRowModel,
+    getExpandedRowModel,
+    type Row,
+    type Table,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
-import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
@@ -66,7 +74,9 @@ function isSourceCodeBundleEnabled(type: string): boolean {
 interface ExtendedNestedRows<K> extends NestedRows<K> {
     projectPath?: string
 }
-const releaseMatchesFilter = (release: Release, filter: string): boolean => {
+const releaseMatchesFilter = (release: Release, filter: string, saveUsagesPayload?: SaveUsagesPayload): boolean => {
+    const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
+
     if (!filter) return true
     const attachments = release.attachments ?? []
     switch (filter) {
@@ -78,6 +88,28 @@ const releaseMatchesFilter = (release: Release, filter: string): boolean => {
             return !attachments.some((att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC')
         case 'withoutAttachments':
             return attachments.length === 0
+        case 'withoutCliUsage': {
+            if (!saveUsagesPayload || !releaseId) return true
+            const cliAttachments = attachments.filter(
+                (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
+            )
+            if (cliAttachments.length === 0) return false
+
+            return !cliAttachments.some((att) =>
+                saveUsagesPayload.selected.includes(`${releaseId}_licenseInfo_${att.attachmentContentId}`),
+            )
+        }
+        case 'withoutSourceUsage': {
+            if (!saveUsagesPayload || !releaseId) return true
+            const sourceAttachments = attachments.filter(
+                (att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC',
+            )
+            if (sourceAttachments.length === 0) return false
+
+            return !sourceAttachments.some((att) =>
+                saveUsagesPayload.selected.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`),
+            )
+        }
         default:
             return true
     }
@@ -111,6 +143,7 @@ const filterRows = (
     rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
     filter: string,
     term: string,
+    saveUsagesPayload?: SaveUsagesPayload,
 ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] => {
     const result: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
     for (const row of rows) {
@@ -121,11 +154,13 @@ const filterRows = (
                       row.children as ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
                       filter,
                       term,
+                      saveUsagesPayload,
                   )
                 : []
         let matchesFilter = true
         if (node.type === 'release') {
-            matchesFilter = releaseMatchesFilter(node.entity as Release, filter)
+            const releaseEntity = node.entity as Release
+            matchesFilter = releaseMatchesFilter(releaseEntity, filter, saveUsagesPayload)
         }
         const matchesSearch = rowMatchesSearch(row, term)
         let keepRow = false
@@ -146,6 +181,7 @@ const filterRows = (
 
 function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
+    const tableRef = useRef<Table<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>> | null>(null)
     const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
         selected: [],
         deselected: [],
@@ -180,11 +216,12 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [searchTerm, setSearchTerm] = useState<string>('')
     const session = useSession()
     const filteredData = useMemo(
-        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm) : data),
+        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm, saveUsagesPayload) : data),
         [
             data,
             releaseFilter,
             searchTerm,
+            saveUsagesPayload,
         ],
     )
 
@@ -338,7 +375,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessingAttachmentUsages(false)
@@ -366,19 +403,50 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                             <span className='fw-bold'>
                                 {t('Linked Releases And Projects')}
                                 {' ('}
-                                <Link
-                                    href='#'
-                                    className='table-text-link'
+                                <button
+                                    type='button'
+                                    className='btn-reset table-text-link'
+                                    onClick={() => {
+                                        setExpandedState((prev) => {
+                                            const next =
+                                                typeof prev === 'object'
+                                                    ? {
+                                                          ...prev,
+                                                      }
+                                                    : {}
+                                            if (!tableRef.current) return next
+
+                                            const expandNextLevel = (
+                                                rows: Row<
+                                                    ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>
+                                                >[],
+                                            ) => {
+                                                for (const row of rows) {
+                                                    if (!row.getCanExpand()) continue
+
+                                                    if (!next[row.id]) {
+                                                        next[row.id] = true
+                                                    } else {
+                                                        expandNextLevel(row.subRows ?? [])
+                                                    }
+                                                }
+                                            }
+
+                                            expandNextLevel(tableRef.current.getRowModel().rows)
+                                            return next
+                                        })
+                                    }}
                                 >
                                     {t('Expand next level')}
-                                </Link>
+                                </button>
                                 {' | '}
-                                <Link
-                                    href='#'
-                                    className='table-text-link'
+                                <button
+                                    type='button'
+                                    className='btn-reset table-text-link'
+                                    onClick={() => setExpandedState({})}
                                 >
                                     {t('Collapse all')}
-                                </Link>
+                                </button>
                                 {')'}
                             </span>
                         </div>
@@ -407,6 +475,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 <option value='withAttachments'>With Attachments</option>
                                 <option value='withoutSrc'>Without Source Attachments</option>
                                 <option value='withoutAttachments'>Without Attachments</option>
+                                <option value='withoutCliUsage'>Without CLI Usage Set</option>
+                                <option value='withoutSourceUsage'>Without Source Usage Set</option>
                             </select>
 
                             <input
@@ -748,6 +818,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
         onExpandedChange: setExpandedState,
     })
+
+    tableRef.current = table
 
     // function to add attachments to a release
     const formatReleaseAttachmentDataToTableData = (

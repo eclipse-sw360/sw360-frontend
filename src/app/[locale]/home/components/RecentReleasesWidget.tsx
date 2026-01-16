@@ -15,9 +15,10 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
+import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
@@ -75,8 +76,12 @@ function RecentReleasesWidget(): ReactNode {
                     setRecentRelease([])
                 }
             })
-            .catch((err: Error) => {
-                throw new Error(err.message)
+            .catch((error: Error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             })
             .finally(() => {
                 setLoading(false)

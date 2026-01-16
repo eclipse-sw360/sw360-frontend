@@ -30,7 +30,6 @@ import {
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 
-import styles from './spdx/CssButton.module.css'
 import EditAnnotationInformation from './spdx/EditAnnotationInformation'
 import EditDocumentCreationInformation from './spdx/EditDocumentCreationInformation'
 import EditOtherLicensingInformationDetected from './spdx/EditOtherLicensingInformationDetected'
@@ -283,13 +282,13 @@ const EditSPDXDocument = ({
             >
                 <div className='btn-group'>
                     <button
-                        className={`btn ${isModeFull ? styles['btn-full'] : styles['btn-lite']}`}
+                        className={`btn ${isModeFull ? 'spdx-btn-full' : 'spdx-btn-lite'}`}
                         onClick={changeModeFull}
                     >
                         {t('SPDX Full')}
                     </button>
                     <button
-                        className={`btn ${isModeFull ? styles['btn-lite'] : styles['btn-full']}`}
+                        className={`btn ${isModeFull ? 'spdx-btn-lite' : 'spdx-btn-full'}`}
                         onClick={changeModeLite}
                     >
                         {t('SPDX Lite')}

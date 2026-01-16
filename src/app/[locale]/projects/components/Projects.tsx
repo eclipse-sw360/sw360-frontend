@@ -272,7 +272,7 @@ function Project(): JSX.Element {
                                             <span className={'d-inline-block'}>
                                                 <BsCheck2Square
                                                     size={20}
-                                                    className='btn-icon overlay-trigger'
+                                                    className='btn-icon overlay-trigger icon-disabled'
                                                 />
                                             </span>
                                         </OverlayTrigger>

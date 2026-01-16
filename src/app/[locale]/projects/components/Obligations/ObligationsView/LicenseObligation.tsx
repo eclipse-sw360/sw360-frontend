@@ -23,7 +23,6 @@ import {
     NestedRows,
     ObligationData,
     ObligationEntry,
-    ObligationRelease,
     ObligationResponse,
     PageableQueryParam,
     PaginationMeta,
@@ -32,7 +31,7 @@ import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import CompareObligation from '../CompareObligation'
-import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
+import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
 import UpdateCommentModal from './UpdateCommentModal'
 

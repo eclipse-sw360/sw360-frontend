@@ -22,7 +22,6 @@ import { BsCheck2Square } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LicensePayload, NestedRows, Obligation } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from './CssButton.module.css'
 
 interface Props {
     show: boolean
@@ -320,7 +319,7 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
                     {t('Cancel')}
                 </Button>
                 <Button
-                    className={`${styles['btn-info']}`}
+                    className='btn-info'
                     type='button'
                     onClick={handleClickSelectObligations}
                 >
