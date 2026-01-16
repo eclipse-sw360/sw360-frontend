@@ -77,6 +77,22 @@ function GenerateSourceCodeBundle({
     const [showProcessing, setShowProcessing] = useState(false)
     const [project, setProject] = useState<Project>()
 
+    const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
+    const memoizedLinkedProjects = useMemo(
+        () => linkedProjects,
+        [
+            linkedProjects,
+        ],
+    )
+
+    const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
+    const memoizedAttachmentUsages = useMemo(
+        () => attachmentUsages,
+        [
+            attachmentUsages,
+        ],
+    )
+
     const [data, setData] = useState<NestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
 
     const hasSourceUsageSet = (release: Release): boolean => {
@@ -181,11 +197,13 @@ function GenerateSourceCodeBundle({
                 setProject(proj)
 
                 const attachmentUsages = (await responses[1].json()) as AttachmentUsages
+                setAttachmentUsages(attachmentUsages)
 
                 const linkedProjects =
                     searchParams.withSubProjects === 'true'
                         ? ((await responses[2].json()) as LinkedProjects)['_embedded']['sw360:projects']
                         : ([] as Project[])
+                setLinkedProjects(linkedProjects)
 
                 const saveUsages: SaveUsagesPayload = {
                     selected: [],
@@ -213,14 +231,12 @@ function GenerateSourceCodeBundle({
                     }
                 }
                 setSaveUsagesPayload(saveUsages)
-
-                buildTable(setData, attachmentUsages, linkedProjects, hideWithUsage)
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -230,7 +246,16 @@ function GenerateSourceCodeBundle({
     }, [
         projectId,
         params,
+    ])
+
+    useEffect(() => {
+        if (memoizedAttachmentUsages === undefined || memoizedLinkedProjects === undefined) return
+        buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects, hideWithUsage)
+    }, [
+        memoizedLinkedProjects,
+        memoizedAttachmentUsages,
         hideWithUsage,
+        saveUsagesPayload,
     ])
 
     // function to add attachments to a release
