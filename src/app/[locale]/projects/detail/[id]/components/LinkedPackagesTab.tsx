@@ -130,12 +130,15 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 header: t('Release Name Version'),
                 cell: ({ row }) => {
                     const release = row.original._embedded?.['sw360:release']
+                    if (!release?.id) {
+                        return <>{t('No Linked Release')}</>
+                    }
                     return (
                         <Link
-                            href={`/components/releases/detail/${release?.id}`}
+                            href={`/components/releases/detail/${release.id}`}
                             className='text-link'
                         >
-                            {`${release?.name} (${release?.version})`}
+                            {`${release.name} (${release.version})`}
                         </Link>
                     )
                 },

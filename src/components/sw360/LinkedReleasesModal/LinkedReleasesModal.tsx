@@ -224,6 +224,7 @@ export default function LinkedReleasesModal({ projectPayload, setProjectPayload,
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
+            setShowProcessing(true)
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
             const queryUrl = CommonUtils.createUrlWithParams(

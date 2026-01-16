@@ -17,7 +17,6 @@ import { type JSX, useCallback, useEffect, useState } from 'react'
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
-import styles from './LinkedReases.module.css'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
 import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
@@ -91,7 +90,7 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                     setReleasePayload={setReleasePayload}
                 />
                 <div
-                    className={`row ${styles['attachment-table']}`}
+                    className='row attachment-table'
                     style={{
                         padding: '25px',
                         fontSize: '0.875rem',

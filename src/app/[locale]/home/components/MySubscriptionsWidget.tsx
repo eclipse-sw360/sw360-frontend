@@ -17,6 +17,7 @@ import { useTranslations } from 'next-intl'
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Component, Embedded, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
@@ -71,8 +72,12 @@ function MySubscriptionsWidget(): ReactNode {
                     setReleaseData([])
                 }
             })
-            .catch((err: Error) => {
-                throw new Error(err.message)
+            .catch((error: Error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             })
             .finally(() => {
                 setLoading(false)

@@ -46,7 +46,7 @@ import {
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
+
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -377,7 +377,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     <Dropdown>
                                         <Dropdown.Toggle variant='primary'>
                                             <span
-                                                className={`${styles['badge-circle']} ${styles[release.clearingState]}`}
+                                                className={`badge-circle clearing-state-${release.clearingState.toLowerCase()}`}
                                             ></span>
                                             {`${t('Version')} ${release.version}`}
                                         </Dropdown.Toggle>
@@ -389,12 +389,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 ]) => (
                                                     <Dropdown.Item
                                                         key={index}
-                                                        className={styles['dropdown-item']}
+                                                        className='release-dropdown-item'
                                                     >
                                                         <span
-                                                            className={`${styles['badge-circle']} ${
-                                                                styles[item.clearingState ?? 'NEW']
-                                                            }`}
+                                                            className={`badge-circle clearing-state-${(item.clearingState ?? 'new').toLowerCase()}`}
                                                         ></span>
                                                         <Link href={`/components/releases/detail/${item.id}`}>
                                                             {`${t('Version')} ${item.version}`}

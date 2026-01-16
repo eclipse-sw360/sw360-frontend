@@ -21,7 +21,6 @@ import { BsInfoCircle } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 
 interface LicenseInfo {
     license: string
@@ -128,7 +127,7 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
                             color: 'gray',
                         }}
                         size={20}
-                        className={styles.info}
+                        className='release-detail-info'
                     />
                 )}
             </li>

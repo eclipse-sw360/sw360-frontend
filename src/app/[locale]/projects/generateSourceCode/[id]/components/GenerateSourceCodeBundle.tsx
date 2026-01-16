@@ -61,6 +61,7 @@ function GenerateSourceCodeBundle({
         deselectedConcludedUsages: [],
     })
     const [loading, setLoading] = useState(false)
+    const [hideWithUsage, setHideWithUsage] = useState(false)
 
     const session = useSession()
     useEffect(() => {
@@ -76,6 +77,20 @@ function GenerateSourceCodeBundle({
     const [project, setProject] = useState<Project>()
 
     const [data, setData] = useState<NestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
+
+    const hasSourceUsageSet = (release: Release): boolean => {
+        const sourceAttachments =
+            release.attachments?.filter((att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC') ?? []
+
+        if (sourceAttachments.length === 0) return false
+
+        const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
+
+        // Check if ANY source attachment has source package usage set
+        return sourceAttachments.some((att) =>
+            saveUsagesPayload.selected.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`),
+        )
+    }
 
     const handleDownloadSourceCodeBundle = async (projectId: string) => {
         try {
@@ -197,7 +212,7 @@ function GenerateSourceCodeBundle({
                 }
                 setSaveUsagesPayload(saveUsages)
 
-                buildTable(setData, attachmentUsages, linkedProjects)
+                buildTable(setData, attachmentUsages, linkedProjects, hideWithUsage)
             } catch (error) {
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
@@ -213,13 +228,19 @@ function GenerateSourceCodeBundle({
     }, [
         projectId,
         params,
+        hideWithUsage,
     ])
 
     // function to add attachments to a release
     const formatReleaseAttachmentDataToTableData = (
         r: Release,
         release: NestedRows<TypedProject | TypedRelease | TypedAttachment>,
+        filterWithoutUsage: boolean,
     ) => {
+        if (filterWithoutUsage && hasSourceUsageSet(r)) {
+            return
+        }
+
         for (const att of r.attachments ?? []) {
             const attachment: NestedRows<TypedProject | TypedRelease | TypedAttachment> = {
                 node: {
@@ -236,6 +257,7 @@ function GenerateSourceCodeBundle({
     const extractLinkedProjectsAndTheirLinkedReleases = (
         attachmentUsages: AttachmentUsages,
         project: Project,
+        filterWithoutUsage: boolean,
     ): NestedRows<TypedProject | TypedRelease | TypedAttachment>[] => {
         const rows: NestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
 
@@ -245,7 +267,7 @@ function GenerateSourceCodeBundle({
                     type: 'project',
                     entity: p,
                 },
-                children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, p),
+                children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, p, filterWithoutUsage),
             }
             if (nodeProject.children && nodeProject.children.length !== 0) {
                 rows.push(nodeProject)
@@ -262,7 +284,7 @@ function GenerateSourceCodeBundle({
                         },
                         children: [],
                     }
-                    formatReleaseAttachmentDataToTableData(r, nodeRelease)
+                    formatReleaseAttachmentDataToTableData(r, nodeRelease, filterWithoutUsage)
                     if (nodeRelease.children && nodeRelease.children.length !== 0) {
                         rows.push(nodeRelease)
                     }
@@ -277,6 +299,7 @@ function GenerateSourceCodeBundle({
         setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease | TypedAttachment>[]>>,
         attachmentUsages: AttachmentUsages,
         linkedProjects: Project[],
+        filterWithoutUsage: boolean,
     ) => {
         const tableData: NestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
         // adding releases and attachments of the base project
@@ -290,7 +313,7 @@ function GenerateSourceCodeBundle({
                         },
                         children: [],
                     }
-                    formatReleaseAttachmentDataToTableData(r, nodeRelease)
+                    formatReleaseAttachmentDataToTableData(r, nodeRelease, filterWithoutUsage)
                     if (nodeRelease.children && nodeRelease.children.length !== 0) {
                         tableData.push(nodeRelease)
                     }
@@ -314,7 +337,7 @@ function GenerateSourceCodeBundle({
                     entity: project,
                 },
                 // adding releases and attachments of > 1st level linked projects
-                children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, project),
+                children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, project, filterWithoutUsage),
             }
             if (nodeProject.children && nodeProject.children.length !== 0) {
                 tableData.push(nodeProject)
@@ -629,6 +652,13 @@ function GenerateSourceCodeBundle({
                             disabled={loading}
                         >
                             {t('Download File')}{' '}
+                        </Button>
+                        <Button
+                            variant={hideWithUsage ? 'secondary' : 'outline-secondary'}
+                            className='me-2 py-2 col-auto'
+                            onClick={() => setHideWithUsage(!hideWithUsage)}
+                        >
+                            {hideWithUsage ? t('Show All Releases') : t('Hide Releases With Usage Set')}
                         </Button>
                         <div
                             className='subscriptionBox my-2'

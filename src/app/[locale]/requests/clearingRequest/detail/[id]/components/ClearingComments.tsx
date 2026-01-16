@@ -17,7 +17,7 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
+
 import { ClearingRequestComments, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -123,7 +123,7 @@ export default function ClearingComments({
     return (
         <>
             {loading == false ? (
-                <table className={`table label-value-table ${styles['summary-table']}`}>
+                <table className='table label-value-table request-summary-table'>
                     <thead>
                         <tr>
                             <th colSpan={2}>{t('Comments')}</th>
