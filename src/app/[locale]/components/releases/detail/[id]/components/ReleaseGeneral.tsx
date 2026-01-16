@@ -20,7 +20,6 @@ import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
-
 interface Props {
     release: ReleaseDetail
     releaseId: string

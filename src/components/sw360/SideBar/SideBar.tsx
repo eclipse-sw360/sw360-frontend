@@ -98,7 +98,10 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                             id={tab.id}
                             onClick={handleSelectTab}
                         >
-                            {tab.name} <span className={`clearing-state-${(eccStatus ?? '').toLowerCase().replace(/_/g, '-')}`}></span>
+                            {tab.name}{' '}
+                            <span
+                                className={`clearing-state-${(eccStatus ?? '').toLowerCase().replace(/_/g, '-')}`}
+                            ></span>
                         </a>
                     )
                 }

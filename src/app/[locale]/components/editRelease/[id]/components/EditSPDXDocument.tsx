@@ -30,7 +30,6 @@ import {
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 
-
 import EditAnnotationInformation from './spdx/EditAnnotationInformation'
 import EditDocumentCreationInformation from './spdx/EditDocumentCreationInformation'
 import EditOtherLicensingInformationDetected from './spdx/EditOtherLicensingInformationDetected'

@@ -14,7 +14,6 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Accordion, Form } from 'react-bootstrap'
 import { Preferences } from '@/object-types'
 
-
 interface NotificationSetting {
     wantsMailNotification: boolean
     notificationPreferences: {

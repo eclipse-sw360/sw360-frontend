@@ -14,7 +14,6 @@ import { Gravatar } from 'next-sw360'
 import { ReactNode } from 'react'
 import { User } from '@/object-types'
 
-
 interface Props {
     user: User | undefined
 }

@@ -22,7 +22,6 @@ import { ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
-
 interface LicenseInfo {
     license: string
     otherLicense: string

@@ -22,7 +22,6 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSummary from '../../../../object-types/cyclonedx/ImportSummary'
 
-
 interface Props {
     importSBOMMetadata: ImportSBOMMetadata
     setImportSBOMMetadata: React.Dispatch<React.SetStateAction<ImportSBOMMetadata>>

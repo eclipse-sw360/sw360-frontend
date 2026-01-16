@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect } from 'react'
 import { LicensePayload } from '@/object-types'
 
-
 interface Props {
     licensePayload: LicensePayload
     setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>

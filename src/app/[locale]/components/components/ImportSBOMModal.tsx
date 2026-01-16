@@ -21,7 +21,6 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 import { Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
-
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
