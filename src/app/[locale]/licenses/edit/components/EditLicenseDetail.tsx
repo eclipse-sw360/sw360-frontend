@@ -20,7 +20,6 @@ import { Embedded, ErrorDetails, LicensePayload, LicenseType } from '@/object-ty
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
-
 interface Props {
     inputValid: boolean
     errorFullName: boolean

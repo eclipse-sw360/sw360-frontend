@@ -153,7 +153,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={openCardIndex === 0 ? 'request-card-header-expanded' : ''}
+                                                    className={
+                                                        openCardIndex === 0 ? 'request-card-header-expanded' : ''
+                                                    }
                                                     id='request-card-header'
                                                 >
                                                     <Button
@@ -210,7 +212,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={openCardIndex === 1 ? 'request-card-header-expanded' : ''}
+                                                    className={
+                                                        openCardIndex === 1 ? 'request-card-header-expanded' : ''
+                                                    }
                                                     id='request-card-header'
                                                 >
                                                     <Button

@@ -229,7 +229,6 @@ function GenerateSourceCodeBundle({
         projectId,
         params,
         hideWithUsage,
-        saveUsagesPayload,
     ])
 
     // function to add attachments to a release

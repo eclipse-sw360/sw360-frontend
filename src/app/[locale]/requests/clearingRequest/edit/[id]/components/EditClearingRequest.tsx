@@ -178,7 +178,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={openCardIndex === 0 ? 'request-card-header-expanded' : ''}
+                                                    className={
+                                                        openCardIndex === 0 ? 'request-card-header-expanded' : ''
+                                                    }
                                                     id='request-card-header'
                                                 >
                                                     <Button
@@ -246,7 +248,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={openCardIndex === 1 ? 'request-card-header-expanded' : ''}
+                                                    className={
+                                                        openCardIndex === 1 ? 'request-card-header-expanded' : ''
+                                                    }
                                                     id='request-card-header'
                                                 >
                                                     <Button
