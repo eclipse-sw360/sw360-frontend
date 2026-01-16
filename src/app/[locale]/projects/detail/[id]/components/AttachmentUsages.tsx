@@ -375,7 +375,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessingAttachmentUsages(false)
