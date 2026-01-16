@@ -77,7 +77,17 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                 header: t('BA-BL/Group'),
                 cell: ({ row }) => <>{row.original.projectBU ?? t('Not Available')}</>,
             },
-
+            {
+                id: 'tag',
+                header: t('Tag'),
+                cell: ({ row }) => {
+                    if (!Object.hasOwn(row.original, 'projectId')) {
+                        return <>{t('Not Available')}</>
+                    } else {
+                        return <>{row.original._embedded?.['sw360:projectDTOs']?.[0]?.tag ?? t('Not Available')}</>
+                    }
+                },
+            },
             {
                 id: 'project',
                 header: t('Project'),
@@ -101,9 +111,9 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                 header: t('Open Releases'),
                 cell: ({ row }) => {
                     if (!Object.hasOwn(row.original, 'projectId')) {
-                        return <>{t('Project Deleted')}</>
+                        return <>{t('Not Available')}</>
                     } else {
-                        return <>{row.original._embedded?.openRelease}</>
+                        return <>{row.original._embedded?.openRelease ?? t('Not Available')}</>
                     }
                 },
             },
