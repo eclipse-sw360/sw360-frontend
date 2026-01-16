@@ -198,7 +198,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                                                                         href={`/projects/detail/${clearingRequestData.projectId}`}
                                                                         className='text-link'
                                                                     >
-                                                                        {`${clearingRequestData._embedded['sw360:projectDTOs']?.[0]?.name ?? ''}(${clearingRequestData._embedded['sw360:projectDTOs']?.[0]?.version ?? ''})`}
+                                                                        {`${clearingRequestData._embedded['sw360:project']?.name ?? ''}(${clearingRequestData._embedded['sw360:project']?.version ?? ''})`}
                                                                     </Link>
                                                                 )}
                                                             </>

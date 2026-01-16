@@ -38,6 +38,6 @@ export default interface ClearingRequest {
         requestingUser?: User
         totalRelease?: number
         createdOn?: string
-        'sw360:projectDTOs'?: Project[]
+        'sw360:project'?: Project
     }
 }
