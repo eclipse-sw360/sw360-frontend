@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
+
 import { ClearingRequestDetails } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
@@ -149,52 +149,52 @@ export default function ViewClearingRequestModal({
                         <br />
                     </Form.Group>
                     <>
-                        <table className={`table label-value-table ${styles['summary-table']}`}>
+                        <table className='table label-value-table request-summary-table'>
                             <tbody>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Requesting User')}:</b>
                                     </td>
                                     <td>{clearingRequestData?.requestingUser ?? ''}</td>
                                 </tr>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Requester Comment')}:</b>
                                     </td>
                                     <td>{clearingRequestData?.requestingUserComment ?? ''}</td>
                                 </tr>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Created On')}:</b>
                                     </td>
                                     <td>{clearingRequestData?._embedded?.createdOn ?? ''}</td>
                                 </tr>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Preferred Clearing Date')}:</b>
                                     </td>
                                     <td>{clearingRequestData?.requestedClearingDate ?? ''}</td>
                                 </tr>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Clearing Team')}:</b>
                                     </td>
                                     <td>{clearingRequestData?.clearingTeam ?? ''}</td>
                                 </tr>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Agreed Clearing Date')}:</b>
                                     </td>
                                     <td>{clearingRequestData?.agreedClearingDate ?? ''}</td>
                                 </tr>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Priority')}:</b>
                                     </td>
                                     <td>{clearingRequestData?.priority ?? ''}</td>
                                 </tr>
                                 <tr>
-                                    <td className={`${styles['summary-table-view-cr']}`}>
+                                    <td className='request-summary-table-view-cr'>
                                         <b>{t('Request Status')}:</b>
                                     </td>
                                     <td>{clearingRequestData?.clearingState ?? ''}</td>

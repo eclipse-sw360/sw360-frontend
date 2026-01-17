@@ -683,8 +683,7 @@ export default function ListView({
                 const message = error instanceof Error ? error.message : String(error)
                 throw new Error(message)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLicenseClearing(false)
             }
         })()
         return () => controller.abort()
@@ -724,8 +723,7 @@ export default function ListView({
                 const message = error instanceof Error ? error.message : String(error)
                 throw new Error(message)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLinkedProjects(false)
             }
         })()
         return () => controller.abort()
@@ -739,6 +737,8 @@ export default function ListView({
         if (memoizedLicenseClearing === undefined) return
         const data = buildTable(memoizedLicenseClearing, memoizedLinkedProjects, projectName, projectVersion)
         setRowData(data)
+        // Mark data as ready only after setting row data
+        setIsDataReady(true)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,

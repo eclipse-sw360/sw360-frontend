@@ -12,7 +12,6 @@
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
 import { LicenseDetail } from '@/object-types'
-import styles from '../detail.module.css'
 
 interface Props {
     license: LicenseDetail
@@ -31,7 +30,7 @@ const Text = ({ license }: Props): ReactNode => {
                 <tbody>
                     <tr>
                         <td>
-                            <pre className={`${styles['pre-text']}`}>{license.text ?? ''}</pre>
+                            <pre className='license-detail-pre-text'>{license.text ?? ''}</pre>
                         </td>
                     </tr>
                 </tbody>

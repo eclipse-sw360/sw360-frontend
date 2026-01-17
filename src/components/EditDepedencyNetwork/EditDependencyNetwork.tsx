@@ -20,7 +20,6 @@ import { Embedded, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } fro
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import SearchReleasesModal from '../sw360/SearchReleasesModal/SearchReleasesModal'
-import styles from './component.module.css'
 import LinkedReleasesTable from './LinkedReleasesTable'
 
 interface CheckCyclicLinkPayload {
@@ -719,7 +718,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     return (
         <div className='row mb-4'>
-            <div className={`${styles.title} mb-2`}>
+            <div className='dependency-network-title mb-2'>
                 <h6 className='fw-bold text-uppercase'>
                     {t('Linked Releases')}
                     <hr className='my-2 mb-2' />
@@ -748,7 +747,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                             onClose={() => closeMessage()}
                             variant={message.variant}
                             dismissible
-                            className={`${styles['message']}`}
+                            className='dependency-network-message'
                         >
                             <b>
                                 <BsInfoCircle size={20} /> {message.variant === 'danger' ? t('Warning') : t('Success')}:

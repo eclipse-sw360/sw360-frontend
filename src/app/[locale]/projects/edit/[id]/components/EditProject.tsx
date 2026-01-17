@@ -155,11 +155,18 @@ function EditProject({
             ...serverObl,
         }
 
-        for (const k of Object.keys(obligations ?? {})) {
-            merged[k] = {
-                status: obligations[k]?.status,
+        Object.keys(obligations).forEach((key) => {
+            if (merged[key]) {
+                merged[key] = {
+                    ...merged[key],
+                    status: obligations[key]?.status,
+                }
+            } else {
+                merged[key] = {
+                    status: obligations[key]?.status,
+                }
             }
-        }
+        })
 
         const list = Object.values(merged)
         const nonOpen = list.filter((o) => !isOpen(o?.status)).length

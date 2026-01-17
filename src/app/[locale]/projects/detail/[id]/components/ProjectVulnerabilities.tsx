@@ -75,7 +75,6 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                 extractLinkedProjects(data._embedded['sw360:projects'], d)
                 setData(d)
             } catch (error) {
-                console.error(error)
                 if (error instanceof DOMException && error.name === 'AbortError') {
                     return
                 }

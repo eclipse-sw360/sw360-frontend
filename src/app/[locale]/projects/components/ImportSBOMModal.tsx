@@ -21,7 +21,6 @@ import { ApiUtils, CommonUtils } from '@/utils'
 
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSummary from '../../../../object-types/cyclonedx/ImportSummary'
-import styles from '../projects.module.css'
 
 interface Props {
     importSBOMMetadata: ImportSBOMMetadata
@@ -381,9 +380,9 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                 </>
                             )}
                         </div>
-                        <div className={`${styles['modal-body-first']}`}>
+                        <div className='modal-body-first'>
                             <div
-                                className={`${styles['modal-body-second']}`}
+                                className='modal-body-second'
                                 onDragOver={handleDragOver}
                                 onDrop={handleDrop}
                             >
@@ -392,7 +391,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                 {t('Or')}
                                 <br />
                                 <input
-                                    className={`${styles['input']}`}
+                                    className='sbom-input'
                                     ref={inputRef}
                                     type='file'
                                     onChange={handleFileChange}

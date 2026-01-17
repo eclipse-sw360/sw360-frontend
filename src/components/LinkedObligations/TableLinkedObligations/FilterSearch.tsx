@@ -10,7 +10,6 @@
 'use client'
 
 import type { JSX } from 'react'
-import styles from './TableLinkedObligations.module.css'
 
 interface Props {
     title?: string
@@ -18,14 +17,14 @@ interface Props {
 }
 function FilterSearch({ title, searchFunction }: Props): JSX.Element {
     return (
-        <div className={styles['div-filter']}>
+        <div className='linked-obligations-filter'>
             <label>Search: </label>
             &nbsp;&nbsp;
             <input
                 type='text'
                 name={title}
                 onInput={searchFunction}
-                className={`form-control ${styles['input-filter']}`}
+                className='form-control linked-obligations-filter-input'
             />
         </div>
     )

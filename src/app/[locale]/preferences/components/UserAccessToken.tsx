@@ -21,7 +21,7 @@ import { useConfigValue } from '@/contexts'
 import { ErrorDetails, UIConfigKeys } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import styles from '../preferences.module.css'
+
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -116,7 +116,7 @@ const UserAccessToken = (): ReactNode => {
         <>
             <div className='row'>
                 <div className='col'>
-                    <h4 className={styles.decorator}>{t('REST API Tokens')}</h4>
+                    <h4 className='preferences-decorator'>{t('REST API Tokens')}</h4>
                     <Form
                         noValidate
                         validated={validated}

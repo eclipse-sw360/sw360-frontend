@@ -18,7 +18,6 @@ import { BsArrowCounterclockwise } from 'react-icons/bs'
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 
 import { useLocalStorage } from '@/hooks'
-import styles from './Gravatar.module.css'
 
 function Gravatar({ email }: { email: string }): JSX.Element {
     const [gravatarImage, setGravatarImage] = useLocalStorage<string | undefined | null>('gravatarImage', null)
@@ -65,7 +64,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
 
     return (
         <>
-            <div className={styles.gravatar}>
+            <div className='gravatar'>
                 <div>
                     <Form.Check
                         type='checkbox'

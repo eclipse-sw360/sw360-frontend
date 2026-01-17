@@ -419,14 +419,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             </Dropdown.Toggle>
                                             <Dropdown.Menu>
                                                 <Dropdown.Item
-                                                    onClick={() =>
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
                                                         setImportSBOMMetadata({
                                                             importType: 'CycloneDx',
                                                             show: true,
                                                             projectId: projectId,
                                                             doNotReplace: false,
                                                         })
-                                                    }
+                                                    }}
                                                 >
                                                     <span
                                                         style={{
@@ -444,14 +445,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                     </span>
                                                 </Dropdown.Item>
                                                 <Dropdown.Item
-                                                    onClick={() =>
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
                                                         setImportSBOMMetadata({
                                                             importType: 'CycloneDx',
                                                             show: true,
                                                             projectId: projectId,
                                                             doNotReplace: true,
                                                         })
-                                                    }
+                                                    }}
                                                 >
                                                     <span
                                                         style={{
@@ -483,7 +485,12 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 {t('Export SBOM')}
                                             </Dropdown.Toggle>
                                             <Dropdown.Menu>
-                                                <Dropdown.Item onClick={() => setShowExportProjectSbomModal(true)}>
+                                                <Dropdown.Item
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setShowExportProjectSbomModal(true)
+                                                    }}
+                                                >
                                                     {t('CycloneDX')}
                                                 </Dropdown.Item>
                                             </Dropdown.Menu>
