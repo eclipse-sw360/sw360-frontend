@@ -1,9 +1,7 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
-
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
 // which is available at https://www.eclipse.org/legal/epl-2.0/
-
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
@@ -44,7 +42,6 @@ interface ListViewRelease extends Release {
 }
 
 type TypedProject = TypedEntity<ListViewProject, 'project'>
-
 type TypedRelease = TypedEntity<ListViewRelease, 'release'>
 
 const typeFilterOptions: FilterOption[] = [
@@ -178,7 +175,6 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                 path: path.join(' -> '),
             },
         })
-
         for (const l of p['linkedReleases'] ?? []) {
             const release: Release | undefined = licenseClearing.filter(
                 (r: Release) => r.id === l.release.split('/').at(-1),
@@ -250,10 +246,8 @@ const buildTable = (
         projectName,
         projectVersion,
     )
-
     path.splice(0, path.length)
     extractLinkedReleases(projectName, projectVersion, licenseClearing, finalData, path)
-
     return finalData
 }
 
@@ -280,6 +274,7 @@ export default function ListView({
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
+
     const [showProcessing, setShowProcessing] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
@@ -369,6 +364,7 @@ export default function ListView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Component Type')}
+                                resetPaginationParams={() => table.resetPagination()}
                             />
                         </>
                     )
@@ -417,6 +413,7 @@ export default function ListView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Release Relation')}
+                                resetPaginationParams={() => table.resetPagination()}
                             />
                         </>
                     )
@@ -468,6 +465,7 @@ export default function ListView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Release Clearing State')}
+                                resetPaginationParams={() => table.resetPagination()}
                             />
                         </>
                     )
@@ -596,7 +594,6 @@ export default function ListView({
                     const { id } = row.original.entity
                     const url =
                         row.original.type === 'project' ? `/projects/edit/${id}` : `/components/editRelease/${id}`
-
                     return (
                         <div className='text-center'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
@@ -658,7 +655,6 @@ export default function ListView({
         if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
-
         const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
         const timeout = setTimeout(() => {
             setShowProcessing(true)
@@ -678,7 +674,6 @@ export default function ListView({
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
-
                 const licenseClearingData = (await response.json()) as LicenseClearing
                 setLicenseClearing(licenseClearingData)
             } catch (error) {
@@ -692,7 +687,6 @@ export default function ListView({
                 setShowProcessing(false)
             }
         })()
-
         return () => controller.abort()
     }, [
         status,
@@ -706,12 +700,10 @@ export default function ListView({
         if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
-
         const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
         const timeout = setTimeout(() => {
             setShowProcessing(true)
         }, timeLimit)
-
         void (async () => {
             try {
                 const response = await ApiUtils.GET(
@@ -719,12 +711,10 @@ export default function ListView({
                     session.user.access_token,
                     signal,
                 )
-
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new Error(err.message)
                 }
-
                 const linkedProjectsData = (await response.json()) as LinkedProjects
                 setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
             } catch (error) {
@@ -738,7 +728,6 @@ export default function ListView({
                 setShowProcessing(false)
             }
         })()
-
         return () => controller.abort()
     }, [
         status,
