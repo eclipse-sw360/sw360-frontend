@@ -279,7 +279,7 @@ export default function ListView({
     const [showModal, setShowModal] = useState(false)
     const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
     const [licenseFiles, setLicenseFiles] = useState<string[]>([])
-
+    const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState(false)
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const memoizedLinkedProjects = useMemo(
         () => linkedProjects,
