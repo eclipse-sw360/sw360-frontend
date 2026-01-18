@@ -12,9 +12,9 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, LicenseDetail, PageableQueryParam, PaginationMeta } from '@/object-types'
 import MessageService from '@/services/message.service'

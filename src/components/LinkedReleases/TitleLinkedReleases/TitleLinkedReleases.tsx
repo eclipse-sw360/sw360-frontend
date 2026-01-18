@@ -9,7 +9,7 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import React, { type JSX } from 'react'
+import { type JSX } from 'react'
 
 export default function TitleLinkedReleases(): JSX.Element {
     const t = useTranslations('default')
