@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { StatusCodes } from 'http-status-codes'
 import { RequestContent } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 
@@ -17,12 +18,12 @@ const base = SW360_API_URL + '/resource/api'
 const DEFAULT_TIMEOUT_MS = 30000 // 30 seconds
 const DEFAULT_RETRIES = 3
 const RETRY_STATUS_CODES = [
-    408,
-    429,
-    500,
-    502,
-    503,
-    504,
+    StatusCodes.REQUEST_TIMEOUT,
+    StatusCodes.TOO_MANY_REQUESTS,
+    StatusCodes.INTERNAL_SERVER_ERROR,
+    StatusCodes.BAD_GATEWAY,
+    StatusCodes.SERVICE_UNAVAILABLE,
+    StatusCodes.GATEWAY_TIMEOUT,
 ]
 
 /**
