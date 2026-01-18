@@ -323,7 +323,7 @@ export default function LinkProjects({
                             ? {}
                             : {
                                   name: searchValue,
-                                  luceneSearch: !exactMatch,
+                                  luceneSearch: exactMatch,
                               }),
                     }).map(([key, value]) => [
                         key,

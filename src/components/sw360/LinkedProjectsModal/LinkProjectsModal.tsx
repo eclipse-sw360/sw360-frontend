@@ -305,7 +305,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                         ...(searchText && searchText !== ''
                             ? {
                                   searchText: searchText,
-                                  luceneSearch: !exactMatch,
+                                  luceneSearch: exactMatch,
                               }
                             : {}),
                         allDetails: true,

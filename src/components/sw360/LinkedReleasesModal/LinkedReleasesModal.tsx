@@ -234,7 +234,7 @@ export default function LinkedReleasesModal({ projectPayload, setProjectPayload,
                         ...(searchText && searchText !== ''
                             ? {
                                   searchText: searchText,
-                                  luceneSearch: !exactMatch,
+                                  luceneSearch: exactMatch,
                               }
                             : {}),
                         allDetails: true,
