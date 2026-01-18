@@ -9,12 +9,38 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import '@/styles/globals.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import Link from 'next/link'
-import type { JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
+import { SW360_API_URL } from '@/utils/env'
 
 function Footer(): JSX.Element {
+    const [buildVersion, setBuildVersion] = useState<string>('')
+    const [apiVersion, setApiVersion] = useState<string>('')
+
+    useEffect(() => {
+        const fetchVersion = async () => {
+            try {
+                const response = await fetch(`${SW360_API_URL}/resource/version`)
+                if (response.ok) {
+                    const data = (await response.json()) as {
+                        sw360BuildVersion?: string
+                        sw360RestVersion?: string
+                    }
+                    setBuildVersion(data.sw360BuildVersion ?? '')
+                    setApiVersion(data.sw360RestVersion ?? '')
+                }
+            } catch {
+                // Silently fail - version display is non-critical
+            }
+        }
+
+        void fetchVersion()
+    }, [])
+
     return (
         <>
             <footer className='sw360-footer footer d-flex flex-column'>
@@ -61,7 +87,7 @@ function Footer(): JSX.Element {
                     </Link>
                 </div>
                 <div className='footer-version'>
-                    Version: 17.0.0-SNAPSHOT | Branch: main (f69a224) | Build time: 2023-01-29T14:25:37Z
+                    Version: {buildVersion ? buildVersion : '-'} - ApiVersion: {apiVersion ? apiVersion : '-'}
                 </div>
             </footer>
         </>
