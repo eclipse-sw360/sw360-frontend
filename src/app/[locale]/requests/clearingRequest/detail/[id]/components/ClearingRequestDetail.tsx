@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'

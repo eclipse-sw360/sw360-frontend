@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'

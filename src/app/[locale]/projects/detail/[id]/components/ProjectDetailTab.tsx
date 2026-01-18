@@ -10,8 +10,8 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'

@@ -13,7 +13,7 @@
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { JSX, useEffect } from 'react'
+import { JSX, useEffect } from 'react'
 import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
