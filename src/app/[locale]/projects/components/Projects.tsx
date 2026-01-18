@@ -33,6 +33,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { SW360_API_URL } from '@/utils/env'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
@@ -410,6 +411,9 @@ function Project(): JSX.Element {
             return
         }
 
+        const controller = new AbortController()
+        const signal = controller.signal
+
         void (async () => {
             try {
                 const session = await getSession()
@@ -421,11 +425,15 @@ function Project(): JSX.Element {
 
                 if (projectIds.length === 0) return
 
-                const response = await ApiUtils.POST(
-                    'projects/licenseClearingCount',
-                    projectIds,
-                    session.user.access_token,
-                )
+                const response = await fetch(`${SW360_API_URL}/resource/api/projects/licenseClearingCount`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: session.user.access_token,
+                    },
+                    body: JSON.stringify(projectIds),
+                    signal,
+                })
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -435,10 +443,15 @@ function Project(): JSX.Element {
                 const data = (await response.json()) as LicenseClearingMap
                 setLicenseClearingData(data)
             } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
                 const message = error instanceof Error ? error.message : String(error)
                 MessageService.error(message)
             }
         })()
+
+        return () => controller.abort()
     }, [
         projectData,
     ])
