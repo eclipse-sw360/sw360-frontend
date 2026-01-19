@@ -258,6 +258,28 @@ body {
     color: var(--sw360-primary-color) !important;
 }
 
+.filter-card-header {
+    cursor: pointer;
+    user-select: none;
+    background-color: #f8f9fa;
+}
+
+.filter-card-header-with-border {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.search-button-warning {
+    background-color: #ff9800;
+    border-color: #ff9800;
+    color: #000;
+}
+
+.search-button-warning:hover {
+    background-color: #e68900;
+    border-color: #e68900;
+    color: #000;
+}
+
 .upload-btn:disabled {
     background-color: var(--sw360-primary-color) !important;
     border-color: var(--sw360-primary-color) !important;
