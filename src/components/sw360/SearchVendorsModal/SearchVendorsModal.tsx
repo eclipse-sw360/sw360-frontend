@@ -11,7 +11,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { type JSX, useCallback, useEffect, useRef, useState } from 'react'
+import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { Pagination, Spinner, Table } from 'react-bootstrap'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -104,6 +104,7 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
 
     useEffect(() => {
         if (session?.user?.access_token) {
+            setCurrentPage(0)
             void fetchVendors(0, lastSearchedText, sortField, sortDirection)
         }
     }, [
@@ -269,26 +270,71 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                                                             }}
                                                         ></th>
                                                         <th
+                                                            role='button'
+                                                            tabIndex={0}
+                                                            aria-sort={
+                                                                sortField === 'fullName'
+                                                                    ? sortDirection === 'asc'
+                                                                        ? 'ascending'
+                                                                        : 'descending'
+                                                                    : 'none'
+                                                            }
                                                             style={{
                                                                 cursor: 'pointer',
                                                             }}
                                                             onClick={() => handleSort('fullName')}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault()
+                                                                    handleSort('fullName')
+                                                                }
+                                                            }}
                                                         >
                                                             {t('Full Name')} {renderSortIcon('fullName')}
                                                         </th>
                                                         <th
+                                                            role='button'
+                                                            tabIndex={0}
+                                                            aria-sort={
+                                                                sortField === 'shortName'
+                                                                    ? sortDirection === 'asc'
+                                                                        ? 'ascending'
+                                                                        : 'descending'
+                                                                    : 'none'
+                                                            }
                                                             style={{
                                                                 cursor: 'pointer',
                                                             }}
                                                             onClick={() => handleSort('shortName')}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault()
+                                                                    handleSort('shortName')
+                                                                }
+                                                            }}
                                                         >
                                                             {t('Short Name')} {renderSortIcon('shortName')}
                                                         </th>
                                                         <th
+                                                            role='button'
+                                                            tabIndex={0}
+                                                            aria-sort={
+                                                                sortField === 'url'
+                                                                    ? sortDirection === 'asc'
+                                                                        ? 'ascending'
+                                                                        : 'descending'
+                                                                    : 'none'
+                                                            }
                                                             style={{
                                                                 cursor: 'pointer',
                                                             }}
                                                             onClick={() => handleSort('url')}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault()
+                                                                    handleSort('url')
+                                                                }
+                                                            }}
                                                         >
                                                             {t('URL')} {renderSortIcon('url')}
                                                         </th>
@@ -297,7 +343,7 @@ function SearchVendorsModal({ chooseVendor }: Props): JSX.Element {
                                                 <tbody>
                                                     {vendors.map((vendor, index) => (
                                                         <tr
-                                                            key={vendor.fullName || index}
+                                                            key={`${vendor.fullName}-${vendor.shortName ?? ''}-${vendor.url ?? ''}`}
                                                             onClick={() => handleSelectVendor(vendor)}
                                                             style={{
                                                                 cursor: 'pointer',
