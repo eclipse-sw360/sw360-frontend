@@ -153,6 +153,7 @@ export default function ComponentEditSummary({
                 defaultVendorId: component.defaultVendorId,
                 categories: component.categories,
                 homepage: component.homepage,
+                vcs: component.vcs,
                 mailinglist: component.mailinglist,
                 wiki: component.wiki,
                 blog: component.blog,

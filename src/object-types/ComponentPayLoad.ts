@@ -34,6 +34,7 @@ export default interface ComponentPayload {
     defaultVendorId?: string
     categories?: Array<string> | null
     homepage?: string
+    vcs?: string
     mailinglist?: string
     wiki?: string
     blog?: string
