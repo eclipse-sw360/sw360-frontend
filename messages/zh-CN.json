@@ -600,7 +600,7 @@
     "Every task unscheduled successfully": "每个任务都成功完成了！",
     "Everyone": "每个人",
     "Exact Match": "完全符合",
-    "Exact_Match_Info": "搜索结果将显示与输入完全匹配的元素。\n等效于在搜索关键字上使用（“）。应用于组件名称。",
+    "Exact_Match_Info": "搜索结果将显示与输入完全匹配的元素。\n相当于在搜索关键字周围使用 (\")。应用于名称。",
     "Excel report generation has started": "Excel 报告生成已开始。\n完成后，我们将向您发送一封包含下载链接的电子邮件！",
     "Expand Next Level": "展开下一个级别",
     "Expand next level": "扩展下一个级别",

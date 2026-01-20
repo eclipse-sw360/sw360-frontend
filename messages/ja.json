@@ -600,7 +600,7 @@
     "Every task unscheduled successfully": "すべてのタスクが予定外に正常に予定されています！",
     "Everyone": "みんな",
     "Exact Match": "完全に一致",
-    "Exact_Match_Info": "検索結果は、入力に正確に一致する要素を表示します。\n検索キーワードの周りに（ \"）を使用するのと同等です。コンポーネント名に適用されます。",
+    "Exact_Match_Info": "検索結果には、入力と完全に一致する要素が表示されます。\n検索キーワードを (\") で囲むのと同じです。名前に適用されます。",
     "Excel report generation has started": "Excel レポートの生成が開始されました。\n完了したら、ダウンロードリンクを記載したメールを送信します。",
     "Expand Next Level": "次のレベルを展開",
     "Expand next level": "次のレベルを展開します",

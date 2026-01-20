@@ -600,7 +600,7 @@
     "Every task unscheduled successfully": "모든 작업이 성공적으로 예정되어 있습니다!",
     "Everyone": "한국어",
     "Exact Match": "Exact 일치",
-    "Exact_Match_Info": "검색 결과에는 입력과 정확히 일치하는 요소가 표시됩니다. \n검색 키워드 주위에 ( \")를 사용하는 것과 동일합니다. 구성 요소 이름에 적용됩니다.",
+    "Exact_Match_Info": "검색 결과에는 입력과 정확히 일치하는 요소가 표시됩니다. \n검색어 앞뒤에 (\")를 사용하는 것과 같습니다. 이름에 적용됩니다.",
     "Excel report generation has started": "Excel 보고서 생성이 시작되었습니다. \n완료되면 다운로드 링크가 포함된 이메일을 보내드리겠습니다!",
     "Expand Next Level": "다음 레벨 확장",
     "Expand next level": "다음 단계를 확장하십시오",
