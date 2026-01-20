@@ -313,108 +313,114 @@ export default function MyProjectsWidget(): ReactNode {
                 setReload={setReload}
             />
             <Card className='mb-3 border-0 shadow-sm'>
-                <Card.Header
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`filter-card-header ${showFilters ? 'filter-card-header-with-border' : ''} d-flex justify-content-between align-items-center py-2`}
-                >
-                    <strong>{t('MY PROJECTS')}</strong>
-                    {showFilters ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
-                </Card.Header>
-                <Collapse in={showFilters}>
-                    <Card.Body className='p-3'>
-                        <div className='row'>
-                            <div className='col-md-6 mb-3'>
-                                <h6 className='mb-3'>{t('Role In Project')}</h6>
-                                <div className='d-flex flex-column gap-2'>
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-creator'
-                                        label={t('Creator')}
-                                        checked={filters.roles.creator}
-                                        onChange={() => handleRoleChange('creator')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-moderator'
-                                        label={t('Moderator')}
-                                        checked={filters.roles.moderator}
-                                        onChange={() => handleRoleChange('moderator')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-contributor'
-                                        label={t('Contributor')}
-                                        checked={filters.roles.contributor}
-                                        onChange={() => handleRoleChange('contributor')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-project-owner'
-                                        label={t('Project Owner')}
-                                        checked={filters.roles.projectOwner}
-                                        onChange={() => handleRoleChange('projectOwner')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-lead-architect'
-                                        label={t('Lead Architect')}
-                                        checked={filters.roles.leadArchitect}
-                                        onChange={() => handleRoleChange('leadArchitect')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-project-responsible'
-                                        label={t('Project Responsible')}
-                                        checked={filters.roles.projectResponsible}
-                                        onChange={() => handleRoleChange('projectResponsible')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-security-responsible'
-                                        label={t('Security Responsible')}
-                                        checked={filters.roles.securityResponsible}
-                                        onChange={() => handleRoleChange('securityResponsible')}
-                                    />
+                <Card.Body className='p-0'>
+                    <div
+                        onClick={() => setShowFilters(!showFilters)}
+                        className='d-flex justify-content-between align-items-center px-3 py-2 filter-toggle-section'
+                        style={{
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                        }}
+                    >
+                        <span className='fw-bold'>{t('Filter')}</span>
+                        {showFilters ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
+                    </div>
+                    <Collapse in={showFilters}>
+                        <div className='p-3 border-top'>
+                            <div className='row'>
+                                <div className='col-md-6 mb-3'>
+                                    <h6 className='mb-3'>{t('Role In Project')}</h6>
+                                    <div className='d-flex flex-column gap-2'>
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-creator'
+                                            label={t('Creator')}
+                                            checked={filters.roles.creator}
+                                            onChange={() => handleRoleChange('creator')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-moderator'
+                                            label={t('Moderator')}
+                                            checked={filters.roles.moderator}
+                                            onChange={() => handleRoleChange('moderator')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-contributor'
+                                            label={t('Contributor')}
+                                            checked={filters.roles.contributor}
+                                            onChange={() => handleRoleChange('contributor')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-project-owner'
+                                            label={t('Project Owner')}
+                                            checked={filters.roles.projectOwner}
+                                            onChange={() => handleRoleChange('projectOwner')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-lead-architect'
+                                            label={t('Lead Architect')}
+                                            checked={filters.roles.leadArchitect}
+                                            onChange={() => handleRoleChange('leadArchitect')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-project-responsible'
+                                            label={t('Project Responsible')}
+                                            checked={filters.roles.projectResponsible}
+                                            onChange={() => handleRoleChange('projectResponsible')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-security-responsible'
+                                            label={t('Security Responsible')}
+                                            checked={filters.roles.securityResponsible}
+                                            onChange={() => handleRoleChange('securityResponsible')}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='col-md-6 mb-3'>
+                                    <h6 className='mb-3'>{t('Clearing State')}</h6>
+                                    <div className='d-flex flex-column gap-2'>
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-open'
+                                            label={t('Open')}
+                                            checked={filters.clearingStates.open}
+                                            onChange={() => handleClearingStateChange('open')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-closed'
+                                            label={t('Closed')}
+                                            checked={filters.clearingStates.closed}
+                                            onChange={() => handleClearingStateChange('closed')}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            id='filter-in-progress'
+                                            label={t('In Progress')}
+                                            checked={filters.clearingStates.inProgress}
+                                            onChange={() => handleClearingStateChange('inProgress')}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className='col-md-6 mb-3'>
-                                <h6 className='mb-3'>{t('Clearing State')}</h6>
-                                <div className='d-flex flex-column gap-2'>
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-open'
-                                        label={t('Open')}
-                                        checked={filters.clearingStates.open}
-                                        onChange={() => handleClearingStateChange('open')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-closed'
-                                        label={t('Closed')}
-                                        checked={filters.clearingStates.closed}
-                                        onChange={() => handleClearingStateChange('closed')}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        id='filter-in-progress'
-                                        label={t('In Progress')}
-                                        checked={filters.clearingStates.inProgress}
-                                        onChange={() => handleClearingStateChange('inProgress')}
-                                    />
-                                </div>
+                            <div className='d-flex justify-content-center mt-3'>
+                                <Button
+                                    variant='warning'
+                                    onClick={handleSearch}
+                                    className='px-5 search-button-warning'
+                                >
+                                    {t('Search')}
+                                </Button>
                             </div>
                         </div>
-                        <div className='d-flex justify-content-center mt-3'>
-                            <Button
-                                variant='warning'
-                                onClick={handleSearch}
-                                className='px-5 search-button-warning'
-                            >
-                                {t('Search')}
-                            </Button>
-                        </div>
-                    </Card.Body>
-                </Collapse>
+                    </Collapse>
+                </Card.Body>
             </Card>
             <div className='mb-3'>
                 {pageableQueryParam && table && paginationMeta ? (
