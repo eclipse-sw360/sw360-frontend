@@ -443,6 +443,16 @@ function EditProject({
                     setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
                 }
 
+                if (project['_embedded']?.['sw360:vendors']?.[0] !== undefined) {
+                    const vendorData = project['_embedded']['sw360:vendors'][0]
+                    setVendor({
+                        id: vendorData.id ?? '',
+                        fullName: vendorData.fullName ?? '',
+                        shortName: vendorData.shortName ?? '',
+                        url: vendorData.url ?? '',
+                    })
+                }
+
                 const projectPayloadData: ProjectPayload = {
                     name: project.name,
                     version: project.version ?? '',
@@ -452,6 +462,7 @@ function EditProject({
                     tag: project.tag ?? '',
                     description: project.description ?? '',
                     domain: project.domain ?? '',
+                    vendorId: project.vendorId ?? '',
                     modifiedOn: project.modifiedOn ?? '',
                     modifiedBy: project.modifiedBy ?? '',
                     externalIds: project.externalIds ?? {},
