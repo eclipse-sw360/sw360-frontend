@@ -1,5 +1,4 @@
 {
-  "VCS / Repository URL": "VCS / URL kho lưu trữ",
   "default": {
     "(n/a)": "",
     "A License Type with same title already exists": "Một loại giấy phép có cùng tiêu đề đã tồn tại",
@@ -1472,6 +1471,7 @@
     "User with the same email already exists": "Người dùng có cùng một email đã tồn tại!",
     "Users": "Người dùng",
     "VALUE": "giá trị",
+    "VCS": "VCS",
     "VCS URLs were redirected": "URL VCS đã được chuyển hướng",
     "VENDORS": "VENDORS",
     "VIEWER": "Người xem",

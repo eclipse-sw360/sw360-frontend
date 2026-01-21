@@ -18,6 +18,7 @@ import { Spinner } from 'react-bootstrap'
 import { BsCaretRightFill } from 'react-icons/bs'
 import { PaddedCell, SW360Table } from '@/components/sw360'
 import { NestedRows, TypedEntity } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface ViewRelease {
@@ -171,7 +172,7 @@ export default function ReleaseView({
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

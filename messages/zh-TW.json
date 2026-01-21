@@ -1,5 +1,4 @@
 {
-  "VCS / Repository URL": "版本控制系統/存儲庫 URL",
   "default": {
     "(n/a)": "",
     "A License Type with same title already exists": "具有同一標題的許可類型已經存在",
@@ -1472,6 +1471,7 @@
     "User with the same email already exists": "使用相同電子郵件的用戶已經存在！",
     "Users": "使用者",
     "VALUE": "值",
+    "VCS": "VCS",
     "VCS URLs were redirected": "VCS URL被重定向",
     "VENDORS": "选民",
     "VIEWER": "觀眾",

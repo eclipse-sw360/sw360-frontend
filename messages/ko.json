@@ -1,5 +1,4 @@
 {
-  "VCS / Repository URL": "VCS/저장소 URL",
   "default": {
     "(n/a)": "",
     "A License Type with same title already exists": "제목이 같은 라이센스 유형이 이미 존재합니다",
@@ -1472,6 +1471,7 @@
     "User with the same email already exists": "동일한 이메일을 가진 사용자가 이미 존재합니다!",
     "Users": "이름 *",
     "VALUE": "제품정보",
+    "VCS": "VCS",
     "VCS URLs were redirected": "VCS URL을 리디렉션했습니다",
     "VENDORS": "회사연혁",
     "VIEWER": "뷰어",

@@ -1,5 +1,4 @@
 {
-  "VCS / Repository URL": "URL do VCS/repositório",
   "default": {
     "(n/a)": "",
     "A License Type with same title already exists": "Um tipo de licença com o mesmo título já existe",
@@ -1472,6 +1471,7 @@
     "User with the same email already exists": "Usuário com o mesmo email já existe!",
     "Users": "Usuários",
     "VALUE": "Valor",
+    "VCS": "VC",
     "VCS URLs were redirected": "URLs de VCS foram redirecionados",
     "VENDORS": "VENDORS",
     "VIEWER": "Espectador",

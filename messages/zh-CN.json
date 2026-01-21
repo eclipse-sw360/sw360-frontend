@@ -1,5 +1,4 @@
 {
-  "VCS / Repository URL": "版本控制系统/存储库 URL",
   "default": {
     "(n/a)": "",
     "A License Type with same title already exists": "具有同一标题的许可类型已经存在",
@@ -1472,6 +1471,7 @@
     "User with the same email already exists": "使用相同电子邮件的用户已经存在！",
     "Users": "用户",
     "VALUE": "价值",
+    "VCS": "VCS",
     "VCS URLs were redirected": "VCS URL被重定向",
     "VENDORS": "VENDORS",
     "VIEWER": "观众",
