@@ -39,6 +39,7 @@ import {
     UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
@@ -798,7 +799,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 setIsLoadingLicenseClearing(false)
             }
@@ -839,7 +840,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 setIsLoadingLinkedProjects(false)
             }

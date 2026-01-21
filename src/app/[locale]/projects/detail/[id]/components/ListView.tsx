@@ -25,6 +25,7 @@ import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
 import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Attachment {
@@ -686,7 +687,7 @@ export default function ListView({
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -727,7 +728,7 @@ export default function ListView({
                     return
                 }
                 const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                MessageService.error(message)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
