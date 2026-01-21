@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-ARG VARIANT=20-bullseye-slim
+ARG VARIANT=22-slim
 FROM node:${VARIANT}
 
 ARG USERNAME=devel
@@ -30,6 +30,9 @@ RUN useradd \
 # sudo support
 RUN echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
+
+# Add pnpm
+RUN npm install -g pnpm
 
 USER ${USERNAME}
 WORKDIR $HOMEDIR

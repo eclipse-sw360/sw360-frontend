@@ -9,15 +9,15 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import { ReactNode } from 'react'
 import NotificationSettingForm from './components/NotificationSettingForm'
 import UserAccessToken from './components/UserAccessToken'
-import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Preferences',
 }
 
-const PreferencesPage = () : ReactNode => {
+const PreferencesPage = (): ReactNode => {
     return (
         <div className='container page-content'>
             <NotificationSettingForm />

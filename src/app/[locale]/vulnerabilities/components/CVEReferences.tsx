@@ -9,10 +9,10 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
-
+import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Vulnerability } from '@/object-types'
 
 function CVEReferences({
@@ -23,11 +23,23 @@ function CVEReferences({
     setPayload: Dispatch<SetStateAction<Vulnerability>>
 }): ReactNode {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const addReference = () => {
         setPayload((prev: Vulnerability) => ({
             ...prev,
-            cveReferences: [...(prev.cveReferences ?? []), '-'],
+            cveReferences: [
+                ...(prev.cveReferences ?? []),
+                '-',
+            ],
         }))
     }
 
@@ -38,10 +50,15 @@ function CVEReferences({
         const ref = payload.cveReferences?.[i] ?? ''
         const extractedNumber = ref.split('-')[1] || ''
         const updatedReference = `${e.target.value}-${extractedNumber || ''}`
-        const updatedReferences = [...(payload.cveReferences ?? [])]
+        const updatedReferences = [
+            ...(payload.cveReferences ?? []),
+        ]
         updatedReferences[i] = updatedReference
 
-        setPayload((prev) => ({ ...prev, cveReferences: updatedReferences }))
+        setPayload((prev) => ({
+            ...prev,
+            cveReferences: updatedReferences,
+        }))
     }
 
     const handleNumberChange = (
@@ -51,17 +68,25 @@ function CVEReferences({
         const ref = payload.cveReferences?.[i] ?? ''
         const extractedYear = ref.split('-')[0] || ''
         const updatedReference = `${extractedYear}-${e.target.value}`
-        const updatedReferences = [...(payload.cveReferences ?? [])]
+        const updatedReferences = [
+            ...(payload.cveReferences ?? []),
+        ]
         updatedReferences[i] = updatedReference
 
-        setPayload((prev) => ({ ...prev, cveReferences: updatedReferences }))
+        setPayload((prev) => ({
+            ...prev,
+            cveReferences: updatedReferences,
+        }))
     }
 
     const deleteReference = (i: number) => {
         setPayload((prev: Vulnerability) => {
             const refs = (prev.cveReferences ?? []).slice()
             refs.splice(i, 1)
-            return { ...prev, cveReferences: refs }
+            return {
+                ...prev,
+                cveReferences: refs,
+            }
         })
     }
 
@@ -84,7 +109,9 @@ function CVEReferences({
                                 {t('CVE Year')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -96,11 +123,20 @@ function CVEReferences({
                                 name='year'
                                 value={elem.split('-')[0]}
                                 onKeyDown={(e) => {
-                                    if (['+', '-', '.', 'e'].includes(e.key)) {
+                                    if (
+                                        [
+                                            '+',
+                                            '-',
+                                            '.',
+                                            'e',
+                                        ].includes(e.key)
+                                    ) {
                                         e.preventDefault()
                                     }
                                 }}
-                                onChange={(e) => {handleYearChange(e, i)}}
+                                onChange={(e) => {
+                                    handleYearChange(e, i)
+                                }}
                                 className='form-control'
                                 id='vulnerabilityDetail.cveReferences.year'
                                 placeholder={t('Enter CVE Year')}
@@ -115,7 +151,9 @@ function CVEReferences({
                                 {t('CVE Number')}{' '}
                                 <span
                                     className='text-red'
-                                    style={{ color: '#F7941E' }}
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
                                 >
                                     *
                                 </span>
@@ -127,11 +165,20 @@ function CVEReferences({
                                 name='number'
                                 value={elem.split('-')[1]}
                                 onKeyDown={(e) => {
-                                    if (['+', '-', '.', 'e'].includes(e.key)) {
+                                    if (
+                                        [
+                                            '+',
+                                            '-',
+                                            '.',
+                                            'e',
+                                        ].includes(e.key)
+                                    ) {
                                         e.preventDefault()
                                     }
                                 }}
-                                onChange={(e) => {handleNumberChange(e, i)}}
+                                onChange={(e) => {
+                                    handleNumberChange(e, i)
+                                }}
                                 className='form-control'
                                 id='vulnerabilityDetail.cveReferences.number'
                                 placeholder={t('Enter CVE Number')}
@@ -139,9 +186,9 @@ function CVEReferences({
                             />
                         </div>
                         <div className='col-lg-1 d-flex align-items-end pb-2'>
-                            <FaTrashAlt
+                            <BsFillTrashFill
                                 className='btn-icon'
-                                size={22}
+                                size={20}
                                 onClick={() => deleteReference(i)}
                             />
                         </div>

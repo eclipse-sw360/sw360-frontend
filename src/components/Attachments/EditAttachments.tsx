@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,128 +9,144 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getSession, signOut } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 
-import { Attachment, ComponentPayload, DocumentTypes, Embedded, HttpStatus, Release } from '@/object-types'
+import { Attachment, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from './Attachment.module.css'
+import AttachmentRowData from './AttachmentRowData'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
 import TableAttachment from './TableAttachment/TableAttachment'
 import TitleAttachment from './TiltleAttachment/TitleAttachment'
 
-interface Props {
-    documentId?: string
-    documentType?: string
-    componentPayload?: ComponentPayload
-    setComponentPayload?: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    releasePayload?: Release
-    setReleasePayload?: React.Dispatch<React.SetStateAction<Release>>
+interface Props<T> {
+    documentId: string
+    documentType: string
+    documentPayload: T
+    setDocumentPayload: React.Dispatch<React.SetStateAction<T>>
 }
 
-type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachmentDTOes'>
+type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
-function EditAttachments({
-    documentId,
-    documentType,
-    componentPayload,
-    setComponentPayload,
-    releasePayload,
-    setReleasePayload,
-}: Props) : JSX.Element {
+function EditAttachments<T>({ documentId, documentType, documentPayload, setDocumentPayload }: Props<T>): JSX.Element {
     const t = useTranslations('default')
-    const [attachmentData, setAttachmentData] = useState<Array<Attachment>>([])
-    const [reRender, setReRender] = useState(false)
-    const handleReRender = () => {
-        setReRender(!reRender)
-    }
+    const [attachmentsData, setAttachmentsData] = useState<Array<AttachmentRowData>>([])
+    const [beforeUpdateAttachmentsCheckStatus, setBeforeUpdateAttachmentsCheckStatus] = useState<Array<string>>([])
     const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
-
-    // const setAttachmentToComponentData = (attachmentDatas: AttachmentDetail[]) => {
-    //     setComponentPayload({
-    //         ...componentPayload,
-    //         attachmentDTOs: attachmentDatas,
-    //     })
-    // }
-
-    // const setAttachmentToReleasePayload = (attachmentDatas: AttachmentDetail[]) => {
-    //     setReleasePayload({
-    //         ...releasePayload,
-    //         attachmentDTOs: attachmentDatas,
-    //     })
-    // }
-
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = await response.json() as EmbeddedAttachments
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
+    const { status } = useSession()
 
     useEffect(() => {
-        fetchData(`${documentType}/${documentId}/attachments`).then((attachments: EmbeddedAttachments | undefined) => {
-            if (attachments === undefined) return
-            if (
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachmentDTOes'])
-            ) {
-                const attachmentDetails: Array<Attachment> = []
-                attachments['_embedded']['sw360:attachmentDTOes'].map((item: Attachment) => {
-                    attachmentDetails.push(item)
-                })
-                setAttachmentData(attachmentDetails)
-                if (documentType === DocumentTypes.COMPONENT) {
-                    if(setComponentPayload !== undefined) {
-                        setComponentPayload({
-                            ...componentPayload,
-                            attachmentDTOs: attachmentDetails,
-                        })
-                    }
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as EmbeddedAttachments
+            return data
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchData(`${documentType}/${documentId}/attachments`)
+            .then((attachments: EmbeddedAttachments | undefined) => {
+                if (attachments === undefined) return
+                if (
+                    !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(attachments['_embedded']['sw360:attachments'])
+                ) {
+                    const attachmentDetails: Array<Attachment> = []
+                    attachments['_embedded']['sw360:attachments'].map((item: Attachment) => {
+                        attachmentDetails.push(item)
+                    })
+                    const existingAttachmentsRowData: Array<AttachmentRowData> = attachmentDetails.map(
+                        (attachment) => ({
+                            attachmentContentId: CommonUtils.getIdFromUrl(attachment._links?.self.href),
+                            filename: attachment.filename,
+                            attachmentType: attachment.attachmentType,
+                            createdBy: attachment.createdBy,
+                            createdTeam: attachment.createdTeam,
+                            createdComment: attachment.createdComment,
+                            createdOn: attachment.createdOn,
+                            checkedTeam: attachment.checkedTeam,
+                            checkedComment: attachment.checkedComment,
+                            checkedOn: attachment.checkedOn,
+                            checkStatus: attachment.checkStatus,
+                            checkedBy: attachment.checkedBy,
+                            isAddedNew: false,
+                        }),
+                    )
+                    const beforeUpdateAttachmentsCheckStatus = attachmentDetails.map(
+                        (attachment) => attachment.checkStatus ?? 'NOTCHECKED',
+                    )
+                    setBeforeUpdateAttachmentsCheckStatus(beforeUpdateAttachmentsCheckStatus)
+                    setAttachmentsData(existingAttachmentsRowData)
                 }
-            }
-        }).catch((err) => console.error(err))
-    }, [documentId, documentType, fetchData, setComponentPayload, componentPayload])
+            })
+            .catch((err) => console.error(err))
+    }, [])
+
+    useEffect(() => {
+        const attachmentsToSave: Array<Attachment> = attachmentsData.map((attachment) => ({
+            attachmentContentId: attachment.attachmentContentId,
+            filename: attachment.filename,
+            attachmentType: attachment.attachmentType,
+            createdBy: attachment.createdBy,
+            createdTeam: attachment.createdTeam,
+            createdComment: attachment.createdComment,
+            createdOn: attachment.createdOn,
+            checkedTeam: attachment.checkedTeam,
+            checkedComment: attachment.checkedComment,
+            checkedOn: attachment.checkedOn,
+            checkStatus: attachment.checkStatus,
+            checkedBy: attachment.checkedBy,
+        }))
+        setDocumentPayload({
+            ...documentPayload,
+            attachments: attachmentsToSave,
+        })
+    }, [
+        attachmentsData,
+    ])
 
     return (
         <>
             <SelectAttachment
-                componentPayload={componentPayload}
-                setComponentPayload={setComponentPayload}
-                attachmentUpload={attachmentData}
-                setAttachmentFromUpload={setAttachmentData}
+                attachmentsData={attachmentsData}
+                setAttachmentsData={setAttachmentsData}
                 show={dialogOpenSelectAttachment}
                 setShow={setDialogOpenSelectAttachment}
-                onReRender={handleReRender}
-                documentType={documentType}
-                releasePayload={releasePayload}
-                setReleasePayload={setReleasePayload}
             />
-            <div className={`row ${styles['attachment-table']}`} style={{ padding: '25px' }}>
-                <TitleAttachment />
-                <TableAttachment
-                    data={attachmentData}
-                    setAttachmentData={setAttachmentData}
-                    // setAttachmentToComponentData={setAttachmentToComponentData}
-                    documentType={documentType}
-                    // setAttachmentToReleasePayload={setAttachmentToReleasePayload}
-                />
+            <div className='col mb-3'>
+                <table className='table col'>
+                    <TitleAttachment />
+                    <TableAttachment
+                        beforeUpdateAttachmentsCheckStatus={beforeUpdateAttachmentsCheckStatus}
+                        setBeforeUpdateAttachmentsCheckStatus={setBeforeUpdateAttachmentsCheckStatus}
+                        attachmentsData={attachmentsData}
+                        setAttachmentsData={setAttachmentsData}
+                    />
+                </table>
             </div>
-
-            <div>
-                <button type='button' onClick={handleClickSelectAttachment} className={`fw-bold btn btn-secondary`}>
+            <div className='mb-3'>
+                <button
+                    type='button'
+                    onClick={handleClickSelectAttachment}
+                    className={`fw-bold btn btn-secondary`}
+                >
                     {t('Add Attachment')}
                 </button>
             </div>

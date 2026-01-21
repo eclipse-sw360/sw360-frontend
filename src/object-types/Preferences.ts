@@ -11,7 +11,14 @@
 
 import { useTranslations } from 'next-intl'
 
-function Preferences() : { key: string; documentType: string; entries: { id: string; name: string; }[] }[] {
+function Preferences(): {
+    key: string
+    documentType: string
+    entries: {
+        id: string
+        name: string
+    }[]
+}[] {
     const t = useTranslations('default')
 
     const PREFERENCES = [
@@ -33,7 +40,7 @@ function Preferences() : { key: string; documentType: string; entries: { id: str
                 },
                 {
                     id: 'projectMODERATORS',
-                    name: t('Moderator'),
+                    name: t('Moderators'),
                 },
                 {
                     id: 'projectCONTRIBUTORS',
@@ -41,7 +48,7 @@ function Preferences() : { key: string; documentType: string; entries: { id: str
                 },
                 {
                     id: 'projectSECURITY_RESPONSIBLES',
-                    name: t('Security Responsible'),
+                    name: t('Security Responsibles'),
                 },
                 {
                     id: 'projectROLES',
@@ -64,11 +71,11 @@ function Preferences() : { key: string; documentType: string; entries: { id: str
                 },
                 {
                     id: 'componentMODERATORS',
-                    name: t('Moderator'),
+                    name: t('Moderators'),
                 },
                 {
                     id: 'componentSUBSCRIBERS',
-                    name: t('Subcriber'),
+                    name: t('Subscribers'),
                 },
                 {
                     id: 'componentROLES',
@@ -91,11 +98,11 @@ function Preferences() : { key: string; documentType: string; entries: { id: str
                 },
                 {
                     id: 'releaseMODERATORS',
-                    name: t('Moderator'),
+                    name: t('Moderators'),
                 },
                 {
                     id: 'releaseSUBSCRIBERS',
-                    name: t('Subcriber'),
+                    name: t('Subscribers'),
                 },
                 {
                     id: 'releaseROLES',
@@ -114,7 +121,7 @@ function Preferences() : { key: string; documentType: string; entries: { id: str
                 },
                 {
                     id: 'moderationMODERATORS',
-                    name: t('Moderator'),
+                    name: t('Moderators'),
                 },
             ],
         },

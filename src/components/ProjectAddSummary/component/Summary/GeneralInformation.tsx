@@ -10,11 +10,12 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, useCallback, useState } from 'react'
-import { GiCancel } from 'react-icons/gi'
-
-import { ProjectPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
+import { BsXCircle } from 'react-icons/bs'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
+import { useConfigValue } from '@/contexts'
+import { ProjectPayload, UIConfigKeys, Vendor } from '@/object-types'
 
 interface Param {
     vendor: Vendor
@@ -23,10 +24,24 @@ interface Param {
     setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
 }
 
-export default function GeneralInformation({ vendor, setVendor, projectPayload, setProjectPayload }: Param): JSX.Element {
+export default function GeneralInformation({
+    vendor,
+    setVendor,
+    projectPayload,
+    setProjectPayload,
+}: Param): JSX.Element {
     const t = useTranslations('default')
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
     const handleClickSearchVendor = useCallback(() => setShowVendorsModal(true), [])
+
+    // Configs from backend
+    const projectDomains = useConfigValue(UIConfigKeys.UI_DOMAINS) as string[] | null
+    const projectTags = useConfigValue(UIConfigKeys.UI_PROJECT_TAG) as string[] | null
+    const isSvmEnabled =
+        useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) === null
+            ? true
+            : (useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) as boolean)
+
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
@@ -34,15 +49,18 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
         })
     }
 
-    const setVendorData = (vendorResponse: Vendor) => {
-        const vendorData: Vendor = {
-            id: vendorResponse.id,
-            fullName: vendorResponse.fullName,
-        }
-        setVendor(vendorData)
+    const onSuggestChangeHandler = (key: string) => (newValue: string | string[]) => {
         setProjectPayload({
             ...projectPayload,
-            defaultVendorId: vendorResponse.id,
+            [key]: newValue,
+        })
+    }
+
+    const setVendorData = (vendorResponse: Vendor) => {
+        setVendor(vendorResponse)
+        setProjectPayload({
+            ...projectPayload,
+            vendorId: vendorResponse._links?.self.href.split('/').at(-1),
         })
     }
 
@@ -54,7 +72,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
         setVendor(vendorData)
         setProjectPayload({
             ...projectPayload,
-            defaultVendorId: '',
+            vendorId: '',
         })
     }
 
@@ -62,10 +80,20 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
         <>
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('General Information')}</h6>
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.name' className='form-label fw-medium'>
-                            {t('Name')} <span style={{ color: 'red' }}>*</span>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.name'
+                            className='form-label fw-medium'
+                        >
+                            {t('Name')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <input
                             type='text'
@@ -78,8 +106,11 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             onChange={updateInputField}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.version' className='form-label fw-medium'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.version'
+                            className='form-label fw-medium'
+                        >
                             {t('Version')}
                         </label>
                         <input
@@ -92,16 +123,26 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             onChange={updateInputField}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.visibility' className='form-label fw-medium'>
-                            {t('Visibility')} <span style={{ color: 'red' }}>*</span>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.visibility'
+                            className='form-label fw-medium'
+                        >
+                            {t('Visibility')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <select
                             className='form-select'
                             id='addProjects.visibility'
                             aria-describedby='addProjects.visibility.HelpBlock'
                             name='visibility'
-                            value={projectPayload.visibility}
+                            value={projectPayload.visibility ?? 'EVERYONE'}
                             onChange={updateInputField}
                             required
                         >
@@ -110,16 +151,21 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             <option value='BUISNESSUNIT_AND_MODERATORS'>{t('Group and Moderators')}</option>
                             <option value='EVERYONE'>{t('Everyone')}</option>
                         </select>
-                        <div className='form-text' id='addProjects.visibility.HelpBlock'>
+                        <div
+                            className='form-text'
+                            id='addProjects.visibility.HelpBlock'
+                        >
                             <ShowInfoOnHover text={t('VISIBILITY_INFO')} />
                             {t('Learn more about project visibilities')}.
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.createdBy' className='form-label fw-medium'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.createdBy'
+                            className='form-label fw-medium'
+                        >
                             {t('Created by')}
                         </label>
                         <input
@@ -131,16 +177,26 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             value={projectPayload.createdBy}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.projectType' className='form-label fw-medium'>
-                            {t('Project Type')} <span style={{ color: 'red' }}>*</span>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.projectType'
+                            className='form-label fw-medium'
+                        >
+                            {t('Project Type')}{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </label>
                         <select
                             className='form-select'
                             id='addProjects.projectType'
                             aria-describedby='addProjects.projectType.HelpBlock'
                             name='projectType'
-                            value={projectPayload.projectType}
+                            value={projectPayload.projectType ?? 'PRODUCT'}
                             onChange={updateInputField}
                             required
                         >
@@ -151,43 +207,59 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             <option value='INNER_SOURCE'>{t('Inner Source')}</option>
                             <option value='CLOUD_BACKEND'>{t('Cloud Backend')}</option>
                         </select>
-                        <div className='form-text' id='addProjects.projectType.HelpBlock'>
+                        <div
+                            className='form-text'
+                            id='addProjects.projectType.HelpBlock'
+                        >
                             <ShowInfoOnHover text={t('PROJECT_TYPE_INFO')} /> {t('Learn more about project types')}.
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.tag' className='form-label fw-medium'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.tag'
+                            className='form-label fw-medium'
+                        >
                             {t('Tag')}
                         </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            id='addProjects.tag'
-                            placeholder={t('Enter one word tag')}
-                            name='tag'
-                            value={projectPayload.tag}
-                            onChange={updateInputField}
+                        <SuggestionBox
+                            initialValue={projectPayload.tag}
+                            possibleValues={projectTags === null ? [] : projectTags}
+                            onValueChange={onSuggestChangeHandler('tag')}
+                            inputProps={{
+                                id: 'addProjects.tag',
+                                name: 'tag',
+                                placeHolder: t('Enter one word tag'),
+                                aria_describedby: 'addProjects.tag',
+                            }}
+                            isMultiValue={false}
                         />
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.description' className='form-label fw-medium'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.description'
+                            className='form-label fw-medium'
+                        >
                             {t('Description')}
                         </label>
                         <textarea
                             className='form-control'
                             id='addProjects.description'
                             placeholder={t('Enter Description')}
-                            style={{ height: '100px' }}
+                            style={{
+                                height: '100px',
+                            }}
                             name='description'
                             value={projectPayload.description}
                             onChange={updateInputField}
                         ></textarea>
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.domain' className='form-label fw-medium'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.domain'
+                            className='form-label fw-medium'
+                        >
                             {t('Domain')}
                         </label>
                         <select
@@ -195,19 +267,26 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.domain'
                             aria-label={t('Enter Domain')}
                             name='domain'
-                            value={projectPayload.domain}
+                            value={projectPayload.domain ?? ''}
                             onChange={updateInputField}
                         >
                             <option value=''>-- {t('Select Domain')} --</option>
-                            <option value='Application Software'>{t('Application Software')}</option>
-                            <option value='Documentation'>{t('Documentation')}</option>
-                            <option value='Embedded Software'>{t('Embedded Software')}</option>
-                            <option value='Hardware'>{t('Hardware')}</option>
-                            <option value='Test and Diagnostics'>{t('Test and Diagnostics')}</option>
+                            {projectDomains &&
+                                projectDomains.map((domain) => (
+                                    <option
+                                        key={domain}
+                                        value={domain}
+                                    >
+                                        {domain}
+                                    </option>
+                                ))}
                         </select>
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.vendor' className='form-label fw-medium'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.vendor'
+                            className='form-label fw-medium'
+                        >
                             {t('Vendor')}
                         </label>
                         <input
@@ -216,35 +295,45 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             id='addProjects.vendor'
                             placeholder={t('Click to set vendor')}
                             readOnly={true}
-                            name='defaultVendorId'
+                            name='vendorId'
                             value={vendor.fullName ?? ''}
                             onClick={handleClickSearchVendor}
                         />
                         <VendorDialog
                             show={showVendorsModal}
                             setShow={setShowVendorsModal}
-                            selectVendor={setVendorData}
+                            setVendor={setVendorData}
+                            vendor={vendor}
                         />
                         <div className='form-text'>
-                            <GiCancel onClick={handleClearVendorData} />
+                            <BsXCircle
+                                onClick={handleClearVendorData}
+                                size={20}
+                            />
                         </div>
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.modifiedOn' className='form-label fw-medium'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.modifiedOn'
+                            className='form-label fw-medium'
+                        >
                             {t('Modified On')}
                         </label>
-                        <input type='date'
-                               className='form-control'
-                               id='addProjects.modifiedOn'
-                               readOnly={true}
-                               value={projectPayload.modifiedOn ?? ''}
+                        <input
+                            type='date'
+                            className='form-control'
+                            id='addProjects.modifiedOn'
+                            readOnly={true}
+                            value={projectPayload.modifiedOn ?? ''}
                         />
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.modifiedBy' className='form-label fw-medium'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.modifiedBy'
+                            className='form-label fw-medium'
+                        >
                             {t('Modified By')}
                         </label>
                         <input
@@ -257,8 +346,7 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                         />
                     </div>
                 </div>
-                <hr className='my-2' />
-                <div className='row'>
+                <div className='row with-divider py-3'>
                     <div className='col-lg-4'>
                         <input
                             className='form-check-input'
@@ -287,8 +375,12 @@ export default function GeneralInformation({ vendor, setVendor, projectPayload, 
                             type='checkbox'
                             value=''
                             id='addProjects.useExternalIdList'
+                            disabled={!isSvmEnabled}
                         />
-                        <label className='form-check-label fw-medium ms-2' htmlFor='addProjects.useExternalIdList'>
+                        <label
+                            className='form-check-label fw-medium ms-2'
+                            htmlFor='addProjects.useExternalIdList'
+                        >
                             {t('Do not create monitoring list, but use list from external id')}
                         </label>
                     </div>

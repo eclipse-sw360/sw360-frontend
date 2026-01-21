@@ -10,21 +10,23 @@
 'use client'
 
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
-import { ClearingRequestDetails } from '@/object-types'
 import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode } from 'react'
+import { ClearingRequestDetails } from '@/object-types'
 
-
-export default function ClearingRequestInfo({ data }: { data: ClearingRequestDetails | undefined}) {
+export default function ClearingRequestInfo({
+    data,
+}: Readonly<{
+    data: ClearingRequestDetails | undefined
+}>): ReactNode | undefined {
     const t = useTranslations('default')
     const { status } = useSession()
-
 
     if (status === 'unauthenticated') {
         signOut()
     } else {
-    return (
-        <>
+        return (
             <table className='table summary-table'>
                 <thead>
                     <tr>
@@ -35,14 +37,19 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     <tr>
                         <td>{t('Requesting User')}:</td>
                         <td>
-                            {data?.requestingUser && data?.requestingUserName
-                                ? <Link href={`mailto:${data?.requestingUser}`}>{data?.requestingUserName}</Link>
-                                : ''}
+                            {data?.requestingUser !== undefined &&
+                            data?._embedded?.requestingUser?.fullName !== undefined ? (
+                                <Link href={`mailto:${data._embedded.requestingUser.email}`}>
+                                    {data._embedded.requestingUser.fullName}
+                                </Link>
+                            ) : (
+                                ''
+                            )}
                         </td>
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
-                        <td>{data?.createdOn ?? ''}</td>
+                        <td>{data?._embedded?.createdOn ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Preferred Clearing Date')}:</td>
@@ -62,6 +69,6 @@ export default function ClearingRequestInfo({ data }: { data: ClearingRequestDet
                     </tr>
                 </tbody>
             </table>
-        </>
-    )}
+        )
+    }
 }

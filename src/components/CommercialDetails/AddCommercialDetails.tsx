@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,6 +11,8 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
+import { type JSX, useEffect } from 'react'
 import { Release } from '@/object-types'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
@@ -17,14 +20,42 @@ import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
-    cotsResponsible: { [k: string]: string }
-    setCotsResponsible: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    cotsResponsible: {
+        [k: string]: string
+    }
+    setCotsResponsible: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
-function AddCommercialDetails({ releasePayload, setReleasePayload, cotsResponsible, setCotsResponsible }: Props) : JSX.Element {
+function AddCommercialDetails({
+    releasePayload,
+    setReleasePayload,
+    cotsResponsible,
+    setCotsResponsible,
+}: Props): JSX.Element {
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
     return (
         <>
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
+            <div
+                className='container'
+                style={{
+                    maxWidth: '98vw',
+                    marginTop: '10px',
+                    fontSize: '0.875rem',
+                }}
+            >
                 <CommercialDetailsAdministration
                     releasePayload={releasePayload}
                     setReleasePayload={setReleasePayload}
@@ -32,7 +63,10 @@ function AddCommercialDetails({ releasePayload, setReleasePayload, cotsResponsib
                     setCotsResponsible={setCotsResponsible}
                 />
 
-                <COTSOSSInformation releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                <COTSOSSInformation
+                    releasePayload={releasePayload}
+                    setReleasePayload={setReleasePayload}
+                />
             </div>
         </>
     )

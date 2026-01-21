@@ -9,6 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { PaginationMeta } from '@/object-types'
+
 interface Embedded<SW360Type, SW360Key extends string> {
     _embedded: {
         [key in SW360Key]: Array<SW360Type>
@@ -25,15 +27,10 @@ interface Embedded<SW360Type, SW360Key extends string> {
                 href: string
                 name: string
                 templated: boolean
-            }
+            },
         ]
     }
-    page?: {
-        size: number
-        totalElements: number
-        totalPages: number
-        number: number
-    }
+    page?: PaginationMeta
 }
 
 export default Embedded

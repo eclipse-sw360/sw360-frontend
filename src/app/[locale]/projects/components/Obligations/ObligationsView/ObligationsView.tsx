@@ -9,25 +9,86 @@
 
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
+import { Tab, Tabs } from 'react-bootstrap'
+import { ActionType, ObligationEntry, ObligationType } from '@/object-types'
 import LicenseObligation from './LicenseObligation'
-import { ActionType, ProjectObligation } from '@/object-types'
+import ObligationTab from './ObligationTab'
 
-export default function ObligationView({ projectId, actionType, payload, setPayload, selectedProjectId }:
-    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>>, selectedProjectId: string | null }): JSX.Element {
+interface Props {
+    projectId: string
+    actionType: ActionType
+    payload?: ObligationEntry
+    setPayload?: Dispatch<SetStateAction<ObligationEntry>>
+}
+
+export default function ObligationView({ projectId, actionType, payload, setPayload }: Props): JSX.Element {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        status,
+    ])
+
     return (
-        <Tabs defaultActiveKey='license-obligation' className='mb-3' mountOnEnter={true} unmountOnExit={true}>
-            <Tab eventKey='license-obligation' title={t('License Obligation')}>
-                <LicenseObligation projectId={projectId} actionType={actionType} payload={payload} setPayload={setPayload} selectedProjectId={selectedProjectId} />
+        <Tabs
+            defaultActiveKey='license-obligation'
+            className='mb-3'
+            mountOnEnter={true}
+            unmountOnExit={true}
+        >
+            <Tab
+                eventKey='license-obligation'
+                title={t('License Obligation')}
+            >
+                <LicenseObligation
+                    projectId={projectId}
+                    actionType={actionType}
+                    payload={payload}
+                    setPayload={setPayload}
+                />
             </Tab>
-            <Tab eventKey='component-obligation' title={t('Component Obligation')}>
+            <Tab
+                eventKey='component-obligation'
+                title={t('Component Obligation')}
+            >
+                <ObligationTab
+                    projectId={projectId}
+                    actionType={actionType}
+                    payload={payload}
+                    setPayload={setPayload}
+                    obligationType={ObligationType.COMPONENT_OBLIGATION}
+                />
             </Tab>
-            <Tab eventKey='project-obligation' title={t('Project Obligation')}>
+            <Tab
+                eventKey='project-obligation'
+                title={t('Project Obligation')}
+            >
+                <ObligationTab
+                    projectId={projectId}
+                    actionType={actionType}
+                    payload={payload}
+                    setPayload={setPayload}
+                    obligationType={ObligationType.PROJECT_OBLIGATION}
+                />
             </Tab>
-            <Tab eventKey='organisation-obligation' title={t('Organisation Obligation')}>
+            <Tab
+                eventKey='organisation-obligation'
+                title={t('Organisation Obligation')}
+            >
+                <ObligationTab
+                    projectId={projectId}
+                    actionType={actionType}
+                    payload={payload}
+                    setPayload={setPayload}
+                    obligationType={ObligationType.ORGANISATION_OBLIGATION}
+                />
             </Tab>
         </Tabs>
     )

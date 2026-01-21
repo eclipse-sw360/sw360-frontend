@@ -11,8 +11,8 @@ import Release from './Release'
 
 export interface AttachmentUsages {
     _embedded: {
-        "sw360:release": Release[]
-        "sw360:attachmentUsages": AttachmentUsage[][]
+        'sw360:release': Release[]
+        'sw360:attachmentUsages': AttachmentUsage[][]
     }
     linkedProjects?: {
         [key: string]: {
@@ -33,11 +33,11 @@ export interface AttachmentUsages {
     }
     releaseIdToUsage?: {
         [key: string]: {
-            releaseRelation : string
-            mainlineState : string
-            comment : string
-            createdOn : string
-            createdBy : string
+            releaseRelation: string
+            mainlineState: string
+            comment: string
+            createdOn: string
+            createdBy: string
         }
     }
 }
@@ -54,6 +54,20 @@ export interface AttachmentUsage {
     usageData?: {
         sourcePackage?: object
         manuallySet?: object
-        licenseInfo?: object
+        licenseInfo?: {
+            excludedLicenseIds: string[]
+            projectPath: string
+            includeConcludedLicense: boolean
+        }
+    }
+}
+
+export interface SaveUsagesPayload {
+    selected: string[]
+    deselected: string[]
+    selectedConcludedUsages: string[]
+    deselectedConcludedUsages: string[]
+    ignoredLicenses: {
+        [path: string]: string[]
     }
 }

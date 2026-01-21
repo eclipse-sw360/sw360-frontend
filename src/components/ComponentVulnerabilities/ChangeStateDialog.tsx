@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,18 +11,17 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useState } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 
-import { ApiUtils, CommonUtils } from '@/utils'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
-interface SelectedVulnerability  {
+interface SelectedVulnerability {
     releaseId: string
     vulnerExternalId: string
-    index: string
 }
 
 interface Props {
@@ -35,31 +35,37 @@ interface ChangeStatePayload {
     releaseVulnerabilityRelationDTOs: [
         {
             externalId: string
-        }
+        },
     ]
     comment: string
     verificationState: string
 }
 
-const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JSX.Element => {
+const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [comment, setComment] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const handleCloseDialog = () => {
         setShow(!show)
     }
 
-    const updateState = useCallback(
-        async (url: string, data: ChangeStatePayload) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return
-            } 
-            await ApiUtils.PATCH(url, data, session.user.access_token)
-        },
-        []
-    )
+    const updateState = useCallback(async (url: string, data: ChangeStatePayload) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return signOut()
+        }
+        await ApiUtils.PATCH(url, data, session.user.access_token)
+    }, [])
 
     const handleSubmit = async () => {
         if (selectedVulner.length > 0) {
@@ -80,7 +86,13 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JS
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     <b>{t('Change Vulnerability Rating And Action?')}</b>
@@ -95,7 +107,13 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JS
                     : <b>{t(state as never)}</b>.
                     <hr />
                     <Form.Group className='mb-3'>
-                        <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
+                        <Form.Label
+                            style={{
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {t('Please comment your changes')}
+                        </Form.Label>
                         <Form.Control
                             as='textarea'
                             aria-label='With textarea'
@@ -106,11 +124,19 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props) : JS
                 </Form>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {' '}
                     {t('Close')}{' '}
                 </Button>
-                <Button className='login-btn' variant='primary' onClick={() => void handleSubmit()}>
+                <Button
+                    className='login-btn'
+                    variant='primary'
+                    onClick={() => void handleSubmit()}
+                >
                     {t('Change State')}
                 </Button>
             </Modal.Footer>

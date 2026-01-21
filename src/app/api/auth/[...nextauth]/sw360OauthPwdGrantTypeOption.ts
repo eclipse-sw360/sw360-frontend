@@ -9,12 +9,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { StatusCodes } from 'http-status-codes'
+import { NextAuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { CREDENTIAL_PROVIDER } from '@/constants'
+import { User as AppUser, UserCredentialInfo } from '@/object-types'
 import AuthService from '@/services/auth.service'
-import { HttpStatus, UserCredentialInfo } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { NextAuthOptions, User } from 'next-auth'
 
 const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
     providers: [
@@ -23,7 +24,10 @@ const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
             credentials: {},
             async authorize(credentials) {
                 try {
-                    const { username, password } = credentials as any
+                    const { username, password } = credentials as {
+                        username: string
+                        password: string
+                    }
                     const userCredential: UserCredentialInfo = {
                         username: username,
                         password: password,
@@ -34,12 +38,16 @@ const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
                     if (authToken === null) throw new Error('Error while fetching Auth Token')
 
                     const response = await ApiUtils.GET(`users/${username}`, authToken.access_token)
-                    if (response.status !== HttpStatus.OK) {
+                    if (response.status !== StatusCodes.OK) {
                         throw new Error('Error while fetching User Group')
                     }
 
-                    const data = await response.json()
-                    return { ...authToken, userGroup: data.userGroup, email: username } as any
+                    const data = (await response.json()) as AppUser
+                    return {
+                        ...authToken,
+                        userGroup: data.userGroup,
+                        email: username,
+                    } as User
                 } catch (e) {
                     console.error(e)
                     return null
@@ -53,10 +61,13 @@ const sw360OauthPwdGrantTypeOption: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user }) {
-            return { ...token, ...user } as User
+        jwt({ token, user }) {
+            return {
+                ...token,
+                ...user,
+            } as User
         },
-        async session({ session, token }) {
+        session({ session, token }) {
             // Send properties to the client, like an access_token from a provider.
             session.user = token
             return session

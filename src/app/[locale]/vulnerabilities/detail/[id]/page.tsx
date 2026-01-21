@@ -9,18 +9,21 @@
 
 import { Metadata } from 'next'
 
-import VulnerabilityDetailsTab from './components/VulnerabilityDetailsTab'
 import { ReactNode } from 'react'
+import VulnerabilityDetailsTab from './components/VulnerabilityDetailsTab'
 
 export const metadata: Metadata = {
-    title: 'Vulnerabilites',
+    title: 'Vulnerabilities',
 }
 
 interface Context {
-    params: { id: string }
+    params: Promise<{
+        id: string
+    }>
 }
 
-const Detail = ({ params }: Context) : ReactNode => {
+const Detail = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params
     return <VulnerabilityDetailsTab vulnerabilityId={params.id} />
 }
 

@@ -1,25 +1,23 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
-
+//
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
 // which is available at https://www.eclipse.org/legal/epl-2.0/
-
+//
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
 'use client'
 
-import { ReactNode, useState } from 'react'
-import { Dispatch, SetStateAction } from 'react'
-import { HttpStatus } from '@/object-types'
-import { getSession, signOut } from 'next-auth/react'
-import { redirect } from 'next/navigation'
-import { ApiUtils } from '@/utils'
-import { useTranslations } from 'next-intl'
-import { Modal, Alert, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
-import MessageService from '@/services/message.service'
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Dispatch, type JSX, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Alert, Modal, Spinner } from 'react-bootstrap'
+import { BsQuestionCircle } from 'react-icons/bs'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -33,53 +31,96 @@ interface AlertData {
     message: JSX.Element
 }
 
-export default function DeletePackageModal({ modalMetaData, setModalMetaData, isEditPage }: 
-    { modalMetaData: DeletePackageModalMetData, setModalMetaData: Dispatch<SetStateAction<DeletePackageModalMetData>>, isEditPage: boolean }) : ReactNode {
+export default function DeletePackageModal({
+    modalMetaData,
+    setModalMetaData,
+    isEditPage,
+    onDeleteSuccess,
+}: {
+    modalMetaData: DeletePackageModalMetData
+    setModalMetaData: Dispatch<SetStateAction<DeletePackageModalMetData>>
+    isEditPage: boolean
+    onDeleteSuccess?: (packageId: string) => void
+}): ReactNode {
     const t = useTranslations('default')
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [deleting, setDeleting] = useState<boolean | null>(null)
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const handleGoBack = () => {
+        if (window.history.length > 1) {
+            router.back()
+        } else {
+            router.push('/packages')
+        }
+    }
 
     const deletePackage = async () => {
         try {
             setDeleting(true)
             const session = await getSession()
-            if(!session) {
-                return redirect('/')
+            if (!session) {
+                return router.push('/')
             }
+
             const response = await ApiUtils.DELETE(`packages/${modalMetaData.packageId}`, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                if(isEditPage) {
+
+            if (response.status == StatusCodes.OK) {
+                if (isEditPage) {
                     MessageService.success(t('Package deleted successfully'))
-                    setModalMetaData({ show: false, packageId: '', packageName: '', packageVersion: '' })
-                    router.push('/packages')
+                    setModalMetaData({
+                        show: false,
+                        packageId: '',
+                        packageName: '',
+                        packageVersion: '',
+                    })
+                    handleGoBack()
                 } else {
                     setAlert({
                         variant: 'success',
                         message: (
-                            <>
-                                <p>
-                                    {t('Deleted successfully')}!
-                                </p>
-                            </>
+                            <p>
+                                {t('Package')}{' '}
+                                <strong>
+                                    {`${modalMetaData.packageName}${
+                                        modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''
+                                    }`}
+                                </strong>{' '}
+                                {t('deleted successfully')}!
+                            </p>
                         ),
                     })
+                    if (onDeleteSuccess) {
+                        onDeleteSuccess(modalMetaData.packageId)
+                    }
                 }
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                if(isEditPage) {
+                if (isEditPage) {
                     MessageService.error(t('Package cannot be deleted'))
-                    setModalMetaData({ show: false, packageId: '', packageName: '', packageVersion: '' })
-                    router.push('/packages')
+                    setModalMetaData({
+                        show: false,
+                        packageId: '',
+                        packageName: '',
+                        packageVersion: '',
+                    })
+                    router.push(`/packages/edit/${modalMetaData.packageId}`)
                 } else {
                     setAlert({
                         variant: 'danger',
                         message: (
                             <>
-                                <p>
-                                    {t('Package cannot be deleted')}!
-                                </p>
+                                <p>{t('Package cannot be deleted')}!</p>
                             </>
                         ),
                     })
@@ -93,63 +134,107 @@ export default function DeletePackageModal({ modalMetaData, setModalMetaData, is
     }
 
     return (
-        <>
-            <Modal
-                size='lg'
-                centered
-                show={modalMetaData.show}
-                onHide={() => {
-                    if (deleting !== null) {
-                        setModalMetaData({ show: false, packageId: modalMetaData.packageId, packageName: '', packageVersion: '' })
-                    }
+        <Modal
+            size='lg'
+            centered
+            show={modalMetaData.show}
+            onHide={() => {
+                setModalMetaData({
+                    show: false,
+                    packageId: '',
+                    packageName: '',
+                    packageVersion: '',
+                })
+                setAlert(null)
+                setDeleting(null)
+            }}
+            aria-labelledby={t('Delete Package')}
+            scrollable
+        >
+            <Modal.Header
+                style={{
+                    backgroundColor: '#feefef',
+                    color: '#da1414',
                 }}
-                aria-labelledby={t('Delete Package')}
-                scrollable
+                closeButton
             >
-                <Modal.Header style={{ backgroundColor: '#feefef', color: '#da1414' }} closeButton>
-                    <Modal.Title id='delete-all-license-info-modal'>
-                        <AiOutlineQuestionCircle /> {t('Delete Package')}?
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {alert && (
-                        <Alert variant={alert.variant} id='deletePackage.message.alert'>
-                            {alert.message}
-                        </Alert>
-                    )}
-                    <p>{`${t('Do you really want to delete the package')} `}<span className='fw-medium'>{`${modalMetaData.packageName} ${(modalMetaData.packageVersion !== "") ? `(${modalMetaData.packageVersion})` : ''}}`}</span>?</p>
-                </Modal.Body>
-                <Modal.Footer>
-                    {
-                        (deleting === null || deleting === true || isEditPage) ?
-                        <>
-                            <button
-                                className='btn btn-dark'
-                                onClick={() => setModalMetaData({ show: false, packageId: '', packageName: '', packageVersion: '' })}
-                                disabled={deleting ?? undefined}
-                            >
-                                {t('Cancel')}
-                            </button>
-                            <button
-                                className='btn btn-danger'
-                                onClick={() => {
-                                    deletePackage().catch((e) => console.error(e))
-                                }}
-                                disabled={deleting ?? undefined}
-                            >
-                                {t('Delete Package')}
-                                {deleting === true && <Spinner size='sm' className='ms-1 spinner' />}
-                            </button>   
-                        </>:
+                <Modal.Title id='delete-all-license-info-modal'>
+                    <BsQuestionCircle size={20} /> {t('Delete Package')}?
+                </Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+                {alert && (
+                    <Alert
+                        variant={alert.variant}
+                        id='deletePackage.message.alert'
+                    >
+                        {alert.message}
+                    </Alert>
+                )}
+
+                {!alert && modalMetaData.packageName && (
+                    <p>
+                        {`${t('Do you really want to delete the package')} `}
+                        <span className='fw-medium'>
+                            {`${modalMetaData.packageName}${
+                                modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''
+                            }`}
+                        </span>
+                        ?
+                    </p>
+                )}
+            </Modal.Body>
+
+            <Modal.Footer>
+                {alert ? (
+                    <button
+                        className='btn btn-dark'
+                        onClick={() => {
+                            setModalMetaData({
+                                show: false,
+                                packageId: '',
+                                packageName: '',
+                                packageVersion: '',
+                            })
+                            setAlert(null)
+                            setDeleting(null)
+                        }}
+                    >
+                        {t('Close')}
+                    </button>
+                ) : (
+                    <>
                         <button
                             className='btn btn-dark'
-                            onClick={() => setModalMetaData({ show: false, packageId: '', packageName: '', packageVersion: '' })}
+                            onClick={() =>
+                                setModalMetaData({
+                                    show: false,
+                                    packageId: '',
+                                    packageName: '',
+                                    packageVersion: '',
+                                })
+                            }
+                            disabled={deleting ?? undefined}
                         >
-                            {t('Close')}
+                            {t('Cancel')}
                         </button>
-                    }
-                </Modal.Footer>
-            </Modal>
-        </>
+                        <button
+                            className='btn btn-danger'
+                            onClick={() => deletePackage().catch(console.error)}
+                            disabled={deleting ?? undefined}
+                        >
+                            {t('Delete Package')}
+                            {deleting === true && (
+                                <Spinner
+                                    size='sm'
+                                    className='ms-1 spinner'
+                                />
+                            )}
+                        </button>
+                    </>
+                )}
+            </Modal.Footer>
+        </Modal>
     )
 }

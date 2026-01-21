@@ -20,7 +20,6 @@ enum RequestDocumentTypes {
     PROJECT_DELETION = 'projectDeletions',
     RELEASE_ADDITION = 'releaseAdditions',
     RELEASE_DELETION = 'releaseDeletions',
-
 }
 
 export default RequestDocumentTypes

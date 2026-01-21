@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,57 +11,75 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { PageButtonHeader, SideBar } from '@/components/sw360'
-import { Changelogs, HttpStatus, LicenseDetail, LicenseTabIds, Embedded } from '@/object-types'
+import {
+    Changelogs,
+    Embedded,
+    ErrorDetails,
+    LicenseDetail,
+    LicenseTabIds,
+    PageableQueryParam,
+    PaginationMeta,
+    UserGroupType,
+} from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { notFound, useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
+
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
-import styles from '../detail.module.css'
-import MessageService from '@/services/message.service'
-import React from 'react'
 
 interface Props {
     licenseId: string
 }
 
-const tabList = [
-    {
-        id: LicenseTabIds.DETAILS,
-        name: 'Details',
-    },
-    {
-        id: LicenseTabIds.TEXT,
-        name: 'Text',
-    },
-    {
-        id: LicenseTabIds.OBLIGATIONS,
-        name: 'Obligations',
-    },
-    {
-        id: LicenseTabIds.CHANGE_LOG,
-        name: 'Change Log',
-    },
-]
-
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
-const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
+const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
-    const [changesLogTab, setChangesLogTab] = useState('list-change')
-    const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [license, setLicenseDetail] = useState<LicenseDetail | undefined>(undefined)
-    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [isEditWhitelist, setIsEditWhitelist] = useState(false)
     const [whitelist, setWhitelist] = useState<Map<string, boolean> | undefined>(undefined)
     const params = useSearchParams()
+    const [changeLogId, setChangeLogId] = useState('')
+    const [changelogTab, setChangelogTab] = useState('list-change')
+    const session = useSession()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
+
+    const tabList = [
+        {
+            id: LicenseTabIds.DETAILS,
+            name: t('Details'),
+        },
+        {
+            id: LicenseTabIds.TEXT,
+            name: t('Text'),
+        },
+        {
+            id: LicenseTabIds.OBLIGATIONS,
+            name: t('Obligations'),
+        },
+        {
+            id: LicenseTabIds.CHANGE_LOG,
+            name: t('Change Log'),
+        },
+    ]
 
     useEffect(() => {
         const controller = new AbortController()
@@ -69,51 +88,28 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
 
-                const licenses = await response.json() as LicenseDetail
+                const licenses = (await response.json()) as LicenseDetail
                 setLicenseDetail(licenses)
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
-                const response = await ApiUtils.GET(
-                    `changelog/document/${licenseId}`,
-                    session.user.access_token,
-                    signal
-                )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
                 }
-
-                const data = await response.json() as EmbeddedChangeLogs
-
-                setChangeLogList(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
-                        ? []
-                        : data['_embedded']['sw360:changeLogs']
-                )
-            } catch (e) {
-                console.error(e)
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
-
         return () => controller.abort()
-    }, [params, licenseId])
+    }, [
+        params,
+        licenseId,
+    ])
 
     const handleEditWhitelist = () => {
         setIsEditWhitelist(true)
@@ -126,21 +122,20 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
-        if (CommonUtils.isNullOrUndefined(whitelist))
-            return
+        if (CommonUtils.isNullOrUndefined(whitelist)) return
         const whitelistObj = Object.fromEntries(whitelist)
         const response = await ApiUtils.PATCH(
             `licenses/${licenseId}/whitelist`,
             whitelistObj,
-            session.user.access_token
+            session.user.access_token,
         )
-        if (response.status == HttpStatus.OK) {
-            MessageService.success(t('License updated successfully!'))
+        if (response.status == StatusCodes.OK) {
+            MessageService.success(t('License updated successfully'))
             window.location.reload()
         } else {
-            MessageService.error(t('License updated failed!'))
+            MessageService.error(t('License update failed'))
         }
     }
 
@@ -158,21 +153,119 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
             type: 'primary',
             name: t('Edit License'),
         },
-        'Edit Whitelist': { link: '', type: 'secondary', onClick: handleEditWhitelist, name: t('Edit Whitelist') },
+        'Edit Whitelist': {
+            link: '',
+            type: 'secondary',
+            onClick: handleEditWhitelist,
+            name: t('Edit Whitelist'),
+        },
     }
 
     const headerButtonsUpdateWhitelist = {
-        'Update Whitelist': { link: '', type: 'primary', onClick: handleUpdateWhitelist, name: t('Update Whitelist') },
-        Cancel: { link: '', type: 'light', onClick: handleCancel, name: t('Cancel') },
+        'Update whitelist': {
+            link: '',
+            type: 'primary',
+            onClick: handleUpdateWhitelist,
+            name: t('Update whitelist'),
+        },
+        Cancel: {
+            link: '',
+            type: 'light',
+            onClick: handleCancel,
+            name: t('Cancel'),
+        },
     }
 
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = changeLogList.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `changelog/document/${licenseId}`,
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangeLogs
+                    setPaginationMeta(data.page)
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        licenseId,
+        session,
+    ])
 
     return (
         license && (
-            <div className={`container ${styles['row-license-detail']}`}>
+            <div className='container license-detail-row'>
                 <div className='row'>
                     <div className='col-2 sidebar'>
-                        <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                        <SideBar
+                            selectedTab={selectedTab}
+                            setSelectedTab={setSelectedTab}
+                            tabList={tabList}
+                        />
                     </div>
                     <div className='col'>
                         <div className='row'>
@@ -217,9 +310,9 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                                                     title={`${license.fullName} (${license.shortName})`}
                                                     buttons={headerButtons}
                                                     checked={license.checked}
-                                                    changesLogTab={changesLogTab}
-                                                    setChangesLogTab={setChangesLogTab}
-                                                    changeLogIndex={changeLogIndex}
+                                                    changesLogTab={changelogTab}
+                                                    setChangesLogTab={setChangelogTab}
+                                                    changeLogId={changeLogId}
                                                 ></PageButtonHeader>
                                             ) : (
                                                 <PageButtonHeader
@@ -233,13 +326,25 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                                 </>
                             )}
                         </div>
-                        <div className='row' hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}>
-                            <Detail license={license} setLicense={setLicenseDetail} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}
+                        >
+                            <Detail
+                                license={license}
+                                setLicense={setLicenseDetail}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab !== LicenseTabIds.TEXT ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== LicenseTabIds.TEXT ? true : false}
+                        >
                             <Text license={license} />
                         </div>
-                        <div className='row' hidden={selectedTab !== LicenseTabIds.OBLIGATIONS ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== LicenseTabIds.OBLIGATIONS ? true : false}
+                        >
                             <Obligations
                                 licenseId={licenseId}
                                 isEditWhitelist={isEditWhitelist}
@@ -247,19 +352,39 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
                                 setWhitelist={setWhitelist}
                             />
                         </div>
-                        <div className='row' hidden={selectedTab != LicenseTabIds.CHANGE_LOG ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab != LicenseTabIds.CHANGE_LOG ? true : false}
+                        >
                             <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changelogTab !== 'list-change' ? true : false}
+                                >
                                     <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
+                                        setChangeLogId={setChangeLogId}
                                         documentId={licenseId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
+                                        setChangesLogTab={setChangelogTab}
+                                        changeLogList={memoizedData}
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        showProcessing={showProcessing}
+                                        paginationMeta={paginationMeta}
                                     />
                                 </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
+                                <div
+                                    className='row'
+                                    hidden={changelogTab !== 'view-log' ? true : false}
+                                >
+                                    <ChangeLogDetail
+                                        changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
+                                    />
+                                    <div
+                                        id='cardScreen'
+                                        style={{
+                                            padding: '0px',
+                                        }}
+                                    ></div>
                                 </div>
                             </div>
                         </div>
@@ -270,4 +395,8 @@ const LicenseDetailOverview = ({ licenseId }: Props) : ReactNode => {
     )
 }
 
-export default LicenseDetailOverview
+// export default LicenseDetailOverview
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(LicenseDetailOverview, [
+    UserGroupType.SECURITY_USER,
+])

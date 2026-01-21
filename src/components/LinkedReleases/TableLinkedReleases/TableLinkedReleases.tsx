@@ -9,11 +9,9 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import React from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
-
+import React, { type JSX } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { ReleaseLink } from '@/object-types'
-import styles from './TableLinkedReleases.module.css'
 
 interface Props {
     setReleaseLinks: React.Dispatch<React.SetStateAction<ReleaseLink[]>>
@@ -25,11 +23,13 @@ export default function TableLinkedReleases({
     releaseLinks,
     setReleaseLinks,
     setReleaseIdToRelationshipsToReleasePayLoad,
-}: Props) : JSX.Element {
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target
-        const list = [...releaseLinks]
+        const list = [
+            ...releaseLinks,
+        ]
         list[index][name as keyof ReleaseLink] = value as never
         const map = new Map<string, string>()
         list.forEach((item) => {
@@ -40,7 +40,9 @@ export default function TableLinkedReleases({
     }
 
     const handleClickDelete = (index: number) => {
-        const list: ReleaseLink[] = [...releaseLinks]
+        const list: ReleaseLink[] = [
+            ...releaseLinks,
+        ]
         list.splice(index, 1)
         const map = new Map<string, string>()
         list.forEach((item) => {
@@ -56,9 +58,9 @@ export default function TableLinkedReleases({
                 {releaseLinks.map((item: ReleaseLink, index: number) => {
                     return (
                         <div key={index}>
-                            <div className={`${styles['div-row']}`}>
+                            <div className='linked-releases-div-row'>
                                 <input
-                                    className={`${styles['input-field']}`}
+                                    className='linked-releases-input-field'
                                     name='vendor'
                                     value={item.vendor}
                                     type='text'
@@ -66,21 +68,21 @@ export default function TableLinkedReleases({
                                     readOnly
                                 />
                                 <input
-                                    className={`${styles['input-field']}`}
+                                    className='linked-releases-input-field'
                                     type='text'
                                     value={item.name}
                                     name='name'
                                     readOnly
                                 />
                                 <input
-                                    className={`${styles['input-field']}`}
+                                    className='linked-releases-input-field'
                                     type='text'
                                     value={item.version}
                                     name='version'
                                     readOnly
                                 />
                                 <select
-                                    className={`${styles['select-relation']}`}
+                                    className='linked-releases-select-relation'
                                     aria-label='releaseRelationship'
                                     id='releaseRelationship'
                                     name='releaseRelationship'
@@ -102,13 +104,18 @@ export default function TableLinkedReleases({
                                 <button
                                     type='button'
                                     onClick={() => handleClickDelete(index)}
-                                    style={{ border: 'none' }}
+                                    style={{
+                                        border: 'none',
+                                    }}
                                     className={`fw-bold btn btn-secondary`}
                                 >
-                                    <FaTrashAlt className='bi bi-trash3-fill' />
+                                    <BsFillTrashFill
+                                        className='bi bi-trash3-fill'
+                                        size={20}
+                                    />
                                 </button>
                             </div>
-                            <hr className={`${styles['hr']}`} />
+                            <hr className='linked-releases-hr' />
                         </div>
                     )
                 })}

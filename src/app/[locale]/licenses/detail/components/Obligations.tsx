@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,16 +11,22 @@
 
 'use client'
 
-import TableLicense from '@/components/LinkedObligations/TableLicense'
-import { HttpStatus, LicenseDetail, Obligation } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import {
+    ColumnDef,
+    getCoreRowModel,
+    getExpandedRowModel,
+    getFilteredRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { _ } from 'next-sw360'
-import { notFound, useSearchParams } from 'next/navigation'
-import { ReactNode, useEffect, useState } from 'react'
-import { Form } from 'react-bootstrap'
-import styles from '../detail.module.css'
+import { PaddedCell, SW360Table } from 'next-sw360'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { Form, Spinner } from 'react-bootstrap'
+import { ErrorDetails, LicenseDetail, NestedRows, Obligation } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     licenseId?: string
@@ -28,50 +35,46 @@ interface Props {
     setWhitelist: React.Dispatch<React.SetStateAction<Map<string, boolean> | undefined>>
 }
 
-type RowData = Array<string | Obligation | string[]>
-
-const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props) : ReactNode => {
+const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props): ReactNode => {
     const t = useTranslations('default')
-    const [data, setData] = useState<Array<RowData>>([])
-    const [dataEditWhitelist, setDataEditWhitelist] = useState<Array<RowData>>([])
-    const params = useSearchParams()
+    const session = useSession()
 
-    const buildAttachmentDetail = (item: Obligation) => {
-        return (event: React.MouseEvent<HTMLElement>) => {
-            if ((event.target as HTMLElement).className == styles.expand) {
-                ;(event.target as HTMLElement).className = styles.collapse
-            } else {
-                ;(event.target as HTMLElement).className = styles.expand
-            }
+    const [globalFilter, setGlobalFilter] = useState('')
+    const [obligationData, setObligationData] = useState<Obligation[]>([])
+    const [showProcessing, setShowProcessing] = useState(false)
 
-            const obligationDetail = document.getElementById(item.title ?? '')
-            if (!obligationDetail) {
-                const parent = (event.target as HTMLElement).parentElement?.parentElement?.parentElement
-                const html = `<td colspan="10">
-                    <table class="table table-borderless">
-                        <tbody>
-                            <tr>
-                            <td>${
-                                item.text?.replace(/[\r\n]/g, '<br>').replace(/\t/g, '&ensp;&ensp;&ensp;&ensp;') ?? ''
-                            }</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </td>`
-                const tr = document.createElement('tr')
-                tr.id = item.title ?? ''
-                tr.innerHTML = html
-
-                parent?.parentNode?.insertBefore(tr, parent.nextSibling)
-            } else {
-                if (obligationDetail.hidden == true) {
-                    obligationDetail.hidden = false
-                } else {
-                    obligationDetail.hidden = true
-                }
-            }
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
         }
-    }
+    }, [
+        session,
+    ])
+
+    const memoizedData = useMemo(
+        () =>
+            obligationData.map(
+                (ob) =>
+                    ({
+                        node: ob,
+                        children: [
+                            {
+                                node: ob,
+                            },
+                        ],
+                    }) as NestedRows<Obligation>,
+            ),
+        [
+            obligationData,
+        ],
+    )
+
+    const memoizedWhitelistData = useMemo(
+        () => obligationData,
+        [
+            obligationData,
+        ],
+    )
 
     useEffect(() => {
         const controller = new AbortController()
@@ -79,180 +82,221 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
-                const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                setShowProcessing(true)
+                const response = await ApiUtils.GET(`licenses/${licenseId}`, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
 
-                const license = await response.json() as LicenseDetail
-                if (CommonUtils.isNullEmptyOrUndefinedArray(license._embedded['sw360:obligations'])) {
-                    setData([])
-                } else {
-                    const data = license._embedded['sw360:obligations']
-                        .map((item: Obligation) => [
-                            item,
-                            item.title ?? '',
-                            !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
-                                ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
-                                : '',
-                            !CommonUtils.isNullOrUndefined(item.customPropertyToValue)
-                                ? JSON.stringify(item.customPropertyToValue)
-                                : '',
-                            item.text ?? '',
-                            item.whitelist ?? [],
-                        ])
-                        .filter((item: RowData) => (item[5] as string[]).length  !== 0)
-                    const whitelist = new Map<string, boolean>()
-                    data.forEach((element: RowData) => {
-                        whitelist.set(CommonUtils.getIdFromUrl((element[0] as Obligation)._links?.self.href), true)
-                    })
-                    setWhitelist(whitelist)
-                    setData(data)
-                    const dataEditWhitelist = license._embedded['sw360:obligations'].map((item: Obligation) => [
-                        item,
-                        item.text ?? '',
-                        !CommonUtils.isNullOrUndefined(item.customPropertyToValue)
-                            ? JSON.stringify(item.customPropertyToValue)
-                            : '',
-                    ])
-                    setDataEditWhitelist(dataEditWhitelist)
+                const data = (await response.json()) as LicenseDetail
+                const obligations = data['_embedded']?.['sw360:obligations'] ?? []
+                setObligationData(obligations)
+
+                const newWhitelist = new Map<string, boolean>()
+                obligations.forEach((element: Obligation) => {
+                    newWhitelist.set(CommonUtils.getIdFromUrl(element._links?.self.href), true)
+                })
+                setWhitelist(newWhitelist)
+            } catch (error: unknown) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
                 }
-            } catch (e) {
-                console.error(e)
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                setShowProcessing(false)
             }
         })()
         return () => controller.abort()
-    }, [params, licenseId])
+    }, [
+        licenseId,
+        session.data,
+        isEditWhitelist,
+        setWhitelist,
+    ])
 
-    const columns = [
-        {
-            id: 'check',
-            name: _(<i className={styles.collapse}></i>),
-            formatter: (item: Obligation) =>
-                _(
-                    <i
-                        className={styles.collapse}
-                        onClick={buildAttachmentDetail(item)}
-                    ></i>,
+    const handlerRadioButton = useCallback(
+        (item: Obligation) => {
+            if (whitelist === undefined) return
+            const id: string = CommonUtils.getIdFromUrl(item._links?.self.href)
+            const newWhitelist = new Map(whitelist)
+
+            newWhitelist.set(id, !newWhitelist.get(id))
+
+            setWhitelist(newWhitelist)
+        },
+        [
+            whitelist,
+            setWhitelist,
+        ],
+    )
+
+    const columns = useMemo<ColumnDef<NestedRows<Obligation>>[]>(
+        () => [
+            {
+                id: 'expand',
+                cell: ({ row }) => {
+                    if (row.depth > 0) {
+                        return <p>{row.original.node.text ?? ''}</p>
+                    } else {
+                        return <PaddedCell row={row}></PaddedCell>
+                    }
+                },
+                meta: {
+                    width: '3%',
+                },
+            },
+            {
+                id: 'obligation',
+                header: t('Obligation'),
+                accessorFn: (row) => row.node.title,
+                cell: ({ row }) => <>{row.original.node.title}</>,
+            },
+            {
+                id: 'obligationType',
+                header: t('Obligation Type'),
+                accessorFn: (row) => row.node.obligationType,
+                cell: ({ row }) => <>{row.original.node.obligationType}</>,
+            },
+            {
+                id: 'furtherProperties',
+                header: t('Further properties'),
+                accessorFn: (row) =>
+                    row.node.customPropertyToValue ? JSON.stringify(row.node.customPropertyToValue) : '',
+                cell: ({ row }) => (
+                    <>
+                        {!CommonUtils.isNullOrUndefined(row.original.node.customPropertyToValue)
+                            ? JSON.stringify(row.original.node.customPropertyToValue)
+                            : ''}
+                    </>
                 ),
-            sort: false,
-            width: '10%',
-        },
-        {
-            id: 'obligation',
-            name: t('Obligation'),
-            sort: true,
-            width: '30%',
-        },
-        {
-            id: 'obligationType',
-            name: t('Obligation Type'),
-            sort: true,
-            width: '30%',
-        },
-        {
-            id: 'furtherProperties',
-            name: t('Further properties'),
-            sort: true,
-            width: '30%',
-        },
-    ]
+            },
+        ],
+        [
+            t,
+        ],
+    )
 
-    const handlerRadioButton = (item: Obligation) => {
-        if (whitelist === undefined)
-            return
-        const id: string = CommonUtils.getIdFromUrl(item._links?.self.href)
-        if (whitelist.has(id)) {
-            if (whitelist.get(id) !== true) {
-                whitelist.set(id, true)
-            } else {
-                whitelist.set(id, false)
-            }
-        } else {
-            whitelist.set(id, true)
-        }
-        setWhitelist(whitelist)
-    }
-
-    const columnEditWhitelists = [
-        {
-            id: 'obligationId',
-            name: 'Whitelist',
-            formatter: (item: Obligation) =>
-                _(
+    const columnEditWhitelists = useMemo<ColumnDef<Obligation>[]>(
+        () => [
+            {
+                id: 'check',
+                header: t('Whitelist'),
+                cell: ({ row }) => (
                     <Form.Check
-                        style={{ textAlign: 'center' }}
+                        className='text-center'
                         name='obligationId'
                         type='checkbox'
-                        defaultChecked={!CommonUtils.isNullEmptyOrUndefinedArray(item.whitelist)}
+                        defaultChecked={!CommonUtils.isNullEmptyOrUndefinedArray(row.original.whitelist)}
                         onClick={() => {
-                            handlerRadioButton(item)
+                            handlerRadioButton(row.original)
                         }}
-                    ></Form.Check>,
+                    ></Form.Check>
                 ),
-        },
-        {
-            id: 'text',
-            name: 'Obligation',
-            sort: true,
-            width: '30%',
-        },
-        {
-            id: 'Further properties',
-            name: 'Further properties',
-            sort: true,
-            width: '10%',
-        },
-    ]
-    const style = {
-        table: {
-            fontSize: '14px',
-        },
-        th: {
-            'text-align': 'center',
-            'font-size': '14px',
-        },
-        td: {
-            'text-align': 'center',
-        },
-    }
+            },
+            {
+                id: 'text',
+                header: t('Obligation'),
+                accessorKey: 'text',
+                cell: ({ row }) => <>{row.original.text}</>,
+            },
+            {
+                id: 'furtherProperties',
+                header: t('Further properties'),
+                accessorFn: (row) => (row.customPropertyToValue ? JSON.stringify(row.customPropertyToValue) : ''),
+                cell: ({ row }) => (
+                    <>
+                        {!CommonUtils.isNullOrUndefined(row.original.customPropertyToValue)
+                            ? JSON.stringify(row.original.customPropertyToValue)
+                            : ''}
+                    </>
+                ),
+            },
+        ],
+        [
+            t,
+            handlerRadioButton,
+        ],
+    )
 
-    const styleEditWhiteList = {
-        table: {
-            fontSize: '14px',
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        state: {
+            globalFilter,
         },
-        th: {
-            'text-align': 'left',
-            'font-size': '14px',
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        globalFilterFn: 'includesString',
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.children ?? [],
+        getRowCanExpand: (row) => {
+            if (row.depth === 1) {
+                row.meta = {
+                    isFullSpanRow: true,
+                }
+            }
+            return row.depth === 0
         },
-        td: {
-            'text-align': 'left',
+    })
+
+    table.getRowModel().rows.forEach((row) => {
+        if (row.depth === 1) {
+            row.meta = {
+                isFullSpanRow: true,
+            }
+        }
+    })
+
+    const whiteListTable = useReactTable({
+        data: memoizedWhitelistData,
+        columns: columnEditWhitelists,
+        state: {
+            globalFilter,
         },
-    }
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        globalFilterFn: 'includesString',
+    })
 
     return (
-        <div className='row'>
+        <div className='mb-3'>
+            <div className='row mb-3'>
+                <div className='col-lg-4'>
+                    <input
+                        type='text'
+                        className='form-control'
+                        placeholder='Search obligations...'
+                        aria-label='Search obligations'
+                        value={globalFilter ?? ''}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                    />
+                </div>
+            </div>
+
             {isEditWhitelist ? (
-                <TableLicense
-                    data={dataEditWhitelist}
-                    search={true}
-                    columns={columnEditWhitelists}
-                    style={styleEditWhiteList}
-                    pagination={false}
+                whiteListTable ? (
+                    <SW360Table
+                        table={whiteListTable}
+                        showProcessing={showProcessing}
+                    />
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )
+            ) : table ? (
+                <SW360Table
+                    table={table}
+                    showProcessing={showProcessing}
                 />
             ) : (
-                <div>
-                    <TableLicense
-                        data={data}
-                        columns={columns}
-                        style={style}
-                        pagination={false}
-                    />
+                <div className='col-12 mt-1 text-center'>
+                    <Spinner className='spinner' />
                 </div>
             )}
         </div>

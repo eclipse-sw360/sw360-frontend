@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,15 +11,14 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
-
-import { Attachment, FossologyProcessInfo, FossologyProcessStatus, HttpStatus, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import styles from './fossologyClearing.module.css'
-import { getSession } from 'next-auth/react'
+import { Attachment, FossologyProcessInfo, FossologyProcessStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     show: boolean
@@ -26,7 +26,11 @@ interface Props {
     releaseId: string
 }
 
-const clearingMessages: { [key: string]: { [key: string]: string } } = {
+const clearingMessages: {
+    [key: string]: {
+        [key: string]: string
+    }
+} = {
     NUMBER_OF_ATTACHMENTS_NOT_MATCH: {
         message: 'number_of_attachments_not_match_condition',
         variant: 'danger',
@@ -74,6 +78,15 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         percent: 0,
         stepName: '',
     })
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const resetTimeCountDown = () => {
         setTimeInterval(5)
@@ -81,55 +94,58 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
 
     const clearAllInterval = useCallback(() => {
         if (countDownInterval.current !== undefined) {
-            clearInterval(countDownInterval.current);
+            clearInterval(countDownInterval.current)
             countDownInterval.current = undefined
         }
 
         if (progressInterval.current !== undefined) {
-            clearInterval(progressInterval.current);
+            clearInterval(progressInterval.current)
             progressInterval.current = undefined
         }
         resetTimeCountDown()
     }, [])
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return undefined
-            }
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
-                MessageService.error(t('Session has expired'))
-                return undefined
-            } else if (response.status === HttpStatus.OK) {
-                const data = await response.json() as ReleaseDetail & FossologyProcessStatus
-                return data
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return signOut()
+        }
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === StatusCodes.UNAUTHORIZED) {
+            MessageService.error(t('Session has expired'))
+            return undefined
+        } else if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as ReleaseDetail & FossologyProcessStatus
+            return data
+        } else {
+            return undefined
+        }
+    }, [])
 
     const fetchRelease = useCallback(() => {
         const url = `releases/${releaseId}`
-        fetchData(url).then((data: ReleaseDetail | undefined) => {
-            if (data === undefined) return
-            setRelease(data)
-            numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
-            if (!isClearingAllowed()) {
-                clearAllInterval()
-                showMessage(clearingMessages.NUMBER_OF_ATTACHMENTS_NOT_MATCH)
-                setProgressStatus({
-                    percent: 0,
-                    stepName: '',
-                })
-                return
-            }
-        }).catch((err) => console.error(err))
-    }, [releaseId, clearAllInterval, fetchData])
+        fetchData(url)
+            .then((data: ReleaseDetail | undefined) => {
+                if (data === undefined) return
+                setRelease(data)
+                numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
+                if (!isClearingAllowed()) {
+                    clearAllInterval()
+                    showMessage(clearingMessages.NUMBER_OF_ATTACHMENTS_NOT_MATCH)
+                    setProgressStatus({
+                        percent: 0,
+                        stepName: '',
+                    })
+                    return
+                }
+            })
+            .catch((err) => console.error(err))
+    }, [
+        releaseId,
+        clearAllInterval,
+        fetchData,
+    ])
 
     const handleCloseDialog = () => {
         hideMessage()
@@ -143,7 +159,9 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
     }
 
     const handleOutdated = async () => {
-        await handleFossologyClearing({ markFossologyProcessOutdated: 'true' })
+        await handleFossologyClearing({
+            markFossologyProcessOutdated: 'true',
+        })
         showMessage(clearingMessages.SET_OUTDATED)
         setConfirmShow(false)
     }
@@ -154,12 +172,15 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
             const response = await fetchData(url)
             return response ? true : false
         },
-        [releaseId, fetchData]
+        [
+            releaseId,
+            fetchData,
+        ],
     )
 
     const checkFossologyProcessStatus = useCallback(async () => {
         const url = `releases/${releaseId}/checkFossologyProcessStatus`
-        const response = await fetchData(url) as FossologyProcessStatus | undefined
+        const response = (await fetchData(url)) as FossologyProcessStatus | undefined
         if (response === undefined) return
 
         if (response.status === 'SUCCESS') {
@@ -180,28 +201,34 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         //     clearAllInterval()
         //     startIntervalCheckFossologyProcessStatus()
         // }
-    }, [clearAllInterval, fetchData, releaseId])
+    }, [
+        clearAllInterval,
+        fetchData,
+        releaseId,
+    ])
 
     const startIntervalCheckFossologyProcessStatus = useCallback(() => {
         startCountDownt()
 
         const interval = window.setInterval(() => {
-            checkFossologyProcessStatus().catch(err => console.error(err))
+            checkFossologyProcessStatus().catch((err) => console.error(err))
             resetTimeCountDown()
         }, 5000)
         progressInterval.current = interval
-    }, [checkFossologyProcessStatus])
+    }, [
+        checkFossologyProcessStatus,
+    ])
 
     const reloadReport = async () => {
         hideMessage()
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return undefined
+            return signOut()
         }
         const url = `releases/${releaseId}/reloadFossologyReport`
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             clearAllInterval()
             setProgressStatus({
                 percent: RELOAD_ATTACHMENTS_PERCENT,
@@ -228,7 +255,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
 
             startIntervalCheckFossologyProcessStatus()
         },
-        [clearAllInterval, triggerFossologyClearing, startIntervalCheckFossologyProcessStatus]
+        [
+            clearAllInterval,
+            triggerFossologyClearing,
+            startIntervalCheckFossologyProcessStatus,
+        ],
     )
 
     const updateProgressStatus = (fossologyProcessInfo: FossologyProcessInfo) => {
@@ -302,19 +333,19 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         if (show === true) {
             if (release === undefined) {
                 fetchRelease()
-                checkFossologyProcessStatus().catch(err => console.log(err))
+                checkFossologyProcessStatus().catch((err) => console.log(err))
             } else {
                 if (progressStatus.percent >= PERCENT_DONE) {
                     showMessage(clearingMessages.CLEARING_SUCCESS)
                     return
                 }
                 if (
-                    (countDownInterval.current !== undefined) &&
-                    (progressInterval.current !== undefined) &&
+                    countDownInterval.current !== undefined &&
+                    progressInterval.current !== undefined &&
                     progressStatus.percent === 0 &&
                     numberOfSourceAttachment.current == 1
                 ) {
-                    handleFossologyClearing({}).catch(err => console.log(err))
+                    handleFossologyClearing({}).catch((err) => console.log(err))
                 }
 
                 if (progressStatus.percent >= PERCENT_DONE) {
@@ -337,17 +368,28 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
 
     return (
         <>
-            <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
+            <Modal
+                show={show}
+                onHide={handleCloseDialog}
+                backdrop='static'
+                centered
+                size='lg'
+            >
                 <Modal.Header closeButton>
                     <Modal.Title>
                         <b>{t('Fossology Process')}</b>
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Alert variant={message.variant} onClose={hideMessage} dismissible show={message.show}>
+                    <Alert
+                        variant={message.variant}
+                        onClose={hideMessage}
+                        dismissible
+                        show={message.show}
+                    >
                         {message.content}
                     </Alert>
-                    <div className={`${styles.guide} form-text`}>
+                    <div className='fossology-guide form-text'>
                         <h3>{t('How it works')}:</h3>
                         <p>{t('basic_fossology_process')}:</p>
                         <ol>
@@ -360,7 +402,9 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     </div>
                     <div>
                         {t('Found source attachment')}:
-                        {(release && numberOfSourceAttachment.current === 1 && release._embedded['sw360:attachments'] !== undefined)
+                        {release &&
+                        numberOfSourceAttachment.current === 1 &&
+                        release._embedded['sw360:attachments'] !== undefined
                             ? release._embedded['sw360:attachments']
                                   .filter((attachment: Attachment) => attachment.attachmentType === 'SOURCE')
                                   .at(0)?.filename
@@ -368,7 +412,13 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     </div>
                     <div className='row mt-2'>
                         <div className='col'>
-                            <div className='progress' style={{ height: '40px', borderRadius: '100px' }}>
+                            <div
+                                className='progress'
+                                style={{
+                                    height: '40px',
+                                    borderRadius: '100px',
+                                }}
+                            >
                                 <div
                                     className='progress-bar'
                                     style={{
@@ -390,22 +440,34 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                 <Modal.Footer className='justify-content-end'>
                     {numberOfSourceAttachment.current === 1 ? (
                         <>
-                            <Button variant='light' onClick={() => setConfirmShow(true)}>
+                            <Button
+                                variant='light'
+                                onClick={() => setConfirmShow(true)}
+                            >
                                 {' '}
                                 {t('Set Outdated')}{' '}
                             </Button>
-                            <Button variant='light' onClick={() => void reloadReport()}>
+                            <Button
+                                variant='light'
+                                onClick={() => void reloadReport()}
+                            >
                                 {' '}
                                 {t('Reload Report')}{' '}
                             </Button>
-                            <Button variant='light' onClick={handleCloseDialog}>
+                            <Button
+                                variant='light'
+                                onClick={handleCloseDialog}
+                            >
                                 {' '}
                                 {t('Close')}{' '}
                             </Button>
                         </>
                     ) : (
                         <>
-                            <Button variant='primary' onClick={handleCloseDialog}>
+                            <Button
+                                variant='primary'
+                                onClick={handleCloseDialog}
+                            >
                                 {' '}
                                 {t('Close')}{' '}
                             </Button>
@@ -413,9 +475,19 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     )}
                 </Modal.Footer>
             </Modal>
-            <Modal show={confirmShow} onHide={() => setConfirmShow(false)} backdrop='static' centered size='lg'>
+            <Modal
+                show={confirmShow}
+                onHide={() => setConfirmShow(false)}
+                backdrop='static'
+                centered
+                size='lg'
+            >
                 <Modal.Header closeButton>
-                    <Modal.Title style={{ color: 'red' }}>
+                    <Modal.Title
+                        style={{
+                            color: 'red',
+                        }}
+                    >
                         <b>{t('Reset FOSSology Process')}?</b>
                     </Modal.Title>
                 </Modal.Header>
@@ -426,11 +498,17 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     </div>
                 </Modal.Body>
                 <Modal.Footer className='justify-content-end'>
-                    <Button variant='light' onClick={() => setConfirmShow(false)}>
+                    <Button
+                        variant='light'
+                        onClick={() => setConfirmShow(false)}
+                    >
                         {' '}
                         {t('Cancel')}{' '}
                     </Button>
-                    <Button variant='danger' onClick={() => void handleOutdated()}>
+                    <Button
+                        variant='danger'
+                        onClick={() => void handleOutdated()}
+                    >
                         {' '}
                         {t('Set To Outdated')}{' '}
                     </Button>

@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,17 +11,27 @@
 
 'use client'
 
-import { Release } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
+import { Release } from '@/object-types'
 
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : ReactNode => {
+const RequestInformation = ({ releasePayload, setReleasePayload }: Props): ReactNode => {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
         setReleasePayload({
@@ -34,14 +45,22 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{
+                    padding: '0px 12px',
+                }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
                         <span className='fw-bold'>{t('Request Information')}</span>
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='request_id' className='form-label fw-bold'>
+                            <label
+                                htmlFor='request_id'
+                                className='form-label fw-bold'
+                            >
                                 {t('Request ID')}
                             </label>
                             <input
@@ -57,7 +76,10 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='additional_request_info' className='form-label fw-bold'>
+                            <label
+                                htmlFor='additional_request_info'
+                                className='form-label fw-bold'
+                            >
                                 {t('Additional request Info')}
                             </label>
                             <input
@@ -75,7 +97,10 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='evaluation_start' className='form-label fw-bold'>
+                            <label
+                                htmlFor='evaluation_start'
+                                className='form-label fw-bold'
+                            >
                                 {t('Evaluation Start')}
                             </label>
                             <input
@@ -91,7 +116,10 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props) : Reac
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='evaluation_end' className='form-label fw-bold'>
+                            <label
+                                htmlFor='evaluation_end'
+                                className='form-label fw-bold'
+                            >
                                 {t('Evaluation End')}
                             </label>
                             <input

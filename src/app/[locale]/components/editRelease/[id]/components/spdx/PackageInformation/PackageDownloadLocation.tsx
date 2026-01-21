@@ -30,7 +30,7 @@ function PackageDownloadLocation({
     packageDownloadLocationNoasserttion,
     setPackageDownloadLocationNoasserttion,
     packageDownloadLocation,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const selectPackageDownloadLocationExist = () => {
         setPackageDownloadLocationExist(true)
         setPackageDownloadLocationNone(false)
@@ -58,8 +58,19 @@ function PackageDownloadLocation({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>7.7 Package download location</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             type='radio'
@@ -70,7 +81,10 @@ function PackageDownloadLocation({
                             checked={packageDownloadLocationExist}
                         />
                         <input
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='spdxConcludedLicenseValue'
                             className='form-control'
                             type='text'
@@ -81,7 +95,11 @@ function PackageDownloadLocation({
                             disabled={packageDownloadLocationNone || packageDownloadLocationNoasserttion}
                         />
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='downloadLocationNone'
@@ -92,7 +110,9 @@ function PackageDownloadLocation({
                             checked={packageDownloadLocationNone}
                         />
                         <label
-                            style={{ marginRight: '2rem' }}
+                            style={{
+                                marginRight: '2rem',
+                            }}
                             className='form-check-label radio-label lableSPDX'
                             htmlFor='packageDownloadLocationNone'
                         >
@@ -107,7 +127,10 @@ function PackageDownloadLocation({
                             onChange={selectPackageDownloadLocationNoasserttion}
                             checked={packageDownloadLocationNoasserttion}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='downloadLocationNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='downloadLocationNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

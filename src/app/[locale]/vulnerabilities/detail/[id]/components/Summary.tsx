@@ -9,14 +9,28 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { ReactNode, useState } from 'react'
-import { Vulnerability } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useState } from 'react'
+import { DisplayMap } from '@/components/DisplayMap/DisplayMap'
+import { useConfigValue } from '@/contexts'
+import { UIConfigKeys, Vulnerability } from '@/object-types'
+import UsingReleasesTable from './UsingReleasesTable'
 
-export default function Summary({ summaryData }: { summaryData: Vulnerability }) : ReactNode {
+export default function Summary({ summaryData }: { summaryData: Vulnerability }): ReactNode {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
+    const { status } = useSession()
+    const svmNotificationUrl = useConfigValue(UIConfigKeys.UI_SVM_NOTIFICATION_URL) as string | null
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     return (
         <>
@@ -42,7 +56,29 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     </tr>
                     <tr>
                         <td>{t('External Id')}:</td>
-                        <td>{(summaryData.externalId ?? '') && (summaryData.externalId ?? '')}</td>
+                        <td>
+                            {(() => {
+                                const externalId = summaryData.externalId
+                                if (!externalId) return ''
+
+                                const urlString = String(svmNotificationUrl || '').trim()
+                                if (urlString && urlString.length > 0) {
+                                    const fullUrl = `${urlString}${externalId}`
+                                    return (
+                                        <a
+                                            href={fullUrl}
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                            className='text-link'
+                                        >
+                                            {externalId}
+                                        </a>
+                                    )
+                                }
+
+                                return externalId
+                            })()}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Publish Date')}:</td>
@@ -66,17 +102,7 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     </tr>
                     <tr>
                         <td>{t('Impact')}:</td>
-                        <td>
-                            <ul className='px-3'>
-                                {summaryData.impact &&
-                                    Object.entries(summaryData.impact).map(([key, val]) => (
-                                        <li key={key}>
-                                            <b>{t(key as never)}: </b>
-                                            {val}
-                                        </li>
-                                    ))}
-                            </ul>
-                        </td>
+                        <td>{summaryData.impact && <DisplayMap mapElement={Object.entries(summaryData.impact)} />}</td>
                     </tr>
                     <tr>
                         <td>{t('Legal Notice')}:</td>
@@ -90,7 +116,9 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                                     return (
                                         <li
                                             key={i}
-                                            style={{ display: 'inline' }}
+                                            style={{
+                                                display: 'inline',
+                                            }}
                                         >
                                             {elem}
                                             {i === (summaryData.assignedExtComponentIds?.length ?? 0) - 1
@@ -110,7 +138,9 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                                     return (
                                         <li
                                             key={i}
-                                            style={{ display: 'inline' }}
+                                            style={{
+                                                display: 'inline',
+                                            }}
                                         >
                                             {`CVE-${elem}`}
                                             {i === (summaryData.cveReferences?.length ?? 0) - 1 ? '' : ', '}{' '}
@@ -144,17 +174,7 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     </tr>
                     <tr>
                         <td>{t('Access')}:</td>
-                        <td>
-                            <ul className='px-3'>
-                                {summaryData.access &&
-                                    Object.entries(summaryData.access).map(([key, val]) => (
-                                        <li key={key}>
-                                            <b>{t(key as never)}: </b>
-                                            {val}
-                                        </li>
-                                    ))}
-                            </ul>
-                        </td>
+                        <td>{summaryData.access && <DisplayMap mapElement={Object.entries(summaryData.access)} />}</td>
                     </tr>
                     <tr>
                         <td>{t('Common weakness enumeration')}:</td>
@@ -173,18 +193,14 @@ export default function Summary({ summaryData }: { summaryData: Vulnerability })
                     <tr>
                         <td>{t('Vulnerable configurations')}:</td>
                         <td>
-                            <ul className='px-3'>
-                                {summaryData.vulnerableConfiguration &&
-                                    Object.entries(summaryData.vulnerableConfiguration).map(([key, value]) => (
-                                        <li key={key}>
-                                            <span className='fw-bold'>{key}</span> {value}
-                                        </li>
-                                    ))}
-                            </ul>
+                            {summaryData.vulnerableConfiguration && (
+                                <DisplayMap mapElement={Object.entries(summaryData.vulnerableConfiguration)} />
+                            )}
                         </td>
                     </tr>
                 </tbody>
             </table>
+            <UsingReleasesTable summaryData={summaryData} />
         </>
     )
 }

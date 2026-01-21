@@ -9,14 +9,15 @@
 
 'use client'
 
-import { HttpStatus, Project } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ChangeEvent, type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
+import { Project } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Data {
     attachment?: number
@@ -31,17 +32,31 @@ interface Props {
     setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element {
+function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const [project, setProject] = useState<Project>()
-    const [internalData, setInternalData] = useState<Data>({ attachment: 0, project: 0, release: 0, package: 0 })
+    const [internalData, setInternalData] = useState<Data>({
+        attachment: 0,
+        project: 0,
+        release: 0,
+        package: 0,
+    })
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
     const [visuallyHideLinkedData, setVisuallyHideLinkedData] = useState(true)
     const [comment, setComment] = useState('')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -52,28 +67,34 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     const handleError = useCallback(() => {
         displayMessage('danger', t('Error when processing'))
         setReloadPage(true)
-    }, [t])
+    }, [
+        t,
+    ])
 
     const deleteProject = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return
-            const response = await ApiUtils.DELETE(`projects/${projectId}`, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                displayMessage('success', t('Delete project successful!'))
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const url = CommonUtils.createUrlWithParams(`projects/${projectId}`, {
+                comment: comment,
+            })
+            const response = await ApiUtils.DELETE(url, session.user.access_token)
+            if (response.status === StatusCodes.OK) {
+                displayMessage('success', t('Delete project successful'))
                 router.push('/projects')
                 setReloadPage(true)
-            } else if (response.status == HttpStatus.ACCEPTED) {
-                displayMessage('info', t('Moderation request is created!'))
-            } else if (response.status == HttpStatus.CONFLICT) {
-                displayMessage('danger', t('The project cannot be deleted, since it is used by another project!'))
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.ACCEPTED) {
+                displayMessage('info', t('Moderation request is created'))
+            } else if (response.status == StatusCodes.CONFLICT) {
+                displayMessage('danger', t('The project cannot be deleted'))
+            } else if (response.status == StatusCodes.FORBIDDEN) {
+                displayMessage('danger', t('Request Forbidden'))
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 displayMessage('danger', t('Error when processing'))
             }
-        } catch (err) {
+        } catch {
             handleError()
         }
     }
@@ -81,14 +102,13 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     useEffect(() => {
         const fetchData = async (projectId: string) => {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
-            if (projectsResponse.status == HttpStatus.OK) {
+            if (projectsResponse.status == StatusCodes.OK) {
                 const projectData = (await projectsResponse.json()) as Project
                 setProject(projectData)
                 handleInternalDataCount(projectData)
-            } else if (projectsResponse.status == HttpStatus.UNAUTHORIZED) {
+            } else if (projectsResponse.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
                 handleError()
@@ -98,7 +118,11 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
         fetchData(projectId).catch((err) => {
             console.error(err)
         })
-    }, [show, projectId, handleError])
+    }, [
+        show,
+        projectId,
+        handleError,
+    ])
 
     const handleSubmit = () => {
         deleteProject().catch((err) => {
@@ -142,38 +166,61 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header closeButton style={{ color: 'red' }}>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{
+                    color: 'red',
+                }}
+            >
                 <Modal.Title>
-                    <AiOutlineQuestionCircle style={{ marginBottom: '5px' }} />
+                    <BsQuestionCircle
+                        style={{
+                            marginBottom: '5px',
+                        }}
+                        size={20}
+                    />
                     {t('Delete Project')} ?
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <>
-                    {
-                        project === undefined ?
+                    {project === undefined ? (
                         <div className='col-12 mt-1 text-center'>
                             <Spinner className='spinner' />
-                        </div>:
+                        </div>
+                    ) : (
                         <>
-                            <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
+                            <Alert
+                                variant={variant}
+                                onClose={() => setShowMessage(false)}
+                                dismissible
+                                show={showMessage}
+                            >
                                 {message}
                             </Alert>
                             <Form>
                                 <Form.Group>
                                     <Form.Label className='mb-3'>
-                                        {t.rich('Do you really want to delete the project?', {
+                                        {t.rich('Do you really want to delete the project', {
                                             name: project.name,
                                             strong: (data) => <b>{data}</b>,
                                         })}
                                     </Form.Label>
                                     <br />
-                                    <Form.Label className='mb-1' visuallyHidden={visuallyHideLinkedData}>
+                                    <Form.Label
+                                        className='mb-1'
+                                        visuallyHidden={visuallyHideLinkedData}
+                                    >
                                         {t.rich('This project contains', {
                                             name: project.name,
                                             strong: (data) => <b>{data}</b>,
-                                            visuallyHideLinkedData,
                                         })}
                                         <ul>
                                             {Object.entries(internalData).map(([key, value]) => (
@@ -184,7 +231,13 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                                 </Form.Group>
                                 <hr />
                                 <Form.Group className='mb-3'>
-                                    <Form.Label style={{ fontWeight: 'bold' }}>{t('Please comment your changes')}</Form.Label>
+                                    <Form.Label
+                                        style={{
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
+                                        {t('Please comment your changes')}
+                                    </Form.Label>
                                     <Form.Control
                                         as='textarea'
                                         aria-label='With textarea'
@@ -194,20 +247,24 @@ function DeleteProjectDialog ({ projectId, show, setShow }: Props): JSX.Element 
                                 </Form.Group>
                             </Form>
                         </>
-                    }
+                    )}
                 </>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {' '}
                     {t('Close')}{' '}
                 </Button>
                 <Button
                     className='login-btn'
                     variant='danger'
-                    disabled={!comment}
                     onClick={() => handleSubmit()}
                     hidden={reloadPage}
+                    disabled={!comment}
                 >
                     {t('Delete Project')}
                 </Button>

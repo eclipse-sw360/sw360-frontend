@@ -10,14 +10,15 @@
 
 'use-client'
 
-import { useTranslations } from 'next-intl'
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-
-import { Component, Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { Component, Embedded, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
@@ -28,15 +29,16 @@ function MySubscriptionsWidget(): ReactNode {
     const [releaseData, setReleaseData] = useState<Array<ReleaseDetail>>([])
     const t = useTranslations('default')
     const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedComponents & EmbeddedReleases
             return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             return undefined
@@ -70,19 +72,38 @@ function MySubscriptionsWidget(): ReactNode {
                     setReleaseData([])
                 }
             })
-            .catch((err) => console.error(err))
-        setLoading(false)
-    }, [fetchData])
+            .catch((error: Error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
+    }, [
+        fetchData,
+        reload,
+    ])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('My Subscriptions')} />
+            <HomeTableHeader
+                title={t('My Subscriptions')}
+                setReload={setReload}
+            />
             {loading === false ? (
                 <>
                     {componentData.length > 0 && (
                         <>
                             <h3 className='fw-bold titleSubSideBar'>{t('Components')}</h3>
-                            <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                            <ul
+                                style={{
+                                    listStyleType: 'disc',
+                                    color: 'black',
+                                }}
+                            >
                                 {componentData.map((item: Component) => (
                                     <li key={item.id}>
                                         <Link
@@ -102,7 +123,12 @@ function MySubscriptionsWidget(): ReactNode {
                     {releaseData.length > 0 && (
                         <>
                             <h3 className='fw-bold titleSubSideBar'>{t('Releases')}</h3>
-                            <ul style={{ listStyleType: 'disc', color: 'black' }}>
+                            <ul
+                                style={{
+                                    listStyleType: 'disc',
+                                    color: 'black',
+                                }}
+                            >
                                 {releaseData.map((item: ReleaseDetail) => (
                                     <li key={item.id}>
                                         <Link
@@ -119,7 +145,7 @@ function MySubscriptionsWidget(): ReactNode {
                             </ul>
                         </>
                     )}
-                    {releaseData.length === 0 && componentData.length === 0 && (
+                    {releaseData.length === 0 && componentData.length === 0 && loading === false && (
                         <>
                             <div className='subscriptionBox'>{t('No subscriptions available')}</div>
                         </>

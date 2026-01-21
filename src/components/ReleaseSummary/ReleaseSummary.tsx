@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,12 +11,14 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useState } from 'react'
-import { GiCancel } from 'react-icons/gi'
-
-import { ActionType, Release, Vendor } from '@/object-types'
-import { ShowInfoOnHover, VendorDialog, SelectUsersDialog } from 'next-sw360'
+import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import React, { type JSX, useCallback, useEffect, useState } from 'react'
+import { BsXCircle } from 'react-icons/bs'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
+import { useConfigValue } from '@/contexts'
+import { ActionType, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
@@ -24,14 +27,39 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: { [k: string]: string }
-    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses: { [k: string]: string }
-    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    contributors: { [k: string]: string }
-    setContributors: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    moderators: { [k: string]: string }
-    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    mainLicenses: {
+        [k: string]: string
+    }
+    setMainLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    otherLicenses: {
+        [k: string]: string
+    }
+    setOtherLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    contributors: {
+        [k: string]: string
+    }
+    setContributors: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    moderators: {
+        [k: string]: string
+    }
+    setModerators: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    releaseDetail?: ReleaseDetail
 }
 
 const ReleaseSummary = ({
@@ -48,7 +76,8 @@ const ReleaseSummary = ({
     setContributors,
     moderators,
     setModerators,
-}: Props) => {
+    releaseDetail,
+}: Props): JSX.Element => {
     const t = useTranslations('default')
     const [currentDate] = useState(new Date().toLocaleDateString())
     const [dialogOpenMainLicenses, setDialogOpenMainLicenses] = useState(false)
@@ -61,6 +90,20 @@ const ReleaseSummary = ({
     const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
+    const { status } = useSession()
+
+    // Configs from backend
+    const operatingSystemSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
+    const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
+    const platformSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const setMainLicensesToPayload = (mainLicenses: { [k: string]: string }) => {
         setMainLicenses(mainLicenses)
@@ -85,39 +128,31 @@ const ReleaseSummary = ({
         })
     }
 
-    const setArrayData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        const data: string[] = splitValueCategories(e.target.value)
+    const splitValueCategories = (valueCategories: string) => {
+        return valueCategories.split(',').map((v) => v.trim())
+    }
+
+    const setMultiValueSuggestionFields = (key: string) => (input: string) => {
+        const data: string[] = splitValueCategories(input)
         setReleasePayload({
             ...releasePayload,
-            [e.target.name]: data,
+            [key]: data,
         })
     }
 
-    const splitValueCategories = (valueCatergories: string) => {
-        return valueCatergories.split(',')
-    }
-
     const setVendorId = (vendorResponse: Vendor) => {
-        const vendorData: Vendor = {
-            id: vendorResponse.id,
-            fullName: vendorResponse.fullName,
-        }
-        setVendor(vendorData)
+        setVendor(vendorResponse)
         setReleasePayload({
             ...releasePayload,
-            vendorId: vendorResponse.id,
+            vendorId: vendorResponse._links?.self.href.split('/').at(-1),
         })
     }
 
     const handleClearVendor = () => {
-        const vendorData: Vendor = {
-            id: '',
-            fullName: '',
-        }
-        setVendor(vendorData)
+        setVendor({})
         setReleasePayload({
             ...releasePayload,
-            vendorId: '',
+            vendorId: undefined,
         })
     }
 
@@ -138,7 +173,9 @@ const ReleaseSummary = ({
     }
 
     const defaultValueCreatedOn = () => {
-        return actionType === ActionType.EDIT ? releasePayload.createdOn : currentDate
+        return actionType === ActionType.EDIT && releaseDetail !== undefined
+            ? (releaseDetail.createdOn ?? '')
+            : currentDate
     }
 
     const defaultValueClearingState = () => {
@@ -147,7 +184,12 @@ const ReleaseSummary = ({
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{
+                    padding: '0px 12px',
+                }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header'>
                         <span className='fw-bold'>{t('Release Summary')}</span>
@@ -155,7 +197,10 @@ const ReleaseSummary = ({
                     <div className='col bg-white'>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
-                                <label htmlFor='default_vendor' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='default_vendor'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Vendor')}
                                 </label>
                                 <input
@@ -171,20 +216,33 @@ const ReleaseSummary = ({
                                     onClick={handleClickSearchVendor}
                                     value={vendor.fullName ?? ''}
                                 />
+
                                 <VendorDialog
                                     show={dialogOpenVendor}
                                     setShow={setDialogOpenVendor}
-                                    selectVendor={setVendorId}
+                                    setVendor={setVendorId}
+                                    vendor={vendor}
                                 />
-                                <div className='form-text' onClick={handleClearVendor}>
+                                <div
+                                    className='form-text'
+                                    onClick={handleClearVendor}
+                                >
                                     {' '}
-                                    <GiCancel />
+                                    <BsXCircle size={20} />
                                 </div>
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='name' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='name'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Name')}{' '}
-                                    <span className='text-red' style={{ color: '#F7941E' }}>
+                                    <span
+                                        className='text-red'
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
+                                    >
                                         *
                                     </span>
                                 </label>
@@ -198,15 +256,26 @@ const ReleaseSummary = ({
                                     readOnly={true}
                                     value={releasePayload.name ?? ''}
                                 />
-                                <div id='learn_more_about_component_name' className='form-text'>
+                                <div
+                                    id='learn_more_about_component_name'
+                                    className='form-text'
+                                >
                                     <ShowInfoOnHover text={t('NAME_COMPONENT')} />
                                     {t('Name of the component')}.
                                 </div>
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='version' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='version'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Version')}{' '}
-                                    <span className='text-red' style={{ color: '#F7941E' }}>
+                                    <span
+                                        className='text-red'
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
+                                    >
                                         *
                                     </span>
                                 </label>
@@ -225,37 +294,54 @@ const ReleaseSummary = ({
                         </div>
                         <div className='row pt-2 pb-2 with-divider'>
                             <div className='col-lg-4'>
-                                <label htmlFor='programming_languages' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='programming_languages'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Programming Languages')}
                                 </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    placeholder='e.g., Java,C++, C#,...'
-                                    id='programming_languages'
-                                    aria-describedby='programming_languages'
-                                    name='languages'
-                                    onChange={setArrayData}
-                                    value={releasePayload.languages ?? ''}
+                                <SuggestionBox
+                                    initialValue={releasePayload.languages?.join(', ')}
+                                    possibleValues={languagesSuggestions === null ? [] : languagesSuggestions}
+                                    onValueChange={setMultiValueSuggestionFields('languages')}
+                                    inputProps={{
+                                        id: 'programming_languages',
+                                        name: 'languages',
+                                        required: false,
+                                        placeHolder: 'e.g., Java, C++, C#,...',
+                                        aria_describedby: 'programming_languages',
+                                    }}
+                                    isMultiValue={true}
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='operating_systems' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='operating_systems'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Operating Systems')}
                                 </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    placeholder='e.g.,Linux,MAC,Windows,...'
-                                    id='operating_systems'
-                                    aria-describedby='operating_systems'
-                                    name='operatingSystems'
-                                    onChange={setArrayData}
-                                    value={releasePayload.operatingSystems ?? ''}
+                                <SuggestionBox
+                                    initialValue={releasePayload.operatingSystems?.join(', ')}
+                                    possibleValues={
+                                        operatingSystemSuggestions === null ? [] : operatingSystemSuggestions
+                                    }
+                                    onValueChange={setMultiValueSuggestionFields('operatingSystems')}
+                                    inputProps={{
+                                        id: 'operating_systems',
+                                        name: 'operatingSystems',
+                                        required: false,
+                                        placeHolder: 'e.g.,Linux,MAC,Windows,...',
+                                        aria_describedby: 'operating_systems',
+                                    }}
+                                    isMultiValue={true}
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='tag' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='tag'
+                                    className='form-label fw-bold'
+                                >
                                     {t('CPE ID')}
                                 </label>
                                 <input
@@ -268,7 +354,10 @@ const ReleaseSummary = ({
                                     onChange={updateField}
                                     value={releasePayload.cpeid ?? ''}
                                 />
-                                <div id='learn_more_about_cpe' className='form-text'>
+                                <div
+                                    id='learn_more_about_cpe'
+                                    className='form-text'
+                                >
                                     <ShowInfoOnHover text={t('CPE_ID')} />
                                     {t('Learn more about the CPE ID format')}.
                                 </div>
@@ -276,22 +365,31 @@ const ReleaseSummary = ({
                         </div>
                         <div className='row pt-2 pb-2 with-divider'>
                             <div className='col-lg-4'>
-                                <label htmlFor='blog_url' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='software_platforms'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Software Platforms')}
                                 </label>
-                                <input
-                                    type='URL'
-                                    className='form-control'
-                                    placeholder='e.g.,Adobe AIR,.NET,Qt,...'
-                                    id='blog_url'
-                                    aria-describedby='blog_url'
-                                    name='softwarePlatforms'
-                                    onChange={setArrayData}
-                                    value={releasePayload.softwarePlatforms ?? ''}
+                                <SuggestionBox
+                                    initialValue={releasePayload.softwarePlatforms?.join(', ')}
+                                    possibleValues={platformSuggestions === null ? [] : platformSuggestions}
+                                    onValueChange={setMultiValueSuggestionFields('softwarePlatforms')}
+                                    inputProps={{
+                                        id: 'software_platforms',
+                                        name: 'softwarePlatforms',
+                                        required: false,
+                                        placeHolder: 'e.g.,Adobe AIR,.NET,Qt,...',
+                                        aria_describedby: 'software_platforms',
+                                    }}
+                                    isMultiValue={true}
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='releaseDate' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='releaseDate'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Release date')}
                                 </label>
                                 <input
@@ -306,7 +404,10 @@ const ReleaseSummary = ({
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='mainLicenseIds' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='mainLicenseIds'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Main Licenses')}
                                 </label>
                                 <input
@@ -332,7 +433,10 @@ const ReleaseSummary = ({
                         </div>
                         <div className='row pt-2 pb-2 with-divider'>
                             <div className='col-lg-4'>
-                                <label htmlFor='otherLicenseIds' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='otherLicenseIds'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Other licenses')}
                                 </label>
                                 <input
@@ -356,7 +460,10 @@ const ReleaseSummary = ({
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='sourceCodeDownloadurl' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='sourceCodeDownloadurl'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Source Code Download URL')}
                                 </label>
                                 <input
@@ -371,7 +478,10 @@ const ReleaseSummary = ({
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='binaryDownloadurl' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='binaryDownloadurl'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Binary Download URL')}
                                 </label>
                                 <input
@@ -388,7 +498,10 @@ const ReleaseSummary = ({
                         </div>
                         <div className='row pt-2 pb-2 with-divider'>
                             <div className='col-lg-4'>
-                                <label htmlFor='modified_on' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='modified_on'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Clearing State')}
                                 </label>
                                 <input
@@ -402,7 +515,10 @@ const ReleaseSummary = ({
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='mainlineState' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='mainlineState'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Release Mainline State')}
                                 </label>
                                 <select
@@ -420,13 +536,19 @@ const ReleaseSummary = ({
                                     <option value='PHASEOUT'>{t('PHASEOUT')}</option>
                                     <option value='DENIED'>{t('DENIED')}</option>
                                 </select>
-                                <div id='mainlineState-i' className='form-text'>
+                                <div
+                                    id='mainlineState-i'
+                                    className='form-text'
+                                >
                                     <ShowInfoOnHover text={t('RELEASE_MAIN_STATE')} />
                                     {t('Learn more about mainline states')}.
                                 </div>
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='createdOn' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='createdOn'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Created on')}
                                 </label>
                                 <input
@@ -441,7 +563,10 @@ const ReleaseSummary = ({
                         </div>
                         <div className='row pt-2 pb-2 with-divider'>
                             <div className='col-lg-4'>
-                                <label htmlFor='createdBy' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='createdBy'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Created by')}
                                 </label>
                                 <input
@@ -452,11 +577,18 @@ const ReleaseSummary = ({
                                     aria-describedby='Create by'
                                     readOnly={true}
                                     name='createBy'
-                                    value={releasePayload.createBy ?? ''}
+                                    value={
+                                        releaseDetail !== undefined
+                                            ? releaseDetail._embedded['sw360:createdBy']?.fullName
+                                            : ''
+                                    }
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='contributors' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='contributors'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Contributors')}
                                 </label>
                                 <input
@@ -481,7 +613,10 @@ const ReleaseSummary = ({
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='moderators' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='moderators'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Moderators')}
                                 </label>
                                 <input
@@ -508,7 +643,10 @@ const ReleaseSummary = ({
                         </div>
                         <div className='row pt-2 pb-2 with-divider'>
                             <div className='col-lg-4'>
-                                <label htmlFor='modified_on' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='modified_on'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Modified On')}
                                 </label>
                                 <input
@@ -518,11 +656,14 @@ const ReleaseSummary = ({
                                     aria-describedby='Modified on'
                                     readOnly={true}
                                     name='modifiedOn'
-                                    value={releasePayload.modifiedOn ?? ''}
+                                    value={releaseDetail !== undefined ? releaseDetail.modifiedOn : ''}
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='modified_by' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='modified_by'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Modified By')}
                                 </label>
                                 <input
@@ -533,7 +674,11 @@ const ReleaseSummary = ({
                                     aria-describedby='Modified By'
                                     readOnly={true}
                                     name='modifiedBy'
-                                    value={releasePayload.modifiedBy ?? ''}
+                                    value={
+                                        releaseDetail !== undefined
+                                            ? releaseDetail._embedded['sw360:modifiedBy']?.fullName
+                                            : ''
+                                    }
                                 />
                             </div>
                         </div>
@@ -544,4 +689,4 @@ const ReleaseSummary = ({
     )
 }
 
-export default React.memo(ReleaseSummary)
+export default ReleaseSummary

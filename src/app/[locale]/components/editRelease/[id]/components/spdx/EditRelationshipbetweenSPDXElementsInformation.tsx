@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,9 +10,9 @@
 // License-Filename: LICENSE
 
 'use client'
-import { ReactNode, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
-
+import { signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect, useState } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { PackageInformation, RelationshipsBetweenSPDXElements, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 
@@ -35,10 +36,19 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
     setRelationshipsBetweenSPDXElementPackages,
     SPDXPayload,
     setSPDXPayload,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [changeSource, setChangeSource] = useState(false)
     const [isSourceSPDXDocument, setIsSourceSPDXDocument] = useState<boolean>(true)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const relationTypes: Array<string> = [
         'DESCRIBES',
@@ -163,7 +173,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
 
     const addRelationshipsBetweenSPDXElementsSPDX = () => {
         setChangeSource(false)
-        const arrayExternals: RelationshipsBetweenSPDXElements[] = [...relationshipsBetweenSPDXElementSPDXs]
+        const arrayExternals: RelationshipsBetweenSPDXElements[] = [
+            ...relationshipsBetweenSPDXElementSPDXs,
+        ]
         if (CommonUtils.isNullEmptyOrUndefinedArray(relationshipsBetweenSPDXElementSPDXs)) {
             setIndexRelation(0)
         }
@@ -191,7 +203,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
 
     const addRelationshipsBetweenSPDXElementsPackage = () => {
         setChangeSource(false)
-        const arrayExternals: RelationshipsBetweenSPDXElements[] = [...relationshipsBetweenSPDXElementPackages]
+        const arrayExternals: RelationshipsBetweenSPDXElements[] = [
+            ...relationshipsBetweenSPDXElementPackages,
+        ]
         if (CommonUtils.isNullEmptyOrUndefinedArray(relationshipsBetweenSPDXElementPackages)) {
             setIndexRelation(0)
         }
@@ -218,7 +232,11 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
     }
 
     const addRelations = () => {
-        isSourceSPDXDocument ? addRelationshipsBetweenSPDXElementsSPDX() : addRelationshipsBetweenSPDXElementsPackage()
+        if (isSourceSPDXDocument) {
+            addRelationshipsBetweenSPDXElementsSPDX()
+        } else {
+            addRelationshipsBetweenSPDXElementsPackage()
+        }
     }
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
@@ -232,7 +250,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                         }
                     }
                     return relation
-                }
+                },
             )
             setRelationshipsBetweenSPDXElementSPDXs(relationsUpdate)
             setSPDXPayload({
@@ -252,7 +270,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                         }
                     }
                     return relation
-                }
+                },
             )
             setRelationshipsBetweenSPDXElementPackages(relationsUpdate)
             setSPDXPayload({
@@ -284,7 +302,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
             } else {
                 let relationships: RelationshipsBetweenSPDXElements[] = []
                 relationships = relationshipsBetweenSPDXElementSPDXs.filter(
-                    (relatedSPDXElement) => numberIndexSPDX != relatedSPDXElement.index
+                    (relatedSPDXElement) => numberIndexSPDX != relatedSPDXElement.index,
                 )
                 for (let index = 0; index < relationships.length; index++) {
                     relationships[index].index = index
@@ -317,7 +335,7 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
             } else {
                 let relationships: RelationshipsBetweenSPDXElements[] = []
                 relationships = relationshipsBetweenSPDXElementPackages.filter(
-                    (relatedSPDXElement) => numberIndexPackage != relatedSPDXElement.index
+                    (relatedSPDXElement) => numberIndexPackage != relatedSPDXElement.index,
                 )
                 for (let index = 0; index < relationships.length; index++) {
                     relationships[index].index = index
@@ -365,7 +383,9 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                         >
                             <label
                                 htmlFor='selectRelationshipSource'
-                                style={{ textDecoration: 'underline' }}
+                                style={{
+                                    textDecoration: 'underline',
+                                }}
                                 className='sub-title lableSPDX'
                             >
                                 Select Source
@@ -373,18 +393,34 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                             <select
                                 id='selectRelationshipSource'
                                 className='form-control spdx-select always-enable form-select'
-                                style={{ marginRight: '4rem' }}
+                                style={{
+                                    marginRight: '4rem',
+                                }}
                                 onChange={changeRelationshipSource}
                             >
                                 <option value='spdxDoucument'>SPDX Document</option>
                                 <option value='package'>Package</option>
                             </select>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                paddingLeft: '1rem',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginBottom: '0.75rem',
+                                }}
+                            >
                                 <label
                                     htmlFor='selectRelationship'
-                                    style={{ textDecoration: 'underline' }}
+                                    style={{
+                                        textDecoration: 'underline',
+                                    }}
                                     className='sub-title lableSPDX'
                                 >
                                     Select Relationship
@@ -396,39 +432,53 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                                     disabled={
                                         isSourceSPDXDocument
                                             ? CommonUtils.isNullEmptyOrUndefinedArray(
-                                                  relationshipsBetweenSPDXElementSPDXs
+                                                  relationshipsBetweenSPDXElementSPDXs,
                                               )
                                             : CommonUtils.isNullEmptyOrUndefinedArray(
-                                                  relationshipsBetweenSPDXElementPackages
+                                                  relationshipsBetweenSPDXElementPackages,
                                               )
                                     }
                                     value={
                                         changeSource
                                             ? 0
                                             : isAdd
-                                            ? isDeleteSucces
-                                                ? indexRelation
-                                                : increIndex
-                                            : isSourceSPDXDocument
-                                            ? numberIndexSPDX
-                                            : numberIndexPackage
+                                              ? isDeleteSucces
+                                                  ? indexRelation
+                                                  : increIndex
+                                              : isSourceSPDXDocument
+                                                ? numberIndexSPDX
+                                                : numberIndexPackage
                                     }
                                 >
                                     {isSourceSPDXDocument
                                         ? relationshipsBetweenSPDXElementSPDXs.map((item) => (
-                                              <option key={item.index} value={item.index}>
+                                              <option
+                                                  key={item.index}
+                                                  value={item.index}
+                                              >
                                                   {item.index + 1}
                                               </option>
                                           ))
                                         : relationshipsBetweenSPDXElementPackages.map((item) => (
-                                              <option key={item.index} value={item.index}>
+                                              <option
+                                                  key={item.index}
+                                                  value={item.index}
+                                              >
                                                   {item.index + 1}
                                               </option>
                                           ))}
                                 </select>
-                                <FaTrashAlt className='spdx-delete-icon-main-index' onClick={deleteRelation} />
+                                <BsFillTrashFill
+                                    className='spdx-delete-icon-main-index'
+                                    onClick={deleteRelation}
+                                    size={20}
+                                />
                             </div>
-                            <button className='spdx-add-button-main' name='add-relationship' onClick={addRelations}>
+                            <button
+                                className='spdx-add-button-main'
+                                name='add-relationship'
+                                onClick={addRelations}
+                            >
                                 Add new Relationship
                             </button>
                         </div>
@@ -438,12 +488,21 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     <tr>
                         <td>
                             <div className='form-group'>
-                                <label htmlFor='spdxElement' className='lableSPDX'>
+                                <label
+                                    htmlFor='spdxElement'
+                                    className='lableSPDX'
+                                >
                                     11.1 Relationship
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <input
-                                        style={{ marginRight: '1rem' }}
+                                        style={{
+                                            marginRight: '1rem',
+                                        }}
                                         id='spdxElement'
                                         className='form-control'
                                         name='spdxElementId'
@@ -452,29 +511,34 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                                         onChange={updateField}
                                         value={
                                             isSourceSPDXDocument
-                                                ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                        ?.spdxElementId ?? ''
-                                                : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                        ?.spdxElementId ?? ''
+                                                ? (relationshipsBetweenSPDXElementSPDXs[indexRelation]?.spdxElementId ??
+                                                  '')
+                                                : (relationshipsBetweenSPDXElementPackages[indexRelation]
+                                                      ?.spdxElementId ?? '')
                                         }
                                     />
                                     <select
                                         className='form-control form-select'
                                         id='relationshipType'
                                         name='relationshipType'
-                                        style={{ marginRight: '1rem' }}
+                                        style={{
+                                            marginRight: '1rem',
+                                        }}
                                         onChange={updateField}
                                         value={
                                             isSourceSPDXDocument
-                                                ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                        ?.relationshipType ?? ''
-                                                : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                        ?.relationshipType ?? ''
+                                                ? (relationshipsBetweenSPDXElementSPDXs[indexRelation]
+                                                      ?.relationshipType ?? '')
+                                                : (relationshipsBetweenSPDXElementPackages[indexRelation]
+                                                      ?.relationshipType ?? '')
                                         }
                                     >
                                         <option value=''></option>
                                         {relationTypes.map((type) => (
-                                            <option key={type} value={type}>
+                                            <option
+                                                key={type}
+                                                value={type}
+                                            >
                                                 {type}
                                             </option>
                                         ))}
@@ -488,10 +552,10 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                                         placeholder='Enter related SPDX element'
                                         value={
                                             isSourceSPDXDocument
-                                                ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                        ?.relatedSpdxElement ?? ''
-                                                : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                        ?.relatedSpdxElement ?? ''
+                                                ? (relationshipsBetweenSPDXElementSPDXs[indexRelation]
+                                                      ?.relatedSpdxElement ?? '')
+                                                : (relationshipsBetweenSPDXElementPackages[indexRelation]
+                                                      ?.relatedSpdxElement ?? '')
                                         }
                                     />
                                 </div>
@@ -501,7 +565,10 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                     <tr>
                         <td>
                             <div className='form-group'>
-                                <label htmlFor='relationshipComment' className='lableSPDX'>
+                                <label
+                                    htmlFor='relationshipComment'
+                                    className='lableSPDX'
+                                >
                                     11.2 Relationship comment
                                 </label>
                                 <textarea
@@ -513,10 +580,10 @@ const EditRelationshipbetweenSPDXElementsInformation = ({
                                     placeholder='Enter relationship comment'
                                     value={
                                         isSourceSPDXDocument
-                                            ? relationshipsBetweenSPDXElementSPDXs[indexRelation]
-                                                    ?.relationshipComment ?? ''
-                                            : relationshipsBetweenSPDXElementPackages[indexRelation]
-                                                    ?.relationshipComment ?? ''
+                                            ? (relationshipsBetweenSPDXElementSPDXs[indexRelation]
+                                                  ?.relationshipComment ?? '')
+                                            : (relationshipsBetweenSPDXElementPackages[indexRelation]
+                                                  ?.relationshipComment ?? '')
                                     }
                                 ></textarea>
                             </div>

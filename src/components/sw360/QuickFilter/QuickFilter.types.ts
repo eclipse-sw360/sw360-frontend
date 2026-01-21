@@ -9,6 +9,6 @@
 
 export interface QuickFilterProps {
     id: string
-    searchFunction?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+    searchFunction?: (value: string) => void
     title?: string
 }

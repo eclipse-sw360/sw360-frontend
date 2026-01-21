@@ -7,11 +7,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 export default interface CreateClearingRequestPayload {
-    requestedClearingDate?: string,
-    clearingTeam?: string,
-    clearingType?: string,
-    priority?: string,
+    requestedClearingDate?: string
+    clearingTeam?: string
+    clearingType?: string
+    priority?: string
     requestingUserComment?: string
 }

@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,17 +9,25 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useState, ReactNode } from 'react'
-import { CiCircleRemove } from 'react-icons/ci'
-import { FiCheckCircle } from 'react-icons/fi'
-
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useState } from 'react'
+import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import { COTSDetails } from '@/object-types'
 
-const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails | undefined }) : ReactNode => {
+const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     return (
         <table className='table summary-table'>
@@ -37,12 +46,20 @@ const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDet
                     <td>{t('Usage Right Available')}:</td>
                     <td>
                         {costDetails && costDetails.usageRightAvailable == true ? (
-                            <span style={{ color: '#287d3c' }}>
-                                <FiCheckCircle /> {t('Yes')}
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
-                                <CiCircleRemove /> {t('No')}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>
@@ -60,17 +77,21 @@ const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDet
                 <tr>
                     <td>{t('COTS Clearing Deadline')}:</td>
                     <td>
-                        {(costDetails !== undefined && costDetails.clearingDeadline !== undefined)
-                            ? <span>{costDetails.clearingDeadline}</span>
-                            : ''}
+                        {costDetails !== undefined && costDetails.clearingDeadline !== undefined ? (
+                            <span>{costDetails.clearingDeadline}</span>
+                        ) : (
+                            ''
+                        )}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('COTS Clearing Report URL')}:</td>
                     <td>
-                        {(costDetails !== undefined && costDetails.licenseClearingReportURL !== undefined)
-                            ? <span>{costDetails.licenseClearingReportURL}</span>
-                            : ''}
+                        {costDetails !== undefined && costDetails.licenseClearingReportURL !== undefined ? (
+                            <span>{costDetails.licenseClearingReportURL}</span>
+                        ) : (
+                            ''
+                        )}
                     </td>
                 </tr>
             </tbody>

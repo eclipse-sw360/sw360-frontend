@@ -11,11 +11,11 @@
 // app/components/ThemeSwitcher.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { Nav } from 'react-bootstrap'
 import { BsSun, BsSunFill } from 'react-icons/bs'
 
-function ThemeSwitcher() : JSX.Element {
+function ThemeSwitcher(): JSX.Element {
     const [userTheme, setUserTheme] = useState('')
     function setTheme(theme: string) {
         setUserTheme(theme)
@@ -25,15 +25,25 @@ function ThemeSwitcher() : JSX.Element {
 
     useEffect(() => {
         const storedTheme = localStorage.getItem('theme')
-        storedTheme === null ? setTheme('light') : setTheme(storedTheme)
+        if (storedTheme === null) {
+            setTheme('light')
+        } else {
+            setTheme(storedTheme)
+        }
     }, [])
 
     return (
         <Nav.Item>
             {userTheme === 'dark' ? (
-                <BsSunFill onClick={() => setTheme('light')} />
+                <BsSunFill
+                    onClick={() => setTheme('light')}
+                    size={20}
+                />
             ) : (
-                <BsSun onClick={() => setTheme('dark')} />
+                <BsSun
+                    onClick={() => setTheme('dark')}
+                    size={20}
+                />
             )}
         </Nav.Item>
     )

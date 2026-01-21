@@ -1,0 +1,51 @@
+{
+    "TC01_REQUIRED_FIELDS": {
+        "name": ".Component 1@1",
+        "categories": "Open source 2020",
+        "component_type": {
+            "name": "OSS",
+            "value": "OSS"
+        }
+    },
+    "TC05_ALL_FIELDS": {
+        "name" : "@Component with all fills",
+        "categories" : "library@@",
+        "component_type" : {
+            "name": "COTS",
+            "value": "COTS"
+        },
+        "default_vendor": {
+            "is_add_vendor": false,
+            "user_no": 2
+        },
+        "homeurl": "https://translate.google.com/?hl=vi&sl=en&tl=vi&op=translate",
+        "blog_url": "http://10.15.77.184:8080/group/guest/projects/-/project/detail/#/tab-licenseClearing",
+        "wiki_url": "https://www.eclipse.org/sw360/docs/development/testcases/test-cases-components/",
+        "mailing_list_url": "http://mailinglisturl.com",
+        "description": "This is the sort description.",
+        "component_owner": {
+            "user_no": 1
+        },
+        "owner_accounting_unit": "$ and Y",
+        "owner_billing_group": "Owner Billing Group",
+        "country": {
+            "name": "Japan",
+            "value": "JP"
+        },
+        "moderators": {
+            "num_user": 2
+        },
+        "additional_roles": {
+            "role": "Committer",
+            "mailAddress": "commiter123.cmt@toshiba.co.jp"
+        },
+        "external_id": {
+            "key": "External_key",
+            "value": "External value"
+        },
+        "additional_data": {
+            "key": "Additional_key",
+            "value": "Additional value"
+        }
+    }
+}

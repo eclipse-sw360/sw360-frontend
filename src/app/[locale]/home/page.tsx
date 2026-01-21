@@ -12,14 +12,14 @@
 
 import { Metadata } from 'next'
 
-import HomePage from './HomePage'
 import { ReactNode } from 'react'
+import HomePage from './HomePage'
 
 export const metadata: Metadata = {
     title: 'Home',
 }
 
-function Home() : ReactNode {
+function Home(): ReactNode {
     return <HomePage />
 }
 

@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,13 +11,12 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
-
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
-import styles from './LinkedReases.module.css'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
 import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
@@ -27,7 +27,7 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props) : JSX.Element => {
+const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<ReleaseLink[]>([])
@@ -36,6 +36,15 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
     }
     const [linkedReleasesDiaglog, setLinkedReleasesDiaglog] = useState(false)
     const handleClickSelectLinkedReleases = useCallback(() => setLinkedReleasesDiaglog(true), [])
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const setReleaseIdToRelationshipsToReleasePayLoad = (releaseIdToRelationships: Map<string, string>) => {
         const obj = Object.fromEntries(releaseIdToRelationships)
@@ -52,15 +61,25 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 !CommonUtils.isNullOrUndefined(release['_embedded']['sw360:releaseLinks'])
             ) {
                 const linkedReleases: ReleaseLink[] = []
-                release['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [linkedReleases.push(item)])
+                release['_embedded']['sw360:releaseLinks'].map((item: ReleaseLink) => [
+                    linkedReleases.push(item),
+                ])
                 setReleaseLinks(linkedReleases)
             }
         }
-    }, [actionType, release])
+    }, [
+        actionType,
+        release,
+    ])
 
     return (
         <>
-            <div className='col' style={{ fontSize: '0.875rem' }}>
+            <div
+                className='col'
+                style={{
+                    fontSize: '0.875rem',
+                }}
+            >
                 <LinkedReleasesDialog
                     show={linkedReleasesDiaglog}
                     releaseLinks={releaseLinks}
@@ -71,8 +90,12 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                     setReleasePayload={setReleasePayload}
                 />
                 <div
-                    className={`row ${styles['attachment-table']}`}
-                    style={{ padding: '25px', fontSize: '0.875rem', paddingTop: '1px' }}
+                    className='row attachment-table'
+                    style={{
+                        padding: '25px',
+                        fontSize: '0.875rem',
+                        paddingTop: '1px',
+                    }}
                 >
                     <TitleLinkedReleases />
                     <TableLinkedReleases

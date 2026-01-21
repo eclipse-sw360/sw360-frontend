@@ -8,17 +8,21 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import EditClearingRequest from './components/EditClearingRequest'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{
+        id: string
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'Requests',
 }
 
-const EditClearingRequestPage = async ({ params }: Context) => {
+const EditClearingRequestPage = async (props: Context): Promise<JSX.Element> => {
+    const params = await props.params
     return <EditClearingRequest clearingRequestId={params.id} />
 }
 

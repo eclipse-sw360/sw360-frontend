@@ -8,5 +8,6 @@
 // License-Filename: LICENSE
 
 import useLocalStorage from './useLocalStorage'
+import { useUiConfig } from './useUiConfig'
 
-export { useLocalStorage }
+export { useLocalStorage, useUiConfig }

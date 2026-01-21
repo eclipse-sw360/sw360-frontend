@@ -9,8 +9,8 @@
 // License-Filename: LICENSE
 
 'use client'
-import { OtherLicensingInformationDetected, SPDXDocument } from '@/object-types'
 import { ReactNode, useState } from 'react'
+import { OtherLicensingInformationDetected, SPDXDocument } from '@/object-types'
 
 interface Props {
     spdxDocument?: SPDXDocument
@@ -26,7 +26,7 @@ const OtherLicensingInformationDetectedDetail = ({
     setIndexOtherLicense,
     otherLicensingInformationDetecteds,
     isModeFull,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [show, setShow] = useState<boolean>(true)
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const index: string = e.target.value
@@ -48,12 +48,18 @@ const OtherLicensingInformationDetectedDetail = ({
             <tbody hidden={!show}>
                 <tr>
                     <td className='spdx-label-index'>Index</td>
-                    <td style={{ height: '50px' }}>
+                    <td
+                        style={{
+                            height: '50px',
+                        }}
+                    >
                         <select
                             id='otherLicensingSelect'
                             className='spdx-col-2'
                             onChange={displayIndex}
-                            style={{ width: '100%' }}
+                            style={{
+                                width: '100%',
+                            }}
                             disabled={spdxDocument?.otherLicensingInformationDetecteds.length == 0}
                         >
                             {spdxDocument?.otherLicensingInformationDetecteds
@@ -70,64 +76,34 @@ const OtherLicensingInformationDetectedDetail = ({
                         </select>
                     </td>
                 </tr>
-                {(otherLicensingInformationDetecteds
-                    && (typeof otherLicensingInformationDetecteds[indexOtherLicense] !== 'undefined')) && (
-                    <>
-                        <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
-                            <td>10.1 License identifier</td>
-                            <td>
-                                <div className='spdx-col-2'>
-                                    {otherLicensingInformationDetecteds[indexOtherLicense].licenseId}
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
-                            <td>10.2 Extracted text</td>
-                            <td>
-                                <p
-                                    className='spdx-col-2 '
-                                    id={`extractedText-${otherLicensingInformationDetecteds[indexOtherLicense].index}`}
-                                    style={{ whiteSpace: 'pre-wrap' }}
-                                >
-                                    {otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
-                                        .trim()
-                                        .split('\n')
-                                        .map((item) => {
-                                            return (
-                                                <>
-                                                    {item}
-                                                    <br></br>
-                                                </>
-                                            )
-                                        })}
-                                </p>
-                            </td>
-                        </tr>
-                        <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
-                            <td>10.3 License name</td>
-                            <td>
-                                <div className='spdx-col-2'>
-                                    {otherLicensingInformationDetecteds[indexOtherLicense].licenseName}
-                                </div>
-                            </td>
-                        </tr>
-                        {isModeFull && (
-                            <tr
-                                className='spdx-full'
-                                data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}
-                            >
-                                <td>10.4 License cross reference</td>
+                {otherLicensingInformationDetecteds &&
+                    typeof otherLicensingInformationDetecteds[indexOtherLicense] !== 'undefined' && (
+                        <>
+                            <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
+                                <td>10.1 License identifier</td>
+                                <td>
+                                    <div className='spdx-col-2'>
+                                        {otherLicensingInformationDetecteds[indexOtherLicense].licenseId}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
+                                <td>10.2 Extracted text</td>
                                 <td>
                                     <p
                                         className='spdx-col-2 '
-                                        id={`licenseCrossRefs-${otherLicensingInformationDetecteds[indexOtherLicense].index}`}
+                                        id={`extractedText-${otherLicensingInformationDetecteds[indexOtherLicense].index}`}
+                                        style={{
+                                            whiteSpace: 'pre-wrap',
+                                        }}
                                     >
-                                        {otherLicensingInformationDetecteds[indexOtherLicense].licenseCrossRefs
-                                            .sort()
-                                            .map((licenseCrossRefsData) => {
+                                        {otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
+                                            .trim()
+                                            .split('\n')
+                                            .map((item) => {
                                                 return (
                                                     <>
-                                                        {licenseCrossRefsData}
+                                                        {item}
                                                         <br></br>
                                                     </>
                                                 )
@@ -135,30 +111,62 @@ const OtherLicensingInformationDetectedDetail = ({
                                     </p>
                                 </td>
                             </tr>
-                        )}
-                        <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
-                            <td>10.5 License comment</td>
-                            <td>
-                                <p
-                                    className='spdx-col-2 '
-                                    id={`otherLicenseComment-${otherLicensingInformationDetecteds[indexOtherLicense].index}`}
+                            <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
+                                <td>10.3 License name</td>
+                                <td>
+                                    <div className='spdx-col-2'>
+                                        {otherLicensingInformationDetecteds[indexOtherLicense].licenseName}
+                                    </div>
+                                </td>
+                            </tr>
+                            {isModeFull && (
+                                <tr
+                                    className='spdx-full'
+                                    data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}
                                 >
-                                    {otherLicensingInformationDetecteds[indexOtherLicense]?.licenseComment
-                                        .trim()
-                                        .split('\n')
-                                        .map((item) => {
-                                            return (
-                                                <>
-                                                    {item}
-                                                    <br></br>
-                                                </>
-                                            )
-                                        })}
-                                </p>
-                            </td>
-                        </tr>
-                    </>
-                )}
+                                    <td>10.4 License cross reference</td>
+                                    <td>
+                                        <p
+                                            className='spdx-col-2 '
+                                            id={`licenseCrossRefs-${otherLicensingInformationDetecteds[indexOtherLicense].index}`}
+                                        >
+                                            {otherLicensingInformationDetecteds[indexOtherLicense].licenseCrossRefs
+                                                .sort()
+                                                .map((licenseCrossRefsData) => {
+                                                    return (
+                                                        <>
+                                                            {licenseCrossRefsData}
+                                                            <br></br>
+                                                        </>
+                                                    )
+                                                })}
+                                        </p>
+                                    </td>
+                                </tr>
+                            )}
+                            <tr data-index={otherLicensingInformationDetecteds[indexOtherLicense].index}>
+                                <td>10.5 License comment</td>
+                                <td>
+                                    <p
+                                        className='spdx-col-2 '
+                                        id={`otherLicenseComment-${otherLicensingInformationDetecteds[indexOtherLicense].index}`}
+                                    >
+                                        {otherLicensingInformationDetecteds[indexOtherLicense]?.licenseComment
+                                            .trim()
+                                            .split('\n')
+                                            .map((item) => {
+                                                return (
+                                                    <>
+                                                        {item}
+                                                        <br></br>
+                                                    </>
+                                                )
+                                            })}
+                                    </p>
+                                </td>
+                            </tr>
+                        </>
+                    )}
             </tbody>
         </table>
     )

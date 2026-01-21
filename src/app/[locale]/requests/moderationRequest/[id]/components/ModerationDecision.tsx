@@ -11,34 +11,30 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ModerationRequestDetails, ModerationRequestPayload } from '@/object-types'
+import { ReactNode } from 'react'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 
 interface ModerationRequestMap {
-    [key: string]: string;
+    [key: string]: string
 }
 
 interface Props {
-    data: ModerationRequestDetails | undefined,
-    moderationRequestPayload : ModerationRequestPayload,
-    setModerationRequestPayload : React.Dispatch<React.SetStateAction<ModerationRequestPayload>>
+    data: ModerationRequestDetails | undefined
+    moderationRequestPayload: ModerationRequestPayload
+    setModerationRequestPayload: React.Dispatch<React.SetStateAction<ModerationRequestPayload>>
 }
 
-
-export default function ModerationDecision({ data,
-                                             moderationRequestPayload,
-                                             setModerationRequestPayload }: Props ) {
-
+function ModerationDecision({ data, moderationRequestPayload, setModerationRequestPayload }: Props): ReactNode {
     const t = useTranslations('default')
-    const moderationRequestStatus : ModerationRequestMap = {
+    const moderationRequestStatus: ModerationRequestMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
         PENDING: t('Pending'),
         REJECTED: t('REJECTED'),
-    };
+    }
 
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                                       HTMLInputElement |
-                                                       HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setModerationRequestPayload({
             ...moderationRequestPayload,
             [event.target.name]: event.target.value,
@@ -56,23 +52,32 @@ export default function ModerationDecision({ data,
                 <tbody>
                     <tr>
                         <td>{t('Status')}:</td>
-                        <td>{data?.moderationState !== undefined ?
-                                moderationRequestStatus[data?.moderationState] : undefined
-                            }
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{t('Moderator')}:</td>
                         <td>
-                            {data?.reviewer
-                                ? <Link href={`mailto:${data?.reviewer}`}>{data?.reviewer}</Link>
-                                : ''}
+                            {data?.moderationState !== undefined
+                                ? moderationRequestStatus[data.moderationState]
+                                : undefined}
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('Comment on Moderation Decision')}
-
-                            : <span style={{ color: 'red' }}>*</span>
+                        <td>{t('Moderators')}:</td>
+                        <td>
+                            {data?.reviewer != null ? (
+                                <Link href={`mailto:${data.reviewer}`}>{data.reviewer}</Link>
+                            ) : (
+                                ''
+                            )}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            {t('Comment on Moderation Decision')}:{' '}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                *
+                            </span>
                         </td>
                         <td>
                             <textarea
@@ -80,8 +85,10 @@ export default function ModerationDecision({ data,
                                 id='moderationDecision.commentModerationRequestDecision'
                                 name='comment'
                                 aria-describedby={t('Comment on Moderation Decision')}
-                                style={{ height: '120px' }}
-                                value={moderationRequestPayload?.comment || ''}
+                                style={{
+                                    height: '120px',
+                                }}
+                                value={moderationRequestPayload.comment || ''}
                                 onChange={updateInputField}
                                 required
                             />
@@ -92,3 +99,8 @@ export default function ModerationDecision({ data,
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ModerationDecision, [
+    UserGroupType.SECURITY_USER,
+])

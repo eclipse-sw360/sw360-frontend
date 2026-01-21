@@ -1,129 +1,206 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
-
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
 // which is available at https://www.eclipse.org/legal/epl-2.0/
-
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaPencilAlt } from 'react-icons/fa'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { FaFile, FaPencilAlt } from 'react-icons/fa'
+import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
+
+interface Attachment {
+    attachmentType: string
+    filename: string
+}
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-interface ProjectState {
-    state: string
-    clearingState: string
+type LinkedProjects = Embedded<Project, 'sw360:projects'>
+
+interface ListViewProject extends Project {
+    path?: string
 }
 
-interface ReleaseState {
-    clearingState: string
+interface ListViewRelease extends Release {
+    releaseRelation?: string
+    path?: string
 }
 
-enum ElementType {
-    LINKED_PROJECT,
-    LINKED_RELEASE,
-}
+type TypedProject = TypedEntity<ListViewProject, 'project'>
+type TypedRelease = TypedEntity<ListViewRelease, 'release'>
 
-interface ListViewData {
-    elementType: ElementType
-    elem: {
-        name: string
-        version: string
-        id: string
-    }
-    type: string
-    projectPath: string[]
-    releasePath: string[]
-    relation: string
-    mainLicenses: string[]
-    state: ProjectState | ReleaseState
-    releaseMainlineState: string
-    projectMainlineState: string
-    comment: string
-    actions: string
-}
+const typeFilterOptions: FilterOption[] = [
+    {
+        tag: 'OSS',
+        value: 'OSS',
+    },
+    {
+        tag: 'Internal',
+        value: 'INTERNAL',
+    },
+    {
+        tag: 'COTS',
+        value: 'COTS',
+    },
+    {
+        tag: 'Freeware',
+        value: 'FREESOFTWARE',
+    },
+    {
+        tag: 'Inner Source',
+        value: 'INNER_SOURCE',
+    },
+    {
+        tag: 'Service',
+        value: 'SERVICE',
+    },
+    {
+        tag: 'Code Snippet',
+        value: 'CODE_SNIPPET',
+    },
+    {
+        tag: 'COTS Trusted Supplier',
+        value: 'COTS_TRUESTED_SUPPLIER',
+    },
+]
+
+const relationFilterOptions: FilterOption[] = [
+    {
+        tag: 'Contained',
+        value: 'CONTAINED',
+    },
+    {
+        tag: 'Related',
+        value: 'REFERRED',
+    },
+    {
+        tag: 'Unknown',
+        value: 'UNKNOWN',
+    },
+    {
+        tag: 'Dynamically Linked',
+        value: 'DYNAMICALLY_LINKED',
+    },
+    {
+        tag: 'Statically Linked',
+        value: 'STATICALLY_LINKED',
+    },
+    {
+        tag: 'Side By Side',
+        value: 'SIDE_BY_SIDE',
+    },
+    {
+        tag: 'Standalone',
+        value: 'STANDALONE',
+    },
+    {
+        tag: 'Internal Use',
+        value: 'INTERNAL_USE',
+    },
+    {
+        tag: 'Optional',
+        value: 'OPTIONAL',
+    },
+    {
+        tag: 'To Be Replaced',
+        value: 'TO_BE_REPLACED',
+    },
+    {
+        tag: 'Code Snippet',
+        value: 'CODE_SNIPPET',
+    },
+]
+
+const stateFilterOptions: FilterOption[] = [
+    {
+        tag: 'New',
+        value: 'NEW_CLEARING',
+    },
+    {
+        tag: 'Sent To Clearing Tool',
+        value: 'SENT_TO_CLEARING_TOOL',
+    },
+    {
+        tag: 'Under Clearing',
+        value: 'UNDER_CLEARING',
+    },
+    {
+        tag: 'Report Available',
+        value: 'REPORT_AVAILABLE',
+    },
+    {
+        tag: 'Report Approved',
+        value: 'APPROVED',
+    },
+    {
+        tag: 'Scan Available',
+        value: 'SCAN_AVAILABLE',
+    },
+    {
+        tag: 'Internal Use Scan Available',
+        value: 'INTERNAL_USE_SCAN_AVAILABLE',
+    },
+]
 
 const extractLinkedProjectsAndTheirLinkedReleases = (
-    licenseClearingData: any,
-    linkedProjectsData: any,
-    finalData: ListViewData[],
-    path: string[]
+    licenseClearing: Release[],
+    linkedProjects: Project[] | undefined,
+    finalData: (TypedProject | TypedRelease)[],
+    path: string[],
+    projectName: string,
+    projectVersion: string,
 ) => {
-    if (!linkedProjectsData) return
-    for (const p of linkedProjectsData) {
+    path.push(`${projectName} (${projectVersion})`)
+    for (const p of linkedProjects ?? []) {
         path.push(`${p.name} (${p.version})`)
-
         finalData.push({
-            elementType: ElementType.LINKED_PROJECT,
-            elem: {
-                name: p.name ?? '',
-                version: p.version ?? '',
-                id: p['_links']['self']['href'].substring(p['_links']['self']['href'].lastIndexOf('/') + 1),
+            type: 'project',
+            entity: {
+                ...p,
+                path: path.join(' -> '),
             },
-            type: p.projectType ?? '',
-            projectPath: path.slice(),
-            releasePath: [],
-            relation: '',
-            mainLicenses: [],
-            state: {
-                clearingState: p.clearingState ?? '',
-                state: p.state ?? '',
-            },
-            releaseMainlineState: '',
-            projectMainlineState: '',
-            comment: '',
-            actions: p['_links']['self']['href'].substring(p['_links']['self']['href'].lastIndexOf('/') + 1),
         })
-
-        if (!licenseClearingData['linkedReleases']) {
-            continue
-        }
-
         for (const l of p['linkedReleases'] ?? []) {
-            const id = l.release.substring(l.release.lastIndexOf('/') + 1)
-            const res = licenseClearingData['_embedded']['sw360:release'].filter(
-                (e: any) =>
-                    e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
-            )
+            const release: Release | undefined = licenseClearing.filter(
+                (r: Release) => r.id === l.release.split('/').at(-1),
+            )?.[0]
+            if (release === undefined) continue
             finalData.push({
-                elementType: ElementType.LINKED_RELEASE,
-                elem: {
-                    name: res[0].name ?? '',
-                    version: res[0].version ?? '',
-                    id: id,
+                type: 'release',
+                entity: {
+                    ...release,
+                    path: path.join(' -> '),
+                    releaseRelation: l.relation,
                 },
-                type: res[0].componentType ?? '',
-                projectPath: path.slice(),
-                releasePath: [],
-                relation: l.relation ?? '',
-                mainLicenses: res[0].mainLicenseIds ?? [],
-                state: {
-                    clearingState: res[0].clearingState ?? '',
-                },
-                releaseMainlineState: l.mainlineState ?? '',
-                projectMainlineState: l.mainlineState ?? '',
-                comment: l.comment ?? '',
-                actions: id,
             })
         }
         extractLinkedProjectsAndTheirLinkedReleases(
-            licenseClearingData,
-            p?.['_embedded']?.['sw360:linkedProjects'],
+            licenseClearing,
+            p['_embedded']?.['sw360:linkedProjects'],
             finalData,
-            path
+            path,
+            projectName,
+            projectVersion,
         )
         path.pop()
     }
@@ -132,38 +209,51 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
 const extractLinkedReleases = (
     projectName: string,
     projectVersion: string,
-    licenseClearingData: any,
-    finalData: ListViewData[],
-    path: string[]
+    licenseClearing: LicenseClearing,
+    finalData: (TypedProject | TypedRelease)[],
+    path: string[],
 ) => {
-    if (!licenseClearingData && !licenseClearingData?.['linkedReleases']) return
     path.push(`${projectName} (${projectVersion})`)
-    for (const l of licenseClearingData['linkedReleases'] ?? []) {
-        const id = l.release.substring(l.release.lastIndexOf('/') + 1)
-        const res = licenseClearingData['_embedded']['sw360:release'].filter(
-            (e: any) => e['_links']['self']['href'].substring(e['_links']['self']['href'].lastIndexOf('/') + 1) === id
-        )
+    for (const l of licenseClearing['linkedReleases']) {
+        const release = licenseClearing['_embedded']['sw360:release'].filter(
+            (r: Release) => r.id === l.release.split('/').at(-1),
+        )?.[0]
         finalData.push({
-            elementType: ElementType.LINKED_RELEASE,
-            elem: {
-                name: res[0].name,
-                version: res[0].version,
-                id: id,
+            type: 'release',
+            entity: {
+                ...release,
+                path: path.join('->'),
+                releaseRelation: l.relation,
             },
-            type: res[0].componentType,
-            projectPath: path.slice(),
-            releasePath: [],
-            relation: l.relation,
-            mainLicenses: res[0].mainLicenseIds,
-            state: {
-                clearingState: res[0].clearingState,
-            },
-            releaseMainlineState: l.mainlineState,
-            projectMainlineState: l.mainlineState,
-            comment: l.comment,
-            actions: id,
         })
     }
+}
+
+const tableIdToUrlParamMapper: Record<string, string> = {
+    type: 'componentType',
+    relation: 'releaseRelation',
+    state: 'clearingState',
+}
+
+const buildTable = (
+    licenseClearing: LicenseClearing,
+    linkedProjects: Project[],
+    projectName: string,
+    projectVersion: string,
+): (TypedProject | TypedRelease)[] => {
+    const finalData: (TypedProject | TypedRelease)[] = []
+    const path: string[] = []
+    extractLinkedProjectsAndTheirLinkedReleases(
+        licenseClearing['_embedded']['sw360:release'],
+        linkedProjects,
+        finalData,
+        path,
+        projectName,
+        projectVersion,
+    )
+    path.splice(0, path.length)
+    extractLinkedReleases(projectName, projectVersion, licenseClearing, finalData, path)
+    return finalData
 }
 
 export default function ListView({
@@ -174,105 +264,227 @@ export default function ListView({
     projectId: string
     projectName: string
     projectVersion: string
-}) {
+}): JSX.Element {
     const t = useTranslations('default')
-    const [data, setData] = useState<null | any[]>()
-    const { data: session, status } = useSession()
+    const { status, data: session } = useSession()
 
-    const columns = [
-        {
-            id: 'licenseClearing.name',
-            name: t('Name'),
-            width: '9%',
-            formatter: ({
-                name,
-                version,
-                id,
-                type,
-            }: {
-                name: string
-                version: string
-                id: string
-                type: ElementType
-            }) =>
-                _(
-                    <Link
-                        href={
-                            type === ElementType.LINKED_RELEASE
-                                ? `/components/releases/detail/${id}`
-                                : `/projects/detail/${id}`
-                        }
-                        className='text-link'
-                    >
-                        {`${name} (${version})`}
-                    </Link>
-                ),
-            sort: true,
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [showFilter, setShowFilter] = useState<undefined | string>()
+
+    const [showProcessing, setShowProcessing] = useState(false)
+    const [showModal, setShowModal] = useState(false)
+    const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
+    const [licenseFiles, setLicenseFiles] = useState<string[]>([])
+
+    const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
+    const memoizedLinkedProjects = useMemo(
+        () => linkedProjects,
+        [
+            linkedProjects,
+        ],
+    )
+
+    const [licenseClearing, setLicenseClearing] = useState<LicenseClearing | undefined>()
+    const memoizedLicenseClearing = useMemo(
+        () => licenseClearing,
+        [
+            licenseClearing,
+        ],
+    )
+
+    const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
+
+    const handleShowLicenseFiles = useCallback(
+        async (release: Release) => {
+            setSelectedRelease(release)
+            setShowModal(true)
+            setLicenseFiles([])
+
+            if (status === 'authenticated' && session) {
+                try {
+                    const response = await ApiUtils.GET(`releases/${release.id}/attachments`, session.user.access_token)
+
+                    if (response.status === StatusCodes.OK) {
+                        const data = await response.json()
+                        const files =
+                            data._embedded?.['sw360:attachments']
+                                ?.filter((att: Attachment) => att.attachmentType === 'LICENSE')
+                                ?.map((att: Attachment) => att.filename) || []
+                        setLicenseFiles(files)
+                    }
+                } catch (error) {
+                    console.error('Error fetching license files:', error)
+                }
+            }
         },
-        {
-            id: 'licenseClearing.type',
-            name: t('Type'),
-            width: '7%',
-            formatter: (type: string) => _(<>{Capitalize(type)}</>),
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.projectPath',
-            name: t('Project Path'),
-            width: '12%',
-            formatter: (path: string[]) => _(<>{path.join(' -> ')}</>),
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.releasePath',
-            name: t('Release Path'),
-            width: '9%',
-            formatter: (path: string[]) => _(<>{path.join(' -> ')}</>),
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.relation',
-            name: t('Relation'),
-            width: '9%',
-            formatter: (type: string) => _(<>{Capitalize(type)}</>),
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.mainLicenses',
-            name: t('Main Licenses'),
-            width: '10%',
-            formatter: (licenses: string[]) =>
-                _(
-                    <>
-                        {licenses.map((e, i) => (
-                            <li key={e} style={{ display: 'inline' }}>
-                                <Link href={`/licenses/detail${e}`} className='text-link'>
-                                    {e}
-                                </Link>
-                                {i === licenses.length - 1 ? '' : ','}{' '}
-                            </li>
-                        ))}
-                    </>
-                ),
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.state',
-            name: t('State'),
-            width: '8%',
-            formatter: ({ state, elementType }: { state: ProjectState | ReleaseState; elementType: ElementType }) => {
-                if (elementType === ElementType.LINKED_PROJECT) {
-                    return _(
+        [
+            status,
+            session,
+        ],
+    )
+
+    const columns = useMemo<ColumnDef<TypedProject | TypedRelease>[]>(
+        () => [
+            {
+                id: 'name',
+                header: t('Name'),
+                accessorFn: (row) => row.entity.name,
+                cell: ({ row }) => {
+                    const { id, name, version } = row.original.entity
+                    const url =
+                        row.original.type === 'project' ? `/projects/detail/${id}` : `/components/releases/detail/${id}`
+                    return (
+                        <Link
+                            href={url}
+                            className='text-link'
+                        >
+                            {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '30%',
+                },
+            },
+            {
+                id: 'type',
+                header: () => {
+                    return (
                         <>
+                            {t('Type')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={typeFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'type'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Component Type')}
+                                resetPaginationParams={() => table.resetPagination()}
+                            />
+                        </>
+                    )
+                },
+                accessorFn: (row) => {
+                    if (row.type === 'project') {
+                        return row.entity.projectType ?? ''
+                    } else {
+                        return (row.entity as Release).componentType
+                    }
+                },
+                cell: ({ row }) => {
+                    if (row.original.type === 'project') {
+                        return <div className='text-center'>{Capitalize(row.original.entity.projectType ?? '')}</div>
+                    } else {
+                        const matchedOption = typeFilterOptions.find(
+                            (op) => op.value === (row.original.entity as Release).componentType,
+                        )
+                        return <div className='text-center'>{matchedOption?.tag ?? ''}</div>
+                    }
+                },
+                meta: {
+                    width: '6%',
+                },
+            },
+            {
+                id: 'path',
+                header: t('Project Path'),
+                accessorFn: (row) => row.entity.path,
+                cell: ({ row }) => <div className='text-center'>{row.original.entity.path}</div>,
+                meta: {
+                    width: '12%',
+                },
+            },
+            {
+                id: 'relation',
+                header: () => {
+                    return (
+                        <>
+                            {t('Relation')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={relationFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'relation'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Release Relation')}
+                                resetPaginationParams={() => table.resetPagination()}
+                            />
+                        </>
+                    )
+                },
+                accessorFn: (row) => {
+                    if (row.type === 'release') {
+                        return (row.entity as ListViewRelease).releaseRelation ?? ''
+                    }
+                    return ''
+                },
+                cell: ({ row }) => {
+                    if (row.original.type === 'release') {
+                        return (
+                            <div className='text-center'>{Capitalize(row.original.entity.releaseRelation ?? '')}</div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'mainLicenses',
+                header: t('Main Licenses'),
+                enableColumnFilter: false,
+                enableSorting: false,
+                cell: ({ row }) => {
+                    if (row.original.type === 'release') {
+                        return (
+                            <div className='text-center'>{(row.original.entity.mainLicenseIds ?? []).join(', ')}</div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'state',
+                header: () => {
+                    return (
+                        <>
+                            {t('State')}{' '}
+                            <FilterComponent
+                                renderFilterOptions={stateFilterOptions}
+                                setColumnFilters={setColumnFilters}
+                                columnFilters={columnFilters}
+                                id={'state'}
+                                show={showFilter}
+                                setShow={setShowFilter}
+                                header={t('Release Clearing State')}
+                                resetPaginationParams={() => table.resetPagination()}
+                            />
+                        </>
+                    )
+                },
+                accessorFn: (row) => row.entity.clearingState ?? '',
+                cell: ({ row }) => {
+                    if (row.original.type === 'project') {
+                        const { clearingState, state } = row.original.entity
+                        return (
                             <div className='text-center'>
                                 <OverlayTrigger
-                                    overlay={
-                                        <Tooltip>{`${t('Project State')}: ${Capitalize(
-                                            (state as ProjectState).state
-                                        )}`}</Tooltip>
-                                    }
+                                    overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state ?? '')}`}</Tooltip>}
                                 >
-                                    {(state as ProjectState).state === 'ACTIVE' ? (
+                                    {state === 'ACTIVE' ? (
                                         <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
                                     ) : (
                                         <span className='badge bg-secondary capsule-left overlay-badge'>{'PS'}</span>
@@ -281,164 +493,313 @@ export default function ListView({
                                 <OverlayTrigger
                                     overlay={
                                         <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
-                                            (state as ProjectState).clearingState
+                                            clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
                                 >
-                                    {(state as ProjectState).clearingState === 'OPEN' ? (
+                                    {clearingState === 'OPEN' ? (
                                         <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
-                                    ) : (state as ProjectState).clearingState === 'IN_PROGRESS' ? (
+                                    ) : clearingState === 'IN_PROGRESS' ? (
                                         <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
                                     ) : (
                                         <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
                                     )}
                                 </OverlayTrigger>
                             </div>
-                        </>
-                    )
-                }
-                return _(
-                    <>
-                        <div className='text-center'>
-                            <OverlayTrigger
-                                overlay={
-                                    <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
-                                        (state as ReleaseState).clearingState
-                                    )}`}</Tooltip>
-                                }
-                            >
-                                {(state as ReleaseState).clearingState === 'NEW_CLEARING' ? (
-                                    <span className='badge bg-danger overlay-badge'>{'CS'}</span>
-                                ) : (state as ReleaseState).clearingState === 'REPORT_AVAILABLE' ? (
-                                    <span className='badge bg-primary overlay-badge'>{'CS'}</span>
-                                ) : (
-                                    <span className='badge bg-success overlay-badge'>{'CS'}</span>
-                                )}
-                            </OverlayTrigger>
-                        </div>
-                    </>
-                )
+                        )
+                    } else {
+                        const { clearingState } = row.original.entity
+                        return (
+                            <div className='text-center'>
+                                <OverlayTrigger
+                                    overlay={
+                                        <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
+                                            clearingState ?? '',
+                                        )}`}</Tooltip>
+                                    }
+                                >
+                                    {clearingState === 'NEW_CLEARING' ? (
+                                        <span className='badge bg-danger overlay-badge'>{'CS'}</span>
+                                    ) : clearingState === 'REPORT_AVAILABLE' ? (
+                                        <span className='badge bg-primary overlay-badge'>{'CS'}</span>
+                                    ) : (
+                                        <span className='badge bg-success overlay-badge'>{'CS'}</span>
+                                    )}
+                                </OverlayTrigger>
+                            </div>
+                        )
+                    }
+                },
+                meta: {
+                    width: '6%',
+                },
             },
-            sort: true,
+            {
+                id: 'releaseMainlineState',
+                header: t('Release Mainline State'),
+                enableColumnFilter: false,
+                accessorFn: (row) => {
+                    if (row.type === 'release') {
+                        return row.entity.mainlineState ?? ''
+                    }
+                    return ''
+                },
+                cell: ({ row }) => {
+                    if (row.original.type === 'release') {
+                        return <div className='text-center'>{Capitalize(row.original.entity.mainlineState ?? '')}</div>
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'projectMainlineState',
+                header: t('Project Mainline State'),
+                enableColumnFilter: false,
+                enableSorting: false,
+                cell: ({ row }) => {
+                    if (row.original.type === 'release') {
+                        return <div className='text-center'></div>
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'comment',
+                header: t('Comment'),
+                enableColumnFilter: false,
+                enableSorting: false,
+                cell: ({ row }) => {
+                    if (row.original.type === 'release') {
+                        const { id: releaseId } = row.original.entity
+                        const entity = row.getParentRow()?.original.entity as Project
+                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
+                            const linkedRelease = entity.linkedReleases.filter(
+                                (lr) => lr.release.split('/').at(-1) === releaseId,
+                            )
+                            if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
+                                return <div className='text-center'>{linkedRelease?.[0].comment}</div>
+                            }
+                        }
+                    }
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                enableColumnFilter: false,
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const { id } = row.original.entity
+                    const url =
+                        row.original.type === 'project' ? `/projects/edit/${id}` : `/components/editRelease/${id}`
+                    return (
+                        <div className='text-center'>
+                            <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                <Link
+                                    href={url}
+                                    className='overlay-trigger'
+                                >
+                                    <FaPencilAlt className='btn-icon' />
+                                </Link>
+                            </OverlayTrigger>
+                            {row.original.type === 'release' && (
+                                <OverlayTrigger overlay={<Tooltip>{t('License Files')}</Tooltip>}>
+                                    <span
+                                        className='overlay-trigger ms-2'
+                                        onClick={() => handleShowLicenseFiles(row.original.entity as Release)}
+                                        style={{
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <FaFile className='btn-icon' />
+                                    </span>
+                                </OverlayTrigger>
+                            )}
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '6%',
+                },
+            },
+        ],
+        [
+            t,
+            columnFilters,
+            showFilter,
+            handleShowLicenseFiles,
+        ],
+    )
+
+    const table = useReactTable({
+        state: {
+            columnFilters,
+            sorting,
         },
-        {
-            id: 'licenseClearing.releaseMainlineState',
-            name: t('Release Mainline State'),
-            width: '8%',
-            formatter: (type: string) => _(<>{Capitalize(type)}</>),
-            sort: true,
+        data: rowData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        manualFiltering: true,
+        onColumnFiltersChange: setColumnFilters,
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        meta: {
+            rowHeightConstant: true,
         },
-        {
-            id: 'licenseClearing.projectMainlineState',
-            name: t('Project Mainline State'),
-            width: '8%',
-            formatter: (type: string) => _(<>{Capitalize(type)}</>),
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.comment',
-            name: t('Comment'),
-            width: '8%',
-            sort: true,
-        },
-        {
-            id: 'licenseClearing.actions',
-            name: t('Actions'),
-            sort: true,
-            width: '6%',
-            formatter: ({ id, type }: { id: string; type: ElementType }) =>
-                _(
-                    <>
-                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                            <Link
-                                href={
-                                    type === ElementType.LINKED_PROJECT
-                                        ? `/projects/edit/${id}`
-                                        : `/components/releases/edit/${id}`
-                                }
-                                className='overlay-trigger'
-                            >
-                                <FaPencilAlt className='btn-icon' />
-                            </Link>
-                        </OverlayTrigger>
-                    </>
-                ),
-        },
-    ]
+    })
 
     useEffect(() => {
         if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
+        const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
 
-        ;(async () => {
+        void (async () => {
             try {
-                const res_licenseClearing = await ApiUtils.GET(
-                    `projects/${projectId}/licenseClearing?transitive=true`,
-                    session.user.access_token,
-                    signal
-                )
+                const filterParams = columnFilters
+                    .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
+                    .filter((param) => param !== '')
+                    .join('&')
 
-                const res_linkedProjects = ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.user.access_token,
-                    signal
-                )
+                const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? '&' + filterParams : ''}`
+                const response = await ApiUtils.GET(url, session.user.access_token, signal)
 
-                const responses = await Promise.all([res_licenseClearing, res_linkedProjects])
-                if (
-                    responses[0].status === HttpStatus.UNAUTHORIZED ||
-                    responses[1].status === HttpStatus.UNAUTHORIZED
-                ) {
-                    return signOut()
-                } else if (responses[0].status !== HttpStatus.OK || responses[1].status !== HttpStatus.OK) {
-                    return notFound()
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-
-                const licenseClearingData = await responses[0].json()
-                const linkedProjectsData = await responses[1].json()
-
-                const finalData: ListViewData[] = []
-                const path: string[] = []
-                extractLinkedReleases(projectName, projectVersion, licenseClearingData, finalData, path)
-                extractLinkedProjectsAndTheirLinkedReleases(
-                    licenseClearingData,
-                    linkedProjectsData?.['_embedded']?.['sw360:projects'],
-                    finalData,
-                    path
-                )
-
-                const d = finalData.map((e) => [
-                    { ...e.elem, type: e.elementType ?? '' },
-                    e.type ?? '',
-                    e.projectPath ?? '',
-                    e.releasePath ?? '',
-                    e.relation ?? '',
-                    e.mainLicenses ?? [],
-                    { state: e.state, elementType: e.elementType },
-                    e.releaseMainlineState ?? '',
-                    e.projectMainlineState ?? '',
-                    e.comment ?? '',
-                    { id: e.elem.id ?? '', type: e.elementType ?? '' },
-                ])
-                setData(d)
-            } catch (e) {
-                console.error(e)
+                const licenseClearingData = (await response.json()) as LicenseClearing
+                setLicenseClearing(licenseClearingData)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                throw new Error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
             }
         })()
-
         return () => controller.abort()
-    }, [projectId, projectName, projectVersion, session, status])
+    }, [
+        status,
+        projectId,
+        session,
+        columnFilters,
+        memoizedLicenseClearing,
+    ])
+
+    useEffect(() => {
+        if (status !== 'authenticated') return
+        const controller = new AbortController()
+        const signal = controller.signal
+        const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/linkedProjects?transitive=true`,
+                    session.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const linkedProjectsData = (await response.json()) as LinkedProjects
+                setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                throw new Error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+        return () => controller.abort()
+    }, [
+        status,
+        projectId,
+        session,
+    ])
+
+    useEffect(() => {
+        if (memoizedLicenseClearing === undefined) return
+        const data = buildTable(memoizedLicenseClearing, memoizedLinkedProjects, projectName, projectVersion)
+        setRowData(data)
+    }, [
+        memoizedLicenseClearing,
+        memoizedLinkedProjects,
+        projectName,
+        projectVersion,
+    ])
 
     return (
         <>
-            {data ? (
-                <Table columns={columns} data={data} selector={true} sort={false} />
-            ) : (
-                <div className='col-12 text-center'>
-                    <Spinner className='spinner' />
-                </div>
-            )}
+            <div className='mb-3'>
+                {table ? (
+                    <>
+                        <ClientSidePageSizeSelector table={table} />
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                        />
+                        <ClientSideTableFooter table={table} />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
+
+            <Modal
+                show={showModal}
+                onHide={() => setShowModal(false)}
+                size='lg'
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        {t('License Files')} - {selectedRelease?.name} ({selectedRelease?.version})
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {licenseFiles.length > 0 ? (
+                        <ul>
+                            {licenseFiles.map((file, index) => (
+                                <li key={index}>{file}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>{t('No license files available')}</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant='secondary'
+                        onClick={() => setShowModal(false)}
+                    >
+                        {t('Close')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

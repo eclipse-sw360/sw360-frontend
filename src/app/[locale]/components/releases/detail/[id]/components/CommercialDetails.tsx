@@ -8,12 +8,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ReactNode } from 'react'
 import { COTSDetails } from '@/object-types'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
 import CotsOssInformation from './CotsOssInformation'
-import { ReactNode } from 'react'
 
-const CommercialDetails = ({ costDetails }: { costDetails: COTSDetails | undefined }) : ReactNode => {
+const CommercialDetails = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
     return (
         <div className='col'>
             <CommercialDetailsAdministration costDetails={costDetails} />

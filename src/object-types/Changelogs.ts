@@ -30,7 +30,9 @@ interface Changelogs {
     userEdited: string
     changeTimestamp: string
     referenceDoc?: Array<ReferenceDoc>
-    info?: { [k: string]: string }
+    info?: {
+        [k: string]: string
+    }
 }
 
 export default Changelogs

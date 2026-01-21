@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-const AttachmentType = {
+const AttachmentTypes = {
     DOCUMENT: 'DOCUMENT',
     SOURCE: 'SOURCE',
     DESIGN: 'DESIGN',
@@ -33,4 +33,4 @@ const AttachmentType = {
     INTERNAL_USE_SCAN: 'INTERNAL_USE_SCAN',
 }
 
-export default AttachmentType
+export default AttachmentTypes

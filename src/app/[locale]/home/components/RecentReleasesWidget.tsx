@@ -10,33 +10,35 @@
 
 'used-client'
 
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-
-import { Embedded, HttpStatus, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getSession, signOut } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { Embedded, ReleaseDetail } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
-function RecentReleasesWidget() : ReactNode {
+function RecentReleasesWidget(): ReactNode {
     const t = useTranslations('default')
 
     const [recentRelease, setRecentRelease] = useState<Array<JSX.Element[]>>([])
     const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedReleases
             return data
-        } else if (response.status == HttpStatus.UNAUTHORIZED) {
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
             notFound()
@@ -45,47 +47,71 @@ function RecentReleasesWidget() : ReactNode {
 
     useEffect(() => {
         setLoading(true)
-        void fetchData('releases/recentReleases').then((releases: EmbeddedReleases | undefined) => {
-            if (releases === undefined) {
-                setLoading(false)
-                return
-            }
+        void fetchData('releases/recentReleases')
+            .then((releases: EmbeddedReleases | undefined) => {
+                if (releases === undefined) {
+                    return
+                }
 
-            if (
-                !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
-                !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
-            ) {
-                setRecentRelease(
-                    releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
-                        <li key={item.name}>
-                            <Link
-                                href={'components/releases/detail/' + item.id}
-                                style={{ color: 'orange', textDecoration: 'none' }}
-                            >
-                                {item.name}
-                            </Link>
-                        </li>,
-                    ]),
-                )
+                if (
+                    !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
+                    !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
+                ) {
+                    setRecentRelease(
+                        releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
+                            <li key={item.name}>
+                                <Link
+                                    href={'components/releases/detail/' + item.id}
+                                    style={{
+                                        color: 'orange',
+                                        textDecoration: 'none',
+                                    }}
+                                >
+                                    {item.name}
+                                </Link>
+                            </li>,
+                        ]),
+                    )
+                } else {
+                    setRecentRelease([])
+                }
+            })
+            .catch((error: Error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            })
+            .finally(() => {
                 setLoading(false)
-            } else {
-                setRecentRelease([])
-                setLoading(false)
-            }
-        })
-    }, [fetchData])
+            })
+    }, [
+        fetchData,
+        reload,
+    ])
 
     return (
         <div className='content-container'>
-            <HomeTableHeader title={t('Recent Releases')} />
+            <HomeTableHeader
+                title={t('Recent Releases')}
+                setReload={setReload}
+            />
             {loading == false ? (
-                <ul style={{ listStyleType: 'disc', color: 'black' }}>{recentRelease}</ul>
+                <ul
+                    style={{
+                        listStyleType: 'disc',
+                        color: 'black',
+                    }}
+                >
+                    {recentRelease}
+                </ul>
             ) : (
                 <div className='col-12'>
                     <Spinner className='spinner' />
                 </div>
             )}
-            {recentRelease.length === 0 && (
+            {recentRelease.length === 0 && loading === false && (
                 <>
                     <div className='subscriptionBox'>{t('No recent releases available')}</div>
                 </>

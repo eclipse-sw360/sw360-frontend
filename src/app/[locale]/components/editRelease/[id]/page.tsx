@@ -8,17 +8,37 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { getServerSession } from 'next-auth/next'
+import { signOut } from 'next-auth/react'
 import { ReactNode } from 'react'
+import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
+import { ConfigKeys, Configuration } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 import EditRelease from './components/EditRelease'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{
+        id: string
+    }>
 }
 
-const ReleaseEditPage = ({ params }: Context) : ReactNode => {
+const ReleaseEditPage = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params
     const releaseId = params.id
+    const session = await getServerSession(authOptions)
+    if (CommonUtils.isNullOrUndefined(session)) {
+        return signOut()
+    }
+    const response = await ApiUtils.GET('configurations', session.user.access_token)
+    const config = (await response.json()) as Configuration
+    const isSPDXFeatureEnabled = config[ConfigKeys.SPDX_DOCUMENT_ENABLED] == 'true'
 
-    return <EditRelease releaseId={releaseId} />
+    return (
+        <EditRelease
+            releaseId={releaseId}
+            isSPDXFeatureEnabled={isSPDXFeatureEnabled}
+        />
+    )
 }
 
 export default ReleaseEditPage

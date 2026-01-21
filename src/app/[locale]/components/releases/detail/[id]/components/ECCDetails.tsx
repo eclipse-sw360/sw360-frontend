@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,18 +10,28 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useState } from 'react'
-
+import { ReactNode, useEffect, useState } from 'react'
 import { ReleaseDetail } from '@/object-types'
 
 interface Props {
     release: ReleaseDetail
 }
 
-const ECCDetails = ({ release }: Props) : ReactNode => {
+const ECCDetails = ({ release }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
     return (
         <div className='col'>
             <table className='table summary-table'>
@@ -37,11 +48,7 @@ const ECCDetails = ({ release }: Props) : ReactNode => {
                 <tbody hidden={toggle}>
                     <tr>
                         <td>{t('ECC Status')}:</td>
-                        <td>
-                            {
-                                t(release.eccInformation?.eccStatus as never)
-                            }
-                        </td>
+                        <td>{t(release.eccInformation?.eccStatus as never)}</td>
                     </tr>
                     <tr>
                         <td>{t('AL')}:</td>
@@ -58,6 +65,16 @@ const ECCDetails = ({ release }: Props) : ReactNode => {
                     <tr>
                         <td>{t('ECC Comment')}:</td>
                         <td>{release.eccInformation?.eccComment}</td>
+                    </tr>
+                    <tr>
+                        <td>{t('Contains Cryptography')}:</td>
+                        <td>
+                            {release.eccInformation?.containsCryptography === true
+                                ? t('Yes')
+                                : release.eccInformation?.containsCryptography === false
+                                  ? t('No')
+                                  : t('Not Specified')}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Assessor Contact Person')}:</td>

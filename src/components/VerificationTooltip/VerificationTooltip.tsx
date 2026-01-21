@@ -8,9 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { type JSX, ReactNode, useState } from 'react'
 import { VerificationStateInfo } from '@/object-types'
-import { ReactNode, useState } from 'react'
-import styles from './VerificationTooltip.module.css'
 
 interface Props {
     verificationStateInfos: Array<VerificationStateInfo>
@@ -20,19 +19,19 @@ interface Props {
 const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationStateInfo }) => {
     return (
         <li>
-            <span className={styles.formatedMessageForVulHeader}>
+            <span className='verification-tooltip-header'>
                 <b>{stateInfo.verificationState} </b>
                 <span className='formatedMessageForVulDate'>({stateInfo.checkedOn})</span>
             </span>
-            <span className={styles.formatedMessageForVulItem}>
+            <span className='verification-tooltip-item'>
                 <i>Checked By: </i>
                 <span>{stateInfo.checkedBy}</span>
             </span>
-            <span className={styles.formatedMessageForVulItem}>
+            <span className='verification-tooltip-item'>
                 <i>Action: </i>
                 <span></span>
             </span>
-            <span className={styles.formatedMessageForVulItem}>
+            <span className='verification-tooltip-item'>
                 <p>
                     <i>Comment: </i>
                     {stateInfo.comment}
@@ -45,12 +44,22 @@ const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationState
 const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.Element => {
     const [show, setShow] = useState(false)
     return (
-        <div className={styles.tooltip} onMouseOver={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+        <div
+            className='verification-tooltip'
+            onMouseOver={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}
+        >
             {show && (
-                <div className={`${styles['tooltip-content']}`}>
-                    <ol className={styles.formatedMessageForVul} reversed>
+                <div className='verification-tooltip-content'>
+                    <ol
+                        className='verification-tooltip-list'
+                        reversed
+                    >
                         {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (
-                            <VerificationStateFormater key={index} stateInfo={info} />
+                            <VerificationStateFormater
+                                key={index}
+                                stateInfo={info}
+                            />
                         ))}
                     </ol>
                 </div>

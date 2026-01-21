@@ -10,8 +10,6 @@
   License-Filename: LICENSE
 */
 
-
-
 .buttons a {
     margin-top: 1.75rem;
     font-weight: bold;
@@ -26,8 +24,6 @@
     padding-right: 1.5rem;
     padding-top: 0.59375rem;
 }
-
-
 
 #portlet_sw360_portlet_welcome {
     margin: 2rem;
@@ -56,7 +52,8 @@
     width: 70%;
 }
 
-.btn-primary:focus, .focus.btn-primary {
+.btn-primary:focus,
+.focus.btn-primary {
     background-color: #f28809;
     border-color: #da7a08;
     color: #fff;

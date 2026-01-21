@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,10 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect, useState } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { OtherLicensingInformationDetected, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
     isModeFull: boolean
@@ -46,14 +48,23 @@ const EditOtherLicensingInformationDetected = ({
     inputValid,
     toggleOther,
     setToggleOther,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [increIndex, setIncreIndex] = useState(0)
     const [isAdd, setIsAdd] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (
             CommonUtils.isNullEmptyOrUndefinedString(
-                otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId
+                otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId,
             ) ||
             otherLicensingInformationDetecteds[indexOtherLicense].licenseId === 'LicenseRef-'
         ) {
@@ -61,18 +72,18 @@ const EditOtherLicensingInformationDetected = ({
         }
         if (
             CommonUtils.isNullEmptyOrUndefinedString(
-                otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
+                otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText,
             )
         ) {
             setErrorExtractedText(true)
         }
         if (
             CommonUtils.isNullEmptyOrUndefinedString(
-                otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId
+                otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId,
             ) ||
             otherLicensingInformationDetecteds[indexOtherLicense].licenseId === 'LicenseRef-' ||
             CommonUtils.isNullEmptyOrUndefinedString(
-                otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
+                otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText,
             )
         ) {
             return
@@ -91,17 +102,17 @@ const EditOtherLicensingInformationDetected = ({
     const addOtherLicensingInformationDetecteds = () => {
         if (
             (CommonUtils.isNullEmptyOrUndefinedString(
-                otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId
+                otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId,
             ) ||
                 otherLicensingInformationDetecteds[indexOtherLicense].licenseId === 'LicenseRef-' ||
                 CommonUtils.isNullEmptyOrUndefinedString(
-                    otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
+                    otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText,
                 )) &&
             !CommonUtils.isNullEmptyOrUndefinedArray(otherLicensingInformationDetecteds)
         ) {
             if (
                 CommonUtils.isNullEmptyOrUndefinedString(
-                    otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId
+                    otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId,
                 ) ||
                 otherLicensingInformationDetecteds[indexOtherLicense].licenseId === 'LicenseRef-'
             ) {
@@ -109,13 +120,15 @@ const EditOtherLicensingInformationDetected = ({
             }
             if (
                 CommonUtils.isNullEmptyOrUndefinedString(
-                    otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
+                    otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText,
                 )
             ) {
                 setErrorExtractedText(true)
             }
         } else {
-            const arrayExternals: OtherLicensingInformationDetected[] = [...otherLicensingInformationDetecteds]
+            const arrayExternals: OtherLicensingInformationDetected[] = [
+                ...otherLicensingInformationDetecteds,
+            ]
             setIncreIndex(otherLicensingInformationDetecteds.length)
             setNumberIndex(otherLicensingInformationDetecteds.length)
             setIsAdd(true)
@@ -156,7 +169,7 @@ const EditOtherLicensingInformationDetected = ({
                     }
                 }
                 return otherLicensing
-            }
+            },
         )
         setOtherLicensingInformationDetecteds(otherLicensings)
         setSPDXPayload({
@@ -169,7 +182,7 @@ const EditOtherLicensingInformationDetected = ({
     }
 
     const updateFieldLicenseCrossRefs = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         const otherLicensings: OtherLicensingInformationDetected[] = otherLicensingInformationDetecteds.map(
             (otherLicensing, index) => {
@@ -180,7 +193,7 @@ const EditOtherLicensingInformationDetected = ({
                     }
                 }
                 return otherLicensing
-            }
+            },
         )
         setOtherLicensingInformationDetecteds(otherLicensings)
         setSPDXPayload({
@@ -203,7 +216,7 @@ const EditOtherLicensingInformationDetected = ({
                     }
                 }
                 return otherLicensing
-            }
+            },
         )
         setOtherLicensingInformationDetecteds(otherLicensings)
         setSPDXPayload({
@@ -233,7 +246,7 @@ const EditOtherLicensingInformationDetected = ({
         } else {
             let otherLicensingInformationDetectedDatas: OtherLicensingInformationDetected[] = []
             otherLicensingInformationDetectedDatas = otherLicensingInformationDetecteds.filter(
-                (otherLicensingInformationDetected) => numberIndex != otherLicensingInformationDetected.index
+                (otherLicensingInformationDetected) => numberIndex != otherLicensingInformationDetected.index,
             )
             setNumberIndex(indexOtherLicense)
             for (let index = 0; index < otherLicensingInformationDetectedDatas.length; index++) {
@@ -268,7 +281,10 @@ const EditOtherLicensingInformationDetected = ({
                 setLicenseName(otherLicensingInformationDetecteds[indexOtherLicense].licenseName)
             }
         }
-    }, [indexOtherLicense, otherLicensingInformationDetecteds])
+    }, [
+        indexOtherLicense,
+        otherLicensingInformationDetecteds,
+    ])
 
     const [licenseName, setLicenseName] = useState('')
     const [hasLicenseName, setHasLicenseName] = useState(true)
@@ -283,7 +299,7 @@ const EditOtherLicensingInformationDetected = ({
                     }
                 }
                 return otherLicense
-            }
+            },
         )
         setOtherLicensingInformationDetecteds(otherLicenses)
         setSPDXPayload({
@@ -327,11 +343,26 @@ const EditOtherLicensingInformationDetected = ({
             <tbody hidden={toggleOther}>
                 <tr>
                     <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginBottom: '0.75rem',
+                                }}
+                            >
                                 <label
                                     htmlFor='selectOtherLicensing'
-                                    style={{ textDecoration: 'underline', width: '175px', marginRight: 'auto' }}
+                                    style={{
+                                        textDecoration: 'underline',
+                                        width: '175px',
+                                        marginRight: 'auto',
+                                    }}
                                     className='sub-title lableSPDX'
                                 >
                                     Select Other Licensing
@@ -341,17 +372,24 @@ const EditOtherLicensingInformationDetected = ({
                                     className='form-control spdx-select form-select'
                                     onChange={displayIndex}
                                     disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                        otherLicensingInformationDetecteds
+                                        otherLicensingInformationDetecteds,
                                     )}
                                     value={isAdd ? (isDeleteSucces ? indexOtherLicense : increIndex) : numberIndex}
                                 >
                                     {otherLicensingInformationDetecteds.map((item) => (
-                                        <option key={item.index} value={item.index}>
+                                        <option
+                                            key={item.index}
+                                            value={item.index}
+                                        >
                                             {item.index + 1}
                                         </option>
                                     ))}
                                 </select>
-                                <FaTrashAlt className='spdx-delete-icon-main' onClick={deleteOtherLicenses} />
+                                <BsFillTrashFill
+                                    className='spdx-delete-icon-main'
+                                    onClick={deleteOtherLicenses}
+                                    size={20}
+                                />
                             </div>
                             <button
                                 className='spdx-add-button-main'
@@ -367,13 +405,25 @@ const EditOtherLicensingInformationDetected = ({
                     <tr>
                         <td>
                             <div className='form-group'>
-                                <label className='mandatory lableSPDX' htmlFor='licenseId'>
+                                <label
+                                    className='mandatory lableSPDX'
+                                    htmlFor='licenseId'
+                                >
                                     10.1 License identifier
-                                    <span className='text-red' style={{ color: '#F7941E' }}>
+                                    <span
+                                        className='text-red'
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
+                                    >
                                         *
                                     </span>
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <label className='sub-label'>LicenseRef-</label>
                                     <input
                                         id='licenseId'
@@ -381,15 +431,19 @@ const EditOtherLicensingInformationDetected = ({
                                             !errorLicenseIdentifier && inputValid ? 'is-valid' : ''
                                         }`}
                                         type='text'
-                                        style={{ backgroundColor: errorLicenseIdentifier ? '#feefef' : '' }}
+                                        style={{
+                                            backgroundColor: errorLicenseIdentifier ? '#feefef' : '',
+                                        }}
                                         placeholder='Enter license identifier'
                                         name='licenseId'
                                         onChange={updateFieldLicenseIdentifier}
                                         value={
-                                            otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId.startsWith('LicenseRef-')
+                                            otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId.startsWith(
+                                                'LicenseRef-',
+                                            )
                                                 ? otherLicensingInformationDetecteds[
-                                                        indexOtherLicense
-                                                    ].licenseId.substring(11)
+                                                      indexOtherLicense
+                                                  ].licenseId.substring(11)
                                                 : otherLicensingInformationDetecteds[indexOtherLicense]?.licenseId
                                         }
                                     />
@@ -412,9 +466,17 @@ const EditOtherLicensingInformationDetected = ({
                     <tr>
                         <td>
                             <div className='form-group'>
-                                <label className='mandatory lableSPDX' htmlFor='extractedText'>
+                                <label
+                                    className='mandatory lableSPDX'
+                                    htmlFor='extractedText'
+                                >
                                     10.2 Extracted text
-                                    <span className='text-red' style={{ color: '#F7941E' }}>
+                                    <span
+                                        className='text-red'
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
+                                    >
                                         *
                                     </span>
                                 </label>
@@ -422,15 +484,15 @@ const EditOtherLicensingInformationDetected = ({
                                     className={`form-control ${errorExtractedText ? 'is-invalid ' : ''} ${
                                         !errorExtractedText && inputValid ? 'is-valid' : ''
                                     }`}
-                                    style={{ backgroundColor: errorExtractedText ? '#feefef' : '' }}
+                                    style={{
+                                        backgroundColor: errorExtractedText ? '#feefef' : '',
+                                    }}
                                     id='extractedText'
                                     rows={5}
                                     name='extractedText'
                                     onChange={updateField}
                                     placeholder='Enter extracted text'
-                                    value={
-                                        otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText
-                                    }
+                                    value={otherLicensingInformationDetecteds[indexOtherLicense]?.extractedText}
                                 ></textarea>
                             </div>
                             {errorExtractedText && (
@@ -451,8 +513,19 @@ const EditOtherLicensingInformationDetected = ({
                         <td colSpan={3}>
                             <div className='form-group'>
                                 <label className='lableSPDX'>10.3 License name</label>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            flex: 3,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseNameExist'
@@ -463,7 +536,10 @@ const EditOtherLicensingInformationDetected = ({
                                             checked={hasLicenseName}
                                         />
                                         <input
-                                            style={{ flex: 6, marginRight: '1rem' }}
+                                            style={{
+                                                flex: 6,
+                                                marginRight: '1rem',
+                                            }}
                                             id='licenseName'
                                             className='form-control needs-validation'
                                             type='text'
@@ -472,17 +548,19 @@ const EditOtherLicensingInformationDetected = ({
                                             onChange={updateField}
                                             value={
                                                 isNotNoneOrNoasserttionString(
-                                                    otherLicensingInformationDetecteds[indexOtherLicense]
-                                                        ?.licenseName
+                                                    otherLicensingInformationDetecteds[indexOtherLicense]?.licenseName,
                                                 )
-                                                    ? otherLicensingInformationDetecteds[indexOtherLicense]
-                                                            ?.licenseName
+                                                    ? otherLicensingInformationDetecteds[indexOtherLicense]?.licenseName
                                                     : ''
                                             }
                                             disabled={!hasLicenseName}
                                         />
                                     </div>
-                                    <div style={{ flex: 2 }}>
+                                    <div
+                                        style={{
+                                            flex: 2,
+                                        }}
+                                    >
                                         <input
                                             className='spdx-radio'
                                             id='licenseNameNoAssertion'
@@ -507,7 +585,10 @@ const EditOtherLicensingInformationDetected = ({
                         <tr className='spdx-full'>
                             <td>
                                 <div className='form-group'>
-                                    <label className='lableSPDX' htmlFor='licenseCrossRefs'>
+                                    <label
+                                        className='lableSPDX'
+                                        htmlFor='licenseCrossRefs'
+                                    >
                                         10.4 License cross reference
                                     </label>
                                     <textarea
@@ -517,11 +598,9 @@ const EditOtherLicensingInformationDetected = ({
                                         placeholder='Enter license cross reference'
                                         name='licenseCrossRefs'
                                         onChange={updateFieldLicenseCrossRefs}
-                                        value={
-                                            otherLicensingInformationDetecteds[indexOtherLicense]?.licenseCrossRefs
-                                                .toString()
-                                                .replaceAll(',', '\n')
-                                        }
+                                        value={otherLicensingInformationDetecteds[indexOtherLicense]?.licenseCrossRefs
+                                            .toString()
+                                            .replaceAll(',', '\n')}
                                     ></textarea>
                                 </div>
                             </td>
@@ -530,7 +609,10 @@ const EditOtherLicensingInformationDetected = ({
                     <tr>
                         <td>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='licenseComment'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='licenseComment'
+                                >
                                     10.5 License comment
                                 </label>
                                 <textarea
@@ -540,9 +622,7 @@ const EditOtherLicensingInformationDetected = ({
                                     placeholder='Enter license comment'
                                     name='licenseComment'
                                     onChange={updateField}
-                                    value={
-                                        otherLicensingInformationDetecteds[indexOtherLicense]?.licenseComment
-                                    }
+                                    value={otherLicensingInformationDetecteds[indexOtherLicense]?.licenseComment}
                                 ></textarea>
                             </div>
                         </td>

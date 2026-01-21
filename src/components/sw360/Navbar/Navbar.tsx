@@ -10,27 +10,30 @@
 
 'use client'
 
+import Link from 'next/link'
+import { useParams, useRouter, useSelectedLayoutSegment } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import Image from 'next/image'
-import { useRouter, useSelectedLayoutSegment } from 'next/navigation'
-import { useState } from 'react'
+import { LocaleSwitcher, Logo, ProfileDropdown } from 'next-sw360'
+import { type JSX, useState } from 'react'
 import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
-
-import sw360logo from '@/assets/images/sw360-logo.svg'
 import { NavList } from '@/object-types'
-import { LocaleSwitcher, ProfileDropdown } from 'next-sw360'
-import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 
 function Navbar(): JSX.Element {
     const router = useRouter()
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
 
     const { data: session, status } = useSession()
     const [show, setShow] = useState(false)
     const selectedLayoutSegment = useSelectedLayoutSegment()
-    const pathname = (selectedLayoutSegment !== null) ? `/${selectedLayoutSegment}` : '/'
+    const pathname = selectedLayoutSegment !== null ? `/${selectedLayoutSegment}` : '/'
 
     const navlist = NavList()
 
+    const getLocalizedPath = (path: string) => {
+        if (path === '#' || path === '/') return path
+        return `/${locale}${path}`
+    }
     // NavItems receives an array of links with possible entries:
     // href: the link (mandatory)
     // name: the name of the link (mandatory)
@@ -42,10 +45,17 @@ function Navbar(): JSX.Element {
         <>
             {navlist.map((item) => {
                 if ('visibility' in item) {
-                    if (status === 'authenticated' && session.user.userGroup !== item.visibility) {
+                    const userGroupData = session?.user.userGroup
+                    if (
+                        userGroupData === undefined ||
+                        !Array.isArray(item.visibility) ||
+                        !item.visibility.includes(userGroupData)
+                    ) {
                         return
                     }
                 }
+
+                const localizedHref = getLocalizedPath(item.href)
                 if ('childs' in item) {
                     return (
                         <NavDropdown
@@ -61,12 +71,15 @@ function Navbar(): JSX.Element {
                                 // hack to route to /admin when clicked on dropdown title
                                 if ((e.target as HTMLElement).attributes[0].name === 'id') {
                                     e.preventDefault()
-                                    router.push(item.href)
+                                    router.push(localizedHref)
                                 }
                             }}
                         >
                             {item.childs?.map((child) => (
-                                <NavDropdown.Item href={child.href} key={child.id}>
+                                <NavDropdown.Item
+                                    href={getLocalizedPath(child.href)}
+                                    key={child.id}
+                                >
                                     {child.name}
                                 </NavDropdown.Item>
                             ))}
@@ -74,7 +87,11 @@ function Navbar(): JSX.Element {
                     )
                 } else {
                     return (
-                        <Nav.Link key={item.name} className={`${pathname == item.href ? 'active' : ''}`} href={item.href}>
+                        <Nav.Link
+                            key={item.name}
+                            className={`${pathname == item.href ? 'active' : ''}`}
+                            href={localizedHref}
+                        >
                             {item.name}
                         </Nav.Link>
                     )
@@ -85,21 +102,37 @@ function Navbar(): JSX.Element {
 
     return (
         <>
-            <BSNavbar expand='lg' className='bg-body-tertiary'>
+            <BSNavbar
+                expand='lg'
+                className='bg-body-tertiary'
+            >
                 <Container fluid>
-                    <BSNavbar.Brand href='/'>
-                        <Image src={sw360logo as StaticImport} height={57} width={147} alt='SW360 Logo' />
+                    <BSNavbar.Brand
+                        as={Link}
+                        href={status === 'authenticated' ? `/${locale ?? 'en'}/home` : `/${locale ?? 'en'}`}
+                    >
+                        <Logo
+                            src={process.env.NEXT_PUBLIC_CUSTOM_LOGO ?? undefined}
+                            alt='SW360 Logo'
+                        />
                     </BSNavbar.Brand>
                     <BSNavbar.Toggle aria-controls='navbarScroll' />
                     <BSNavbar.Collapse id='navbarScroll'>
                         {pathname != '/' && (
-                            <Nav className='me-auto my-2 my-lg-0' navbarScroll>
+                            <Nav
+                                className='me-auto my-2 my-lg-0'
+                                navbarScroll
+                            >
                                 <NavItems />
                             </Nav>
                         )}
                         {pathname != '/' && (
                             <Form className='d-flex gap-3'>
-                                <Form.Control type='text' placeholder='Search' className='me-2' />
+                                <Form.Control
+                                    type='text'
+                                    placeholder='Search'
+                                    className='me-2'
+                                />
                                 <ProfileDropdown />
                                 <LocaleSwitcher />
                             </Form>

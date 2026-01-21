@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,15 +12,14 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import styles from './SideBar.module.css'
-
+import { type JSX, useEffect, useState } from 'react'
 import { CommonTabIds, LinkedVulnerability, ReleaseTabIds, VulnerabilitiesVerificationState } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
 interface Tab {
     name: string
     id: string
+    hidden?: boolean
 }
 
 interface Props {
@@ -54,61 +54,80 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
             setNumberOfCheckedOrUncheckedVulnerabilities(numberOfCheckOrUnchecked)
             setNumberOfIncorrectVulnerabilities(numberOfIncorrect)
         }
-    }, [numberOfCheckedOrUncheckedVulnerabilities, numberOfIncorrectVulnerabilities, vulnerabilities])
+    }, [
+        numberOfCheckedOrUncheckedVulnerabilities,
+        numberOfIncorrectVulnerabilities,
+        vulnerabilities,
+    ])
 
     const handleSelectTab = (event: React.MouseEvent<HTMLElement>) => {
         setSelectedTab(event.currentTarget.id)
     }
 
     const createMenuBar = () => {
-        const elements: JSX.Element[] = Object.entries(tabList).map(([index, tab]: [string, Tab]) => {
-            if (tab.id === CommonTabIds.VULNERABILITIES) {
+        const elements: (JSX.Element | null)[] = Object.entries(tabList).map(
+            ([index, tab]: [
+                string,
+                Tab,
+            ]) => {
+                if (tab.hidden) {
+                    return null
+                }
+                if (tab.id === CommonTabIds.VULNERABILITIES) {
+                    return (
+                        <a
+                            key={index}
+                            className={`list-group-item sidebar-tab ${selectedTab === tab.id ? 'sidebar-tab-active' : ''}`}
+                            id={tab.id}
+                            onClick={handleSelectTab}
+                        >
+                            {t(tab.name as never)}
+                            <span
+                                id='numberOfVulnerabilitiesDiv'
+                                className='badge badge-light'
+                            >
+                                {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
+                            </span>
+                        </a>
+                    )
+                } else if (tab.id === ReleaseTabIds.ECC_DETAILS) {
+                    return (
+                        <a
+                            key={index}
+                            className={`list-group-item sidebar-tab ${selectedTab === tab.id ? 'sidebar-tab-active' : ''}`}
+                            id={tab.id}
+                            onClick={handleSelectTab}
+                        >
+                            {tab.name}{' '}
+                            <span
+                                className={`clearing-state-${(eccStatus ?? '').toLowerCase().replace(/_/g, '-')}`}
+                            ></span>
+                        </a>
+                    )
+                }
                 return (
                     <a
                         key={index}
-                        className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
+                        className={`list-group-item sidebar-tab ${selectedTab === tab.id ? 'sidebar-tab-active' : ''}`}
                         id={tab.id}
                         onClick={handleSelectTab}
                     >
-                        {
-                            t(tab.name as never)
-                        }
-                        <span id={styles.numberOfVulnerabilitiesDiv} className='badge badge-light'>
-                            {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
-                        </span>
+                        {t(tab.name as never)}
                     </a>
                 )
-            } else if (tab.id === ReleaseTabIds.ECC_DETAILS) {
-                return (
-                    <a
-                        key={index}
-                        className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
-                        id={tab.id}
-                        onClick={handleSelectTab}
-                    >
-                        {tab.name} <span className={`${styles[eccStatus ?? '']}`}></span>
-                    </a>
-                )
-            }
-            return (
-                <a
-                    key={index}
-                    className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
-                    id={tab.id}
-                    onClick={handleSelectTab}
-                >
-                    {
-                        t(tab.name as never)
-                    }
-                </a>
-            )
-        })
+            },
+        )
 
         return elements
     }
 
     return (
-        <div id='detailTab' className='list-group' data-initial-tab={selectedTab} role='tablist'>
+        <div
+            id='detailTab'
+            className='list-group'
+            data-initial-tab={selectedTab}
+            role='tablist'
+        >
             {createMenuBar()}
         </div>
     )

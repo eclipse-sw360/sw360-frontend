@@ -15,8 +15,8 @@ interface RequestContent {
         Authorization?: string
         Accept?: string
     }
-    body: any
-    signal?: any
+    body: BodyInit | null
+    signal?: AbortSignal
 }
 
 export default RequestContent

@@ -7,33 +7,35 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 'use client'
 
-import { HttpStatus, ModerationRequestPayload } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { notFound, useParams, useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { signOut, useSession } from 'next-auth/react'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
-import { Button, Col, Row, Tab, Card, Collapse } from 'react-bootstrap'
-import { ModerationRequestDetails } from '@/object-types'
-import ModerationRequestInfo from './ModerationRequestInfo'
-import ModerationDecision from './ModerationDecision'
+import { ReactNode, useEffect, useState } from 'react'
+import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
+
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import ProposedChanges from './ProposedChanges'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
-import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
+import ModerationDecision from './ModerationDecision'
+import ModerationRequestInfo from './ModerationRequestInfo'
+import ProposedChanges from './ProposedChanges'
 
-
-function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }) {
-
+function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }): ReactNode | undefined {
     const t = useTranslations('default')
-    const [openCardIndex, setOpenCardIndex] = useState<number>(0);
-    const { data: session, status } = useSession()
+    const [openCardIndex, setOpenCardIndex] = useState<number>(0)
+    const { status } = useSession()
     const router = useRouter()
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const requestsPath = `/${locale}/requests`
     const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails | undefined>({
         id: '',
         revision: '',
@@ -60,277 +62,344 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         releaseDeletions: {},
         projectDeletions: {},
         licenseDeletions: {},
-        moderatorsSize: undefined
+        moderatorsSize: undefined,
     })
-    const [moderationRequestPayload, setModerationRequestPayload] =
-                                         useState<ModerationRequestPayload>({
+    const [moderationRequestPayload, setModerationRequestPayload] = useState<ModerationRequestPayload>({
         action: '',
-        comment: ''
+        comment: '',
     })
-    const toastShownRef = useRef(false);
-
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json() as ModerationRequestDetails
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[session]
-    )
+    const [isAssignedModerator, setIsAssignedModerator] = useState<boolean>(false)
 
     useEffect(() => {
-        if (!toastShownRef.current) {
-            MessageService.success(t('You have assigned yourself to this moderation request'));
-            toastShownRef.current = true;
+        if (status === 'unauthenticated') {
+            signOut()
         }
+    }, [
+        status,
+    ])
 
+    const fetchData = async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == StatusCodes.OK) {
+            const data = (await response.json()) as ModerationRequestDetails
+            return data
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            notFound()
+        }
+    }
+
+    useEffect(() => {
         void fetchData(`moderationrequest/${moderationRequestId}`).then(
-                      (moderationRequestDetails: ModerationRequestDetails | undefined) => {
-            setModerationRequestData(moderationRequestDetails)
-        })}, [fetchData, session])
+            (moderationRequestDetails: ModerationRequestDetails | undefined) => {
+                setModerationRequestData(moderationRequestDetails)
+            },
+        )
+
+        // Call assignModerationRequest on page load
+        void assignModerationRequest()
+    }, [])
 
     const handleCommentValidation = () => {
-        if (!moderationRequestPayload?.comment.trim()) {
+        if (!moderationRequestPayload.comment.trim()) {
             return false
         }
         return true
-    };
+    }
+
+    const assignModerationRequest = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const updatedAssignPayload = {
+                ...moderationRequestPayload,
+                action: 'ASSIGN',
+            }
+            setModerationRequestPayload(updatedAssignPayload)
+            const response = await ApiUtils.PATCH(
+                `moderationrequest/${moderationRequestId}`,
+                updatedAssignPayload,
+                session.user.access_token,
+            )
+            if (response.status == StatusCodes.ACCEPTED) {
+                await response.json()
+                setIsAssignedModerator(true)
+                MessageService.success(t('You have assigned yourself to this moderation request'))
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                return notFound()
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
     const handleAcceptModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
-        const hasComment = handleCommentValidation()
-        if (hasComment){
-            const updatedAcceptPayload = {
-                ...moderationRequestPayload,
-                action: "ACCEPT"
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const hasComment = handleCommentValidation()
+            if (hasComment) {
+                const updatedAcceptPayload = {
+                    ...moderationRequestPayload,
+                    action: 'ACCEPT',
+                }
+                setModerationRequestPayload(updatedAcceptPayload)
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${moderationRequestId}`,
+                    updatedAcceptPayload,
+                    session.user.access_token,
+                )
+                if (response.status == StatusCodes.ACCEPTED) {
+                    await response.json()
+                    MessageService.success(t('You have accepted the moderation request'))
+                    router.push('/requests')
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                    router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                }
+            } else {
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-            setModerationRequestPayload(updatedAcceptPayload)
-            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                                updatedAcceptPayload,
-                                                session.user.access_token)
-            if (response.status == HttpStatus.ACCEPTED) {
-                await response.json()
-                MessageService.success(t('You have accepted the moderation request'))
-                router.push('/requests')
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            }
-            else {
-                MessageService.error(t('There are some errors while updating moderation request'))
-                router.push(`/requests/moderationRequest/${moderationRequestId}`)
-            }
+        } catch (e) {
+            console.error(e)
         }
-        else {
-            MessageService.error(t('Mandatory fields are empty please provide required data'))
-        }
-    };
+    }
 
     const handleRejectModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
-        const hasComment = handleCommentValidation()
-        if (hasComment){
-            const updatedRejectPayload = {
-                ...moderationRequestPayload,
-                action: "REJECT"
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const hasComment = handleCommentValidation()
+            if (hasComment) {
+                const updatedRejectPayload = {
+                    ...moderationRequestPayload,
+                    action: 'REJECT',
+                }
+                setModerationRequestPayload(updatedRejectPayload)
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${moderationRequestId}`,
+                    updatedRejectPayload,
+                    session.user.access_token,
+                )
+                if (response.status == StatusCodes.ACCEPTED) {
+                    await response.json()
+                    MessageService.success(t('You have rejected the moderation request'))
+                    router.push('/requests')
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                    router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                }
+            } else {
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
-            setModerationRequestPayload(updatedRejectPayload)
-            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                                updatedRejectPayload,
-                                                session.user.access_token)
-            if (response.status == HttpStatus.ACCEPTED) {
-                await response.json()
-                MessageService.success(t('You have rejected the moderation request'))
-                router.push('/requests')
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            }
-            else {
-                MessageService.error(t('There are some errors while updating moderation request'))
-                router.push(`/requests/moderationRequest/${moderationRequestId}`)
-            }
+        } catch (e) {
+            console.error(e)
         }
-        else {
-            MessageService.error(t('Mandatory fields are empty please provide required data'))
-        }
-    };
+    }
 
     const handlePostponeModerationRequest = async () => {
+        try {
+            const hasComment = handleCommentValidation()
+            if (hasComment) {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const updatedPostponePayload = {
+                    ...moderationRequestPayload,
+                    action: 'POSTPONE',
+                }
+                setModerationRequestPayload(updatedPostponePayload)
+                const response = await ApiUtils.PATCH(
+                    `moderationrequest/${moderationRequestId}`,
+                    updatedPostponePayload,
+                    session.user.access_token,
+                )
+                if (response.status == StatusCodes.ACCEPTED) {
+                    await response.json()
+                    MessageService.success(t('You have postponed the moderation request'))
+                    router.push('/requests')
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                    return signOut()
+                } else {
+                    MessageService.error(t('There are some errors while updating moderation request'))
+                    router.push(`/requests/moderationRequest/${moderationRequestId}`)
+                }
+            } else {
+                MessageService.error(t('Mandatory fields are empty please provide required data'))
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
-        const hasComment = handleCommentValidation()
-        if (hasComment){
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const updatedPostponePayload = {
+    const handleUnassignModerationRequest = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const updatedUnassignPayload = {
                 ...moderationRequestPayload,
-                action: "POSTPONE"
+                action: 'UNASSIGN',
             }
-            setModerationRequestPayload(updatedPostponePayload)
-            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                                updatedPostponePayload,
-                                                session.user.access_token)
-            if (response.status == HttpStatus.ACCEPTED) {
+            setModerationRequestPayload(updatedUnassignPayload)
+            const response = await ApiUtils.PATCH(
+                `moderationrequest/${moderationRequestId}`,
+                updatedUnassignPayload,
+                session.user.access_token,
+            )
+            if (response.status == StatusCodes.ACCEPTED) {
                 await response.json()
-                MessageService.success(t('You have postponed the moderation request'))
+                MessageService.success(t('You have unassigned yourself from the moderation request'))
                 router.push('/requests')
-            }
-            else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.CONFLICT) {
+                await response.json()
+                MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
+                router.push('/requests')
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 return signOut()
-            }
-            else {
+            } else {
                 MessageService.error(t('There are some errors while updating moderation request'))
                 router.push(`/requests/moderationRequest/${moderationRequestId}`)
             }
+        } catch (e) {
+            console.error(e)
         }
-        else {
-            MessageService.error(t('Mandatory fields are empty please provide required data'))
-        }
-    };
-
-    const handleUnassignModerationRequest = async () => {
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
-        const updatedUnassignPayload = {
-            ...moderationRequestPayload,
-            action: "UNASSIGN"
-        }
-        setModerationRequestPayload(updatedUnassignPayload)
-        const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`,
-                                               updatedUnassignPayload,
-                                               session.user.access_token)
-        if (response.status == HttpStatus.ACCEPTED) {
-            await response.json()
-            MessageService.success(t('You have unassigned yourself from the moderation request'))
-            router.push('/requests')
-        }
-        else if (response.status == HttpStatus.CONFLICT) {
-            await response.json()
-            MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
-            router.push('/requests')
-        }
-        else if (response.status == HttpStatus.UNAUTHORIZED) {
-            return signOut()
-        }
-        else {
-            MessageService.error(t('There are some errors while updating moderation request'))
-            router.push(`/requests/moderationRequest/${moderationRequestId}`)
-        }
-    };
+    }
 
     const handleCancel = () => {
         router.push('/requests')
     }
 
     const toggleCollapse = (index: number) => {
-        setOpenCardIndex(prevIndex => (prevIndex === index ? -1 : index));
-    };
+        setOpenCardIndex((prevIndex) => (prevIndex === index ? -1 : index))
+    }
 
+    // Check if user is assigned as moderator based on assignment status
+    const canShowModerationActions = () => {
+        return isAssignedModerator
+    }
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
     return (
-        <div className='ms-5 mt-2'>
+        <>
+            <Breadcrumb className='container page-content'>
+                <Breadcrumb.Item
+                    linkAs={Link}
+                    href={requestsPath}
+                >
+                    {t('Requests')}
+                </Breadcrumb.Item>
+                <Breadcrumb.Item active>
+                    {moderationRequestData &&
+                    (moderationRequestData.documentType === 'COMPONENT' ||
+                        moderationRequestData.documentType === 'RELEASE')
+                        ? `${moderationRequestData.documentName} (${moderationRequestData.componentType})`
+                        : moderationRequestData?.documentName || moderationRequestId}
+                </Breadcrumb.Item>
+            </Breadcrumb>
+            <div className='ms-5 mt-2'>
                 <Tab.Container>
                     <Row>
                         <Row>
-                            <Col lg={12} className='text-truncate buttonheader-title me-3'>
+                            <Col
+                                lg={12}
+                                className='text-truncate buttonheader-title me-3'
+                            >
                                 {moderationRequestData &&
-                                 (moderationRequestData?.documentType === "COMPONENT" ||
-                                 moderationRequestData?.documentType === "RELEASE") &&
-                                `${moderationRequestData?.documentName}
-                                (${moderationRequestData?.componentType})`}
+                                    (moderationRequestData.documentType === 'COMPONENT' ||
+                                        moderationRequestData.documentType === 'RELEASE') &&
+                                    `${moderationRequestData.documentName}
+                            (${moderationRequestData.componentType})`}
                                 {moderationRequestData &&
-                                 moderationRequestData?.documentType === "PROJECT" &&
-                                `${moderationRequestData?.documentName}`}
+                                    moderationRequestData.documentType === 'PROJECT' &&
+                                    `${moderationRequestData.documentName}`}
                             </Col>
                         </Row>
                         <Col className='ps-2 me-3 mt-3'>
-                            <Row className='d-flex justify-content-between'>
-                                <Col lg={6}>
-                                    <Row>
-                                        <Button
-                                            variant='success'
-                                            className='me-2 col-auto'
-                                            onClick={handleAcceptModerationRequest}
-                                        >
-                                            {t('Accept Request')}
-                                        </Button>
-                                        <Button
-                                            variant='danger'
-                                            className='me-2 col-auto'
-                                            onClick={handleRejectModerationRequest}
-                                        >
-                                            {t('Decline Request')}
-                                        </Button>
-                                        <Button variant='secondary'
+                            {canShowModerationActions() && (
+                                <Row className='d-flex justify-content-between'>
+                                    <Col lg={6}>
+                                        <Row>
+                                            <Button
+                                                variant='success'
+                                                className='me-2 col-auto'
+                                                onClick={handleAcceptModerationRequest}
+                                            >
+                                                {t('Accept Request')}
+                                            </Button>
+                                            <Button
+                                                variant='danger'
+                                                className='me-2 col-auto'
+                                                onClick={handleRejectModerationRequest}
+                                            >
+                                                {t('Decline Request')}
+                                            </Button>
+                                            <Button
+                                                variant='secondary'
                                                 className='me-2 col-auto'
                                                 onClick={handlePostponeModerationRequest}
                                             >
-                                            {t('Postpone Request')}
-                                        </Button>
-                                        <Button
-                                            variant='secondary'
-                                            className='me-2 col-auto'
-                                            onClick={handleUnassignModerationRequest}
+                                                {t('Postpone Request')}
+                                            </Button>
+                                            <Button
+                                                variant='secondary'
+                                                className='me-2 col-auto'
+                                                onClick={handleUnassignModerationRequest}
                                             >
-                                            {t('Remove Me From Moderators')}
-                                        </Button>
-                                        <Button
-                                            variant='dark'
-                                            className='me-2 col-auto'
-                                            onClick={handleCancel}
-                                        >
-                                            {t('Cancel')}
-                                        </Button>
-                                    </Row>
-                                </Col>
-                            </Row>
+                                                {t('Remove Me From Moderators')}
+                                            </Button>
+                                            <Button
+                                                variant='dark'
+                                                className='me-2 col-auto'
+                                                onClick={handleCancel}
+                                            >
+                                                {t('Cancel')}
+                                            </Button>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            )}
                             <Row className='mt-3'>
-                                <Card className = {`${styles['card']}`}>
-                                    <div onClick={() => toggleCollapse(0)}
-                                            style={{ cursor: 'pointer', padding: '0'}}
+                                <Card className='request-card'>
+                                    <div
+                                        onClick={() => toggleCollapse(0)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
                                     >
                                         <Card.Header
-                                                className = {`
-                                                                ${openCardIndex === 0 ?
-                                                                styles['cardHeader-expanded'] : ''}`}
-                                                id = {`${styles['cardHeader']}`}>
-
+                                            className={openCardIndex === 0 ? 'request-card-header-expanded' : ''}
+                                            id='request-card-header'
+                                        >
                                             <Button
-                                                variant="button"
-                                                className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls="example-collapse-text-1"
+                                                variant='button'
+                                                className='p-0 border-0 request-header-button'
+                                                aria-controls='example-collapse-text-1'
                                                 aria-expanded={openCardIndex === 0}
                                             >
-                                            {t('Moderation Request Information')}
+                                                {t('Moderation Request Information')}
                                             </Button>
                                         </Card.Header>
                                     </div>
                                     <Collapse in={openCardIndex === 0}>
-                                        <div id="example-collapse-text-1">
-                                            <Card.Body className = {`${styles['card-body']}`}>
-                                                <div className="row">
-                                                    <div className="col">
-                                                        <ModerationRequestInfo
-                                                            data={moderationRequestData}
-                                                        />
+                                        <div id='example-collapse-text-1'>
+                                            <Card.Body className='request-card-body'>
+                                                <div className='row'>
+                                                    <div className='col'>
+                                                        <ModerationRequestInfo data={moderationRequestData} />
                                                     </div>
-                                                    <div className="col">
+                                                    <div className='col'>
                                                         <ModerationDecision
                                                             data={moderationRequestData}
-                                                            moderationRequestPayload = {moderationRequestPayload}
-                                                            setModerationRequestPayload = {setModerationRequestPayload}
+                                                            moderationRequestPayload={moderationRequestPayload}
+                                                            setModerationRequestPayload={setModerationRequestPayload}
                                                         />
                                                     </div>
                                                 </div>
@@ -340,31 +409,36 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Card>
                             </Row>
                             <Row>
-                                <Card className = {`${styles['card']}`}>
-                                    <div onClick={() => toggleCollapse(1)}
-                                            style={{ cursor: 'pointer', padding: '0'}}>
+                                <Card className='request-card'>
+                                    <div
+                                        onClick={() => toggleCollapse(1)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
+                                    >
                                         <Card.Header
-                                                className = {`
-                                                                ${openCardIndex === 1 ?
-                                                                styles['cardHeader-expanded'] : ''}`}
-                                                                id = {`${styles['cardHeader']}`}>
+                                            className={openCardIndex === 1 ? 'request-card-header-expanded' : ''}
+                                            id='request-card-header'
+                                        >
                                             <Button
-                                                variant="button"
-                                                className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls="example-collapse-text-2"
+                                                variant='button'
+                                                className='p-0 border-0 request-header-button'
+                                                aria-controls='example-collapse-text-2'
                                                 aria-expanded={openCardIndex === 1}
                                             >
-                                            {t('Proposed Changes')}
+                                                {t('Proposed Changes')}
                                             </Button>
                                         </Card.Header>
                                     </div>
                                     <Collapse in={openCardIndex === 1}>
-                                        <div id="example-collapse-text-2">
-                                            <Card.Body className = {`${styles['card-body']}`}>
-                                                <div className="row">
-                                                    <div className="col">
-                                                        <ProposedChanges 
-                                                            moderationRequestData={moderationRequestData}/>
+                                        <div id='example-collapse-text-2'>
+                                            <Card.Body className='request-card-body'>
+                                                <div className='row'>
+                                                    <div className='col'>
+                                                        <ProposedChanges
+                                                            moderationRequestData={moderationRequestData}
+                                                        />
                                                     </div>
                                                 </div>
                                             </Card.Body>
@@ -373,39 +447,53 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                                 </Card>
                             </Row>
                             <Row>
-                                <Card className = {`${styles['card']}`}>
-                                    <div onClick={() => toggleCollapse(2)}
-                                            style={{ cursor: 'pointer', padding: '0'}}>
+                                <Card className='request-card'>
+                                    <div
+                                        onClick={() => toggleCollapse(2)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            padding: '0',
+                                        }}
+                                    >
                                         <Card.Header
-                                                className = {`
-                                                                ${openCardIndex === 2 ?
-                                                                styles['cardHeader-expanded'] : ''}`}
-                                                                id = {`${styles['cardHeader']}`}>
+                                            className={openCardIndex === 2 ? 'request-card-header-expanded' : ''}
+                                            id='request-card-header'
+                                        >
                                             <Button
-                                                variant="button"
-                                                className={`p-0 border-0 ${styles['header-button']}`}
-                                                aria-controls="example-collapse-text-3"
+                                                variant='button'
+                                                className='p-0 border-0 request-header-button'
+                                                aria-controls='example-collapse-text-3'
                                                 aria-expanded={openCardIndex === 2}
                                             >
-                                            { moderationRequestData?.documentType === "COMPONENT" && t('Current Component') ||
-                                                moderationRequestData?.documentType === "RELEASE" && t('Current Release') ||
-                                                moderationRequestData?.documentType === "PROJECT" && t('Current Project') ||
-                                                moderationRequestData?.documentType === "LICENSE" && t('Current License')
-                                            }
+                                                {(moderationRequestData?.documentType === 'COMPONENT' &&
+                                                    t('Current Component')) ||
+                                                    (moderationRequestData?.documentType === 'RELEASE' &&
+                                                        t('Current Release')) ||
+                                                    (moderationRequestData?.documentType === 'PROJECT' &&
+                                                        t('Current Project')) ||
+                                                    (moderationRequestData?.documentType === 'LICENSE' &&
+                                                        t('Current License'))}
                                             </Button>
                                         </Card.Header>
                                     </div>
                                     <Collapse in={openCardIndex === 2}>
-                                        <div id="example-collapse-text-3">
-                                            <Card.Body className = {`${styles['card-body']}`}>
-                                            {
-                                                moderationRequestData?.documentType === 'COMPONENT'
-                                                    && <CurrentComponentDetail componentId={moderationRequestData?.documentId} /> ||
-                                                moderationRequestData?.documentType === 'PROJECT'
-                                                    && <CurrentProjectDetail projectId={moderationRequestData?.documentId} /> ||
-                                                moderationRequestData?.documentType === 'RELEASE'
-                                                    && <CurrentReleaseDetail releaseId={moderationRequestData?.documentId} />
-                                            }
+                                        <div id='example-collapse-text-3'>
+                                            <Card.Body className='request-card-body'>
+                                                {(moderationRequestData?.documentType === 'COMPONENT' && (
+                                                    <CurrentComponentDetail
+                                                        componentId={moderationRequestData.documentId}
+                                                    />
+                                                )) ||
+                                                    (moderationRequestData?.documentType === 'PROJECT' && (
+                                                        <CurrentProjectDetail
+                                                            projectId={moderationRequestData.documentId}
+                                                        />
+                                                    )) ||
+                                                    (moderationRequestData?.documentType === 'RELEASE' && (
+                                                        <CurrentReleaseDetail
+                                                            releaseId={moderationRequestData.documentId}
+                                                        />
+                                                    ))}
                                             </Card.Body>
                                         </div>
                                     </Collapse>
@@ -415,7 +503,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     </Row>
                 </Tab.Container>
             </div>
-    )}
+        </>
+    )
 }
 
-export default ModerationRequestDetail
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(ModerationRequestDetail, [
+    UserGroupType.SECURITY_USER,
+])

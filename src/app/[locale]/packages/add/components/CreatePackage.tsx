@@ -9,43 +9,69 @@
 
 'use client'
 
-import { useState, ReactNode } from 'react'
-import { Package, HttpStatus } from "@/object-types"
-import CreateOrEditPackage from '../../components/CreateOrEditPackage'
-import { Tab, ListGroup } from 'react-bootstrap'
-import { useTranslations } from 'next-intl'
-import { getSession, signOut } from 'next-auth/react'
-import { ApiUtils, CommonUtils } from '@/utils'
-import MessageService from '@/services/message.service'
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useState } from 'react'
+import { ListGroup, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { Package, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import CreateOrEditPackage from '../../components/CreateOrEditPackage'
 
-export default function CreatePackage() : ReactNode {
-
+function CreatePackage(): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const d = new Date()
-    const [ packagePayload, setPackagePayload ] = useState<Package>({
-        createdOn: `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`
+    const [packagePayload, setPackagePayload] = useState<Package>({
+        createdOn: `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`,
     })
     const [creatingPackage, setCreatingPackage] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const handleGoBack = () => {
+        if (window.history.length > 1) {
+            router.back()
+        } else {
+            router.push('/packages')
+        }
+    }
 
     const handleCreatePackage = async () => {
         try {
             setCreatingPackage(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
-            const response = await ApiUtils.POST('packages', { 
-                ...packagePayload, 
-                createdBy: session.user.email,
-                packageManager: packagePayload.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase()
-            }, session.user.access_token)
-            if (response.status == HttpStatus.CREATED) {
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const response = await ApiUtils.POST(
+                'packages',
+                {
+                    ...packagePayload,
+                    createdBy: session.user.email,
+                    packageManager: packagePayload.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase(),
+                },
+                session.user.access_token,
+            )
+            const res = (await response.json()) as Record<string, string>
+            if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Package created successfully'))
-                router.push('/packages')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (res.id) {
+                    router.push(`/packages/detail/${res.id}`)
+                } else {
+                    handleGoBack()
+                }
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                const res = await response.json() as Record<string, string>
                 MessageService.error(`${t('Something went wrong')}: ${res.message}`)
             }
         } catch (e) {
@@ -79,7 +105,9 @@ export default function CreatePackage() : ReactNode {
                                 <CreateOrEditPackage
                                     packagePayload={packagePayload}
                                     setPackagePayload={setPackagePayload}
-                                    handleSubmit={() => {handleCreatePackage().catch((e) => console.error(e))}}
+                                    handleSubmit={() => {
+                                        handleCreatePackage().catch((e) => console.error(e))
+                                    }}
                                     isPending={creatingPackage}
                                     isEditPage={false}
                                 />
@@ -91,3 +119,8 @@ export default function CreatePackage() : ReactNode {
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(CreatePackage, [
+    UserGroupType.SECURITY_USER,
+])

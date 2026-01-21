@@ -9,41 +9,64 @@
 
 'use client'
 
-import { Vendor } from '@/object-types'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
+import { Vendor } from '@/object-types'
 
 export default function VendorDetailForm({
     payload,
     setPayload,
+    tableTitle,
 }: {
     payload: Vendor
-    setPayload: Dispatch<SetStateAction<Vendor>>
+    setPayload: Dispatch<SetStateAction<Vendor | null>>
+    tableTitle: string
 }): JSX.Element {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setPayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+        setPayload((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }))
     }
 
     return (
         <>
             <div className='row mb-4 mx-0'>
                 <div className='row header mb-2 pb-2 px-2'>
-                    <h6>{t('Edit Vendor')}</h6>
+                    <h6>{tableTitle}</h6>
                 </div>
-                <div className='row'>
+                <div className='row mb-3'>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.fullName' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.fullName'
+                            className='form-label fw-medium'
+                        >
                             {t('Full Name')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{
+                                    color: '#F7941E',
+                                }}
+                            >
                                 *
                             </span>
                         </label>
                         <input
                             type='text'
                             name='fullName'
-                            value={payload.fullName}
+                            value={payload.fullName ?? ''}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.fullName'
@@ -52,16 +75,24 @@ export default function VendorDetailForm({
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.shortName' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.shortName'
+                            className='form-label fw-medium'
+                        >
                             {t('Short Name')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{
+                                    color: '#F7941E',
+                                }}
+                            >
                                 *
                             </span>
                         </label>
                         <input
                             type='text'
                             name='shortName'
-                            value={payload.shortName}
+                            value={payload.shortName ?? ''}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.shortName'
@@ -70,16 +101,24 @@ export default function VendorDetailForm({
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='vendor.url' className='form-label fw-medium'>
+                        <label
+                            htmlFor='vendor.url'
+                            className='form-label fw-medium'
+                        >
                             {t('URL')}{' '}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                            <span
+                                className='text-red'
+                                style={{
+                                    color: '#F7941E',
+                                }}
+                            >
                                 *
                             </span>
                         </label>
                         <input
                             type='url'
                             name='url'
-                            value={payload.url}
+                            value={payload.url ?? ''}
                             onChange={handleChange}
                             className='form-control'
                             id='vendor.url'
@@ -87,7 +126,6 @@ export default function VendorDetailForm({
                             required
                         />
                     </div>
-                    <hr className='my-3' />
                 </div>
             </div>
         </>

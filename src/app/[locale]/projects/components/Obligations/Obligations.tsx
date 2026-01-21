@@ -9,28 +9,56 @@
 
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
+import { useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { Button, Nav, Tab, Dropdown } from 'react-bootstrap'
+import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
+import { Dropdown, Nav, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ActionType, ObligationEntry, UserGroupType } from '@/object-types'
 import ObligationView from './ObligationsView/ObligationsView'
-import { ActionType, ProjectObligation } from '@/object-types'
-import CompareObligation from './CompareObligation'
+import ReleaseView from './ReleaseView'
 
-export default function Obligations({ projectId, actionType, payload, setPayload }: 
-    { projectId: string, actionType: ActionType, payload?: ProjectObligation, setPayload?: Dispatch<SetStateAction<ProjectObligation>> }): JSX.Element {
+interface Props {
+    projectId: string
+    actionType: ActionType
+    payload?: ObligationEntry
+    setPayload?: Dispatch<SetStateAction<ObligationEntry>>
+}
+
+function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX.Element {
+    const router = useRouter()
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
-    const [show, setShow] = useState(false)
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const generateLicenseInfo = (withSubProjects: boolean) => {
+        const isCalledFromProjectLicenseTab = false
+        sessionStorage.setItem('isCalledFromProjectLicenseTab', JSON.stringify(isCalledFromProjectLicenseTab))
+        router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects}`)
+    }
 
     return (
         <>
-        <CompareObligation show={show} setShow={setShow} setSelectedProjectId={setSelectedProjectId} />
-            <Tab.Container id='views-tab' activeKey={key} onSelect={(k) => setKey(k as string)}>
+            <Tab.Container
+                id='views-tab'
+                activeKey={key}
+                onSelect={(k) => setKey(k as string)}
+            >
                 <div className='row'>
-                    <div className='col ps-0'>
-                        <Nav variant='pills' className='d-inline-flex'>
+                    <div className='col ms-0'>
+                        <Nav
+                            variant='pills'
+                            className='d-inline-flex'
+                        >
                             <Nav.Item>
                                 <Nav.Link eventKey='obligations-view'>
                                     <span className='fw-medium'>{t('Obligations View')}</span>
@@ -43,32 +71,39 @@ export default function Obligations({ projectId, actionType, payload, setPayload
                             </Nav.Item>
                         </Nav>
                     </div>
-                    {
-                        (actionType === ActionType.DETAIL) &&
+                    {actionType === ActionType.DETAIL && (
                         <Dropdown className='col-auto'>
                             <Dropdown.Toggle variant='primary'>{t('Create Project Clearing Report')}</Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item eventKey={key}>{t('Project only')}</Dropdown.Item>
-                                <Dropdown.Item eventKey={key}>{t('Project with sub project')}</Dropdown.Item>
+                                <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
+                                    {t('Projects only')}
+                                </Dropdown.Item>
+                                <Dropdown.Item onClick={() => generateLicenseInfo(true)}>
+                                    {t('Projects with sub projects')}
+                                </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-                    }
-                    {
-                        (actionType === ActionType.EDIT) &&
-                        <Button variant='secondary' className='col-auto' onClick={() => setShow(true)}>
-                            {t('Compare Obligation')}
-                        </Button>
-                    }
+                    )}
                 </div>
                 <Tab.Content className='mt-4'>
                     <Tab.Pane eventKey='obligations-view'>
-                        <ObligationView projectId={projectId} actionType={actionType} payload={payload} setPayload={setPayload} selectedProjectId={selectedProjectId} />
+                        <ObligationView
+                            projectId={projectId}
+                            actionType={actionType}
+                            payload={payload}
+                            setPayload={setPayload}
+                        />
                     </Tab.Pane>
                     <Tab.Pane eventKey='release-view'>
-                        
+                        <ReleaseView projectId={projectId} />
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(Obligations, [
+    UserGroupType.SECURITY_USER,
+])

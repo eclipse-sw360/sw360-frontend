@@ -9,7 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Attachment, Links, Package, Release, User } from '@/object-types'
+import { Attachment, Links, Package, Release, User, Vendor } from '@/object-types'
 
 export interface ProjectLinkedRelease {
     createdBy: string
@@ -24,21 +24,30 @@ export interface Project {
     id?: string
     name: string
     considerReleasesFromExternalList?: boolean
-    additionalData?: { [k: string]: string }
+    additionalData?: {
+        [k: string]: string
+    }
     businessUnit?: string
     clearingState?: string
     clearingSummary?: string
+    clearingRequestId?: string
     contributors?: string[]
-    defaultVendorId?: string
+    vendorId?: string
     deliveryChannels?: string
     deliveryStart?: string
     description?: string
     domain?: string
     modifiedOn?: string
     modifiedBy?: string
-    externalIds?: { [k: string]: string }
-    externalUrls?: { [k: string]: string }
-    roles?: { [k: string]: Array<string> }
+    externalIds?: {
+        [k: string]: string
+    }
+    externalUrls?: {
+        [k: string]: string
+    }
+    roles?: {
+        [k: string]: Array<string>
+    }
     ownerAccountingUnit?: string
     ownerGroup?: string
     ownerCountry?: string
@@ -66,12 +75,17 @@ export interface Project {
     createdBy?: string
     enableSvm?: boolean
     linkedProjects?: {
+        project: string
+        relation: string
+        enableSvm: string
+    }[]
+    linkedReleases?: ProjectLinkedRelease[]
+    packageIds?: {
         [key: string]: {
-            projectRelationship: string
-            enableSvm: boolean
+            comment?: string
+            createdOn?: string
         }
     }
-    linkedReleases?: ProjectLinkedRelease[]
     _links: Links
     _embedded?: {
         leadArchitect?: User
@@ -86,5 +100,8 @@ export interface Project {
         'sw360:contributors'?: Array<User>
         'sw360:securityResponsibles'?: Array<User>
         'sw360:linkedProjects'?: Array<Project>
+        'sw360:vendors'?: Array<Vendor>
     }
 }
+
+export default Project

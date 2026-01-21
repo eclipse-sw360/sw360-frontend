@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,10 +12,11 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { useCallback, useState } from 'react'
-
-import { ComponentPayload, Vendor } from '@/object-types'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
+import React, { useCallback, useState } from 'react'
+import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
+import { useConfigValue } from '@/contexts'
+import { ComponentPayload, UIConfigKeys, Vendor } from '@/object-types'
 
 interface Props {
     componentPayload: ComponentPayload
@@ -28,6 +30,9 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
 
+    // Configs from backend
+    const categoriesSuggestions = useConfigValue(UIConfigKeys.UI_COMPONENT_CATEGORIES) as string[] | null
+
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setComponentPayload({
             ...componentPayload,
@@ -35,27 +40,23 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
         })
     }
 
-    const setCategoriesData = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        const data: string[] = splitValueCategories(e.target.value)
+    const setCategoriesData = (input: string) => {
+        const data: string[] = splitValueCategories(input)
         setComponentPayload({
             ...componentPayload,
             categories: data,
         })
     }
 
-    const splitValueCategories = (valueCatergories: string) => {
-        return valueCatergories.split(',')
+    const splitValueCategories = (valueCategories: string) => {
+        return valueCategories.split(',').map((v) => v.trim())
     }
 
     const setVendorId = (vendorResponse: Vendor) => {
-        const vendorData: Vendor = {
-            id: vendorResponse.id,
-            fullName: vendorResponse.fullName,
-        }
-        setVendor(vendorData)
+        setVendor(vendorResponse)
         setComponentPayload({
             ...componentPayload,
-            defaultVendorId: vendorResponse.id,
+            defaultVendorId: vendorResponse._links?.self.href.split('/').at(-1),
         })
     }
 
@@ -73,16 +74,29 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{
+                    padding: '0px 12px',
+                }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
                         <span className='fw-bold'>{t('General Information')}</span>
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='name' className='form-label fw-bold'>
+                            <label
+                                htmlFor='name'
+                                className='form-label fw-bold'
+                            >
                                 {t('Name')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
+                                >
                                     *
                                 </span>
                             </label>
@@ -99,7 +113,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='createdBy' className='form-label fw-bold'>
+                            <label
+                                htmlFor='createdBy'
+                                className='form-label fw-bold'
+                            >
                                 {t('Created by')}
                             </label>
                             <input
@@ -115,30 +132,47 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='categories' className='form-label fw-bold'>
+                            <label
+                                htmlFor='categories'
+                                className='form-label fw-bold'
+                            >
                                 {t('Categories')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
+                                >
                                     *
                                 </span>
                             </label>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder='e.g.,Library,cloud,mobile,...'
-                                id='categories'
-                                aria-describedby='categories'
-                                required
-                                name='categories'
-                                onChange={setCategoriesData}
-                                value={componentPayload.categories ?? ''}
+                            <SuggestionBox
+                                initialValue={componentPayload.categories?.join(', ')}
+                                possibleValues={categoriesSuggestions === null ? [] : categoriesSuggestions}
+                                onValueChange={setCategoriesData}
+                                inputProps={{
+                                    id: 'categories',
+                                    name: 'categories',
+                                    required: true,
+                                    placeHolder: 'e.g.,Library,cloud,mobile,...',
+                                }}
+                                isMultiValue={true}
                             />
                         </div>
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='component_type' className='form-label fw-bold'>
+                            <label
+                                htmlFor='component_type'
+                                className='form-label fw-bold'
+                            >
                                 {t('Component Type')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
+                                >
                                     *
                                 </span>
                             </label>
@@ -159,15 +193,22 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 <option value='SERVICE'>{t('Service')}</option>
                                 <option value='FREESOFTWARE'>{t('Freeware')}</option>
                                 <option value='CODE_SNIPPET'>{t('Code Snippet')}</option>
+                                <option value='COTS_TRUSTED_SUPPLIER'>{t('COTS Trusted Supplier')}</option>
                             </select>
-                            <div id='learn_more_about_component_type' className='form-text'>
+                            <div
+                                id='learn_more_about_component_type'
+                                className='form-text'
+                            >
                                 <ShowInfoOnHover text={t('TYPE_COMPONENT')} />
                                 {t('Learn more about component types')}.
                             </div>
                         </div>
 
                         <div className='col-lg-4'>
-                            <label htmlFor='default_vendor' className='form-label fw-bold'>
+                            <label
+                                htmlFor='default_vendor'
+                                className='form-label fw-bold'
+                            >
                                 {t('Default vendor')}
                             </label>
                             <input
@@ -186,12 +227,16 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             <VendorDialog
                                 show={dialogOpenVendor}
                                 setShow={setDialogOpenVendor}
-                                selectVendor={setVendorId}
+                                setVendor={setVendorId}
+                                vendor={vendor}
                             />
                             <span onClick={handleClearVendor}>x</span>
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='tag' className='form-label fw-bold'>
+                            <label
+                                htmlFor='tag'
+                                className='form-label fw-bold'
+                            >
                                 {t('Homepage Url')}
                             </label>
                             <input
@@ -208,7 +253,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='blog_url' className='form-label fw-bold'>
+                            <label
+                                htmlFor='blog_url'
+                                className='form-label fw-bold'
+                            >
                                 {t('Blog URL')}
                             </label>
                             <input
@@ -223,7 +271,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='wiki_url' className='form-label fw-bold'>
+                            <label
+                                htmlFor='wiki_url'
+                                className='form-label fw-bold'
+                            >
                                 {t('Wiki URL')}
                             </label>
                             <input
@@ -238,7 +289,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='mailing_list_url' className='form-label fw-bold'>
+                            <label
+                                htmlFor='mailing_list_url'
+                                className='form-label fw-bold'
+                            >
                                 {t('Mailing List URL')}
                             </label>
                             <input
@@ -255,7 +309,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='description' className='form-label fw-bold'>
+                            <label
+                                htmlFor='description'
+                                className='form-label fw-bold'
+                            >
                                 {t('Description')}
                             </label>
                             <textarea
@@ -263,14 +320,19 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 placeholder={t('Enter Description')}
                                 id='description'
                                 aria-describedby='Description'
-                                style={{ height: '100px' }}
+                                style={{
+                                    height: '100px',
+                                }}
                                 name='description'
                                 onChange={updateField}
                                 value={componentPayload.description ?? ''}
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='modified_on' className='form-label fw-bold'>
+                            <label
+                                htmlFor='modified_on'
+                                className='form-label fw-bold'
+                            >
                                 {t('Modified On')}
                             </label>
                             <input
@@ -283,7 +345,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='modified_by' className='form-label fw-bold'>
+                            <label
+                                htmlFor='modified_by'
+                                className='form-label fw-bold'
+                            >
                                 {t('Modified By')}
                             </label>
                             <input

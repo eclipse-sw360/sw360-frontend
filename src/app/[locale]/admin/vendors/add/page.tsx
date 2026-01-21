@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
+import type { JSX } from 'react'
 import AddVendor from '../components/AddVendor'
 
 export const metadata: Metadata = {

@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,15 +11,17 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
-import styles from '../preferences.module.css'
+import { useConfigValue } from '@/contexts'
+import { ErrorDetails, UIConfigKeys } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -27,9 +30,24 @@ const UserAccessToken = (): ReactNode => {
     const [tokenData, setTokenData] = useState({
         name: '',
         expirationDate: '',
-        authorities: ['READ'],
+        authorities: [
+            'READ',
+        ],
     })
     const [generatedToken, setGeneratedToken] = useState<string>('')
+    const { status } = useSession()
+
+    // Config values from backend
+    const apiTokenGenerator = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE)
+    const writeAuthorityAllowed = apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const generateToken = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -41,24 +59,33 @@ const UserAccessToken = (): ReactNode => {
         } else {
             setValidated(false)
             try {
+                if (!writeAuthorityAllowed && 'WRITE' in tokenData.authorities) {
+                    tokenData.authorities = tokenData.authorities.filter((v) => v.toLowerCase() !== 'write')
+                }
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
                 const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
 
-                if (response.status === HttpStatus.CREATED) {
+                if (response.status === StatusCodes.CREATED) {
                     const data: string = (await response.json()) as string
                     setGeneratedToken(data)
                     setTokenData({
                         name: '',
                         expirationDate: '',
-                        authorities: ['READ'],
+                        authorities: [
+                            'READ',
+                        ],
                     })
                 } else {
-                    const errorData: Record<string, string> = (await response.json()) as Record<string, string>
-                    MessageService.error(errorData.string)
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
             } catch (error) {
-                console.error('An error occurred:', error)
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         }
     }
@@ -89,7 +116,7 @@ const UserAccessToken = (): ReactNode => {
         <>
             <div className='row'>
                 <div className='col'>
-                    <h4 className={styles.decorator}>{t('REST API Tokens')}</h4>
+                    <h4 className='preferences-decorator'>{t('REST API Tokens')}</h4>
                     <Form
                         noValidate
                         validated={validated}
@@ -144,15 +171,17 @@ const UserAccessToken = (): ReactNode => {
                                                 checked={tokenData.authorities.includes('READ')}
                                                 onChange={handleChangeAuthorities}
                                             />
-                                            <Form.Check
-                                                type='checkbox'
-                                                value='WRITE'
-                                                id='authorities_write'
-                                                name='authorities'
-                                                label='Write Access'
-                                                checked={tokenData.authorities.includes('WRITE')}
-                                                onChange={handleChangeAuthorities}
-                                            />
+                                            {writeAuthorityAllowed && (
+                                                <Form.Check
+                                                    type='checkbox'
+                                                    value='WRITE'
+                                                    id='authorities_write'
+                                                    name='authorities'
+                                                    label='Write Access'
+                                                    checked={tokenData.authorities.includes('WRITE')}
+                                                    onChange={handleChangeAuthorities}
+                                                />
+                                            )}
                                         </Form.Group>
                                     </td>
                                 </tr>

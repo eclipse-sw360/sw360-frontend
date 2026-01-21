@@ -9,28 +9,33 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-ARG VARIANT=22-alpine
-FROM node:${VARIANT} as build
+ARG VARIANT=24-slim
+FROM node:${VARIANT} AS build
+
+RUN npm install -g pnpm
+
 WORKDIR /frontend
 
 # Prepare the build environment
-COPY package.json .
-RUN npm install
 COPY . .
-RUN npm run build --production
+
+# define build-time args
+ARG NEXT_PUBLIC_SW360_API_URL
+ARG NEXTAUTH_URL
+ARG AUTH_SECRET
+
+RUN pnpm install
+RUN pnpm build --experimental-analyze --turbo --profile
 
 # Runtime
-ARG VARIANT=20-alpine
+ARG VARIANT=24-slim
 FROM node:${VARIANT}
 WORKDIR /frontend
 
-COPY --from=build /frontend/package.json .
-COPY --from=build /frontend/package-lock.json .
-COPY --from=build /frontend/next.config.js .
+COPY --from=build /frontend/next.config.ts .
 COPY --from=build /frontend/public ./public
 COPY --from=build /frontend/.next/standalone ./
 COPY --from=build /frontend/.next/static ./.next/static
 
 CMD ["node", "server.js"]
 EXPOSE 3000
-

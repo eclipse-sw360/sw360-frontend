@@ -30,8 +30,7 @@ const isNullOrUndefined = (obj: unknown): obj is null | undefined => {
  * @returns True if the string is null, empty or undefined, false otherwise.
  */
 const isNullEmptyOrUndefinedString = (str: string | undefined | null): str is null | undefined | '' => {
-    if (isNullOrUndefined(str))
-        return true
+    if (isNullOrUndefined(str)) return true
     if (str.length === 0) {
         return true
     }
@@ -53,7 +52,12 @@ const createUrlWithParams = (url: string, params: UrlWithParams): string => {
     const queryString = Object.keys(params)
         .filter((key) => params[key])
         .map((key) => {
-            return [key, params[key]].map(encodeURIComponent).join('=')
+            return [
+                key,
+                params[key],
+            ]
+                .map(encodeURIComponent)
+                .join('=')
         })
         .join('&')
     return `${url}?${queryString}`
@@ -65,8 +69,7 @@ const createUrlWithParams = (url: string, params: UrlWithParams): string => {
  * @returns True if the array is null, empty or undefined, false otherwise.
  */
 const isNullEmptyOrUndefinedArray = (arr: Array<unknown> | undefined | null): arr is null | undefined => {
-    if (isNullOrUndefined(arr))
-        return true
+    if (isNullOrUndefined(arr)) return true
     if (arr.length === 0) {
         return true
     }
@@ -123,9 +126,15 @@ const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
  */
-const convertObjectToMapRoles = (data: { [k: string]: Array<string> } | null | undefined): InputKeyValue[] => {
-    if (isNullOrUndefined(data))
-        return []
+const convertObjectToMapRoles = (
+    data:
+        | {
+              [k: string]: Array<string>
+          }
+        | null
+        | undefined,
+): InputKeyValue[] => {
+    if (isNullOrUndefined(data)) return []
     const inputRoles: InputKeyValue[] = []
     const mapRoles = new Map(Object.entries(data))
     mapRoles.forEach((value, key) => {
@@ -145,9 +154,13 @@ const convertObjectToMapRoles = (data: { [k: string]: Array<string> } | null | u
  * @param datas - The array of key-value pairs to convert.
  * @returns An object with keys for each role type and an array of values for each role.
  */
-const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
+const convertRoles = (
+    datas: InputKeyValue[],
+): {
+    [key: string]: string[]
+} => {
     const contributors: string[] = []
-    const commiters: string[] = []
+    const committers: string[] = []
     const expecters: string[] = []
     const stakeholder: string[] = []
     const analyst: string[] = []
@@ -162,7 +175,7 @@ const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
         if (data.key === 'Contributor') {
             contributors.push(data.value)
         } else if (data.key === 'Committer') {
-            commiters.push(data.value)
+            committers.push(data.value)
         } else if (data.key === 'Expert') {
             expecters.push(data.value)
         } else if (data.key === 'Stakeholder') {
@@ -185,7 +198,7 @@ const convertRoles = (datas: InputKeyValue[]): { [key: string]: string[] } => {
     })
     const roles = {
         Contributor: contributors,
-        Committer: commiters,
+        Committer: committers,
         Expert: expecters,
         Stakeholder: stakeholder,
         Analyst: analyst,
@@ -273,23 +286,43 @@ const readDateTime = (datePicker: string, timePicker: string): string => {
     return localDate.toISOString().slice(0, -5) + 'Z'
 }
 
-const extractEmailsAndFullNamesFromUsers = (users: Array<User>): { [k: string]: string } => {
+const extractEmailsAndFullNamesFromUsers = (
+    users: Array<User>,
+): {
+    [k: string]: string
+} => {
     return users.reduce(
         (result, user) => {
             result[user.email] = user.fullName ?? ''
             return result
         },
-        {} as { [k: string]: string },
+        {} as {
+            [k: string]: string
+        },
     )
 }
 
 const nullToEmptyString = (item: string | null | undefined): string => (item != null ? item : '')
+
+const isCrAllowed = (
+    businessUnit: string,
+    clearingState: string,
+    clearingRequestDisabledGroups: string[] | null,
+    visibility?: string,
+) => {
+    return (
+        visibility?.toUpperCase() !== 'PRIVATE' &&
+        clearingState.toLowerCase() !== 'closed' &&
+        (clearingRequestDisabledGroups === null || !clearingRequestDisabledGroups.includes(businessUnit))
+    )
+}
 
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
     createUrlWithParams,
     isNullEmptyOrUndefinedArray,
+    isCrAllowed,
     getIdFromUrl,
     getEmailsModerators,
     convertObjectToMap,

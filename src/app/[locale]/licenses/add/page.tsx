@@ -9,13 +9,13 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-import AddLicense from './components/AddLicense'
 import { ReactNode } from 'react'
+import AddLicense from './components/AddLicense'
 
 export const metadata: Metadata = {
     title: 'Licenses',
 }
 
-export default function LicenseAddPage() : ReactNode {
+export default function LicenseAddPage(): ReactNode {
     return <AddLicense />
 }

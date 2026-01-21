@@ -11,18 +11,29 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { SelectCountry, SelectUsersDialog } from 'next-sw360'
 import React, { useCallback, useState } from 'react'
-
 import { ComponentPayload } from '@/object-types'
-import { SelectUsersDialog, SelectCountry } from 'next-sw360'
 
 interface Props {
     componentPayload: ComponentPayload
     setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    componentOwner: { [k: string]: string }
-    setComponentOwner: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    moderators: { [k: string]: string }
-    setModerators: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    componentOwner: {
+        [k: string]: string
+    }
+    setComponentOwner: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    moderators: {
+        [k: string]: string
+    }
+    setModerators: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 const RolesInformation = ({
@@ -89,13 +100,21 @@ const RolesInformation = ({
 
     return (
         <>
-            <div className='row mb-4' style={{ padding: '0px 12px' }}>
+            <div
+                className='row mb-4'
+                style={{
+                    padding: '0px 12px',
+                }}
+            >
                 <div className='section-header mb-2'>
                     <span className='fw-bold'>{t('Roles')}</span>
                 </div>
                 <div className='row with-divider pt-2 pb-2'>
                     <div className='col-lg-4'>
-                        <label htmlFor='component_owner' className='form-label fw-bold'>
+                        <label
+                            htmlFor='component_owner'
+                            className='form-label fw-bold'
+                        >
                             {t('Component Owner')}
                         </label>
                         <input
@@ -109,7 +128,7 @@ const RolesInformation = ({
                             readOnly={true}
                             name='componentOwner'
                             onClick={handleClickSearchComponentOwner}
-                            value={(Object.values(componentOwner).length === 0) ? '' : Object.values(componentOwner)[0]}
+                            value={Object.values(componentOwner).length === 0 ? '' : Object.values(componentOwner)[0]}
                         />
                         <SelectUsersDialog
                             show={dialogOpenComponentOwner}
@@ -121,7 +140,10 @@ const RolesInformation = ({
                         <span onClick={handleClearComponentOwner}>x</span>
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='owner_accounting_unit' className='form-label fw-bold'>
+                        <label
+                            htmlFor='owner_accounting_unit'
+                            className='form-label fw-bold'
+                        >
                             {t('Owner Accounting Unit')}
                         </label>
                         <input
@@ -136,7 +158,10 @@ const RolesInformation = ({
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='owner_billing_group' className='form-label fw-bold'>
+                        <label
+                            htmlFor='owner_billing_group'
+                            className='form-label fw-bold'
+                        >
                             {t('Owner Billing Group')}
                         </label>
                         <input
@@ -153,10 +178,16 @@ const RolesInformation = ({
                 </div>
                 <div className='row with-divider pt-2 pb-2'>
                     <div className='col-lg-4'>
-                        <SelectCountry selectCountry={updateField} value={componentPayload.ownerCountry ?? ''} />
+                        <SelectCountry
+                            selectCountry={updateField}
+                            value={componentPayload.ownerCountry ?? ''}
+                        />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='moderators' className='form-label fw-bold'>
+                        <label
+                            htmlFor='moderators'
+                            className='form-label fw-bold'
+                        >
                             {t('Moderators')}
                         </label>
                         <input

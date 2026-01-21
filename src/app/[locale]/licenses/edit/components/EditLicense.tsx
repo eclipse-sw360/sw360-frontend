@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,38 +11,34 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { PageButtonHeader, SideBar } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { HttpStatus, LicensePayload, LicenseTabIds, Obligation, Embedded, LicenseDetail } from '@/object-types'
+import { LicenseDetail, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { PageButtonHeader, SideBar } from 'next-sw360'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
 import EditLicenseSummary from './EditLicenseSummary'
-import MessageService from '@/services/message.service'
 
 interface Props {
     licenseId: string
 }
 
-type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
-
-export default function EditLicense({ licenseId }: Props) : ReactNode {
+function EditLicense({ licenseId }: Props): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const params = useSearchParams()
 
     const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
-    const [data, setData] = useState<Array<(string | Obligation)[]>>([])
-    const [reRender, setReRender] = useState(false)
 
     const [addObligationDiaglog, setAddObligationDiaglog] = useState<boolean>(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false)
-    const [obligations, setObligations] = useState<Array<(string | Obligation)[]>>([])
     const [inputValid, setInputValid] = useState<boolean>(false)
     const [errorFullName, setErrorFullName] = useState<boolean>(false)
     const [licensePayload, setLicensePayload] = useState<LicensePayload>({
@@ -55,10 +52,15 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
         checked: false,
         licenseTypeDatabaseId: '',
     })
+    const session = useSession()
 
-    const handleReRender = () => {
-        setReRender(!reRender)
-    }
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        session,
+    ])
 
     const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
 
@@ -68,68 +70,29 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
-                const license = await response.json() as LicenseDetail
+                const license = (await response.json()) as LicenseDetail
                 setLicensePayload(license)
-                if (!CommonUtils.isNullOrUndefined(license._embedded['sw360:obligations'])) {
-                    const data = license._embedded['sw360:obligations'].map((item: Obligation) => [
-                        item,
-                        item.title ?? '',
-                        !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
-                            ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
-                            : '',
-                        item,
-                    ])
-                    setData(data)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
                 }
-            } catch (e) {
-                console.error(e)
-            }
-        })()
-        void (async () => {
-            try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
-                const response = await ApiUtils.GET(
-                    'obligations?obligationLevel=LICENSE_OBLIGATION',
-                    session.user.access_token,
-                    signal
-                )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
-                }
-
-                const obligations = await response.json() as EmbeddedObligations
-                if (!CommonUtils.isNullEmptyOrUndefinedArray(obligations._embedded['sw360:obligations'])) {
-                    const data = obligations._embedded['sw360:obligations'].map((item: Obligation) => [
-                        item,
-                        item,
-                        item.title ?? '',
-                        !CommonUtils.isNullEmptyOrUndefinedString(item.obligationType)
-                            ? item.obligationType.charAt(0) + item.obligationType.slice(1).toLowerCase()
-                            : '',
-                        item.text ?? '',
-                    ])
-                    setObligations(data)
-                }
-            } catch (e) {
-                console.error(e)
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         return () => controller.abort()
-    }, [params, licenseId])
+    }, [
+        params,
+        licenseId,
+    ])
 
     const tabList = [
         {
@@ -153,45 +116,93 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
-        const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
-        if (response.status == HttpStatus.OK) {
-            const data = (await response.json()) as LicensePayload
-            MessageService.success(t('License updated successfully!'))
-            router.push(`/licenses/detail?id=${data.shortName}`)
-        } else {
-            MessageService.error(t('License updated failed!'))
+
+        try {
+            const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
+
+            if (response.status === StatusCodes.OK) {
+                const data = (await response.json()) as LicensePayload
+                MessageService.success(t('License updated successfully'))
+                router.push(`/licenses/detail?id=${data.shortName}`)
+            } else if (response.status === StatusCodes.ACCEPTED) {
+                MessageService.success(t('License update sent for moderation'))
+                router.push(`/licenses/detail?id=${licensePayload.shortName}`)
+            } else {
+                const responseMessage = await response.text()
+                MessageService.error(responseMessage)
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
         }
     }
-
     const deleteLicense = () => {
         setDeleteDialogOpen(true)
     }
 
     const headerButtons = {
-        'Update License': { link: '', type: 'primary', onClick: submit, name: t('Update License') },
-        'Delete License': { link: '', type: 'danger', onClick: deleteLicense, name: t('Delete License') },
-        Cancel: { link: `/licenses/detail?id=${licenseId}`, type: 'light', name: t('Cancel') },
+        'Update License': {
+            link: '',
+            type: 'primary',
+            onClick: submit,
+            name: t('Update License'),
+        },
+        'Delete License': {
+            link: '',
+            type: 'danger',
+            onClick: deleteLicense,
+            name: t('Delete License'),
+        },
+        Cancel: {
+            link: `/licenses/detail?id=${licenseId}`,
+            type: 'light',
+            name: t('Cancel'),
+        },
     }
 
     const headerButtonAddObligations = {
-        'Update License': { link: '', type: 'primary', onClick: submit, name: t('Update License') },
-        'Delete License': { link: '', type: 'danger', onClick: deleteLicense, name: t('Delete License') },
+        'Update License': {
+            link: '',
+            type: 'primary',
+            onClick: submit,
+            name: t('Update License'),
+        },
+        'Delete License': {
+            link: '',
+            type: 'danger',
+            onClick: deleteLicense,
+            name: t('Delete License'),
+        },
         'Add Obligation': {
             link: '',
             type: 'secondary',
             onClick: handleClickAddObligations,
             name: t('Add Obligation'),
         },
-        Cancel: { link: `/licenses/detail?id=${licenseId}`, type: 'light', name: t('Cancel') },
+        Cancel: {
+            link: `/licenses/detail?id=${licenseId}`,
+            type: 'light',
+            name: t('Cancel'),
+        },
     }
 
     return (
-        <div className='container' style={{ maxWidth: '98vw', marginTop: '10px' }}>
+        <div
+            className='container'
+            style={{
+                maxWidth: '98vw',
+                marginTop: '10px',
+            }}
+        >
             <div className='row'>
                 <div className='col-2 sidebar'>
-                    <SideBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabList={tabList} />
+                    <SideBar
+                        selectedTab={selectedTab}
+                        setSelectedTab={setSelectedTab}
+                        tabList={tabList}
+                    />
                 </div>
                 <DeleteLicenseDialog
                     licensePayload={licensePayload}
@@ -199,7 +210,12 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                     setShow={setDeleteDialogOpen}
                 />
                 <div className='col'>
-                    <div className='row' style={{ marginBottom: '20px' }}>
+                    <div
+                        className='row'
+                        style={{
+                            marginBottom: '20px',
+                        }}
+                    >
                         {selectedTab === LicenseTabIds.OBLIGATIONS ? (
                             <PageButtonHeader
                                 title={`${licensePayload.fullName} (${licensePayload.shortName})`}
@@ -214,9 +230,12 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                             ></PageButtonHeader>
                         )}
                     </div>
+
                     <div
                         className='row'
-                        style={{ fontSize: '14px' }}
+                        style={{
+                            fontSize: '14px',
+                        }}
                         hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}
                     >
                         <EditLicenseSummary
@@ -227,20 +246,17 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
                             setLicensePayload={setLicensePayload}
                         />
                     </div>
-                    <div className='row' hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}>
+                    <div
+                        className='row'
+                        hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}
+                    >
                         <LinkedObligationsDialog
                             show={addObligationDiaglog}
-                            data={data}
-                            setData={setData}
-                            obligations={obligations}
                             setShow={setAddObligationDiaglog}
-                            onReRender={handleReRender}
                             licensePayload={licensePayload}
                             setLicensePayload={setLicensePayload}
                         />
                         <LinkedObligations
-                            data={data}
-                            setData={setData}
                             licensePayload={licensePayload}
                             setLicensePayload={setLicensePayload}
                         />
@@ -250,3 +266,8 @@ export default function EditLicense({ licenseId }: Props) : ReactNode {
         </div>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(EditLicense, [
+    UserGroupType.SECURITY_USER,
+])

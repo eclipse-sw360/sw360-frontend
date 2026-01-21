@@ -13,14 +13,17 @@ import { ReactNode } from 'react'
 import EditVulnerability from './components/EditVulnerability'
 
 export const metadata: Metadata = {
-    title: 'Vulnerabilites',
+    title: 'Vulnerabilities',
 }
 
 interface Context {
-    params: { id: string }
+    params: Promise<{
+        id: string
+    }>
 }
 
-const Vulnerability = ({ params }: Context) : ReactNode => {
+const Vulnerability = async (props: Context): Promise<ReactNode> => {
+    const params = await props.params
     return <EditVulnerability vulnerabilityId={params.id} />
 }
 

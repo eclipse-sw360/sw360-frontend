@@ -9,37 +9,41 @@
 
 'use client'
 
-
-import React, { useState } from 'react';
 import Link from 'next/link'
+import React, { useState } from 'react'
 
 interface ModeratorCellProps {
-    moderators: string[];
+    moderators: string[]
 }
 
 const ExpandingModeratorCell: React.FC<ModeratorCellProps> = ({ moderators }) => {
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(false)
 
     return (
         <>
-            <button className='btn-dark' onClick={() => setExpanded(!expanded)}>
+            <button
+                className='btn-dark'
+                onClick={() => setExpanded(!expanded)}
+            >
                 {expanded ? 'Hide Moderators' : 'Show Moderators'}
             </button>
             {expanded && (
                 <div>
                     {moderators.map((email, index) => (
                         <span key={index}>
-                        <Link href={`mailto:${email}`} className='text-link'>
-                            {email}
-                        </Link>
-                        {index !== moderators.length - 1 && ', '}
+                            <Link
+                                href={`mailto:${email}`}
+                                className='text-link'
+                            >
+                                {email}
+                            </Link>
+                            {index !== moderators.length - 1 && ', '}
                         </span>
                     ))}
                 </div>
             )}
-
         </>
-    );
-};
+    )
+}
 
-export default ExpandingModeratorCell;
+export default ExpandingModeratorCell

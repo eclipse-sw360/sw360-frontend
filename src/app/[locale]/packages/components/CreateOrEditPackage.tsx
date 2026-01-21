@@ -9,12 +9,18 @@
 
 'use client'
 
-import { Package } from '@/object-types'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { useRouter } from 'next/navigation'
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
-import { IoIosClose } from 'react-icons/io'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { BsXCircle } from 'react-icons/bs'
+import { ErrorDetails, Package } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import AddMainLicenseModal from './AddMainLicenseModal'
+import AddReleaseModal from './AddReleaseModal'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -25,32 +31,111 @@ interface DeletePackageModalMetData {
     packageVersion: string
 }
 
+interface Props {
+    packagePayload: Package
+    setPackagePayload: Dispatch<SetStateAction<Package>>
+    handleSubmit: () => void
+    isPending: boolean
+    isEditPage: boolean
+    packageId?: string
+}
+
+interface IsPackageUsed {
+    isUsed: boolean
+    count: number
+}
+
 export default function CreateOrEditPackage({
     packagePayload,
     setPackagePayload,
     handleSubmit,
     isPending,
     isEditPage,
-}: {
-    packagePayload: Package
-    setPackagePayload: Dispatch<SetStateAction<Package>>
-    handleSubmit: () => void
-    isPending: boolean
-    isEditPage: boolean
-}): ReactNode {
-    const t = useTranslations('default')
+    packageId,
+}: Props): ReactNode {
     const router = useRouter()
-
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        setPackagePayload((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-    }
-
+    const t = useTranslations('default')
+    const [releaseNameVersion, setReleaseNameVersion] = useState<string>('')
+    const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
+    const [showMainLicenseModal, setShowMainLicenseModal] = useState<boolean>(false)
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
         show: false,
         packageId: '',
         packageName: '',
         packageVersion: '',
     })
+    const [isPackageUsed, setIsPackageUsed] = useState(false)
+    const session = useSession()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        session,
+    ])
+
+    const handleGoBack = () => {
+        if (window.history.length > 1) {
+            router.back()
+        } else {
+            router.push('/packages')
+        }
+    }
+
+    const handleReleaseName = () => {
+        const releaseId = packagePayload.releaseId ?? ''
+
+        if (!releaseId) {
+            return releaseNameVersion
+        }
+
+        if (releaseNameVersion) {
+            return releaseNameVersion
+        }
+
+        if (isEditPage) {
+            const name = packagePayload._embedded?.['sw360:release']?.name ?? ''
+            const version = packagePayload._embedded?.['sw360:release']?.version ?? ''
+            return name && version ? `${name} (${version})` : ''
+        }
+
+        return ''
+    }
+
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+        setPackagePayload((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }))
+    }
+
+    useEffect(() => {
+        if (isEditPage && !CommonUtils.isNullOrUndefined(packageId) && session.status !== 'loading') {
+            void (async () => {
+                try {
+                    if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                    const response = await ApiUtils.GET(`packages/${packageId}/usage`, session.data.user.access_token)
+                    if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
+                        const err = (await response.json()) as ErrorDetails
+                        throw new Error(err.message)
+                    }
+                    if (response.status !== StatusCodes.NO_CONTENT) {
+                        const data = (await response.json()) as IsPackageUsed
+                        setIsPackageUsed(data.isUsed)
+                    }
+                } catch (error) {
+                    if (error instanceof DOMException && error.name === 'AbortError') {
+                        return
+                    }
+                    const message = error instanceof Error ? error.message : String(error)
+                    MessageService.error(message)
+                }
+            })()
+        }
+    }, [
+        packageId,
+    ])
 
     return (
         <>
@@ -58,6 +143,18 @@ export default function CreateOrEditPackage({
                 modalMetaData={deletePackageModalMetaData}
                 setModalMetaData={setDeletePackageModalMetaData}
                 isEditPage={isEditPage}
+            />
+            <AddReleaseModal
+                setPackagePayload={setPackagePayload}
+                show={showLinkedReleasesModal}
+                setShow={setShowLinkedReleasesModal}
+                setReleaseNameVersion={setReleaseNameVersion}
+            />
+            <AddMainLicenseModal
+                showMainLicenseModal={showMainLicenseModal}
+                setShowMainLicenseModal={setShowMainLicenseModal}
+                setPackagePayload={setPackagePayload}
+                packagePayload={packagePayload}
             />
             <form
                 id='add_or_edit_package_form_submit'
@@ -80,6 +177,7 @@ export default function CreateOrEditPackage({
                         <button
                             type='button'
                             className='mb-3 me-1 col-auto btn btn-danger'
+                            disabled={isPackageUsed}
                             onClick={() =>
                                 setDeletePackageModalMetaData({
                                     show: true,
@@ -95,7 +193,7 @@ export default function CreateOrEditPackage({
                     <button
                         type='button'
                         className='mb-3 me-1 col-auto btn btn-secondary'
-                        onClick={() => router.push('/packages')}
+                        onClick={handleGoBack}
                     >
                         {t('Cancel')}
                     </button>
@@ -112,7 +210,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.name'
                                 className='form-label fw-medium'
                             >
-                                {t('Name')} <span style={{ color: 'red' }}>*</span>
+                                {t('Name')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'
@@ -130,7 +235,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.version'
                                 className='form-label fw-medium'
                             >
-                                {t('Version')} <span style={{ color: 'red' }}>*</span>
+                                {t('Version')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='text'
@@ -148,7 +260,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.packageType'
                                 className='form-label fw-medium'
                             >
-                                {t('Package Type')} <span style={{ color: 'red' }}>*</span>
+                                {t('Package Type')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <select
                                 className='form-select'
@@ -184,7 +303,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.purl'
                                 className='form-label fw-medium'
                             >
-                                {`PURL (${t('Package URL')})`} <span style={{ color: 'red' }}>*</span>
+                                {`PURL (${t('Package URL')})`}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <input
                                 type='url'
@@ -202,7 +328,14 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.packageManager'
                                 className='form-label fw-medium'
                             >
-                                {t('Package Manager')} <span style={{ color: 'red' }}>*</span>
+                                {t('Package Manager')}{' '}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
                             </label>
                             <select
                                 className='form-select'
@@ -256,6 +389,7 @@ export default function CreateOrEditPackage({
                                 id='createOrEditPackage.licenseIds'
                                 placeholder={t('Click to set Licenses')}
                                 value={packagePayload.licenseIds?.join(', ') ?? ''}
+                                onClick={() => setShowMainLicenseModal(true)}
                                 readOnly
                             />
                         </div>
@@ -269,13 +403,24 @@ export default function CreateOrEditPackage({
                             <div className='input-group'>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     placeholder={t('Click to link a Release')}
                                     id='createOrEditPackage.release'
-                                    value={packagePayload.releaseId ?? ''}
+                                    value={handleReleaseName()}
+                                    onClick={() => setShowLinkedReleasesModal(true)}
+                                    readOnly
                                 />
-                                <span className='input-group-text'>
-                                    <IoIosClose />
+                                <span
+                                    className='input-group-text cursor-pointer'
+                                    onClick={() => {
+                                        setReleaseNameVersion('')
+                                        setPackagePayload((prev) => ({
+                                            ...prev,
+                                            releaseId: '',
+                                        }))
+                                    }}
+                                >
+                                    <BsXCircle size={20} />
                                 </span>
                             </div>
                         </div>

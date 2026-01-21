@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,15 +11,15 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { useCallback, useState, ReactNode } from 'react'
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
-
-import { HttpStatus, LicensePayload } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
+import { LicensePayload } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     licensePayload: LicensePayload
@@ -26,13 +27,23 @@ interface Props {
     setShow: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNode => {
+const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
     const [variant, setVariant] = useState('success')
     const [message, setMessage] = useState('')
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -46,24 +57,29 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
     }, [])
 
     const deleteLicense = async () => {
+        setLoading(true)
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.DELETE(`licenses/${licensePayload.shortName}`, session.user.access_token)
         try {
-            if (response.status == HttpStatus.OK) {
-                displayMessage('success', t('Delete License success!'))
+            if (response.status == StatusCodes.OK) {
+                displayMessage('success', t('Delete license successful'))
                 router.push('/licenses?delete=success')
                 setReloadPage(true)
-            } else if (response.status == HttpStatus.ACCEPTED) {
+            } else if (response.status == StatusCodes.ACCEPTED) {
                 displayMessage('success', t('Created moderation request'))
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
+            } else if (response.status == StatusCodes.BAD_REQUEST) {
+                const errorResponse = await response.json()
+                displayMessage('danger', errorResponse.message)
             } else {
                 displayMessage('danger', t('Error when processing'))
             }
-        } catch (err) {
+        } catch {
             handleError()
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -82,47 +98,63 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props) : ReactNo
     }
 
     return (
-        <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-            <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414' }}>
-                <h5>
-                    <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
-                        <BsQuestionCircle />
-                        &nbsp;
-                        {t('Delete License')}?
-                    </Modal.Title>
-                </h5>
-                <button
-                    type='button'
-                    style={{
-                        color: 'red',
-                        backgroundColor: '#FEEFEF',
-                        alignItems: 'center',
-                        borderColor: '#FEEFEF',
-                        borderWidth: '0px',
-                        fontSize: '1.1rem',
-                        margin: '-1rem -1rem auto',
-                    }}
-                    onClick={handleCloseDialog}
-                >
-                    <span aria-hidden='true'>&times;</span>
-                </button>
+        <Modal
+            show={show}
+            onHide={handleCloseDialog}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{
+                    color: 'red',
+                }}
+            >
+                <Modal.Title>
+                    <BsQuestionCircle size={20} />
+                    &nbsp;
+                    {t('Delete License')}?
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Alert variant={variant} onClose={() => setShowMessage(false)} dismissible show={showMessage}>
+                <Alert
+                    variant={variant}
+                    onClose={() => setShowMessage(false)}
+                    dismissible
+                    show={showMessage}
+                >
                     {message}
                 </Alert>
                 <Form>
-                    {t.rich('Do you really want to delete the license?', {
-                        name: `${licensePayload.fullName} (${licensePayload.shortName})`,
-                        strong: (chunks) => <b>{chunks}</b>,
-                    })}
+                    {loading === false ? (
+                        <p>
+                            {t.rich('Do you really want to delete the license', {
+                                name: `${licensePayload.fullName} (${licensePayload.shortName})`,
+                                strong: (chunks) => <b>{chunks}</b>,
+                            })}
+                        </p>
+                    ) : (
+                        <div className='col-12 d-flex justify-content-center align-items-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
                 </Form>
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                <Button
+                    className='delete-btn'
+                    variant='light'
+                    onClick={handleCloseDialog}
+                >
                     {t('Cancel')}
                 </Button>
-                <Button className='login-btn' variant='danger' onClick={() => handleSubmit()} hidden={reloadPage}>
+                <Button
+                    className='login-btn'
+                    variant='danger'
+                    onClick={() => handleSubmit()}
+                    hidden={reloadPage}
+                >
                     {t('Delete License')}
                 </Button>
             </Modal.Footer>

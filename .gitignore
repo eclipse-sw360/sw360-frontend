@@ -39,10 +39,16 @@ next-env.d.ts
 
 # Other Lock files
 yarn.lock
-pnpm-lock.yaml
+package-lock.yaml
 
 # Aria
 .hintrc
 
 # Miscelanea
 output
+# cypress
+/cypress/screenshots
+/cypress/downloads
+dist
+public
+uploads

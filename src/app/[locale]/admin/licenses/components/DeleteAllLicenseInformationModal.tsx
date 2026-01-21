@@ -9,13 +9,13 @@
 
 'use client'
 
-import { HttpStatus } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { getSession, signOut } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
-import { AiOutlineQuestionCircle } from 'react-icons/ai'
+import { BsQuestionCircle } from 'react-icons/bs'
+import { ApiUtils } from '@/utils'
 
 interface Message {
     type: 'success' | 'danger'
@@ -28,10 +28,19 @@ export default function DeleteAllLicenseInformationModal({
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
-}) : ReactNode {
+}): ReactNode {
     const t = useTranslations('default')
     const [deleting, setDeleting] = useState<boolean>(false)
     const [message, setMessage] = useState<undefined | Message>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const handleDelete = async () => {
         try {
@@ -41,13 +50,19 @@ export default function DeleteAllLicenseInformationModal({
                 return signOut()
             }
             const response = await ApiUtils.DELETE('licenses/deleteAll', session.user.access_token)
-            if (response.status === HttpStatus.UNAUTHORIZED) {
+            if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
-            } else if (response.status !== HttpStatus.OK) {
-                setMessage({ type: 'danger', message: t('DELETE_ALL_LICENCES_ERROR') })
+            } else if (response.status !== StatusCodes.OK) {
+                setMessage({
+                    type: 'danger',
+                    message: t('DELETE_ALL_LICENCES_ERROR'),
+                })
                 return
             }
-            setMessage({ type: 'success', message: t('DELETE_ALL_LICENCES_SUCCESS') })
+            setMessage({
+                type: 'success',
+                message: t('DELETE_ALL_LICENCES_SUCCESS'),
+            })
         } catch (e) {
             console.error(e)
         } finally {
@@ -71,11 +86,14 @@ export default function DeleteAllLicenseInformationModal({
                 scrollable
             >
                 <Modal.Header
-                    style={{ backgroundColor: '#feefef', color: '#da1414' }}
+                    style={{
+                        backgroundColor: '#feefef',
+                        color: '#da1414',
+                    }}
                     closeButton
                 >
                     <Modal.Title id='delete-all-license-info-modal'>
-                        <AiOutlineQuestionCircle /> {t('Delete All Licenses')}
+                        <BsQuestionCircle size={20} /> {t('Delete All Licenses')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

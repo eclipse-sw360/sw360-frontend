@@ -7,10 +7,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 export default interface ModerationRequest {
     id: string
-    timestamp?: number,
+    timestamp?: number
     timestampOfDecision?: number
     documentId?: string
     documentType?: string

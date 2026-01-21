@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,23 +11,25 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
+import { useConfigValue } from '@/contexts'
 import {
-    COTSDetails,
     ClearingInformation,
+    COTSDetails,
     DocumentTypes,
     ECCInformation,
     InputKeyValue,
     Release,
     ReleaseDetail,
+    UIConfigKeys,
     Vendor,
 } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
     release: ReleaseDetail
@@ -36,10 +39,22 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: { [k: string]: string }
-    setMainLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
-    otherLicenses: { [k: string]: string }
-    setOtherLicenses: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    mainLicenses: {
+        [k: string]: string
+    }
+    setMainLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
+    otherLicenses: {
+        [k: string]: string
+    }
+    setOtherLicenses: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
     cotsDetails: COTSDetails
     eccInformation?: ECCInformation
     clearingInformation?: ClearingInformation
@@ -59,15 +74,34 @@ function ReleaseEditSummary({
     cotsDetails,
     eccInformation,
     clearingInformation,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const t = useTranslations('default')
     const [roles, setRoles] = useState<InputKeyValue[]>([])
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
 
     // Store users data in format {'email': 'fullName'}
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
+    const { status } = useSession()
+
+    // Configs from backend
+    const releaseExternalIdSuggestions =
+        useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) as string[])
+            : undefined
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -106,7 +140,7 @@ function ReleaseEditSummary({
             setAddtionalData(CommonUtils.convertObjectToMap(release.additionalData))
         }
 
-        let vendorId = ''
+        let vendorId = null
         if (!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:vendors'])) {
             vendorId = CommonUtils.getIdFromUrl(release._embedded['sw360:vendors'][0]._links?.self.href)
             const vendor: Vendor = {
@@ -116,16 +150,6 @@ function ReleaseEditSummary({
             setVendor(vendor)
         }
 
-        let modifiedBy = ''
-        if (typeof release._embedded['sw360:modifiedBy'] !== 'undefined') {
-            modifiedBy = release._embedded['sw360:modifiedBy'].fullName ?? ''
-        }
-
-        let createdBy = ''
-        if (typeof release._embedded['sw360:createdBy'] !== 'undefined') {
-            createdBy = release._embedded['sw360:createdBy'].fullName ?? ''
-        }
-
         let componentId = ''
         if (typeof release._links['sw360:component'].href !== 'undefined') {
             componentId = CommonUtils.getIdFromUrl(release._links['sw360:component'].href)
@@ -133,13 +157,17 @@ function ReleaseEditSummary({
 
         let moderatorsFromRelease = {}
         if (typeof release._embedded['sw360:moderators'] !== 'undefined') {
-            moderatorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(release._embedded['sw360:moderators'])
+            moderatorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(
+                release._embedded['sw360:moderators'],
+            )
             setModerators(moderatorsFromRelease)
         }
 
         let contributorsFromRelease = {}
         if (typeof release._embedded['sw360:contributors'] !== 'undefined') {
-            contributorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(release._embedded['sw360:contributors'])
+            contributorsFromRelease = CommonUtils.extractEmailsAndFullNamesFromUsers(
+                release._embedded['sw360:contributors'],
+            )
             setContributors(contributorsFromRelease)
         }
 
@@ -154,10 +182,6 @@ function ReleaseEditSummary({
             clearingState: release.clearingState,
             mainlineState: release.mainlineState,
             contributors: Object.keys(contributorsFromRelease),
-            createdOn: release.createdOn,
-            createBy: createdBy,
-            modifiedBy: modifiedBy,
-            modifiedOn: release.modifiedOn,
             moderators: Object.keys(moderatorsFromRelease),
             roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(release.roles ?? {})),
             mainLicenseIds: release.mainLicenseIds,
@@ -187,7 +211,12 @@ function ReleaseEditSummary({
                     e.preventDefault()
                 }}
             >
-                <div className='col' style={{ fontSize: '0.875rem' }}>
+                <div
+                    className='col'
+                    style={{
+                        fontSize: '0.875rem',
+                    }}
+                >
                     <ReleaseSummary
                         actionType={actionType}
                         releasePayload={releasePayload}
@@ -202,6 +231,7 @@ function ReleaseEditSummary({
                         setContributors={setContributors}
                         moderators={moderators}
                         setModerators={setModerators}
+                        releaseDetail={release}
                     />
                     <div className='row mb-4'>
                         <AddAdditionalRoles
@@ -218,6 +248,7 @@ function ReleaseEditSummary({
                             setData={setExternalIds}
                             data={externalIds}
                             setObject={setDataExternalIds}
+                            keySuggestions={releaseExternalIdSuggestions}
                         />
                     </div>
                     <div className='row mb-4'>
@@ -229,7 +260,10 @@ function ReleaseEditSummary({
                             setObject={setDataAddtionalData}
                         />
                     </div>
-                    <ReleaseRepository releasePayload={releasePayload} setReleasePayload={setReleasePayload} />
+                    <ReleaseRepository
+                        releasePayload={releasePayload}
+                        setReleasePayload={setReleasePayload}
+                    />
                 </div>
             </form>
         </>

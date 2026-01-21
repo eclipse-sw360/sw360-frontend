@@ -8,17 +8,21 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import ModerationRequestDetail from './components/ModerationRequestDetail'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{
+        id: string
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'Requests',
 }
 
-const ModerationRequestDetailsPage = async ({ params }: Context) => {
+const ModerationRequestDetailsPage = async (props: Context): Promise<JSX.Element> => {
+    const params = await props.params
     return <ModerationRequestDetail moderationRequestId={params.id} />
 }
 

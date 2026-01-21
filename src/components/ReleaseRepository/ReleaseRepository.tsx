@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,19 +11,28 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React from 'react'
-
-import { Release } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
+import React, { type JSX, useEffect } from 'react'
+import { Release } from '@/object-types'
 
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
-const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) : JSX.Element => {
+const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setReleasePayload({
@@ -42,7 +52,10 @@ const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) : JSX.E
                 </div>
                 <div className='row'>
                     <div className='col-lg-4'>
-                        <label htmlFor='repository_type' className='form-label fw-bold'>
+                        <label
+                            htmlFor='repository_type'
+                            className='form-label fw-bold'
+                        >
                             {t('Repository Type')} <span className='text-red'>*</span>
                         </label>
                         <select
@@ -76,13 +89,19 @@ const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props) : JSX.E
                             <option value='RATIONAL_TEAM_CONCERT'>{t('Rational Team Concert')}</option>
                             <option value='RCS'>{t('Revision Control System (RCS)')}</option>
                         </select>
-                        <div id='learn_more_about_repository_types' className='form-text'>
+                        <div
+                            id='learn_more_about_repository_types'
+                            className='form-text'
+                        >
                             <ShowInfoOnHover text={t('REPOSITORY_TYPE')} />
                             {t('Learn more about repository types')}.
                         </div>
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='version' className='form-label fw-bold'>
+                        <label
+                            htmlFor='version'
+                            className='form-label fw-bold'
+                        >
                             {t('Repository URL')}
                         </label>
                         <input

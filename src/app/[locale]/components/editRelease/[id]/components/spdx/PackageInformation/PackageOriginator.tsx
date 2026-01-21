@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,9 +9,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect } from 'react'
 import { InputKeyValue } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ReactNode } from 'react'
 
 interface Props {
     dataPackageOriginator: InputKeyValue
@@ -26,7 +28,17 @@ function PackageOriginator({
     setPackageOriginatorToPackage,
     isPackageOriginator,
     setIsPackageOriginator,
-}: Props) : ReactNode {
+}: Props): ReactNode {
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataPackageOriginator
@@ -69,8 +81,19 @@ function PackageOriginator({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>7.6 Package originator</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             type='radio'
@@ -81,7 +104,10 @@ function PackageOriginator({
                         />
                         <select
                             id='originatorType'
-                            style={{ flex: 2, marginRight: '1rem' }}
+                            style={{
+                                flex: 2,
+                                marginRight: '1rem',
+                            }}
                             className='form-control form-select'
                             disabled={!isPackageOriginator}
                             name='key'
@@ -92,7 +118,10 @@ function PackageOriginator({
                             <option value='Person'>Person</option>
                         </select>
                         <input
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             className='form-control'
                             id='originatorValue'
                             type='text'
@@ -103,7 +132,11 @@ function PackageOriginator({
                             disabled={!isPackageOriginator}
                         />
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='originatorNoAssertion'
@@ -113,7 +146,10 @@ function PackageOriginator({
                             onClick={selectPackageOriginatorNoasserttion}
                             checked={!isPackageOriginator}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='originatorNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='originatorNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

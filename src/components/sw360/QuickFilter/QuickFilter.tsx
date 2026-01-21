@@ -9,24 +9,45 @@
 
 'use client'
 
-import React from 'react'
+import React, { type JSX, useRef } from 'react'
 import { Form } from 'react-bootstrap'
 import { QuickFilterProps } from './QuickFilter.types'
 
-function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilterProps) : JSX.Element {
+function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilterProps): JSX.Element {
+    const debounceRef = useRef<NodeJS.Timeout | null>(null)
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current)
+        }
+
+        debounceRef.current = setTimeout(() => {
+            searchFunction?.(value)
+        }, 700)
+    }
+
     return (
         <div className='card-deck'>
-            <div id='component-quickfilter' className='card'>
+            <div
+                id='component-quickfilter'
+                className='card'
+            >
                 <div className='card-header'>{title}</div>
                 <div className='card-body'>
                     <Form>
-                        <Form.Group key={id} className='mb-3' controlId={id}>
+                        <Form.Group
+                            key={id}
+                            className='mb-3'
+                            controlId={id}
+                        >
                             <Form.Control
                                 className='form-control'
                                 type='text'
                                 size='sm'
                                 name={title}
-                                onKeyUp={searchFunction}
+                                onChange={handleChange}
                             />
                         </Form.Group>
                     </Form>

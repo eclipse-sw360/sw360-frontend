@@ -19,18 +19,27 @@ export interface User {
     givenName?: string
     lastName?: string
     wantsMailNotification?: boolean
-    notificationPreferences?: { [key: string]: boolean }
-    secondaryDepartmentsAndRoles?: { [key: string]: Array<string> }
+    notificationPreferences?: {
+        [key: string]: boolean
+    }
+    secondaryDepartmentsAndRoles?: {
+        [key: string]: Array<string>
+    }
     externalid?: string
     userGroup?: string
     _links?: Links
 }
 
-export interface CreateUserPayload {
-    email: string,
+export interface UserPayload {
+    userGroup?: string
+    email?: string
     givenName?: string
     lastName?: string
     fullName?: string
     password?: string
     department?: string
+    externalid?: string
+    secondaryDepartmentsAndRoles?: {
+        [key: string]: Array<string>
+    }
 }

@@ -9,13 +9,15 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { decode } from 'he'
 import Link from 'next/link'
-import { useState } from 'react'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiClipboard } from 'react-icons/bi'
+import { BsClipboard } from 'react-icons/bs'
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
-import { SummaryDataType, DocumentTypes } from '@/object-types'
+import { DocumentTypes, SummaryDataType } from '@/object-types'
 
 const Capitalize = (text: string) => {
     return text
@@ -28,26 +30,54 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
     const [toggleRoles, setToggleRoles] = useState(false)
     const [toggleVendor, setToggleVendor] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const Clipboard = ({ text }: { text: string }) => {
+        const [copied, setCopied] = useState(false)
+
+        async function handleCopy() {
+            try {
+                await navigator.clipboard.writeText(text)
+                setCopied(true)
+            } catch (e) {
+                console.error(e)
+            }
+        }
         return (
-            <>
-                <OverlayTrigger overlay={<Tooltip>{t('Copy to Clipboard')}</Tooltip>}>
-                    <span className='d-inline-block'>
-                        <BiClipboard
-                            onClick={() => {
-                                void navigator.clipboard.writeText(text)
-                            }}
-                        />
-                    </span>
-                </OverlayTrigger>
-            </>
+            <OverlayTrigger
+                trigger={[
+                    'hover',
+                    'focus',
+                ]}
+                placement='top'
+                overlay={(props) => <Tooltip {...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>}
+                onToggle={(show) => {
+                    if (show) setCopied(false)
+                }}
+            >
+                <span className='d-inline-block'>
+                    <BsClipboard
+                        onClick={handleCopy}
+                        size={20}
+                    />
+                </span>
+            </OverlayTrigger>
         )
     }
 
     return (
         <>
-            <p className='mt-3 mb-4 px-0 mx-0'>{summaryData.description}</p>
+            <p className='mt-3 mb-4 px-0 mx-0'>
+                {summaryData.description?.trim() ? decode(summaryData.description) : ''}
+            </p>
             <table className='table summary-table'>
                 <thead
                     title='Click to expand or collapse'
@@ -76,7 +106,13 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                     <tr>
                         <td>{t('Visibility')}:</td>
-                        <td>{Capitalize(summaryData.visibility) ?? ''}</td>
+                        <td>
+                            {Capitalize(
+                                summaryData.visibility === 'BUISNESSUNIT_AND_MODERATORS'
+                                    ? 'GROUP_AND_MODERATORS'
+                                    : summaryData.visibility,
+                            ) ?? ''}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Created On')}:</td>
@@ -146,7 +182,10 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                             {Object.entries(summaryData.externalUrls ?? {}).map(([name, value]) => (
                                 <li key={name}>
                                     <span className='fw-bold'>{name}</span>{' '}
-                                    <Link className='text-link' href={`mailto:${value}`}>
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${value}`}
+                                    >
                                         {value}
                                     </Link>
                                 </li>
@@ -204,7 +243,18 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
 
                     <tr>
                         <td>{t('Owner Country')}:</td>
-                        <td>{summaryData.ownerCountry !== undefined ? new Intl.DisplayNames(['en'], { type: 'region' }).of(summaryData.ownerCountry) : ''}</td>
+                        <td>
+                            {summaryData.ownerCountry != null && /^[A-Z]{2}$/.test(summaryData.ownerCountry)
+                                ? new Intl.DisplayNames(
+                                      [
+                                          'en',
+                                      ],
+                                      {
+                                          type: 'region',
+                                      },
+                                  ).of(summaryData.ownerCountry)
+                                : ''}
+                        </td>
                     </tr>
                     <tr>
                         <td>{t('Lead Architect')}:</td>
@@ -221,12 +271,23 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>{t('Moderators')}:</td>
                         <td>
                             {summaryData._embedded?.['sw360:moderators']?.map((elem, i) => (
-                                <li key={elem.email} style={{ display: 'inline' }}>
-                                    <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
+                                <li
+                                    key={elem.email}
+                                    style={{
+                                        display: 'inline',
+                                    }}
+                                >
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${elem.email}`}
+                                        key={elem.email}
+                                    >
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:moderators']?.length !== undefined &&
-                                        i === summaryData._embedded['sw360:moderators'].length - 1 ? '' : ','}{' '}
+                                    i === summaryData._embedded['sw360:moderators'].length - 1
+                                        ? ''
+                                        : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -235,12 +296,23 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>{t('Contributors')}:</td>
                         <td>
                             {summaryData._embedded?.['sw360:contributors']?.map((elem, i) => (
-                                <li key={elem.email} style={{ display: 'inline' }}>
-                                    <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
+                                <li
+                                    key={elem.email}
+                                    style={{
+                                        display: 'inline',
+                                    }}
+                                >
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${elem.email}`}
+                                        key={elem.email}
+                                    >
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.['sw360:contributors']?.length !== undefined &&
-                                        i === summaryData._embedded['sw360:contributors'].length - 1 ? '' : ','}{' '}
+                                    i === summaryData._embedded['sw360:contributors'].length - 1
+                                        ? ''
+                                        : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -249,12 +321,23 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                         <td>{t('Security Responsibles')}:</td>
                         <td>
                             {summaryData._embedded?.securityResponsibles?.map((elem, i) => (
-                                <li key={elem.email} style={{ display: 'inline' }}>
-                                    <Link className='text-link' href={`mailto:${elem.email}`} key={elem.email}>
+                                <li
+                                    key={elem.email}
+                                    style={{
+                                        display: 'inline',
+                                    }}
+                                >
+                                    <Link
+                                        className='text-link'
+                                        href={`mailto:${elem.email}`}
+                                        key={elem.email}
+                                    >
                                         {elem.fullName}
                                     </Link>
                                     {summaryData._embedded?.securityResponsibles?.length !== undefined &&
-                                        i === summaryData._embedded.securityResponsibles.length - 1 ? '' : ','}{' '}
+                                    i === summaryData._embedded.securityResponsibles.length - 1
+                                        ? ''
+                                        : ','}{' '}
                                 </li>
                             )) ?? ''}
                         </td>
@@ -262,19 +345,27 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     <tr>
                         <td>{t('Additional Roles')}:</td>
                         <td>
-                            {Object.entries(summaryData.roles ?? {}).map(([name, value]: [string, string[]]) => (
-                                <li key={name}>
-                                    <span className='fw-bold'>{name}</span>{' '}
-                                    {value.map((v: string, i: number) => (
-                                        <span key={v}>
-                                            <Link className='text-link' href={`mailto:${v}`}>
-                                                {v}
-                                            </Link>
-                                            {i === value.length - 1 ? '' : ','}{' '}
-                                        </span>
-                                    ))}
-                                </li>
-                            ))}
+                            {Object.entries(summaryData.roles ?? {}).map(
+                                ([name, value]: [
+                                    string,
+                                    string[],
+                                ]) => (
+                                    <li key={name}>
+                                        <span className='fw-bold'>{name}</span>{' '}
+                                        {value.map((v: string, i: number) => (
+                                            <span key={v}>
+                                                <Link
+                                                    className='text-link'
+                                                    href={`mailto:${v}`}
+                                                >
+                                                    {v}
+                                                </Link>
+                                                {i === value.length - 1 ? '' : ','}{' '}
+                                            </span>
+                                        ))}
+                                    </li>
+                                ),
+                            )}
                         </td>
                     </tr>
                 </tbody>

@@ -8,14 +8,15 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import UserAdministration from './components/UserAdministration'
 
 export const metadata: Metadata = {
     title: 'Admin',
 }
 
-function LicenseAdministrationPage(): JSX.Element {
-    return <UserAdministration/>
+function UsersAdministrationPage(): JSX.Element {
+    return <UserAdministration />
 }
 
-export default LicenseAdministrationPage
+export default UsersAdministrationPage

@@ -12,10 +12,7 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-
-import { PageSpinner } from 'next-sw360'
-
+import { ReactNode } from 'react'
 import MyComponentsWidget from './components/MyComponentsWidget'
 import MyProjectsWidget from './components/MyProjectsWidget'
 import MySubscriptionsWidget from './components/MySubscriptionsWidget'
@@ -23,53 +20,63 @@ import MyTaskAssignmentsWidget from './components/MyTaskAssignmentsWidget'
 import MyTaskSubmissionsWidget from './components/MyTaskSubmissionsWidget'
 import RecentComponentsWidget from './components/RecentComponentsWidget'
 import RecentReleasesWidget from './components/RecentReleasesWidget'
-import { ReactNode } from 'react'
 
-function HomePage() : ReactNode {
-    const { status } = useSession()
-
-    if (status === 'unauthenticated') {
-        return signOut()
-    }
-
+function HomePage(): ReactNode {
     return (
         <>
             <div className='content-container container-fluid homePage'>
-                {status === 'loading' ? (
-                    <PageSpinner />
-                ) : (
-                    <div className='row'>
-                        <div className='col col-md-10'>
-                            <div className='row'>
-                                <div className='col-sm' id='sw360_table_col'>
-                                    <MyProjectsWidget />
-                                </div>
-                                <div className='col-sm' id='sw360_table_col'>
-                                    <MyComponentsWidget />
-                                </div>
+                <div className='row'>
+                    <div className='col col-md-10'>
+                        <div className='row'>
+                            <div
+                                className='col-sm'
+                                id='sw360_table_col'
+                            >
+                                <MyProjectsWidget />
                             </div>
-                            <div className='row'>
-                                <div className='col-sm' id='sw360_table_col'>
-                                    <MyTaskAssignmentsWidget />
-                                </div>
-                                <div className='col-sm' id='sw360_table_col'>
-                                    <MyTaskSubmissionsWidget />
-                                </div>
+                            <div
+                                className='col-sm'
+                                id='sw360_table_col'
+                            >
+                                <MyComponentsWidget />
                             </div>
                         </div>
-                        <div className='col col-md-2'>
-                            <div className='col-sm' id='sw360_table_col'>
-                                <MySubscriptionsWidget />
+                        <div className='row'>
+                            <div
+                                className='col-sm'
+                                id='sw360_table_col'
+                            >
+                                <MyTaskAssignmentsWidget />
                             </div>
-                            <div className='col-sm' id='sw360_table_col'>
-                                <RecentComponentsWidget />
-                            </div>
-                            <div className='col-sm' id='sw360_table_col'>
-                                <RecentReleasesWidget />
+                            <div
+                                className='col-sm'
+                                id='sw360_table_col'
+                            >
+                                <MyTaskSubmissionsWidget />
                             </div>
                         </div>
                     </div>
-                )}
+                    <div className='col col-md-2'>
+                        <div
+                            className='col-sm'
+                            id='sw360_table_col'
+                        >
+                            <MySubscriptionsWidget />
+                        </div>
+                        <div
+                            className='col-sm'
+                            id='sw360_table_col'
+                        >
+                            <RecentComponentsWidget />
+                        </div>
+                        <div
+                            className='col-sm'
+                            id='sw360_table_col'
+                        >
+                            <RecentReleasesWidget />
+                        </div>
+                    </div>
+                </div>
             </div>
         </>
     )

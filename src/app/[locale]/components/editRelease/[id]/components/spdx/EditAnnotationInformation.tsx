@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,10 +10,11 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect, useState } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Annotations, InputKeyValue, PackageInformation, SPDX, SPDXDocument } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import { ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
 import AnnotationDate from './AnnotationInformation/AnnotationDate'
 import Annotator from './AnnotationInformation/Annotator'
 
@@ -36,7 +38,7 @@ const EditAnnotationInformation = ({
     setAnnotationsPackages,
     SPDXPayload,
     setSPDXPayload,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const [changeSource, setChangeSource] = useState(false)
     const [isSourceSPDXDocument, setIsSourceSPDXDocument] = useState<boolean>(true)
@@ -45,6 +47,15 @@ const EditAnnotationInformation = ({
     const handleInputKeyToAnnotator = (data: InputKeyValue) => {
         return data.key + ':' + data.value
     }
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const setAnnotatorToAnnotation = (input: InputKeyValue) => {
         if (isSourceSPDXDocument) {
@@ -227,7 +238,9 @@ const EditAnnotationInformation = ({
 
     const addAnnotationsSPDXsSPDX = () => {
         setChangeSource(false)
-        const arrayExternals: Annotations[] = [...annotationsSPDXs]
+        const arrayExternals: Annotations[] = [
+            ...annotationsSPDXs,
+        ]
         setIncreIndex(annotationsSPDXs.length)
         setNumberIndexSPDX(annotationsSPDXs.length)
         setIsAdd(true)
@@ -260,7 +273,9 @@ const EditAnnotationInformation = ({
 
     const addAnnotationsSPDXsPackage = () => {
         setChangeSource(false)
-        const arrayExternals: Annotations[] = [...annotationsPackages]
+        const arrayExternals: Annotations[] = [
+            ...annotationsPackages,
+        ]
         setIncreIndex(annotationsPackages.length)
         setIsAdd(true)
         setNumberIndexPackage(annotationsPackages.length)
@@ -292,7 +307,11 @@ const EditAnnotationInformation = ({
     }
 
     const addAnnotation = () => {
-        isSourceSPDXDocument ? addAnnotationsSPDXsSPDX() : addAnnotationsSPDXsPackage()
+        if (isSourceSPDXDocument) {
+            addAnnotationsSPDXsSPDX()
+        } else {
+            addAnnotationsSPDXsPackage()
+        }
     }
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
@@ -488,7 +507,9 @@ const EditAnnotationInformation = ({
                         >
                             <label
                                 htmlFor='selectAnnotationSource'
-                                style={{ textDecoration: 'underline' }}
+                                style={{
+                                    textDecoration: 'underline',
+                                }}
                                 className='sub-title lableSPDX'
                             >
                                 Select Source
@@ -496,18 +517,34 @@ const EditAnnotationInformation = ({
                             <select
                                 id='selectAnnotationSource'
                                 className='form-control spdx-select always-enable form-select'
-                                style={{ marginRight: '4rem' }}
+                                style={{
+                                    marginRight: '4rem',
+                                }}
                                 onChange={changeAnnotationSource}
                             >
                                 <option value='spdxDocument'>SPDX Document</option>
                                 <option value='package'>Package</option>
                             </select>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                paddingLeft: '1rem',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginBottom: '0.75rem',
+                                }}
+                            >
                                 <label
                                     htmlFor='selectAnnotation'
-                                    style={{ textDecoration: 'underline' }}
+                                    style={{
+                                        textDecoration: 'underline',
+                                    }}
                                     className='sub-title lableSPDX'
                                 >
                                     Select Annotation
@@ -525,29 +562,43 @@ const EditAnnotationInformation = ({
                                         changeSource
                                             ? 0
                                             : isAdd
-                                            ? isDeleteSucces
-                                                ? indexAnnotations
-                                                : increIndex
-                                            : isSourceSPDXDocument
-                                            ? numberIndexSPDX
-                                            : numberIndexPackage
+                                              ? isDeleteSucces
+                                                  ? indexAnnotations
+                                                  : increIndex
+                                              : isSourceSPDXDocument
+                                                ? numberIndexSPDX
+                                                : numberIndexPackage
                                     }
                                 >
                                     {isSourceSPDXDocument
                                         ? annotationsSPDXs.map((item) => (
-                                              <option key={item.index} value={item.index}>
+                                              <option
+                                                  key={item.index}
+                                                  value={item.index}
+                                              >
                                                   {item.index + 1}
                                               </option>
                                           ))
                                         : annotationsPackages.map((item) => (
-                                              <option key={item.index} value={item.index}>
+                                              <option
+                                                  key={item.index}
+                                                  value={item.index}
+                                              >
                                                   {item.index + 1}
                                               </option>
                                           ))}
                                 </select>
-                                <FaTrashAlt className='spdx-delete-icon-main-index' onClick={deleteAnnotation} />
+                                <BsFillTrashFill
+                                    className='spdx-delete-icon-main-index'
+                                    onClick={deleteAnnotation}
+                                    size={20}
+                                />
                             </div>
-                            <button className='spdx-add-button-main' name='add-annotation' onClick={addAnnotation}>
+                            <button
+                                className='spdx-add-button-main'
+                                name='add-annotation'
+                                onClick={addAnnotation}
+                            >
                                 Add new Annotation
                             </button>
                         </div>
@@ -557,7 +608,11 @@ const EditAnnotationInformation = ({
                     <>
                         <tr>
                             <td>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <Annotator
                                         dataAnnotator={dataAnnotator}
                                         setDataAnnotator={setDataAnnotator}
@@ -573,9 +628,22 @@ const EditAnnotationInformation = ({
                         </tr>
                         <tr>
                             <td>
-                                <div style={{ display: 'flex' }}>
-                                    <div className='form-group' style={{ flex: 1, marginRight: '1rem' }}>
-                                        <label htmlFor='annotationType' className='lableSPDX'>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
+                                    <div
+                                        className='form-group'
+                                        style={{
+                                            flex: 1,
+                                            marginRight: '1rem',
+                                        }}
+                                    >
+                                        <label
+                                            htmlFor='annotationType'
+                                            className='lableSPDX'
+                                        >
                                             12.3 Annotation type
                                         </label>
                                         <input
@@ -587,13 +655,21 @@ const EditAnnotationInformation = ({
                                             onChange={updateField}
                                             value={
                                                 isSourceSPDXDocument
-                                                    ? annotationsSPDXs[indexAnnotations]?.annotationType ?? ''
-                                                    : annotationsPackages[indexAnnotations]?.annotationType ?? ''
+                                                    ? (annotationsSPDXs[indexAnnotations]?.annotationType ?? '')
+                                                    : (annotationsPackages[indexAnnotations]?.annotationType ?? '')
                                             }
                                         />
                                     </div>
-                                    <div className='form-group' style={{ flex: 1 }}>
-                                        <label htmlFor='spdxIdRef' className='lableSPDX'>
+                                    <div
+                                        className='form-group'
+                                        style={{
+                                            flex: 1,
+                                        }}
+                                    >
+                                        <label
+                                            htmlFor='spdxIdRef'
+                                            className='lableSPDX'
+                                        >
                                             12.4 SPDX identifier reference
                                         </label>
                                         <input
@@ -605,8 +681,8 @@ const EditAnnotationInformation = ({
                                             onChange={updateField}
                                             value={
                                                 isSourceSPDXDocument
-                                                    ? annotationsSPDXs[indexAnnotations]?.spdxIdRef ?? ''
-                                                    : annotationsPackages[indexAnnotations]?.spdxIdRef ?? ''
+                                                    ? (annotationsSPDXs[indexAnnotations]?.spdxIdRef ?? '')
+                                                    : (annotationsPackages[indexAnnotations]?.spdxIdRef ?? '')
                                             }
                                         />
                                     </div>
@@ -616,7 +692,10 @@ const EditAnnotationInformation = ({
                         <tr>
                             <td>
                                 <div className='form-group'>
-                                    <label htmlFor='annotationComment' className='lableSPDX'>
+                                    <label
+                                        htmlFor='annotationComment'
+                                        className='lableSPDX'
+                                    >
                                         12.5 Annotation comment
                                     </label>
                                     <textarea
@@ -628,8 +707,8 @@ const EditAnnotationInformation = ({
                                         onChange={updateField}
                                         value={
                                             isSourceSPDXDocument
-                                                ? annotationsSPDXs[indexAnnotations]?.annotationComment ?? ''
-                                                : annotationsPackages[indexAnnotations]?.annotationComment ?? ''
+                                                ? (annotationsSPDXs[indexAnnotations]?.annotationComment ?? '')
+                                                : (annotationsPackages[indexAnnotations]?.annotationComment ?? '')
                                         }
                                     ></textarea>
                                 </div>

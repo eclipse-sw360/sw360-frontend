@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,15 +9,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useTranslations } from 'next-intl'
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { Alert, Button, Form } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
-
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, ShowInfoOnHover, SW360Table } from 'next-sw360'
+import { type JSX, useEffect, useMemo, useState } from 'react'
+import { Alert, Button, Form, Spinner } from 'react-bootstrap'
+import { BsInfoCircle } from 'react-icons/bs'
 import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
-import { LinkedVulnerability, VerificationStateInfo, VulnerabilitiesVerificationState } from '@/object-types'
-import { Table, _ } from 'next-sw360'
+import { LinkedVulnerability, VulnerabilitiesVerificationState } from '@/object-types'
 import ChangeStateDialog from './ChangeStateDialog'
 import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
 
@@ -24,157 +26,213 @@ interface Props {
     vulnerData: Array<LinkedVulnerability>
 }
 
-interface SelectedVulnerability  {
-    releaseId: string
-    vulnerExternalId: string
-    index: string
-}
-
-type RowData = (string | string[] | VerificationStateInfo[] | FirstCellData)[]
-
-interface FirstCellData {
-    index: string
-    checked: boolean
+interface SelectedVulnerability {
     releaseId: string
     vulnerExternalId: string
 }
 
-const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
+const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [dialogOpen, setDialogOpen] = useState(false)
     const [state, setState] = useState('NOT_CHECKED')
-    const [data, setData] = useState<RowData[]>([])
     const [selectedVulner, setSelectedVulner] = useState<Array<SelectedVulnerability>>([])
     const [checkAll, setCheckAll] = useState<boolean>(false)
-
-    const handleCheckBox = (index: string, checked: boolean) => {
-        const newData = Object.entries(data).map(([i, rowData]) => {
-            const firstCell = rowData[0] as FirstCellData
-
-            if (i === index) {
-                rowData[0] = {
-                    ...firstCell,
-                    checked: !checked,
-                }
-            }
-            return rowData
-        })
-
-        setData(newData)
-    }
-
-    const handleCheckAll = () => {
-        const newData = Object.values(data).map((rowData) => {
-            const firstCell = rowData[0] as FirstCellData
-
-            rowData[0] = {
-                ...firstCell,
-                checked: !checkAll,
-            }
-            return rowData
-        })
-
-        setData(newData)
-        setCheckAll((prev) => !prev)
-    }
-
-    const handleClick = () => {
-        const selectingVulner = Object.entries(data)
-            .map(([index, item]) => {
-                const firstCell = item[0] as FirstCellData
-
-                if (firstCell.checked === true) {
-                    return {
-                        releaseId: firstCell.releaseId,
-                        vulnerExternalId: firstCell.vulnerExternalId,
-                        index: index,
-                    }
-                }
-            })
-            .filter((element) => element !== undefined)
-
-        setSelectedVulner(selectingVulner)
-        setDialogOpen(true)
-    }
-
-    const columns = [
-        {
-            id: 'check',
-            name: _(<Form.Check defaultChecked={checkAll} type='checkbox' onClick={handleCheckAll}></Form.Check>),
-            formatter: ({ checked, index } : { checked: boolean, index: string}) =>
-                _(
-                    <Form.Check
-                        defaultChecked={checked}
-                        onClick={() => handleCheckBox(index, checked)}
-                        type='checkbox'
-                    ></Form.Check>
-                ),
-            sort: false,
-        },
-        {
-            id: 'release',
-            name: t('Release'),
-            sort: true,
-        },
-        {
-            id: 'externalId',
-            name: t('External Id'),
-            formatter: ([externalId, id]: Array<string>) =>
-                _(
-                    <Link href={'/vulnerabilites/detail/' + id} className='link'>
-                        {externalId}
-                    </Link>
-                ),
-            sort: true,
-        },
-        {
-            id: 'priority',
-            name: t('Priority'),
-            sort: true,
-        },
-        {
-            id: 'matchedBy',
-            name: t('Matched by'),
-            sort: true,
-        },
-        {
-            id: 'title',
-            name: t('Title'),
-            sort: true,
-        },
-        {
-            id: 'verification',
-            name: t('Verification'),
-            formatter: (verificationStateInfos: Array<VerificationStateInfo>) =>
-                (verificationStateInfos.length > 0) && _(
-                    <VerificationTooltip verificationStateInfos={verificationStateInfos}>
-                        <FaInfoCircle style={{ marginRight: '5px', color: 'gray', width: '15px', height: '15px' }} />
-                        {verificationStateInfos.at(-1)?.verificationState}
-                    </VerificationTooltip>
-                ),
-            sort: true,
-        },
-        t('Action'),
-    ]
+    const { status } = useSession()
 
     useEffect(() => {
-        const mappedData = Object.entries(vulnerData).map(([index, item]) => [
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const memoizedData = useMemo(
+        () => vulnerData,
+        [
+            vulnerData,
+        ],
+    )
+
+    useEffect(() => {
+        if (checkAll) {
+            setSelectedVulner(
+                memoizedData.map((v) => ({
+                    releaseId: v.releaseVulnerabilityRelation.releaseId,
+                    vulnerExternalId: v.externalId,
+                })),
+            )
+        } else {
+            setSelectedVulner([])
+        }
+    }, [
+        checkAll,
+        memoizedData,
+    ])
+
+    const columns = useMemo<ColumnDef<LinkedVulnerability>[]>(
+        () => [
             {
-                index: index,
-                checked: false,
-                releaseId: item.releaseVulnerabilityRelation.releaseId,
-                vulnerExternalId: item.externalId,
+                id: 'selectVulnerabilityCheckbox',
+                header: () => (
+                    <input
+                        className='form-check-input'
+                        type='checkbox'
+                        checked={checkAll}
+                        onChange={() => setCheckAll(!checkAll)}
+                    />
+                ),
+                cell: ({ row }) => (
+                    <input
+                        className='form-check-input'
+                        type='checkbox'
+                        checked={
+                            selectedVulner.findIndex(
+                                (v) =>
+                                    v.vulnerExternalId === row.original.externalId &&
+                                    v.releaseId === row.original.releaseVulnerabilityRelation.releaseId,
+                            ) !== -1
+                        }
+                        onChange={() => {
+                            const index = selectedVulner.findIndex(
+                                (v) => v.vulnerExternalId === row.original.externalId,
+                            )
+                            if (index === -1) {
+                                const vuls = [
+                                    ...selectedVulner,
+                                    {
+                                        releaseId: row.original.releaseVulnerabilityRelation.releaseId,
+                                        vulnerExternalId: row.original.externalId,
+                                    },
+                                ]
+                                setSelectedVulner(vuls)
+                            } else {
+                                const vuls = [
+                                    ...selectedVulner,
+                                ]
+                                vuls.splice(index, 1)
+                                setSelectedVulner(vuls)
+                            }
+                        }}
+                    />
+                ),
+                meta: {
+                    width: '3%',
+                },
             },
-            item.intReleaseName ?? '',
-            [item.externalId, item.releaseVulnerabilityRelation.vulnerabilityId],
-            item.priority ?? '',
-            item.releaseVulnerabilityRelation.matchedBy,
-            item.title ?? '',
-            item.releaseVulnerabilityRelation.verificationStateInfo ?? [],
-            item.projectAction ?? '',
-        ])
-        setData(mappedData)
-    }, [vulnerData])
+            {
+                id: 'release',
+                header: t('Release'),
+                cell: ({ row }) => <div className='text-center'>{row.original.intReleaseName}</div>,
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'externalId',
+                header: t('External Id'),
+                cell: ({ row }) => (
+                    <Link
+                        href={`/vulnerabilities/detail/${row.original.externalId}`}
+                        className='text-link text-center'
+                    >
+                        {row.original.externalId}
+                    </Link>
+                ),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'priority',
+                header: t('Priority'),
+                cell: ({ row }) => (
+                    <div className='text-center'>
+                        {row.original.priority && (
+                            <div>
+                                <ShowInfoOnHover text={row.original.priorityToolTip} /> {row.original.priority}
+                            </div>
+                        )}
+                    </div>
+                ),
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'matchedBy',
+                header: t('Matched By'),
+                cell: ({ row }) => (
+                    <div className='text-center'>{row.original.releaseVulnerabilityRelation?.matchedBy ?? ''}</div>
+                ),
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'title',
+                header: t('Title'),
+                cell: ({ row }) => (
+                    <span
+                        className='info-text'
+                        title={row.original.description}
+                    >
+                        {row.original.title}
+                    </span>
+                ),
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'verification',
+                header: t('Verification'),
+                cell: ({ row }) => {
+                    const verificationStateInfos = row.original.releaseVulnerabilityRelation.verificationStateInfo ?? []
+                    if (verificationStateInfos.length > 0) {
+                        return (
+                            <VerificationTooltip verificationStateInfos={verificationStateInfos}>
+                                <BsInfoCircle
+                                    style={{
+                                        marginRight: '5px',
+                                        color: 'gray',
+                                        width: '15px',
+                                        height: '15px',
+                                    }}
+                                    size={20}
+                                />
+                                {verificationStateInfos.at(-1)?.verificationState}
+                            </VerificationTooltip>
+                        )
+                    }
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => <div className='text-center'>{row.original.projectAction}</div>,
+                meta: {
+                    width: '10%',
+                },
+            },
+        ],
+        [
+            t,
+            selectedVulner,
+        ],
+    )
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
+        },
+    })
 
     return (
         <div className='row'>
@@ -195,8 +253,26 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
                 >
                     {t('Vulnerabilities')}
                 </h5>
-                <Table columns={columns} data={data} selector={true} />
-                <Form.Group className='mb-3' controlId='createdOn'>
+                <div className='mb-3'>
+                    {table ? (
+                        <>
+                            <ClientSidePageSizeSelector table={table} />
+                            <SW360Table
+                                table={table}
+                                showProcessing={false}
+                            />
+                            <ClientSideTableFooter table={table} />
+                        </>
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
+                </div>
+                <Form.Group
+                    className='mb-3'
+                    controlId='createdOn'
+                >
                     <Form.Label>
                         <b>{t('Change verification state of selected vulnerabilities to')}</b>
                     </Form.Label>
@@ -214,14 +290,17 @@ const ComponentVulnerabilities = ({ vulnerData }: Props) : JSX.Element => {
                     >
                         {Object.values(VulnerabilitiesVerificationState).map(
                             (item): JSX.Element => (
-                                <option key={item} value={item}>
+                                <option
+                                    key={item}
+                                    value={item}
+                                >
                                     {' '}
                                     {t(item)}{' '}
                                 </option>
-                            )
+                            ),
                         )}
                     </Form.Select>
-                    <Button onClick={handleClick}>{t('Change State')}</Button>
+                    <Button onClick={() => setDialogOpen(true)}>{t('Change State')}</Button>
                 </Form.Group>
                 <VulnerabilitiesMatchingStatistics vulnerData={vulnerData} />
             </div>

@@ -9,12 +9,14 @@
 
 'use client'
 
-import { HttpStatus, ProjectData, ProjectVulnerabilityTabType, Embedded, Project } from '@/object-types'
-import { ApiUtils } from '@/utils'
-import { signOut, useSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { signOut, useSession } from 'next-auth/react'
+import { type JSX, useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
+import { Embedded, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 import VulnerabilityTab from './VulnerabilityTab'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -28,7 +30,7 @@ const extractLinkedProjects = (projectPayload: Project[], projectData: ProjectDa
             enableSvm: x.enableSvm ?? false,
             enableVulnerabilitiesDisplay: x.enableVulnerabilitiesDisplay ?? false,
         })
-        if(x._embedded?.['sw360:linkedProjects']) {
+        if (x._embedded?.['sw360:linkedProjects']) {
             extractLinkedProjects(x._embedded['sw360:linkedProjects'], projectData)
         }
     }
@@ -39,7 +41,15 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
     const [data, setData] = useState<ProjectData[]>([])
 
     useEffect(() => {
-        if (status !== 'authenticated') return
+        if (status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        status,
+    ])
+
+    useEffect(() => {
+        if (CommonUtils.isNullOrUndefined(session)) return
 
         const controller = new AbortController()
         const signal = controller.signal
@@ -49,39 +59,64 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                 const response = await ApiUtils.GET(
                     `projects/${projectData.id}/linkedProjects?transitive=true`,
                     session.user.access_token,
-                    signal
+                    signal,
                 )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
                     return signOut()
-                } else if (response.status !== HttpStatus.OK) {
+                } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
 
-                const data = await response.json() as LinkedProjects
+                const data = (await response.json()) as LinkedProjects
 
                 const d: ProjectData[] = []
                 d.push(projectData)
 
                 extractLinkedProjects(data._embedded['sw360:projects'], d)
-
                 setData(d)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
 
         return () => controller.abort(signal)
-    }, [status])
+    }, [
+        session,
+    ])
 
     return (
         <>
-            <Tabs defaultActiveKey={projectData.id} className='mb-3' mountOnEnter={true} unmountOnExit={true}>
-                {data.length !== 0 && <Tab eventKey='summary' title='Summary'>
-                    <VulnerabilityTab projectData={projectData} tabType={ProjectVulnerabilityTabType.SUMMARY} />
-                </Tab>}
+            <Tabs
+                defaultActiveKey={projectData.id}
+                className='mb-3'
+                mountOnEnter={true}
+                unmountOnExit={true}
+            >
+                {data.length !== 0 && (
+                    <Tab
+                        eventKey='summary'
+                        title='Summary'
+                    >
+                        <VulnerabilityTab
+                            projectData={projectData}
+                            tabType={ProjectVulnerabilityTabType.SUMMARY}
+                        />
+                    </Tab>
+                )}
                 {data.map((e: ProjectData) => (
-                    <Tab eventKey={e.id} key={e.id} title={`${e.name} (${e.version})`}>
-                        <VulnerabilityTab projectData={e} tabType={ProjectVulnerabilityTabType.PROJECT} />
+                    <Tab
+                        eventKey={e.id}
+                        key={e.id}
+                        title={`${e.name} (${e.version})`}
+                    >
+                        <VulnerabilityTab
+                            projectData={e}
+                            tabType={ProjectVulnerabilityTabType.PROJECT}
+                        />
                     </Tab>
                 ))}
             </Tabs>

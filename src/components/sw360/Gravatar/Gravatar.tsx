@@ -11,16 +11,15 @@
 'use client'
 
 import { MD5 } from 'crypto-js'
-import { useCallback, useEffect } from 'react'
+import { type JSX, useCallback, useEffect } from 'react'
 import { Form, Image } from 'react-bootstrap'
 import { BsArrowCounterclockwise } from 'react-icons/bs'
 
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 
 import { useLocalStorage } from '@/hooks'
-import styles from './Gravatar.module.css'
 
-function Gravatar({ email }: { email: string }) : JSX.Element {
+function Gravatar({ email }: { email: string }): JSX.Element {
     const [gravatarImage, setGravatarImage] = useLocalStorage<string | undefined | null>('gravatarImage', null)
     const [useGravatar, setUseGravatar] = useLocalStorage<boolean>('useGravatar', false)
 
@@ -43,7 +42,10 @@ function Gravatar({ email }: { email: string }) : JSX.Element {
                 console.log(imageUrl)
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
-    }, [email, setGravatarImage])
+    }, [
+        email,
+        setGravatarImage,
+    ])
 
     useEffect(() => {
         if (useGravatar) {
@@ -51,13 +53,18 @@ function Gravatar({ email }: { email: string }) : JSX.Element {
                 downloadGravatarImage()
             }
         }
-    }, [useGravatar, gravatarImage, setGravatarImage, downloadGravatarImage])
+    }, [
+        useGravatar,
+        gravatarImage,
+        setGravatarImage,
+        downloadGravatarImage,
+    ])
 
     const iconSize = 64
 
     return (
         <>
-            <div className={styles.gravatar}>
+            <div className='gravatar'>
                 <div>
                     <Form.Check
                         type='checkbox'
@@ -75,7 +82,12 @@ function Gravatar({ email }: { email: string }) : JSX.Element {
                         alt='Gravatar'
                         roundedCircle
                     />
-                    {useGravatar && <BsArrowCounterclockwise onClick={downloadGravatarImage} />}
+                    {useGravatar && (
+                        <BsArrowCounterclockwise
+                            size={20}
+                            onClick={downloadGravatarImage}
+                        />
+                    )}
                 </div>
             </div>
         </>

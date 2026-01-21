@@ -16,15 +16,22 @@ interface Component {
     description?: string
     createdOn?: string
     componentType?: string
+    cycloneDxComponentType?: string
     subscribers?: Array<string>
     moderators?: Array<string>
     componentOwner?: string
     ownerAccountingUnit?: string
     ownerGroup?: string
     ownerCountry?: string
+    vcsUrl?: string
     visbility?: string
-    externalIds?: { [k: string]: string }
-    additionalData?: { [k: string]: string }
+    externalIds?: {
+        [k: string]: string
+    }
+    releaseIds?: string[]
+    additionalData?: {
+        [k: string]: string
+    }
     mainLicenseIds?: Array<string>
     defaultVendorId?: string
     categories?: Array<string>
@@ -37,15 +44,14 @@ interface Component {
     blog?: string
     modifiedOn?: string
     modifiedBy?: string
-    roles?: { [k: string]: Array<string> }
+    createdBy?: string
+    attachments?: Attachment[]
+    roles?: {
+        [k: string]: Array<string>
+    }
     setBusinessUnit?: boolean
     setVisbility?: boolean
-    defaultVendor?: {
-        type: string
-        url: string
-        shortName: string
-        fullName: string
-    }
+    defaultVendor?: Vendor
     _links?: Links
     _embedded?: {
         createdBy?: User
@@ -55,7 +61,7 @@ interface Component {
         defaultVendor?: Vendor
         modifiedBy?: User
         componentOwner?: User
-        'sw360:attachments'?: Array<Attachment>,
+        'sw360:attachments'?: Array<Attachment>
         'sw360:subscribers'?: Array<User>
     }
 }

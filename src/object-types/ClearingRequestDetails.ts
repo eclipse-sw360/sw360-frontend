@@ -7,40 +7,45 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import Project from './Project'
+import { Project } from './Project'
 import { User } from './User'
 
-export default interface ClearingRequestDetails{
-    id: string,
-    requestedClearingDate?: string,
-    projectId?: string,
-    projectName?: string,
-    requestingUser?: string,
-    requestingUserName?: string,
-    projectBU?: string,
-    requestingUserComment?: string,
-    clearingTeam?: string,
-    clearingTeamName?: string,
-    agreedClearingDate?: string,
-    priority?: string,
-    clearingType?: string,
-    clearingState?: string,
-    reOpenedOn?: number,
-    createdOn?: string,
-    lastUpdatedOn?: string,
-    comments?: [{
-        text?: string,
-        commentedBy?: string
-    }]
+export default interface ClearingRequestDetails {
+    id: string
+    requestedClearingDate?: string
+    projectId?: string
+    projectName?: string
+    requestingUser?: string
+    requestingUserName?: string
+    projectBU?: string
+    requestingUserComment?: string
+    clearingTeam?: string
+    clearingTeamName?: string
+    agreedClearingDate?: string
+    priority?: string
+    clearingType?: string
+    clearingState?: string
+    reOpenedOn?: number
+    lastUpdatedOn?: string
+    comments?: [
+        {
+            text?: string
+            commentedBy?: string
+        },
+    ]
     links?: {
         self: {
             href: string
         }
-    },
+    }
     _embedded?: {
-        'clearingTeam'?: User
-        'requestingUser'?: User
-        'sw360:project'?: Project
+        createdOn?: string
+        clearingTeam?: User
+        requestingUser?: User
+        'sw360:projectDTOs'?: Project[]
         requestClosedOn?: string
+        lastUpdatedOn?: string
+        totalRelease?: number
+        openRelease?: number
     }
 }

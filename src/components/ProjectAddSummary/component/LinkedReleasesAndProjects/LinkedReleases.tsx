@@ -9,161 +9,150 @@
 
 'use client'
 
-import { Table, _ } from '@/components/sw360'
-import LinkedReleasesModal from '@/components/sw360/LinkedReleasesModal/LinkedReleasesModal'
-import { useEffect, useState } from 'react'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { ProjectPayload } from '@/object-types'
-import { CommonUtils } from '@/utils'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import { FaTrashAlt } from 'react-icons/fa'
+import { SW360Table } from '@/components/sw360'
+import LinkedReleasesModal from '@/components/sw360/LinkedReleasesModal/LinkedReleasesModal'
+import { LinkedReleaseData, ProjectPayload } from '@/object-types'
 
 interface Props {
     projectPayload: ProjectPayload
-    existingReleaseData: Map<string, LinkedReleaseData> | undefined
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
-interface LinkedReleaseData {
-    comment: string
-    mainlineState: string
-    name: string
-    releaseRelation: string
-    version: string
-}
-
-type RowData = Array<string | {
-    updatedReleaseRelation?: string
-    key?: string
-    updatedProjectMainlineState?: string
-    updatedComment?: string
-}>
-
-export default function LinkedReleases({ projectPayload, existingReleaseData, setProjectPayload }: Props) : JSX.Element {
-
+export default function LinkedReleases({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
-    const [linkedReleaseData, setLinkedReleaseData] = useState<Map<string, LinkedReleaseData>>(new Map())
-    const [tableData, setTableData] = useState<Array<RowData>>([])
+    const [tableData, setTableData] = useState<
+        [
+            string,
+            LinkedReleaseData,
+        ][]
+    >([])
 
-    const updateReleaseRelation = (
-        releaseId: string,
-        updatedReleaseRelation: string,
-        linkedReleaseData: Map<string, LinkedReleaseData>
-    ) => {
-        try {
-            if (linkedReleaseData.has(releaseId)) {
-                linkedReleaseData.forEach((value, key) => {
-                    if ((key === releaseId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedReleases)) {
-                        value.releaseRelation = updatedReleaseRelation
-                        setLinkedReleaseData(linkedReleaseData)
-                        projectPayload.linkedReleases[releaseId].releaseRelation = updatedReleaseRelation
-                        const data = extractDataFromMap(linkedReleaseData)
-                        setTableData(data)
-                    }
-                })
-            }
-        } catch (e) {
-            console.error(e)
-        }
-    }
+    const updateReleaseRelation = useCallback(
+        (releaseId: string, updatedReleaseRelation: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
 
-    const updateProjectMainlineState = (
-        releaseId: string,
-        updatedProjectMainlineState: string,
-        linkedReleaseData: Map<string, LinkedReleaseData>
-    ) => {
-        try {
-            if (linkedReleaseData.has(releaseId)) {
-                if (projectPayload.linkedReleases === undefined)
-                    return
-                linkedReleaseData.forEach((value, key) => {
-                    if ((key === releaseId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedReleases)) {
-                        value.mainlineState = updatedProjectMainlineState
-                        setLinkedReleaseData(linkedReleaseData)
-                        projectPayload.linkedReleases[releaseId].mainlineState = updatedProjectMainlineState
-                        const data = extractDataFromMap(linkedReleaseData)
-                        setTableData(data)
-                    }
-                })
-            }
-        } catch (e) {
-            console.error(e)
-        }
-    }
-    
-    const handleComments = ( releaseId:string,
-                             updatedComment:string,
-                             linkedReleaseData: Map<string, LinkedReleaseData>) => {
-        try {
-            if (linkedReleaseData.has(releaseId)) {
-                linkedReleaseData.forEach((value, key) => {
-                    if ((key === releaseId) && !CommonUtils.isNullOrUndefined(projectPayload.linkedReleases)) {
-                        value.comment = updatedComment
-                        setLinkedReleaseData(linkedReleaseData)
-                        projectPayload.linkedReleases[releaseId].comment = updatedComment
-                        const data = extractDataFromMap(linkedReleaseData)
-                        setTableData(data)
-                    }
-                })
-            }
-        } catch (e) {
-            console.error(e)
-        }
-    }
+                return {
+                    ...prev,
+                    linkedReleases: {
+                        ...prev.linkedReleases,
+                        [releaseId]: {
+                            ...prev.linkedReleases[releaseId],
+                            releaseRelation: updatedReleaseRelation,
+                        },
+                    },
+                }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
 
-    const extractDataFromMap = (linkedReleaseData: Map<string, LinkedReleaseData>) => {
-        const extractedData: Array<RowData> = []
-        linkedReleaseData.forEach((value, key) => {
-            const updatedReleaseRelation = value.releaseRelation
-            const updatedProjectMainlineState = value.mainlineState
-            const updatedComment = value.comment
-            extractedData.push([value.name,
-                                value.version,
-                                { updatedReleaseRelation, key },
-                                { updatedProjectMainlineState, key },
-                                { updatedComment, key }])
-        })
-        return extractedData
-    }
+    const updateProjectMainlineState = useCallback(
+        (releaseId: string, updatedProjectMainlineState: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
+
+                return {
+                    ...prev,
+                    linkedReleases: {
+                        ...prev.linkedReleases,
+                        [releaseId]: {
+                            ...prev.linkedReleases[releaseId],
+                            mainlineState: updatedProjectMainlineState,
+                        },
+                    },
+                }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
+
+    const handleComments = useCallback(
+        (releaseId: string, updatedComment: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
+
+                return {
+                    ...prev,
+                    linkedReleases: {
+                        ...prev.linkedReleases,
+                        [releaseId]: {
+                            ...prev.linkedReleases[releaseId],
+                            comment: updatedComment,
+                        },
+                    },
+                }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
+
+    const handleClickDelete = useCallback(
+        (releaseId: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
+
+                const { [releaseId]: _, ...remainingReleases } = prev.linkedReleases
+
+                return {
+                    ...prev,
+                    linkedReleases: remainingReleases,
+                }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
 
     useEffect(() => {
-        if ((existingReleaseData !== undefined) && linkedReleaseData.size === 0){
-            const data = extractDataFromMap(existingReleaseData)
-            setTableData(data)
-            setLinkedReleaseData(existingReleaseData)
-        }
-        else {
-            const data = extractDataFromMap(linkedReleaseData)
-            setTableData(data)
-        }
-    }, [existingReleaseData, linkedReleaseData])
+        const data = Object.entries(projectPayload.linkedReleases ?? {})
+        setTableData(data)
+    }, [
+        projectPayload.linkedReleases,
+    ])
 
-    const columns = [
-        {
-            id: 'linkedReleaseData.name',
-            name: 'Release Name',
-            sort: true,
-        },
-        {
-            id: 'linkedReleaseData.version',
-            name: 'Release Version',
-            sort: true,
-        },
-        {
-            id: 'linkedReleaseData.releaseRelation',
-            name: 'Release Relation',
-            sort: true,
-            formatter: ({ releaseRelation, key }: { releaseRelation: string; key: string }) =>
-                _(
+    const columns = useMemo<
+        ColumnDef<
+            [
+                string,
+                LinkedReleaseData,
+            ]
+        >[]
+    >(
+        () => [
+            {
+                id: 'name',
+                header: t('Release Name'),
+                cell: ({ row }) => <>{row.original[1].name}</>,
+            },
+            {
+                id: 'version',
+                header: t('Release Version'),
+                cell: ({ row }) => <>{row.original[1].version}</>,
+            },
+            {
+                id: 'releaseRelation',
+                header: t('Release Relation'),
+                cell: ({ row }) => (
                     <div className='form-dropdown'>
                         <select
                             className='form-select'
-                            id='linkedReleaseData.releaseRelation'
-                            aria-describedby='linkedReleaseData.releaseRelation.HelpBlock'
-                            name='releaseRelation'
-                            value={linkedReleaseData.get(key)?.releaseRelation ?? releaseRelation}
+                            value={row.original[1].releaseRelation}
                             onChange={(event) => {
-                                const updatedReleaseRelationStatus = event.target.value
-                                updateReleaseRelation(key, updatedReleaseRelationStatus, linkedReleaseData)
+                                updateReleaseRelation(row.original[0], event.target.value)
                             }}
                             required
                         >
@@ -181,23 +170,17 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                         </select>
                     </div>
                 ),
-        },
-        {
-            id: 'linkedReleaseData.mainlineState',
-            name: 'Project Mainline State',
-            sort: true,
-            formatter: ({ mainlineState, key }: { mainlineState: string; key: string }) =>
-                _(
+            },
+            {
+                id: 'mainlineState',
+                header: t('Project Mainline State'),
+                cell: ({ row }) => (
                     <div className='form-dropdown'>
                         <select
                             className='form-select'
-                            id='linkedReleaseData.mainlineState'
-                            aria-describedby='linkedReleaseData.mainlineState'
-                            name='mainlineState'
-                            value={linkedReleaseData.get(key)?.mainlineState ?? mainlineState}
+                            value={row.original[1].mainlineState}
                             onChange={(event) => {
-                                const updatedProjectMainlineState = event.target.value
-                                updateProjectMainlineState(key, updatedProjectMainlineState, linkedReleaseData)
+                                updateProjectMainlineState(row.original[0], event.target.value)
                             }}
                             required
                         >
@@ -209,52 +192,104 @@ export default function LinkedReleases({ projectPayload, existingReleaseData, se
                         </select>
                     </div>
                 ),
-        },
-        {
-            id: 'linkedReleaseData.comment',
-            name: 'Comments',
-            sort: true,
-            formatter: ({ comments, key }: { comments: string; key: string }) => _(
-                <div className='col-lg-9'>
-                    <input
-                        type='text'
-                        className='form-control'
-                        placeholder='Enter Comments'
-                        id='linkedReleaseData.comment'
-                        aria-describedby='linkedReleaseData.comment'
-                        name='comment'
-                        defaultValue={linkedReleaseData.get(key)?.comment ?? comments}
-                        onBlur={(event) => {
-                            const updatedComment = event.target.value
-                            handleComments(key, updatedComment, linkedReleaseData)
-                        }}
-                    />
-                </div>
-            )
-        }
+            },
+            {
+                id: 'comment',
+                header: t('Comments'),
+                cell: ({ row }) => (
+                    <div className='d-flex align-items-center'>
+                        <input
+                            type='text'
+                            className='form-control me-2'
+                            placeholder='Enter Comments'
+                            value={row.original[1].comment ?? ''}
+                            onChange={(event) => {
+                                handleComments(row.original[0], event.target.value)
+                            }}
+                        />
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            style={{
+                                border: 'none',
+                                minWidth: 'fit-content',
+                            }}
+                            onClick={() => handleClickDelete(row.original[0])}
+                            title={t('Delete')}
+                            aria-label={t('Delete linked release')}
+                        >
+                            <FaTrashAlt />
+                        </button>
+                    </div>
+                ),
+            },
+        ],
+        [
+            t,
+            updateReleaseRelation,
+            updateProjectMainlineState,
+            handleComments,
+            handleClickDelete,
+        ],
+    )
 
-    ]
+    const memoizedData = useMemo(
+        () => tableData,
+        [
+            tableData,
+        ],
+    )
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+    })
 
     return (
         <>
             <LinkedReleasesModal
-                    setLinkedReleaseData={setLinkedReleaseData}
-                    projectPayload={projectPayload}
-                    setProjectPayload={setProjectPayload}
-                    show={showLinkedReleasesModal}
-                    setShow={setShowLinkedReleasesModal}
+                projectPayload={projectPayload}
+                setProjectPayload={setProjectPayload}
+                show={showLinkedReleasesModal}
+                setShow={setShowLinkedReleasesModal}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>
-                    <h6 className='fw-medium' style={{ color: '#5D8EA9', paddingLeft: '0px' }}>
+                    <h6
+                        className='fw-medium'
+                        style={{
+                            color: '#5D8EA9',
+                            paddingLeft: '0px',
+                        }}
+                    >
                         {t('LINKED RELEASES')}
-                        <hr className='my-2 mb-2' style={{ color: '#5D8EA9', paddingLeft: '0px' }} />
+                        <hr
+                            className='my-2 mb-2'
+                            style={{
+                                color: '#5D8EA9',
+                                paddingLeft: '0px',
+                            }}
+                        />
                     </h6>
                 </div>
-                <div style={{ paddingLeft: '0px' }}>
-                    <Table data={tableData} columns={columns} sort={false}/>
+                <div className='mb-3'>
+                    {table ? (
+                        <SW360Table
+                            table={table}
+                            showProcessing={false}
+                        />
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
                 </div>
-                <div className='row' style={{ paddingLeft: '0px' }}>
+                <div
+                    className='row'
+                    style={{
+                        paddingLeft: '0px',
+                    }}
+                >
                     <div className='col-lg-4'>
                         <button
                             type='button'

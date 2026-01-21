@@ -11,17 +11,21 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-
-import { useCallback, useState } from 'react'
-
-import { Release } from '@/object-types'
 import { SelectUsersDialog } from 'next-sw360'
+import { type JSX, useCallback, useState } from 'react'
+import { Release } from '@/object-types'
 
 interface Props {
     releasePayload: Release
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
-    cotsResponsible: { [k: string]: string }
-    setCotsResponsible: React.Dispatch<React.SetStateAction<{ [k: string]: string }>>
+    cotsResponsible: {
+        [k: string]: string
+    }
+    setCotsResponsible: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
 }
 
 const CommercialDetailsAdministration = ({
@@ -60,14 +64,19 @@ const CommercialDetailsAdministration = ({
             ...releasePayload,
             cotsDetails: {
                 ...releasePayload.cotsDetails,
-                cotsResponsible: (Object.keys(responsibleUser).length === 0) ? '' : Object.keys(responsibleUser)[0],
+                cotsResponsible: Object.keys(responsibleUser).length === 0 ? '' : Object.keys(responsibleUser)[0],
             },
         })
     }
 
     return (
         <>
-            <div className='col' style={{ padding: '0px 12px' }}>
+            <div
+                className='col'
+                style={{
+                    padding: '0px 12px',
+                }}
+            >
                 <div className='row mb-4'>
                     <div className='section-header mb-2'>
                         <span className='fw-bold'>{t('Commercial Details Administration')}</span>
@@ -83,13 +92,19 @@ const CommercialDetailsAdministration = ({
                                     checked={releasePayload.cotsDetails?.usageRightAvailable ?? false}
                                     onChange={updateFieldChecked}
                                 />
-                                <label className='form-label fw-bold' htmlFor='usageRightAvailable'>
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='usageRightAvailable'
+                                >
                                     {t('Usage Right Available')}
                                 </label>
                             </div>
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='COTS_responsible' className='form-label fw-bold'>
+                            <label
+                                htmlFor='COTS_responsible'
+                                className='form-label fw-bold'
+                            >
                                 {t('COTS Responsible')}
                             </label>
                             <input
@@ -101,7 +116,9 @@ const CommercialDetailsAdministration = ({
                                 onClick={handleClickSearchComponentOwner}
                                 readOnly={true}
                                 name='COTS_responsible'
-                                value={(Object.values(cotsResponsible).length === 0) ? '' : Object.values(cotsResponsible)[0]}
+                                value={
+                                    Object.values(cotsResponsible).length === 0 ? '' : Object.values(cotsResponsible)[0]
+                                }
                             />
                             <SelectUsersDialog
                                 show={dialogCotsResponsibleOpen}
@@ -112,7 +129,10 @@ const CommercialDetailsAdministration = ({
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='clearingDeadline' className='form-label fw-bold'>
+                            <label
+                                htmlFor='clearingDeadline'
+                                className='form-label fw-bold'
+                            >
                                 {t('COTS Clearing Deadline')}
                             </label>
                             <input
@@ -129,7 +149,10 @@ const CommercialDetailsAdministration = ({
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
-                            <label htmlFor='licenseClearingReportURL' className='form-label fw-bold'>
+                            <label
+                                htmlFor='licenseClearingReportURL'
+                                className='form-label fw-bold'
+                            >
                                 {t('COTS Clearing Report URL')}
                             </label>
                             <input

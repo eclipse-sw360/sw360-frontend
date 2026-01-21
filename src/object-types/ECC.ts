@@ -9,7 +9,8 @@
 
 import { Links } from '@/object-types'
 
-interface ECC {
+interface ECCInterface {
+    id: string
     name: string
     version: string
     eccInformation: {
@@ -23,4 +24,4 @@ interface ECC {
     _links?: Links
 }
 
-export default ECC
+export default ECCInterface

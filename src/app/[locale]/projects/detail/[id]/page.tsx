@@ -8,17 +8,21 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import ProjectDetailTab from './components/ProjectDetailTab'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{
+        id: string
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'Projects',
 }
 
-const Detail = async ({ params }: Context) => {
+const Detail = async (props: Context): Promise<JSX.Element> => {
+    const params = await props.params
     return <ProjectDetailTab projectId={params.id} />
 }
 

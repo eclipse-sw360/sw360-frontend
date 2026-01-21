@@ -9,12 +9,12 @@
 // License-Filename: LICENSE
 
 interface NodeData {
-    rowData: Array<any>
+    rowData: unknown[]
     isExpanded?: boolean
-    children?: Array<NodeData>
+    children?: NodeData[]
     isExpandable?: boolean
     isNodeFetched?: boolean
-    additionalData?: any // You can add any thing to this field, this will help you customize fetching function when expanding
+    additionalData?: unknown
 }
 
 export default NodeData

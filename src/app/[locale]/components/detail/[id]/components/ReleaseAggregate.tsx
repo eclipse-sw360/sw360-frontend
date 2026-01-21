@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,15 +10,24 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, ReactNode } from 'react'
-
+import { ReactNode, useEffect, useState } from 'react'
 import { Component, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
-const ReleaseAgrregate = ({ component }: { component: Component }) : ReactNode => {
+const ReleaseAgrregate = ({ component }: { component: Component }): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     return (
         <table className='table summary-table'>
@@ -42,9 +52,13 @@ const ReleaseAgrregate = ({ component }: { component: Component }) : ReactNode =
                                         .map(
                                             (vendor: Vendor): React.ReactNode => (
                                                 <span key={vendor.fullName}>{vendor.fullName}</span>
-                                            )
+                                            ),
                                         )
-                                        .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                        .reduce((prev, curr): React.ReactNode[] => [
+                                            prev,
+                                            ', ',
+                                            curr,
+                                        ])}
                             </>
                         )}
                     </td>

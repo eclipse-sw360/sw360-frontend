@@ -30,7 +30,7 @@ function PackageHomePage({
     packageHomePageNoasserttion,
     setPackageHomePageNoasserttion,
     packageHomePage,
-}: Props) : ReactNode{
+}: Props): ReactNode {
     const selectPackageHomePageExist = () => {
         setPackageHomePageExist(true)
         setPackageHomePageNone(false)
@@ -58,8 +58,19 @@ function PackageHomePage({
         <td colSpan={3}>
             <div className='form-group'>
                 <label className='lableSPDX'>7.11 Package home page</label>
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ display: 'inline-flex', flex: 3, marginRight: '1rem' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'inline-flex',
+                            flex: 3,
+                            marginRight: '1rem',
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='packageHomepageExist'
@@ -70,7 +81,10 @@ function PackageHomePage({
                             checked={packageHomePageExist}
                         />
                         <input
-                            style={{ flex: 6, marginRight: '1rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '1rem',
+                            }}
                             id='packageHomePage'
                             className='form-control'
                             type='text'
@@ -81,7 +95,11 @@ function PackageHomePage({
                             disabled={packageHomePageNone || packageHomePageNoasserttion}
                         />
                     </div>
-                    <div style={{ flex: 2 }}>
+                    <div
+                        style={{
+                            flex: 2,
+                        }}
+                    >
                         <input
                             className='spdx-radio'
                             id='packageHomepageNone'
@@ -92,7 +110,9 @@ function PackageHomePage({
                             checked={packageHomePageNone}
                         />
                         <label
-                            style={{ marginRight: '2rem' }}
+                            style={{
+                                marginRight: '2rem',
+                            }}
                             className='form-check-label radio-label lableSPDX'
                             htmlFor='packageHomePageNone'
                         >
@@ -107,7 +127,10 @@ function PackageHomePage({
                             onChange={selectPackageHomePageNoasserttion}
                             checked={packageHomePageNoasserttion}
                         />
-                        <label className='form-check-label radio-label lableSPDX' htmlFor='packageHomePageNoAssertion'>
+                        <label
+                            className='form-check-label radio-label lableSPDX'
+                            htmlFor='packageHomePageNoAssertion'
+                        >
                             NOASSERTION
                         </label>
                     </div>

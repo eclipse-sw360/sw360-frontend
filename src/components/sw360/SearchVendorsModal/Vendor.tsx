@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 export interface Vendor {
-    fullName: string;
-    shortName: string;
-    url: string;
-};
+    fullName: string
+    shortName: string
+    url: string
+}

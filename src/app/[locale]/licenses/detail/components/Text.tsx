@@ -9,16 +9,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import { LicenseDetail } from '@/object-types'
 import { useTranslations } from 'next-intl'
-import styles from '../detail.module.css'
 import { ReactNode } from 'react'
+import { LicenseDetail } from '@/object-types'
 
 interface Props {
     license: LicenseDetail
 }
 
-const Text = ({ license }: Props) : ReactNode => {
+const Text = ({ license }: Props): ReactNode => {
     const t = useTranslations('default')
     return (
         <div className='col'>
@@ -31,7 +30,7 @@ const Text = ({ license }: Props) : ReactNode => {
                 <tbody>
                     <tr>
                         <td>
-                            <pre className={`${styles['pre-text']}`}>{license.text ?? ''}</pre>
+                            <pre className='license-detail-pre-text'>{license.text ?? ''}</pre>
                         </td>
                     </tr>
                 </tbody>

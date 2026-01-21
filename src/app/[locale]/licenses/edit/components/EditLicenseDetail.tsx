@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,13 +10,15 @@
 // License-Filename: LICENSE
 
 'use client'
-import { Embedded, HttpStatus, LicensePayload, LicenseType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession, signOut } from 'next-auth/react'
+
+import { StatusCodes } from 'http-status-codes'
+import { useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useSearchParams } from 'next/navigation'
 import { ReactNode, useEffect, useState } from 'react'
-import styles from './LicenseDetails.module.css'
+import { Embedded, ErrorDetails, LicensePayload, LicenseType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     inputValid: boolean
@@ -33,10 +36,19 @@ const EditLicenseDetail = ({
     inputValid,
     errorFullName,
     setErrorFullName,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
     const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
+    const session = useSession()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        session,
+    ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.target.name === 'fullName') {
@@ -61,37 +73,78 @@ const EditLicenseDetail = ({
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session))
-                    return signOut()
-                const response = await ApiUtils.GET(`licenseTypes`, session.user.access_token, signal)
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(`licenseTypes`, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
-                const licenses = await response.json() as EmbeddedLicenseTypes
-                setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
-            } catch (e) {
-                console.error(e)
+                const licenses = (await response.json()) as EmbeddedLicenseTypes
+                setLicenseTypes(licenses._embedded?.['sw360:licenseTypes'] ?? [])
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
         return () => controller.abort()
-    }, [params])
+    }, [
+        params,
+    ])
 
     return (
-        <div className='row mb-4' style={{ padding: '0px 12px', fontSize: '14px' }}>
-            <div className={`${styles['header']} mb-1`} style={{ paddingTop: '0.5rem', height: '45px' }}>
-                <p className='fw-bold mt-1' style={{ fontSize: '0.875rem' }}>
+        <div
+            className='row mb-4'
+            style={{
+                padding: '0px 12px',
+                fontSize: '14px',
+            }}
+        >
+            <div
+                className='header mb-1'
+                style={{
+                    paddingTop: '0.5rem',
+                    height: '45px',
+                }}
+            >
+                <p
+                    className='fw-bold mt-1'
+                    style={{
+                        fontSize: '0.875rem',
+                    }}
+                >
                     {t('License Details')}
                 </p>
             </div>
-            <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
-                <div className='row' style={{ paddingBottom: '0.7rem' }}>
+            <div
+                style={{
+                    backgroundColor: '#FFF',
+                    borderBottom: '1px solid #DCDCDC',
+                }}
+            >
+                <div
+                    className='row'
+                    style={{
+                        paddingBottom: '0.7rem',
+                    }}
+                >
                     <div className='col-lg-4'>
-                        <label htmlFor='fullName' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('Fullname')}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                        <label
+                            htmlFor='fullName'
+                            className='form-label fw-bold'
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                        >
+                            {t('Full Name')}
+                            <span
+                                className='text-red'
+                                style={{
+                                    color: '#F7941E',
+                                }}
+                            >
                                 *
                             </span>
                         </label>
@@ -111,9 +164,20 @@ const EditLicenseDetail = ({
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='shortName' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('Shortname')}
-                            <span className='text-red' style={{ color: '#F7941E' }}>
+                        <label
+                            htmlFor='shortName'
+                            className='form-label fw-bold'
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                        >
+                            {t('Short Name')}
+                            <span
+                                className='text-red'
+                                style={{
+                                    color: '#F7941E',
+                                }}
+                            >
                                 *
                             </span>
                         </label>
@@ -135,7 +199,9 @@ const EditLicenseDetail = ({
                         <label
                             htmlFor='licenseTypeDatabaseId'
                             className='form-label fw-bold'
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                            }}
                         >
                             {t('License Type')}{' '}
                         </label>
@@ -149,7 +215,10 @@ const EditLicenseDetail = ({
                         >
                             <option value=''>{t('No type selected')}</option>
                             {licenseTypes.map((item) => (
-                                <option key={item.id} value={item.id}>
+                                <option
+                                    key={item.id}
+                                    value={item.id}
+                                >
                                     {item.licenseType}
                                 </option>
                             ))}
@@ -157,11 +226,27 @@ const EditLicenseDetail = ({
                     </div>
                 </div>
             </div>
-            <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC' }}>
-                <div className='row' style={{ paddingBottom: '0.7rem' }}>
+            <div
+                style={{
+                    backgroundColor: '#FFF',
+                    borderBottom: '1px solid #DCDCDC',
+                }}
+            >
+                <div
+                    className='row'
+                    style={{
+                        paddingBottom: '0.7rem',
+                    }}
+                >
                     <div className='col-lg-4'>
-                        <label htmlFor='OSIApproved' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('OSI Approved?')}{' '}
+                        <label
+                            htmlFor='OSIApproved'
+                            className='form-label fw-bold'
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                        >
+                            {t('OSI Approved')}{' '}
                         </label>
                         <select
                             className={`form-control ${inputValid ? 'is-valid' : ''}`}
@@ -172,13 +257,19 @@ const EditLicenseDetail = ({
                             onChange={updateField}
                             value={licensePayload.OSIApproved ?? ''}
                         >
-                            <option value='NA'>{t('(n/a)')}</option>
-                            <option value='YES'>{t('yes')}</option>
+                            <option value='NA'>{t('NA')}</option>
+                            <option value='YES'>{t('Yes')}</option>
                         </select>
                     </div>
                     <div className='col-lg-4'>
-                        <label htmlFor='FSFLibre' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
-                            {t('FSF Free/Libre?')}{' '}
+                        <label
+                            htmlFor='FSFLibre'
+                            className='form-label fw-bold'
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                        >
+                            {t('FSF Free Libre')}{' '}
                         </label>
                         <select
                             className={`form-control ${inputValid ? 'is-valid' : ''}`}
@@ -189,8 +280,8 @@ const EditLicenseDetail = ({
                             value={licensePayload.FSFLibre ?? ''}
                             onChange={updateField}
                         >
-                            <option value='NA'>{t('(n/a)')}</option>
-                            <option value='YES'>{t('yes')}</option>
+                            <option value='NA'>{t('NA')}</option>
+                            <option value='YES'>{t('Yes')}</option>
                         </select>
                     </div>
                     <div className='col-lg-4'>
@@ -203,17 +294,40 @@ const EditLicenseDetail = ({
                                 checked={licensePayload.checked ?? false}
                                 onChange={updateFieldChecked}
                             />
-                            <label className='form-label fw-bold' htmlFor='isChecked' style={{ cursor: 'pointer' }}>
-                                {t('Is checked')}
+                            <label
+                                className='form-label fw-bold'
+                                htmlFor='isChecked'
+                                style={{
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                {t('Is Checked')}
                             </label>
                         </div>
                     </div>
                 </div>
             </div>
-            <div style={{ backgroundColor: '#FFF', borderBottom: '1px solid #DCDCDC', width: '495px' }}>
-                <div className='row' style={{ paddingBottom: '0.7rem' }}>
+            <div
+                style={{
+                    backgroundColor: '#FFF',
+                    borderBottom: '1px solid #DCDCDC',
+                    width: '495px',
+                }}
+            >
+                <div
+                    className='row'
+                    style={{
+                        paddingBottom: '0.7rem',
+                    }}
+                >
                     <div className='col-lg-12'>
-                        <label htmlFor='note' className='form-label fw-bold' style={{ cursor: 'pointer' }}>
+                        <label
+                            htmlFor='note'
+                            className='form-label fw-bold'
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                        >
                             {t('Note')}
                         </label>
                         <textarea

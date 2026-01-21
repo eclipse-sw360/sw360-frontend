@@ -9,6 +9,7 @@
 
 'use client'
 
+import type { JSX } from 'react'
 import { ProjectPayload } from '@/object-types'
 import Clearing from './component/Administration/Clearing'
 import LicenseInfoHeader from './component/Administration/LicenseInfoHeader'
@@ -23,9 +24,18 @@ export default function Administration({ projectPayload, setProjectPayload }: Pr
     return (
         <>
             <div className='ms-1'>
-                <Clearing projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
-                <Lifecycle projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
-                <LicenseInfoHeader projectPayload={projectPayload} setProjectPayload={setProjectPayload} />
+                <Clearing
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
+                <Lifecycle
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
+                <LicenseInfoHeader
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload}
+                />
             </div>
         </>
     )

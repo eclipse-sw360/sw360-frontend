@@ -9,22 +9,36 @@
 
 'use client'
 
-import { HttpStatus, Package } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
-import { useEffect, useState, ReactNode } from 'react'
-import { ListGroup, Spinner, Tab } from 'react-bootstrap'
+import { ReactNode, useEffect, useState } from 'react'
+import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import Summary from './Summary'
+import { ApiUtils, CommonUtils } from '@/utils'
 import ChangeLog from './Changelog'
+import Summary from './Summary'
 
-export default function PackageDetailTab({ packageId }: { packageId: string }) : ReactNode {
+function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
     const router = useRouter()
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const packagesPath = `/${locale}/packages`
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -34,35 +48,40 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `packages/${packageId}`,
-                    session.user.access_token,
-                    signal
-                )
-                if (response.status === HttpStatus.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== HttpStatus.OK) {
-                    return notFound()
+                const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
 
-                const data = await response.json() as Package
+                const data = (await response.json()) as Package
 
-                setSummaryData({ id: packageId, ...data })
-            } catch (e) {
-                console.error(e)
+                setSummaryData({
+                    id: packageId,
+                    ...data,
+                })
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
             }
         })()
 
         return () => controller.abort()
-    }, [packageId, session, status])
+    }, [
+        packageId,
+        session,
+        status,
+    ])
 
     const handleEditPackage = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
-        if (session.user.email === summaryData?._embedded?.createdBy?.email){
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (session.user.email === summaryData?._embedded?.createdBy?.email) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/packages/edit/${packageId}`)
-        }
-        else {
+        } else {
             MessageService.success(t('You will create a moderation request if you update'))
             router.push(`/packages/edit/${packageId}`)
         }
@@ -70,15 +89,36 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
 
     return (
         <>
+            <Breadcrumb className='container page-content'>
+                <Breadcrumb.Item
+                    linkAs={Link}
+                    href={packagesPath}
+                >
+                    {t('Packages')}
+                </Breadcrumb.Item>
+                <Breadcrumb.Item active>
+                    {summaryData ? `${summaryData.name} (${summaryData.version})` : packageId}
+                </Breadcrumb.Item>
+            </Breadcrumb>
             <div className='container page-content'>
-                <Tab.Container defaultActiveKey='summary' mountOnEnter={true} unmountOnExit={true}>
+                <Tab.Container
+                    defaultActiveKey='summary'
+                    mountOnEnter={true}
+                    unmountOnExit={true}
+                >
                     <div className='row'>
                         <div className='col-sm-2 me-3'>
                             <ListGroup>
-                                <ListGroup.Item action eventKey='summary'>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='summary'
+                                >
                                     <div className='my-2'>{t('Summary')}</div>
                                 </ListGroup.Item>
-                                <ListGroup.Item action eventKey='changeLog'>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='changeLog'
+                                >
                                     <div className='my-2'>{t('Change Log')}</div>
                                 </ListGroup.Item>
                             </ListGroup>
@@ -100,7 +140,12 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
                                 <Tab.Content>
                                     <Tab.Pane eventKey='summary'>
                                         {!summaryData ? (
-                                            <div className='col-12' style={{ textAlign: 'center' }}>
+                                            <div
+                                                className='col-12'
+                                                style={{
+                                                    textAlign: 'center',
+                                                }}
+                                            >
                                                 <Spinner className='spinner' />
                                             </div>
                                         ) : (
@@ -119,3 +164,8 @@ export default function PackageDetailTab({ packageId }: { packageId: string }) :
         </>
     )
 }
+
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(PackageDetailTab, [
+    UserGroupType.SECURITY_USER,
+])

@@ -15,4 +15,5 @@ set -e
 git config --global --add safe.directory /workspaces/sw360-frontend
 
 # Install npm packages to development
-npm install
+pnpm config set pnpm-prefix devnode
+pnpm install

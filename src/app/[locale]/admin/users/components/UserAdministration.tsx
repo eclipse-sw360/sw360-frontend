@@ -9,135 +9,418 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { AdvancedSearch, Table, _ } from 'next-sw360'
-import { FaPencilAlt } from 'react-icons/fa'
-import { OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap'
-import { TfiFiles } from "react-icons/tfi"
-import { SW360_API_URL } from '@/utils/env'
-import { User, Embedded } from '@/object-types'
-import { useSession } from 'next-auth/react'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { BsFiles, BsPencil } from 'react-icons/bs'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
+import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
+import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
+
+type EmbeddedUsers = Embedded<User, 'sw360:users'>
 
 export default function UserAdminstration(): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
-    const [num, setNum]  = useState< null | number >(null)
+    const [num, setNum] = useState<number>(0)
     const router = useRouter()
+    const [editingUserId, setEditingUserId] = useState<string | undefined>(undefined)
+    const [departments, setDepartments] = useState<Array<string | undefined>>([])
+    const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] =
+        useState<boolean>(false)
+    const params = useSearchParams()
+    const session = useSession()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
 
     const handleAddUsers = () => {
         router.push('/admin/users/add')
     }
 
-    const columns = [
-        {
-            id: 'users.givenName',
-            name: t('Given Name'),
-            sort: true,
-        },
-        {
-            id: 'users.lastName',
-            name: t('Last Name'),
-            sort: true,
-        },
-        {
-            id: 'users.email',
-            name: t('Email'),
-            width: '20%',
-            formatter: (email: string) =>
-                _(
-                    <>
-                        <Link
-                            className={`text-link`}
-                            href={`mailto:${email}`}
-                        >
-                            {email}
-                        </Link>
-                    </>
-                ),
-            sort: true,
-        },
-        {
-            id: 'users.activeStatus',
-            name: t('Active status'),
-            sort: true,
-        },
-        {
-            id: 'users.primaryDepartment',
-            name: t('Primary Department'),
-            sort: true,
-        },
-        {
-            id: 'users.primaryDepartmentRole',
-            name: t('Primary Department Role'),
-            sort: true,
-        },
-        {
-            id: 'users.secondaryDepartmentsAndRoles',
-            name: t('Secondary Departments and Roles'),
-            sort: true,
-        },
-        {
-            id: 'users.actions',
-            name: t('Actions'),
-            width: '9%',
-            formatter: (id: string) =>
-            _(
-                <>
-                    <span className='d-flex justify-content-evenly'>
-                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                            <Link href={`/admin/users/edit/${id}`} className='overlay-trigger'>
-                                <FaPencilAlt className='btn-icon' />
-                            </Link>
-                        </OverlayTrigger>
-
-                        <OverlayTrigger overlay={<Tooltip>{t('Edit User Secondary Departments And Role')}</Tooltip>}>
-                            <span className='d-inline-block'>
-                                <TfiFiles className='btn-icon overlay-trigger' />
-                            </span>
-                        </OverlayTrigger>
-                    </span>
-                </>
-            ),
-            sort: true,
-        },
-    ]
-
-    const initServerPaginationConfig = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return
-        return {
-            url: `${SW360_API_URL}/resource/api/users`,
-            then: (data: Embedded<User, 'sw360:users'>) => {
-                setNum(data.page ? data.page.totalElements : 0)
-                return data._embedded['sw360:users'].map((elem: User) => [
-                    elem.givenName ?? '',
-                    elem.lastName ?? '',
-                    elem.email,
-                    (elem.deactivated === undefined || elem.deactivated === false) ? 'Inactive' : 'Active',
-                    elem.department ?? '',
-                    '',
-                    '',
-                    CommonUtils.getIdFromUrl(elem._links?.self.href),
-                ])
-            },
-            total: (data: Embedded<User, 'sw360:users'>) => data.page ? data.page.totalElements : 0,
-            headers: { Authorization: `${session.user.access_token}` },
-        }
+    const downloadUsers = () => {
+        getSession()
+            .then((session) => {
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                void DownloadService.download('importExport/downloadUsers', session, 'users.csv', {
+                    Accept: 'text/plain',
+                })
+            })
+            .catch((error: unknown) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            })
     }
+
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === StatusCodes.OK) {
+            const data = await response.json()
+            return data
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
+            MessageService.error(t('Unauthorized request'))
+            return
+        } else {
+            return undefined
+        }
+    }, [])
+
+    useEffect(() => {
+        void fetchData('users/departments')
+            .then((departments: Array<string> | undefined) => {
+                if (departments === undefined) {
+                    return
+                }
+                if (!CommonUtils.isNullOrUndefined(departments)) {
+                    setDepartments(departments)
+                }
+            })
+            .catch((error) => {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            })
+    }, [])
+
+    const handleEditSecondaryDepartmentAndRoles = (id: string) => {
+        setEditingUserId(id)
+        setOpenEditSecondaryDepartmentAndRolesModal(true)
+    }
+
+    const columns = useMemo<ColumnDef<User>[]>(
+        () => [
+            {
+                id: 'givenName',
+                header: t('Given Name'),
+                accessorKey: 'givenName',
+                enableSorting: false,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'lastname',
+                header: t('Last Name'),
+                accessorKey: 'lastName',
+                enableSorting: true,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'email',
+                accessorKey: 'email',
+                header: t('Email'),
+                enableSorting: true,
+                cell: ({ row }) => {
+                    return (
+                        <Link
+                            className='text-link'
+                            href={`/admin/users/details/${CommonUtils.getIdFromUrl(row.original._links?.self.href)}`}
+                        >
+                            {row.original.email}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'deactivated',
+                accessorKey: 'deactivated',
+                header: t('Active status'),
+                enableSorting: true,
+                cell: ({ row }) => {
+                    const { deactivated } = row.original
+                    return deactivated === undefined || deactivated === false ? t('Active') : t('Inactive')
+                },
+                meta: {
+                    width: '8%',
+                },
+            },
+            {
+                id: 'department',
+                header: t('Primary Department'),
+                accessorKey: 'department',
+                enableSorting: true,
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'primaryRoles',
+                header: t('Primary Department Role'),
+                accessorKey: 'userGroup',
+                enableSorting: true,
+                cell: ({ row }) => {
+                    const { userGroup } = row.original
+                    return <>{userGroup ? t(userGroup) : t('User')}</>
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'secondaryDepartmentsAndRoles',
+                header: t('Secondary Departments and Roles'),
+                cell: ({ row }) => {
+                    const { secondaryDepartmentsAndRoles } = row.original
+                    return (
+                        <ul className='text-break text-start'>
+                            {Object.entries(secondaryDepartmentsAndRoles ?? {}).map(([department, roles], index) => (
+                                <li key={index}>
+                                    <b>{department}</b> {'->'} {roles.map((role) => t(role as never)).join(', ')}
+                                </li>
+                            ))}
+                        </ul>
+                    )
+                },
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => {
+                    return (
+                        <span className='d-flex justify-content-evenly'>
+                            <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                <Link
+                                    href={`/admin/users/edit/${CommonUtils.getIdFromUrl(row.original._links?.self.href)}`}
+                                    className='overlay-trigger'
+                                >
+                                    <BsPencil
+                                        className='btn-icon'
+                                        size={20}
+                                    />
+                                </Link>
+                            </OverlayTrigger>
+
+                            <OverlayTrigger
+                                rootClose={true}
+                                overlay={<Tooltip>{t('Edit User Secondary Departments And Role')}</Tooltip>}
+                            >
+                                <span
+                                    className='d-inline-block'
+                                    onClick={() =>
+                                        handleEditSecondaryDepartmentAndRoles(
+                                            CommonUtils.getIdFromUrl(row.original._links?.self.href),
+                                        )
+                                    }
+                                >
+                                    <BsFiles
+                                        className='btn-icon overlay-trigger cursor-pointer'
+                                        size={20}
+                                    />
+                                </span>
+                            </OverlayTrigger>
+                        </span>
+                    )
+                },
+                meta: {
+                    width: '7%',
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [userData, setUserData] = useState<User[]>(() => [])
+    const memoizedData = useMemo(
+        () => userData,
+        [
+            userData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = userData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const searchParams = Object.fromEntries(params.entries())
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `users`,
+                    Object.fromEntries(
+                        Object.entries({
+                            ...searchParams,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const data = (await response.json()) as EmbeddedUsers
+                setPaginationMeta(data.page)
+                setNum(data.page?.totalElements ?? 0)
+                setUserData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:users'])
+                        ? []
+                        : data['_embedded']['sw360:users'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        params.toString(),
+        session,
+    ])
+
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+    }, [
+        params.toString(),
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
+        },
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+
+        meta: {
+            rowHeightConstant: true,
+        },
+    })
 
     const advancedSearch = [
         {
             fieldName: t('Given Name'),
             value: '',
-            paramName: 'givenName',
+            paramName: 'givenname',
         },
         {
             fieldName: t('Last Name'),
             value: '',
-            paramName: 'lastName',
+            paramName: 'lastname',
         },
         {
             fieldName: t('Email'),
@@ -146,14 +429,54 @@ export default function UserAdminstration(): JSX.Element {
         },
         {
             fieldName: t('Primary Department'),
-            value: '',
+            value: departments.map((department) => ({
+                key: department ?? '',
+                text: department ?? '',
+            })),
             paramName: 'department',
         },
         {
             fieldName: t('Primary Department Role'),
-            value: '',
-            paramName: 'departmentRole',
-        }
+            value: [
+                {
+                    key: 'USER',
+                    text: t('User'),
+                },
+                {
+                    key: 'ADMIN',
+                    text: t('Admin'),
+                },
+                {
+                    key: 'CLEARING_ADMIN',
+                    text: t('CLEARING_ADMIN'),
+                },
+                {
+                    key: 'CLEARING_EXPERT',
+                    text: t('CLEARING_EXPERT'),
+                },
+                {
+                    key: 'ECC_ADMIN',
+                    text: t('ECC_ADMIN'),
+                },
+                {
+                    key: 'SECURITY_ADMIN',
+                    text: t('SECURITY_ADMIN'),
+                },
+                {
+                    key: 'SW360_ADMIN',
+                    text: t('SW360_ADMIN'),
+                },
+                {
+                    key: 'SECURITY_USER',
+                    text: t('SECURITY_USER'),
+                },
+                {
+                    key: 'VIEWER',
+                    text: t('VIEWER'),
+                },
+            ],
+            paramName: 'usergroup',
+        },
     ]
 
     return (
@@ -161,30 +484,63 @@ export default function UserAdminstration(): JSX.Element {
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-lg-2'>
-                        <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
+                        <AdvancedSearch
+                            title='Advanced Search'
+                            fields={advancedSearch}
+                        />
                     </div>
                     <div className='col-lg-10'>
                         <div className='row d-flex justify-content-between ms-1'>
-                            <button className='btn btn-primary col-auto' onClick={handleAddUsers}>
-                                {t('Add User')}
-                            </button>
-                            <div className='col-auto buttonheader-title'>{`${t('Users')} (${(num === null) ? num : ''})`}</div>
-                        </div>
-                        <h5 className="mt-3 mb-1 ms-1 header-underlined">
-                            {t('Users')}
-                        </h5>
-                        {
-                            status === 'authenticated' ?
-                            <div className="ms-1">
-                                <Table columns={columns} server={initServerPaginationConfig()} selector={true} sort={false}/>
-                            </div> :
-                            <div className='col-12 mt-1 text-center'>
-                                <Spinner className='spinner' />
+                            <div className='col-auto px-0'>
+                                <button
+                                    className='btn btn-primary me-2'
+                                    onClick={handleAddUsers}
+                                >
+                                    {t('Add User')}
+                                </button>
+                                <button
+                                    className='btn btn-primary'
+                                    onClick={downloadUsers}
+                                >
+                                    {t('Download Users')}
+                                </button>
                             </div>
-                        }
+                            <div className='col-auto buttonheader-title'>{`${t('Users')} (${num})`}</div>
+                        </div>
+                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('Users')}</h5>
+                        <div className='mb-3'>
+                            {pageableQueryParam && table && paginationMeta ? (
+                                <>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <SW360Table
+                                        table={table}
+                                        showProcessing={showProcessing}
+                                    />
+                                    <TableFooter
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        paginationMeta={paginationMeta}
+                                    />
+                                </>
+                            ) : (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
+            {editingUserId !== undefined && (
+                <EditSecondaryDepartmentAndRolesModal
+                    show={openEditSecondaryDepartmentAndRolesModal}
+                    setShow={setOpenEditSecondaryDepartmentAndRolesModal}
+                    editingUserId={editingUserId}
+                />
+            )}
         </>
     )
 }

@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,9 +11,14 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
+import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
@@ -26,15 +32,18 @@ import {
     ComponentTabIds,
     DocumentTypes,
     Embedded,
-    HttpStatus,
+    ErrorDetails,
     LinkedVulnerability,
+    PageableQueryParam,
+    PaginationMeta,
     User,
+    UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
-import MessageService from '@/services/message.service'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -43,75 +52,56 @@ interface Props {
     componentId: string
 }
 
-const tabList = [
-    {
-        id: CommonTabIds.SUMMARY,
-        name: 'Summary',
-    },
-    {
-        id: ComponentTabIds.RELEASE_OVERVIEW,
-        name: 'Release Overview',
-    },
-    {
-        id: CommonTabIds.ATTACHMENTS,
-        name: 'Attachments',
-    },
-    {
-        id: CommonTabIds.VULNERABILITIES,
-        name: 'Vulnerabilities',
-    },
-    {
-        id: CommonTabIds.CHANGE_LOG,
-        name: 'Change Log',
-    },
-]
-
-const DetailOverview = ({ componentId }: Props) : ReactNode => {
+const DetailOverview = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [changesLogTab, setChangesLogTab] = useState('list-change')
-    const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [component, setComponent] = useState<Component | undefined>(undefined)
-    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
+    const [changeLogId, setChangeLogId] = useState('')
+    const [changelogTab, setChangelogTab] = useState('list-change')
+    const session = useSession()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
 
     const fetchData = useCallback(
         async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
+            if (CommonUtils.isNullOrUndefined(session.data)) return
+            const response = await ApiUtils.GET(url, session.data.user.access_token)
+            if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
                 return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
             } else {
                 return undefined
             }
         },
-        []
+        [
+            session,
+        ],
     )
 
     const downloadBundle = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
-        DownloadService.download(
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        await DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
-            session,
-            'AttachmentBundle.zip'
+            session.data,
+            'AttachmentBundle.zip',
         )
     }
 
-    const extractUserEmailFromSession = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return
-        setUserEmail(session.user.email)
+    const extractUserEmailFromSession = () => {
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        setUserEmail(session.data.user.email)
     }
 
     useEffect(() => {
@@ -130,30 +120,22 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
             })
             .catch((err) => console.error(err))
 
-        fetchData(`changelog/document/${componentId}`)
-            .then((changeLogs: EmbeddedChangelogs | undefined) => {
-                if (changeLogs === undefined) return
-                setChangeLogList(
-                    CommonUtils.isNullOrUndefined(changeLogs['_embedded']['sw360:changeLogs'])
-                        ? []
-                        : changeLogs['_embedded']['sw360:changeLogs']
-                )
-            })
-            .catch((err) => console.error(err))
-
         fetchData(`components/${componentId}/vulnerabilities`)
             .then((data: EmbeddedVulnerabilities | undefined) => {
                 if (data === undefined) return
 
                 if (!CommonUtils.isNullOrUndefined(data)) {
-                    setVulnerData(data['_embedded']['sw360:vulnerabilityDTOes'])
+                    setVulnerData(data['_embedded']?.['sw360:vulnerabilityDTOes'] ?? [])
                 }
             })
             .catch((err) => console.error(err))
-    }, [componentId, fetchData])
+    }, [
+        componentId,
+        fetchData,
+    ])
 
     const getSubcribersEmail = (component: Component) => {
-        return (component._embedded !== undefined && component._embedded['sw360:subscribers'] !== undefined)
+        return component._embedded !== undefined && component._embedded['sw360:subscribers'] !== undefined
             ? Object.values(component._embedded['sw360:subscribers'].map((user: User) => user.email))
             : []
     }
@@ -164,34 +146,177 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
     }
 
     const handleSubcriptions = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return
-        }
-        await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.user.access_token)
+        if (CommonUtils.isNullOrUndefined(session.data)) return
+
+        await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.data.user.access_token)
         fetchData(`components/${componentId}`)
             .then((component: Component | undefined) => {
                 if (component === undefined) return
                 setComponent(component)
                 setSubscribers(getSubcribersEmail(component))
-            }).catch((e) => console.error(e))
+            })
+            .catch((e) => console.error(e))
     }
 
+    const tabList = [
+        {
+            id: CommonTabIds.SUMMARY,
+            name: 'Summary',
+        },
+        {
+            id: ComponentTabIds.RELEASE_OVERVIEW,
+            name: 'Release Overview',
+        },
+        {
+            id: CommonTabIds.ATTACHMENTS,
+            name: 'Attachments',
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        {
+            id: CommonTabIds.VULNERABILITIES,
+            name: 'Vulnerabilities',
+        },
+        {
+            id: CommonTabIds.CHANGE_LOG,
+            name: 'Change Log',
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+    ]
+
     const headerButtons = {
-        Edit: { link: `/components/edit/${componentId}`, type: 'primary', name: t('Edit component') },
-        Merge: { link: '', type: 'secondary', name: t('Merge') },
-        Split: { link: '', type: 'secondary', name: t('Split') },
+        Edit: {
+            link: `/components/edit/${componentId}`,
+            type: 'primary',
+            name: t('Edit component'),
+            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        Merge: {
+            link: `/components/detail/${componentId}/merge`,
+            type: 'secondary',
+            name: t('Merge'),
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
+        Split: {
+            link: `/components/detail/${componentId}/split`,
+            type: 'secondary',
+            name: t('Split'),
+            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+        },
         Subscribe: {
             link: '',
             type: isUserSubscribed() ? 'outline-danger' : 'outline-success',
             name: isUserSubscribed() ? t('Unsubscribe') : t('Subscribe'),
-            onClick: handleSubcriptions
-        }
+            onClick: handleSubcriptions,
+        },
     }
 
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = changeLogList.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `changelog/document/${componentId}`,
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangelogs
+                    setPaginationMeta(data.page)
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        componentId,
+        session,
+    ])
+
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const componentsPath = `/${locale}/components`
+
+    // Early return for loading state
+    if (!component) {
+        return (
+            <div className='container page-content'>
+                <div className='col-12 mt-5 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            </div>
+        )
+    }
+
+    // Normal render when component data is available
     return (
-        component && (
+        <>
+            <Breadcrumb className='container page-content'>
+                <Breadcrumb.Item
+                    linkAs={Link}
+                    href={componentsPath}
+                >
+                    {t('Components')}
+                </Breadcrumb.Item>
+                <Breadcrumb.Item active>{component.name}</Breadcrumb.Item>
+            </Breadcrumb>
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-2 sidebar'>
@@ -203,11 +328,25 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                         />
                     </div>
                     <div className='col'>
-                        <div className='row' style={{ marginBottom: '20px' }}>
-                            <PageButtonHeader title={component.name} buttons={headerButtons}>
+                        <div
+                            className='row'
+                            style={{
+                                marginBottom: '20px',
+                            }}
+                        >
+                            <PageButtonHeader
+                                title={component.name}
+                                buttons={headerButtons}
+                            >
                                 {selectedTab === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
-                                    <div className='list-group-companion' data-belong-to='tab-Attachments'>
-                                        <div className='btn-group' role='group'>
+                                    <div
+                                        className='list-group-companion'
+                                        data-belong-to='tab-Attachments'
+                                    >
+                                        <div
+                                            className='btn-group'
+                                            role='group'
+                                        >
                                             <button
                                                 id='downloadAttachmentBundle'
                                                 type='button'
@@ -226,22 +365,26 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                                         role='tablist'
                                     >
                                         <a
-                                            className={`nav-item nav-link ${
-                                                changesLogTab == 'list-change' ? 'active' : ''
-                                            }`}
-                                            onClick={() => setChangesLogTab('list-change')}
-                                            style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                            className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
+                                            onClick={() => setChangelogTab('list-change')}
+                                            style={{
+                                                color: '#F7941E',
+                                                fontWeight: 'bold',
+                                            }}
                                         >
                                             {t('Change Log')}
                                         </a>
                                         <a
-                                            className={`nav-item nav-link ${
-                                                changesLogTab == 'view-log' ? 'active' : ''
-                                            }`}
+                                            className={`nav-item nav-link ${changelogTab == 'view-log' ? 'active' : ''}`}
                                             onClick={() => {
-                                                changeLogIndex !== -1 && setChangesLogTab('view-log')
+                                                if (changeLogId !== '') {
+                                                    setChangelogTab('view-log')
+                                                }
                                             }}
-                                            style={{ color: '#F7941E', fontWeight: 'bold' }}
+                                            style={{
+                                                color: '#F7941E',
+                                                fontWeight: 'bold',
+                                            }}
                                         >
                                             {t('Changes')}
                                         </a>
@@ -249,38 +392,76 @@ const DetailOverview = ({ componentId }: Props) : ReactNode => {
                                 )}
                             </PageButtonHeader>
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary component={component} componentId={componentId} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
+                        >
+                            <Summary
+                                component={component}
+                                componentId={componentId}
+                            />
                         </div>
-                        <div className='row' hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}
+                        >
                             <ReleaseOverview componentId={componentId} />
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments documentId={componentId} documentType={DocumentTypes.COMPONENT} />
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
+                        >
+                            <Attachments
+                                documentId={componentId}
+                                documentType={DocumentTypes.COMPONENT}
+                            />
                         </div>
-                        <div className='containers' hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}>
+                        <div
+                            className='containers'
+                            hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}
+                        >
                             <ComponentVulnerabilities vulnerData={vulnerData} />
                         </div>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}>
+                        <div
+                            className='row'
+                            hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}
+                        >
                             <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
+                                <div
+                                    className='row'
+                                    hidden={changelogTab !== 'list-change' ? true : false}
+                                >
                                     <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
+                                        setChangeLogId={setChangeLogId}
                                         documentId={componentId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
+                                        setChangesLogTab={setChangelogTab}
+                                        changeLogList={memoizedData}
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                        showProcessing={showProcessing}
+                                        paginationMeta={paginationMeta}
                                     />
                                 </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
+                                <div
+                                    className='row'
+                                    hidden={changelogTab !== 'view-log' ? true : false}
+                                >
+                                    <ChangeLogDetail
+                                        changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
+                                    />
+                                    <div
+                                        id='cardScreen'
+                                        style={{
+                                            padding: '0px',
+                                        }}
+                                    ></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        )
+        </>
     )
 }
 

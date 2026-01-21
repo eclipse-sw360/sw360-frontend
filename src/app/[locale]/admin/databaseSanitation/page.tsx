@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import DatabaseSanitation from './components/DatabaseSanitation'
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 function DatabaseSanitationAdministrationPage(): JSX.Element {
-    return <DatabaseSanitation/>
+    return <DatabaseSanitation />
 }
 
 export default DatabaseSanitationAdministrationPage

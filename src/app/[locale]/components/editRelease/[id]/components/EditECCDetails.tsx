@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,11 +11,11 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BiInfoCircle } from 'react-icons/bi'
-
+import { BsInfoCircle } from 'react-icons/bs'
 import { Release } from '@/object-types'
 
 interface Props {
@@ -27,7 +28,7 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
         <>
             <OverlayTrigger overlay={<Tooltip>{text}</Tooltip>}>
                 <span className='d-inline-block'>
-                    <BiInfoCircle />
+                    <BsInfoCircle size={20} />
                 </span>
             </OverlayTrigger>
         </>
@@ -36,6 +37,16 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
 
 const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setReleasePayload({
             ...releasePayload,
@@ -48,15 +59,31 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
 
     return (
         <>
-            <div className='container' style={{ maxWidth: '98vw', marginTop: '10px', fontSize: '0.875rem' }}>
-                <div className='col' style={{ padding: '0px 12px', fontSize: '0.875rem' }}>
+            <div
+                className='container'
+                style={{
+                    maxWidth: '98vw',
+                    marginTop: '10px',
+                    fontSize: '0.875rem',
+                }}
+            >
+                <div
+                    className='col'
+                    style={{
+                        padding: '0px 12px',
+                        fontSize: '0.875rem',
+                    }}
+                >
                     <div className='row mb-4'>
                         <div className='section-header mb-2'>
                             <span className='fw-bold'>{t('ECC Information')}</span>
                         </div>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
-                                <label htmlFor='ECC_Status' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='ECC_Status'
+                                    className='form-label fw-bold'
+                                >
                                     {t('ECC Status')}
                                 </label>
                                 <select
@@ -73,13 +100,19 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                     <option value='APPROVED'>{t('APPROVED')}</option>
                                     <option value='REJECTED'>{t('REJECTED')}</option>
                                 </select>
-                                <div className='form-text' id='addProjects.visibility.HelpBlock'>
+                                <div
+                                    className='form-text'
+                                    id='addProjects.visibility.HelpBlock'
+                                >
                                     <ShowInfoOnHover text={t('ECC_STATUS')} />
                                     {t('Learn more about ECC statuses')}.
                                 </div>
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='ECC_comment' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='ECC_comment'
+                                    className='form-label fw-bold'
+                                >
                                     {t('ECC Comment')}
                                 </label>
                                 <input
@@ -97,7 +130,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                         </div>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
-                                <label htmlFor='ausfuhrliste' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='ausfuhrliste'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Ausfuhrliste')}
                                 </label>
                                 <input
@@ -112,7 +148,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='eccn' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='eccn'
+                                    className='form-label fw-bold'
+                                >
                                     {t('ECCN')}
                                 </label>
                                 <input
@@ -127,7 +166,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='material_index_number' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='material_index_number'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Material Index Number')}
                                 </label>
                                 <input
@@ -144,7 +186,74 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                         </div>
                         <div className='row with-divider pt-2 pb-2'>
                             <div className='col-lg-4'>
-                                <label htmlFor='assessor_contact_person' className='form-label fw-bold'>
+                                <label className='form-label fw-bold'>{t('Contains Cryptography')}</label>
+                                <div>
+                                    <div className='form-check'>
+                                        <input
+                                            className='form-check-input'
+                                            type='radio'
+                                            id='contains_cryptography_yes'
+                                            name='containsCryptography'
+                                            value='true'
+                                            checked={releasePayload.eccInformation?.containsCryptography === true}
+                                            onChange={(e) =>
+                                                setReleasePayload({
+                                                    ...releasePayload,
+                                                    eccInformation: {
+                                                        ...releasePayload.eccInformation,
+                                                        containsCryptography: e.target.value === 'true',
+                                                    },
+                                                })
+                                            }
+                                        />
+                                        <label
+                                            className='form-check-label'
+                                            htmlFor='contains_cryptography_yes'
+                                        >
+                                            {t('Yes')}
+                                        </label>
+                                    </div>
+                                    <div className='form-check'>
+                                        <input
+                                            className='form-check-input'
+                                            type='radio'
+                                            id='contains_cryptography_no'
+                                            name='containsCryptography'
+                                            value='false'
+                                            checked={releasePayload.eccInformation?.containsCryptography === false}
+                                            onChange={(e) =>
+                                                setReleasePayload({
+                                                    ...releasePayload,
+                                                    eccInformation: {
+                                                        ...releasePayload.eccInformation,
+                                                        containsCryptography: e.target.value === 'true',
+                                                    },
+                                                })
+                                            }
+                                        />
+                                        <label
+                                            className='form-check-label'
+                                            htmlFor='contains_cryptography_no'
+                                        >
+                                            {t('No')}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div
+                                    className='form-text'
+                                    id='containsCryptography.HelpBlock'
+                                >
+                                    <ShowInfoOnHover text={t('Contains Cryptography')} />
+                                    {t('cryptoinfo')}.
+                                </div>
+                            </div>
+                        </div>
+                        <div className='row with-divider pt-2 pb-2'>
+                            <div className='col-lg-4'>
+                                <label
+                                    htmlFor='assessor_contact_person'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Assessor Contact Person')}
                                 </label>
                                 <input
@@ -159,7 +268,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='assessor_department' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='assessor_department'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Assessor Department')}
                                 </label>
                                 <input
@@ -174,7 +286,10 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                 />
                             </div>
                             <div className='col-lg-4'>
-                                <label htmlFor='assessment_date' className='form-label fw-bold'>
+                                <label
+                                    htmlFor='assessment_date'
+                                    className='form-label fw-bold'
+                                >
                                     {t('Assessment Date')}
                                 </label>
                                 <input

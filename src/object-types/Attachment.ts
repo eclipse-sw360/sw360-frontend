@@ -13,7 +13,7 @@ import { Links } from '@/object-types'
 interface Attachment {
     attachmentContentId?: string
     filename: string
-    sha1: string
+    sha1?: string
     attachmentType: string
     createdBy?: string
     createdTeam?: string
@@ -25,13 +25,14 @@ interface Attachment {
     checkStatus?: string
     checkedBy?: string
     size?: string
-    usageAttachment?:
+    attachmentUsageCount?: number
+    projectAttachmentUsage?:
         | {
               visible: number
               restricted: number
           }
         | undefined
-    _links: Links
+    _links?: Links
 }
 
 export default Attachment

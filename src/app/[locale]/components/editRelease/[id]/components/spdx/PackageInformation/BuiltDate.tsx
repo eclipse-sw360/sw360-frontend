@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
 import React from 'react'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     setBuiltDate: (inputs: InputKeyValue) => void
@@ -20,7 +20,7 @@ interface Props {
 function BuiltDate({ dataBuiltDate, setDataBuiltDate, setBuiltDate }: Props) {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataBuiltDate ?? {} as InputKeyValue
+        const list: InputKeyValue = dataBuiltDate ?? ({} as InputKeyValue)
         list[name as keyof InputKeyValue] = value
         setDataBuiltDate(list)
         setBuiltDate(list)
@@ -29,7 +29,10 @@ function BuiltDate({ dataBuiltDate, setDataBuiltDate, setBuiltDate }: Props) {
     return (
         <td colSpan={3}>
             <div className='form-group'>
-                <label className='lableSPDX' htmlFor='createdDate'>
+                <label
+                    className='lableSPDX'
+                    htmlFor='createdDate'
+                >
                     7.26 Built Date
                 </label>
                 <div
@@ -48,6 +51,7 @@ function BuiltDate({ dataBuiltDate, setDataBuiltDate, setBuiltDate }: Props) {
                             onChange={handleInputChange}
                             name='key'
                             value={dataBuiltDate?.key ?? ''}
+                            max={new Date().toISOString().split('T')[0]}
                         />
                     </div>
                     <div>

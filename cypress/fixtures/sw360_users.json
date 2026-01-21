@@ -1,0 +1,18 @@
+{
+    "admin":{
+        "email": "admin@sw360.org",
+        "password": "12345",
+        "role": "admin",
+        "fullname":"Test Admin",
+        "group":"DEPARTMENT"
+    },
+    
+    "user01":{
+        "email": "user@sw360.org",
+        "password": "12345",
+        "role": "user",
+        "fullname":"Test User",
+        "group":"DEPARTMENT"
+    }
+
+}

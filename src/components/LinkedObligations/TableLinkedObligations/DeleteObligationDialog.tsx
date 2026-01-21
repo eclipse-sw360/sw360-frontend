@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,100 +11,121 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-
+import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
-
-import { Obligation } from '@/object-types'
-import { CommonUtils } from '@/utils'
 import { BsQuestionCircle } from 'react-icons/bs'
+import { LicensePayload, Obligation } from '@/object-types'
 
 interface Props {
-    data: Array<(string | Obligation)[]>
-    setData: React.Dispatch<React.SetStateAction<Array<(string | Obligation)[]>>>
-    setObligationIdToLicensePayLoad: (releaseIdToRelationships: Array<string>) => void
     obligation: Obligation | undefined
-    show: boolean
-    setShow: React.Dispatch<React.SetStateAction<boolean>>
+    setObligationToBeRemoved: Dispatch<SetStateAction<Obligation | undefined>>
+    licensePayload: LicensePayload
+    setLicensePayload: Dispatch<SetStateAction<LicensePayload>>
 }
 
 const DeleteObligationDialog = ({
     obligation,
-    data,
-    setData,
-    setObligationIdToLicensePayLoad,
-    show,
-    setShow,
-}: Props) : JSX.Element => {
+    setObligationToBeRemoved,
+    licensePayload,
+    setLicensePayload,
+}: Props): JSX.Element => {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const handleSubmit = () => {
-        let obligations: Array<(string | Obligation)[]> = []
-        data.forEach((element) => {
-            obligations.push(element)
+        const id = obligation?._links?.self.href.split('/').at(-1) ?? ''
+
+        const ids = licensePayload.obligationDatabaseIds ?? []
+        const index = ids.indexOf(id)
+        if (index !== -1) {
+            ids.splice(index, 1)
+        }
+
+        const obs = [
+            ...(licensePayload.obligations ?? []),
+        ]
+        const obIndex = obs.findIndex((ob) => ob._links?.self.href.split('/').at(-1) === id)
+        if (obIndex !== -1) {
+            obs.splice(index, 1)
+        }
+        setLicensePayload({
+            ...licensePayload,
+            obligations: obs,
+            obligationDatabaseIds: ids,
         })
-        obligations = obligations.filter((element) => element[1] !== obligation?.title)
-        setData(obligations)
-        const obligationIds: string[] = []
-        obligations.forEach((item) => {
-            obligationIds.push(CommonUtils.getIdFromUrl((item[0] as Obligation)._links?.self.href))
-        })
-        setObligationIdToLicensePayLoad(obligationIds)
-        setShow(!show)
+        setObligationToBeRemoved(undefined)
     }
 
     const handleCloseDialog = () => {
-        setShow(!show)
+        setObligationToBeRemoved(undefined)
     }
 
     return (
         <>
-        {
-            (obligation !== undefined) && (
-                <Modal show={show} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-                    <Modal.Header style={{ backgroundColor: '#FEEFEF', color: '#da1414', fontWeight: '700' }}>
+            {obligation !== undefined && (
+                <Modal
+                    show={obligation !== undefined}
+                    onClose={handleCloseDialog}
+                    backdrop='static'
+                    centered
+                    size='lg'
+                >
+                    <Modal.Header
+                        style={{
+                            backgroundColor: '#FEEFEF',
+                            color: '#da1414',
+                            fontWeight: '700',
+                        }}
+                    >
                         <h5>
-                            <Modal.Title style={{ fontSize: '1.25rem', fontWeight: '700' }}>
-                                <BsQuestionCircle />
+                            <Modal.Title
+                                style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: '700',
+                                }}
+                            >
+                                <BsQuestionCircle size={20} />
                                 &nbsp;
                                 {t('Delete Obligation')}?
                             </Modal.Title>
                         </h5>
-                        <button
-                            type='button'
-                            style={{
-                                color: 'red',
-                                backgroundColor: '#FEEFEF',
-                                alignItems: 'center',
-                                borderColor: '#FEEFEF',
-                                borderWidth: '0px',
-                                fontSize: '1.1rem',
-                                margin: '-1rem -1rem auto',
-                            }}
-                            onClick={handleCloseDialog}
-                        >
-                            <span aria-hidden='true'>&times;</span>
-                        </button>
                     </Modal.Header>
                     <Modal.Body>
                         <Form>
-                            {t.rich('Do you really want to delete the Obligation?', {
-                                name: obligation.title,
+                            {t.rich('Do you really want to delete the Obligation', {
+                                name: obligation.title ?? '',
                                 strong: (chunks) => <b>{chunks}</b>,
                             })}
                         </Form>
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
-                        <Button className='delete-btn' variant='light' onClick={handleCloseDialog}>
+                        <Button
+                            className='delete-btn'
+                            variant='light'
+                            onClick={handleCloseDialog}
+                        >
                             {t('Cancel')}
                         </Button>
-                        <Button className='login-btn' variant='danger' onClick={() => handleSubmit()}>
+                        <Button
+                            className='login-btn'
+                            variant='danger'
+                            onClick={() => handleSubmit()}
+                        >
                             {t('Delete Obligation')}
                         </Button>
                     </Modal.Footer>
                 </Modal>
-            )
-        }
+            )}
         </>
     )
 }

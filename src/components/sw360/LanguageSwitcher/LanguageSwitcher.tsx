@@ -10,12 +10,11 @@
 
 'use client'
 
-import { useTransition } from 'react'
+import { type JSX, useTransition } from 'react'
+import { LOCALES } from '@/constants'
 import { usePathname, useRouter } from '../../../navigation'
 
-import { LOCALES } from '@/constants'
-
-function LanguageSwitcher() : JSX.Element {
+function LanguageSwitcher(): JSX.Element {
     const [, startTransition] = useTransition()
     const router = useRouter()
     const pathname = usePathname()
@@ -28,14 +27,19 @@ function LanguageSwitcher() : JSX.Element {
     const handleOptionClick = (option: Option) => {
         const nextLocale = option.i18n
         startTransition(() => {
-            router.replace(pathname, { locale: nextLocale })
+            router.replace(pathname, {
+                locale: nextLocale,
+            })
         })
     }
 
     return (
         <>
             {LOCALES.map((locale) => (
-                <div className='flag' key={locale.i18n}>
+                <div
+                    className='flag'
+                    key={locale.i18n}
+                >
                     <span
                         className={`fi fi-${locale.flag} custom-class`}
                         key={locale.i18n}

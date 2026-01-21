@@ -8,15 +8,18 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Embedded, HttpStatus, ModerationRequest } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
+import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Table, _ } from 'next-sw360'
-import Link from 'next/link'
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import { SW360Table, TableFooter } from 'next-sw360'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { FaTrashAlt } from 'react-icons/fa'
+import { BsFillTrashFill } from 'react-icons/bs'
+import type { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedTaskSubmissions = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -27,11 +30,9 @@ interface TaskSubmissionStatusMap {
 
 function MyTaskSubmissionsWidget(): ReactNode {
     const t = useTranslations('default')
-    const language = { noRecordsFound: t('NoModerationRequests') }
     const title = t('My Task Submissions')
 
-    const [taskSubmissionData, setTaskSubmissionData] = useState<Array<(string | JSX.Element)[]>>([])
-    const [loading, setLoading] = useState(true)
+    const [reload, setReload] = useState(false)
     const taskSubmissionStatus: TaskSubmissionStatusMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
@@ -39,86 +40,215 @@ function MyTaskSubmissionsWidget(): ReactNode {
         REJECTED: t('REJECTED'),
     }
 
-    const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
-            const data = (await response.json()) as EmbeddedTaskSubmissions
-            return data
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            return undefined
-        }
-    }, [])
+    const columns = useMemo<ColumnDef<ModerationRequest>[]>(
+        () => [
+            {
+                id: 'name',
+                header: t('Document Name'),
+                cell: ({ row }) => {
+                    const { documentName, id } = row.original
+                    return (
+                        <Link
+                            href={`/requests/moderationRequest/${id}`}
+                            className='text-link'
+                        >
+                            {documentName}
+                        </Link>
+                    )
+                },
+                meta: {
+                    width: '60%',
+                },
+            },
+            {
+                id: 'status',
+                header: t('Status'),
+                cell: ({ row }) => (
+                    <>{row.original.moderationState && taskSubmissionStatus[row.original.moderationState]}</>
+                ),
+                meta: {
+                    width: '40%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                enableSorting: false,
+                cell: ({ row }) => {
+                    const { documentId } = row.original
+                    return (
+                        <>
+                            {documentId && (
+                                <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                    <span className='d-inline-block'>
+                                        <BsFillTrashFill
+                                            className='btn-icon'
+                                            size={20}
+                                            onClick={() => handleDeleteProject(documentId)}
+                                        />
+                                    </span>
+                                </OverlayTrigger>
+                            )}
+                        </>
+                    )
+                },
+                meta: {
+                    width: '12.5%',
+                },
+            },
+        ],
+        [
+            t,
+        ],
+    )
+
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 5,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [taskSubmissionData, setTaskSubmissionData] = useState<ModerationRequest[]>(() => [])
+    const memoizedData = useMemo(
+        () => taskSubmissionData,
+        [
+            taskSubmissionData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        setLoading(true)
-        void fetchData('moderationrequest/mySubmissions').then(
-            (moderationRequests: EmbeddedTaskSubmissions | undefined) => {
-                if (moderationRequests === undefined) {
-                    setLoading(false)
-                    return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = taskSubmissionData.length !== 0 ? 400 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `moderationrequest/mySubmissions`,
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
                 }
 
-                if (!CommonUtils.isNullOrUndefined(moderationRequests['_embedded']['sw360:moderationRequests'])) {
-                    setTaskSubmissionData(
-                        moderationRequests['_embedded']['sw360:moderationRequests'].map((item: ModerationRequest) => [
-                            _(<Link href={'moderationrequest/' + item.id}>{item.documentName}</Link>),
-                            taskSubmissionStatus[item.moderationState ?? 'INPROGRESS'],
-                            item.id,
-                        ]),
-                    )
-                    setLoading(false)
+                const data = (await response.json()) as EmbeddedTaskSubmissions
+                setPaginationMeta(data.page)
+                setTaskSubmissionData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:moderationRequests'])
+                        ? []
+                        : data['_embedded']['sw360:moderationRequests'],
+                )
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
                 }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        reload,
+    ])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        // table state config
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
             },
-        )
-    }, [fetchData])
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
+
+        meta: {
+            rowHeightConstant: true,
+        },
+    })
 
     const handleDeleteProject = (id: string) => {
         console.log(id)
     }
 
-    const columns = [
-        t('Document Name'),
-        t('Status'),
-        {
-            id: 'myTaskSubmissions.actions',
-            name: t('Actions'),
-            width: '13%',
-            formatter: (id: string) =>
-                _(
-                    <>
-                        <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                            <span className='d-inline-block'>
-                                <FaTrashAlt
-                                    className='btn-icon'
-                                    onClick={() => handleDeleteProject(id)}
-                                    style={{ color: 'gray', fontSize: '18px' }}
-                                />
-                            </span>
-                        </OverlayTrigger>
-                    </>,
-                ),
-            sort: true,
-        },
-    ]
-
     return (
         <div>
-            <HomeTableHeader title={title} />
-            {loading === false ? (
-                <Table
-                    columns={columns}
-                    data={taskSubmissionData}
-                    language={language}
-                />
-            ) : (
-                <div className='col-12'>
-                    <Spinner className='spinner' />
-                </div>
-            )}
+            <HomeTableHeader
+                title={title}
+                setReload={setReload}
+            />
+            <div className='mb-3'>
+                {pageableQueryParam && table && paginationMeta ? (
+                    <>
+                        <SW360Table
+                            table={table}
+                            showProcessing={showProcessing}
+                            noRecordsFoundMessage={t('NoModerationRequests')}
+                        />
+                        <TableFooter
+                            pageableQueryParam={pageableQueryParam}
+                            setPageableQueryParam={setPageableQueryParam}
+                            paginationMeta={paginationMeta}
+                        />
+                    </>
+                ) : (
+                    <div className='col-12 mt-1 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

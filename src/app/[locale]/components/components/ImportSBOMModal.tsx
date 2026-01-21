@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,15 +11,15 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import React, { ReactNode, useRef, useState } from 'react'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
 
-import { Component, HttpStatus } from '@/object-types'
+import { Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from '../components.module.css'
 
 interface Props {
     show: boolean
@@ -39,18 +40,26 @@ interface PrepareImportData {
     releasesName?: string
 }
 
-const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
+const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
     const t = useTranslations('default')
     const [importState, setImportState] = useState(ImportSBOMState.INIT_STATE)
     const [prepateImportData, setPrepareImportData] = useState<PrepareImportData | undefined>(undefined)
     const [notAllowedMessageDisplayed, setNotAllowedMessageDisplayed] = useState(false)
     const selectedFile = useRef<File | undefined>(undefined)
-    const inputRef = useRef<HTMLInputElement>()
+    const inputRef = useRef<HTMLInputElement>(undefined)
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.currentTarget.files)
-            return
+        if (!e.currentTarget.files) return
         selectedFile.current = e.currentTarget.files[0]
 
         if (!selectedFile.current.name.endsWith('.rdf') && !selectedFile.current.name.endsWith('.spdx')) {
@@ -65,7 +74,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
         if (!selectedFile.current) return
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         setNotAllowedMessageDisplayed(false)
         const formData = new FormData()
@@ -74,13 +83,13 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
         const response = await ApiUtils.POST(
             'components/prepareImport/SBOM?type=SPDX',
             formData,
-            session.user.access_token
+            session.user.access_token,
         )
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const responseData = (await response.json()) as PrepareImportData
             setPrepareImportData(responseData)
             setImportState(ImportSBOMState.PREPARE_IMPORT)
-        } else if (response.status === HttpStatus.INTERNAL_SERVER_ERROR) {
+        } else if (response.status === StatusCodes.INTERNAL_SERVER_ERROR) {
             setImportState(ImportSBOMState.IMPORT_ERROR)
         }
     }
@@ -89,7 +98,7 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
         if (!selectedFile.current) return
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const formData = new FormData()
         formData.append('file', selectedFile.current, selectedFile.current.name)
@@ -98,9 +107,9 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
             const response = await ApiUtils.POST(
                 'components/import/SBOM?type=SPDX',
                 formData,
-                session.user.access_token
+                session.user.access_token,
             )
-            if (response.status === HttpStatus.OK) {
+            if (response.status === StatusCodes.OK) {
                 const responseData = (await response.json()) as Component
                 router.push(`/components/detail/${responseData.id}`)
             }
@@ -135,7 +144,13 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
     }
 
     return (
-        <Modal show={show} onHide={() => closeModal()} backdrop='static' centered size='lg'>
+        <Modal
+            show={show}
+            onHide={() => closeModal()}
+            backdrop='static'
+            centered
+            size='lg'
+        >
             <Modal.Header closeButton>
                 <Modal.Title>
                     <b>{t('Upload SBOM')}</b>
@@ -162,9 +177,9 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                             {t('wrong_spdx_information')}.
                         </div>
                         <div>
-                            <div className={`${styles['modal-body-first']}`}>
+                            <div className='modal-body-first'>
                                 <div
-                                    className={`${styles['modal-body-second']}`}
+                                    className='modal-body-second'
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
                                 >
@@ -173,14 +188,17 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                                     {t('Or')}
                                     <br />
                                     <input
-                                        className={`${styles['input']}`}
-                                        ref={inputRef as React.LegacyRef<HTMLInputElement>}
+                                        className='sbom-input'
+                                        ref={inputRef as React.Ref<HTMLInputElement>}
                                         type='file'
                                         accept='.rdf,.spdx'
                                         onChange={handleFileChange}
                                         placeholder={t('Drop a File Here')}
                                     />
-                                    <button className={`${styles['button-browse']}`} onClick={handleBrowseFile}>
+                                    <button
+                                        className='button-browse'
+                                        onClick={handleBrowseFile}
+                                    >
                                         {t('Browse')}
                                     </button>
                                 </div>
@@ -188,8 +206,8 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                         </div>
                     </>
                 )}
-                {importState === ImportSBOMState.IMPORTING && <h4>{t('Importing')}...</h4>}
-                {importState === ImportSBOMState.PREPARE_IMPORT && prepateImportData &&
+                {importState === ImportSBOMState.IMPORTING && <h4>{t('Importing SBOM file')}...</h4>}
+                {importState === ImportSBOMState.PREPARE_IMPORT && prepateImportData && (
                     <>
                         {!CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) ? (
                             <h4> {prepateImportData.message} </h4>
@@ -211,31 +229,35 @@ const ImportSBOMModal = ({ show, setShow }: Props) : ReactNode => {
                             </div>
                         )}
                     </>
-                }
+                )}
             </Modal.Body>
             <Modal.Body>
                 {importState === ImportSBOMState.IMPORT_ERROR && (
                     <>
                         <h4> {'Failed :('} </h4>
                         <div>
-                            {JSON.stringify({ readyState: 4, responseText: '', status: 500, statusText: 'error' })}
+                            {JSON.stringify({
+                                readyState: 4,
+                                responseText: '',
+                                status: 500,
+                                statusText: 'error',
+                            })}
                         </div>
                     </>
                 )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                {
-                    importState === ImportSBOMState.PREPARE_IMPORT
-                        && prepateImportData
-                        && CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) && (
-                    <Button
-                        type='button'
-                        className={`fw-bold btn btn-primary button-orange`}
-                        onClick={() => void importFile()}
-                    >
-                        {t('Import')}
-                    </Button>
-                )}
+                {importState === ImportSBOMState.PREPARE_IMPORT &&
+                    prepateImportData &&
+                    CommonUtils.isNullEmptyOrUndefinedString(prepateImportData.message) && (
+                        <Button
+                            type='button'
+                            className={`fw-bold btn btn-primary button-orange`}
+                            onClick={() => void importFile()}
+                        >
+                            {t('Import')}
+                        </Button>
+                    )}
                 <Button
                     type='button'
                     data-bs-dismiss='modal'

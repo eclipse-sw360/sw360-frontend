@@ -8,11 +8,12 @@
 // License-Filename: LICENSE
 
 'use client'
-
 import { useTranslations } from 'next-intl'
-
-import { ProjectPayload } from '@/object-types'
 import { ShowInfoOnHover } from 'next-sw360'
+import type { JSX } from 'react'
+
+import { useConfigValue } from '@/contexts'
+import { ProjectPayload, UIConfigKeys } from '@/object-types'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -23,9 +24,11 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
     const t = useTranslations('default')
     const CLEARING_STATE_INFO = `Open: \n In Progress: \n Closed:`
 
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                                       HTMLInputElement |
-                                                       HTMLTextAreaElement>) => {
+    // Configs from backend
+    const projectClearingTeams = useConfigValue(UIConfigKeys.UI_CLEARING_TEAMS) as string[] | null
+    const unknownClearingTeamEnabled = useConfigValue(UIConfigKeys.UI_CLEARING_TEAM_UNKNOWN_ENABLED) as boolean | null
+
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
             [event.target.name]: event.target.value,
@@ -36,55 +39,66 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
         <>
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('Clearing')}</h6>
-                <div className='row mb-2'>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.clearingState' className='form-label fw-bold'>
+                <div className='row with-divider py-3'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.clearingState'
+                            className='form-label fw-bold'
+                        >
                             {t('Clearing State')}
                         </label>
                         <select
                             className='form-select'
                             id='addProjects.clearingState'
-                            defaultValue='OPEN'
                             aria-describedby='addProjects.clearingState.HelpBlock'
                             name='clearingState'
-                            value={projectPayload.clearingState}
+                            value={projectPayload.clearingState ?? 'OPEN'}
                             onChange={updateInputField}
                         >
                             <option value='OPEN'>{t('Open')}</option>
                             <option value='IN_PROGRESS'>{t('In Progress')}</option>
                             <option value='CLOSED'>{t('Closed')}</option>
                         </select>
-                        <div className='form-text' id='addProjects.clearingState.HelpBlock'>
+                        <div
+                            className='form-text'
+                            id='addProjects.clearingState.HelpBlock'
+                        >
                             <ShowInfoOnHover text={CLEARING_STATE_INFO} />{' '}
                             {t('Learn more about project clearing state')}
                         </div>
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.clearingTeam' className='form-label fw-bold'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.clearingTeam'
+                            className='form-label fw-bold'
+                        >
                             {t('Clearing Team')}
                         </label>
                         <select
                             className='form-select'
                             id='addProjects.clearingTeam'
-                            defaultValue='CT'
                             aria-label='Clearing Team'
-                            name='businessUnit'
-                            value={projectPayload.businessUnit}
+                            name='clearingTeam'
+                            value={projectPayload.clearingTeam ?? 'UNKNOWN'}
                             onChange={updateInputField}
                         >
-                            <option value='CT'>CT</option>
-                            <option value='GP'>GP</option>
-                            <option value='IOT'>IOT</option>
-                            <option value='MO'>MO</option>
-                            <option value='MO ITS'>MO ITS</option>
-                            <option value='SGRE'>SGRE</option>
-                            <option value='SHS'>SHS</option>
-                            <option value='SI'>SI</option>
-                            <option value='SOP'>SOP</option>
+                            {unknownClearingTeamEnabled && <option value={'Unknown'}>{t('Unknown')}</option>}
+                            {projectClearingTeams &&
+                                projectClearingTeams.map((team) => (
+                                    <option
+                                        value={team}
+                                        key={team}
+                                    >
+                                        {team}
+                                    </option>
+                                ))}
                         </select>
                     </div>
-                    <div className='col-lg-4 mb-3'>
-                        <label htmlFor='addProjects.deadlinePreEvaluation' className='form-label fw-bold'>
+                    <div className='col-lg-4'>
+                        <label
+                            htmlFor='addProjects.deadlinePreEvaluation'
+                            className='form-label fw-bold'
+                        >
                             {t('Deadline for pre-evaluation')}
                         </label>
                         <input
@@ -105,91 +119,115 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         />
                     </div>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
-                    <label htmlFor='addProjects.clearingSummary' className='form-label fw-bold'>
+                <div className='row with-divider py-3'>
+                    <label
+                        htmlFor='addProjects.clearingSummary'
+                        className='form-label fw-bold'
+                    >
                         {t('Clearing summary')}
                     </label>
                     <textarea
                         className='form-control'
                         aria-label='Clearing Summary'
                         id='addProjects.clearingSummary'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='clearingSummary'
                         value={projectPayload.clearingSummary}
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
-                    <label htmlFor='addProjects.specialRiskOpenSourceSoftware' className='form-label fw-bold'>
+                <div className='row with-divider py-3'>
+                    <label
+                        htmlFor='addProjects.specialRiskOpenSourceSoftware'
+                        className='form-label fw-bold'
+                    >
                         {t('Special risk Open Source Software')}
                     </label>
                     <textarea
                         className='form-control'
                         id='addProjects.specialRiskOpenSourceSoftware'
                         aria-label='Special Risk Open Source Software'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='specialRisksOSS'
                         value={projectPayload.specialRisksOSS}
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
-                    <label htmlFor='addProjects.generalRiskThirdPartySoftware' className='form-label fw-bold'>
+                <div className='row with-divider py-3'>
+                    <label
+                        htmlFor='addProjects.generalRiskThirdPartySoftware'
+                        className='form-label fw-bold'
+                    >
                         {t('General risk 3rd party software')}
                     </label>
                     <textarea
                         className='form-control'
                         id='addProjects.generalRiskThirdPartySoftware'
                         aria-label='General risk 3rd party software'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='generalRisks3rdParty'
                         value={projectPayload.generalRisks3rdParty}
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
-                    <label htmlFor='addProjects.specialRiskThirdPartySoftware' className='form-label fw-bold'>
+                <div className='row with-divider py-3'>
+                    <label
+                        htmlFor='addProjects.specialRiskThirdPartySoftware'
+                        className='form-label fw-bold'
+                    >
                         {t('Special risks 3rd party software')}
                     </label>
                     <textarea
                         className='form-control'
                         id='addProjects.specialRiskThirdPartySoftware'
                         aria-label='Special risk 3rd party software'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='specialRisks3rdParty'
                         value={projectPayload.specialRisks3rdParty}
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
-                    <label htmlFor='addProjects.salesAndDeliveryChannels' className='form-label fw-bold'>
+                <div className='row with-divider py-3'>
+                    <label
+                        htmlFor='addProjects.salesAndDeliveryChannels'
+                        className='form-label fw-bold'
+                    >
                         {t('Sales and delivery channels')}
                     </label>
                     <textarea
                         className='form-control'
                         id='addProjects.salesAndDeliveryChannels'
                         aria-label='Sales and delivery channels'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='deliveryChannels'
                         value={projectPayload.deliveryChannels}
                         onChange={updateInputField}
                     ></textarea>
                 </div>
-                <hr />
-                <div className='mb-2 row'>
-                    <label htmlFor='addProjects.remarksAdditionalRequirements' className='form-label fw-bold'>
+                <div className='row with-divider py-3'>
+                    <label
+                        htmlFor='addProjects.remarksAdditionalRequirements'
+                        className='form-label fw-bold'
+                    >
                         {t('Remarks additional requirements')}
                     </label>
                     <textarea
                         className='form-control'
                         id='addProjects.remarksAdditionalRequirements'
                         aria-label='Remarks additional requirements'
-                        style={{ height: '120px' }}
+                        style={{
+                            height: '120px',
+                        }}
                         name='remarksAdditionalRequirements'
                         value={projectPayload.remarksAdditionalRequirements}
                         onChange={updateInputField}

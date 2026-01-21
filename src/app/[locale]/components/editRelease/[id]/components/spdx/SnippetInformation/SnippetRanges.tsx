@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,9 +9,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { SnippetRange } from '@/object-types'
-import { ReactNode } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
 
 interface Props {
     setDataSnippetRanges: (inputs: SnippetRange[]) => void
@@ -25,10 +27,22 @@ interface SnippetRangeInput {
     reference: string
 }
 
-function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props) : ReactNode {
+function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props): ReactNode {
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: SnippetRange[] = [...inputList]
+        const list: SnippetRange[] = [
+            ...inputList,
+        ]
         console.log(inputList)
         console.log(list)
         list[index][name as keyof SnippetRangeInput] = value
@@ -37,7 +51,9 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList]
+        const list = [
+            ...inputList,
+        ]
         list.splice(index, 1)
         setInputList(list)
         setDataSnippetRanges(list)
@@ -50,17 +66,38 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
         }
         setInputList([
             ...inputList,
-            { rangeType: 'BYTE', startPointer: '', endPointer: '', reference: '', index: index },
+            {
+                rangeType: 'BYTE',
+                startPointer: '',
+                endPointer: '',
+                reference: '',
+                index: index,
+            },
         ])
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1rem' }}>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                paddingLeft: '1rem',
+            }}
+        >
             {inputList.map((elem, j) => {
                 return (
-                    <div key={j} style={{ display: 'flex', marginBottom: '0.75rem' }}>
+                    <div
+                        key={j}
+                        style={{
+                            display: 'flex',
+                            marginBottom: '0.75rem',
+                        }}
+                    >
                         <select
-                            style={{ flex: 1, marginRight: '1rem' }}
+                            style={{
+                                flex: 1,
+                                marginRight: '1rem',
+                            }}
                             className='form-control range-type form-select'
                             name='rangeType'
                             value={elem.rangeType}
@@ -70,7 +107,10 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
                             <option value='LINE'>LINE</option>
                         </select>
                         <input
-                            style={{ flex: 2, marginRight: '1rem' }}
+                            style={{
+                                flex: 2,
+                                marginRight: '1rem',
+                            }}
                             type='text'
                             className='form-control start-pointer'
                             placeholder='Enter start pointer'
@@ -79,7 +119,10 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
                             onChange={(e) => handleInputChange(e, j)}
                         />
                         <input
-                            style={{ flex: 2, marginRight: '1rem' }}
+                            style={{
+                                flex: 2,
+                                marginRight: '1rem',
+                            }}
                             type='text'
                             className='form-control end-pointer'
                             placeholder='Enter end pointer'
@@ -88,7 +131,10 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
                             onChange={(e) => handleInputChange(e, j)}
                         />
                         <input
-                            style={{ flex: 4, marginRight: '2rem' }}
+                            style={{
+                                flex: 4,
+                                marginRight: '2rem',
+                            }}
                             type='text'
                             className='form-control reference'
                             placeholder='Enter reference'
@@ -96,11 +142,19 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
                             value={elem.reference}
                             onChange={(e) => handleInputChange(e, j)}
                         />
-                        <FaTrashAlt className='spdx-delete-icon-main' onClick={() => handleRemoveClick(j)} />
+                        <BsFillTrashFill
+                            className='spdx-delete-icon-main'
+                            onClick={() => handleRemoveClick(j)}
+                            size={20}
+                        />
                     </div>
                 )
             })}
-            <button id='addNewRange' className='spdx-add-button-sub' onClick={() => handleAddClick()}>
+            <button
+                id='addNewRange'
+                className='spdx-add-button-sub'
+                onClick={() => handleAddClick()}
+            >
                 Add new Range
             </button>
         </div>

@@ -9,6 +9,8 @@
 
 import { useTranslations } from 'next-intl'
 
+import type { JSX } from 'react'
+
 function SearchUsersModal(): JSX.Element {
     const t = useTranslations('default')
     return (
@@ -23,7 +25,10 @@ function SearchUsersModal(): JSX.Element {
                 <div className='modal-dialog modal-lg modal-dialog-centered'>
                     <div className='modal-content'>
                         <div className='modal-header'>
-                            <h5 className='modal-title fw-bold' id='search_users_modal_label'>
+                            <h5
+                                className='modal-title fw-bold'
+                                id='search_users_modal_label'
+                            >
                                 {t('Search Users')}
                             </h5>
                             <button
@@ -44,20 +49,33 @@ function SearchUsersModal(): JSX.Element {
                                     />
                                 </div>
                                 <div className='col-lg-4'>
-                                    <button type='button' className='btn btn-secondary me-2'>
+                                    <button
+                                        type='button'
+                                        className='btn btn-secondary me-2'
+                                    >
                                         {t('Search')}
                                     </button>
-                                    <button type='button' className='btn btn-secondary'>
+                                    <button
+                                        type='button'
+                                        className='btn btn-secondary'
+                                    >
                                         {t('Reset')}
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div className='modal-footer'>
-                            <button type='button' data-bs-dismiss='modal' className='btn btn-secondary me-2'>
+                            <button
+                                type='button'
+                                data-bs-dismiss='modal'
+                                className='btn btn-secondary me-2'
+                            >
                                 {t('Close')}
                             </button>
-                            <button type='button' className='btn btn-primary'>
+                            <button
+                                type='button'
+                                className='btn btn-primary'
+                            >
                                 {t('Select Users')}
                             </button>
                         </div>

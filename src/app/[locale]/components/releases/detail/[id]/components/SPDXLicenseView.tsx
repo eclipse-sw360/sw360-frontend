@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,25 +11,93 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
+import { ErrorDetails } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
 
-import { CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
-
-interface Props {
-    licenseInfo: { [key: string]: string | Array<string> | number }
-    isISR: boolean
-    attachmentName?: string
+interface LicenseInfo {
+    license: string
+    otherLicense: string
+    licenseIds?: string[]
+    otherLicenseIds?: string[]
+    totalFileCount?: number
 }
 
-const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactNode => {
+interface Props {
+    isISR: boolean
+    attachmentName: string
+    attachmentId: string
+    releaseId: string
+    licenseInfo: LicenseInfo
+}
+
+interface FileList {
+    licName: string
+    srcFiles: string[]
+    licSpdxId: string
+}
+
+interface SrcFileList {
+    data: FileList[]
+}
+
+const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licenseInfo }: Props): ReactNode => {
     const t = useTranslations('default')
     const [selectedLicenseId, setSelectedLicenseId] = useState<string>()
     const [modalShow, setModalShow] = useState(false)
+    const session = useSession()
+    const [fileList, setFileList] = useState<FileList[] | undefined>()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        session.status,
+    ])
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(
+                    `releases/${releaseId}/licenseFileList?attachmentId=${attachmentId}`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+
+                const fileData = (await response.json()) as SrcFileList
+                setFileList(fileData.data)
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        session,
+        releaseId,
+        attachmentId,
+    ])
 
     const handleCloseDialog = () => {
         setModalShow(false)
@@ -51,10 +120,14 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactN
             <li key={licenseId}>
                 {licenseId}
                 {isISR && (
-                    <FaInfoCircle
+                    <BsInfoCircle
                         onClick={() => showLicenseToSrcMapping(licenseId)}
-                        style={{ marginLeft: '5px', color: 'gray' }}
-                        className={styles.info}
+                        style={{
+                            marginLeft: '5px',
+                            color: 'gray',
+                        }}
+                        size={20}
+                        className='release-detail-info'
                     />
                 )}
             </li>
@@ -108,18 +181,25 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactN
             ) : (
                 <>
                     <div>
-                        <b>
-                            {
-                                t(licenseInfo.otherLicense as never)
-                            }
-                        </b>
+                        <b>{t(licenseInfo.otherLicense as never)}</b>
                     </div>
                     <ul>{renderLicenseIds(licenseInfo['otherLicenseIds'] as Array<string>)}</ul>
                 </>
             )}
 
-            <Modal show={modalShow} onHide={handleCloseDialog} backdrop='static' centered size='lg'>
-                <Modal.Header closeButton style={{ color: '#2e5aac' }}>
+            <Modal
+                show={modalShow}
+                onHide={handleCloseDialog}
+                backdrop='static'
+                centered
+                size='lg'
+            >
+                <Modal.Header
+                    closeButton
+                    style={{
+                        color: '#2e5aac',
+                    }}
+                >
                     <Modal.Title>
                         <b>{attachmentName}</b>
                     </Modal.Title>
@@ -134,11 +214,13 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactN
                                 {t('Source File List')}:
                                 <ul>
                                     {CommonUtils.isNullEmptyOrUndefinedArray(
-                                        licenseInfo[selectedLicenseId] as Array<string>
+                                        fileList?.filter((l) => l.licName === selectedLicenseId)?.[0].srcFiles,
                                     ) ? (
                                         <li>{t('Source file information not found in ISR')}</li>
                                     ) : (
-                                        renderSourceList(licenseInfo[selectedLicenseId] as Array<string>)
+                                        renderSourceList(
+                                            fileList?.filter((l) => l.licName === selectedLicenseId)?.[0].srcFiles,
+                                        )
                                     )}
                                 </ul>
                             </div>
@@ -146,7 +228,10 @@ const SPDXLicenseView = ({ licenseInfo, isISR, attachmentName }: Props) : ReactN
                     )}
                 </Modal.Body>
                 <Modal.Footer className='justify-content-end'>
-                    <Button variant='light' onClick={handleCloseDialog}>
+                    <Button
+                        variant='light'
+                        onClick={handleCloseDialog}
+                    >
                         {' '}
                         OK{' '}
                     </Button>

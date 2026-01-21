@@ -17,7 +17,7 @@ interface Props {
     clearingInformation: ClearingInformation | undefined
 }
 
-const SupplementalInformation = ({ clearingInformation }: Props) : ReactNode => {
+const SupplementalInformation = ({ clearingInformation }: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const t = useTranslations('default')
 

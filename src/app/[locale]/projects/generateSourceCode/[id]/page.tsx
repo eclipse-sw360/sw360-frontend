@@ -8,17 +8,21 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import GenerateSourceCodeBundle from './components/GenerateSourceCodeBundle'
 
 interface Context {
-    params: { id: string }
+    params: Promise<{
+        id: string
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'Projects',
 }
 
-const GenerateSourceCode = async ({ params }: Context) => {
+const GenerateSourceCode = async (props: Context): Promise<JSX.Element> => {
+    const params = await props.params
     const projectId = params.id
 
     return <GenerateSourceCodeBundle projectId={projectId} />

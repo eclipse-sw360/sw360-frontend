@@ -9,10 +9,10 @@
 
 'use client'
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, SetStateAction, ReactNode } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
-
+import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { VendorAdvisory, Vulnerability } from '@/object-types'
 
 function AddVendorAdvisory({
@@ -21,23 +21,45 @@ function AddVendorAdvisory({
 }: {
     payload: Vulnerability
     setPayload: Dispatch<SetStateAction<Vulnerability>>
-}) : ReactNode {
+}): ReactNode {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const addAdvisory = () => {
         setPayload((prev: Vulnerability) => {
-            return { ...prev, vendorAdvisories: [...(prev.vendorAdvisories ?? []), { vendor: '', name: '', url: '' }] }
+            return {
+                ...prev,
+                vendorAdvisories: [
+                    ...(prev.vendorAdvisories ?? []),
+                    {
+                        vendor: '',
+                        name: '',
+                        url: '',
+                    },
+                ],
+            }
         })
     }
 
     const handleChange = (
         e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
-        i: number
+        i: number,
     ) => {
         setPayload((prev: Vulnerability) => {
             const refs = prev.vendorAdvisories ?? []
             refs[i][e.target.name as keyof VendorAdvisory] = e.target.value
-            return { ...prev, vendorAdvisories: refs }
+            return {
+                ...prev,
+                vendorAdvisories: refs,
+            }
         })
     }
 
@@ -45,7 +67,10 @@ function AddVendorAdvisory({
         setPayload((prev: Vulnerability) => {
             const refs = (prev.vendorAdvisories ?? []).slice()
             refs.splice(i, 1)
-            return { ...prev, vendorAdvisories: refs }
+            return {
+                ...prev,
+                vendorAdvisories: refs,
+            }
         })
     }
 
@@ -56,14 +81,22 @@ function AddVendorAdvisory({
                     <h6>{t('Vendor Advisories')}</h6>
                 </div>
                 {payload.vendorAdvisories?.map((elem, i) => (
-                    <div className='row mb-2' key={i}>
+                    <div
+                        className='row mb-2'
+                        key={i}
+                    >
                         <div className='col-lg-3'>
                             <label
                                 htmlFor='vulnerabilityDetail.vendorAdvisories.vendor'
                                 className='form-label fw-medium'
                             >
                                 {t('Advisory Vendor')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
+                                >
                                     *
                                 </span>
                             </label>
@@ -81,9 +114,17 @@ function AddVendorAdvisory({
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='vulnerabilityDetail.vendorAdvisories.name' className='form-label fw-medium'>
+                            <label
+                                htmlFor='vulnerabilityDetail.vendorAdvisories.name'
+                                className='form-label fw-medium'
+                            >
                                 {t('Advisory Name')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
+                                >
                                     *
                                 </span>
                             </label>
@@ -101,9 +142,17 @@ function AddVendorAdvisory({
                             />
                         </div>
                         <div className='col-lg-4'>
-                            <label htmlFor='vulnerabilityDetail.vendorAdvisories.url' className='form-label fw-medium'>
+                            <label
+                                htmlFor='vulnerabilityDetail.vendorAdvisories.url'
+                                className='form-label fw-medium'
+                            >
                                 {t('Advisory Url')}{' '}
-                                <span className='text-red' style={{ color: '#F7941E' }}>
+                                <span
+                                    className='text-red'
+                                    style={{
+                                        color: '#F7941E',
+                                    }}
+                                >
                                     *
                                 </span>
                             </label>
@@ -121,12 +170,20 @@ function AddVendorAdvisory({
                             />
                         </div>
                         <div className='col-lg-1 d-flex align-items-end pb-2'>
-                            <FaTrashAlt className='btn-icon' size={22} onClick={() => deleteAdvisory(i)} />
+                            <BsFillTrashFill
+                                className='btn-icon'
+                                size={20}
+                                onClick={() => deleteAdvisory(i)}
+                            />
                         </div>
                     </div>
                 ))}
                 <div className='col-lg-4 mt-2'>
-                    <button type='button' onClick={addAdvisory} className={`fw-bold btn btn-secondary`}>
+                    <button
+                        type='button'
+                        onClick={addAdvisory}
+                        className={`fw-bold btn btn-secondary`}
+                    >
                         {t('Click to add Vendor Advisory')}
                     </button>
                 </div>

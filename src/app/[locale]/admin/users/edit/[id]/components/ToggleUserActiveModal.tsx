@@ -1,0 +1,120 @@
+// Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
+
+// This program and the accompanying materials are made
+// available under the terms of the Eclipse Public License 2.0
+// which is available at https://www.eclipse.org/legal/epl-2.0/
+
+// SPDX-License-Identifier: EPL-2.0
+// License-Filename: LICENSE
+
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import React, { type JSX, useEffect } from 'react'
+import { Modal } from 'react-bootstrap'
+import { BsQuestionCircle } from 'react-icons/bs'
+import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
+
+interface Props {
+    userId: string
+    isUserDeactived: boolean
+    showToggleActiveModal: boolean
+    setShowToggleActiveModal: React.Dispatch<React.SetStateAction<boolean>>
+    userEmail: string
+}
+
+const ToggleUserActiveModal = ({
+    userId,
+    isUserDeactived,
+    showToggleActiveModal,
+    setShowToggleActiveModal,
+    userEmail,
+}: Props): JSX.Element => {
+    const t = useTranslations('default')
+    const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const toggleUserAccount = async () => {
+        try {
+            const session = await getSession()
+            if (!session) {
+                return signOut()
+            }
+            const response = await ApiUtils.PATCH(
+                `users/${userId}`,
+                {
+                    deactivated: !isUserDeactived,
+                },
+                session.user.access_token,
+            )
+            if (response.status === StatusCodes.OK) {
+                MessageService.success(t('Your request completed successfully'))
+                router.push('/admin/users')
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
+                MessageService.success(t('Session has expired'))
+                return signOut()
+            } else {
+                MessageService.error(t('Something went wrong'))
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    return (
+        <Modal
+            show={showToggleActiveModal}
+            onHide={() => setShowToggleActiveModal(false)}
+            backdrop='static'
+            centered
+            size='lg'
+        >
+            <Modal.Header
+                closeButton
+                style={{
+                    color: 'red',
+                }}
+            >
+                <Modal.Title>
+                    <BsQuestionCircle size={20} />{' '}
+                    {isUserDeactived === true ? t('Activate User') : t('Deactivate User')} ?
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>
+                    {t(`Do you really want to ${isUserDeactived ? 'activate' : 'deactivate'} the user`)}{' '}
+                    <b>{userEmail}</b>?
+                </p>
+            </Modal.Body>
+            <Modal.Footer className='justify-content-end'>
+                <button
+                    className='btn close-btn btn-light'
+                    onClick={() => setShowToggleActiveModal(false)}
+                >
+                    {t('Close')}
+                </button>
+                <button
+                    className='btn btn-danger'
+                    id='submit'
+                    onClick={() => toggleUserAccount()}
+                >
+                    {isUserDeactived === true ? t('Activate User') : t('Deactivate User')}
+                </button>
+            </Modal.Footer>
+        </Modal>
+    )
+}
+
+export default ToggleUserActiveModal

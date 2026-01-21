@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,27 +11,27 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import {
     Annotations,
     DocumentCreationInformation,
     ExternalDocumentReferences,
     ExternalReference,
-    HttpStatus,
     OtherLicensingInformationDetected,
     PackageInformation,
     RelationshipsBetweenSPDXElements,
     ReleaseDetail,
-    SPDXDocument,
     SnippetInformation,
     SnippetRange,
+    SPDXDocument,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import AnnotationInformation from './AnnotationInformation'
-import styles from './CssButton.module.css'
+
 import DocumentCreationInformationDetail from './DocumentCreationInformation'
 import OtherLicensingInformationDetectedDetail from './OtherLicensingInformationDetectedDetail'
 import PackageInformationDetail from './PackageInformationDetail'
@@ -41,7 +42,7 @@ interface Props {
     releaseId: string
 }
 
-const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
+const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [spdxDocument, setSPDXDocument] = useState<SPDXDocument>()
     const [documentCreationInformation, setDocumentCreationInformation] = useState<DocumentCreationInformation>()
@@ -56,7 +57,10 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
         OtherLicensingInformationDetected[]
     >([])
 
-    const [relationshipSelection, setRelationshipSelection] = useState<{ index: number; isSPDXDocument: boolean }>({
+    const [relationshipSelection, setRelationshipSelection] = useState<{
+        index: number
+        isSPDXDocument: boolean
+    }>({
         index: 0,
         isSPDXDocument: true,
     })
@@ -68,7 +72,10 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
         RelationshipsBetweenSPDXElements[]
     >([])
 
-    const [annotationsSelection, setAnnotationsSelection] = useState<{ index: number; isSPDXDocument: boolean }>({
+    const [annotationsSelection, setAnnotationsSelection] = useState<{
+        index: number
+        isSPDXDocument: boolean
+    }>({
         index: 0,
         isSPDXDocument: true,
     })
@@ -77,24 +84,29 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
     const [annotationsPackages, setAnnotationsPackages] = useState<Annotations[]>([])
 
     const [isModeFull, setIsModeFull] = useState(true)
+    const { status } = useSession()
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as ReleaseDetail
-                return data
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        []
-    )
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as ReleaseDetail
+            return data
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return undefined
+        }
+    }, [])
 
     useEffect(() => {
         fetchData(`releases/${releaseId}`)
@@ -109,12 +121,12 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
                     //SnippetInformation
                     if (!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:spdxDocument'].snippets)) {
                         setSnippetInformations(
-                            release._embedded['sw360:spdxDocument'].snippets.toSorted((e1, e2) => e1.index - e2.index)
+                            release._embedded['sw360:spdxDocument'].snippets.toSorted((e1, e2) => e1.index - e2.index),
                         )
                         setIndexSnippetInformation(0)
                         if (
                             !CommonUtils.isNullEmptyOrUndefinedArray(
-                                release._embedded['sw360:spdxDocument'].snippets[0].snippetRanges
+                                release._embedded['sw360:spdxDocument'].snippets[0].snippetRanges,
                             )
                         ) {
                             setSnippetRanges(release._embedded['sw360:spdxDocument'].snippets[0].snippetRanges)
@@ -123,13 +135,13 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
                     //OtherLicensingInformationDetected
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:spdxDocument'].otherLicensingInformationDetecteds
+                            release._embedded['sw360:spdxDocument'].otherLicensingInformationDetecteds,
                         )
                     ) {
                         setOtherLicensingInformationDetecteds(
                             release._embedded['sw360:spdxDocument'].otherLicensingInformationDetecteds.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                         setIndexOtherLicense(0)
                     }
@@ -139,16 +151,16 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
                     ) {
                         setRelationshipsBetweenSPDXElementSPDXs(
                             release._embedded['sw360:spdxDocument'].relationships.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                     }
                     //Annotations
                     if (!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:spdxDocument'].annotations)) {
                         setAnnotationsSPDXs(
                             release._embedded['sw360:spdxDocument'].annotations.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                     }
                 }
@@ -162,11 +174,11 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
                     // ExternalDocumentRefs
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs
+                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs,
                         )
                     ) {
                         setExternalDocumentRef(
-                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs[0]
+                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs[0],
                         )
                     }
                 }
@@ -179,29 +191,29 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
                     setPackageInformation(release._embedded['sw360:packageInformation'])
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:packageInformation'].relationships
+                            release._embedded['sw360:packageInformation'].relationships,
                         )
                     ) {
                         setRelationshipsBetweenSPDXElementPackages(
                             release._embedded['sw360:packageInformation'].relationships.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                     }
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:packageInformation'].annotations
+                            release._embedded['sw360:packageInformation'].annotations,
                         )
                     ) {
                         setAnnotationsPackages(
                             release._embedded['sw360:packageInformation'].annotations.toSorted(
-                                (e1, e2) => e1.index - e2.index
-                            )
+                                (e1, e2) => e1.index - e2.index,
+                            ),
                         )
                     }
                     if (
                         !CommonUtils.isNullEmptyOrUndefinedArray(
-                            release._embedded['sw360:packageInformation'].externalRefs
+                            release._embedded['sw360:packageInformation'].externalRefs,
                         )
                     ) {
                         setExternalRefsData(release._embedded['sw360:packageInformation'].externalRefs[0])
@@ -221,16 +233,19 @@ const SPDXDocumentTab = ({ releaseId }: Props) : ReactNode => {
 
     return (
         <>
-            <div className='list-group-companion' data-belong-to='tab-Attachments'>
+            <div
+                className='list-group-companion'
+                data-belong-to='tab-Attachments'
+            >
                 <div className='btn-group'>
                     <button
-                        className={`btn ${isModeFull ? styles['btn-full'] : styles['btn-lite']}`}
+                        className={`btn ${isModeFull ? 'spdx-btn-full' : 'spdx-btn-lite'}`}
                         onClick={changeModeFull}
                     >
                         {t('SPDX Full')}
                     </button>
                     <button
-                        className={`btn ${isModeFull ? styles['btn-lite'] : styles['btn-full']}`}
+                        className={`btn ${isModeFull ? 'spdx-btn-lite' : 'spdx-btn-full'}`}
                         onClick={changeModeLite}
                     >
                         {t('SPDX Lite')}

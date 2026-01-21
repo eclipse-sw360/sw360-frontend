@@ -9,32 +9,40 @@
 
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { AdvancedSearch} from 'next-sw360'
-import { Col, ListGroup, Row, Tab} from 'react-bootstrap'
-import OpenModerationRequest from './OpenModerationRequest'
-import ClosedModerationRequest from './ClosedModerationRequest'
-import OpenClearingRequest from './OpenClearingRequest'
-import ClosedClearingRequest from './ClosedClearingRequest'
-import { useCallback, useEffect, useState } from 'react'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { ClearingRequest, Embedded, HttpStatus, ModerationRequest } from '@/object-types'
-import { signOut, useSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { AdvancedSearch } from 'next-sw360'
+import { ReactNode, useEffect, useState } from 'react'
+import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
+import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import ClearingRequestComponent from './ClearingRequest'
+import ClosedModerationRequest from './ClosedModerationRequest'
+import OpenModerationRequest from './OpenModerationRequest'
 
 type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
-
-function Requests() {
-
+function Requests(): ReactNode | undefined {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const { status } = useSession()
     const [openModerationRequestCount, setOpenModerationRequestCount] = useState(0)
     const [closedModerationRequestCount, setClosedModerationRequestCount] = useState(0)
     const [openClearingRequestCount, setOpenClearingRequestCount] = useState(0)
     const [closedClearingRequestCount, setClosedClearingRequestCount] = useState(0)
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
     const advancedSearch = [
         {
             fieldName: t('Date'),
@@ -54,7 +62,7 @@ function Requests() {
                 {
                     key: 'BETWEEN',
                     text: t('Between'),
-                }
+                },
             ],
             paramName: 'createdOn',
         },
@@ -132,146 +140,174 @@ function Requests() {
                 {
                     key: 'inProgress',
                     text: t('In Progress'),
-                }
+                },
             ],
             paramName: 'state',
-        }
+        },
     ]
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = await response.json()
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[session]
-    )
-
     useEffect(() => {
-        void fetchData('moderationrequest')
-            .then((moderationRequests: EmbeddedModerationRequest) => {
-                    let openMRCount = 0
-                    let closedMRCount = 0
-                    moderationRequests['_embedded']['sw360:moderationRequests']
-                    .filter((item: ModerationRequest) => {
-                        if (item.moderationState === 'PENDING' ||
-                            item.moderationState === 'INPROGRESS') {
-                                openMRCount++;
-                        }
-                        else if (item.moderationState === 'APPROVED' ||
-                                 item.moderationState === 'REJECTED') {
-                                    closedMRCount++;
-                        }
-                    })
+        const controller = new AbortController()
+        const signal = controller.signal
+        void (async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const moderationRequestsPromsies = ApiUtils.GET('moderationrequest', session.user.access_token, signal)
+                const clearingRequestsPromises = ApiUtils.GET('clearingrequests', session.user.access_token, signal)
+
+                const responses = await Promise.all([
+                    moderationRequestsPromsies,
+                    clearingRequestsPromises,
+                ])
+                if (responses[0].status !== StatusCodes.OK || responses[1].status !== StatusCodes.OK) {
+                    return notFound()
+                }
+
+                const moderationRequests = (await responses[0].json()) as EmbeddedModerationRequest
+                let openMRCount = 0
+                let closedMRCount = 0
+                moderationRequests['_embedded']['sw360:moderationRequests'].map((item: ModerationRequest) => {
+                    if (item.moderationState === 'PENDING' || item.moderationState === 'INPROGRESS') {
+                        openMRCount++
+                    } else if (item.moderationState === 'APPROVED' || item.moderationState === 'REJECTED') {
+                        closedMRCount++
+                    }
+                })
                 setOpenModerationRequestCount(openMRCount)
                 setClosedModerationRequestCount(closedMRCount)
-            })
-        void fetchData('clearingrequests')
-            .then((clearingRequests: EmbeddedClearingRequest) => {
+
+                const clearingRequests = (await responses[1].json()) as EmbeddedClearingRequest
                 let openCRCount = 0
                 let closedCRCount = 0
-                clearingRequests['_embedded']['sw360:clearingRequests']
-                .filter((item: ClearingRequest) => {
-                    if (item.clearingState === 'NEW' ||
+                clearingRequests['_embedded']['sw360:clearingRequests'].map((item: ClearingRequest) => {
+                    if (
+                        item.clearingState === 'NEW' ||
                         item.clearingState === 'ACCEPTED' ||
                         item.clearingState === 'IN_QUEUE' ||
                         item.clearingState === 'IN_PROGRESS' ||
                         item.clearingState === 'AWAITING_RESPONSE' ||
                         item.clearingState === 'ON_HOLD' ||
                         item.clearingState === 'SANITY_CHECK' ||
-                        item.clearingState === 'PENDING_INPUT') {
-                            openCRCount++;
-                    }
-                    else if (item.clearingState === 'CLOSED' ||
-                             item.clearingState === 'REJECTED') {
-                                closedCRCount++;
+                        item.clearingState === 'PENDING_INPUT'
+                    ) {
+                        openCRCount++
+                    } else if (item.clearingState === 'CLOSED' || item.clearingState === 'REJECTED') {
+                        closedCRCount++
                     }
                 })
                 setOpenClearingRequestCount(openCRCount)
                 setClosedClearingRequestCount(closedCRCount)
-        })
-        }, [fetchData, session])
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            }
+        })()
+        return () => {
+            controller.abort()
+        }
+    }, [])
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <>
-                <div className='container page-content'>
-                    <Tab.Container defaultActiveKey='openModerationrequests'
-                                mountOnEnter={true}
-                                unmountOnExit={true}>
-                        <Row>
-                            <Col sm='auto' className='me-3'>
-                                <ListGroup>
-                                    <ListGroup.Item action eventKey='openModerationrequests'>
-                                        <div className='my-2'>{t('Open Moderation Requests')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='closedModerationrequests'>
-                                        <div className='my-2'>{t('Closed Moderation Requests')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='openClearingRequests'>
-                                        <div className='my-2'>{t('Open Clearing Requests')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='closedClearingRequests'>
-                                        <div className='my-2'>{t('Closed Clearing Requests')}</div>
-                                    </ListGroup.Item>
-                                </ListGroup>
-                                <div className='mt-4 mb-4'>
-                                    <AdvancedSearch title='Advanced Search' fields={advancedSearch} />
-                                </div>
-                            </Col>
-                            <Col>
-                                <Row className='mt-3' style={{ marginRight: '0px' }}>
-                                    <Tab.Content>
-                                        <Tab.Pane eventKey='openModerationrequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('MODERATIONS') +
+    return (
+        <>
+            <div className='container page-content'>
+                <Tab.Container
+                    defaultActiveKey='openModerationrequests'
+                    mountOnEnter={true}
+                    unmountOnExit={true}
+                >
+                    <Row>
+                        <Col
+                            sm='auto'
+                            className='me-3'
+                        >
+                            <ListGroup>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='openModerationrequests'
+                                >
+                                    <div className='my-2'>{t('Open Moderation Requests')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='closedModerationrequests'
+                                >
+                                    <div className='my-2'>{t('Closed Moderation Requests')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='openClearingRequests'
+                                >
+                                    <div className='my-2'>{t('Open Clearing Requests')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='closedClearingRequests'
+                                >
+                                    <div className='my-2'>{t('Closed Clearing Requests')}</div>
+                                </ListGroup.Item>
+                            </ListGroup>
+                            <div className='mt-4 mb-4'>
+                                <AdvancedSearch
+                                    title='Advanced Search'
+                                    fields={advancedSearch}
+                                />
+                            </div>
+                        </Col>
+                        <Col>
+                            <Row
+                                className='mt-3'
+                                style={{
+                                    marginRight: '0px',
+                                }}
+                            >
+                                <Tab.Content>
+                                    <Tab.Pane eventKey='openModerationrequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('MODERATIONS') +
                                                 `(${openModerationRequestCount}/
-                                                ${closedModerationRequestCount})`}
-                                            </Row>
-                                            <OpenModerationRequest/>
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='closedModerationrequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('MODERATIONS') +
+                                            ${closedModerationRequestCount})`}
+                                        </Row>
+                                        <OpenModerationRequest />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='closedModerationrequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('MODERATIONS') +
                                                 `(${openModerationRequestCount}/
-                                                ${closedModerationRequestCount})`}
-                                            </Row>
-                                            <ClosedModerationRequest/>
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='openClearingRequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('CLEARING') +
+                                            ${closedModerationRequestCount})`}
+                                        </Row>
+                                        <ClosedModerationRequest />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='openClearingRequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('CLEARING') +
                                                 `(${openClearingRequestCount}/
-                                                ${closedClearingRequestCount})`}
-                                            </Row>
-                                            <OpenClearingRequest/>
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='closedClearingRequests'>
-                                            <Row className='text-truncate buttonheader-title '>
-                                                {t('CLEARING') +
+                                            ${closedClearingRequestCount})`}
+                                        </Row>
+                                        <ClearingRequestComponent requestType={RequestType.OPEN} />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='closedClearingRequests'>
+                                        <Row className='text-truncate buttonheader-title '>
+                                            {t('CLEARING') +
                                                 `(${openClearingRequestCount}/
-                                                ${closedClearingRequestCount})`}
-                                            </Row>
-                                            <ClosedClearingRequest/>
-                                        </Tab.Pane>
-                                    </Tab.Content>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Tab.Container>
-                </div>
-            </>
-        )
-    }
+                                            ${closedClearingRequestCount})`}
+                                        </Row>
+                                        <ClearingRequestComponent requestType={RequestType.CLOSED} />
+                                    </Tab.Pane>
+                                </Tab.Content>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Tab.Container>
+            </div>
+        </>
+    )
 }
 
-export default Requests
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(Requests, [
+    UserGroupType.SECURITY_USER,
+])

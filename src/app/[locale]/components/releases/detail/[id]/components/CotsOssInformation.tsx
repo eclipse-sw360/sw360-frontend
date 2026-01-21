@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,15 +9,24 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useState } from 'react'
-import { CiCircleRemove } from 'react-icons/ci'
-import { FiCheckCircle } from 'react-icons/fi'
+import { ReactNode, useEffect, useState } from 'react'
+import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import { COTSDetails } from '@/object-types'
 
-const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefined }) : ReactNode => {
+const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     return (
         <table className='table summary-table'>
@@ -33,18 +43,28 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
             <tbody hidden={toggle}>
                 <tr>
                     <td>{t('Used License')}:</td>
-                    <td>{costDetails && costDetails.usedLicense !== undefined && <span>{costDetails.usedLicense}</span>}</td>
+                    <td>
+                        {costDetails && costDetails.usedLicense !== undefined && <span>{costDetails.usedLicense}</span>}
+                    </td>
                 </tr>
                 <tr>
                     <td>{t('Contains Open Source Software')}:</td>
                     <td>
                         {costDetails && costDetails.containsOSS == true ? (
-                            <span style={{ color: '#287d3c' }}>
-                                <FiCheckCircle /> {t('Yes')}
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
-                                <CiCircleRemove /> {t('No')}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>
@@ -53,12 +73,20 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                     <td>{t('OSS Contract Signed')}:</td>
                     <td>
                         {costDetails && costDetails.ossContractSigned == true ? (
-                            <span style={{ color: '#287d3c' }}>
-                                <FiCheckCircle /> {t('Yes')}
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
-                                <CiCircleRemove /> {t('No')}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>
@@ -66,19 +94,29 @@ const CotsOssInformation = ({ costDetails }: { costDetails: COTSDetails | undefi
                 <tr>
                     <td>{t('OSS Information URL')}:</td>
                     <td>
-                        {costDetails && costDetails.ossInformationURL !== undefined && <span>{costDetails.ossInformationURL}</span>}
+                        {costDetails && costDetails.ossInformationURL !== undefined && (
+                            <span>{costDetails.ossInformationURL}</span>
+                        )}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Source Code Available')}:</td>
                     <td>
                         {costDetails && costDetails.sourceCodeAvailable == true ? (
-                            <span style={{ color: '#287d3c' }}>
-                                <FiCheckCircle /> {t('Yes')}
+                            <span
+                                style={{
+                                    color: '#287d3c',
+                                }}
+                            >
+                                <BsCheck2Circle size={20} /> {t('Yes')}
                             </span>
                         ) : (
-                            <span style={{ color: 'red' }}>
-                                <CiCircleRemove /> {t('No')}
+                            <span
+                                style={{
+                                    color: 'red',
+                                }}
+                            >
+                                <BsXCircle size={20} /> {t('No')}
                             </span>
                         )}
                     </td>

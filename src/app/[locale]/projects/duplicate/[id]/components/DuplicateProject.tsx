@@ -9,34 +9,55 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { notFound, useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Breadcrumb } from 'next-sw360'
+import { type JSX, useEffect, useState } from 'react'
+import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, Project, ProjectPayload, Vendor } from '@/object-types'
+import {
+    InputKeyValue,
+    LinkedPackageData,
+    LinkedProjectData,
+    Project,
+    ProjectPayload,
+    ReleaseDetail,
+    UserGroupType,
+    Vendor,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
-import { signOut, getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { notFound, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
-import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
-interface Props{
+interface Props {
     projectId: string
+    isDependencyNetworkFeatureEnabled: boolean
 }
 
 interface LinkedReleaseProps {
     release?: string
     relation?: string
     mainlineState?: string
+    releaseRelation?: string
     comment?: string
 }
 
-function DuplicateProject({projectId}:Props) {
+interface LinkedReleaseData {
+    comment: string
+    mainlineState: string
+    name: string
+    releaseRelation: string
+    version: string
+}
 
+function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
+    const session = useSession()
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -50,13 +71,24 @@ function DuplicateProject({projectId}:Props) {
 
     const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
 
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [securityResponsibles, setSecurityResponsibles] = useState<{ [k: string]: string }>({})
-    const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
-    const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
-    const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
-    const [existingReleaseData, setExistingReleaseData] = useState<Map<string, any>>()
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [securityResponsibles, setSecurityResponsibles] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectOwner, setProjectOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectManager, setProjectManager] = useState<{
+        [k: string]: string
+    }>({})
+    const [leadArchitect, setLeadArchitect] = useState<{
+        [k: string]: string
+    }>({})
     const [isDuplicateProjectFetched, setIsDuplicateProjectFetched] = useState(false)
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
@@ -68,39 +100,44 @@ function DuplicateProject({projectId}:Props) {
         tag: '',
         description: '',
         domain: '',
-        defaultVendorId: '',
+        vendorId: '',
         modifiedOn: '',
         modifiedBy: '',
-        externalUrls: null,
         additionalData: {},
-        externalIds: null,
-        roles: null,
         ownerAccountingUnit: '',
         ownerGroup: '',
         ownerCountry: '',
-        clearingState : '',
-        businessUnit : '',
-        preevaluationDeadline : '',
-        clearingSummary : '',
-        specialRisksOSS : '',
-        generalRisks3rdParty : '',
-        specialRisks3rdParty : '',
-        deliveryChannels : '',
-        remarksAdditionalRequirements : '',
-        state : '',
-        systemTestStart : '',
-        systemTestEnd : '',
-        deliveryStart : '',
-        phaseOutSince : '',
-        licenseInfoHeaderText : '',
+        clearingState: '',
+        businessUnit: '',
+        preevaluationDeadline: '',
+        clearingSummary: '',
+        specialRisksOSS: '',
+        generalRisks3rdParty: '',
+        specialRisks3rdParty: '',
+        deliveryChannels: '',
+        remarksAdditionalRequirements: '',
+        state: '',
+        systemTestStart: '',
+        systemTestEnd: '',
+        deliveryStart: '',
+        phaseOutSince: '',
+        licenseInfoHeaderText: '',
         linkedReleases: {},
         securityResponsibles: [],
         moderators: [],
         contributors: [],
         projectOwner: '',
         leadArchitect: '',
-        projectManager: ''
+        projectManager: '',
     })
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        session,
+    ])
 
     const setDataExternalUrls = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
@@ -135,162 +172,231 @@ function DuplicateProject({projectId}:Props) {
     }
 
     const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
-        const map = new Map<string, any>();
-        const linkedReleasesObject: { [key: string]: any } = {}
-        await Promise.all(linkedReleases.map(async (obj) => {
-            const releaseId = obj['release'].split('/').pop();
-            const releaseData = await fetchData(`releases/${releaseId}`);
-            map.set(releaseId, {
-                'name': releaseData.name,
-                'version': releaseData.version,
-                'releaseRelation': obj['relation'],
-                'mainlineState': obj['mainlineState'],
-                'comment': obj['comment'],
-            })
-            setExistingReleaseData(map)
-            linkedReleasesObject[releaseId] = {
-                'releaseRelation': obj['relation'],
-                'mainlineState': obj['mainlineState'],
-                'comment': obj['comment'],
-            };
-        }))
-        setProjectPayload((prevProjectPayload) => ({
-            ...prevProjectPayload,
-            linkedReleases: linkedReleasesObject,
-        }));
+        try {
+            const linkedReleasesObject: {
+                [key: string]: LinkedReleaseData
+            } = {}
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            for (const l of linkedReleases) {
+                const releaseId = l['release']?.split('/').pop()
+                if (releaseId === undefined) continue
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token)
+                const releaseData = (await response.json()) as ReleaseDetail
+                linkedReleasesObject[releaseId] = {
+                    name: releaseData.name,
+                    version: releaseData.version,
+                    releaseRelation: l.relation ?? '',
+                    mainlineState: l.mainlineState ?? '',
+                    comment: l.comment ?? '',
+                }
+            }
+            setProjectPayload((prevProjectPayload) => ({
+                ...prevProjectPayload,
+                linkedReleases: linkedReleasesObject,
+            }))
+        } catch (e) {
+            console.error(e)
+        }
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as Project
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                notFound()
-            }
-        },[]
-    )
-
     useEffect(() => {
-        void fetchData(`projects/${projectId}`).then((project: Project) => {
-            if (typeof project.externalIds !== 'undefined') {
-                setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
-            }
+        if (session.status === 'loading') return
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token)
+                if (response.status !== StatusCodes.OK) {
+                    return notFound()
+                }
+                const project = (await response.json()) as Project
+                if (project.externalIds !== undefined) {
+                    setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
+                }
 
-            if (typeof project.externalUrls !== 'undefined') {
-                setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
-            }
+                if (project.externalUrls !== undefined) {
+                    setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
+                }
 
-            if (typeof project.additionalData !== 'undefined') {
-                setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
-            }
+                if (project.additionalData !== undefined) {
+                    setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
+                }
 
-            if (typeof project.roles !== 'undefined') {
-                setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
-            }
+                if (project.roles !== undefined) {
+                    setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
+                }
 
-            if (typeof project.linkedReleases !== 'undefined') {
-                setObjectToMap(project.linkedReleases)
-            }
+                if (project.linkedReleases !== undefined) {
+                    void setObjectToMap(project.linkedReleases)
+                }
 
-            if (typeof project["_embedded"]["leadArchitect"] !== 'undefined') {
-                setLeadArchitect({ [project["_embedded"]["leadArchitect"].email]:
-                                    project["_embedded"]["leadArchitect"].fullName })
-            }
+                if (project['_embedded']?.['leadArchitect'] !== undefined) {
+                    setLeadArchitect({
+                        [project['_embedded']['leadArchitect'].email]:
+                            project['_embedded']['leadArchitect'].fullName ?? '',
+                    })
+                }
 
-            if (typeof project["_embedded"]["projectOwner"] !== 'undefined') {
-                setProjectOwner({ [project["_embedded"]["projectOwner"].email]:
-                                   project["_embedded"]["projectOwner"].fullName })
-            }
+                if (project['_embedded']?.['projectOwner'] !== undefined) {
+                    setProjectOwner({
+                        [project['_embedded']['projectOwner'].email]:
+                            project['_embedded']['projectOwner'].fullName ?? '',
+                    })
+                }
 
-            if (typeof project["_embedded"]["projectManager"] !== 'undefined') {
-                setProjectManager({ [project["_embedded"]["projectManager"].email]:
-                                     project["_embedded"]["projectManager"].fullName })
-            }
+                if (project['_embedded']?.['projectManager'] !== undefined) {
+                    setProjectManager({
+                        [project['_embedded']['projectManager'].email]:
+                            project['_embedded']['projectManager'].fullName ?? '',
+                    })
+                }
 
-            if (typeof project["_embedded"]["sw360:moderators"] !== 'undefined') {
-                const moderatorMap = new Map<string, string>()
-                project["_embedded"]["sw360:moderators"].map((moderator) => {
-                    moderatorMap.set(moderator.email, moderator.fullName)
-                })
-                setModerators(Object.fromEntries(moderatorMap))
-            }
+                if (project['_embedded']?.['sw360:moderators'] !== undefined) {
+                    const moderatorMap = new Map<string, string>()
+                    project['_embedded']['sw360:moderators'].map((moderator) => {
+                        moderatorMap.set(moderator.email, moderator.fullName ?? '')
+                    })
+                    setModerators(Object.fromEntries(moderatorMap))
+                }
 
-            if (typeof project["_embedded"]["sw360:contributors"] !== 'undefined') {
-                const contributorMap = new Map<string, string>()
-                project["_embedded"]["sw360:contributors"].map((contributor) => {
-                    contributorMap.set(contributor.email, contributor.fullName)
-                })
-                setContributors(Object.fromEntries(contributorMap))
-            }
+                if (project['_embedded']?.['sw360:contributors'] !== undefined) {
+                    const contributorMap = new Map<string, string>()
+                    project['_embedded']['sw360:contributors'].map((contributor) => {
+                        contributorMap.set(contributor.email, contributor.fullName ?? '')
+                    })
+                    setContributors(Object.fromEntries(contributorMap))
+                }
 
-            if (typeof project["_embedded"]["sw360:securityResponsibles"] !== 'undefined') {
-                const securityResponsiblesMap = new Map<string, string>()
-                project["_embedded"]["sw360:securityResponsibles"].map((securityResponsible) => {
-                    securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName)
-                })
-                setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
-            }
+                if (project['_embedded']?.['sw360:securityResponsibles'] !== undefined) {
+                    const securityResponsiblesMap = new Map<string, string>()
+                    project['_embedded']['sw360:securityResponsibles'].map((securityResponsible) => {
+                        securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName ?? '')
+                    })
+                    setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
+                }
 
-            const projectPayloadData: ProjectPayload = {
-                name: project.name,
-                version: project.version ?? '',
-                visibility: project.visibility ?? 'EVERYONE',
-                createdBy: project._embedded.createdBy.fullName ?? '',
-                projectType: project.projectType ?? 'PRODUCT',
-                tag: project.tag ?? '',
-                description: project.description ?? '',
-                domain: project.domain ?? '',
-                modifiedOn: project.modifiedOn ?? '',
-                modifiedBy: project.modifiedBy ?? '',
-                externalIds: project.externalIds ?? {},
-                externalUrls:project.externalUrls ?? {},
-                additionalData: project.additionalData ?? {},
-                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)) ?? {},
-                ownerAccountingUnit: project.ownerAccountingUnit ?? '',
-                ownerGroup: project.ownerGroup ?? '',
-                ownerCountry: project.ownerCountry ?? '',
-                clearingState: project.clearingState ?? 'OPEN',
-                businessUnit: project.businessUnit ?? 'CT',
-                preevaluationDeadline: project.preevaluationDeadline ?? '',
-                clearingSummary: project.clearingSummary ?? '',
-                specialRisksOSS: project.specialRisksOSS ?? '',
-                generalRisks3rdParty: project.generalRisks3rdParty ?? '',
-                specialRisks3rdParty: project.specialRisks3rdParty ?? '',
-                deliveryChannels: project.deliveryChannels ?? '',
-                remarksAdditionalRequirements: project.remarksAdditionalRequirements ?? '',
-                state: project.state ?? 'ACTIVE',
-                systemTestStart: project.systemTestStart ?? '',
-                systemTestEnd: project.systemTestEnd ?? '',
-                deliveryStart: project.deliveryStart ?? '',
-                phaseOutSince: project.phaseOutSince ?? '',
-                licenseInfoHeaderText: project.licenseInfoHeaderText ?? '',
-                securityResponsibles: project.securityResponsibles ?? [],
-                contributors: (project._embedded?.['sw360:contributors'] ?? []).map(user => user.email),
-                moderators: (project._embedded?.['sw360:moderators'] ?? []).map(user => user.email),
-                projectOwner: project._embedded?.projectOwner?.email ?? '',
-                leadArchitect: project._embedded?.leadArchitect?.email ?? '',
-                linkedReleases: projectPayload?.linkedReleases ?? {},
+                const projectPayloadData: ProjectPayload = {
+                    name: project.name,
+                    version: project.version ?? '',
+                    visibility: project.visibility ?? 'EVERYONE',
+                    createdBy: project._embedded?.createdBy?.fullName ?? '',
+                    projectType: project.projectType ?? 'PRODUCT',
+                    tag: project.tag ?? '',
+                    description: project.description ?? '',
+                    domain: project.domain ?? '',
+                    modifiedOn: project.modifiedOn ?? '',
+                    modifiedBy: project.modifiedBy ?? '',
+                    externalIds: project.externalIds ?? {},
+                    externalUrls: project.externalUrls ?? {},
+                    additionalData: project.additionalData ?? {},
+                    roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(project.roles)),
+                    ownerAccountingUnit: project.ownerAccountingUnit ?? '',
+                    ownerGroup: project.ownerGroup ?? '',
+                    ownerCountry: project.ownerCountry ?? '',
+                    clearingState: project.clearingState ?? 'OPEN',
+                    businessUnit: project.businessUnit ?? 'CT',
+                    preevaluationDeadline: project.preevaluationDeadline ?? '',
+                    clearingSummary: project.clearingSummary ?? '',
+                    specialRisksOSS: project.specialRisksOSS ?? '',
+                    generalRisks3rdParty: project.generalRisks3rdParty ?? '',
+                    specialRisks3rdParty: project.specialRisks3rdParty ?? '',
+                    deliveryChannels: project.deliveryChannels ?? '',
+                    remarksAdditionalRequirements: project.remarksAdditionalRequirements ?? '',
+                    state: project.state ?? 'ACTIVE',
+                    systemTestStart: project.systemTestStart ?? '',
+                    systemTestEnd: project.systemTestEnd ?? '',
+                    deliveryStart: project.deliveryStart ?? '',
+                    phaseOutSince: project.phaseOutSince ?? '',
+                    licenseInfoHeaderText: project.licenseInfoHeaderText ?? '',
+                    securityResponsibles: project.securityResponsibles ?? [],
+                    contributors: (project._embedded?.['sw360:contributors'] ?? []).map((user) => user.email),
+                    moderators: (project._embedded?.['sw360:moderators'] ?? []).map((user) => user.email),
+                    projectOwner: project._embedded?.projectOwner?.email ?? '',
+                    leadArchitect: project._embedded?.leadArchitect?.email ?? '',
+                    linkedReleases: projectPayload.linkedReleases ?? {},
+                    linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
+                        (acc, proj) => {
+                            acc[proj.id ?? ''] = {
+                                name: proj.name,
+                                version: proj.version ?? '',
+                                enableSvm:
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.enableSvm === 'true',
+                                projectRelationship:
+                                    project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
+                                        ?.relation ?? '',
+                            }
+                            return acc
+                        },
+                        {} as {
+                            [k: string]: LinkedProjectData
+                        },
+                    ),
+                    packageIds: (project._embedded?.['sw360:packages'] ?? []).reduce(
+                        (acc, singlePackage) => {
+                            if (singlePackage.id) {
+                                // Get comment from project's packageIds if it exists, otherwise empty string
+                                const existingComment = project.packageIds?.[singlePackage.id]?.comment || ''
+                                acc[singlePackage.id] = {
+                                    packageId: singlePackage._links?.self.href.split('/').at(-1) ?? '',
+                                    name: singlePackage.name ?? '',
+                                    version: singlePackage.version ?? '',
+                                    licenseIds: singlePackage.licenseIds ?? [],
+                                    packageManager: singlePackage.packageManager ?? '',
+                                    comment: existingComment,
+                                }
+                            }
+                            return acc
+                        },
+                        {} as {
+                            [key: string]: LinkedPackageData
+                        },
+                    ),
+                }
+                setProjectPayload(projectPayloadData)
+                setIsDuplicateProjectFetched(true)
+            } catch (e) {
+                console.error(e)
             }
-            setProjectPayload(projectPayloadData)
-            setIsDuplicateProjectFetched(true)
-        })
-    }, [projectId, fetchData, setProjectPayload])
+        })()
+    }, [
+        projectId,
+        setProjectPayload,
+        session,
+    ])
 
     const createProject = async () => {
-        const session = await getSession()
-        const createProjectUrl = (ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network/duplicate/${projectId}` : `projects/duplicate/${projectId}`
-        const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.user.access_token)
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        const createProjectUrl =
+            isDependencyNetworkFeatureEnabled === true
+                ? `projects/network/duplicate/${projectId}`
+                : `projects/duplicate/${projectId}`
+        try {
+            const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.data.user.access_token)
 
-        if (response.status == HttpStatus.CREATED) {
-            const data = await response.json()
-            MessageService.success(t('Your project is created'))
-            router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
-        } else {
+            if (response.status == StatusCodes.CREATED) {
+                const data = (await response.json()) as Project
+                MessageService.success(t('Your project is created'))
+                router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                const body = await response.json().catch(() => ({}))
+                const msg = body?.message ?? t('SW360 project already exists')
+                MessageService.error(`${msg}`)
+            } else {
+                MessageService.error(t('There are some errors while creating project'))
+            }
+        } catch (err: unknown) {
+            const res = (err as Response) ?? {}
+            if ('status' in res && res.status === StatusCodes.CONFLICT) {
+                let msg = t('SW360 project already exists')
+                try {
+                    const body = await res.json()
+                    msg = body?.message ?? msg
+                } catch {
+                    // No action needed if parsing fails
+                }
+                MessageService.error(`${msg}`)
+                return
+            }
             MessageService.error(t('There are some errors while creating project'))
         }
     }
@@ -300,116 +406,138 @@ function DuplicateProject({projectId}:Props) {
     }
 
     return (
-        <div className='container page-content'>
-            <form
-                action=''
-                id='form_submit'
-                method='post'
-                onSubmit={(event) => {
-                    event.preventDefault()
-                }}
-            >
-                <div>
-                    <Tab.Container defaultActiveKey='summary'>
-                        <Row>
-                            <Col sm='auto' className='me-3'>
-                                <ListGroup>
-                                    <ListGroup.Item action eventKey='summary'>
-                                        <div className='my-2'>{t('Summary')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='administration'>
-                                        <div className='my-2'>{t('Administration')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='linkedProjects'>
-                                        <div className='my-2'>{t('Linked Releases and Projects')}</div>
-                                    </ListGroup.Item>
-                                </ListGroup>
-                            </Col>
-                            <Col className='me-3'>
-                                <Row className='d-flex justify-content-between'>
-                                    <Col lg={3}>
-                                        <Row>
-                                            <Button
-                                                variant='primary'
-                                                type='submit'
-                                                className='me-2 col-auto'
-                                                onClick={createProject}
-                                            >
-                                                {t('Create Project')}
-                                            </Button>
-                                            <Button
-                                                variant='secondary'
-                                                className='col-auto'
-                                                onClick={handleCancelClick}
-                                            >
-                                                {t('Cancel')}
-                                            </Button>
-                                        </Row>
-                                    </Col>
-                                    <Col lg={4} className='text-truncate buttonheader-title'>
-                                        {projectPayload && `${projectPayload.name} (${projectPayload.version})`}
-                                    </Col>
-                                </Row>
-                                <Row className='mt-5'>
-                                    <Tab.Content>
-                                        <Tab.Pane eventKey='summary'>
-                                            <Summary
-                                                vendor={vendor}
-                                                setVendor={setVendor}
-                                                externalUrls={externalUrls}
-                                                setExternalUrls={setExternalUrls}
-                                                setExternalUrlsData={setDataExternalUrls}
-                                                externalIds={externalIds}
-                                                setExternalIds={setExternalIds}
-                                                setExternalIdsData={setDataExternalIds}
-                                                additionalData={additionalData}
-                                                setAdditionalData={setAdditionalData}
-                                                setAdditionalDataObject={setDataAdditionalData}
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                                additionalRoles={additionalRoles}
-                                                setAdditionalRoles={setAdditionalRoles}
-                                                setDataAdditionalRoles={setDataAdditionalRoles}
-                                                moderators={moderators}
-                                                setModerators={setModerators}
-                                                contributors={contributors}
-                                                setContributors={setContributors}
-                                                securityResponsibles={securityResponsibles}
-                                                setSecurityResponsibles={setSecurityResponsibles}
-                                                projectOwner={projectOwner}
-                                                setProjectOwner={setProjectOwner}
-                                                projectManager={projectManager}
-                                                setProjectManager={setProjectManager}
-                                                leadArchitect={leadArchitect}
-                                                setLeadArchitect={setLeadArchitect}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='administration'>
-                                            <Administration
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='linkedProjects'>
-                                            {
-                                                isDuplicateProjectFetched &&
-                                                <LinkedReleasesAndProjects
-                                                    projectId={projectId}
+        <>
+            <Breadcrumb name={t('Create Duplicate Project')} />
+            <div className='container page-content'>
+                <form
+                    action=''
+                    id='form_submit'
+                    method='post'
+                    onSubmit={(event) => {
+                        event.preventDefault()
+                    }}
+                >
+                    <div>
+                        <Tab.Container defaultActiveKey='summary'>
+                            <Row>
+                                <Col
+                                    sm='auto'
+                                    className='me-3'
+                                >
+                                    <ListGroup>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='summary'
+                                        >
+                                            <div className='my-2'>{t('Summary')}</div>
+                                        </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='administration'
+                                        >
+                                            <div className='my-2'>{t('Administration')}</div>
+                                        </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='linkedProjects'
+                                        >
+                                            <div className='my-2'>{t('Linked Releases and Projects')}</div>
+                                        </ListGroup.Item>
+                                    </ListGroup>
+                                </Col>
+                                <Col className='me-3'>
+                                    <Row className='d-flex justify-content-between'>
+                                        <Col lg={3}>
+                                            <Row>
+                                                <Button
+                                                    variant='primary'
+                                                    type='submit'
+                                                    className='me-2 col-auto'
+                                                    onClick={() => void createProject()}
+                                                >
+                                                    {t('Create Project')}
+                                                </Button>
+                                                <Button
+                                                    variant='secondary'
+                                                    className='col-auto'
+                                                    onClick={() => handleCancelClick()}
+                                                >
+                                                    {t('Cancel')}
+                                                </Button>
+                                            </Row>
+                                        </Col>
+                                        <Col
+                                            lg={4}
+                                            className='text-truncate buttonheader-title'
+                                        >
+                                            {`${projectPayload.name} (${projectPayload.version})`}
+                                        </Col>
+                                    </Row>
+                                    <Row className='mt-5'>
+                                        <Tab.Content>
+                                            <Tab.Pane eventKey='summary'>
+                                                <Summary
+                                                    vendor={vendor}
+                                                    setVendor={setVendor}
+                                                    externalUrls={externalUrls}
+                                                    setExternalUrls={setExternalUrls}
+                                                    setExternalUrlsData={setDataExternalUrls}
+                                                    externalIds={externalIds}
+                                                    setExternalIds={setExternalIds}
+                                                    setExternalIdsData={setDataExternalIds}
+                                                    additionalData={additionalData}
+                                                    setAdditionalData={setAdditionalData}
+                                                    setAdditionalDataObject={setDataAdditionalData}
                                                     projectPayload={projectPayload}
                                                     setProjectPayload={setProjectPayload}
-                                                    existingReleaseData={existingReleaseData}
+                                                    additionalRoles={additionalRoles}
+                                                    setAdditionalRoles={setAdditionalRoles}
+                                                    setDataAdditionalRoles={setDataAdditionalRoles}
+                                                    moderators={moderators}
+                                                    setModerators={setModerators}
+                                                    contributors={contributors}
+                                                    setContributors={setContributors}
+                                                    securityResponsibles={securityResponsibles}
+                                                    setSecurityResponsibles={setSecurityResponsibles}
+                                                    projectOwner={projectOwner}
+                                                    setProjectOwner={setProjectOwner}
+                                                    projectManager={projectManager}
+                                                    setProjectManager={setProjectManager}
+                                                    leadArchitect={leadArchitect}
+                                                    setLeadArchitect={setLeadArchitect}
                                                 />
-                                            }
-                                        </Tab.Pane>
-                                    </Tab.Content>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Tab.Container>
-                </div>
-            </form>
-        </div>
+                                            </Tab.Pane>
+                                            <Tab.Pane eventKey='administration'>
+                                                <Administration
+                                                    projectPayload={projectPayload}
+                                                    setProjectPayload={setProjectPayload}
+                                                />
+                                            </Tab.Pane>
+                                            <Tab.Pane eventKey='linkedProjects'>
+                                                {isDuplicateProjectFetched && (
+                                                    <LinkedReleasesAndProjects
+                                                        projectId={projectId}
+                                                        projectPayload={projectPayload}
+                                                        setProjectPayload={setProjectPayload}
+                                                        isDependencyNetworkFeatureEnabled={
+                                                            isDependencyNetworkFeatureEnabled
+                                                        }
+                                                    />
+                                                )}
+                                            </Tab.Pane>
+                                        </Tab.Content>
+                                    </Row>
+                                </Col>
+                            </Row>
+                        </Tab.Container>
+                    </div>
+                </form>
+            </div>
+        </>
     )
 }
 
-export default DuplicateProject
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(DuplicateProject, [
+    UserGroupType.SECURITY_USER,
+])

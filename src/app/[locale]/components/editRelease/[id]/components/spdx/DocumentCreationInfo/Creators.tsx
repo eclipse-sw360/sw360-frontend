@@ -8,46 +8,70 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
-import { FaTrashAlt } from 'react-icons/fa'
 import { ReactNode } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     setInputList: React.Dispatch<React.SetStateAction<InputKeyValue[]>>
     inputList: InputKeyValue[]
     isAnonymous: boolean
     setDataCreators: (inputs: InputKeyValue[]) => void
-    setIsDelete: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function Creators({ inputList, setInputList, isAnonymous, setDataCreators, setIsDelete }: Props) : ReactNode {
+function Creators({ inputList, setInputList, isAnonymous, setDataCreators }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
-        const list: InputKeyValue[] = [...inputList]
+        const list: InputKeyValue[] = [
+            ...inputList,
+        ]
         list[index][name as keyof InputKeyValue] = value
         setInputList(list)
         setDataCreators(list)
     }
 
     const handleRemoveClick = (index: number) => {
-        const list = [...inputList]
+        const list = [
+            ...inputList,
+        ]
         list.splice(index, 1)
         setInputList(list)
         setDataCreators(list)
-        setIsDelete(true)
     }
 
     const handleAddClick = () => {
-        setInputList([...inputList, { key: 'Organization', value: '' }])
+        setInputList([
+            ...inputList,
+            {
+                key: 'Organization',
+                value: '',
+            },
+        ])
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 7 }}>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 7,
+            }}
+        >
             {inputList.map((elem, j) => {
                 return (
-                    <div key={j} style={{ display: 'flex', marginBottom: '0.75rem' }} className='creatorRow'>
+                    <div
+                        key={j}
+                        style={{
+                            display: 'flex',
+                            marginBottom: '0.75rem',
+                        }}
+                        className='creatorRow'
+                    >
                         <select
-                            style={{ flex: 2, marginRight: '1rem' }}
+                            style={{
+                                flex: 2,
+                                marginRight: '1rem',
+                            }}
                             value={elem.key}
                             className='form-control creator-type form-select'
                             disabled={isAnonymous && (elem.key === 'Organization' || elem.key === 'Person')}
@@ -59,7 +83,10 @@ function Creators({ inputList, setInputList, isAnonymous, setDataCreators, setIs
                             <option value='Tool'>Tool</option>
                         </select>
                         <input
-                            style={{ flex: 6, marginRight: '2rem' }}
+                            style={{
+                                flex: 6,
+                                marginRight: '2rem',
+                            }}
                             type='text'
                             value={elem.value}
                             name='value'
@@ -68,7 +95,11 @@ function Creators({ inputList, setInputList, isAnonymous, setDataCreators, setIs
                             onChange={(e) => handleInputChange(e, j)}
                             disabled={isAnonymous && (elem.key === 'Organization' || elem.key === 'Person')}
                         />
-                        <FaTrashAlt className='spdx-delete-icon-main' onClick={() => handleRemoveClick(j)} />
+                        <BsFillTrashFill
+                            className='spdx-delete-icon-main'
+                            onClick={() => handleRemoveClick(j)}
+                            size={20}
+                        />
                     </div>
                 )
             })}

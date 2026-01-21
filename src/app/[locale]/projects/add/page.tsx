@@ -9,20 +9,23 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Breadcrumb } from 'next-sw360'
+import { type JSX, useEffect, useState } from 'react'
+import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
+import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
-import { HttpStatus, InputKeyValue, ProjectPayload, Vendor } from '@/object-types'
+import { ConfigKeys, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
-import { ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP } from '@/utils/env'
-import { getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { ApiUtils, CommonUtils } from '@/utils'
 
-function AddProjects() {
+function AddProjects(): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
     const [vendor, setVendor] = useState<Vendor>({
@@ -33,12 +36,24 @@ function AddProjects() {
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([])
 
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
-    const [contributors, setContributors] = useState<{ [k: string]: string }>({})
-    const [securityResponsibles, setSecurityResponsibles] = useState<{ [k: string]: string }>({})
-    const [projectOwner, setProjectOwner] = useState<{ [k: string]: string }>({})
-    const [projectManager, setProjectManager] = useState<{ [k: string]: string }>({})
-    const [leadArchitect, setLeadArchitect] = useState<{ [k: string]: string }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
+    const [contributors, setContributors] = useState<{
+        [k: string]: string
+    }>({})
+    const [securityResponsibles, setSecurityResponsibles] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectOwner, setProjectOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectManager, setProjectManager] = useState<{
+        [k: string]: string
+    }>({})
+    const [leadArchitect, setLeadArchitect] = useState<{
+        [k: string]: string
+    }>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -49,18 +64,16 @@ function AddProjects() {
         tag: '',
         domain: '',
         leadArchitect: '',
-        defaultVendorId: '',
-        externalUrls: null,
-        externalIds: null,
-        additionalData: null,
+        vendorId: '',
         state: 'ACTIVE',
         phaseOutSince: '',
         moderators: [],
         contributors: [],
         clearingState: 'OPEN',
-        businessUnit: 'CT',
+        businessUnit: '',
         preevaluationDeadline: '',
         clearingSummary: '',
+        clearingTeam: '',
         specialRisksOSS: '',
         generalRisks3rdParty: '',
         specialRisks3rdParty: '',
@@ -74,8 +87,45 @@ function AddProjects() {
         projectManager: '',
         securityResponsibles: [],
         linkedProjects: {},
-        linkedReleases:{},
+        linkedReleases: {},
+        packageIds: {},
     })
+
+    const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
+
+    useEffect(() => {
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) {
+                    MessageService.error(t('Session has expired'))
+                    return signOut()
+                }
+                const response = await ApiUtils.GET('configurations', session.user.access_token)
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    signOut()
+                } else if (response.status !== StatusCodes.OK) {
+                    setDependencyNetworkFeatureEnabled(false)
+                    return
+                }
+                const config = await response.json()
+                setDependencyNetworkFeatureEnabled(
+                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true',
+                )
+            } catch {
+                setDependencyNetworkFeatureEnabled(false)
+            }
+        })()
+    }, [])
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
@@ -102,20 +152,38 @@ function AddProjects() {
     }
 
     const createProject = async () => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
         try {
-            const session = await getSession()
-            const createUrl = (ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP === 'true') ? `projects/network` : 'projects'
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
 
-            if (response.status == HttpStatus.CREATED) {
-                const data = await response.json()
+            if (response.status == StatusCodes.CREATED) {
+                const data = (await response.json()) as Project
                 MessageService.success(t('Your project is created'))
                 router.push(`/projects/detail/${data._links.self.href.split('/').at(-1)}`)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                const body = await response.json().catch(() => ({}))
+                const msg = body?.message ?? t('SW360 project already exists')
+                MessageService.error(`${msg}`)
             } else {
                 MessageService.error(t('There are some errors while creating project'))
             }
-        } catch(e) {
-            console.error(e)
+        } catch (err: unknown) {
+            const res = (err as Response) ?? {}
+            if ('status' in res && res.status === StatusCodes.CONFLICT) {
+                let msg = t('SW360 project already exists')
+                try {
+                    const body = await res.json()
+                    msg = body?.message ?? msg
+                } catch {
+                    // No action needed if parsing fails
+                }
+                MessageService.error(`${msg}`)
+                return
+            }
+
+            MessageService.error(t('There are some errors while creating project'))
         }
     }
 
@@ -124,108 +192,144 @@ function AddProjects() {
     }
 
     return (
-        <div className='container page-content'>
-            <form
-                action=''
-                id='form_submit'
-                method='post'
-                onSubmit={(event) => {
-                    event.preventDefault()
-                }}
-            >
-                <div>
-                    <Tab.Container defaultActiveKey='summary'>
-                        <Row>
-                            <Col sm='auto' className='me-3'>
-                                <ListGroup>
-                                    <ListGroup.Item action eventKey='summary'>
-                                        <div className='my-2'>{t('Summary')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='administration'>
-                                        <div className='my-2'>{t('Administration')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item action eventKey='linkedProjects'>
-                                        <div className='my-2'>{t('Linked Releases and Projects')}</div>
-                                    </ListGroup.Item>
-                                </ListGroup>
-                            </Col>
-                            <Col className='me-3'>
-                                <Row className='d-flex justify-content-between'>
-                                    <Col lg={3}>
-                                        <Row>
-                                            <Button
-                                                variant='primary'
-                                                type='submit'
-                                                className='me-2 col-auto'
-                                                onClick={createProject}
-                                            >
-                                                {t('Create Project')}
-                                            </Button>
-                                            <Button
-                                                variant='secondary'
-                                                className='col-auto'
-                                                onClick={handleCancelClick}
-                                            >
-                                                {t('Cancel')}
-                                            </Button>
-                                        </Row>
-                                    </Col>
-                                    <Col lg={4} className='text-truncate buttonheader-title'>
-                                        {t('New Project')}
-                                    </Col>
-                                </Row>
-                                <Row className='mt-5'>
-                                    <Tab.Content>
-                                        <Tab.Pane eventKey='summary'>
-                                            <Summary
-                                                vendor={vendor}
-                                                setVendor={setVendor}
-                                                externalUrls={externalUrls}
-                                                setExternalUrls={setExternalUrls}
-                                                setExternalUrlsData={setExternalUrlsData}
-                                                externalIds={externalIds}
-                                                setExternalIds={setExternalIds}
-                                                setExternalIdsData={setExternalIdsData}
-                                                additionalData={additionalData}
-                                                setAdditionalData={setAdditionalData}
-                                                setAdditionalDataObject={setAdditionalDataObject}
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                                moderators={moderators}
-                                                setModerators={setModerators}
-                                                contributors={contributors}
-                                                setContributors={setContributors}
-                                                securityResponsibles={securityResponsibles}
-                                                setSecurityResponsibles={setSecurityResponsibles}
-                                                projectOwner={projectOwner}
-                                                setProjectOwner={setProjectOwner}
-                                                projectManager={projectManager}
-                                                setProjectManager={setProjectManager}
-                                                leadArchitect={leadArchitect}
-                                                setLeadArchitect={setLeadArchitect}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='administration'>
-                                            <Administration
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey='linkedProjects'>
-                                            <LinkedReleasesAndProjects
-                                                projectPayload={projectPayload}
-                                                setProjectPayload={setProjectPayload}
-                                            />
-                                        </Tab.Pane>
-                                    </Tab.Content>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Tab.Container>
-                </div>
-            </form>
-        </div>
+        <>
+            <Breadcrumb name={t('Add Project')} />
+            <div className='container page-content'>
+                <form
+                    action=''
+                    id='form_submit'
+                    method='post'
+                    onSubmit={(event) => {
+                        event.preventDefault()
+                    }}
+                >
+                    <div>
+                        <Tab.Container defaultActiveKey='summary'>
+                            <Row>
+                                <Col
+                                    sm='auto'
+                                    className='me-3'
+                                >
+                                    <ListGroup>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='summary'
+                                        >
+                                            <div className='my-2'>{t('Summary')}</div>
+                                        </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='administration'
+                                        >
+                                            <div className='my-2'>{t('Administration')}</div>
+                                        </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='linkedProjects'
+                                        >
+                                            <div className='my-2'>{t('Linked Releases and Projects')}</div>
+                                        </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='linkedPackages'
+                                        >
+                                            <div className='my-2'>{t('Linked Packages')}</div>
+                                        </ListGroup.Item>
+                                    </ListGroup>
+                                </Col>
+                                <Col className='me-3'>
+                                    <Row className='d-flex justify-content-between'>
+                                        <Col lg={3}>
+                                            <Row>
+                                                <Button
+                                                    variant='primary'
+                                                    type='submit'
+                                                    className='me-2 col-auto'
+                                                    onClick={() => void createProject()}
+                                                >
+                                                    {t('Create Project')}
+                                                </Button>
+                                                <Button
+                                                    variant='secondary'
+                                                    className='col-auto'
+                                                    onClick={handleCancelClick}
+                                                >
+                                                    {t('Cancel')}
+                                                </Button>
+                                            </Row>
+                                        </Col>
+                                        <Col
+                                            lg={4}
+                                            className='text-truncate buttonheader-title'
+                                        >
+                                            {t('New Project')}
+                                        </Col>
+                                    </Row>
+                                    <Row className='mt-5'>
+                                        <Tab.Content>
+                                            <Tab.Pane eventKey='summary'>
+                                                <Summary
+                                                    vendor={vendor}
+                                                    setVendor={setVendor}
+                                                    externalUrls={externalUrls}
+                                                    setExternalUrls={setExternalUrls}
+                                                    setExternalUrlsData={setExternalUrlsData}
+                                                    externalIds={externalIds}
+                                                    setExternalIds={setExternalIds}
+                                                    setExternalIdsData={setExternalIdsData}
+                                                    additionalData={additionalData}
+                                                    setAdditionalData={setAdditionalData}
+                                                    setAdditionalDataObject={setAdditionalDataObject}
+                                                    projectPayload={projectPayload}
+                                                    setProjectPayload={setProjectPayload}
+                                                    moderators={moderators}
+                                                    setModerators={setModerators}
+                                                    contributors={contributors}
+                                                    setContributors={setContributors}
+                                                    securityResponsibles={securityResponsibles}
+                                                    setSecurityResponsibles={setSecurityResponsibles}
+                                                    projectOwner={projectOwner}
+                                                    setProjectOwner={setProjectOwner}
+                                                    projectManager={projectManager}
+                                                    setProjectManager={setProjectManager}
+                                                    leadArchitect={leadArchitect}
+                                                    setLeadArchitect={setLeadArchitect}
+                                                />
+                                            </Tab.Pane>
+                                            <Tab.Pane eventKey='administration'>
+                                                <Administration
+                                                    projectPayload={projectPayload}
+                                                    setProjectPayload={setProjectPayload}
+                                                />
+                                            </Tab.Pane>
+                                            <Tab.Pane eventKey='linkedProjects'>
+                                                <LinkedReleasesAndProjects
+                                                    projectPayload={projectPayload}
+                                                    setProjectPayload={setProjectPayload}
+                                                    isDependencyNetworkFeatureEnabled={
+                                                        isDependencyNetworkFeatureEnabled
+                                                    }
+                                                />
+                                            </Tab.Pane>
+                                            <Tab.Pane eventKey='linkedPackages'>
+                                                <LinkedPackages
+                                                    projectPayload={projectPayload}
+                                                    setProjectPayload={setProjectPayload}
+                                                />
+                                            </Tab.Pane>
+                                        </Tab.Content>
+                                    </Row>
+                                </Col>
+                            </Row>
+                        </Tab.Container>
+                    </div>
+                </form>
+            </div>
+        </>
     )
 }
 
-export default AddProjects
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(AddProjects, [
+    UserGroupType.SECURITY_USER,
+])

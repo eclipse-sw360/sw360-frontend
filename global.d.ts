@@ -9,3 +9,17 @@
 
 type Messages = typeof import('./messages/en.json')
 declare interface IntlMessages extends Messages {}
+
+import { RowData } from '@tanstack/react-table'
+
+declare module '@tanstack/react-table' {
+  interface Row<TData extends RowData> {
+    meta?: {
+      isFullSpanRow?: boolean
+    }
+  }
+
+  interface TableMeta<TData extends RowData> {
+    rowHeightConstant?: boolean
+  }
+}

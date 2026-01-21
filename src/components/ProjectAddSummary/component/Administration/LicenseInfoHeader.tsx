@@ -9,24 +9,51 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-
+import type { JSX } from 'react'
 import { ProjectPayload } from '@/object-types'
+import MessageService from '@/services/message.service'
+import CommonUtils from '@/utils/common.utils'
+import { ApiUtils } from '@/utils/index'
 
 interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
 }
 
+interface LicenseInfoHeader {
+    licenseInfoHeaderText: string
+}
+
 export default function LicenseInfoHeader({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
-    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement |
-                                                       HTMLInputElement |
-                                                       HTMLTextAreaElement>) => {
+    const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
             ...projectPayload,
             [event.target.name]: event.target.value,
         })
+    }
+
+    const getDefaultLicenseInfoHeader = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const url = 'projects/licenseInfoHeader'
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status == StatusCodes.OK) {
+                const data = (await response.json()) as LicenseInfoHeader
+                setProjectPayload({
+                    ...projectPayload,
+                    licenseInfoHeaderText: data.licenseInfoHeaderText,
+                })
+            } else {
+                MessageService.error(t('There are some errors while fetching default license info header'))
+            }
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     return (
@@ -34,8 +61,12 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
             <div className='row mb-4'>
                 <h6 className='header pb-2 px-2'>{t('License Info Header')}</h6>
                 <div className='row d-flex justify-content-end'>
-                    <div className='col-lg-3'>
-                        <button type='button' className='btn btn-light'>
+                    <div className='col-lg-3 d-flex justify-content-end'>
+                        <button
+                            className='btn btn-light mb-2'
+                            type='button'
+                            onClick={getDefaultLicenseInfoHeader}
+                        >
                             {t('Set to default text')}
                         </button>
                     </div>
@@ -45,7 +76,9 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
                         className='form-control'
                         id='addProjects.licenseInfoHeader'
                         aria-label='License Info Header'
-                        style={{ height: '500px' }}
+                        style={{
+                            height: '500px',
+                        }}
                         name='licenseInfoHeaderText'
                         value={projectPayload.licenseInfoHeaderText}
                         onChange={updateInputField}

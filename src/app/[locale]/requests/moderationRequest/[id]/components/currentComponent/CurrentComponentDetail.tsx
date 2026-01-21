@@ -9,9 +9,13 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
+import { notFound } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import ReleaseOverview from '@/app/[locale]/components/detail/[id]/components/ReleaseOverview'
+import Summary from '@/app/[locale]/components/detail/[id]/components/Summary'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -23,29 +27,36 @@ import {
     ComponentTabIds,
     DocumentTypes,
     Embedded,
-    HttpStatus,
+    ErrorDetails,
     LinkedVulnerability,
+    PageableQueryParam,
+    PaginationMeta,
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import ReleaseOverview from '@/app/[locale]/components/detail/[id]/components/ReleaseOverview'
-import Summary from '@/app/[locale]/components/detail/[id]/components/Summary'
-import { notFound } from 'next/navigation'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
 
 interface Props {
-    componentId: string | undefined
+    componentId: string
 }
 
-const CurrentComponentDetail = ({ componentId }: Props) => {
+const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
-    const { data: session } = useSession()
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [changesLogTab, setChangesLogTab] = useState('list-change')
-    const [changeLogIndex, setChangeLogIndex] = useState(-1)
     const [component, setComponent] = useState<Component>()
-    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
+    const [changelogTab, setChangelogTab] = useState('list-change')
+    const [changeLogId, setChangeLogId] = useState('')
+    const session = useSession()
+
+    useEffect(() => {
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
 
     const tabList = [
         {
@@ -66,22 +77,19 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
         },
     ]
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                await signOut()
-            } else {
-                notFound()
-            }
-        },
-        [session]
-    )
+    const fetchData = async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status == StatusCodes.OK) {
+            const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
+            return data
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
+            await signOut()
+        } else {
+            notFound()
+        }
+    }
 
     useEffect(() => {
         fetchData(`components/${componentId}`)
@@ -89,59 +97,170 @@ const CurrentComponentDetail = ({ componentId }: Props) => {
                 setComponent(component)
             })
             .catch((err) => console.error(err))
+    }, [
+        componentId,
+        fetchData,
+    ])
 
-        fetchData(`changelog/document/${componentId}`)
-            .then((changeLogs: EmbeddedChangelogs | undefined) => {
-                setChangeLogList(
-                    CommonUtils.isNullOrUndefined(changeLogs?._embedded['sw360:changeLogs'])
-                        ? []
-                        : changeLogs?._embedded['sw360:changeLogs']
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = changeLogList.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `changelog/document/${componentId}`,
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
-            })
-            .catch((err) => console.error(err))
-    }, [componentId, fetchData])
 
-    return (
-        component && (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangelogs
+                    setPaginationMeta(data.page)
+                    setChangeLogList(
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
+                            ? []
+                            : data['_embedded']['sw360:changeLogs'],
+                    )
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        componentId,
+        session,
+    ])
+
+    return component ? (
+        <div className='container page-content'>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <SideBar
+                        selectedTab={selectedTab}
+                        setSelectedTab={setSelectedTab}
+                        tabList={tabList}
+                    />
+                </div>
+                <div className='col'>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== CommonTabIds.SUMMARY}
+                    >
+                        <Summary
+                            component={component}
+                            componentId={componentId}
                         />
                     </div>
-                    <div className='col'>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary component={component} componentId={componentId} />
-                        </div>
-                        <div className='row' hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}>
-                            <ReleaseOverview componentId={componentId} calledFromModerationRequestDetail={true} />
-                        </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments documentId={componentId} documentType={DocumentTypes.COMPONENT} />
-                        </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
-                            <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
-                                    <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
-                                        documentId={componentId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
-                                    />
-                                </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
-                                </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW}
+                    >
+                        <ReleaseOverview
+                            componentId={componentId}
+                            calledFromModerationRequestDetail={true}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.ATTACHMENTS}
+                    >
+                        <Attachments
+                            documentId={componentId}
+                            documentType={DocumentTypes.COMPONENT}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.CHANGE_LOG}
+                    >
+                        <div className='col'>
+                            <div
+                                className='row'
+                                hidden={changelogTab !== 'list-change'}
+                            >
+                                <ChangeLogList
+                                    setChangeLogId={setChangeLogId}
+                                    documentId={componentId}
+                                    setChangesLogTab={setChangelogTab}
+                                    changeLogList={memoizedData}
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                    showProcessing={showProcessing}
+                                    paginationMeta={paginationMeta}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={changelogTab != 'view-log'}
+                            >
+                                <ChangeLogDetail
+                                    changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
+                                />
+                                <div
+                                    id='cardScreen'
+                                    style={{
+                                        padding: '0px',
+                                    }}
+                                ></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        )
+        </div>
+    ) : (
+        <></>
     )
 }
 

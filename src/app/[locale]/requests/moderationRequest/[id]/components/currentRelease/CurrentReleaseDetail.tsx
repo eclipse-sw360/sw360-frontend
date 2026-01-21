@@ -7,11 +7,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import ClearingDetails from '@/app/[locale]/components/releases/detail/[id]/components/ClearingDetails'
+import ECCDetails from '@/app/[locale]/components/releases/detail/[id]/components/ECCDetails'
+import LinkedReleases from '@/app/[locale]/components/releases/detail/[id]/components/LinkedReleases'
+import { ReleaseDetailTabs } from '@/app/[locale]/components/releases/detail/[id]/components/ReleaseDetailTabs'
+import Summary from '@/app/[locale]/components/releases/detail/[id]/components/Summary'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -23,136 +28,255 @@ import {
     CommonTabIds,
     DocumentTypes,
     Embedded,
-    HttpStatus,
+    ErrorDetails,
+    PageableQueryParam,
+    PaginationMeta,
     ReleaseDetail,
-    ReleaseLink,
     ReleaseTabIds,
 } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import ClearingDetails from '@/app/[locale]/components/releases/detail/[id]/components/ClearingDetails'
-import ECCDetails from '@/app/[locale]/components/releases/detail/[id]/components/ECCDetails'
-import LinkedReleases from '@/app/[locale]/components/releases/detail/[id]/components/LinkedReleases'
-import ReleaseDetailTabs from '@/app/[locale]/components/releases/detail/[id]/components/ReleaseDetailTabs'
-import Summary from '@/app/[locale]/components/releases/detail/[id]/components/Summary'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
 interface Props {
-    releaseId: string | undefined
+    releaseId: string
 }
 
-const CurrentReleaseDetail = ({ releaseId }: Props) => {
-    const { data: session } = useSession()
+const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
-    const [changesLogTab, setChangesLogTab] = useState('list-change')
-    const [changeLogIndex, setChangeLogIndex] = useState(-1)
-    const [changeLogList, setChangeLogList] = useState<Array<Changelogs>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
-    const [tabList] = useState(ReleaseDetailTabs.MODERATION_REQUEST)
-
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status == HttpStatus.OK) {
-                const data = (await response.json())
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return null
-            }
-        },
-        [session]
-    )
+    const { MODERATION_REQUEST } = ReleaseDetailTabs()
+    const [tabList] = useState(MODERATION_REQUEST)
+    const [changelogTab, setChangelogTab] = useState('list-change')
+    const [changeLogId, setChangeLogId] = useState('')
+    const session = useSession()
 
     useEffect(() => {
-        fetchData(`releases/${releaseId}`)
+        if (session.status === 'unauthenticated') {
+            void signOut()
+        }
+    }, [
+        session,
+    ])
+
+    const fetchData = async (url: string, signal: AbortSignal) => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return
+            const response = await ApiUtils.GET(url, session.user.access_token, signal)
+            if (response.status == StatusCodes.OK) {
+                const data = (await response.json()) as ReleaseDetail & EmbeddedChangelogs
+                return data
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                void signOut()
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        fetchData(`releases/${releaseId}`, signal)
             .then((release: ReleaseDetail | undefined) => {
                 setRelease(release)
-
                 if (
                     !CommonUtils.isNullOrUndefined(release?._embedded) &&
-                    !CommonUtils.isNullOrUndefined(release?._embedded['sw360:attachments'])
+                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
                 ) {
-                    setEmbeddedAttachments(release?._embedded['sw360:attachments'])
+                    setEmbeddedAttachments(release._embedded['sw360:attachments'])
                 }
                 return release
             })
             .catch((err) => console.error(err))
+        return () => controller.abort()
+    }, [
+        releaseId,
+    ])
 
-        fetchData(`changelog/document/${releaseId}`)
-            .then((changeLogs: EmbeddedChangelogs | undefined) => {
-                changeLogs &&
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [changeLogList, setChangeLogList] = useState<Changelogs[]>(() => [])
+    const memoizedData = useMemo(
+        () => changeLogList,
+        [
+            changeLogList,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = changeLogList.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `changelog/document/${releaseId}`,
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new Error(err.message)
+                }
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setChangeLogList([])
+                    return
+                } else {
+                    const data = JSON.parse(responseText) as EmbeddedChangelogs
+                    setPaginationMeta(data.page)
                     setChangeLogList(
-                        CommonUtils.isNullOrUndefined(changeLogs._embedded['sw360:changeLogs'])
+                        CommonUtils.isNullOrUndefined(data['_embedded']['sw360:changeLogs'])
                             ? []
-                            : changeLogs._embedded['sw360:changeLogs']
+                            : data['_embedded']['sw360:changeLogs'],
                     )
-            })
-            .catch((err) => console.error(err))
-    }, [fetchData, releaseId])
+                }
+            } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
+                const message = error instanceof Error ? error.message : String(error)
+                MessageService.error(message)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
 
-    return (
-        release && (
-            <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
-                            eccStatus={release?.eccInformation?.eccStatus}
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        releaseId,
+        session,
+    ])
+
+    return release ? (
+        <div className='container page-content'>
+            <div className='row'>
+                <div className='col-2 sidebar'>
+                    <SideBar
+                        selectedTab={selectedTab}
+                        setSelectedTab={setSelectedTab}
+                        tabList={tabList}
+                        eccStatus={release.eccInformation?.eccStatus}
+                    />
+                </div>
+                <div className='col'>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== CommonTabIds.SUMMARY}
+                    >
+                        <Summary
+                            release={release}
+                            releaseId={releaseId}
                         />
                     </div>
-                    <div className='col'>
-                        <div className='row' hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}>
-                            <Summary release={release} releaseId={releaseId} />
-                        </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}>
-                            <LinkedReleases releaseId={releaseId} />
-                        </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}>
-                            <ClearingDetails
-                                release={release}
-                                releaseId={releaseId}
-                                embeddedAttachments={embeddedAttachments}
-                            />
-                        </div>
-                        <div className='row' hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}>
-                            <ECCDetails release={release} />
-                        </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}>
-                            <Attachments documentId={releaseId} documentType={DocumentTypes.RELEASE} />
-                        </div>
-                        <div className='row' hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}>
-                            <div className='col'>
-                                <div className='row' hidden={changesLogTab != 'list-change' ? true : false}>
-                                    <ChangeLogList
-                                        setChangeLogIndex={setChangeLogIndex}
-                                        documentId={releaseId}
-                                        setChangesLogTab={setChangesLogTab}
-                                        changeLogList={changeLogList}
-                                    />
-                                </div>
-                                <div className='row' hidden={changesLogTab != 'view-log' ? true : false}>
-                                    <ChangeLogDetail changeLogData={changeLogList[changeLogIndex]} />
-                                    <div id='cardScreen' style={{ padding: '0px' }}></div>
-                                </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES}
+                    >
+                        <LinkedReleases releaseId={releaseId} />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS}
+                    >
+                        <ClearingDetails
+                            release={release}
+                            releaseId={releaseId}
+                            embeddedAttachments={embeddedAttachments}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS}
+                    >
+                        <ECCDetails release={release} />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.ATTACHMENTS}
+                    >
+                        <Attachments
+                            documentId={releaseId}
+                            documentType={DocumentTypes.RELEASE}
+                        />
+                    </div>
+                    <div
+                        className='row'
+                        hidden={selectedTab != CommonTabIds.CHANGE_LOG}
+                    >
+                        <div className='col'>
+                            <div
+                                className='row'
+                                hidden={changelogTab !== 'list-change'}
+                            >
+                                <ChangeLogList
+                                    setChangeLogId={setChangeLogId}
+                                    documentId={releaseId}
+                                    setChangesLogTab={setChangelogTab}
+                                    changeLogList={memoizedData}
+                                    pageableQueryParam={pageableQueryParam}
+                                    setPageableQueryParam={setPageableQueryParam}
+                                    showProcessing={showProcessing}
+                                    paginationMeta={paginationMeta}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={changelogTab != 'view-log'}
+                            >
+                                <ChangeLogDetail
+                                    changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
+                                />
+                                <div
+                                    id='cardScreen'
+                                    style={{
+                                        padding: '0px',
+                                    }}
+                                ></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <LinkReleaseToProjectModal
-                    show={linkProjectModalShow}
-                    setShow={setLinkProjectModalShow}
-                    releaseId={releaseId}
-                />
             </div>
-        )
+            <LinkReleaseToProjectModal
+                show={linkProjectModalShow}
+                setShow={setLinkProjectModalShow}
+                releaseId={releaseId}
+            />
+        </div>
+    ) : (
+        <></>
     )
 }
 

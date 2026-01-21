@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,24 +11,25 @@
 
 'use client'
 
-import { getSession, signOut } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
+import { useConfigValue } from '@/contexts'
 import {
     Attachment,
     Component,
     ComponentPayload,
     DocumentTypes,
-    HttpStatus,
     InputKeyValue,
+    UIConfigKeys,
     Vendor,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
-import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 
 interface Props {
     componentId: string
@@ -41,7 +43,7 @@ export default function ComponentEditSummary({
     componentPayload,
     setComponentPayload,
     attachmentData,
-}: Props) : ReactNode {
+}: Props): ReactNode {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
@@ -50,28 +52,42 @@ export default function ComponentEditSummary({
         fullName: '',
     })
 
-    const [componentOwner, setComponentOwner] = useState<{ [k: string]: string }>({})
+    const [componentOwner, setComponentOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [moderators, setModerators] = useState<{
+        [k: string]: string
+    }>({})
+    const { status } = useSession()
 
-    const [moderators, setModerators] = useState<{ [k: string]: string }>({})
+    // Configs from backend
+    const componentExternalIdSuggestions =
+        useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) !== null
+            ? (useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) as string[])
+            : undefined
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === HttpStatus.OK) {
-                const data = (await response.json()) as Component
-                return data
-            } else if (response.status == HttpStatus.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return notFound()
-            }
-        },
-        []
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const session = await getSession()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+
+        const response = await ApiUtils.GET(url, session.user.access_token)
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as Component
+            return data
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
+            return signOut()
+        } else {
+            return notFound()
+        }
+    }, [])
 
     useEffect(() => {
         void fetchData(`components/${componentId}`).then((component: Component | undefined) => {
@@ -107,13 +123,15 @@ export default function ComponentEditSummary({
             if (component._embedded && component._embedded.componentOwner) {
                 componentOwnerEmail = component._embedded.componentOwner.email
                 setComponentOwner({
-                    [componentOwnerEmail]: component._embedded.componentOwner.fullName ?? ''
+                    [componentOwnerEmail]: component._embedded.componentOwner.fullName ?? '',
                 })
             }
 
             let moderatorsFromComponent = {}
             if (component._embedded && component._embedded['sw360:moderators']) {
-                moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(component._embedded['sw360:moderators'])
+                moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(
+                    component._embedded['sw360:moderators'],
+                )
                 setModerators(moderatorsFromComponent)
             }
 
@@ -138,11 +156,16 @@ export default function ComponentEditSummary({
                 mailinglist: component.mailinglist,
                 wiki: component.wiki,
                 blog: component.blog,
-                attachmentDTOs: attachmentData,
+                attachments: attachmentData,
             }
             setComponentPayload(componentPayloadData)
         })
-    }, [componentId, fetchData, attachmentData, setComponentPayload])
+    }, [
+        componentId,
+        fetchData,
+        attachmentData,
+        setComponentPayload,
+    ])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
@@ -187,7 +210,16 @@ export default function ComponentEditSummary({
                             setComponentPayload={setComponentPayload}
                         />
                         <div className='row mb-4'>
-                            <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
+                            <AddAdditionalRoles
+                                documentType={DocumentTypes.COMPONENT}
+                                inputList={CommonUtils.convertObjectToMapRoles(componentPayload.roles ?? {})}
+                                setInputList={(newList) => {
+                                    setComponentPayload({
+                                        ...componentPayload,
+                                        roles: CommonUtils.convertRoles(newList),
+                                    })
+                                }}
+                            />
                         </div>
                         <div className='row mb-4'>
                             <AddKeyValue
@@ -196,6 +228,7 @@ export default function ComponentEditSummary({
                                 setData={setExternalIds}
                                 data={externalIds}
                                 setObject={setDataExternalIds}
+                                keySuggestions={componentExternalIdSuggestions}
                             />
                         </div>
                         <div className='row mb-4'>

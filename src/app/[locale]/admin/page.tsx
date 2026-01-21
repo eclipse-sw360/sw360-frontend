@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
+import type { JSX } from 'react'
 import AdminMainPage from './components/Admin'
 
 export const metadata: Metadata = {

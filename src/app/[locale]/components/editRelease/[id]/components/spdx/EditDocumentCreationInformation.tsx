@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,15 +10,15 @@
 // License-Filename: LICENSE
 
 'use client'
+import { signOut, useSession } from 'next-auth/react'
+import React, { ReactNode, useEffect, useState } from 'react'
+import { BsFillTrashFill } from 'react-icons/bs'
 import { Creator, DocumentCreationInformation, ExternalDocumentReferences, InputKeyValue, SPDX } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import React, { ReactNode, useEffect, useState } from 'react'
-import { FaTrashAlt } from 'react-icons/fa'
 import Created from './DocumentCreationInfo/Created'
 import Creators from './DocumentCreationInfo/Creators'
 
 interface Props {
-    fullnameModifiedBy?: string
     documentCreationInformation: DocumentCreationInformation
     setDocumentCreationInformation: React.Dispatch<React.SetStateAction<DocumentCreationInformation>>
     isModeFull: boolean
@@ -32,7 +33,6 @@ interface Props {
 }
 
 const EditDocumentCreationInformation = ({
-    fullnameModifiedBy,
     documentCreationInformation,
     setDocumentCreationInformation,
     isModeFull,
@@ -44,7 +44,7 @@ const EditDocumentCreationInformation = ({
     setSPDXPayload,
     errorCreator,
     setErrorCreator,
-}: Props) : ReactNode => {
+}: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     const [creator, setCreator] = useState<InputKeyValue[]>([])
@@ -52,7 +52,15 @@ const EditDocumentCreationInformation = ({
     const [increIndex, setIncreIndex] = useState(0)
     const [isAdd, setIsAdd] = useState(false)
     const [isAnonymous, setIsAnonymous] = useState(false)
-    const [isDelete, setIsDelete] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const index: string = e.target.value
@@ -66,13 +74,21 @@ const EditDocumentCreationInformation = ({
     }
 
     const addDocumentReferences = () => {
-        const arrayExternals: ExternalDocumentReferences[] = externalDocumentRefs ? [...externalDocumentRefs] : []
+        const arrayExternals: ExternalDocumentReferences[] = externalDocumentRefs
+            ? [
+                  ...externalDocumentRefs,
+              ]
+            : []
         setIncreIndex(externalDocumentRefs ? externalDocumentRefs.length : 0)
         setNumberIndex(externalDocumentRefs ? externalDocumentRefs.length : 0)
         setIsAdd(true)
         const externalDocumentReference: ExternalDocumentReferences = {
             externalDocumentId: '',
-            checksum: { algorithm: '', checksumValue: '', index: 0 },
+            checksum: {
+                algorithm: '',
+                checksumValue: '',
+                index: 0,
+            },
             spdxDocument: '',
             index: externalDocumentRefs ? externalDocumentRefs.length : 0,
         }
@@ -89,35 +105,26 @@ const EditDocumentCreationInformation = ({
     }
 
     useEffect(() => {
-        if (!CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation.creator)) {
-            if (!isAnonymous) {
-                setCreator(
-                    convertCreator(documentCreationInformation.creator.toSorted((e1, e2) => e1.index - e2.index))
-                )
-            }
-        }
-
-        if (
-            CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation.creator) &&
-            typeof documentCreationInformation.createdBy !== 'undefined' &&
-            CommonUtils.isNullEmptyOrUndefinedArray(creator) &&
-            !isDelete
-        ) {
-            const creators: InputKeyValue[] = []
-            const creator: InputKeyValue = {
-                key: 'Person',
-                value: fullnameModifiedBy + ' (' + documentCreationInformation.createdBy + ')',
-            }
-            creators.push(creator)
-            setCreator(creators)
-        }
-
         if (!CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.created)) {
             setDataCreated(handleCreated(documentCreationInformation.created))
         } else {
             setDataCreated(handleCreated(new Date().toISOString()))
         }
-    }, [documentCreationInformation.created])
+    }, [
+        documentCreationInformation.created,
+    ])
+
+    useEffect(() => {
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(documentCreationInformation.creator)) {
+            if (!isAnonymous) {
+                setCreator(
+                    convertCreator(documentCreationInformation.creator.toSorted((e1, e2) => e1.index - e2.index)),
+                )
+            }
+        }
+    }, [
+        documentCreationInformation.creator,
+    ])
 
     const convertCreator = (creators: Creator[]) => {
         const inputs: InputKeyValue[] = []
@@ -285,7 +292,7 @@ const EditDocumentCreationInformation = ({
             console.log(externalDocumentRefs)
             let externalDocuments: ExternalDocumentReferences[] = []
             externalDocuments = externalDocumentRefs.filter(
-                (externalDocumentRef) => numberIndex != externalDocumentRef.index
+                (externalDocumentRef) => numberIndex != externalDocumentRef.index,
             )
             setNumberIndex(indexExternalDocumentRef)
             for (let index = 0; index < externalDocuments.length; index++) {
@@ -308,18 +315,20 @@ const EditDocumentCreationInformation = ({
     }
 
     const updateCheckSum = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
-        const externals: ExternalDocumentReferences[] = externalDocumentRefs ? externalDocumentRefs.map((externalDocument, index) => {
-            if (index === indexExternalDocumentRef) {
-                return {
-                    ...externalDocument,
-                    checksum: {
-                        ...externalDocument.checksum,
-                        [e.target.name]: e.target.value,
-                    },
-                }
-            }
-            return externalDocument
-        }) : []
+        const externals: ExternalDocumentReferences[] = externalDocumentRefs
+            ? externalDocumentRefs.map((externalDocument, index) => {
+                  if (index === indexExternalDocumentRef) {
+                      return {
+                          ...externalDocument,
+                          checksum: {
+                              ...externalDocument.checksum,
+                              [e.target.name]: e.target.value,
+                          },
+                      }
+                  }
+                  return externalDocument
+              })
+            : []
         setExternalDocumentRefs(externals)
         setSPDXPayload({
             ...SPDXPayload,
@@ -331,17 +340,19 @@ const EditDocumentCreationInformation = ({
     }
 
     const updateExternalReferens = (
-        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
     ) => {
-        const externals: ExternalDocumentReferences[] = externalDocumentRefs ? externalDocumentRefs.map((externalDocument, index) => {
-            if (index === indexExternalDocumentRef) {
-                return {
-                    ...externalDocument,
-                    [e.target.name]: e.target.value,
-                }
-            }
-            return externalDocument
-        }) : []
+        const externals: ExternalDocumentReferences[] = externalDocumentRefs
+            ? externalDocumentRefs.map((externalDocument, index) => {
+                  if (index === indexExternalDocumentRef) {
+                      return {
+                          ...externalDocument,
+                          [e.target.name]: e.target.value,
+                      }
+                  }
+                  return externalDocument
+              })
+            : []
 
         setExternalDocumentRefs(externals)
         setSPDXPayload({
@@ -369,11 +380,23 @@ const EditDocumentCreationInformation = ({
                 <>
                     <tr>
                         <td>
-                            <div className='form-group' style={{ flex: 1 }}>
-                                <label className='lableSPDX' htmlFor='spdxVersion'>
+                            <div
+                                className='form-group'
+                                style={{
+                                    flex: 1,
+                                }}
+                            >
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='spdxVersion'
+                                >
                                     6.1 SPDX version
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <label className='sub-label'>SPDX-</label>
                                     <input
                                         id='spdxVersion'
@@ -383,20 +406,29 @@ const EditDocumentCreationInformation = ({
                                         placeholder='Enter SPDX version'
                                         onChange={updateFieldSPDXVersion}
                                         value={
-                                            !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.spdxVersion)
-                                            ?
-                                                documentCreationInformation.spdxVersion.startsWith('SPDX-')
+                                            !CommonUtils.isNullEmptyOrUndefinedString(
+                                                documentCreationInformation.spdxVersion,
+                                            )
+                                                ? documentCreationInformation.spdxVersion.startsWith('SPDX-')
                                                     ? documentCreationInformation.spdxVersion.substring(5)
                                                     : documentCreationInformation.spdxVersion
-                                            : ''
+                                                : ''
                                         }
                                     />
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div className='form-group' style={{ flex: 1 }}>
-                                <label className='lableSPDX' htmlFor='dataLicense'>
+                            <div
+                                className='form-group'
+                                style={{
+                                    flex: 1,
+                                }}
+                            >
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='dataLicense'
+                                >
                                     6.2 Data license
                                 </label>
                                 <input
@@ -411,11 +443,23 @@ const EditDocumentCreationInformation = ({
                             </div>
                         </td>
                         <td>
-                            <div className='form-group' style={{ flex: 1 }}>
-                                <label className='lableSPDX' htmlFor='spdxIdentifier'>
+                            <div
+                                className='form-group'
+                                style={{
+                                    flex: 1,
+                                }}
+                            >
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='spdxIdentifier'
+                                >
                                     6.3 SPDX identifier
                                 </label>
-                                <div style={{ display: 'flex' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                    }}
+                                >
                                     <label className='sub-label'>SPDXRef-</label>
                                     <input
                                         id='spdxIdentifier'
@@ -425,12 +469,13 @@ const EditDocumentCreationInformation = ({
                                         placeholder='Enter SPDX identifier'
                                         onChange={updateFieldSPDXIdentifier}
                                         value={
-                                            !CommonUtils.isNullEmptyOrUndefinedString(documentCreationInformation.SPDXID)
-                                            ?
-                                                documentCreationInformation.SPDXID.startsWith('SPDXRef-')
+                                            !CommonUtils.isNullEmptyOrUndefinedString(
+                                                documentCreationInformation.SPDXID,
+                                            )
+                                                ? documentCreationInformation.SPDXID.startsWith('SPDXRef-')
                                                     ? documentCreationInformation.SPDXID.substring(8)
                                                     : documentCreationInformation.SPDXID
-                                            : ''
+                                                : ''
                                         }
                                     />
                                 </div>
@@ -440,7 +485,10 @@ const EditDocumentCreationInformation = ({
                     <tr>
                         <td colSpan={3}>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='documentName'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='documentName'
+                                >
                                     6.4 Document name
                                 </label>
                                 <input
@@ -458,7 +506,10 @@ const EditDocumentCreationInformation = ({
                     <tr>
                         <td colSpan={3}>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='documentNamespace'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='documentNamespace'
+                                >
                                     6.5 SPDX document namespace
                                 </label>
                                 <input
@@ -476,9 +527,15 @@ const EditDocumentCreationInformation = ({
                     {isModeFull && (
                         <>
                             <tr>
-                                <td className='spdx-full' colSpan={3}>
+                                <td
+                                    className='spdx-full'
+                                    colSpan={3}
+                                >
                                     <div className='form-group section section-external-doc-ref'>
-                                        <label className='lableSPDX' htmlFor='externalDocumentRefs'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='externalDocumentRefs'
+                                        >
                                             6.6 External document references
                                         </label>
                                         <br></br>
@@ -499,7 +556,9 @@ const EditDocumentCreationInformation = ({
                                                 <label
                                                     className='lableSPDX sub-title'
                                                     htmlFor='externalDocumentRefs'
-                                                    style={{ textDecoration: 'underline' }}
+                                                    style={{
+                                                        textDecoration: 'underline',
+                                                    }}
                                                 >
                                                     Select Reference
                                                 </label>
@@ -508,7 +567,7 @@ const EditDocumentCreationInformation = ({
                                                     className='form-control spdx-select form-select'
                                                     onChange={displayIndex}
                                                     disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                        externalDocumentRefs
+                                                        externalDocumentRefs,
                                                     )}
                                                     value={
                                                         isAdd
@@ -518,15 +577,20 @@ const EditDocumentCreationInformation = ({
                                                             : numberIndex
                                                     }
                                                 >
-                                                    {externalDocumentRefs && externalDocumentRefs.map((item) => (
-                                                        <option key={item.index} value={item.index}>
-                                                            {item.index + 1}
-                                                        </option>
-                                                    ))}
+                                                    {externalDocumentRefs &&
+                                                        externalDocumentRefs.map((item) => (
+                                                            <option
+                                                                key={item.index}
+                                                                value={item.index}
+                                                            >
+                                                                {item.index + 1}
+                                                            </option>
+                                                        ))}
                                                 </select>
-                                                <FaTrashAlt
+                                                <BsFillTrashFill
                                                     className='spdx-delete-icon-main-index'
                                                     onClick={deleteExternalReference}
+                                                    size={20}
                                                 />
                                             </div>
                                             <button
@@ -545,22 +609,29 @@ const EditDocumentCreationInformation = ({
                                                 marginBottom: '0.75rem',
                                             }}
                                         >
-                                            <label className='sub-title lableSPDX' htmlFor='externalDocumentId'>
+                                            <label
+                                                className='sub-title lableSPDX'
+                                                htmlFor='externalDocumentId'
+                                            >
                                                 External document ID
                                             </label>
                                             <input
                                                 id='externalDocumentId'
-                                                style={{ width: 'auto', flex: 'auto' }}
+                                                style={{
+                                                    width: 'auto',
+                                                    flex: 'auto',
+                                                }}
                                                 type='text'
                                                 name='externalDocumentId'
                                                 className='form-control'
                                                 placeholder='Enter external document ID'
                                                 onChange={updateExternalReferens}
-                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                    externalDocumentRefs
-                                                )}
+                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(externalDocumentRefs)}
                                                 value={
-                                                    externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.externalDocumentId ?? '') : ''
+                                                    externalDocumentRefs
+                                                        ? (externalDocumentRefs[indexExternalDocumentRef]
+                                                              ?.externalDocumentId ?? '')
+                                                        : ''
                                                 }
                                             />
                                         </div>
@@ -571,26 +642,37 @@ const EditDocumentCreationInformation = ({
                                                 marginBottom: '0.75rem',
                                             }}
                                         >
-                                            <label className='sub-title lableSPDX' htmlFor='externalDocument'>
+                                            <label
+                                                className='sub-title lableSPDX'
+                                                htmlFor='externalDocument'
+                                            >
                                                 External document
                                             </label>
                                             <input
                                                 id='externalDocument'
-                                                style={{ width: 'auto', flex: 'auto' }}
+                                                style={{
+                                                    width: 'auto',
+                                                    flex: 'auto',
+                                                }}
                                                 type='text'
                                                 name='spdxDocument'
                                                 className='form-control'
                                                 placeholder='Enter external document'
                                                 onChange={updateExternalReferens}
-                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                    externalDocumentRefs
-                                                )}
+                                                disabled={CommonUtils.isNullEmptyOrUndefinedArray(externalDocumentRefs)}
                                                 value={
-                                                    externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.spdxDocument ?? '') : ''
+                                                    externalDocumentRefs
+                                                        ? (externalDocumentRefs[indexExternalDocumentRef]
+                                                              ?.spdxDocument ?? '')
+                                                        : ''
                                                 }
                                             />
                                         </div>
-                                        <div style={{ display: 'flex' }}>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                            }}
+                                        >
                                             <label className='sub-title lableSPDX'>Checksum</label>
                                             <div
                                                 style={{
@@ -599,9 +681,17 @@ const EditDocumentCreationInformation = ({
                                                     flex: 7,
                                                 }}
                                             >
-                                                <div style={{ display: 'flex', marginBottom: '0.75rem' }}>
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        marginBottom: '0.75rem',
+                                                    }}
+                                                >
                                                     <input
-                                                        style={{ flex: 2, marginRight: '1rem' }}
+                                                        style={{
+                                                            flex: 2,
+                                                            marginRight: '1rem',
+                                                        }}
                                                         type='text'
                                                         className='form-control'
                                                         id='checksumAlgorithm'
@@ -609,14 +699,19 @@ const EditDocumentCreationInformation = ({
                                                         placeholder='Enter algorithm'
                                                         onChange={updateCheckSum}
                                                         disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                            externalDocumentRefs
+                                                            externalDocumentRefs,
                                                         )}
                                                         value={
-                                                            externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.checksum?.algorithm ?? '') : ''
+                                                            externalDocumentRefs
+                                                                ? (externalDocumentRefs[indexExternalDocumentRef]
+                                                                      ?.checksum?.algorithm ?? '')
+                                                                : ''
                                                         }
                                                     />
                                                     <input
-                                                        style={{ flex: 6 }}
+                                                        style={{
+                                                            flex: 6,
+                                                        }}
                                                         type='text'
                                                         className='form-control'
                                                         id='checksumValue'
@@ -624,10 +719,13 @@ const EditDocumentCreationInformation = ({
                                                         name='checksumValue'
                                                         onChange={updateCheckSum}
                                                         disabled={CommonUtils.isNullEmptyOrUndefinedArray(
-                                                            externalDocumentRefs
+                                                            externalDocumentRefs,
                                                         )}
                                                         value={
-                                                            externalDocumentRefs ? (externalDocumentRefs[indexExternalDocumentRef]?.checksum?.checksumValue ?? '') : ''
+                                                            externalDocumentRefs
+                                                                ? (externalDocumentRefs[indexExternalDocumentRef]
+                                                                      ?.checksum?.checksumValue ?? '')
+                                                                : ''
                                                         }
                                                     />
                                                 </div>
@@ -639,7 +737,10 @@ const EditDocumentCreationInformation = ({
                             <tr>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='licenseListVersion'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='licenseListVersion'
+                                        >
                                             6.7 License list version
                                         </label>
                                         <input
@@ -660,12 +761,30 @@ const EditDocumentCreationInformation = ({
                     <tr>
                         <td colSpan={3}>
                             <div className='form-group'>
-                                <label className='lableSPDX' htmlFor='creator'>
+                                <label
+                                    className='lableSPDX'
+                                    htmlFor='creator'
+                                >
                                     6.8 Creators
                                 </label>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'row', marginBottom: '0.75rem' }}>
-                                        <label className='sub-title lableSPDX' htmlFor='creator-anonymous'>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                    }}
+                                    id='spdx-creator'
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            marginBottom: '0.75rem',
+                                        }}
+                                    >
+                                        <label
+                                            className='sub-title lableSPDX'
+                                            htmlFor='creator-anonymous'
+                                        >
                                             Anonymous
                                         </label>
                                         <input
@@ -675,20 +794,25 @@ const EditDocumentCreationInformation = ({
                                             onChange={handleClickAnonymous}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex' }}>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                        }}
+                                    >
                                         <label className='sub-title lableSPDX'>List</label>
                                         <Creators
                                             inputList={creator}
                                             setInputList={setCreator}
                                             isAnonymous={isAnonymous}
                                             setDataCreators={setDataCreators}
-                                            setIsDelete={setIsDelete}
                                         />
                                     </div>
                                     <input
                                         id='spdxCreator'
                                         className='form-control'
-                                        style={{ display: 'none' }}
+                                        style={{
+                                            display: 'none',
+                                        }}
                                         type='text'
                                     />
 
@@ -722,7 +846,10 @@ const EditDocumentCreationInformation = ({
                             <tr>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='creatorComment'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='creatorComment'
+                                        >
                                             6.10 Creator comment
                                         </label>
                                         <textarea
@@ -740,7 +867,10 @@ const EditDocumentCreationInformation = ({
                             <tr>
                                 <td colSpan={3}>
                                     <div className='form-group'>
-                                        <label className='lableSPDX' htmlFor='documentComment'>
+                                        <label
+                                            className='lableSPDX'
+                                            htmlFor='documentComment'
+                                        >
                                             6.11 Document comment
                                         </label>
                                         <textarea

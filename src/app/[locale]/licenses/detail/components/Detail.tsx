@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,27 +10,36 @@
 // License-Filename: LICENSE
 
 'use client'
-import { HttpStatus, LicenseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { getSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+
+import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { Dispatch, ReactNode, SetStateAction } from 'react'
+import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { Button } from 'react-bootstrap'
-import styles from '../detail.module.css'
-import { FiCheckCircle } from 'react-icons/fi'
 import { BiXCircle } from 'react-icons/bi'
-import { BsXCircle } from 'react-icons/bs'
+import { BsCheck2Circle } from 'react-icons/bs'
+import { LicenseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     license: LicenseDetail
     setLicense: Dispatch<SetStateAction<LicenseDetail | undefined>>
 }
 
-const Detail = ({ license, setLicense }: Props) : ReactNode => {
+const Detail = ({ license, setLicense }: Props): ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const hanldeExternalLicenseLink = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLicense({
@@ -42,24 +52,22 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as LicenseDetail
-            MessageService.success(t('Update External Link Success!'))
+            MessageService.success(t('Update external link success'))
             router.push('/licenses/detail?id=' + data.shortName)
         } else {
-            MessageService.error(t('Update External Link Failed!'))
+            MessageService.error(t('Update external link failed'))
         }
     }
 
     return (
         <div className='col'>
-            {(license.checked === true) && (
-                <div
-                    className={`alert ${styles['isChecked']}`}
-                >
+            {license.checked === false && (
+                <div className='alert license-detail-checked'>
                     {t('This license is')} <b>UNCHECKED</b>
                 </div>
             )}
@@ -71,23 +79,31 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{t('Fullname')}:</td>
+                        <td>{t('Full Name')}:</td>
                         <td>{license.fullName ?? ''}</td>
                     </tr>
                     <tr>
-                        <td>{t('Shortname')}:</td>
+                        <td>{t('Short Name')}:</td>
                         <td>{license.shortName ?? ''}</td>
                     </tr>
                     <tr>
-                        <td>{t('Is checked')}:</td>
+                        <td>{t('Is Checked')}:</td>
                         <td>
                             {' '}
-                            {(license.checked === true) ? (
-                                <span style={{ color: '#287d3c' }}>
-                                    <FiCheckCircle />
+                            {license.checked === true ? (
+                                <span
+                                    style={{
+                                        color: '#287d3c',
+                                    }}
+                                >
+                                    <BsCheck2Circle size={20} />
                                 </span>
                             ) : (
-                                <span style={{ color: 'red' }}>
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
                                     <BiXCircle color='red' />
                                 </span>
                             )}
@@ -95,46 +111,74 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                     </tr>
                     <tr>
                         <td>{t('Type')}:</td>
-                        <td></td>
+                        <td>{license.licenseType?.licenseType}</td>
                     </tr>
                     <tr>
-                        <td>{t('OSI Approved?')}:</td>
+                        <td>{t('OSI Approved')}:</td>
                         <td>
                             {' '}
-                            {(license.OSIApproved === 'YES') ? (
-                                <span style={{ color: '#287d3c' }}>
-                                    <FiCheckCircle /> {t('Yes')}
+                            {license.OSIApproved === 'YES' ? (
+                                <span
+                                    style={{
+                                        color: '#287d3c',
+                                    }}
+                                >
+                                    <BsCheck2Circle size={20} /> {t('Yes')}
                                 </span>
                             ) : (
-                                <span style={{ color: 'red' }}>
-                                    <BiXCircle color='red' /> {t('(n/a)')}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    <BiXCircle color='red' /> {t('NA')}
                                 </span>
                             )}
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('FSF Free/Libre?')}:</td>
+                        <td>{t('FSF Free Libre')}:</td>
                         <td>
                             {' '}
-                            {(license.FSFLibre === 'YES') ? (
-                                <span style={{ color: '#287d3c' }}>
-                                    <FiCheckCircle /> {t('Yes')}
+                            {license.FSFLibre === 'YES' ? (
+                                <span
+                                    style={{
+                                        color: '#287d3c',
+                                    }}
+                                >
+                                    <BsCheck2Circle size={20} /> {t('Yes')}
                                 </span>
                             ) : (
-                                <span style={{ color: 'red' }}>
-                                    <BsXCircle color='red' /> {t('(n/a)')}
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    <BiXCircle color='red' /> {t('NA')}
                                 </span>
                             )}
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <p style={{ marginTop: '0.5rem' }}>{t('External link for more information')}:</p>
+                            <p
+                                style={{
+                                    marginTop: '0.5rem',
+                                }}
+                            >
+                                {t('External link for more information')}:
+                            </p>
                         </td>
                         <td>
-                            <div style={{ display: 'flex' }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                }}
+                            >
                                 <input
-                                    style={{ width: 'auto' }}
+                                    style={{
+                                        width: 'auto',
+                                    }}
                                     type='text'
                                     className='form-control'
                                     id='name'
@@ -145,7 +189,7 @@ const Detail = ({ license, setLicense }: Props) : ReactNode => {
                                 />
                                 <Button
                                     variant='secondary'
-                                    className={`${styles['button-save']}`}
+                                    className='license-detail-button-save'
                                     type='submit'
                                     onClick={() => void updateExternalLicenseLink()}
                                 >

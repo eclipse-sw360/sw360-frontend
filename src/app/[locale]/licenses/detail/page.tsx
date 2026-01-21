@@ -11,18 +11,18 @@
 'use client'
 
 import { notFound, useSearchParams } from 'next/navigation'
-import LicenseDetailOverview from './components/LicenseDetailOverview'
-import CommonUtils from '@/utils/common.utils'
 import { ReactNode } from 'react'
+import CommonUtils from '@/utils/common.utils'
+import LicenseDetailOverview from './components/LicenseDetailOverview'
 
-const Detail = () : ReactNode => {
+const Detail = (): ReactNode => {
     const searchParams = useSearchParams()
     const licenseId = searchParams.get('id')
 
-    return (
-        (CommonUtils.isNullEmptyOrUndefinedString(licenseId))
-        ? notFound()
-        : <LicenseDetailOverview licenseId={licenseId} />
+    return CommonUtils.isNullEmptyOrUndefinedString(licenseId) ? (
+        notFound()
+    ) : (
+        <LicenseDetailOverview licenseId={licenseId} />
     )
 }
 

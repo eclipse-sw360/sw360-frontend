@@ -8,19 +8,31 @@
 // License-Filename: LICENSE
 
 'use client'
-
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { type JSX, useEffect } from 'react'
 import { AiOutlineTags, AiOutlineUnorderedList } from 'react-icons/ai'
 import { BsBag, BsFileEarmarkText, BsFilter, BsSearch } from 'react-icons/bs'
 import { FiEdit2 } from 'react-icons/fi'
+import { GrConfigure } from 'react-icons/gr'
 import { HiOutlineDocumentDuplicate } from 'react-icons/hi'
 import { ImUsers } from 'react-icons/im'
 import { RiArrowUpDownFill, RiOrganizationChart } from 'react-icons/ri'
 import { RxCalendar } from 'react-icons/rx'
+import icons from '@/assets/icons/icons.svg'
 
 const AdminMainPage = (): JSX.Element => {
     const t = useTranslations('default')
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     return (
         <>
@@ -28,71 +40,164 @@ const AdminMainPage = (): JSX.Element => {
                 <div className='row d-flex justify-content-end buttonheader-title'>{t('ADMINISTRATION')}</div>
                 <div className='mt-4 d-flex flex-wrap justify-content-center px-5 mx-auto'>
                     <Link href='/admin/users'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <ImUsers /> {t('User')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                    <Link href='/admin/departments'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <RiOrganizationChart /> {t('Department')}
                         </button>
                     </Link>
                     <Link href='/admin/vendors'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <BsBag /> {t('Vendors')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                    <Link href='/admin/bulkreleaseedit'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <FiEdit2 /> {t('Bulk Release Edit')}
                         </button>
                     </Link>
                     <Link href='/admin/licenses'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <BsFileEarmarkText /> {t('Licenses')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                    <Link href='/admin/licenseTypes'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <AiOutlineTags /> {t('License Types')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                    <Link href='/admin/obligations'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <AiOutlineUnorderedList /> {t('Obligations')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                    <Link href='/admin/schedule'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <RxCalendar /> {t('Schedule')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
-                            <svg className='fossology_icon mb-1' height={18} width={18}>
-                                <use href='icons.svg#fossology'></use>
+                    <Link href='/admin/fossology'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
+                            <svg
+                                className='fossology_icon mb-1'
+                                height={18}
+                                width={18}
+                            >
+                                <use href={`${icons.src}#fossology`}></use>
                             </svg>{' '}
                             {t('Fossology')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                    <Link href='/admin/importexport'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <RiArrowUpDownFill /> {t('Import Export')}
                         </button>
                     </Link>
                     <Link href='/admin/databaseSanitation'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <BsSearch /> {t('Database Sanitation')}
                         </button>
                     </Link>
                     <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <BsFilter /> {t('Attachment Cleanup')}
                         </button>
                     </Link>
-                    <Link href='#'>
-                        <button type='button' className='btn btn-secondary mb-2 mx-2' style={{ width: '210px' }}>
+                    <Link href='/admin/oauthclient'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
                             <HiOutlineDocumentDuplicate /> {t('OAuth Client')}
+                        </button>
+                    </Link>
+                    <Link href='/admin/configurations'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2'
+                            style={{
+                                width: '210px',
+                            }}
+                        >
+                            <GrConfigure /> {t('Configurations')}
                         </button>
                     </Link>
                 </div>

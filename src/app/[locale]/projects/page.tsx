@@ -9,14 +9,14 @@
 // License-Filename: LICENSE
 
 import { Metadata } from 'next'
-
+import type { JSX } from 'react'
 import Projects from './components/Projects'
 
 export const metadata: Metadata = {
     title: 'Projects',
 }
 
-async function ProjectsList() {
+function ProjectsList(): JSX.Element {
     return <Projects />
 }
 

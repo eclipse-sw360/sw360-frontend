@@ -8,24 +8,28 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import type { JSX } from 'react'
+
 interface Props {
-  externalIds: { [k: string]: string }
+    externalIds: {
+        [k: string]: string
+    }
 }
 
 const ExternalIds = ({ externalIds }: Props): JSX.Element => {
-  return (
-    <> {
-        Object.entries(externalIds).map(([key, value]) => {
-          return (
-            <li key={key}>
-              <span className='fw-bold'>{key}: </span>
-              <span> {value}</span>
-            </li>
-          )
-        }
-      )}
-    </>
-  )
+    return (
+        <>
+            {' '}
+            {Object.entries(externalIds).map(([key, value]) => {
+                return (
+                    <li key={key}>
+                        <span className='fw-bold'>{key}: </span>
+                        <span> {value}</span>
+                    </li>
+                )
+            })}
+        </>
+    )
 }
 
 export default ExternalIds

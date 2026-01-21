@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue } from '@/object-types'
 import { ReactNode } from 'react'
+import { InputKeyValue } from '@/object-types'
 
 interface Props {
     dataAnnotator?: InputKeyValue
@@ -17,10 +17,10 @@ interface Props {
     setAnnotatorToAnnotation: (input: InputKeyValue) => void
 }
 
-function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }: Props) : ReactNode {
+function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }: Props): ReactNode {
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
-        const list: InputKeyValue = dataAnnotator ? dataAnnotator : {} as InputKeyValue
+        const list: InputKeyValue = dataAnnotator ? dataAnnotator : ({} as InputKeyValue)
         list[name as keyof InputKeyValue] = value
         setDataAnnotator(list)
         setAnnotatorToAnnotation(list)
@@ -28,14 +28,29 @@ function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }
 
     return (
         dataAnnotator && (
-            <div className='form-group' style={{ flex: 3 }}>
-                <label className='lableSPDX' htmlFor='annotator'>
+            <div
+                className='form-group'
+                style={{
+                    flex: 3,
+                }}
+            >
+                <label
+                    className='lableSPDX'
+                    htmlFor='annotator'
+                >
                     12.1 Annotator
                 </label>
-                <div style={{ display: 'flex' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                    }}
+                >
                     <select
                         id='annotatorType'
-                        style={{ flex: 2, marginRight: '1rem' }}
+                        style={{
+                            flex: 2,
+                            marginRight: '1rem',
+                        }}
                         className='form-control form-select'
                         name='key'
                         onChange={handleInputChange}
@@ -46,7 +61,10 @@ function Annotator({ dataAnnotator, setDataAnnotator, setAnnotatorToAnnotation }
                         <option value='Tool'>Tool</option>
                     </select>
                     <input
-                        style={{ flex: 6, marginRight: '1rem' }}
+                        style={{
+                            flex: 6,
+                            marginRight: '1rem',
+                        }}
                         id='annotatorValue'
                         name='value'
                         type='text'

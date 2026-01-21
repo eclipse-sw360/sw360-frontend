@@ -28,7 +28,7 @@ interface PackageInformation {
     downloadLocation?: string // 7.7
     filesAnalyzed?: boolean // 7.8
     packageVerificationCode?: PackageVerificationCode // 7.9
-    checksums?: Array<CheckSum> | null// 7.10
+    checksums?: Array<CheckSum> | null // 7.10
     homepage?: string // 7.11
     sourceInfo?: string // 7.12
     licenseConcluded?: string // 7.13

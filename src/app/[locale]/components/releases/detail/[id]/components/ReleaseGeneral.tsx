@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -9,42 +10,70 @@
 // License-Filename: LICENSE
 
 'use client'
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { ReactNode, useState } from 'react'
-import { FaCopy, FaInfoCircle } from 'react-icons/fa'
-
+import { signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
+import { ReactNode, useEffect, useState } from 'react'
+import { BsClipboard, BsInfoCircle } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 
 interface Props {
     release: ReleaseDetail
     releaseId: string
 }
 
-const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
+const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const renderArrayOfUsers = (users: Array<User>) => {
         return Object.entries(users)
             .map(
-                ([index, item]: [string, User]): React.ReactNode => (
-                    <Link key={index} className='link' href={`mailto:${item.email}`}>
+                ([index, item]: [
+                    string,
+                    User,
+                ]): React.ReactNode => (
+                    <Link
+                        key={index}
+                        className='link'
+                        href={`mailto:${item.email}`}
+                    >
                         {item.fullName}
                     </Link>
-                )
+                ),
             )
-            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
+            .reduce((prev, curr): React.ReactNode[] => [
+                prev,
+                ', ',
+                curr,
+            ])
     }
 
     const renderArrayOfTexts = (texts: Array<string>) => {
         return Object.entries(texts)
-            .map(([index, item]: [string, string]): React.ReactNode => <span key={index}>{item}</span>)
-            .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])
+            .map(
+                ([index, item]: [
+                    string,
+                    string,
+                ]): React.ReactNode => <span key={index}>{item}</span>,
+            )
+            .reduce((prev, curr): React.ReactNode[] => [
+                prev,
+                ', ',
+                curr,
+            ])
     }
 
     return (
@@ -74,7 +103,13 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                                 navigator.clipboard.writeText(releaseId).catch((err) => console.log(err))
                             }}
                         >
-                            <FaCopy style={{ color: 'gray', width: '20px' }} />
+                            <BsClipboard
+                                style={{
+                                    color: 'gray',
+                                    width: '20px',
+                                }}
+                                size={20}
+                            />
                         </button>
                     </td>
                 </tr>
@@ -93,15 +128,14 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                 <tr>
                     <td>{t('Created by')}:</td>
                     <td>
-                        {
-                            release._embedded['sw360:createdBy'] &&
+                        {release._embedded['sw360:createdBy'] && (
                             <Link
                                 className='text-link'
                                 href={`mailto:${release._embedded['sw360:createdBy'].email}`}
                             >
                                 {release._embedded['sw360:createdBy'].fullName}
                             </Link>
-                        } 
+                        )}
                     </td>
                 </tr>
                 <tr>
@@ -111,23 +145,21 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                 <tr>
                     <td>{t('Modified By')}:</td>
                     <td>
-                        {
-                            release._embedded['sw360:modifiedBy'] &&
+                        {release._embedded['sw360:modifiedBy'] && (
                             <Link
                                 className='text-link'
                                 href={`mailto:${release._embedded['sw360:modifiedBy'].email}`}
                             >
                                 {release._embedded['sw360:modifiedBy'].fullName}
                             </Link>
-                        } 
+                        )}
                     </td>
                 </tr>
                 <tr>
                     <td>{t('Contributors')}:</td>
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:contributors']) &&
-                            renderArrayOfUsers(release._embedded['sw360:contributors'])
-                        }
+                            renderArrayOfUsers(release._embedded['sw360:contributors'])}
                     </td>
                 </tr>
                 <tr>
@@ -147,27 +179,31 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                 <tr>
                     <td>{t('Additional Roles')}:</td>
                     <td>
-                        <td>
-                            {!CommonUtils.isNullOrUndefined(release.roles) &&
-                                Object.keys(release.roles).map((key) => (
-                                    <li key={key}>
-                                        <span className='fw-bold'>
-                                            {key}:{' '}
-                                        </span>
-                                        <span className='mapDisplayChildItemRight'>
-                                            {!CommonUtils.isNullOrUndefined(release.roles) && release.roles[key]
+                        {!CommonUtils.isNullOrUndefined(release.roles) &&
+                            Object.keys(release.roles).map((key) => (
+                                <li key={key}>
+                                    <span className='fw-bold'>{key}: </span>
+                                    <span className='mapDisplayChildItemRight'>
+                                        {!CommonUtils.isNullOrUndefined(release.roles) &&
+                                            release.roles[key]
                                                 .map(
                                                     (email: string): React.ReactNode => (
-                                                        <a key={email} href={`mailto:${email}`}>
+                                                        <a
+                                                            key={email}
+                                                            href={`mailto:${email}`}
+                                                        >
                                                             {email}
                                                         </a>
-                                                    )
+                                                    ),
                                                 )
-                                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
-                                        </span>
-                                    </li>
-                                ))}
-                        </td>
+                                                .reduce((prev, curr): React.ReactNode[] => [
+                                                    prev,
+                                                    ', ',
+                                                    curr,
+                                                ])}
+                                    </span>
+                                </li>
+                            ))}
                     </td>
                 </tr>
                 <tr>
@@ -198,25 +234,25 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                     <td>{t('Main Licenses')}:</td>
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release._embedded['sw360:licenses']) &&
-                            Object.entries(release._embedded['sw360:licenses'])
-                                .map(
-                                    ([index, item]: [string, LicenseDetail]): React.ReactNode => (
-                                        <span key={index}>
-                                            {item.shortName}
-                                            <FaInfoCircle
-                                                style={{ marginLeft: '5px', color: 'gray' }}
-                                                className={styles.info}
-                                            />
-                                        </span>
-                                    )
-                                )
-                                .reduce((prev, curr): React.ReactNode[] => [
-                                    prev,
-                                    <>
-                                        , <br />
-                                    </>,
-                                    curr,
-                                ])}
+                            Object.entries(release._embedded['sw360:licenses']).map(
+                                ([index, item]: [
+                                    string,
+                                    LicenseDetail,
+                                ]): React.ReactNode => (
+                                    <span key={index}>
+                                        {index !== '0' && <span className='me-2 ms-1'>{','}</span>}
+                                        {item.shortName}
+                                        <BsInfoCircle
+                                            style={{
+                                                marginLeft: '5px',
+                                                color: 'gray',
+                                            }}
+                                            size={20}
+                                            className='release-detail-info'
+                                        />
+                                    </span>
+                                ),
+                            )}
                     </td>
                 </tr>
                 <tr>
@@ -225,17 +261,28 @@ const ReleaseGeneral = ({ release, releaseId }: Props) : ReactNode => {
                         {!CommonUtils.isNullEmptyOrUndefinedArray(release.otherLicenseIds) &&
                             Object.entries(release.otherLicenseIds)
                                 .map(
-                                    ([index, item]: [string, string]): React.ReactNode => (
+                                    ([index, item]: [
+                                        string,
+                                        string,
+                                    ]): React.ReactNode => (
                                         <span key={index}>
                                             {item}
-                                            <FaInfoCircle
-                                                style={{ marginLeft: '5px', color: 'gray' }}
-                                                className={styles.info}
+                                            <BsInfoCircle
+                                                style={{
+                                                    marginLeft: '5px',
+                                                    color: 'gray',
+                                                }}
+                                                size={20}
+                                                className='release-detail-info'
                                             />
                                         </span>
-                                    )
+                                    ),
                                 )
-                                .reduce((prev, curr): React.ReactNode[] => [prev, ', ', curr])}
+                                .reduce((prev, curr): React.ReactNode[] => [
+                                    prev,
+                                    ', ',
+                                    curr,
+                                ])}
                     </td>
                 </tr>
                 <tr>

@@ -9,24 +9,33 @@
 
 'use client'
 
-import { HttpStatus, Vendor } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { StatusCodes } from 'http-status-codes'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import VendorDetailForm from './VendorDetailForm'
+import { type JSX, useEffect, useState } from 'react'
+import { Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils'
+import VendorDetailForm from './VendorDetailForm'
 
 export default function AddVendor(): JSX.Element {
     const t = useTranslations('default')
     const { status } = useSession()
     const router = useRouter()
-    const [vendorData, setVendorData] = useState<Vendor>({
+    const [vendorData, setVendorData] = useState<Vendor | null>({
         fullName: '',
         shortName: '',
         url: '',
     })
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const handleCancel = () => {
         router.push('/admin/vendors')
@@ -35,20 +44,16 @@ export default function AddVendor(): JSX.Element {
     const handleSubmit = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session))
-                return signOut()
-            const payload: Vendor = {
-                fullName: vendorData.fullName,
-                shortName: vendorData.shortName,
-                url: vendorData.url,
-            }
-            const response = await ApiUtils.POST('vendors', payload, session.user.access_token)
-            if (response.status == HttpStatus.CREATED) {
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (vendorData === null) return
+            delete vendorData['_links']
+            const response = await ApiUtils.POST('vendors', vendorData, session.user.access_token)
+            if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Vendor is created'))
                 router.push('/admin/vendors')
-            } else if (response.status === HttpStatus.UNAUTHORIZED) {
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 return signOut()
-            } else if (response.status === HttpStatus.CONFLICT) {
+            } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('A vendor with same name already exists'))
             } else {
                 MessageService.error(t('Something went wrong'))
@@ -87,7 +92,11 @@ export default function AddVendor(): JSX.Element {
                             {t('Cancel')}
                         </button>
                     </div>
-                    <VendorDetailForm payload={vendorData} setPayload={setVendorData} />
+                    <VendorDetailForm
+                        payload={vendorData as Vendor}
+                        setPayload={setVendorData}
+                        tableTitle={t('Create Vendor')}
+                    />
                 </form>
             </div>
         </>

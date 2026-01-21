@@ -16,7 +16,7 @@ interface Links {
             href: string
             name: string
             templated: boolean
-        }
+        },
     ]
 }
 

@@ -10,7 +10,7 @@
 enum ClearingRequestStates {
     OPEN = 'OPEN',
     IN_PROGRESS = 'IN_PROGRESS',
-    CLOSED = 'CLOSED'
+    CLOSED = 'CLOSED',
 }
 
 export default ClearingRequestStates

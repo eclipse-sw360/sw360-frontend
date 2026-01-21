@@ -10,7 +10,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import React, { useTransition } from 'react'
+import React, { type JSX, useTransition } from 'react'
 import { NavDropdown } from 'react-bootstrap'
 
 import { LOCALES } from '@/constants'
@@ -35,7 +35,14 @@ function LocaleSwitcher(): JSX.Element {
     }
 
     function getLanguageName(lang: string) {
-        const langName = new Intl.DisplayNames([locale], { type: 'language' })
+        const langName = new Intl.DisplayNames(
+            [
+                locale,
+            ],
+            {
+                type: 'language',
+            },
+        )
         return langName.of(lang)
     }
 
@@ -46,7 +53,9 @@ function LocaleSwitcher(): JSX.Element {
         setSelectedOption(option || undefined)
 
         startTransition(() => {
-            router.replace(pathname, { locale: nextLocale })
+            router.replace(pathname, {
+                locale: nextLocale,
+            })
         })
         setSelectedOption(option)
     }
@@ -59,7 +68,10 @@ function LocaleSwitcher(): JSX.Element {
             align='end'
         >
             {LOCALES.map((option) => (
-                <NavDropdown.Item eventKey={option.i18n} key={option.i18n}>
+                <NavDropdown.Item
+                    eventKey={option.i18n}
+                    key={option.i18n}
+                >
                     <span className={`fi fi-${option.flag} me-2`} />
                     <span>{getLanguageName(option.i18n)}</span>
                 </NavDropdown.Item>

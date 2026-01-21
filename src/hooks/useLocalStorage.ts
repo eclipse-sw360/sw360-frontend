@@ -9,7 +9,13 @@
 
 import { useEffect, useState } from 'react'
 
-function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
+function useLocalStorage<T>(
+    key: string,
+    initialValue: T,
+): [
+    T,
+    (value: T | ((val: T) => T)) => void,
+] {
     const [storedValue, setStoredValue] = useState<T>(initialValue)
 
     const setValue = (value: T | ((val: T) => T)) => {
@@ -24,18 +30,24 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
 
     useEffect(() => {
         const item = window.localStorage.getItem(key)
-        setStoredValue((item !== null) ? JSON.parse(item) as T : initialValue)
+        setStoredValue(item !== null ? (JSON.parse(item) as T) : initialValue)
 
         const handleStorageChange = () => {
             const currentItem = window.localStorage.getItem(key)
-            setStoredValue(currentItem !== null ? JSON.parse(currentItem) as T : initialValue)
+            setStoredValue(currentItem !== null ? (JSON.parse(currentItem) as T) : initialValue)
         }
 
         window.addEventListener('storage', handleStorageChange)
         return () => window.removeEventListener('storage', handleStorageChange)
-    }, [initialValue, key])
+    }, [
+        initialValue,
+        key,
+    ])
 
-    return [storedValue, setValue]
+    return [
+        storedValue,
+        setValue,
+    ]
 }
 
 export default useLocalStorage

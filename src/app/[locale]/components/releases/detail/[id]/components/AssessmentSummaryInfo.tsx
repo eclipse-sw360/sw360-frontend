@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,12 +11,13 @@
 
 'use client'
 
-import { signOut, getSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useState, ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Button } from 'react-bootstrap'
 
-import { Attachment, AttachmentType, HttpStatus } from '@/object-types'
+import { Attachment, AttachmentTypes } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
@@ -27,27 +29,35 @@ interface AssessmentSummaryInfo {
     [key: string]: string
 }
 
-const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : ReactNode => {
+const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo | undefined>(undefined)
+    const { status } = useSession()
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signOut()
+        }
+    }, [
+        status,
+    ])
 
     const cliAttachmentNumber = embeddedAttachments.filter(
-        (attachment) => attachment.attachmentType == AttachmentType.COMPONENT_LICENSE_INFO_XML
+        (attachment) => attachment.attachmentType == AttachmentTypes.COMPONENT_LICENSE_INFO_XML,
     ).length
 
     const handleShowAssessmentInfo = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session))
-            return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`, session.user.access_token)
-        if (response.status === HttpStatus.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as AssessmentSummaryInfo
             setAssessmentSummaryInfo(data)
-        } else if (response.status === HttpStatus.NO_CONTENT) {
+        } else if (response.status === StatusCodes.NO_CONTENT) {
             setAssessmentSummaryInfo({})
-        } else if (response.status === HttpStatus.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             await signOut()
         }
     }
@@ -57,11 +67,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : Reac
             if (key !== '#text') {
                 return (
                     <tr key={key}>
-                        <td>
-                            {
-                                t(key as never)
-                            }
-                        </td>
+                        <td>{t(key as never)}</td>
                         <td>{assessmentSummaryInfo[key]}</td>
                     </tr>
                 )
@@ -97,7 +103,10 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props) : Reac
                         ) : (
                             <tr>
                                 <td colSpan={2}>
-                                    <Button variant='secondary' onClick={() => void handleShowAssessmentInfo()}>
+                                    <Button
+                                        variant='secondary'
+                                        onClick={() => void handleShowAssessmentInfo()}
+                                    >
                                         {t('Show Assessment Summary Info')}
                                     </Button>
                                 </td>

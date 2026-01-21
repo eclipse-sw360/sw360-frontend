@@ -10,20 +10,17 @@
 
 'use client'
 
-import { Form, OverlayTrigger, Tooltip as BootstrapTooltip, Spinner, Button, Alert, Modal } from 'react-bootstrap'
-import { ImSpinner11 } from 'react-icons/im'
-import LinkedReleasesTable from './LinkedReleasesTable'
-import { FaInfoCircle, FaRegTrashAlt, FaRegQuestionCircle } from 'react-icons/fa'
-import { FaPlus } from 'react-icons/fa6'
-import { useState, ReactNode, useEffect, useCallback, useRef } from 'react'
-import { getSession } from 'next-auth/react'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import React from 'react'
-import SearchReleasesModal from '../sw360/SearchReleasesModal/SearchReleasesModal'
-import { Embedded, HttpStatus, ReleaseDetail, ReleaseLink, ReleaseNode, ProjectPayload } from '@/object-types'
-import styles from './component.module.css'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import React, { type JSX, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, Tooltip as BootstrapTooltip, Button, Form, Modal, OverlayTrigger, Spinner } from 'react-bootstrap'
+import { BsArrowCounterclockwise, BsFillTrashFill, BsInfoCircle, BsPlusLg, BsQuestionCircle } from 'react-icons/bs'
+import { Embedded, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { ApiUtils, CommonUtils } from '@/utils/index'
+import SearchReleasesModal from '../sw360/SearchReleasesModal/SearchReleasesModal'
+import LinkedReleasesTable from './LinkedReleasesTable'
 
 interface CheckCyclicLinkPayload {
     linkedToReleases?: Array<string>
@@ -71,16 +68,13 @@ const mainlineStates = {
     DENIED: 'DENIED',
 }
 
-const Tooltip = ({ text, children, className }: { text: string, children: ReactNode, className?: string }) => {
+const Tooltip = ({ text, children, className }: { text: string; children: ReactNode; className?: string }) => {
     return (
         <OverlayTrigger
             placement='bottom'
-            overlay={<BootstrapTooltip>{text}</BootstrapTooltip>
-            }
+            overlay={<BootstrapTooltip>{text}</BootstrapTooltip>}
         >
-            <span className={className}>
-                {children}
-            </span>
+            <span className={className}>{children}</span>
         </OverlayTrigger>
     )
 }
@@ -90,19 +84,22 @@ const ADD_RELEASE_MODES = {
     CHILDREN: 1,
 }
 
-const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }: IProps) : JSX.Element => {
+const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }: IProps): JSX.Element => {
     const t = useTranslations('default')
 
     const showMessageTimeOut = useRef<number | undefined>(undefined)
     const addReleaseMode = useRef<number | undefined>(undefined)
     const nodeToAddChildren = useRef<ReleaseNode | undefined>(undefined)
-    const nodeRefToRemove = useRef<{
-        removedNode: ReleaseNode,
-        parentNode?: ReleaseNode
-    } | undefined>(undefined)
+    const nodeRefToRemove = useRef<
+        | {
+              removedNode: ReleaseNode
+              parentNode?: ReleaseNode
+          }
+        | undefined
+    >(undefined)
     const linkedToReleases = useRef<string[] | undefined>(undefined)
 
-    const compareSpinner = useRef<HTMLDivElement>(null);
+    const compareSpinner = useRef<HTMLDivElement>(null)
     const [selectedReleases, setSelectedReleases] = useState<Array<ReleaseDetail>>([])
     const [network, setNetwork] = useState<Array<ReleaseNode> | undefined>(undefined)
     const [duplicatedReleases, setDuplicatedReleases] = useState<Array<string>>([])
@@ -110,104 +107,161 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     const [message, setMessage] = useState({
         show: false,
-        variant: 'danger'
+        variant: 'danger',
     })
     const [showReleaseModal, setShowReleaseModal] = useState<boolean>(false)
     const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false)
 
     // Create linked release rows in table from the current network recusively
-    const renderLinkedReleases = (releases: Array<ReleaseNode>, parentNode: ReleaseNode | undefined = undefined, level = 0, releaseIdPath: Array<string> = []) => {
+    const renderLinkedReleases = (
+        releases: Array<ReleaseNode>,
+        parentNode: ReleaseNode | undefined = undefined,
+        level = 0,
+        releaseIdPath: Array<string> = [],
+    ) => {
         return Object.values(releases).map((release: ReleaseNode): ReactNode => {
-            const pathIdToNode = [...releaseIdPath, release.releaseId]
+            const pathIdToNode = [
+                ...releaseIdPath,
+                release.releaseId,
+            ]
 
-            return <>
-            {
-                CommonUtils.isNullEmptyOrUndefinedString(release.releaseName) && CommonUtils.isNullEmptyOrUndefinedString(release.releaseVersion)
-                ?
-                <tr>
-                    <td colSpan={7} style={{ paddingLeft: `${0.5 + level * 1.5}rem` }}>{t('Restricted release')}</td>
-                </tr>
-                :
-                <tr key={release.releaseId + level}
-                    className={(release.isDiff === true) ? 'node-have-diff' : ''}
-                >
-                    <td className='align-middle' style={{ paddingLeft: `${0.5 + level * 1.5}rem` }}>
-                        {release.releaseName}
-                        <Tooltip text='Add child releases' className='float-end'>
-                            <FaPlus className='float-end cursor-pointer' size={20} onClick={() => addChildrenNode(release, pathIdToNode)} />
-                        </Tooltip>
-                    </td>
-                    <td className='align-middle'>
-                        <Form.Select
-                            onFocus={() => void fetchOtherVersionsOfRelease(release)}
-                            onChange={(event) => void updateReleaseOfNode(release, parentNode, releaseIdPath, event)}
+            return (
+                <>
+                    {CommonUtils.isNullEmptyOrUndefinedString(release.releaseName) &&
+                    CommonUtils.isNullEmptyOrUndefinedString(release.releaseVersion) ? (
+                        <tr>
+                            <td
+                                colSpan={7}
+                                style={{
+                                    paddingLeft: `${0.5 + level * 1.5}rem`,
+                                }}
+                            >
+                                {t('Restricted release')}
+                            </td>
+                        </tr>
+                    ) : (
+                        <tr
+                            key={release.releaseId + level}
+                            className={release.isDiff === true ? 'node-have-diff' : ''}
                         >
-                            {
-                                release.otherReleaseVersions
-                                    ?
-                                    release.otherReleaseVersions.sort((a, b) => a.version.localeCompare(b.version)).map(rel =>
-                                        <option key={rel.id} value={rel.id}
-                                            selected={(rel.id === release.releaseId)}
+                            <td
+                                className='align-middle'
+                                style={{
+                                    paddingLeft: `${0.5 + level * 1.5}rem`,
+                                }}
+                            >
+                                {release.releaseName}
+                                <Tooltip
+                                    text='Add child releases'
+                                    className='float-end'
+                                >
+                                    <BsPlusLg
+                                        className='float-end cursor-pointer'
+                                        size={20}
+                                        onClick={() => addChildrenNode(release, pathIdToNode)}
+                                    />
+                                </Tooltip>
+                            </td>
+                            <td className='align-middle'>
+                                <Form.Select
+                                    onFocus={() => void fetchOtherVersionsOfRelease(release)}
+                                    onChange={(event) =>
+                                        void updateReleaseOfNode(release, parentNode, releaseIdPath, event)
+                                    }
+                                >
+                                    {release.otherReleaseVersions ? (
+                                        release.otherReleaseVersions
+                                            .sort((a, b) => a.version.localeCompare(b.version))
+                                            .map((rel) => (
+                                                <option
+                                                    key={rel.id}
+                                                    value={rel.id}
+                                                    selected={rel.id === release.releaseId}
+                                                    className='textlabel stackedLabel'
+                                                >
+                                                    {rel.version}
+                                                </option>
+                                            ))
+                                    ) : (
+                                        <option
+                                            value={release.releaseId}
                                             className='textlabel stackedLabel'
+                                            selected
                                         >
-                                            {rel.version}
+                                            {release.releaseVersion}
                                         </option>
-                                    )
-                                    :
-                                    <option value={release.releaseId} className='textlabel stackedLabel' selected>
-                                        {release.releaseVersion}
-                                    </option>
-                            }
-                        </Form.Select>
-                    </td>
-                    <td style={{ width: '5%' }} className='align-middle text-center'>
-                        <Tooltip text={t('Load default child releases')}>
-                            <ImSpinner11 size={19} className='cursor-pointer' onClick={() => void loadDefaultNetwork(release)} />
-                        </Tooltip>
-                    </td>
-                    <td className='align-middle'>
-                        <Form.Select onChange={(event) => changeReleaseRelationship(release, event)} name='releaseRelationship'>
-                            {
-                                Object.entries(releaseRelationship).map(([key, value]: Array<string>) =>
-                                    <option key={key} value={key}
-                                        selected={key === release.releaseRelationship}
-                                    >
-                                        {t(value as never)}
-                                    </option>
-                                )
-                            }
-                        </Form.Select>
-                    </td>
-                    <td className='align-middle'>
-                        <Form.Select onChange={(event) => changeMainlineState(release, event)} name='mainlineState'>
-                            {
-                                Object.entries(mainlineStates).map(([key, value]: Array<string>) =>
-                                    <option key={key} value={key}
-                                        selected={key === release.mainlineState}
-                                    >
-                                        {t(value as never)}
-                                    </option>
-                                )
-                            }
-                        </Form.Select>
-                    </td>
-                    <td className='align-middle'>
-                        <input type='text'
-                            className='form-control'
-                            placeholder={t('Enter comment')}
-                            defaultValue={release.comment}
-                            onChange={(event) => changeComment(release, event)}
-                        />
-                    </td>
-                    <td className='align-middle text-center'>
-                        <Tooltip text={t('Delete')}>
-                            <FaRegTrashAlt size={19} className='cursor-pointer' onClick={() => removeNode(parentNode, release)} />
-                        </Tooltip>
-                    </td>
-                </tr>
-                }
-                {renderLinkedReleases(release.releaseLink, release, level + 1, pathIdToNode)}
-            </>
+                                    )}
+                                </Form.Select>
+                            </td>
+                            <td
+                                style={{
+                                    width: '5%',
+                                }}
+                                className='align-middle text-center'
+                            >
+                                <Tooltip text={t('Load default child releases')}>
+                                    <BsArrowCounterclockwise
+                                        size={20}
+                                        className='cursor-pointer'
+                                        onClick={() => void loadDefaultNetwork(release)}
+                                    />
+                                </Tooltip>
+                            </td>
+                            <td className='align-middle'>
+                                <Form.Select
+                                    onChange={(event) => changeReleaseRelationship(release, event)}
+                                    name='releaseRelationship'
+                                >
+                                    {Object.entries(releaseRelationship).map(([key, value]: Array<string>) => (
+                                        <option
+                                            key={key}
+                                            value={key}
+                                            selected={key === release.releaseRelationship}
+                                        >
+                                            {t(value as never)}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </td>
+                            <td className='align-middle'>
+                                <Form.Select
+                                    onChange={(event) => changeMainlineState(release, event)}
+                                    name='mainlineState'
+                                >
+                                    {Object.entries(mainlineStates).map(([key, value]: Array<string>) => (
+                                        <option
+                                            key={key}
+                                            value={key}
+                                            selected={key === release.mainlineState}
+                                        >
+                                            {t(value as never)}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </td>
+                            <td className='align-middle'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder={t('Enter comment')}
+                                    defaultValue={release.comment}
+                                    onChange={(event) => changeComment(release, event)}
+                                />
+                            </td>
+                            <td className='align-middle text-center'>
+                                <Tooltip text={t('Delete')}>
+                                    <BsFillTrashFill
+                                        size={20}
+                                        className='cursor-pointer'
+                                        onClick={() => removeNode(parentNode, release)}
+                                    />
+                                </Tooltip>
+                            </td>
+                        </tr>
+                    )}
+                    {renderLinkedReleases(release.releaseLink, release, level + 1, pathIdToNode)}
+                </>
+            )
         })
     }
 
@@ -236,28 +290,33 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
-        const response = await ApiUtils.GET(`releases/${releaseNode.releaseId}/releases?transitive=true`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        const response = await ApiUtils.GET(
+            `releases/${releaseNode.releaseId}/releases?transitive=true`,
+            session.user.access_token,
+        )
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Error while processing'))
             return
         }
-        // eslint-disable-next-line @typescript-eslint/ban-types
-        const data = await response.json() as EmbeddedReleaseLinks | EmptyEmbeddedResponse
-        const defaultNetwork = (data._embedded !== undefined) ? convertReleaseLinksToReleaseNodes(data._embedded['sw360:releaseLinks']) : []
+
+        const data = (await response.json()) as EmbeddedReleaseLinks | EmptyEmbeddedResponse
+        const defaultNetwork =
+            data._embedded !== undefined ? convertReleaseLinksToReleaseNodes(data._embedded['sw360:releaseLinks']) : []
         releaseNode.releaseLink = defaultNetwork
-        setNetwork([...network])
+        setNetwork([
+            ...network,
+        ])
         showMessage('success')
     }
 
     const convertReleaseLinksToReleaseNodes = (releaseLinks: Array<ReleaseLink> | undefined): Array<ReleaseNode> => {
-        if (releaseLinks === undefined)
-            return []
+        if (releaseLinks === undefined) return []
         return releaseLinks.map((rel: ReleaseLink): ReleaseNode => {
             return {
                 releaseId: rel.id,
@@ -265,7 +324,9 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                 releaseVersion: rel.version,
                 releaseRelationship: 'CONTAINED',
                 mainlineState: 'OPEN',
-                releaseLink: (rel._embedded) ? convertReleaseLinksToReleaseNodes(rel._embedded['sw360:releaseLinks']) : [],
+                releaseLink: rel._embedded
+                    ? convertReleaseLinksToReleaseNodes(rel._embedded['sw360:releaseLinks'])
+                    : [],
                 comment: '',
                 componentId: rel.componentId,
             }
@@ -276,22 +337,27 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`projects/network/${projectId}/linkedReleases`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Error while processing'))
             return
         }
-        const data = await response.json() as Array<ReleaseNode>
+        const data = (await response.json()) as Array<ReleaseNode>
         setNetwork(data)
-    }, [projectId])
+    }, [
+        projectId,
+    ])
 
-    const createReleaseNodeFromReleaseIds = (validSelectedReleases: Array<ReleaseDetail>, releasesInSameLevel: Array<string>) => {
+    const createReleaseNodeFromReleaseIds = (
+        validSelectedReleases: Array<ReleaseDetail>,
+        releasesInSameLevel: Array<string>,
+    ) => {
         const releasesDuplicateInSameLevel = []
         const releaseNodes: Array<ReleaseNode> = []
         for (const rel of validSelectedReleases) {
@@ -323,11 +389,11 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         clearTimeout(showMessageTimeOut.current)
         setMessage({
             show: true,
-            variant: variant
+            variant: variant,
         })
         showMessageTimeOut.current = window.setTimeout(() => {
             closeMessage()
-        }, 7000);
+        }, 7000)
     }
 
     const closeMessage = () => {
@@ -355,33 +421,47 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const removedNode = nodeRefToRemove.current.removedNode
 
         if (parentNode === undefined) {
-            const newNetwork = [...network].filter(rel => rel.releaseId !== removedNode.releaseId)
-            setNetwork([...newNetwork])
+            const newNetwork = [
+                ...network,
+            ].filter((rel) => rel.releaseId !== removedNode.releaseId)
+            setNetwork([
+                ...newNetwork,
+            ])
             closeConfirmDeleteModal()
             return
         }
 
-        parentNode.releaseLink = parentNode.releaseLink.filter((rel: ReleaseNode) => rel.releaseId !== removedNode.releaseId)
-        setNetwork([...network])
+        parentNode.releaseLink = parentNode.releaseLink.filter(
+            (rel: ReleaseNode) => rel.releaseId !== removedNode.releaseId,
+        )
+        setNetwork([
+            ...network,
+        ])
         closeConfirmDeleteModal()
     }
 
     const changeMainlineState = (release: ReleaseNode, event: React.ChangeEvent<HTMLSelectElement>) => {
         if (network === undefined) return
         release.mainlineState = event.target.value
-        setNetwork([...network])
+        setNetwork([
+            ...network,
+        ])
     }
 
     const changeReleaseRelationship = (release: ReleaseNode, event: React.ChangeEvent<HTMLSelectElement>) => {
         if (network === undefined) return
         release.releaseRelationship = event.target.value
-        setNetwork([...network])
+        setNetwork([
+            ...network,
+        ])
     }
 
     const changeComment = (release: ReleaseNode, event: React.ChangeEvent<HTMLInputElement>) => {
         if (network === undefined) return
         release.comment = event.target.value
-        setNetwork([...network])
+        setNetwork([
+            ...network,
+        ])
     }
 
     /*
@@ -389,7 +469,12 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         - If changed version has cyclic link with parent and child releases => show warning message + not allow to change
         - If changed version already exists at the same level =>  show warning message + not allow to change
     */
-    const updateReleaseOfNode = async (release: ReleaseNode, parentNode: ReleaseNode | undefined, releaseIdPath: Array<string>, event: React.ChangeEvent<HTMLSelectElement>) => {
+    const updateReleaseOfNode = async (
+        release: ReleaseNode,
+        parentNode: ReleaseNode | undefined,
+        releaseIdPath: Array<string>,
+        event: React.ChangeEvent<HTMLSelectElement>,
+    ) => {
         if (network === undefined) return
         closeMessage()
         const selectedReleaseId = event.target.value
@@ -409,31 +494,46 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
         setDisplayedCyclicLinks([])
         if (parentNode === undefined) {
-            if (Object.values(network).map(rel => rel.releaseId).includes(selectedReleaseId)) {
-                setDuplicatedReleases([`${release.releaseName} (${selectedReleaseVersion})`])
+            if (
+                Object.values(network)
+                    .map((rel) => rel.releaseId)
+                    .includes(selectedReleaseId)
+            ) {
+                setDuplicatedReleases([
+                    `${release.releaseName} (${selectedReleaseVersion})`,
+                ])
                 event.target.value = release.releaseId
                 showMessage('danger')
                 return
             }
             release.releaseId = selectedReleaseId
             release.releaseVersion = selectedReleaseVersion
-            setNetwork([...network])
+            setNetwork([
+                ...network,
+            ])
         } else {
-            if (Object.values(parentNode.releaseLink).map(rel => rel.releaseId).includes(selectedReleaseId)) {
-                setDuplicatedReleases([`${release.releaseName} (${selectedReleaseVersion})`])
+            if (
+                Object.values(parentNode.releaseLink)
+                    .map((rel) => rel.releaseId)
+                    .includes(selectedReleaseId)
+            ) {
+                setDuplicatedReleases([
+                    `${release.releaseName} (${selectedReleaseVersion})`,
+                ])
                 event.target.value = release.releaseId
                 showMessage('danger')
                 return
             }
             release.releaseId = selectedReleaseId
             release.releaseVersion = selectedReleaseVersion
-            setNetwork([...network])
+            setNetwork([
+                ...network,
+            ])
         }
     }
 
     const getSubNodeIdsOfCurrentNode = (subNodes: Array<ReleaseNode>): Array<string> => {
-        if (CommonUtils.isNullEmptyOrUndefinedArray(subNodes))
-            return []
+        if (CommonUtils.isNullEmptyOrUndefinedArray(subNodes)) return []
         const subNodeIds: Array<string> = []
         for (const subNode of subNodes) {
             subNodeIds.push(subNode.releaseId)
@@ -450,20 +550,20 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
         const response = await ApiUtils.GET(`components/${release.componentId}/releases`, session.user.access_token)
-        if (response.status === HttpStatus.UNAUTHORIZED) {
+        if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return
         }
-        if (response.status !== HttpStatus.OK) {
+        if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Error while processing'))
             return
         }
-        const releases = await response.json() as Embedded<ReleaseLink, 'sw360:releaseLinks'>
+        const releases = (await response.json()) as Embedded<ReleaseLink, 'sw360:releaseLinks'>
 
-        const otherVersions = Object.values(releases._embedded['sw360:releaseLinks']).map(rel => {
+        const otherVersions = Object.values(releases._embedded['sw360:releaseLinks']).map((rel) => {
             return {
                 version: rel.version,
                 id: rel.id,
@@ -472,7 +572,9 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
         release.otherReleaseVersions = otherVersions
 
-        setNetwork([...network])
+        setNetwork([
+            ...network,
+        ])
     }
 
     const compareWithDefault = async () => {
@@ -480,15 +582,19 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return
+            return signOut()
         }
 
         if (compareSpinner.current !== null) {
             compareSpinner.current.style.display = 'inline-block'
         }
 
-        const response = await ApiUtils.POST('projects/network/compareDefaultNetwork', network, session.user.access_token)
-        const comparedNetwork = await response.json() as Array<ReleaseNode>
+        const response = await ApiUtils.POST(
+            'projects/network/compareDefaultNetwork',
+            network,
+            session.user.access_token,
+        )
+        const comparedNetwork = (await response.json()) as Array<ReleaseNode>
         setNetwork(comparedNetwork)
 
         if (compareSpinner.current !== null) {
@@ -496,22 +602,30 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         }
     }
 
-    const getCyclicLinks = async (linkedReleases: Array<string>, linkedToReleases: Array<string>, checkingReleaseId: string) => {
+    const getCyclicLinks = async (
+        linkedReleases: Array<string>,
+        linkedToReleases: Array<string>,
+        checkingReleaseId: string,
+    ) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return []
+            return signOut()
         }
         const cyclicCheckPayload: CheckCyclicLinkPayload = {
             linkedReleases: linkedReleases,
             linkedToReleases: linkedToReleases,
         }
-        const response = await ApiUtils.POST(`releases/${checkingReleaseId}/checkCyclicLink`, cyclicCheckPayload, session.user.access_token)
+        const response = await ApiUtils.POST(
+            `releases/${checkingReleaseId}/checkCyclicLink`,
+            cyclicCheckPayload,
+            session.user.access_token,
+        )
         const cyclicLinks: Array<string> = []
-        if (response.status == HttpStatus.MULTIPLE_STATUS) {
-            const data = await response.json() as Array<CheckCyclicResponse>
+        if (response.status == StatusCodes.MULTI_STATUS) {
+            const data = (await response.json()) as Array<CheckCyclicResponse>
             for (const cyclicResponse of data) {
-                if (cyclicResponse.status == HttpStatus.CONFLICT) {
+                if (cyclicResponse.status == StatusCodes.CONFLICT) {
                     if (!cyclicLinks.includes(cyclicResponse.message.trim())) {
                         cyclicLinks.push(cyclicResponse.message.trim())
                     }
@@ -528,10 +642,10 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         for (const release of selectedReleases) {
             if (release.id === undefined) continue
             const cyclicLinksOfRelease = await getCyclicLinks([], linkedToReleases.current ?? [], release.id)
-            if (cyclicLinksOfRelease.length === 0) {
+            if (Array.isArray(cyclicLinksOfRelease) && cyclicLinksOfRelease.length === 0) {
                 validSelectedReleases.push(release)
             }
-            cyclicLinks.push(...cyclicLinksOfRelease)
+            cyclicLinks.push(...(cyclicLinksOfRelease ?? []))
         }
         setDisplayedCyclicLinks(cyclicLinks)
         if (cyclicLinks.length > 0) {
@@ -541,123 +655,176 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
     }
 
     useEffect(() => {
-        if (selectedReleases.length === 0)
-            return
+        if (selectedReleases.length === 0) return
         if (addReleaseMode.current === ADD_RELEASE_MODES.ROOT) {
             setDisplayedCyclicLinks([])
-            const newReleaseNodes = createReleaseNodeFromReleaseIds(selectedReleases, (network ?? []).map(rel => rel.releaseId))
-            setNetwork([...(network ?? []), ...newReleaseNodes])
+            const newReleaseNodes = createReleaseNodeFromReleaseIds(
+                selectedReleases,
+                (network ?? []).map((rel) => rel.releaseId),
+            )
+            setNetwork([
+                ...(network ?? []),
+                ...newReleaseNodes,
+            ])
             addReleaseMode.current = undefined
         } else {
-
-            getNotCyclicReleaseToLink().then(validSelectedReleases => {
-                if (nodeToAddChildren.current === undefined || network === undefined) return
-                const newReleaseNodes = createReleaseNodeFromReleaseIds(validSelectedReleases, nodeToAddChildren.current.releaseLink.map(rel => rel.releaseId))
-                nodeToAddChildren.current.releaseLink = [...nodeToAddChildren.current.releaseLink, ...newReleaseNodes]
-                setNetwork([...network])
-                linkedToReleases.current = undefined
-                nodeToAddChildren.current = undefined
-                addReleaseMode.current = undefined
-            }).catch(() => {
-                linkedToReleases.current = undefined
-                nodeToAddChildren.current = undefined
-                addReleaseMode.current = undefined
-            })
+            getNotCyclicReleaseToLink()
+                .then((validSelectedReleases) => {
+                    if (nodeToAddChildren.current === undefined || network === undefined) return
+                    const newReleaseNodes = createReleaseNodeFromReleaseIds(
+                        validSelectedReleases,
+                        nodeToAddChildren.current.releaseLink.map((rel) => rel.releaseId),
+                    )
+                    nodeToAddChildren.current.releaseLink = [
+                        ...nodeToAddChildren.current.releaseLink,
+                        ...newReleaseNodes,
+                    ]
+                    setNetwork([
+                        ...network,
+                    ])
+                    linkedToReleases.current = undefined
+                    nodeToAddChildren.current = undefined
+                    addReleaseMode.current = undefined
+                })
+                .catch(() => {
+                    linkedToReleases.current = undefined
+                    nodeToAddChildren.current = undefined
+                    addReleaseMode.current = undefined
+                })
         }
         setSelectedReleases([])
-    }, [selectedReleases])
+    }, [
+        selectedReleases,
+    ])
 
     useEffect(() => {
         if (projectId === undefined) {
             setNetwork([])
             return
         }
-        fetchNetwork().catch(err => console.error(err))
-    }, [projectId])
+        fetchNetwork().catch((err) => console.error(err))
+    }, [
+        projectId,
+    ])
 
     useEffect(() => {
         setProjectPayload({
             ...projectPayload,
-            dependencyNetwork: network
+            dependencyNetwork: network,
         })
-    }, [network])
+    }, [
+        network,
+    ])
 
     return (
         <div className='row mb-4'>
-            <div className={`${styles.title} mb-2`}>
+            <div className='dependency-network-title mb-2'>
                 <h6 className='fw-bold text-uppercase'>
                     {t('Linked Releases')}
                     <hr className='my-2 mb-2' />
                 </h6>
-                <Button variant='outline-success' className='float-start' onClick={() => void compareWithDefault()}>
-                    {t('Compare with default network')} {' '}
-                    <Spinner ref={compareSpinner} className='spinner' size='sm' style={{ display: 'none' }} />
+                <Button
+                    variant='outline-success'
+                    className='float-start'
+                    onClick={() => void compareWithDefault()}
+                >
+                    {t('Compare with default network')}{' '}
+                    <Spinner
+                        ref={compareSpinner}
+                        className='spinner'
+                        size='sm'
+                        style={{
+                            display: 'none',
+                        }}
+                    />
                 </Button>
             </div>
             <div className='px-0'>
-                {
-                    network
-                        ?
-                        <>
-                            <Alert show={message.show}
-                                onClose={() => closeMessage()}
-                                variant={message.variant}
-                                dismissible
-                                className={`${styles['message']}`}
+                {network ? (
+                    <>
+                        <Alert
+                            show={message.show}
+                            onClose={() => closeMessage()}
+                            variant={message.variant}
+                            dismissible
+                            className='dependency-network-message'
+                        >
+                            <b>
+                                <BsInfoCircle size={20} /> {message.variant === 'danger' ? t('Warning') : t('Success')}:
+                            </b>
+                            {message.variant === 'danger' ? (
+                                <p>
+                                    <>
+                                        {!CommonUtils.isNullEmptyOrUndefinedArray(duplicatedReleases) && (
+                                            <div>
+                                                {t('Duplicated Releases')}: <b>{duplicatedReleases.join(', ')}</b>
+                                            </div>
+                                        )}
+                                    </>
+                                    <>
+                                        {!CommonUtils.isNullEmptyOrUndefinedArray(displayedCyclicLinks) &&
+                                            Object.values(displayedCyclicLinks).map((cyclicLink) => (
+                                                <div key={cyclicLink}>
+                                                    {t('Cyclic Hierarchy')}: <b>{cyclicLink}</b>
+                                                </div>
+                                            ))}
+                                    </>
+                                </p>
+                            ) : (
+                                <> {t('Default network is loaded successfully')}</>
+                            )}
+                        </Alert>
+                        <LinkedReleasesTable>
+                            <tbody
+                                style={{
+                                    fontSize: '1rem',
+                                }}
                             >
-                                <b><FaInfoCircle size={13} /> {message.variant === 'danger' ? t('Warning') : t('Success')}:</b>
-                                {
-                                    (message.variant === 'danger')
-                                        ?
-                                        <p>
-                                            <>
-                                                {
-                                                    !CommonUtils.isNullEmptyOrUndefinedArray(duplicatedReleases)
-                                                    && <div>{t('Duplicated Releases')}: <b>{duplicatedReleases.join(', ')}</b></div>
-                                                }
-                                            </>
-                                            <>
-                                                {
-                                                    !CommonUtils.isNullEmptyOrUndefinedArray(displayedCyclicLinks)
-                                                    && Object.values(displayedCyclicLinks)
-                                                        .map(cyclicLink => <div key={cyclicLink}>{t('Cyclic Hierarchy')}: <b>{cyclicLink}</b></div>)
-                                                }
-                                            </>
-                                        </p>
-                                        :
-                                        <> {t('Default network is loaded successfully')}</>
-                                }
-                            </Alert>
-                            <LinkedReleasesTable>
-                                <tbody style={{ fontSize: '1rem' }}>
-                                    {
-                                        renderLinkedReleases(network)
-                                    }
-                                </tbody>
-                            </LinkedReleasesTable>
-                            <Button variant='secondary' className='mt-2' onClick={() => addRootNode()}>{t('Add Releases')}</Button>
-                        </>
-                        :
-                        <div className='col-12 text-center'>
-                            <Spinner className='spinner' />
-                        </div>
-                }
-                <SearchReleasesModal projectId={projectId} show={showReleaseModal} setShow={setShowReleaseModal} setSelectedReleases={setSelectedReleases} />
-                <Modal className='modal-danger' show={showConfirmDelete} setShow={setShowConfirmDelete} backdrop='static' centered size='lg'>
+                                {renderLinkedReleases(network)}
+                            </tbody>
+                        </LinkedReleasesTable>
+                        <Button
+                            variant='secondary'
+                            className='mt-2'
+                            onClick={() => addRootNode()}
+                        >
+                            {t('Add Releases')}
+                        </Button>
+                    </>
+                ) : (
+                    <div className='col-12 text-center'>
+                        <Spinner className='spinner' />
+                    </div>
+                )}
+                <SearchReleasesModal
+                    projectId={projectId}
+                    show={showReleaseModal}
+                    setShow={setShowReleaseModal}
+                    setSelectedReleases={setSelectedReleases}
+                />
+                <Modal
+                    className='modal-danger'
+                    show={showConfirmDelete}
+                    setShow={setShowConfirmDelete}
+                    backdrop='static'
+                    centered
+                    size='lg'
+                >
                     <Modal.Header closeButton>
-                        <Modal.Title><FaRegQuestionCircle /> {t('Delete link to release')}?</Modal.Title>
+                        <Modal.Title>
+                            <BsQuestionCircle size={20} /> {t('Delete link to release')}?
+                        </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        {
-                            nodeRefToRemove.current &&
+                        {nodeRefToRemove.current && (
                             <p>
-                                {t('Do you really want to remove the link to release')}
-                                {' '}
+                                {t('Do you really want to remove the link to release')}{' '}
                                 <b>
                                     {`${nodeRefToRemove.current.removedNode.releaseName} (${nodeRefToRemove.current.removedNode.releaseVersion})`}
-                                </b> ?
+                                </b>{' '}
+                                ?
                             </p>
-                        }
+                        )}
                     </Modal.Body>
                     <Modal.Footer className='justify-content-end'>
                         <Button
@@ -669,7 +836,11 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                         >
                             {t('Cancel')}
                         </Button>
-                        <Button type='button' variant='danger' onClick={confirmToDelete}>
+                        <Button
+                            type='button'
+                            variant='danger'
+                            onClick={confirmToDelete}
+                        >
                             {t('Delete Link')}
                         </Button>
                     </Modal.Footer>

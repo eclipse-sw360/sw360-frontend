@@ -1,0 +1,24 @@
+SPDXVersion: SPDX-2.1
+DataLicense: CC0-1.0
+DocumentNamespace: http://www.spdx.org/spdxdocs/8f141b09-1138-4fc5-aecb-fc10d9ac1eed
+DocumentName: SBOM toy exaple
+SPDXID: SPDXRef-DOCUMENT
+
+## Creation Information
+Creator: Organization: NTIA Standards and Formats Workgroup
+Created: 2019-08-31T11:29:46Z
+LicenseListVersion: 3.6
+## Relationships
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-asoftware-v1.1
+
+## Package Information
+PackageName: Component SPDX
+SPDXID: SPDXRef-asoftware-v1.1
+PackageVersion: v1
+PackageSupplier: Organization: Acme
+PackageChecksum: SHA1: 75068c26abbed3ad3980685bae21d7202d288317
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+FilesAnalyzed: false
+
+

@@ -13,14 +13,13 @@ import 'flag-icons/css/flag-icons.min.css'
 
 import '@/styles/auth.css'
 import '@/styles/globals.css'
-import '@/styles/gridjs/sw360.css'
 
 import { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { ReactNode } from 'react'
-
-import { Footer, Navbar, GlobalMessages } from 'next-sw360'
+import { Footer, GlobalMessages, Navbar } from 'next-sw360'
+import { type JSX, ReactNode } from 'react'
+import { UiConfigProvider } from '@/contexts'
 import { Providers } from '../provider'
 
 export const metadata: Metadata = {
@@ -37,20 +36,25 @@ type Props = {
 }
 
 async function RootLayout({ children }: Props): Promise<JSX.Element> {
-    const locale = await getLocale();
-    const messages = await getMessages();
+    const locale = await getLocale()
+    const messages = await getMessages()
 
     return (
         <html lang={locale}>
             <body>
                 <Providers>
                     <NextIntlClientProvider messages={messages}>
-                        <div id='container' className='d-flex flex-column min-vh-100'>
-                            <GlobalMessages />
-                            <Navbar />
-                            {children}
-                            <Footer />
-                        </div>
+                        <UiConfigProvider>
+                            <div
+                                id='container'
+                                className='d-flex flex-column min-vh-100'
+                            >
+                                <GlobalMessages />
+                                <Navbar />
+                                {children}
+                                <Footer />
+                            </div>
+                        </UiConfigProvider>
                     </NextIntlClientProvider>
                 </Providers>
             </body>

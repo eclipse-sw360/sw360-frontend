@@ -10,14 +10,15 @@
 
 'use client'
 
-import { Preferences } from '@/object-types'
 import { ReactNode, useEffect, useState } from 'react'
 import { Accordion, Form } from 'react-bootstrap'
-import styles from '../preferences.module.css'
+import { Preferences } from '@/object-types'
 
 interface NotificationSetting {
     wantsMailNotification: boolean
-    notificationPreferences: { [key: string]: boolean }
+    notificationPreferences: {
+        [key: string]: boolean
+    }
 }
 
 interface Props {
@@ -25,7 +26,7 @@ interface Props {
     setNotificationSetting: React.Dispatch<React.SetStateAction<NotificationSetting>>
 }
 
-const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props) : ReactNode => {
+const NotificationSettings = ({ notificationSetting, setNotificationSetting }: Props): ReactNode => {
     const preferences = Preferences()
     const [isClient, setIsClient] = useState(false)
 
@@ -49,11 +50,15 @@ const NotificationSettings = ({ notificationSetting, setNotificationSetting }: P
             {preferences.map((value) => (
                 <div key={value.key}>
                     {isClient && (
-                        <Accordion.Item eventKey={value.key} key={value.key} className={styles['accordion-item']}>
-                            <Accordion.Header className={styles['accordion-header']}>
+                        <Accordion.Item
+                            eventKey={value.key}
+                            key={value.key}
+                            className='preferences-accordion-item'
+                        >
+                            <Accordion.Header className='preferences-accordion-header'>
                                 {value.documentType}
                             </Accordion.Header>
-                            <Accordion.Body className={styles['accordion-body']}>
+                            <Accordion.Body className='preferences-accordion-body'>
                                 {value.entries.map((entry) => (
                                     <Form.Check
                                         type='checkbox'
