@@ -698,7 +698,6 @@ export default function ListView({
         projectId,
         session,
         columnFilters,
-        memoizedLicenseClearing,
     ])
 
     useEffect(() => {
