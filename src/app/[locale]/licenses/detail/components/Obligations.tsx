@@ -25,8 +25,7 @@ import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { ErrorDetails, LicenseDetail, NestedRows, Obligation } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     licenseId?: string
@@ -87,7 +86,9 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as LicenseDetail
@@ -100,11 +101,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
                 })
                 setWhitelist(newWhitelist)
             } catch (error: unknown) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 setShowProcessing(false)
             }

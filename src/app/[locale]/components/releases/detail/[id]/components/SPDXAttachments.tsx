@@ -20,8 +20,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Spinner } from 'react-bootstrap'
 import { BsExclamationTriangle } from 'react-icons/bs'
 import { Attachment, AttachmentTypes, Embedded, ErrorDetails } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import SPDXLicenseView from './SPDXLicenseView'
 
 interface Props {
@@ -188,7 +187,9 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
             )
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
             setTableData((prev) => {
                 return prev.map((t) => {
@@ -207,11 +208,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 })
             })
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setShowProcessing(false)
         }
@@ -227,7 +224,9 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
             )
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
 
             const data = (await response.json()) as LicenseInfo
@@ -245,11 +244,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 })
             })
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setShowProcessing(false)
         }
@@ -279,7 +274,9 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as Embedded<Attachment, 'sw360:attachments'>
@@ -314,11 +311,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
                 setTableData(tableData)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

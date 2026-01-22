@@ -17,8 +17,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Component, ErrorDetails, MergeOrSplitActionType, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ComponentTable from '../../components/ComponentTable'
 import SplitComponentConfirmation from './ConfirmSplit'
 import SplitComponent from './SplitData'
@@ -96,14 +95,12 @@ function SplitOverview({
             const response = await ApiUtils.PATCH('components/splitComponents', payload, session.user.access_token)
             if (response.status !== 200) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setLoading(false)
             redirect(`/components/detail/${id}`)
@@ -127,15 +124,15 @@ function SplitOverview({
                     setSourceComponent(component)
                 } else {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
+                ApiUtils.reportError(error)
+                if (error instanceof ApiError && !error.isAborted) {
+                    router.push(`components/${id}`)
                 }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
-                router.push(`components/${id}`)
             }
         })()
 

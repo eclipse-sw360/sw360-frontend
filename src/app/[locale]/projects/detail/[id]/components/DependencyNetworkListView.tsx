@@ -27,8 +27,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import { ErrorDetails, FilterOption } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ClearingStateBadge from './ClearingStateBadge'
 
 interface ListViewData {
@@ -465,17 +464,15 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
 
                 if (listViewResponse.status !== StatusCodes.OK) {
                     const err = (await listViewResponse.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: listViewResponse.status,
+                    })
                 }
 
                 const listViewData = (await listViewResponse.json()) as Array<ListViewData>
                 setListViewData(listViewData)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
