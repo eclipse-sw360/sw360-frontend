@@ -19,9 +19,8 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LicenseType } from '@/object-types'
-import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { ApiError, ApiUtils } from '@/utils/index'
 import DeleteLicenseTypesModal from './DeleteLicenseTypesModal'
 
 type EmbeddedLicenseTypes = Embedded<LicenseType, 'sw360:licenseTypes'>
@@ -119,7 +118,9 @@ export default function LicenseTypesDetail(): ReactNode {
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedLicenseTypes
@@ -131,11 +132,7 @@ export default function LicenseTypesDetail(): ReactNode {
                 )
                 setLicenseTypeCount(data['_embedded']?.['sw360:licenseTypes'].length ?? 0)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

@@ -25,7 +25,7 @@ import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
 import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 interface Attachment {
     attachmentType: string
@@ -677,16 +677,14 @@ export default function ListView({
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const licenseClearingData = (await response.json()) as LicenseClearing
                 setLicenseClearing(licenseClearingData)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -718,16 +716,14 @@ export default function ListView({
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const linkedProjectsData = (await response.json()) as LinkedProjects
                 setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

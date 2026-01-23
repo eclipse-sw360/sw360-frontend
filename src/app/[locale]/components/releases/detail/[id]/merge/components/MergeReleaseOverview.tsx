@@ -25,7 +25,7 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import MergeReleaseDataCheck from './MergeReleaseDataCheck'
 import MergeReleaseTable from './MergeReleaseTable'
 
@@ -97,15 +97,15 @@ function MergeReleaseOverview({
                     setTargetRelease(singleRelease)
                 } else {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
+                ApiUtils.reportError(error)
+                if (!(error instanceof ApiError && error.isAborted)) {
+                    router.push(`releases/${releaseId}`)
                 }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
-                router.push(`releases/${releaseId}`)
             }
         })()
 
@@ -165,12 +165,10 @@ function MergeReleaseOverview({
 
             return false
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return false
+            ApiUtils.reportError(error)
+            if (!(error instanceof ApiError && error.isAborted)) {
+                router.push(`releases/${releaseId}`)
             }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
-            router.push(`releases/${releaseId}`)
             return false
         }
     }

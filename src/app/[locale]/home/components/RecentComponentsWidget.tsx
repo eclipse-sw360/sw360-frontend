@@ -18,7 +18,6 @@ import { useTranslations } from 'next-intl'
 import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Component, Embedded } from '@/object-types'
-import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
@@ -75,11 +74,7 @@ function RecentComponentsWidget(): ReactNode {
                 }
             })
             .catch((error: Error) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
             .finally(() => {
                 setLoading(false)

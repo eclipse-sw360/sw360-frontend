@@ -32,8 +32,7 @@ import {
     TypedEntity,
     UserGroupType,
 } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 
@@ -771,7 +770,9 @@ function GenerateLicenseInfo({
                 responses.map(async (r) => {
                     if (r.status !== StatusCodes.OK) {
                         const err = (await r.json()) as ErrorDetails
-                        throw new Error(err.message)
+                        throw new ApiError(err.message, {
+                            status: r.status,
+                        })
                     }
                 })
 
@@ -805,7 +806,9 @@ function GenerateLicenseInfo({
                 licenseResponses.map(async (r) => {
                     if (r.status !== StatusCodes.OK) {
                         const err = (await r.json()) as ErrorDetails
-                        throw new Error(err.message)
+                        throw new ApiError(err.message, {
+                            status: r.status,
+                        })
                     }
                 })
                 const _licenses = licenseResponses.map(async (licRes) => (await licRes.json()) as License[])
@@ -869,11 +872,7 @@ function GenerateLicenseInfo({
                 }
                 setSaveUsagesPayload(saveUsages)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
