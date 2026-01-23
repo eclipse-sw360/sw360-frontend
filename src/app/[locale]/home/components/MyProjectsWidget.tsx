@@ -320,7 +320,7 @@ export default function MyProjectsWidget(): ReactNode {
                                 key={k}
                                 label={camelCaseToWords(k)}
                                 checked={v}
-                                onChange={() => handleRoleChange(k as any)}
+                                onChange={() => handleRoleChange(k as keyof ProjectFilters['roles'])}
                             />
                         ))}
 
