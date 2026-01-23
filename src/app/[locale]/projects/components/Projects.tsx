@@ -436,7 +436,9 @@ function Project(): JSX.Element {
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, { status: response.status })
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as LicenseClearingMap
@@ -445,7 +447,9 @@ function Project(): JSX.Element {
                 ApiUtils.reportError(error)
             }
         })()
-    }, [projectData])
+    }, [
+        projectData,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
