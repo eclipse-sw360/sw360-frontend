@@ -9,7 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Attachment, Links, Package, Release, User } from '@/object-types'
+import { Attachment, Links, Package, Release, User, Vendor } from '@/object-types'
 
 export interface ProjectLinkedRelease {
     createdBy: string
@@ -100,6 +100,7 @@ export interface Project {
         'sw360:contributors'?: Array<User>
         'sw360:securityResponsibles'?: Array<User>
         'sw360:linkedProjects'?: Array<Project>
+        'sw360:vendors'?: Array<Vendor>
     }
 }
 

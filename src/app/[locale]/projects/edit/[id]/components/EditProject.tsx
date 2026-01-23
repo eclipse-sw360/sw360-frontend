@@ -443,6 +443,16 @@ function EditProject({
                     setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
                 }
 
+                if (project['_embedded']?.['sw360:vendors']?.[0] !== undefined) {
+                    const vendorData = project['_embedded']['sw360:vendors'][0]
+                    setVendor({
+                        id: vendorData.id ?? '',
+                        fullName: vendorData.fullName ?? '',
+                        shortName: vendorData.shortName ?? '',
+                        url: vendorData.url ?? '',
+                    })
+                }
+
                 const projectPayloadData: ProjectPayload = {
                     name: project.name,
                     version: project.version ?? '',
@@ -452,6 +462,7 @@ function EditProject({
                     tag: project.tag ?? '',
                     description: project.description ?? '',
                     domain: project.domain ?? '',
+                    vendorId: project.vendorId ?? '',
                     modifiedOn: project.modifiedOn ?? '',
                     modifiedBy: project.modifiedBy ?? '',
                     externalIds: project.externalIds ?? {},
@@ -655,11 +666,7 @@ function EditProject({
                 )
             }
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -772,11 +779,7 @@ function EditProject({
                                                         <span className='me-2'>{t('Obligations')}</span>
                                                         <span
                                                             id='obligationsCount'
-                                                            className={
-                                                                obligationsNonOpenCount === 0
-                                                                    ? 'badge obligations-badge--danger'
-                                                                    : 'obligations-badge'
-                                                            }
+                                                            className='badge obligations-badge--danger'
                                                             aria-live='polite'
                                                         >
                                                             {`${obligationsNonOpenCount} / ${obligationsTotal}`}

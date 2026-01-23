@@ -21,8 +21,7 @@ import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill, BsGit, BsPencil, BsQuestionCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
@@ -35,14 +34,12 @@ const DeleteVendor = async (vendorId: string) => {
         const response = await ApiUtils.DELETE(`vendors/${vendorId}`, session.user.access_token)
         if (response.status !== StatusCodes.NO_CONTENT) {
             const err = (await response.json()) as ErrorDetails
-            throw new Error(err.message)
+            throw new ApiError(err.message, {
+                status: response.status,
+            })
         }
     } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-            return
-        }
-        const message = error instanceof Error ? error.message : String(error)
-        MessageService.error(message)
+        ApiUtils.reportError(error)
     }
 }
 
@@ -260,7 +257,9 @@ export default function VendorsList(): JSX.Element {
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedVendors
@@ -272,11 +271,7 @@ export default function VendorsList(): JSX.Element {
                         : data['_embedded']['sw360:vendors'],
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -350,11 +345,7 @@ export default function VendorsList(): JSX.Element {
             const currentDate = new Date().toISOString().split('T')[0]
             void DownloadService.download(url, session, `vendors-${currentDate}.xlsx`)
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

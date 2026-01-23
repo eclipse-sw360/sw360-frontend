@@ -21,8 +21,7 @@ import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip 
 import { BsCheck2 } from 'react-icons/bs'
 import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project, ReleaseDetail } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     releaseId?: string
@@ -316,7 +315,9 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
 
             const data = (await response.json()) as EmbeddedProjects
@@ -327,11 +328,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                     : data['_embedded']['sw360:projects'],
             )
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setShowProcessing(false)
         }
@@ -372,16 +369,14 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
             )
             if (response.status !== StatusCodes.CREATED) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
 
             setShowMessage(true)
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -395,7 +390,9 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
             const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.data.user.access_token, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
 
             const data = (await response.json()) as EmbeddedProjects
@@ -405,11 +402,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                     : data['_embedded']['sw360:projects'].map((p) => p._links.self.href.split('/').at(-1) ?? ''),
             )
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setShowLinkedProjectsProcessing(false)
         }
@@ -437,17 +430,15 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as ReleaseDetail
                 setLinkingReleaseName(data.name)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
         return () => controller.abort()

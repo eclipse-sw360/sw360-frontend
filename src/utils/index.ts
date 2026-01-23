@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ApiUtils from './api/api.util'
+import ApiUtils, { ApiError } from './api/api.util'
 import CommonUtils from './common.utils'
 
-export { ApiUtils, CommonUtils }
+export { ApiUtils, ApiError, CommonUtils }

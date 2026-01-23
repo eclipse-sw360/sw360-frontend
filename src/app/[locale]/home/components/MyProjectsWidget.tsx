@@ -22,6 +22,8 @@ import LicenseClearing from '@/components/LicenseClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -216,7 +218,9 @@ export default function MyProjectsWidget(): ReactNode {
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedProjects
@@ -235,6 +239,8 @@ export default function MyProjectsWidget(): ReactNode {
                 if (!(e instanceof DOMException)) {
                     MessageService.error(e instanceof Error ? e.message : String(e))
                 }
+            } catch (error) {
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

@@ -167,11 +167,7 @@ export default function ReleaseView({
                 }
                 setRowData(tableData)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

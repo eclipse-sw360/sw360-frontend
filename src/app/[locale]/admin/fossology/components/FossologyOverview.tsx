@@ -75,11 +75,7 @@ export default function FossologyOverview(): ReactNode {
                 }
             })
             .catch((error) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
             .finally(() => {
                 setLoading(false)
@@ -98,11 +94,7 @@ export default function FossologyOverview(): ReactNode {
                 }
             })
             .catch((error) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
     }, [
         fetchData,

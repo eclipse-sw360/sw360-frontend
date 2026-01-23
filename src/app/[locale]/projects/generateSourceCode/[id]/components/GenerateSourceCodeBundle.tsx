@@ -34,7 +34,7 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -59,6 +59,7 @@ function GenerateSourceCodeBundle({
         deselected: [],
         selectedConcludedUsages: [],
         deselectedConcludedUsages: [],
+        ignoredLicenses: {},
     })
     const [loading, setLoading] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
@@ -75,6 +76,22 @@ function GenerateSourceCodeBundle({
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
     const [project, setProject] = useState<Project>()
+
+    const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
+    const memoizedLinkedProjects = useMemo(
+        () => linkedProjects,
+        [
+            linkedProjects,
+        ],
+    )
+
+    const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
+    const memoizedAttachmentUsages = useMemo(
+        () => attachmentUsages,
+        [
+            attachmentUsages,
+        ],
+    )
 
     const [data, setData] = useState<NestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
 
@@ -172,7 +189,9 @@ function GenerateSourceCodeBundle({
                 responses.map(async (r) => {
                     if (r.status !== StatusCodes.OK) {
                         const err = (await r.json()) as ErrorDetails
-                        throw new Error(err.message)
+                        throw new ApiError(err.message, {
+                            status: r.status,
+                        })
                     }
                 })
 
@@ -180,17 +199,20 @@ function GenerateSourceCodeBundle({
                 setProject(proj)
 
                 const attachmentUsages = (await responses[1].json()) as AttachmentUsages
+                setAttachmentUsages(attachmentUsages)
 
                 const linkedProjects =
                     searchParams.withSubProjects === 'true'
                         ? ((await responses[2].json()) as LinkedProjects)['_embedded']['sw360:projects']
                         : ([] as Project[])
+                setLinkedProjects(linkedProjects)
 
                 const saveUsages: SaveUsagesPayload = {
                     selected: [],
                     deselected: [],
                     selectedConcludedUsages: [],
                     deselectedConcludedUsages: [],
+                    ignoredLicenses: {},
                 }
 
                 for (const r of attachmentUsages['_embedded']['sw360:release']) {
@@ -211,14 +233,8 @@ function GenerateSourceCodeBundle({
                     }
                 }
                 setSaveUsagesPayload(saveUsages)
-
-                buildTable(setData, attachmentUsages, linkedProjects, hideWithUsage)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -228,7 +244,16 @@ function GenerateSourceCodeBundle({
     }, [
         projectId,
         params,
+    ])
+
+    useEffect(() => {
+        if (memoizedAttachmentUsages === undefined || memoizedLinkedProjects === undefined) return
+        buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects, hideWithUsage)
+    }, [
+        memoizedLinkedProjects,
+        memoizedAttachmentUsages,
         hideWithUsage,
+        saveUsagesPayload,
     ])
 
     // function to add attachments to a release
