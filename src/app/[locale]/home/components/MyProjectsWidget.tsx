@@ -20,10 +20,7 @@ import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
 
 import LicenseClearing from '@/components/LicenseClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -235,10 +232,6 @@ export default function MyProjectsWidget(): ReactNode {
                 )
 
                 setProjectData(data['_embedded']?.['sw360:projects'] ?? [])
-            } catch (e) {
-                if (!(e instanceof DOMException)) {
-                    MessageService.error(e instanceof Error ? e.message : String(e))
-                }
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
