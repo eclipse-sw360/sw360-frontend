@@ -18,8 +18,7 @@ import React, { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsXCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Release, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 interface AlertData {
     variant: string
@@ -84,13 +83,16 @@ function UpdateReleaseModal({
                 setReloadKey(reloadKey + 1)
             } else {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
+            if (error instanceof ApiError && error.isAborted) {
                 return
             }
-            const message = error instanceof Error ? error.message : String(error)
+            const message =
+                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
             setAlert({
                 variant: 'danger',
                 message: (
@@ -416,7 +418,9 @@ export default function BulkReleaseEdit(): JSX.Element {
                 }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as Embedded<Release, 'sw360:releases'>
@@ -427,11 +431,7 @@ export default function BulkReleaseEdit(): JSX.Element {
                         : data['_embedded']['sw360:releases'],
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

@@ -41,7 +41,7 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -187,6 +187,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         deselected: [],
         selectedConcludedUsages: [],
         deselectedConcludedUsages: [],
+        ignoredLicenses: {},
     })
     const [saveUsagesLoading, setSaveUsagesLoading] = useState(false)
 
@@ -278,17 +279,15 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const linkedProjectsData = (await response.json()) as LinkedProjects
                 setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessingLinkedProjects(false)
@@ -321,7 +320,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const usages = (await response.json()) as AttachmentUsages
@@ -332,6 +333,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     deselected: [],
                     selectedConcludedUsages: [],
                     deselectedConcludedUsages: [],
+                    ignoredLicenses: {},
                 }
 
                 for (const r of usages['_embedded']['sw360:release']) {
@@ -371,11 +373,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 }
                 setSaveUsagesPayload(saveUsages)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessingAttachmentUsages(false)

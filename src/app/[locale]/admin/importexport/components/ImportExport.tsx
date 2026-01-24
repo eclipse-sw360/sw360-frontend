@@ -17,7 +17,7 @@ import { BsDownload, BsUpload } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { ApiError, ApiUtils } from '@/utils'
 
 export default function ImportExportComponent(): ReactNode {
     const t = useTranslations('default')
@@ -55,11 +55,7 @@ export default function ImportExportComponent(): ReactNode {
                 DownloadService.download(url, session, filename, headers)
             })
             .catch((error: unknown) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
     }
 
@@ -79,15 +75,13 @@ export default function ImportExportComponent(): ReactNode {
             const response = await ApiUtils.POST(url, formData, session.user.access_token)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
             MessageService.success(t('File uploaded successfully'))
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

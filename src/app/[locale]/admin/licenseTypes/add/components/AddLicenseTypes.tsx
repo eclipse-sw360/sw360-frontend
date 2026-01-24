@@ -51,11 +51,7 @@ export default function AddLicenseTypes(): JSX.Element {
                 MessageService.error(t('Something went wrong'))
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

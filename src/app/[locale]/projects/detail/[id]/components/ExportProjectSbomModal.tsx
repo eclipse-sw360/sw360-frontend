@@ -15,8 +15,7 @@ import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
+import { ApiUtils, CommonUtils } from '@/utils'
 
 interface Props {
     show: boolean
@@ -89,11 +88,7 @@ export default function ExportProjectSbomModal({
             const endTime = Date.now()
             setExportTime(parseFloat(((endTime - start) / 1000).toFixed(2)))
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setLoading(false)
         }

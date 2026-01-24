@@ -67,4 +67,7 @@ export interface SaveUsagesPayload {
     deselected: string[]
     selectedConcludedUsages: string[]
     deselectedConcludedUsages: string[]
+    ignoredLicenses: {
+        [path: string]: string[]
+    }
 }
