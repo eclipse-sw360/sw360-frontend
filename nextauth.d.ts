@@ -9,6 +9,7 @@
 // License-Filename: LICENSE
 
 import 'next-auth'
+import { JwtPayload } from 'jwt-decode'
 import { UserGroupType } from '@/object-types'
 import { Profile, DefaultUser } from 'next-auth'
 
@@ -25,7 +26,8 @@ interface SW360User extends DefaultUser {
     email: string
     userGroup: UserGroupType
     id_token: string
-    decoded: string
+    decoded: JwtPayload
+    error?: string
 }
 
 interface SW360Profile extends Profile {
