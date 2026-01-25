@@ -72,7 +72,14 @@ const SelectUsersDialog = ({
         if (Object.keys(copiedSelectingUsers).includes(userEmail)) {
             delete copiedSelectingUsers[userEmail]
         } else {
-            copiedSelectingUsers[userEmail] = user.fullName ?? ''
+            if (multiple) {
+                copiedSelectingUsers[userEmail] = user.fullName ?? ''
+            } else {
+                Object.keys(copiedSelectingUsers).forEach((key) => {
+                    delete copiedSelectingUsers[key]
+                })
+                copiedSelectingUsers[userEmail] = user.fullName ?? ''
+            }
         }
         setSelectingUsers(copiedSelectingUsers)
     }
@@ -85,10 +92,8 @@ const SelectUsersDialog = ({
                     <Form.Check
                         name='user-selection'
                         type={multiple ? 'checkbox' : 'radio'}
-                        defaultChecked={Object.keys(selectingUsers).includes(row.original.email)}
-                        onClick={() => {
-                            handleSelectUser(row.original)
-                        }}
+                        checked={Object.keys(selectingUsers).includes(row.original.email)}
+                        onChange={() => handleSelectUser(row.original)}
                     ></Form.Check>
                 ),
             },
@@ -158,6 +163,7 @@ const SelectUsersDialog = ({
         [
             t,
             selectingUsers,
+            multiple,
         ],
     )
 
