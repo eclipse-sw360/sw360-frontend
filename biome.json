@@ -9,6 +9,7 @@
     "ignoreUnknown": false,
     "includes": [
       "src/**",
+      "!!src/components/ui",
       "messages/*.json",
       "Dockerfile",
       "tsconfig.json",
@@ -143,6 +144,9 @@
     }
   },
   "css": {
+    "parser": {
+      "tailwindDirectives": true
+    },
     "formatter": {
       "quoteStyle": "single"
     }
