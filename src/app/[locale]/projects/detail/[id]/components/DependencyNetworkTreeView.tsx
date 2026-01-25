@@ -202,7 +202,12 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-    const [showProcessing, setShowProcessing] = useState(false)
+    // Track loading state for API call and data readiness separately
+    const [isLoading, setIsLoading] = useState(true)
+    const [isDataReady, setIsDataReady] = useState(false)
+
+    // Show processing until API call completes AND data is ready to render
+    const showProcessing = isLoading || !isDataReady
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
     const [search, setSearch] = useState('')
@@ -551,7 +556,9 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        setShowProcessing(true)
+        // Reset loading states when starting new fetch
+        setIsLoading(true)
+        setIsDataReady(false)
 
         void (async () => {
             try {
@@ -573,11 +580,14 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
-                setShowProcessing(false)
+                setIsLoading(false)
             }
         })()
+
+        return () => controller.abort()
     }, [
         projectId,
+        session.status,
     ])
 
     const fetchReleasesRecursive = (
@@ -653,6 +663,8 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         }
         tableData.push(root)
         setRowData(tableData)
+        // Mark data as ready only after setting row data
+        setIsDataReady(true)
     }, [
         projectClearingState,
         search,
