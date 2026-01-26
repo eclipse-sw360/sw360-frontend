@@ -15,7 +15,7 @@ import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -31,8 +31,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
@@ -92,17 +92,15 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const licenses = (await response.json()) as LicenseDetail
                 setLicenseDetail(licenses)
             } catch (error: unknown) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
         return () => controller.abort()
@@ -222,7 +220,9 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const responseText = await response.text()
                 if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
@@ -238,11 +238,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                     )
                 }
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -258,7 +254,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
 
     return (
         license && (
-            <div className={`container ${styles['row-license-detail']}`}>
+            <div className='container license-detail-row'>
                 <div className='row'>
                     <div className='col-2 sidebar'>
                         <SideBar

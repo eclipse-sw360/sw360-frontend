@@ -10,7 +10,6 @@
 
 import { type JSX, ReactNode, useState } from 'react'
 import { VerificationStateInfo } from '@/object-types'
-import styles from './VerificationTooltip.module.css'
 
 interface Props {
     verificationStateInfos: Array<VerificationStateInfo>
@@ -20,19 +19,19 @@ interface Props {
 const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationStateInfo }) => {
     return (
         <li>
-            <span className={styles.formatedMessageForVulHeader}>
+            <span className='verification-tooltip-header'>
                 <b>{stateInfo.verificationState} </b>
                 <span className='formatedMessageForVulDate'>({stateInfo.checkedOn})</span>
             </span>
-            <span className={styles.formatedMessageForVulItem}>
+            <span className='verification-tooltip-item'>
                 <i>Checked By: </i>
                 <span>{stateInfo.checkedBy}</span>
             </span>
-            <span className={styles.formatedMessageForVulItem}>
+            <span className='verification-tooltip-item'>
                 <i>Action: </i>
                 <span></span>
             </span>
-            <span className={styles.formatedMessageForVulItem}>
+            <span className='verification-tooltip-item'>
                 <p>
                     <i>Comment: </i>
                     {stateInfo.comment}
@@ -46,14 +45,14 @@ const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.E
     const [show, setShow] = useState(false)
     return (
         <div
-            className={styles.tooltip}
+            className='verification-tooltip'
             onMouseOver={() => setShow(true)}
             onMouseLeave={() => setShow(false)}
         >
             {show && (
-                <div className={`${styles['tooltip-content']}`}>
+                <div className='verification-tooltip-content'>
                     <ol
-                        className={styles.formatedMessageForVul}
+                        className='verification-tooltip-list'
                         reversed
                     >
                         {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (

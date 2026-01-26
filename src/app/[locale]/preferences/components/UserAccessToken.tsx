@@ -19,9 +19,8 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
 import { ErrorDetails, UIConfigKeys } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import styles from '../preferences.module.css'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -78,14 +77,12 @@ const UserAccessToken = (): ReactNode => {
                     })
                 } else {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         }
     }
@@ -116,7 +113,7 @@ const UserAccessToken = (): ReactNode => {
         <>
             <div className='row'>
                 <div className='col'>
-                    <h4 className={styles.decorator}>{t('REST API Tokens')}</h4>
+                    <h4 className='preferences-decorator'>{t('REST API Tokens')}</h4>
                     <Form
                         noValidate
                         validated={validated}

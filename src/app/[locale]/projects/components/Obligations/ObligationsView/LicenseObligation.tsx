@@ -23,16 +23,14 @@ import {
     NestedRows,
     ObligationData,
     ObligationEntry,
-    ObligationRelease,
     ObligationResponse,
     PageableQueryParam,
     PaginationMeta,
 } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import CompareObligation from '../CompareObligation'
-import { ExpandableList, ShowObligationTextOnExpand } from './ExpandableComponents'
+import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
 import UpdateCommentModal from './UpdateCommentModal'
 
@@ -468,7 +466,9 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as ObligationResponse
@@ -492,11 +492,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                     ),
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -525,17 +521,15 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as ObligationResponse
                 setSelectedProjectObligationData(data)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 setShowProcessing(false)
             }

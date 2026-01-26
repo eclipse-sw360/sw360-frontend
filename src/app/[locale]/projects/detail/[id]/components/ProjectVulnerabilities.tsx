@@ -15,7 +15,6 @@ import { signOut, useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import { Embedded, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
-import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import VulnerabilityTab from './VulnerabilityTab'
 
@@ -75,12 +74,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                 extractLinkedProjects(data._embedded['sw360:projects'], d)
                 setData(d)
             } catch (error) {
-                console.error(error)
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
 

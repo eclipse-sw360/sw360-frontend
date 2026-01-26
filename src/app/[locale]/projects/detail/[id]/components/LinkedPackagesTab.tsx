@@ -27,9 +27,8 @@ import { BsPencil } from 'react-icons/bs'
 import { packageManagers } from '@/app/[locale]/packages/components/PackageManagers'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
 import { ErrorDetails, FilterOption, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
-import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { ApiError, ApiUtils } from '@/utils/index'
 
 interface Props {
     projectId: string
@@ -130,12 +129,15 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 header: t('Release Name Version'),
                 cell: ({ row }) => {
                     const release = row.original._embedded?.['sw360:release']
+                    if (!release?.id) {
+                        return <>{t('No Linked Release')}</>
+                    }
                     return (
                         <Link
-                            href={`/components/releases/detail/${release?.id}`}
+                            href={`/components/releases/detail/${release.id}`}
                             className='text-link'
                         >
-                            {`${release?.name} (${release?.version})`}
+                            {`${release.name} (${release.version})`}
                         </Link>
                     )
                 },
@@ -331,17 +333,15 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as Package[]
                 setPackagesData(data)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowPackagesProcessing(false)
@@ -370,17 +370,15 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as Project
                 setProjectData(data)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProjectProcessing(false)

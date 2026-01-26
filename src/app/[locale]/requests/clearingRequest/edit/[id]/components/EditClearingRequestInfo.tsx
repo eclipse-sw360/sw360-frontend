@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
+
 import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
@@ -71,7 +71,7 @@ export default function EditClearingRequestInfo({
 
     return (
         <>
-            <table className={`table label-value-table ${styles['summary-table']}`}>
+            <table className='table label-value-table request-summary-table'>
                 <thead>
                     <tr>
                         <th colSpan={2}>{t('Clearing Request')}</th>

@@ -41,7 +41,7 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -74,7 +74,9 @@ function isSourceCodeBundleEnabled(type: string): boolean {
 interface ExtendedNestedRows<K> extends NestedRows<K> {
     projectPath?: string
 }
-const releaseMatchesFilter = (release: Release, filter: string): boolean => {
+const releaseMatchesFilter = (release: Release, filter: string, saveUsagesPayload?: SaveUsagesPayload): boolean => {
+    const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
+
     if (!filter) return true
     const attachments = release.attachments ?? []
     switch (filter) {
@@ -86,6 +88,28 @@ const releaseMatchesFilter = (release: Release, filter: string): boolean => {
             return !attachments.some((att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC')
         case 'withoutAttachments':
             return attachments.length === 0
+        case 'withoutCliUsage': {
+            if (!saveUsagesPayload || !releaseId) return true
+            const cliAttachments = attachments.filter(
+                (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
+            )
+            if (cliAttachments.length === 0) return false
+
+            return !cliAttachments.some((att) =>
+                saveUsagesPayload.selected.includes(`${releaseId}_licenseInfo_${att.attachmentContentId}`),
+            )
+        }
+        case 'withoutSourceUsage': {
+            if (!saveUsagesPayload || !releaseId) return true
+            const sourceAttachments = attachments.filter(
+                (att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC',
+            )
+            if (sourceAttachments.length === 0) return false
+
+            return !sourceAttachments.some((att) =>
+                saveUsagesPayload.selected.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`),
+            )
+        }
         default:
             return true
     }
@@ -119,6 +143,7 @@ const filterRows = (
     rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
     filter: string,
     term: string,
+    saveUsagesPayload?: SaveUsagesPayload,
 ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] => {
     const result: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
     for (const row of rows) {
@@ -129,11 +154,13 @@ const filterRows = (
                       row.children as ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
                       filter,
                       term,
+                      saveUsagesPayload,
                   )
                 : []
         let matchesFilter = true
         if (node.type === 'release') {
-            matchesFilter = releaseMatchesFilter(node.entity as Release, filter)
+            const releaseEntity = node.entity as Release
+            matchesFilter = releaseMatchesFilter(releaseEntity, filter, saveUsagesPayload)
         }
         const matchesSearch = rowMatchesSearch(row, term)
         let keepRow = false
@@ -160,6 +187,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         deselected: [],
         selectedConcludedUsages: [],
         deselectedConcludedUsages: [],
+        ignoredLicenses: {},
     })
     const [saveUsagesLoading, setSaveUsagesLoading] = useState(false)
 
@@ -189,11 +217,12 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [searchTerm, setSearchTerm] = useState<string>('')
     const session = useSession()
     const filteredData = useMemo(
-        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm) : data),
+        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm, saveUsagesPayload) : data),
         [
             data,
             releaseFilter,
             searchTerm,
+            saveUsagesPayload,
         ],
     )
 
@@ -250,17 +279,15 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const linkedProjectsData = (await response.json()) as LinkedProjects
                 setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessingLinkedProjects(false)
@@ -293,7 +320,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const usages = (await response.json()) as AttachmentUsages
@@ -304,6 +333,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     deselected: [],
                     selectedConcludedUsages: [],
                     deselectedConcludedUsages: [],
+                    ignoredLicenses: {},
                 }
 
                 for (const r of usages['_embedded']['sw360:release']) {
@@ -343,11 +373,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 }
                 setSaveUsagesPayload(saveUsages)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessingAttachmentUsages(false)
@@ -447,6 +473,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 <option value='withAttachments'>With Attachments</option>
                                 <option value='withoutSrc'>Without Source Attachments</option>
                                 <option value='withoutAttachments'>Without Attachments</option>
+                                <option value='withoutCliUsage'>Without CLI Usage Set</option>
+                                <option value='withoutSourceUsage'>Without Source Usage Set</option>
                             </select>
 
                             <input

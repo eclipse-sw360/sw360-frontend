@@ -44,9 +44,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -236,7 +235,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const responseText = await response.text()
                 if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
@@ -252,11 +253,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                     )
                 }
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -377,7 +374,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     <Dropdown>
                                         <Dropdown.Toggle variant='primary'>
                                             <span
-                                                className={`${styles['badge-circle']} ${styles[release.clearingState]}`}
+                                                className={`badge-circle clearing-state-${release.clearingState.toLowerCase()}`}
                                             ></span>
                                             {`${t('Version')} ${release.version}`}
                                         </Dropdown.Toggle>
@@ -389,12 +386,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 ]) => (
                                                     <Dropdown.Item
                                                         key={index}
-                                                        className={styles['dropdown-item']}
+                                                        className='release-dropdown-item'
                                                     >
                                                         <span
-                                                            className={`${styles['badge-circle']} ${
-                                                                styles[item.clearingState ?? 'NEW']
-                                                            }`}
+                                                            className={`badge-circle clearing-state-${(item.clearingState ?? 'new').toLowerCase()}`}
                                                         ></span>
                                                         <Link href={`/components/releases/detail/${item.id}`}>
                                                             {`${t('Version')} ${item.version}`}

@@ -39,7 +39,7 @@ import {
     UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
@@ -248,7 +248,13 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
     const [show, setShow] = useState<boolean>(false)
-    const [showProcessing, setShowProcessing] = useState(false)
+    // Track loading state for each API call separately
+    const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState(true)
+    const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState(true)
+    const [isDataReady, setIsDataReady] = useState(false)
+
+    // Show processing until both API calls complete AND data is ready to render
+    const showProcessing = isLoadingLicenseClearing || isLoadingLinkedProjects || !isDataReady
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
@@ -392,8 +398,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     if (row.original.node.type === 'release') {
                         const { id: releaseId } = row.original.node.entity
                         const entity = row.getParentRow()?.original.node.entity as Project
-                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
-                            const linkedRelease = entity.linkedReleases.filter(
+                        if (!CommonUtils.isNullOrUndefined(entity)) {
+                            const linkedRelease = entity.linkedReleases?.filter(
                                 (lr) => lr.release.split('/').at(-1) === releaseId,
                             )
                             if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
@@ -403,6 +409,17 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                                             relationFilterOptions.filter(
                                                 (op) => op.value === linkedRelease?.[0].relation,
                                             )[0].tag}
+                                    </div>
+                                )
+                            }
+                        } else {
+                            const index = (memoizedLicenseClearing?.linkedReleases ?? []).findIndex(
+                                (rel) => rel.release.split('/').at(-1) === releaseId,
+                            )
+                            if (index !== -1) {
+                                return (
+                                    <div className='text-center'>
+                                        {Capitalize(memoizedLicenseClearing?.linkedReleases[index].relation ?? '')}
                                     </div>
                                 )
                             }
@@ -610,6 +627,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
             expandLevel,
             columnFilters,
             showFilter,
+            memoizedLicenseClearing,
         ],
     )
 
@@ -638,6 +656,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) return
         buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
+        // Mark data as ready only after setting row data
+        setIsDataReady(true)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,
@@ -767,10 +787,9 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        // Reset data ready state when starting new fetch
+        setIsLoadingLicenseClearing(true)
+        setIsDataReady(false)
 
         void (async () => {
             try {
@@ -781,20 +800,17 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const licenseClearingData = (await response.json()) as LicenseClearing
                 setLicenseClearing(licenseClearingData)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLicenseClearing(false)
             }
         })()
 
@@ -811,10 +827,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        setIsLoadingLinkedProjects(true)
 
         void (async () => {
             try {
@@ -826,20 +839,17 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const linkedProjectsData = (await response.json()) as LinkedProjects
                 setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoadingLinkedProjects(false)
             }
         })()
 

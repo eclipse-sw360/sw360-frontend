@@ -14,7 +14,7 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Component, Embedded, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -71,8 +71,8 @@ function MySubscriptionsWidget(): ReactNode {
                     setReleaseData([])
                 }
             })
-            .catch((err: Error) => {
-                throw new Error(err.message)
+            .catch((error: Error) => {
+                ApiUtils.reportError(error)
             })
             .finally(() => {
                 setLoading(false)

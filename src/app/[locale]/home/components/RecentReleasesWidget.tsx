@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
+import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -75,8 +75,8 @@ function RecentReleasesWidget(): ReactNode {
                     setRecentRelease([])
                 }
             })
-            .catch((err: Error) => {
-                throw new Error(err.message)
+            .catch((error: Error) => {
+                ApiUtils.reportError(error)
             })
             .finally(() => {
                 setLoading(false)

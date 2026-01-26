@@ -20,7 +20,7 @@ import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter }
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-icons/bs'
-import LicenseClearing from '@/components/LicenseClearing'
+import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigValue } from '@/contexts'
 import {
     Embedded,
@@ -32,7 +32,7 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
@@ -40,6 +40,7 @@ import DeleteProjectDialog from './DeleteProjectDialog'
 import ImportSBOMModal from './ImportSBOMModal'
 
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
+type LicenseClearingMap = Record<string, LicenseClearingData>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -66,6 +67,7 @@ function Project(): JSX.Element {
 
     const [showViewCRModal, setShowViewCRModal] = useState(false)
     const [clearingRequestId, setClearingRequestId] = useState('')
+    const [licenseClearingData, setLicenseClearingData] = useState<LicenseClearingMap>({})
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -193,7 +195,16 @@ function Project(): JSX.Element {
                 enableSorting: false,
                 cell: ({ row }) => {
                     const id = row.original['_links']['self']['href'].split('/').at(-1)
-                    return <>{id && <LicenseClearing projectId={id} />}</>
+                    return (
+                        <>
+                            {id && (
+                                <LicenseClearing
+                                    projectId={id}
+                                    data={licenseClearingData[id]}
+                                />
+                            )}
+                        </>
+                    )
                 },
                 meta: {
                     width: '10%',
@@ -272,7 +283,7 @@ function Project(): JSX.Element {
                                             <span className={'d-inline-block'}>
                                                 <BsCheck2Square
                                                     size={20}
-                                                    className='btn-icon overlay-trigger'
+                                                    className='btn-icon overlay-trigger icon-disabled'
                                                 />
                                             </span>
                                         </OverlayTrigger>
@@ -310,6 +321,7 @@ function Project(): JSX.Element {
         ],
         [
             t,
+            licenseClearingData,
         ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -362,7 +374,9 @@ function Project(): JSX.Element {
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedProjects
@@ -373,11 +387,7 @@ function Project(): JSX.Element {
                         : data['_embedded']['sw360:projects'],
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -398,6 +408,47 @@ function Project(): JSX.Element {
         })
     }, [
         params.toString(),
+    ])
+
+    // Fetch license clearing counts in batch after project data is loaded
+    useEffect(() => {
+        if (projectData.length === 0) {
+            setLicenseClearingData({})
+            return
+        }
+
+        void (async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+
+                const projectIds = projectData
+                    .map((project) => project['_links']['self']['href'].split('/').at(-1))
+                    .filter((id): id is string => id !== undefined)
+
+                if (projectIds.length === 0) return
+
+                const response = await ApiUtils.POST(
+                    'projects/licenseClearingCount',
+                    projectIds,
+                    session.user.access_token,
+                )
+
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const data = (await response.json()) as LicenseClearingMap
+                setLicenseClearingData(data)
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+    }, [
+        projectData,
     ])
 
     const table = useReactTable({

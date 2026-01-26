@@ -73,11 +73,7 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
                 }
             })
             .catch((error) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
             .finally(() => {
                 setLoading(false)
@@ -102,8 +98,7 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
                 MessageService.error(t('Error when processing'))
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

@@ -24,8 +24,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
@@ -58,14 +57,12 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 setImportStatusData(data)
             } else {
                 const err = (await res.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: res.status,
+                })
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -277,7 +274,9 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedAttachments
@@ -297,11 +296,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                           ),
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

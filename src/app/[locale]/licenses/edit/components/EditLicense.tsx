@@ -20,7 +20,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-import { LicenseDetail, LicensePayload, LicenseTabIds, Obligation, UserGroupType } from '@/object-types'
+import { LicenseDetail, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
@@ -81,11 +81,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 const license = (await response.json()) as LicenseDetail
                 setLicensePayload(license)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
         return () => controller.abort()
@@ -134,8 +130,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 MessageService.error(responseMessage)
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
     const deleteLicense = () => {

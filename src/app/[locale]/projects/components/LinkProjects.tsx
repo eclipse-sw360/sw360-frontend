@@ -19,7 +19,7 @@ import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -335,7 +335,9 @@ export default function LinkProjects({
             const response = await ApiUtils.GET(url, session.user.access_token, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
 
             const data = (await response.json()) as EmbeddedProjects
@@ -346,10 +348,11 @@ export default function LinkProjects({
                     : data['_embedded']['sw360:projects'],
             )
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
+            if (error instanceof ApiError && error.isAborted) {
                 return
             }
-            const message = error instanceof Error ? error.message : String(error)
+            const message =
+                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
             setAlert({
                 variant: 'danger',
                 message: (
@@ -376,7 +379,9 @@ export default function LinkProjects({
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.user.access_token)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
             const res = (await response.json()) as Project
             setAlert({
@@ -401,10 +406,11 @@ export default function LinkProjects({
                 ),
             })
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
+            if (error instanceof ApiError && error.isAborted) {
                 return
             }
-            const message = error instanceof Error ? error.message : String(error)
+            const message =
+                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
             setAlert({
                 variant: 'danger',
                 message: (

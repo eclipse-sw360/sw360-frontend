@@ -10,8 +10,8 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
@@ -26,7 +26,7 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import LinkProjects from '../../../components/LinkProjects'
@@ -97,7 +97,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as SummaryDataType | AdministrationDataType
@@ -105,11 +107,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
 
@@ -134,16 +132,14 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const data = (await response.json()) as ClearingDetailsCount
                 setClearingDetailCount(data)
             } catch (error: unknown) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
         return () => controller.abort()
@@ -200,7 +196,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 }
 
                 if (resp.status !== StatusCodes.OK) {
-                    throw new Error(body?.message ?? body?.error ?? `Status ${resp.status}`)
+                    throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
+                        status: resp.status,
+                    })
                 }
 
                 const obligations = body?.obligations ?? {}
@@ -216,8 +214,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setObligationsTotal(total)
                 setObligationsNonOpenCount(nonOpen)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') return
-                MessageService.error(error instanceof Error ? error.message : String(error))
+                ApiUtils.reportError(error)
             } finally {
                 setObligationsLoading(false)
             }

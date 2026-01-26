@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
@@ -18,7 +17,7 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Spinner, Tab } from 'react-bootstrap'
-import styles from '@/app/[locale]/requests/requestDetail.module.css'
+
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequestDetails, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -144,7 +143,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                         </Col>
                                     </Row>
                                     <Row className='mt-3'>
-                                        <Card className={`${styles['card']}`}>
+                                        <Card className='request-card'>
                                             <div
                                                 onClick={() => toggleCollapse(0)}
                                                 style={{
@@ -153,13 +152,14 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={`
-                                                        ${openCardIndex === 0 ? styles['cardHeader-expanded'] : ''}`}
-                                                    id={`${styles['cardHeader']}`}
+                                                    className={
+                                                        openCardIndex === 0 ? 'request-card-header-expanded' : ''
+                                                    }
+                                                    id='request-card-header'
                                                 >
                                                     <Button
                                                         variant='button'
-                                                        className={`p-0 border-0 ${styles['header-button']}`}
+                                                        className='p-0 border-0 request-header-button'
                                                         aria-controls='example-collapse-text-1'
                                                         aria-expanded={openCardIndex === 0}
                                                     >
@@ -176,7 +176,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                                             href={`/projects/detail/${clearingRequestData.projectId}`}
                                                                             className='text-link'
                                                                         >
-                                                                            {`${clearingRequestData._embedded['sw360:project']?.name ?? ''}(${clearingRequestData._embedded['sw360:project']?.version ?? ''})`}
+                                                                            {`${clearingRequestData._embedded['sw360:projectDTOs']?.[0]?.name ?? ''}(${clearingRequestData._embedded['sw360:projectDTOs']?.[0]?.version ?? ''})`}
                                                                         </Link>
                                                                     )}
                                                                 </>
@@ -187,7 +187,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             </div>
                                             <Collapse in={openCardIndex === 0}>
                                                 <div id='example-collapse-text-1'>
-                                                    <Card.Body className={`${styles['card-body']}`}>
+                                                    <Card.Body className='request-card-body'>
                                                         <div className='row'>
                                                             <div className='col'>
                                                                 <ClearingRequestInfo data={clearingRequestData} />
@@ -202,7 +202,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                         </Card>
                                     </Row>
                                     <Row>
-                                        <Card className={`${styles['card']}`}>
+                                        <Card className='request-card'>
                                             <div
                                                 onClick={() => toggleCollapse(1)}
                                                 style={{
@@ -211,13 +211,14 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                                 }}
                                             >
                                                 <Card.Header
-                                                    className={`
-                                                        ${openCardIndex === 1 ? styles['cardHeader-expanded'] : ''}`}
-                                                    id={`${styles['cardHeader']}`}
+                                                    className={
+                                                        openCardIndex === 1 ? 'request-card-header-expanded' : ''
+                                                    }
+                                                    id='request-card-header'
                                                 >
                                                     <Button
                                                         variant='button'
-                                                        className={`p-0 border-0 ${styles['header-button']}`}
+                                                        className='p-0 border-0 request-header-button'
                                                         aria-controls='example-collapse-text-2'
                                                         aria-expanded={openCardIndex === 1}
                                                     >
@@ -229,7 +230,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                                             </div>
                                             <Collapse in={openCardIndex === 1}>
                                                 <div id='example-collapse-text-2'>
-                                                    <Card.Body className={`${styles['card-body']}`}>
+                                                    <Card.Body className='request-card-body'>
                                                         <div>
                                                             <div className='col'>
                                                                 {openCardIndex === 1 && (

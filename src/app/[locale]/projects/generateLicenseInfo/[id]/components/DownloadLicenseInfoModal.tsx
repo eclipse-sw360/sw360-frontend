@@ -10,15 +10,63 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
-import { SaveUsagesPayload } from '@/object-types'
+import { ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+
+const relationFilterOptions: FilterOption[] = [
+    {
+        tag: 'Contained',
+        value: 'CONTAINED',
+    },
+    {
+        tag: 'Related',
+        value: 'REFERRED',
+    },
+    {
+        tag: 'Unknown',
+        value: 'UNKNOWN',
+    },
+    {
+        tag: 'Dynamically Linked',
+        value: 'DYNAMICALLY_LINKED',
+    },
+    {
+        tag: 'Statically Linked',
+        value: 'STATICALLY_LINKED',
+    },
+    {
+        tag: 'Side By Side',
+        value: 'SIDE_BY_SIDE',
+    },
+    {
+        tag: 'Standalone',
+        value: 'STANDALONE',
+    },
+    {
+        tag: 'Internal Use',
+        value: 'INTERNAL_USE',
+    },
+    {
+        tag: 'Optional',
+        value: 'OPTIONAL',
+    },
+    {
+        tag: 'To Be Replaced',
+        value: 'TO_BE_REPLACED',
+    },
+    {
+        tag: 'Code Snippet',
+        value: 'CODE_SNIPPET',
+    },
+]
 
 export default function DownloadLicenseInfoModal({
     show,
@@ -27,6 +75,7 @@ export default function DownloadLicenseInfoModal({
     setShowConfirmation,
     projectId,
     isCalledFromProjectLicenseTab,
+    projectRelationships,
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
@@ -34,48 +83,78 @@ export default function DownloadLicenseInfoModal({
     saveUsagesPayload: SaveUsagesPayload
     projectId: string
     isCalledFromProjectLicenseTab: boolean
+    projectRelationships: string[]
 }): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
-    const { status } = useSession()
+    const [withSubProject, setWithSubProject] = useState(true)
+    const [selectedRelRelationship, setSelectedRelRelationship] = useState<string[]>([])
+    const session = useSession()
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
+    ])
+
+    useEffect(() => {
+        if (Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false) {
+            setWithSubProject(false)
+        }
+    }, [
+        params,
+    ])
+
+    useEffect(() => {
+        setSelectedRelRelationship(projectRelationships)
+    }, [
+        projectRelationships,
     ])
 
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
-            const searchParams = Object.fromEntries(params)
-            if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
-                return
-            }
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                return signOut()
-            }
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            setLoading(true)
             const response = await ApiUtils.POST(
                 `projects/${projectId}/saveAttachmentUsages`,
                 saveUsagesPayload,
-                session.user.access_token,
+                session.data.user.access_token,
             )
             if (response.status !== StatusCodes.CREATED) {
-                return notFound()
+                const err = (await response.json()) as ErrorDetails
+                throw new Error(err.message)
             }
             const currentDate = new Date().toISOString().split('T')[0]
-            DownloadService.download(
-                `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseInfo&withSubProject=${
-                    searchParams.withSubProjects
-                }&generatorClassName=${generatorClassName}&variant=DISCLOSURE`,
-                session,
+            const downloadUrl = CommonUtils.createUrlWithParams(`reports`, {
+                withlinkedreleases: 'false',
+                projectId,
+                module: 'licenseInfo',
+                withSubProject: withSubProject ? 'true' : 'false',
+                generatorClassName,
+                variant: 'DISCLOSURE',
+                selectedRelRelationship,
+            })
+            const downloadStatus = await DownloadService.download(
+                downloadUrl,
+                session.data,
                 `LicenseInfo-${currentDate}.zip`,
             )
-        } catch (e) {
-            console.error(e)
+            if (downloadStatus === StatusCodes.OK) {
+                setShowConfirmation(true)
+                setShow(false)
+            }
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
+            const message = error instanceof Error ? error.message : String(error)
+            MessageService.error(message)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -103,57 +182,59 @@ export default function DownloadLicenseInfoModal({
                 </Modal.Header>
                 <Modal.Body>
                     <h5 className='fw-bold'>{t('Uncheck project release relationships to be excluded')}:</h5>
-                    <div className='form-check'>
-                        <input
-                            id='project_clearing_report_unknown'
-                            type='checkbox'
-                            className='form-check-input'
-                            name='unknown'
-                            checked={true}
-                        />
-                        <label
-                            className='form-label fw-bold'
-                            htmlFor='project_clearing_report_unknown'
-                        >
-                            {t('Unknown')}
-                        </label>
-                    </div>
-                    <div
-                        className='form-check'
-                        hidden={Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false}
-                    >
-                        <input
-                            id='project_clearing_report_contained'
-                            type='checkbox'
-                            className='form-check-input'
-                            name='contained'
-                        />
-                        <label
-                            className='form-label fw-bold'
-                            htmlFor='project_clearing_report_contained'
-                        >
-                            {t('Contained')}
-                        </label>
-                    </div>
-                    <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
-                    <div
-                        className='form-check'
-                        hidden={Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false}
-                    >
-                        <input
-                            id='project_clearing_report_linked_project_relation'
-                            type='checkbox'
-                            className='form-check-input'
-                            name='is_a_subproject'
-                            checked={true}
-                        />
-                        <label
-                            className='form-label fw-bold'
-                            htmlFor='project_clearing_report_linked_project_relation'
-                        >
-                            {t('Is a subproject')}
-                        </label>
-                    </div>
+                    {relationFilterOptions
+                        .filter((fil) => projectRelationships.indexOf(fil.value) !== -1)
+                        .map((fil) => (
+                            <div
+                                className='form-check'
+                                key={fil.value}
+                            >
+                                <input
+                                    type='checkbox'
+                                    className='form-check-input'
+                                    onChange={() => {
+                                        const ind = selectedRelRelationship.indexOf(fil.value)
+                                        if (ind !== -1) {
+                                            const newSelectedRelRelationship = selectedRelRelationship.toSpliced(ind, 1)
+                                            setSelectedRelRelationship(newSelectedRelRelationship)
+                                        } else {
+                                            const newSelectedRelRelationship = [
+                                                ...selectedRelRelationship,
+                                                fil.value,
+                                            ]
+                                            setSelectedRelRelationship(newSelectedRelRelationship)
+                                        }
+                                    }}
+                                    checked={selectedRelRelationship.indexOf(fil.value) !== -1}
+                                />
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='project_clearing_report_unknown'
+                                >
+                                    {fil.tag}
+                                </label>
+                            </div>
+                        ))}
+                    {Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === true && (
+                        <>
+                            <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
+                            <div className='form-check'>
+                                <input
+                                    id='project_clearing_report_linked_project_relation'
+                                    type='checkbox'
+                                    className='form-check-input'
+                                    checked={withSubProject}
+                                    onChange={() => setWithSubProject(!withSubProject)}
+                                />
+                                <label
+                                    className='form-label fw-bold'
+                                    htmlFor='project_clearing_report_linked_project_relation'
+                                >
+                                    {t('Is a subproject')}
+                                </label>
+                            </div>
+                        </>
+                    )}
                     <h5 className='fw-bold'>{t('Select output format')}:</h5>
                     <div className='form-check'>
                         <input
@@ -192,41 +273,40 @@ export default function DownloadLicenseInfoModal({
                             {t('License Disclosure as XHTML')}
                         </label>
                     </div>
-                    <div
-                        className='form-check'
-                        hidden={!isCalledFromProjectLicenseTab}
-                    >
-                        <input
-                            type='radio'
-                            name='generatorClassName'
-                            value='TextGenerator'
-                            id='TextGenerator'
-                            checked={generatorClassName === 'TextGenerator'}
-                            onChange={onOptionChange}
-                            className='form-check-input'
-                        />
-                        <label
-                            className='form-check-label'
-                            htmlFor='TextGenerator'
-                        >
-                            {t('License Disclosure as TEXT')}
-                        </label>
-                    </div>
+                    {isCalledFromProjectLicenseTab && (
+                        <div className='form-check'>
+                            <input
+                                type='radio'
+                                name='generatorClassName'
+                                value='TextGenerator'
+                                id='TextGenerator'
+                                checked={generatorClassName === 'TextGenerator'}
+                                onChange={onOptionChange}
+                                className='form-check-input'
+                            />
+                            <label
+                                className='form-check-label'
+                                htmlFor='TextGenerator'
+                            >
+                                {t('License Disclosure as TEXT')}
+                            </label>
+                        </div>
+                    )}
                 </Modal.Body>
                 <Modal.Footer>
                     <button
                         className='btn btn-primary'
                         onClick={() => {
                             handleLicenseInfoDownload(projectId)
-                            setShowConfirmation(true)
-                            setShow(false)
                         }}
+                        disabled={loading}
                     >
                         {t('Download')}
                     </button>
                     <button
                         className='btn btn-dark'
                         onClick={() => setShow(false)}
+                        disabled={loading}
                     >
                         {t('Close')}
                     </button>

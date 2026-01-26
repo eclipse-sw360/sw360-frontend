@@ -13,7 +13,6 @@ import { useTranslations } from 'next-intl'
 import { Gravatar } from 'next-sw360'
 import { ReactNode } from 'react'
 import { User } from '@/object-types'
-import styles from '../preferences.module.css'
 
 interface Props {
     user: User | undefined
@@ -31,29 +30,29 @@ const UserInformation = ({ user }: Props): ReactNode => {
             </thead>
             <tbody>
                 <tr>
-                    <td className={styles.tag}>{t('Name')}:</td>
+                    <td className='preferences-tag'>{t('Name')}:</td>
                     <td id='user-name'>{user?.fullName}</td>
                 </tr>
                 <tr>
-                    <td className={styles.tag}>{t('Email')}:</td>
+                    <td className='preferences-tag'>{t('Email')}:</td>
                     <td id='user-email'>
                         <Link href={`mailto:${user?.email}`}>{user?.email}</Link>
                     </td>
                 </tr>
                 <tr>
-                    <td className={styles.tag}>{t('Primary Department')}:</td>
+                    <td className='preferences-tag'>{t('Primary Department')}:</td>
                     <td id='user-department'>{user?.department}</td>
                 </tr>
                 <tr>
-                    <td className={styles.tag}>{t('External Id')}:</td>
+                    <td className='preferences-tag'>{t('External Id')}:</td>
                     <td id='user-external-id'>{user?.externalid}</td>
                 </tr>
                 <tr>
-                    <td className={styles.tag}>{t('Primary Department Role')}:</td>
+                    <td className='preferences-tag'>{t('Primary Department Role')}:</td>
                     <td id='user-role'>{user?.userGroup}</td>
                 </tr>
                 <tr>
-                    <td className={styles.tag}>{t('Secondary Departments and Roles')}: </td>
+                    <td className='preferences-tag'>{t('Secondary Departments and Roles')}: </td>
                     <td id='user-secondary-departments-roles'>
                         <ul>
                             {user?.secondaryDepartmentsAndRoles &&

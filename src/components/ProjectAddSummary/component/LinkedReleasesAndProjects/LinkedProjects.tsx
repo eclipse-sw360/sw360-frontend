@@ -11,8 +11,9 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import { LinkedProjectData, ProjectPayload } from '@/object-types'
@@ -32,52 +33,74 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
         ][]
     >([])
 
-    const updateProjectData = (projectId: string, updatedProjectRelationship: string) => {
-        const _linkedProjectData: {
-            [key: string]: LinkedProjectData
-        } = {}
+    const updateProjectData = useCallback(
+        (projectId: string, updatedProjectRelationship: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedProjects) return prev
 
-        for (const [pid, p] of Object.entries(projectPayload.linkedProjects ?? {})) {
-            if (pid === projectId) {
-                _linkedProjectData[pid] = {
-                    ...p,
-                    projectRelationship: updatedProjectRelationship,
+                return {
+                    ...prev,
+                    linkedProjects: {
+                        ...prev.linkedProjects,
+                        [projectId]: {
+                            ...prev.linkedProjects[projectId],
+                            projectRelationship: updatedProjectRelationship,
+                        },
+                    },
                 }
-            } else {
-                _linkedProjectData[pid] = {
-                    ...p,
-                }
-            }
-        }
-        setProjectPayload({
-            ...projectPayload,
-            linkedProjects: _linkedProjectData,
-        })
-    }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
 
-    const handleEnableSvm = (projectId: string) => {
-        const _linkedProjectData: {
-            [key: string]: LinkedProjectData
-        } = {}
+    const handleEnableSvm = useCallback(
+        (projectId: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedProjects) return prev
 
-        for (const [pid, p] of Object.entries(projectPayload.linkedProjects ?? {})) {
-            if (pid === projectId) {
-                _linkedProjectData[pid] = {
-                    ...p,
-                    enableSvm: !p.enableSvm,
+                return {
+                    ...prev,
+                    linkedProjects: {
+                        ...prev.linkedProjects,
+                        [projectId]: {
+                            ...prev.linkedProjects[projectId],
+                            enableSvm: !prev.linkedProjects[projectId].enableSvm,
+                        },
+                    },
                 }
-            } else {
-                _linkedProjectData[pid] = {
-                    ...p,
-                }
-            }
-        }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
 
-        setProjectPayload({
-            ...projectPayload,
-            linkedProjects: _linkedProjectData,
-        })
-    }
+    const handleClickDelete = useCallback(
+        (projectId: string) => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedProjects) return prev
+
+                const { [projectId]: _, ...remainingProjects } = prev.linkedProjects
+
+                return {
+                    ...prev,
+                    linkedProjects: remainingProjects,
+                }
+            })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
+
+    useEffect(() => {
+        const data = Object.entries(projectPayload.linkedProjects ?? {})
+        setTableData(data)
+    }, [
+        projectPayload.linkedProjects,
+    ])
 
     const columns = useMemo<
         ColumnDef<
@@ -93,7 +116,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                 header: t('Name'),
                 cell: ({ row }) => <>{row.original[1].name}</>,
                 meta: {
-                    width: '30%',
+                    width: '25%',
                 },
             },
             {
@@ -101,7 +124,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                 header: t('Version'),
                 cell: ({ row }) => <>{row.original[1].version}</>,
                 meta: {
-                    width: '30%',
+                    width: '20%',
                 },
             },
             {
@@ -114,8 +137,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                                 className='form-select'
                                 value={row.original[1].projectRelationship}
                                 onChange={(event) => {
-                                    const updatedProjectRelationship = event.target.value
-                                    updateProjectData(row.original[0], updatedProjectRelationship)
+                                    updateProjectData(row.original[0], event.target.value)
                                 }}
                                 required
                             >
@@ -128,7 +150,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                     )
                 },
                 meta: {
-                    width: '30%',
+                    width: '25%',
                 },
             },
             {
@@ -137,11 +159,11 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                 cell: ({ row }) => {
                     return (
                         <div className='text-center'>
-                            <div className='form-check'>
+                            <div className='form-check d-flex justify-content-center'>
                                 <input
                                     className='form-check-input'
                                     type='checkbox'
-                                    checked={row.original[1].enableSvm}
+                                    checked={row.original[1].enableSvm ?? false}
                                     onChange={() => handleEnableSvm(row.original[0])}
                                 />
                             </div>
@@ -149,13 +171,39 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                     )
                 },
                 meta: {
-                    width: '10%',
+                    width: '15%',
+                },
+            },
+            {
+                id: 'actions',
+                header: '',
+                cell: ({ row }) => (
+                    <div className='d-flex justify-content-center'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            style={{
+                                border: 'none',
+                                minWidth: 'fit-content',
+                            }}
+                            onClick={() => handleClickDelete(row.original[0])}
+                            title={t('Delete')}
+                            aria-label={t('Delete linked project')}
+                        >
+                            <FaTrashAlt />
+                        </button>
+                    </div>
+                ),
+                meta: {
+                    width: '15%',
                 },
             },
         ],
         [
             t,
-            projectPayload,
+            updateProjectData,
+            handleEnableSvm,
+            handleClickDelete,
         ],
     )
 
@@ -165,18 +213,12 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
             tableData,
         ],
     )
+
     const table = useReactTable({
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
     })
-
-    useEffect(() => {
-        const data = Object.entries(projectPayload.linkedProjects ?? {})
-        setTableData(data)
-    }, [
-        projectPayload,
-    ])
 
     return (
         <>

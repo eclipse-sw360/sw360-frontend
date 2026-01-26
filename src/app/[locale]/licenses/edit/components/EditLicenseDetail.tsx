@@ -17,9 +17,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Embedded, ErrorDetails, LicensePayload, LicenseType } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import styles from './LicenseDetails.module.css'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     inputValid: boolean
@@ -78,16 +76,14 @@ const EditLicenseDetail = ({
                 const response = await ApiUtils.GET(`licenseTypes`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const licenses = (await response.json()) as EmbeddedLicenseTypes
                 setLicenseTypes(licenses._embedded?.['sw360:licenseTypes'] ?? [])
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
         return () => controller.abort()
@@ -104,7 +100,7 @@ const EditLicenseDetail = ({
             }}
         >
             <div
-                className={`${styles['header']} mb-1`}
+                className='header mb-1'
                 style={{
                     paddingTop: '0.5rem',
                     height: '45px',
