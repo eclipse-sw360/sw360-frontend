@@ -38,7 +38,7 @@ const isNullEmptyOrUndefinedString = (str: string | undefined | null): str is nu
 }
 
 interface UrlWithParams {
-    [key: string]: string
+    [key: string]: string | string[]
 }
 
 /**
@@ -49,18 +49,27 @@ interface UrlWithParams {
  * @returns The URL with the query parameters.
  */
 const createUrlWithParams = (url: string, params: UrlWithParams): string => {
-    const queryString = Object.keys(params)
-        .filter((key) => params[key])
-        .map((key) => {
-            return [
-                key,
-                params[key],
-            ]
-                .map(encodeURIComponent)
-                .join('=')
-        })
-        .join('&')
-    return `${url}?${queryString}`
+    const queryParts: string[] = []
+
+    Object.keys(params).forEach((key) => {
+        const value = params[key]
+
+        if (Array.isArray(value)) {
+            value.forEach((item) => {
+                if (item !== undefined && item !== null && item !== '') {
+                    queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`)
+                }
+            })
+        } else {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        }
+    })
+
+    if (queryParts.length === 0) {
+        return url // No parameters to add
+    }
+
+    return `${url}?${queryParts.join('&')}`
 }
 
 /**
