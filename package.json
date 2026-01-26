@@ -54,7 +54,7 @@
     "cypress": "^15.9.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "react-icons": "^5.5.0",
     "systeminformation": "^5.30.5",
