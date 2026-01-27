@@ -1,4 +1,4 @@
-// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens Healthinners, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,37 +10,18 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import type { JSX } from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Form, Modal, Spinner } from 'react-bootstrap'
+import { Button, Form, Modal } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { ErrorDetails, LinkedPackage, LinkedPackageData, Release } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-
-type ReleaseWithLinked = Release & {
-    linkedPackages?: {
-        packageId?: string
-        name?: string
-        version?: string
-        packageManager?: string
-    }[]
-}
+import { LinkedPackageData, Release } from '@/object-types'
 
 interface Props {
-    releaseId?: string
-    setReleasePayload: React.Dispatch<React.SetStateAction<ReleaseWithLinked>>
-}
-
-interface GenericPayload {
-    id?: string
-    name?: string
-    packageIds: Record<string, LinkedPackageData>
+    releasePayload: Release
+    setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
 }
 
 interface DeleteMetaData {
@@ -50,7 +31,7 @@ interface DeleteMetaData {
     packageVersion: string
 }
 
-export default function EditLinkedPackages({ releaseId, setReleasePayload }: Props): JSX.Element {
+export default function EditLinkedPackages({ releasePayload, setReleasePayload }: Props): JSX.Element {
     const t = useTranslations('default')
 
     const [linkedPackageData, setLinkedPackageData] = useState<Map<string, LinkedPackageData>>(new Map())
@@ -61,88 +42,38 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
         packageName: '',
         packageVersion: '',
     })
-    const [showProcessing, setShowProcessing] = useState(false)
-    const [payload, setPayload] = useState<GenericPayload>({
-        packageIds: {},
-    })
     const openLinkPackagesModal = () => {
-        setPayload({
-            packageIds: Object.fromEntries(linkedPackageData),
-        })
         setShowLinkPackagesModal(true)
     }
-
-    const fetchLinkedPackages = useCallback(async () => {
-        if (!releaseId) return
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            void signOut()
-            return
-        }
-        setShowProcessing(true)
-        try {
-            const response = await ApiUtils.GET(`releases/${releaseId}?embed=packages`, session.user.access_token)
-            if (response.status === StatusCodes.OK) {
-                const data = await response.json()
-                const embedded: LinkedPackage[] = data?._embedded?.['sw360:packages'] ?? []
-                const updatedMap = new Map<string, LinkedPackageData>()
-                embedded.forEach((item) => {
-                    updatedMap.set(item.id, {
-                        packageId: item.id,
-                        name: item.name ?? '',
-                        version: item.version ?? '',
-                        licenseIds: item.licenseIds ?? [],
-                        packageManager: item.packageManager ?? '',
-                    })
-                })
-                setLinkedPackageData(updatedMap)
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                void signOut()
-            } else {
-                const err = (await response.json()) as ErrorDetails
-                MessageService.error(err.message)
-            }
-        } catch (error) {
-            if (!(error instanceof DOMException && error.name === 'AbortError')) {
-                const msg = error instanceof Error ? error.message : String(error)
-                MessageService.error(msg)
-            }
-        } finally {
-            setShowProcessing(false)
-        }
-    }, [
-        releaseId,
-    ])
-
     useEffect(() => {
-        fetchLinkedPackages().catch(console.error)
-    }, [
-        fetchLinkedPackages,
-    ])
-
-    useEffect(() => {
-        const linkedPackages = Array.from(linkedPackageData.values()).map((pkg) => ({
-            packageId: pkg.packageId,
-            name: pkg.name,
-            version: pkg.version ?? '',
-            packageManager: pkg.packageManager ?? '',
-        }))
+        const ids = Array.from(
+            new Set(
+                Array.from(linkedPackageData.values())
+                    .map((pkg) => pkg.packageId)
+                    .filter((id): id is string => Boolean(id)),
+            ),
+        )
         setReleasePayload((prev) => ({
-            ...(prev as ReleaseWithLinked),
-            linkedPackages,
+            ...prev,
+            packageIds: ids,
         }))
     }, [
         linkedPackageData,
         setReleasePayload,
     ])
+
     useEffect(() => {
-        if (!payload.packageIds) return
+        if (!releasePayload?.linkedPackages?.length) return
 
-        const next = new Map<string, LinkedPackageData>(Object.entries(payload.packageIds))
+        const map = new Map<string, LinkedPackageData>()
 
-        setLinkedPackageData(next)
+        releasePayload.linkedPackages.forEach((pkg) => {
+            map.set(pkg.packageId, pkg)
+        })
+
+        setLinkedPackageData(map)
     }, [
-        payload,
+        releasePayload.linkedPackages,
     ])
 
     const openDeleteModal = useCallback((pkg: LinkedPackageData) => {
@@ -263,8 +194,19 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             <LinkPackagesModal
                 show={showLinkPackagesModal}
                 setShow={setShowLinkPackagesModal}
-                payload={payload}
-                setPayload={setPayload}
+                payload={{
+                    linkedPackages: Object.fromEntries(linkedPackageData),
+                }}
+                setPayload={(value) => {
+                    const resolved =
+                        typeof value === 'function'
+                            ? value({
+                                  linkedPackages: {},
+                              })
+                            : value
+                    const data = resolved.linkedPackages ?? {}
+                    setLinkedPackageData(new Map(Object.entries(data)))
+                }}
             />
 
             <Modal
@@ -309,29 +251,23 @@ export default function EditLinkedPackages({ releaseId, setReleasePayload }: Pro
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-12'>
-                        {showProcessing ? (
-                            <div className='d-flex justify-content-center my-3'>
-                                <Spinner className='spinner' />
-                            </div>
-                        ) : (
-                            <>
-                                <SW360Table
-                                    table={table}
-                                    showProcessing={showProcessing}
-                                />
-                                <div className='row mt-2'>
-                                    <div className='col-12'>
-                                        <button
-                                            type='button'
-                                            className='btn btn-secondary'
-                                            onClick={openLinkPackagesModal}
-                                        >
-                                            {t('Add Packages')}
-                                        </button>
-                                    </div>
+                        <>
+                            <SW360Table
+                                table={table}
+                                showProcessing={false}
+                            />
+                            <div className='row mt-2'>
+                                <div className='col-12'>
+                                    <button
+                                        type='button'
+                                        className='btn btn-secondary'
+                                        onClick={openLinkPackagesModal}
+                                    >
+                                        {t('Add Packages')}
+                                    </button>
                                 </div>
-                            </>
-                        )}
+                            </div>
+                        </>
                     </div>
                 </div>
             </div>

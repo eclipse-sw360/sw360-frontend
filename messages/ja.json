@@ -414,6 +414,7 @@
     "Delete component success!": "コンポーネントの削除が成功しました。",
     "Delete license successful": "ライセンスの削除が成功しました！",
     "Delete link to release": "リリースへのリンクを削除",
+    "Delete linked release": "リンクされたリリースを削除する",
     "Delete link to package": "パッケージへのリンクを削除",
     "Delete project successful": "プロジェクトの削除が成功しました！",
     "Delete release success!": "削除リリース成功!",

@@ -50,17 +50,6 @@ import EditSPDXDocument from './EditSPDXDocument'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
 
-type EmbeddedPackage = {
-    id?: string
-    name?: string
-    version?: string
-    _links?: {
-        self?: {
-            href?: string
-        }
-    }
-}
-
 interface Props {
     releaseId: string
     isSPDXFeatureEnabled: boolean
@@ -74,7 +63,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const initialTab = !CommonUtils.isNullEmptyOrUndefinedString(tabParam) ? tabParam : CommonTabIds.SUMMARY
     const [selectedTab, setSelectedTab] = useState<string>(initialTab)
     const [tabList, setTabList] = useState(ReleaseEditTabs.WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
-    const [originalLinkedPackageIds, setOriginalLinkedPackageIds] = useState<string[]>([])
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
@@ -184,23 +172,21 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 setRelease(release)
                 setDeletingRelease(releaseId)
                 setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
-                const pkgResponse = await ApiUtils.GET(
-                    `releases/${releaseId}?embed=packages`,
-                    session.user.access_token,
-                )
-                if (pkgResponse.status === StatusCodes.OK) {
-                    const pkgJson = await pkgResponse.json()
-                    const embeddedPkgs = (pkgJson?._embedded?.['sw360:packages'] ?? []) as EmbeddedPackage[]
-                    const ids = embeddedPkgs
-                        .map((p) => {
-                            if (p.id) return p.id
-                            const href = p._links?.self?.href ?? ''
-                            const parts = String(href).split('/').filter(Boolean)
-                            return parts.length ? parts[parts.length - 1] : ''
-                        })
-                        .filter(Boolean)
-                    setOriginalLinkedPackageIds(ids)
-                }
+                const embeddedPkgs = release._embedded?.['sw360:packages'] ?? []
+                const linkedPackages = embeddedPkgs
+                    .map((p) => ({
+                        packageId: CommonUtils.getIdFromUrl(p._links?.self?.href),
+                        name: p.name ?? '',
+                        version: p.version ?? '',
+                        licenseIds: [],
+                        packageManager: '',
+                    }))
+                    .filter((p) => p.packageId)
+
+                setReleasePayload((prev) => ({
+                    ...prev,
+                    linkedPackages,
+                }))
 
                 if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
                     setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
@@ -270,7 +256,11 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         releaseId,
     ])
 
-    const [releasePayload, setReleasePayload] = useState<Release>({
+    const [releasePayload, setReleasePayload] = useState<
+        Release & {
+            packageIds?: string[]
+        }
+    >({
         name: '',
         cpeid: '',
         version: '',
@@ -449,238 +439,36 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             }
         }
         try {
-            type LinkItem =
-                | string
-                | {
-                      packageId?: string
+            const eccInfo = releasePayload.eccInformation
+            const sanitizedEccInformation: ECCInformation | undefined = eccInfo
+                ? {
+                      ...eccInfo,
+                      eccStatus: eccInfo.eccStatus?.trim() !== '' ? eccInfo.eccStatus : undefined,
                   }
-            const payload = releasePayload as Release & {
-                linkedPackages?: LinkItem[]
+                : undefined
+            const { linkedPackages, clearingState, attachments, clearingInformation, cotsDetails, ...cleanPayload } =
+                releasePayload
+
+            const finalPayload: Release = {
+                ...cleanPayload,
+                eccInformation: sanitizedEccInformation,
             }
-            const linkedRaw = payload.linkedPackages ?? []
+            const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload, session.user.access_token)
 
-            const normalizeToId = (raw: string) => {
-                if (!raw) return ''
-                const s = String(raw).trim()
-                try {
-                    if (s.startsWith('http://') || s.startsWith('https://')) {
-                        const u = new URL(s)
-                        const parts = u.pathname.split('/').filter(Boolean)
-                        return parts.at(-1) ?? ''
-                    }
-                } catch {
-                    // ignore invalid URLs
-                }
-                const parts = s.split('/').filter(Boolean)
-                return parts.at(-1) ?? s
-            }
-
-            const currentIds = Array.from(
-                new Set(
-                    linkedRaw
-                        .map((p) => (typeof p === 'string' ? p : (p?.packageId ?? '')))
-                        .map((id) => normalizeToId(id))
-                        .filter((id) => id !== ''),
-                ),
-            )
-
-            const originalIds = Array.from(
-                new Set(originalLinkedPackageIds.map((id) => normalizeToId(id)).filter((id) => id !== '')),
-            )
-
-            const toLink = currentIds.filter((id) => !originalIds.includes(id))
-            const toUnlink = originalIds.filter((id) => !currentIds.includes(id))
-
-            const validatePackages = async (ids: string[]) => {
-                const valid: string[] = []
-                const missing: string[] = []
-                const assignedToOther: {
-                    id: string
-                    releaseId: string
-                }[] = []
-
-                for (const id of ids) {
-                    try {
-                        const resp = await ApiUtils.GET(`packages/${encodeURIComponent(id)}`, session.user.access_token)
-
-                        if (resp.status !== StatusCodes.OK) {
-                            missing.push(id)
-                            continue
-                        }
-
-                        const body = await resp.json().catch(() => ({}) as Record<string, unknown>)
-                        const assigned = body?._embedded?.['sw360:release']?.id ?? null
-
-                        if (assigned && assigned !== releaseId) {
-                            assignedToOther.push({
-                                id,
-                                releaseId: assigned,
-                            })
-                        } else {
-                            valid.push(id)
-                        }
-                    } catch {
-                        missing.push(id)
-                    }
-                }
-
-                return {
-                    valid,
-                    missing,
-                    assignedToOther,
-                }
-            }
-
-            // ---------- LINK ----------
-            if (toLink.length > 0) {
-                const { valid, missing, assignedToOther } = await validatePackages(toLink)
-
-                if (missing.length > 0) {
-                    MessageService.error(`${t('Invalid package IDs:')} ${missing.join(', ')}`)
-                    return
-                }
-
-                const reassigned: string[] = []
-
-                for (const item of assignedToOther) {
-                    const resp = await ApiUtils.PATCH(
-                        `releases/${item.releaseId}/unlink/packages`,
-                        [
-                            item.id,
-                        ],
-                        session.user.access_token,
-                    )
-
-                    if (
-                        ![
-                            StatusCodes.OK,
-                            StatusCodes.CREATED,
-                            StatusCodes.ACCEPTED,
-                        ].includes(resp.status)
-                    ) {
-                        const body = await resp.json().catch(() => undefined)
-                        MessageService.error(body?.message ?? t('Failed to unlink package from previous release'))
-                        return
-                    }
-
-                    reassigned.push(item.id)
-                }
-
-                const finalIds = Array.from(
-                    new Set([
-                        ...valid,
-                        ...reassigned,
-                    ]),
-                )
-
-                if (finalIds.length > 0) {
-                    const resp = await ApiUtils.PATCH(
-                        `releases/${releaseId}/link/packages`,
-                        finalIds,
-                        session.user.access_token,
-                    )
-
-                    if (
-                        ![
-                            StatusCodes.OK,
-                            StatusCodes.CREATED,
-                            StatusCodes.ACCEPTED,
-                        ].includes(resp.status)
-                    ) {
-                        const body = await resp.json().catch(() => undefined)
-                        MessageService.error(body?.message ?? t('Linking failed'))
-                        return
-                    }
-                }
-            }
-
-            // ---------- UNLINK ----------
-            if (toUnlink.length > 0) {
-                const { valid, missing } = await validatePackages(toUnlink)
-
-                if (missing.length > 0) {
-                    MessageService.warn(`${t('Some package IDs not found:')} ${missing.join(', ')}`)
-                }
-
-                if (valid.length > 0) {
-                    const resp = await ApiUtils.PATCH(
-                        `releases/${releaseId}/unlink/packages`,
-                        valid,
-                        session.user.access_token,
-                    )
-
-                    if (
-                        ![
-                            StatusCodes.OK,
-                            StatusCodes.CREATED,
-                            StatusCodes.ACCEPTED,
-                        ].includes(resp.status)
-                    ) {
-                        const body = await resp.json().catch(() => undefined)
-                        MessageService.error(body?.message ?? t('Unlink failed'))
-                        return
-                    }
-                }
-            }
-
-            // ---------- REFRESH ----------
-            const refreshResp = await ApiUtils.GET(`releases/${releaseId}?embed=packages`, session.user.access_token)
-
-            if (refreshResp.status === StatusCodes.OK) {
-                const refreshJson = await refreshResp.json()
-                const embedded = refreshJson?._embedded?.['sw360:packages'] ?? []
-
-                const ids = embedded
-                    .map((p: EmbeddedPackage) => normalizeToId(p.id ?? p._links?.self?.href ?? ''))
-                    .filter(Boolean)
-
-                setOriginalLinkedPackageIds(ids)
-
-                const updated = embedded.map((p: EmbeddedPackage) => ({
-                    packageId: normalizeToId(p.id ?? p._links?.self?.href ?? ''),
-                    name: p.name ?? '',
-                    version: p.version ?? '',
-                }))
-
-                setReleasePayload((prev) => ({
-                    ...prev,
-                    linkedPackages: updated,
-                }))
+            if (response.status === StatusCodes.OK) {
+                const release = (await response.json()) as ReleaseDetail
+                MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
+                router.push('/components/releases/detail/' + releaseId)
+            } else if (response.status === StatusCodes.ACCEPTED) {
+                MessageService.success(t('Moderation request is created'))
+                router.push('/components/releases/detail/' + releaseId)
+            } else {
+                const data = await response.json()
+                MessageService.error(data.message)
             }
         } catch (e) {
             const msg = e instanceof Error ? e.message : String(e)
             MessageService.error(msg)
-            return
-        }
-        const eccInfo = (
-            releasePayload as unknown as {
-                eccInformation?: ECCInformation
-            }
-        ).eccInformation
-        const sanitizedEccInformation: ECCInformation | undefined = eccInfo
-            ? {
-                  ...eccInfo,
-                  eccStatus: eccInfo.eccStatus && eccInfo.eccStatus.trim() !== '' ? eccInfo.eccStatus : undefined,
-              }
-            : undefined
-        const { linkedPackages: _linkedPackages, ...payloadWithoutLinked } = releasePayload as Release & {
-            linkedPackages?: unknown
-        }
-        const finalPayload: Release = {
-            ...payloadWithoutLinked,
-            eccInformation: sanitizedEccInformation,
-        }
-        const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
-            const release = (await response.json()) as ReleaseDetail
-            MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
-            router.push('/components/releases/detail/' + releaseId)
-        } else if (response.status === StatusCodes.ACCEPTED) {
-            MessageService.success(t('Moderation request is created'))
-            router.push('/components/releases/detail/' + releaseId)
-        } else {
-            const data = await response.json()
-            MessageService.error(data.message)
         }
     }
 
@@ -845,7 +633,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                 hidden={selectedTab !== ReleaseTabIds.LINKED_PACKAGES ? true : false}
                             >
                                 <EditLinkedPackages
-                                    releaseId={releaseId}
+                                    releasePayload={releasePayload}
                                     setReleasePayload={setReleasePayload}
                                 />
                             </div>
