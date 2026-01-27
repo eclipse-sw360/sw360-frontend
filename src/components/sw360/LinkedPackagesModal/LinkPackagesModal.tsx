@@ -17,11 +17,12 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
-import { FaInfoCircle } from 'react-icons/fa'
+import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LinkedPackageData, Package, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 interface HasLinkedPackages {
+    linkedPackages?: Record<string, LinkedPackageData>
     packageIds?: Record<string, LinkedPackageData>
 }
 interface Props<T extends HasLinkedPackages> {
@@ -55,7 +56,7 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
     ])
 
     useEffect(() => {
-        setLinkPackages(new Map(Object.entries(payload.packageIds ?? {})))
+        setLinkPackages(new Map(Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})))
     }, [
         payload,
     ])
@@ -257,7 +258,7 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
     const payloadSetter = () => {
         setPayload({
             ...payload,
-            packageIds: Object.fromEntries(linkPackages),
+            linkedPackages: Object.fromEntries(linkPackages),
         })
     }
 
@@ -338,7 +339,7 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
                                     <Form.Label className='pt-2'>
                                         {t('Exact Match')}{' '}
                                         <sup>
-                                            <FaInfoCircle size={20} />
+                                            <BsInfoCircle size={20} />
                                         </sup>
                                     </Form.Label>
                                 </Form.Group>

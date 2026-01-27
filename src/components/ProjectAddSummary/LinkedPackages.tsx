@@ -20,6 +20,7 @@ import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackag
 import { LinkedPackageData } from '@/object-types'
 
 interface HasLinkedPackages {
+    linkedPackages?: Record<string, LinkedPackageData>
     packageIds?: Record<string, LinkedPackageData>
 }
 
@@ -44,7 +45,7 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
             [key: string]: LinkedPackageData
         } = {}
 
-        for (const [pid, p] of Object.entries(payload.packageIds ?? {})) {
+        for (const [pid, p] of Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})) {
             if (pid === packageId) {
                 _newLinkedPackageData[pid] = {
                     ...p,
@@ -58,7 +59,13 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
         }
         setPayload({
             ...payload,
-            packageIds: _newLinkedPackageData,
+            ...(payload.linkedPackages !== undefined
+                ? {
+                      linkedPackages: _newLinkedPackageData,
+                  }
+                : {
+                      packageIds: _newLinkedPackageData,
+                  }),
         })
     }
 
@@ -166,19 +173,25 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
             [key: string]: LinkedPackageData
         } = {}
 
-        for (const [pid, p] of Object.entries(payload.packageIds ?? {})) {
+        for (const [pid, p] of Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})) {
             if (pid !== packageId) {
                 _newLinkedPackageData[pid] = p
             }
         }
         setPayload({
             ...payload,
-            packageIds: _newLinkedPackageData,
+            ...(payload.linkedPackages !== undefined
+                ? {
+                      linkedPackages: _newLinkedPackageData,
+                  }
+                : {
+                      packageIds: _newLinkedPackageData,
+                  }),
         })
     }
 
     useEffect(() => {
-        const data = Object.entries(payload.packageIds ?? {})
+        const data = Object.entries(payload.linkedPackages ?? {})
         setTableData(data)
     }, [
         payload,
