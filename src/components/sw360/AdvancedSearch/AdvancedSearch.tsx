@@ -81,8 +81,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                 searchUrl.searchParams.append(key, value)
             }
         })
-        const encodedUrl = encodeURI(searchUrl.toString().replace(/%40/g, '@'))
-        router.push(encodedUrl)
+        router.push(searchUrl.toString())
     }
 
     const handleSubmit = (e: React.FormEvent) => {
