@@ -29,15 +29,7 @@ const UserDetailPage = (): JSX.Element => {
     const { status } = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
-        ;(async () => {
+        ; (async () => {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
 

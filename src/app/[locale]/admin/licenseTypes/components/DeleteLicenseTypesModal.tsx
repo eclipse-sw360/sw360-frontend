@@ -37,14 +37,6 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
     const [licenseTypeUsageCount, setLicenseTypeUsageCount] = useState<number | null>(null)
     const { status } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()

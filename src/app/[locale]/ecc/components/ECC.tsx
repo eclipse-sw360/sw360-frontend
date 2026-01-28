@@ -36,14 +36,6 @@ function ECC(): ReactNode {
     const t = useTranslations('default')
     const session = useSession()
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
             {
@@ -203,9 +195,9 @@ function ECC(): ReactNode {
             const next =
                 typeof updater === 'function'
                     ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
+                        pageIndex: pageableQueryParam.page,
+                        pageSize: pageableQueryParam.page_entries,
+                    })
                     : updater
 
             setPageableQueryParam((prev) => ({
