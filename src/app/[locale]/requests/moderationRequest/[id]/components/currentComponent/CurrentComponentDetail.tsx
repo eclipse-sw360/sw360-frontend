@@ -91,11 +91,15 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     }
 
     useEffect(() => {
-        fetchData(`components/${componentId}`)
-            .then((component: Component | undefined) => {
+        const load = async () => {
+            try {
+                const component = await fetchData(`components/${componentId}`)
                 setComponent(component)
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
     }, [
         componentId,
         fetchData,

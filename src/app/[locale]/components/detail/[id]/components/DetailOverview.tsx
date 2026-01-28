@@ -105,8 +105,9 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
     useEffect(() => {
         void extractUserEmailFromSession()
-        fetchData(`components/${componentId}`)
-            .then((component: Component | undefined) => {
+        const load = async () => {
+            try {
+                const component = await fetchData(`components/${componentId}`)
                 if (component === undefined) return
                 setComponent(component)
                 setSubscribers(getSubcribersEmail(component))
@@ -116,18 +117,22 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 ) {
                     setAttachmentNumber(component['_embedded']['sw360:attachments'].length)
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
 
-        fetchData(`components/${componentId}/vulnerabilities`)
-            .then((data: EmbeddedVulnerabilities | undefined) => {
+            try {
+                const data = await fetchData(`components/${componentId}/vulnerabilities`)
                 if (data === undefined) return
 
                 if (!CommonUtils.isNullOrUndefined(data)) {
                     setVulnerData(data['_embedded']?.['sw360:vulnerabilityDTOes'] ?? [])
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
     }, [
         componentId,
         fetchData,
@@ -148,13 +153,14 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         if (CommonUtils.isNullOrUndefined(session.data)) return
 
         await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.data.user.access_token)
-        fetchData(`components/${componentId}`)
-            .then((component: Component | undefined) => {
-                if (component === undefined) return
-                setComponent(component)
-                setSubscribers(getSubcribersEmail(component))
-            })
-            .catch((e) => console.error(e))
+        try {
+            const component = await fetchData(`components/${componentId}`)
+            if (component === undefined) return
+            setComponent(component)
+            setSubscribers(getSubcribersEmail(component))
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     const tabList = [

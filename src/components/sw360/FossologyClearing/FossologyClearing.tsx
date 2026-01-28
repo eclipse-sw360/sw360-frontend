@@ -123,24 +123,25 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         }
     }, [])
 
-    const fetchRelease = useCallback(() => {
+    const fetchRelease = useCallback(async () => {
         const url = `releases/${releaseId}`
-        fetchData(url)
-            .then((data: ReleaseDetail | undefined) => {
-                if (data === undefined) return
-                setRelease(data)
-                numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
-                if (!isClearingAllowed()) {
-                    clearAllInterval()
-                    showMessage(clearingMessages.NUMBER_OF_ATTACHMENTS_NOT_MATCH)
-                    setProgressStatus({
-                        percent: 0,
-                        stepName: '',
-                    })
-                    return
-                }
-            })
-            .catch((err) => console.error(err))
+        try {
+            const data = await fetchData(url)
+            if (data === undefined) return
+            setRelease(data)
+            numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
+            if (!isClearingAllowed()) {
+                clearAllInterval()
+                showMessage(clearingMessages.NUMBER_OF_ATTACHMENTS_NOT_MATCH)
+                setProgressStatus({
+                    percent: 0,
+                    stepName: '',
+                })
+                return
+            }
+        } catch (err) {
+            console.error(err)
+        }
     }, [
         releaseId,
         clearAllInterval,
@@ -332,8 +333,8 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
     useEffect(() => {
         if (show === true) {
             if (release === undefined) {
-                fetchRelease()
-                checkFossologyProcessStatus().catch((err) => console.log(err))
+                void fetchRelease()
+                void checkFossologyProcessStatus().catch((err) => console.log(err))
             } else {
                 if (progressStatus.percent >= PERCENT_DONE) {
                     showMessage(clearingMessages.CLEARING_SUCCESS)

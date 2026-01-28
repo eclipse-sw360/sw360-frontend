@@ -129,8 +129,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         void extractUserEmail()
 
-        fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+        const load = async () => {
+            try {
+                const release = await fetchData(`releases/${releaseId}`)
                 if (CommonUtils.isNullOrUndefined(release)) {
                     notFound()
                 }
@@ -157,21 +158,23 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 if (release.componentType !== 'COTS' && isSPDXFeatureEnabled === true) {
                     setTabList(WITH_SPDX)
                 }
-                return release
-            })
-            .then((release: ReleaseDetail) => {
-                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
-                    .then((embeddedReleaseLinks: EmbeddedReleaseLinks | undefined) => {
-                        if (embeddedReleaseLinks) {
-                            setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
-                        }
-                    })
-                    .catch((err) => console.error(err))
-            })
-            .catch((err) => console.error(err))
 
-        fetchData(`releases/${releaseId}/vulnerabilities`)
-            .then((vulnerabilities: EmbeddedVulnerabilities | undefined) => {
+                try {
+                    const embeddedReleaseLinks = await fetchData(
+                        `components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`,
+                    )
+                    if (embeddedReleaseLinks) {
+                        setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
+                    }
+                } catch (err) {
+                    console.error(err)
+                }
+            } catch (err) {
+                console.error(err)
+            }
+
+            try {
+                const vulnerabilities = await fetchData(`releases/${releaseId}/vulnerabilities`)
                 if (
                     vulnerabilities &&
                     !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
@@ -181,8 +184,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 } else {
                     setVulnerData([])
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
     }, [
         fetchData,
         releaseId,
@@ -280,13 +286,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         if (CommonUtils.isNullOrUndefined(session.data)) return
 
         await ApiUtils.POST(`releases/${releaseId}/subscriptions`, {}, session.data.user.access_token)
-        fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
-                if (release === undefined) return
-                setRelease(release)
-                setSubscribers(getSubcribersEmail(release))
-            })
-            .catch((e) => console.error(e))
+        try {
+            const release = await fetchData(`releases/${releaseId}`)
+            if (release === undefined) return
+            setRelease(release)
+            setSubscribers(getSubcribersEmail(release))
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     const isUserSubscribed = () => {

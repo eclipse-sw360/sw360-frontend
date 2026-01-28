@@ -66,21 +66,21 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
         if (!toastShownRef.current) {
             toastShownRef.current = true
         }
-        void fetchData(`clearingrequest/${clearingRequestId}`).then(
-            (clearingRequestDetails: ClearingRequestDetails | undefined) => {
-                if (!Object.hasOwn(clearingRequestDetails ?? {}, 'projectId')) {
-                    setIsProjectDeleted(true)
-                }
+        const load = async () => {
+            const clearingRequestDetails = await fetchData(`clearingrequest/${clearingRequestId}`)
+            if (!Object.hasOwn(clearingRequestDetails ?? {}, 'projectId')) {
+                setIsProjectDeleted(true)
+            }
 
-                if (
-                    clearingRequestDetails?.clearingState === 'CLOSED' ||
-                    clearingRequestDetails?.clearingState === 'REJECTED'
-                ) {
-                    setIsReopenClosedCR(true)
-                }
-                setClearingRequestData(clearingRequestDetails)
-            },
-        )
+            if (
+                clearingRequestDetails?.clearingState === 'CLOSED' ||
+                clearingRequestDetails?.clearingState === 'REJECTED'
+            ) {
+                setIsReopenClosedCR(true)
+            }
+            setClearingRequestData(clearingRequestDetails)
+        }
+        void load()
     }, [
         clearingRequestId,
     ])

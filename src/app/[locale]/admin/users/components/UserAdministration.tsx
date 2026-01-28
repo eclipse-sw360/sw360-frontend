@@ -51,17 +51,16 @@ export default function UserAdminstration(): JSX.Element {
         router.push('/admin/users/add')
     }
 
-    const downloadUsers = () => {
-        getSession()
-            .then((session) => {
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                void DownloadService.download('importExport/downloadUsers', session, 'users.csv', {
-                    Accept: 'text/plain',
-                })
+    const downloadUsers = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            void DownloadService.download('importExport/downloadUsers', session, 'users.csv', {
+                Accept: 'text/plain',
             })
-            .catch((error: unknown) => {
-                ApiUtils.reportError(error)
-            })
+        } catch (error) {
+            ApiUtils.reportError(error)
+        }
     }
 
     const fetchData = useCallback(async (url: string) => {
@@ -80,18 +79,20 @@ export default function UserAdminstration(): JSX.Element {
     }, [])
 
     useEffect(() => {
-        void fetchData('users/departments')
-            .then((departments: Array<string> | undefined) => {
+        const load = async () => {
+            try {
+                const departments = await fetchData('users/departments')
                 if (departments === undefined) {
                     return
                 }
                 if (!CommonUtils.isNullOrUndefined(departments)) {
                     setDepartments(departments)
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 ApiUtils.reportError(error)
-            })
+            }
+        }
+        void load()
     }, [])
 
     const handleEditSecondaryDepartmentAndRoles = (id: string) => {

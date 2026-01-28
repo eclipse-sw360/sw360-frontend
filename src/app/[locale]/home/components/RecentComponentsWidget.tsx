@@ -43,9 +43,10 @@ function RecentComponentsWidget(): ReactNode {
     }, [])
 
     useEffect(() => {
-        setLoading(true)
-        void fetchData('components/recentComponents')
-            .then((components: EmbeddedComponents | undefined) => {
+        const load = async () => {
+            setLoading(true)
+            try {
+                const components = await fetchData('components/recentComponents')
                 if (components === undefined) {
                     return
                 }
@@ -72,13 +73,13 @@ function RecentComponentsWidget(): ReactNode {
                 } else {
                     setRecentComponent([])
                 }
-            })
-            .catch((error: Error) => {
+            } catch (error) {
                 ApiUtils.reportError(error)
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false)
-            })
+            }
+        }
+        void load()
     }, [
         fetchData,
         reload,

@@ -116,8 +116,9 @@ const EditSPDXDocument = ({
     const [typeCategory, setTypeCategory] = useState<Array<string>>([])
     const [isTypeCateGoryEmpty, setIsTypeCateGoryEmpty] = useState(true)
     useEffect(() => {
-        fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+        const load = async () => {
+            try {
+                const release = await fetchData(`releases/${releaseId}`)
                 if (!release) return
                 //SPDX Document
                 if (
@@ -260,8 +261,11 @@ const EditSPDXDocument = ({
                         setIsTypeCateGoryEmpty(false)
                     }
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
     }, [
         releaseId,
     ])

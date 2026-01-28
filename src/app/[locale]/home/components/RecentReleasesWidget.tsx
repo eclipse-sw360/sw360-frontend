@@ -45,9 +45,10 @@ function RecentReleasesWidget(): ReactNode {
     }, [])
 
     useEffect(() => {
-        setLoading(true)
-        void fetchData('releases/recentReleases')
-            .then((releases: EmbeddedReleases | undefined) => {
+        const load = async () => {
+            setLoading(true)
+            try {
+                const releases = await fetchData('releases/recentReleases')
                 if (releases === undefined) {
                     return
                 }
@@ -74,13 +75,13 @@ function RecentReleasesWidget(): ReactNode {
                 } else {
                     setRecentRelease([])
                 }
-            })
-            .catch((error: Error) => {
+            } catch (error) {
                 ApiUtils.reportError(error)
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false)
-            })
+            }
+        }
+        void load()
     }, [
         fetchData,
         reload,

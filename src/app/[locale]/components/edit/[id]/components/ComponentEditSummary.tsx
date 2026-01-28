@@ -90,7 +90,8 @@ export default function ComponentEditSummary({
     }, [])
 
     useEffect(() => {
-        void fetchData(`components/${componentId}`).then((component: Component | undefined) => {
+        const load = async () => {
+            const component = await fetchData(`components/${componentId}`)
             if (!component) return
 
             if (component.externalIds) {
@@ -159,7 +160,8 @@ export default function ComponentEditSummary({
                 attachments: attachmentData,
             }
             setComponentPayload(componentPayloadData)
-        })
+        }
+        void load()
     }, [
         componentId,
         fetchData,

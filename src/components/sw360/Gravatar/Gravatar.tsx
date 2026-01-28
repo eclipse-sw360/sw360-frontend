@@ -30,18 +30,19 @@ function Gravatar({ email }: { email: string }): JSX.Element {
         })
     }
 
-    const downloadGravatarImage = useCallback(() => {
+    const downloadGravatarImage = useCallback(async () => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const gravatarUrl = `https://www.gravatar.com/avatar/${MD5(email)}?d=404`
 
-        fetch(gravatarUrl)
-            .then((response) => response.blob())
-            .then((blob) => {
-                const imageUrl = URL.createObjectURL(blob)
-                setGravatarImage(gravatarUrl)
-                console.log(imageUrl)
-            })
-            .catch((error) => console.error('Error downloading Gravatar image:', error))
+        try {
+            const response = await fetch(gravatarUrl)
+            const blob = await response.blob()
+            const imageUrl = URL.createObjectURL(blob)
+            setGravatarImage(gravatarUrl)
+            console.log(imageUrl)
+        } catch (error) {
+            console.error('Error downloading Gravatar image:', error)
+        }
     }, [
         email,
         setGravatarImage,
@@ -50,7 +51,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
     useEffect(() => {
         if (useGravatar) {
             if (gravatarImage === null) {
-                downloadGravatarImage()
+                void downloadGravatarImage()
             }
         }
     }, [

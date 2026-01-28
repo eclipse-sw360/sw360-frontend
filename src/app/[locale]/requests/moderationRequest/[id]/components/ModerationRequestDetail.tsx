@@ -93,11 +93,11 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     }
 
     useEffect(() => {
-        void fetchData(`moderationrequest/${moderationRequestId}`).then(
-            (moderationRequestDetails: ModerationRequestDetails | undefined) => {
-                setModerationRequestData(moderationRequestDetails)
-            },
-        )
+        const load = async () => {
+            const moderationRequestDetails = await fetchData(`moderationrequest/${moderationRequestId}`)
+            setModerationRequestData(moderationRequestDetails)
+        }
+        void load()
 
         // Call assignModerationRequest on page load
         void assignModerationRequest()

@@ -70,11 +70,11 @@ export default function ClearingComments({
     }
 
     useEffect(() => {
-        setLoading(true)
-        void fetchData(`clearingrequest/${clearingRequestId}/comments`)
-            .then((clearingRequestCommentList: EmbeddedClearingRequestComments | undefined) => {
+        const load = async () => {
+            setLoading(true)
+            try {
+                const clearingRequestCommentList = await fetchData(`clearingrequest/${clearingRequestId}/comments`)
                 if (clearingRequestCommentList === undefined) {
-                    setLoading(false)
                     return
                 }
 
@@ -83,10 +83,14 @@ export default function ClearingComments({
                     !CommonUtils.isNullOrUndefined(clearingRequestCommentList['_embedded']['sw360:comments'])
                 ) {
                     setComments(clearingRequestCommentList['_embedded']['sw360:comments'])
-                    setLoading(false)
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        void load()
     }, [])
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {

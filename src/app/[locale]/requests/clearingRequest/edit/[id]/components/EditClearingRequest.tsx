@@ -67,11 +67,11 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     }
 
     useEffect(() => {
-        void fetchData(`clearingrequest/${clearingRequestId}`).then(
-            (clearingRequestDetails: ClearingRequestDetails | undefined) => {
-                setClearingRequestData(clearingRequestDetails)
-            },
-        )
+        const load = async () => {
+            const clearingRequestDetails = await fetchData(`clearingrequest/${clearingRequestId}`)
+            setClearingRequestData(clearingRequestDetails)
+        }
+        void load()
     }, [
         clearingRequestId,
     ])

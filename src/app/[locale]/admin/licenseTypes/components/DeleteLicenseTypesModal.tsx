@@ -61,9 +61,10 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
     }, [])
 
     useEffect(() => {
-        setLoading(true)
-        void fetchData(`licenseTypes/${licenseTypeId}/usage`)
-            .then((licenseTypeInfo: LicenseTypeInfo) => {
+        const load = async () => {
+            setLoading(true)
+            try {
+                const licenseTypeInfo: LicenseTypeInfo = await fetchData(`licenseTypes/${licenseTypeId}/usage`)
                 if (licenseTypeInfo === undefined) {
                     return
                 }
@@ -71,13 +72,13 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
                     setLicenseTypeInUse(true)
                     setLicenseTypeUsageCount(licenseTypeInfo.count)
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 ApiUtils.reportError(error)
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false)
-            })
+            }
+        }
+        void load()
     }, [
         fetchData,
         licenseTypeId,

@@ -65,37 +65,40 @@ export default function FossologyOverview(): ReactNode {
     }, [])
 
     useEffect(() => {
-        setLoading(true)
-        fetchData('fossology/reServerConnection', false)
-            .then((response: number | undefined) => {
+        const load = async () => {
+            setLoading(true)
+            try {
+                const response = await fetchData('fossology/reServerConnection', false)
                 if (response === StatusCodes.OK) {
                     setFossologyStatus(FossologyStatus.SUCCESS)
                 } else {
                     setFossologyStatus(FossologyStatus.UNKNOWN)
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 ApiUtils.reportError(error)
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false)
                 setRecheckConnection(false)
-            })
+            }
+        }
+        void load()
     }, [
         fetchData,
         recheckConnection,
     ])
 
     useEffect(() => {
-        fetchData('fossology/configData', true)
-            .then((response: FossologyConfig | undefined) => {
+        const load = async () => {
+            try {
+                const response = await fetchData('fossology/configData', true)
                 if (response) {
                     setFossologyConfigData(response)
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 ApiUtils.reportError(error)
-            })
+            }
+        }
+        void load()
     }, [
         fetchData,
     ])
