@@ -14,13 +14,15 @@ Signed-off-by: Your Name <your.email@example.com>
 
 ### Rules
 - Use the conventional commit format: `<type>(<scope>): <description>`
-- **REQUIRED**: All commits must include `Signed-off-by` line (use `git commit -s`)
+  - Follow specification https://www.conventionalcommits.org/en/v1.0.0/#specification
+- **REQUIRED**: All commits must have DCO
 - Keep the subject line concise (under 72 characters, ideally under 50)
 - Use imperative mood (e.g., "add" not "added" or "adds")
 - Don't end the subject with a period
 - Use lowercase for the first word unless it's a proper noun
 - Separate subject from body with a blank line
 - Wrap body at 72 characters
+- Every commit should mention thet was produced by AI, and origin of AI service as an independent line
 
 ### Types
 | Type | Description | Example |
