@@ -45,38 +45,42 @@ function MySubscriptionsWidget(): ReactNode {
     }, [])
 
     useEffect(() => {
-        setLoading(true)
-        fetchData('components/mySubscriptions')
-            .then((components: EmbeddedComponents | undefined) => {
-                if (components === undefined) return
-                if (
-                    !CommonUtils.isNullOrUndefined(components['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
-                ) {
-                    setComponentData(components['_embedded']['sw360:components'])
-                } else {
-                    setComponentData([])
+        const load = async () => {
+            setLoading(true)
+            try {
+                const components = await fetchData('components/mySubscriptions')
+                if (components !== undefined) {
+                    if (
+                        !CommonUtils.isNullOrUndefined(components['_embedded']) &&
+                        !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
+                    ) {
+                        setComponentData(components['_embedded']['sw360:components'])
+                    } else {
+                        setComponentData([])
+                    }
                 }
-            })
-            .catch((err) => console.error(err))
-        fetchData('releases/mySubscriptions')
-            .then((releases: EmbeddedReleases | undefined) => {
-                if (releases === undefined) return
-                if (
-                    !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
-                ) {
-                    setReleaseData(releases['_embedded']['sw360:releases'])
-                } else {
-                    setReleaseData([])
+            } catch (err) {
+                console.error(err)
+            }
+            try {
+                const releases = await fetchData('releases/mySubscriptions')
+                if (releases !== undefined) {
+                    if (
+                        !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
+                        !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
+                    ) {
+                        setReleaseData(releases['_embedded']['sw360:releases'])
+                    } else {
+                        setReleaseData([])
+                    }
                 }
-            })
-            .catch((error: Error) => {
+            } catch (error) {
                 ApiUtils.reportError(error)
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false)
-            })
+            }
+        }
+        void load()
     }, [
         fetchData,
         reload,

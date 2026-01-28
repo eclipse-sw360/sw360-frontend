@@ -43,22 +43,21 @@ function AuthScreen(): ReactNode {
     }
 
     const handleLogin = async () => {
-        await signIn(CREDENTIALS, {
+        const result = await signIn(CREDENTIALS, {
             username: emailAddress,
             password: password,
             redirect: false,
-        }).then((result) => {
-            if (result === undefined) {
-                setMessageShow(true)
-                return
-            }
-
-            if (result.status === StatusCodes.OK) {
-                router.push(`/${locale}/home`)
-            } else {
-                setMessageShow(true)
-            }
         })
+        if (result === undefined) {
+            setMessageShow(true)
+            return
+        }
+
+        if (result.status === StatusCodes.OK) {
+            router.push(`/${locale}/home`)
+        } else {
+            setMessageShow(true)
+        }
     }
 
     return (

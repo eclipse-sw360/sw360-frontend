@@ -61,8 +61,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
     }, [])
 
     useEffect(() => {
-        fetchData(`${documentType}/${documentId}/attachments`)
-            .then((attachments: EmbeddedAttachments | undefined) => {
+        const load = async () => {
+            try {
+                const attachments = await fetchData(`${documentType}/${documentId}/attachments`)
                 if (attachments === undefined) return
                 if (
                     !CommonUtils.isNullOrUndefined(attachments['_embedded']) &&
@@ -95,8 +96,11 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                     setBeforeUpdateAttachmentsCheckStatus(beforeUpdateAttachmentsCheckStatus)
                     setAttachmentsData(existingAttachmentsRowData)
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
     }, [])
 
     useEffect(() => {

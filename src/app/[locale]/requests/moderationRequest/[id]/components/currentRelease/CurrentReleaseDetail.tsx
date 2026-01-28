@@ -81,8 +81,9 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        fetchData(`releases/${releaseId}`, signal)
-            .then((release: ReleaseDetail | undefined) => {
+        const load = async () => {
+            try {
+                const release = await fetchData(`releases/${releaseId}`, signal)
                 setRelease(release)
                 if (
                     !CommonUtils.isNullOrUndefined(release?._embedded) &&
@@ -90,9 +91,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                 ) {
                     setEmbeddedAttachments(release._embedded['sw360:attachments'])
                 }
-                return release
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
         return () => controller.abort()
     }, [
         releaseId,

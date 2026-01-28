@@ -43,20 +43,19 @@ export default function ImportExportComponent(): ReactNode {
         file.current = files[0]
     }
 
-    const handleDownload = (
+    const handleDownload = async (
         url: string,
         filename: string,
         headers: {
             [key: string]: string
         },
     ) => {
-        getSession()
-            .then((session) => {
-                DownloadService.download(url, session, filename, headers)
-            })
-            .catch((error: unknown) => {
-                ApiUtils.reportError(error)
-            })
+        try {
+            const session = await getSession()
+            await DownloadService.download(url, session, filename, headers)
+        } catch (error) {
+            ApiUtils.reportError(error)
+        }
     }
 
     const handleUpload = async (url: string, formDataField: string, file: RefObject<File | undefined>) => {

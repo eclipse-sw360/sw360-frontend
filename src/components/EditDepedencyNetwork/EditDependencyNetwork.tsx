@@ -668,8 +668,9 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
             ])
             addReleaseMode.current = undefined
         } else {
-            getNotCyclicReleaseToLink()
-                .then((validSelectedReleases) => {
+            const addChildren = async () => {
+                try {
+                    const validSelectedReleases = await getNotCyclicReleaseToLink()
                     if (nodeToAddChildren.current === undefined || network === undefined) return
                     const newReleaseNodes = createReleaseNodeFromReleaseIds(
                         validSelectedReleases,
@@ -685,12 +686,13 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                     linkedToReleases.current = undefined
                     nodeToAddChildren.current = undefined
                     addReleaseMode.current = undefined
-                })
-                .catch(() => {
+                } catch {
                     linkedToReleases.current = undefined
                     nodeToAddChildren.current = undefined
                     addReleaseMode.current = undefined
-                })
+                }
+            }
+            void addChildren()
         }
         setSelectedReleases([])
     }, [
@@ -702,7 +704,14 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
             setNetwork([])
             return
         }
-        fetchNetwork().catch((err) => console.error(err))
+        const load = async () => {
+            try {
+                await fetchNetwork()
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
     }, [
         projectId,
     ])

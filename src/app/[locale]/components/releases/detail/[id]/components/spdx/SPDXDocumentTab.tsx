@@ -109,8 +109,9 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
     }, [])
 
     useEffect(() => {
-        fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+        const load = async () => {
+            try {
+                const release = await fetchData(`releases/${releaseId}`)
                 if (!release) return
                 //SPDX Document
                 if (
@@ -219,8 +220,11 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
                         setExternalRefsData(release._embedded['sw360:packageInformation'].externalRefs[0])
                     }
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void load()
     }, [])
 
     const changeModeFull = () => {
