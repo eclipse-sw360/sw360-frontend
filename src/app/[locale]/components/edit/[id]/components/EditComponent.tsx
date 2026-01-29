@@ -91,14 +91,6 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     const { status } = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
         void (async () => {

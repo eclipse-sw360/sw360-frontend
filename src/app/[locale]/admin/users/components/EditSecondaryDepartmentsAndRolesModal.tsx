@@ -37,14 +37,6 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
     const { status } = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
         if (show === false) return
         void (async () => {
             const session = await getSession()

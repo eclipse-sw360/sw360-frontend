@@ -95,15 +95,7 @@ function AddProjects(): JSX.Element {
     const { status } = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
-        ;(async () => {
+        ; (async () => {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) {

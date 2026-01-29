@@ -40,14 +40,6 @@ const UserAccessToken = (): ReactNode => {
     const apiTokenGenerator = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE)
     const writeAuthorityAllowed = apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const generateToken = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const form = event.currentTarget
