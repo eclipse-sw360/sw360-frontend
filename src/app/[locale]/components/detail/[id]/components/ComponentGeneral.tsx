@@ -141,22 +141,19 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                     </td>
                 </tr>
                 <tr>
-                    <td>{t('VCS / Repository URL')}:</td>
+                    <td>{t('VCS/Repository URL')}:</td>
                     <td>
-                        {!CommonUtils.isNullEmptyOrUndefinedString(component.vcsUrl) ? (
+                        {!CommonUtils.isNullEmptyOrUndefinedString(component.vcs) && (
                             <Link
                                 className='text-link'
-                                href={component.vcsUrl}
-                                target='_blank'
-                                rel='noopener noreferrer'
+                                href={component.vcs}
                             >
-                                {component.vcsUrl}
+                                {component.vcs}
                             </Link>
-                        ) : (
-                            '-'
                         )}
                     </td>
                 </tr>
+
                 <tr>
                     <td>{t('Blog')}:</td>
                     <td>
