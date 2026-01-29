@@ -666,11 +666,7 @@ function EditProject({
                 )
             }
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

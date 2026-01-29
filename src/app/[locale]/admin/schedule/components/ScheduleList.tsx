@@ -18,7 +18,7 @@ import { JSX, useEffect } from 'react'
 import { useConfigValue } from '@/contexts'
 import { ErrorDetails, UIConfigKeys } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import { ScheduleItem } from './ScheduleItem'
 
 export default function VendorsList(): JSX.Element {
@@ -47,14 +47,12 @@ export default function VendorsList(): JSX.Element {
                 return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -83,14 +81,12 @@ export default function VendorsList(): JSX.Element {
                 return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

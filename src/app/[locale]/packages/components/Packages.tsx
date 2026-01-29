@@ -22,7 +22,7 @@ import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -284,7 +284,9 @@ function Packages(): ReactNode {
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedPackages
@@ -341,9 +343,7 @@ function Packages(): ReactNode {
 
                 setPackageData(pkgsWithRelease)
             } catch (error) {
-                if (!(error instanceof DOMException && error.name === 'AbortError')) {
-                    MessageService.error(error instanceof Error ? error.message : String(error))
-                }
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

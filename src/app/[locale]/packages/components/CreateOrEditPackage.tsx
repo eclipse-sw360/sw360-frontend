@@ -17,8 +17,7 @@ import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
 import { ErrorDetails, Package } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import AddMainLicenseModal from './AddMainLicenseModal'
 import AddReleaseModal from './AddReleaseModal'
 import DeletePackageModal from './DeletePackageModal'
@@ -118,18 +117,16 @@ export default function CreateOrEditPackage({
                     const response = await ApiUtils.GET(`packages/${packageId}/usage`, session.data.user.access_token)
                     if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                         const err = (await response.json()) as ErrorDetails
-                        throw new Error(err.message)
+                        throw new ApiError(err.message, {
+                            status: response.status,
+                        })
                     }
                     if (response.status !== StatusCodes.NO_CONTENT) {
                         const data = (await response.json()) as IsPackageUsed
                         setIsPackageUsed(data.isUsed)
                     }
                 } catch (error) {
-                    if (error instanceof DOMException && error.name === 'AbortError') {
-                        return
-                    }
-                    const message = error instanceof Error ? error.message : String(error)
-                    MessageService.error(message)
+                    ApiUtils.reportError(error)
                 }
             })()
         }

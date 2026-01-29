@@ -18,7 +18,6 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
-import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 import ClearingRequestComponent from './ClearingRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
@@ -199,11 +198,7 @@ function Requests(): ReactNode | undefined {
                 setOpenClearingRequestCount(openCRCount)
                 setClosedClearingRequestCount(closedCRCount)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
         return () => {

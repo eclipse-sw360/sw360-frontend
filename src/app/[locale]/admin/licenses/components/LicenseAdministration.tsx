@@ -18,7 +18,7 @@ import { FaRegQuestionCircle } from 'react-icons/fa'
 import { ErrorDetails } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { ApiError, ApiUtils } from '@/utils'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
 type ModalType = 'OSADL' | 'SPDX' | undefined
@@ -90,11 +90,7 @@ function ConfirmationModal({ type, setType }: { type: ModalType; setType: Dispat
                 ),
             })
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -208,14 +204,12 @@ export default function LicenseAdministration(): ReactNode {
                 MessageService.success(t('Licenses uploaded successfully'))
             } else {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -224,11 +218,7 @@ export default function LicenseAdministration(): ReactNode {
             if (!session.data) return signOut()
             void DownloadService.download('licenses/downloadLicenses', session.data, `LicensesBackup.lics`)
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

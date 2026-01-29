@@ -14,7 +14,7 @@ import React, { type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { AddtionalDataType, RolesType } from '@/object-types'
-import MessageService from '@/services/message.service'
+import { ApiUtils } from '@/utils'
 
 interface Input {
     key: string
@@ -66,11 +66,7 @@ const DeleteItemWarning = ({
             }
             setIsDeleteItem(false)
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 

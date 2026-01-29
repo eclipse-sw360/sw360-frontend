@@ -16,8 +16,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { ErrorDetails, MergeOrSplitActionType, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import MergeVendor from './MergeData'
 import VendorTable from './VendorsTable'
 
@@ -81,14 +80,12 @@ export default function MergeOverview({
                 router.push(`/admin/vendors`)
             } else {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -109,15 +106,15 @@ export default function MergeOverview({
                     setTargetVendor(vendor)
                 } else {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
+                ApiUtils.reportError(error)
+                if (error instanceof ApiError && !error.isAborted) {
+                    router.push(`/admin/vendors`)
                 }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
-                router.push(`/admin/vendors`)
             }
         })()
 

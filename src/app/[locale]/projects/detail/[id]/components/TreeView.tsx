@@ -39,7 +39,7 @@ import {
     UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
@@ -398,8 +398,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                     if (row.original.node.type === 'release') {
                         const { id: releaseId } = row.original.node.entity
                         const entity = row.getParentRow()?.original.node.entity as Project
-                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
-                            const linkedRelease = entity.linkedReleases.filter(
+                        if (!CommonUtils.isNullOrUndefined(entity)) {
+                            const linkedRelease = entity.linkedReleases?.filter(
                                 (lr) => lr.release.split('/').at(-1) === releaseId,
                             )
                             if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
@@ -409,6 +409,17 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                                             relationFilterOptions.filter(
                                                 (op) => op.value === linkedRelease?.[0].relation,
                                             )[0].tag}
+                                    </div>
+                                )
+                            }
+                        } else {
+                            const index = (memoizedLicenseClearing?.linkedReleases ?? []).findIndex(
+                                (rel) => rel.release.split('/').at(-1) === releaseId,
+                            )
+                            if (index !== -1) {
+                                return (
+                                    <div className='text-center'>
+                                        {Capitalize(memoizedLicenseClearing?.linkedReleases[index].relation ?? '')}
                                     </div>
                                 )
                             }
@@ -616,6 +627,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
             expandLevel,
             columnFilters,
             showFilter,
+            memoizedLicenseClearing,
         ],
     )
 
@@ -788,17 +800,15 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const licenseClearingData = (await response.json()) as LicenseClearing
                 setLicenseClearing(licenseClearingData)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 setIsLoadingLicenseClearing(false)
             }
@@ -829,17 +839,15 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const linkedProjectsData = (await response.json()) as LinkedProjects
                 setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                throw new Error(message)
+                ApiUtils.reportError(error)
             } finally {
                 setIsLoadingLinkedProjects(false)
             }
