@@ -8,24 +8,70 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { Button, Collapse, Form, Spinner } from 'react-bootstrap'
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
+
 import LicenseClearing from '@/components/LicenseClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
+interface ProjectFilters {
+    roles: {
+        creator: boolean
+        moderator: boolean
+        contributor: boolean
+        projectOwner: boolean
+        leadArchitect: boolean
+        projectResponsible: boolean
+        securityResponsible: boolean
+    }
+    clearingStates: {
+        open: boolean
+        closed: boolean
+        inProgress: boolean
+    }
+}
+
+interface ExtendedPageableQueryParam extends PageableQueryParam {
+    roles?: string
+    clearingStates?: string
+}
+
+const camelCaseToWords = (text: string): string => text.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())
+
 export default function MyProjectsWidget(): ReactNode {
     const t = useTranslations('default')
+
     const [reload, setReload] = useState(false)
+    const [showFilters, setShowFilters] = useState(false)
+
+    const [filters, setFilters] = useState<ProjectFilters>({
+        roles: {
+            creator: true,
+            moderator: true,
+            contributor: true,
+            projectOwner: true,
+            leadArchitect: true,
+            projectResponsible: true,
+            securityResponsible: true,
+        },
+        clearingStates: {
+            open: true,
+            closed: true,
+            inProgress: true,
+        },
+    })
+
+    const [appliedFilters, setAppliedFilters] = useState<ProjectFilters>(filters)
 
     const columns = useMemo<ColumnDef<Project>[]>(
         () => [
@@ -42,7 +88,8 @@ export default function MyProjectsWidget(): ReactNode {
                             href={`/projects/detail/${id}`}
                             className='text-link'
                         >
-                            {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
+                            {name}
+                            {!CommonUtils.isNullEmptyOrUndefinedString(version) && ` (${version})`}
                         </Link>
                     )
                 },
@@ -54,7 +101,6 @@ export default function MyProjectsWidget(): ReactNode {
                 id: 'description',
                 header: t('Description'),
                 accessorKey: 'description',
-                cell: (info) => info.getValue(),
                 meta: {
                     width: '50%',
                 },
@@ -77,18 +123,20 @@ export default function MyProjectsWidget(): ReactNode {
         ],
     )
 
-    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+    const [pageableQueryParam, setPageableQueryParam] = useState<ExtendedPageableQueryParam>({
         page: 0,
         page_entries: 5,
         sort: '',
     })
-    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
         size: 0,
         totalElements: 0,
         totalPages: 0,
         number: 0,
     })
-    const [projectData, setProjectData] = useState<Project[]>(() => [])
+
+    const [projectData, setProjectData] = useState<Project[]>([])
     const memoizedData = useMemo(
         () => projectData,
         [
@@ -97,30 +145,74 @@ export default function MyProjectsWidget(): ReactNode {
     )
     const [showProcessing, setShowProcessing] = useState(false)
 
+    const handleRoleChange = (role: keyof ProjectFilters['roles']) => {
+        setFilters((prev) => ({
+            ...prev,
+            roles: {
+                ...prev.roles,
+                [role]: !prev.roles[role],
+            },
+        }))
+    }
+
+    const handleClearingStateChange = (state: keyof ProjectFilters['clearingStates']) => {
+        setFilters((prev) => ({
+            ...prev,
+            clearingStates: {
+                ...prev.clearingStates,
+                [state]: !prev.clearingStates[state],
+            },
+        }))
+    }
+
+    const handleSearch = () => {
+        setAppliedFilters(filters)
+        setPageableQueryParam((prev) => ({
+            ...prev,
+            page: 0,
+        }))
+        setReload((prev) => !prev)
+    }
+
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = projectData.length !== 0 ? 400 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        const timeout = setTimeout(() => setShowProcessing(true), projectData.length ? 400 : 0)
 
         void (async () => {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
-                const queryUrl = CommonUtils.createUrlWithParams(
-                    `projects/myprojects`,
-                    Object.fromEntries(
-                        Object.entries(pageableQueryParam).map(([key, value]) => [
-                            key,
-                            String(value),
-                        ]),
-                    ),
-                )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const queryParams: Record<string, string> = {
+                    page: String(pageableQueryParam.page),
+                    page_entries: String(pageableQueryParam.page_entries),
+                }
+
+                if (pageableQueryParam.sort) {
+                    queryParams.sort = pageableQueryParam.sort
+                }
+
+                const roles = Object.entries(appliedFilters.roles)
+                    .filter(([, v]) => v)
+                    .map(([k]) => k)
+
+                if (roles.length && roles.length !== 7) {
+                    queryParams.roles = roles.map((r) => r.replace(/([A-Z])/g, '_$1').toUpperCase()).join(',')
+                }
+
+                const states = Object.entries(appliedFilters.clearingStates)
+                    .filter(([, v]) => v)
+                    .map(([k]) => (k === 'inProgress' ? 'IN_PROGRESS' : k.toUpperCase()))
+
+                if (states.length && states.length !== 3) {
+                    queryParams.clearingStates = states.join(',')
+                }
+
+                const url = CommonUtils.createUrlWithParams('projects/myprojects', queryParams)
+                const response = await ApiUtils.GET(url, session.user.access_token, signal)
+
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -129,12 +221,17 @@ export default function MyProjectsWidget(): ReactNode {
                 }
 
                 const data = (await response.json()) as EmbeddedProjects
-                setPaginationMeta(data.page)
-                setProjectData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
-                        ? []
-                        : data['_embedded']['sw360:projects'],
+
+                setPaginationMeta(
+                    data.page ?? {
+                        size: 0,
+                        totalElements: 0,
+                        totalPages: 0,
+                        number: 0,
+                    },
                 )
+
+                setProjectData(data['_embedded']?.['sw360:projects'] ?? [])
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
@@ -147,58 +244,44 @@ export default function MyProjectsWidget(): ReactNode {
     }, [
         pageableQueryParam,
         reload,
+        appliedFilters,
     ])
 
     const table = useReactTable({
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
-
-        // table state config
+        manualPagination: true,
+        manualSorting: true,
+        pageCount: paginationMeta.totalPages,
         state: {
             pagination: {
                 pageIndex: pageableQueryParam.page,
                 pageSize: pageableQueryParam.page_entries,
             },
-            sorting: [
-                {
-                    id: pageableQueryParam.sort.split(',')[0],
-                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
-                },
-            ],
+            sorting: pageableQueryParam.sort
+                ? [
+                      {
+                          id: pageableQueryParam.sort.split(',')[0],
+                          desc: pageableQueryParam.sort.endsWith('desc'),
+                      },
+                  ]
+                : [],
         },
-
-        // server side sorting config
-        manualSorting: true,
         onSortingChange: (updater) => {
             setPageableQueryParam((prev) => {
-                const prevSorting: SortingState = [
-                    {
-                        id: prev.sort.split(',')[0],
-                        desc: prev.sort.split(',')[1] === 'desc',
-                    },
-                ]
-
-                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
-
-                if (nextSorting.length > 0) {
-                    const { id, desc } = nextSorting[0]
-                    return {
-                        ...prev,
-                        sort: `${id},${desc ? 'desc' : 'asc'}`,
-                    }
-                }
-
-                return {
-                    ...prev,
-                    sort: '',
-                }
+                const next = typeof updater === 'function' ? updater([]) : updater
+                return next.length
+                    ? {
+                          ...prev,
+                          sort: `${next[0].id},${next[0].desc ? 'desc' : 'asc'}`,
+                      }
+                    : {
+                          ...prev,
+                          sort: '',
+                      }
             })
         },
-
-        // server side pagination config
-        manualPagination: true,
-        pageCount: paginationMeta?.totalPages ?? 1,
         onPaginationChange: (updater) => {
             const next =
                 typeof updater === 'function'
@@ -210,42 +293,88 @@ export default function MyProjectsWidget(): ReactNode {
 
             setPageableQueryParam((prev) => ({
                 ...prev,
-                page: next.pageIndex + 1,
+                page: next.pageIndex,
                 page_entries: next.pageSize,
             }))
-        },
-
-        meta: {
-            rowHeightConstant: true,
         },
     })
 
     return (
         <div>
-            <HomeTableHeader
-                title={t('My Projects')}
-                setReload={setReload}
-            />
-            <div className='mb-3'>
-                {pageableQueryParam && table && paginationMeta ? (
-                    <>
-                        <SW360Table
-                            table={table}
-                            showProcessing={showProcessing}
-                            noRecordsFoundMessage={t('NoProjectsFound')}
+            <div className='d-flex justify-content-between align-items-center mb-3 my-projects-header'>
+                <h5 className='mb-0'>{t('MY PROJECTS')}</h5>
+
+                <div
+                    className='d-flex align-items-center my-projects-filter-toggle'
+                    onClick={() => setShowFilters((prev) => !prev)}
+                >
+                    {showFilters ? <FiChevronUp /> : <FiChevronDown />}
+                </div>
+
+                <Collapse in={showFilters}>
+                    <div className='my-projects-filter-dropdown'>
+                        <h6 className='mb-2'>Role in Project</h6>
+                        {Object.entries(filters.roles).map(([k, v]) => (
+                            <Form.Check
+                                key={k}
+                                label={camelCaseToWords(k)}
+                                checked={v}
+                                onChange={() => handleRoleChange(k as keyof ProjectFilters['roles'])}
+                            />
+                        ))}
+
+                        <hr />
+
+                        <h6 className='mb-2'>Clearing State</h6>
+                        <Form.Check
+                            label='Open'
+                            checked={filters.clearingStates.open}
+                            onChange={() => handleClearingStateChange('open')}
                         />
-                        <TableFooter
-                            pageableQueryParam={pageableQueryParam}
-                            setPageableQueryParam={setPageableQueryParam}
-                            paginationMeta={paginationMeta}
+                        <Form.Check
+                            label='Closed'
+                            checked={filters.clearingStates.closed}
+                            onChange={() => handleClearingStateChange('closed')}
                         />
-                    </>
-                ) : (
-                    <div className='col-12 mt-1 text-center'>
-                        <Spinner className='spinner' />
+                        <Form.Check
+                            label='In Progress'
+                            checked={filters.clearingStates.inProgress}
+                            onChange={() => handleClearingStateChange('inProgress')}
+                        />
+
+                        <div className='text-center mt-3'>
+                            <Button
+                                variant='warning'
+                                onClick={() => {
+                                    handleSearch()
+                                    setShowFilters(false)
+                                }}
+                            >
+                                Search
+                            </Button>
+                        </div>
                     </div>
-                )}
+                </Collapse>
             </div>
+
+            {table ? (
+                <>
+                    <SW360Table
+                        table={table}
+                        showProcessing={showProcessing}
+                        noRecordsFoundMessage={t('NoProjectsFound')}
+                    />
+                    <TableFooter
+                        pageableQueryParam={pageableQueryParam}
+                        setPageableQueryParam={setPageableQueryParam}
+                        paginationMeta={paginationMeta}
+                    />
+                </>
+            ) : (
+                <div className='text-center'>
+                    <Spinner />
+                </div>
+            )}
         </div>
     )
 }
