@@ -81,11 +81,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 const license = (await response.json()) as LicenseDetail
                 setLicensePayload(license)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
         return () => controller.abort()
@@ -134,8 +130,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 MessageService.error(responseMessage)
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
     const deleteLicense = () => {

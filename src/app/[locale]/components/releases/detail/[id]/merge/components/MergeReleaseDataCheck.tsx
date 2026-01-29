@@ -13,9 +13,8 @@ import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Attachment, ErrorDetails, ReleaseDetail } from '@/object-types'
-import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { ApiError, ApiUtils } from '@/utils/index'
 import AdditionalDataSection from './AdditionalDataSection'
 import ExternalIdsSection from './ExternalIdsSection'
 import GeneralSection from './GeneralSection'
@@ -57,18 +56,16 @@ export default function MergeReleaseDataCheck({
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as ReleaseDetail
 
                 setSourceReleaseDetail(CommonUtils.isNullOrUndefined(data) ? null : data)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             }
         })()
 

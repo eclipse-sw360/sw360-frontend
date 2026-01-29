@@ -18,7 +18,6 @@ import { SW360Table } from 'next-sw360'
 import { type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, Package, ReleaseDetail } from '@/object-types'
-import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
 
@@ -130,11 +129,7 @@ export default function AddReleaseModal({
             setReleaseData(tableData)
             setLoading(false)
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setLoading(false)
         }

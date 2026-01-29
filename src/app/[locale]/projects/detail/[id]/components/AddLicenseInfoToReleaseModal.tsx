@@ -71,11 +71,7 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
                 MessageService.error(t('Error occurred while processing license information for linked releases'))
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setIsLoading(false)
         }
