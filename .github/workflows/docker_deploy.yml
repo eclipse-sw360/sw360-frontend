@@ -10,8 +10,8 @@
 name: Docker Build
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # Midnight
+#  schedule:
+#    - cron: '0 0 * * *' # Midnight
   workflow_dispatch:
   push:
     tags:

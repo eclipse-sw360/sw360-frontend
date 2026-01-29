@@ -24,6 +24,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+import BulkUserUpload from './BulkUserUpload'
 import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
@@ -36,6 +37,7 @@ export default function UserAdminstration(): JSX.Element {
     const [departments, setDepartments] = useState<Array<string | undefined>>([])
     const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] =
         useState<boolean>(false)
+    const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
     const params = useSearchParams()
     const session = useSession()
 
@@ -50,6 +52,10 @@ export default function UserAdminstration(): JSX.Element {
     const handleAddUsers = () => {
         router.push('/admin/users/add')
     }
+
+    const handleUploadSuccess = useCallback(() => {
+        setRefreshTrigger((prev) => prev + 1)
+    }, [])
 
     const downloadUsers = () => {
         getSession()
@@ -318,6 +324,7 @@ export default function UserAdminstration(): JSX.Element {
         pageableQueryParam,
         params.toString(),
         session,
+        refreshTrigger,
     ])
 
     useEffect(() => {
@@ -521,6 +528,7 @@ export default function UserAdminstration(): JSX.Element {
                                 </div>
                             )}
                         </div>
+                        <BulkUserUpload onUploadSuccess={handleUploadSuccess} />
                     </div>
                 </div>
             </div>
