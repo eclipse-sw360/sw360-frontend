@@ -26,6 +26,27 @@ type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 export default function MyProjectsWidget(): ReactNode {
     const t = useTranslations('default')
     const [reload, setReload] = useState(false)
+    const [roles, setRoles] = useState<string[]>([])
+    const [clearingStates, setClearingStates] = useState<string[]>([])
+    const [appliedFilters, setAppliedFilters] = useState<{
+        roles: string[]
+        clearingStates: string[]
+    }>({
+        roles: [],
+        clearingStates: [],
+    })
+
+    const handleSearch = () => {
+        setAppliedFilters({
+            roles,
+            clearingStates,
+        })
+        setPageableQueryParam((prev) => ({
+            ...prev,
+            page: 0,
+        }))
+        setReload((prev) => !prev)
+    }
 
     const columns = useMemo<ColumnDef<Project>[]>(
         () => [
@@ -111,15 +132,43 @@ export default function MyProjectsWidget(): ReactNode {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
-                const queryUrl = CommonUtils.createUrlWithParams(
-                    `projects/myprojects`,
-                    Object.fromEntries(
+                const queryParams: Record<string, string> = {
+                    ...Object.fromEntries(
                         Object.entries(pageableQueryParam).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
                     ),
-                )
+                }
+
+                const allRoleKeys = [
+                    'createdBy',
+                    'moderator',
+                    'contributor',
+                    'projectOwner',
+                    'leadArchitect',
+                    'projectResponsible',
+                    'securityResponsible',
+                ]
+                const allClearingStateKeys = [
+                    'stateOpen',
+                    'stateClosed',
+                    'stateInProgress',
+                ]
+
+                if (appliedFilters.roles.length > 0) {
+                    allRoleKeys.forEach((key) => {
+                        queryParams[key] = appliedFilters.roles.includes(key) ? 'true' : 'false'
+                    })
+                }
+
+                if (appliedFilters.clearingStates.length > 0) {
+                    allClearingStateKeys.forEach((key) => {
+                        queryParams[key] = appliedFilters.clearingStates.includes(key) ? 'true' : 'false'
+                    })
+                }
+
+                const queryUrl = CommonUtils.createUrlWithParams(`projects/myprojects`, queryParams)
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -147,6 +196,7 @@ export default function MyProjectsWidget(): ReactNode {
     }, [
         pageableQueryParam,
         reload,
+        appliedFilters,
     ])
 
     const table = useReactTable({
@@ -225,6 +275,11 @@ export default function MyProjectsWidget(): ReactNode {
             <HomeTableHeader
                 title={t('My Projects')}
                 setReload={setReload}
+                roles={roles}
+                setRoles={setRoles}
+                clearingStates={clearingStates}
+                setClearingStates={setClearingStates}
+                onSearch={handleSearch}
             />
             <div className='mb-3'>
                 {pageableQueryParam && table && paginationMeta ? (

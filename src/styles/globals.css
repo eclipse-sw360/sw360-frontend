@@ -637,6 +637,18 @@ body {
     padding-top: 20px;
 }
 
+.tableHeader .dropdown .tableHeaderFilterToggle.btn {
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0;
+    color: #5d8ea9;
+}
+
+.tableHeader .dropdown .dropdown-menu.tableHeaderFilterMenu {
+    min-width: 250px;
+    padding: 10px;
+}
+
 .subscriptionBox {
     border: 1px solid #2e5aac;
     background-color: #eef2fa;
