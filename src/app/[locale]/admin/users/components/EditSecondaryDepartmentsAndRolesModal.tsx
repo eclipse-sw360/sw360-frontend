@@ -10,7 +10,7 @@
 // License-Filename: LICENSE
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
@@ -34,15 +34,6 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
     })
     const [showSuccess, setShowSuccess] = useState<boolean>(false)
     const [isUpdateSuccess, setIsUpdateSuccess] = useState<boolean>(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         if (show === false) return
