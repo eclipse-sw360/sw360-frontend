@@ -141,7 +141,7 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                     </td>
                 </tr>
                 <tr>
-                    <td>{t('VCS/Repository URL')}:</td>
+                    <td>{`${t('VCS')} / ${t('Repository URL')}`}:</td>
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedString(component.vcs) && (
                             <Link
