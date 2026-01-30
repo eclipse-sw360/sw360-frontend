@@ -16,6 +16,7 @@ import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { Dropdown, Nav, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ActionType, ObligationEntry, UserGroupType } from '@/object-types'
+import AllObligationsView from './AllObligationsView'
 import ObligationView from './ObligationsView/ObligationsView'
 import ReleaseView from './ReleaseView'
 
@@ -69,6 +70,11 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
                                     <span className='fw-medium'>{t('Release View')}</span>
                                 </Nav.Link>
                             </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link eventKey='all-obligations'>
+                                    <span className='fw-medium'>{t('All Obligations')}</span>
+                                </Nav.Link>
+                            </Nav.Item>
                         </Nav>
                     </div>
                     {actionType === ActionType.DETAIL && (
@@ -96,6 +102,9 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
                     </Tab.Pane>
                     <Tab.Pane eventKey='release-view'>
                         <ReleaseView projectId={projectId} />
+                    </Tab.Pane>
+                    <Tab.Pane eventKey='all-obligations'>
+                        {actionType === ActionType.DETAIL && <AllObligationsView projectId={projectId} />}
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>
