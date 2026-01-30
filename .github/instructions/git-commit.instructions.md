@@ -1,3 +1,7 @@
+---
+applyTo: "**/*"
+---
+
 # SW360 Frontend Git Commit & Contribution Instructions
 
 > **Eclipse SW360 Frontend follows conventional commits with signed-off commits (DCO)**
