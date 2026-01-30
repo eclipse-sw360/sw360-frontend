@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
@@ -29,7 +29,6 @@ const FrontEndConfigs = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
     const [arrayKeyStates, setArrayKeyStates] = useState<ProcessedUiConfig>({} as ProcessedUiConfig)
-    const { status } = useSession()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
 
     const fetchUiConfig = useCallback(async () => {
@@ -235,8 +234,8 @@ const FrontEndConfigs = (): JSX.Element => {
                                         <PillsInput
                                             tags={
                                                 arrayKeyStates[
-                                                UIConfigKeys
-                                                    .UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP
+                                                    UIConfigKeys
+                                                        .UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP
                                                 ]
                                             }
                                             onTagsChange={onArrayStateChangeHandler(
@@ -334,7 +333,7 @@ const FrontEndConfigs = (): JSX.Element => {
                                             setCurrentUiConfig={setCurrentUiConfig}
                                             checked={
                                                 currentUiConfig[
-                                                UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON
+                                                    UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON
                                                 ] === 'true'
                                             }
                                             propKey={UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON}
@@ -379,7 +378,7 @@ const FrontEndConfigs = (): JSX.Element => {
                                             setCurrentUiConfig={setCurrentUiConfig}
                                             checked={
                                                 currentUiConfig[
-                                                UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING
+                                                    UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING
                                                 ] === 'true'
                                             }
                                             propKey={UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING}
@@ -395,7 +394,7 @@ const FrontEndConfigs = (): JSX.Element => {
                                             setCurrentUiConfig={setCurrentUiConfig}
                                             checked={
                                                 currentUiConfig[
-                                                UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE
+                                                    UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE
                                                 ] === 'true'
                                             }
                                             propKey={UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE}

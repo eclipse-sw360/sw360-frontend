@@ -19,9 +19,9 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { Footer, GlobalMessages, Navbar } from 'next-sw360'
 import { type JSX, ReactNode } from 'react'
+import AuthProvider from '@/components/AuthProvider'
 import { UiConfigProvider } from '@/contexts'
 import { Providers } from '../provider'
-import AuthProvider from '@/components/AuthProvider'
 
 export const metadata: Metadata = {
     title: {

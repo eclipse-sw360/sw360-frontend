@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
@@ -92,10 +92,10 @@ function AddProjects(): JSX.Element {
     })
 
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
-    const { status } = useSession()
+    // ...existing code...
 
     useEffect(() => {
-        ; (async () => {
+        ;(async () => {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) {

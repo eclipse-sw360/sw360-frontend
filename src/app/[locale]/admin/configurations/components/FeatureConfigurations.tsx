@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
@@ -29,7 +29,6 @@ import SelectUserGroup from './SelectUserGroup'
 const FeatureConfigurations = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentConfig, setCurrentConfig] = useState<Configuration | undefined>(undefined)
-    const { status } = useSession()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`
 
     const fetchSw360Config = useCallback(async () => {
@@ -144,7 +143,7 @@ const FeatureConfigurations = (): JSX.Element => {
                                             setCurrentConfig={setCurrentConfig}
                                             checked={
                                                 currentConfig[
-                                                ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED
+                                                    ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED
                                                 ] === 'true'
                                             }
                                             propKey={ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED}

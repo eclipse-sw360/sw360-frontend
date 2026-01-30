@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import {
@@ -84,7 +84,7 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
     const [annotationsPackages, setAnnotationsPackages] = useState<Annotations[]>([])
 
     const [isModeFull, setIsModeFull] = useState(true)
-    const { status } = useSession()
+    // ...existing code...
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()

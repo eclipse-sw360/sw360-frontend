@@ -84,8 +84,8 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
                 cell: ({ row }) => {
                     const expirationDate = new Date(
                         Date.parse(row.original.createdOn + ' +0000') +
-                        row.original.numberOfDaysValid * 24 * 60 * 60 * 1000 -
-                        new Date().getTimezoneOffset() * 60000,
+                            row.original.numberOfDaysValid * 24 * 60 * 60 * 1000 -
+                            new Date().getTimezoneOffset() * 60000,
                     )
                     return <>{expirationDate.toISOString().slice(0, 19).replace('T', ' ')}</>
                 },

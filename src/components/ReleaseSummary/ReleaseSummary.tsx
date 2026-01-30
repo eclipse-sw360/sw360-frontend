@@ -11,15 +11,16 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
-import React, { type JSX, useCallback, useEffect, useState } from 'react'
+import { ShowInfoOnHover } from 'next-sw360'
+import React, { type JSX, useCallback, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
+import LicensesDialog from '@/components/sw360/SearchLicensesDialog/LicensesDialog'
+import SelectUsersDialog from '@/components/sw360/SearchUsersDialog/SelectUsersDialog'
+import VendorDialog from '@/components/sw360/SearchVendorsModal/VendorDialog'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
 import { ActionType, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
-import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
     actionType?: string
@@ -90,7 +91,6 @@ const ReleaseSummary = ({
     const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
-    const { status } = useSession()
 
     // Configs from backend
     const operatingSystemSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null

@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
@@ -78,7 +78,6 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         percent: 0,
         stepName: '',
     })
-    const { status } = useSession()
 
     const resetTimeCountDown = () => {
         setTimeInterval(5)
@@ -395,11 +394,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     <div>
                         {t('Found source attachment')}:
                         {release &&
-                            numberOfSourceAttachment.current === 1 &&
-                            release._embedded['sw360:attachments'] !== undefined
+                        numberOfSourceAttachment.current === 1 &&
+                        release._embedded['sw360:attachments'] !== undefined
                             ? release._embedded['sw360:attachments']
-                                .filter((attachment: Attachment) => attachment.attachmentType === 'SOURCE')
-                                .at(0)?.filename
+                                  .filter((attachment: Attachment) => attachment.attachmentType === 'SOURCE')
+                                  .at(0)?.filename
                             : 'unknown'}
                     </div>
                     <div className='row mt-2'>

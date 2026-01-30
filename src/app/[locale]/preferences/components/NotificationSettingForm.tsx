@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -32,7 +32,7 @@ interface NotificationSetting {
 const NotificationSettingForm = (): ReactNode => {
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
-    const { status } = useSession()
+    // ...existing code...
     const [notificationSetting, setNotificationSetting] = useState<NotificationSetting>({
         wantsMailNotification: false,
         notificationPreferences: {},

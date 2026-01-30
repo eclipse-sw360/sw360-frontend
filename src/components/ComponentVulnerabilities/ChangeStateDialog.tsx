@@ -11,9 +11,9 @@
 
 'use client'
 
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useCallback, useEffect, useState } from 'react'
+import { type JSX, useCallback, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 
 import MessageService from '@/services/message.service'
@@ -44,7 +44,6 @@ interface ChangeStatePayload {
 const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [comment, setComment] = useState('')
-    const { status } = useSession()
 
     const handleCloseDialog = () => {
         setShow(!show)

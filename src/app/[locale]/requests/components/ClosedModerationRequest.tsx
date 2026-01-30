@@ -171,8 +171,8 @@ function ClosedModerationRequest(): ReactNode {
                 )
                     ? []
                     : data['_embedded']['sw360:moderationRequests'].filter(
-                        (mr) => mr.moderationState === 'APPROVED' || mr.moderationState === 'REJECTED',
-                    )
+                          (mr) => mr.moderationState === 'APPROVED' || mr.moderationState === 'REJECTED',
+                      )
                 setModerationRequestData(openModerationRequests)
             } catch (error) {
                 ApiUtils.reportError(error)

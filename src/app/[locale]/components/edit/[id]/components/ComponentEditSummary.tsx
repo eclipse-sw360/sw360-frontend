@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -58,7 +58,7 @@ export default function ComponentEditSummary({
     const [moderators, setModerators] = useState<{
         [k: string]: string
     }>({})
-    const { status } = useSession()
+    // ...existing code...
 
     // Configs from backend
     const componentExternalIdSuggestions =

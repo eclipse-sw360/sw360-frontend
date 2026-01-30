@@ -10,7 +10,7 @@
 // License-Filename: LICENSE
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { DocumentTypes, ErrorDetails, Resources } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
