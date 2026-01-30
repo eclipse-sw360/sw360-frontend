@@ -18,9 +18,8 @@ import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
-import { UIConfigKeys } from '@/object-types'
+import { ErrorDetails, UIConfigKeys } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
-
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
