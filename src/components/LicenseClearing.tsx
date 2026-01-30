@@ -17,8 +17,8 @@ import { ErrorDetails } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 export interface LicenseClearingData {
-    'Release Count': number
-    'Approved Count': number
+    releaseCount: number
+    approvedCount: number
 }
 
 interface LicenseClearingProps {
@@ -70,7 +70,7 @@ export default function LicenseClearing({ projectId, data }: LicenseClearingProp
     return (
         <>
             {lcData ? (
-                <div className='text-center'>{`${lcData['Approved Count']}/${lcData['Release Count']}`}</div>
+                <div className='text-center'>{`${lcData.approvedCount}/${lcData.releaseCount}`}</div>
             ) : (
                 <div className='col-12 text-center'>
                     <Spinner
