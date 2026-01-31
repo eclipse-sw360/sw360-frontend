@@ -28,46 +28,46 @@ interface HomeTableHeaderProps {
 const ROLE_OPTIONS = [
     {
         key: 'createdBy',
-        label: 'Creator',
+        labelKey: 'Creator',
     },
     {
         key: 'moderator',
-        label: 'Moderator',
+        labelKey: 'Moderator',
     },
     {
         key: 'contributor',
-        label: 'Contributor',
+        labelKey: 'Contributor',
     },
     {
         key: 'projectOwner',
-        label: 'Project Owner',
+        labelKey: 'Project Owner',
     },
     {
         key: 'leadArchitect',
-        label: 'Lead Architect',
+        labelKey: 'Lead Architect',
     },
     {
         key: 'projectResponsible',
-        label: 'Project Responsible',
+        labelKey: 'Project Responsible',
     },
     {
         key: 'securityResponsible',
-        label: 'Security Responsible',
+        labelKey: 'Security Responsible',
     },
 ]
 
 const CLEARING_STATE_OPTIONS = [
     {
         key: 'stateOpen',
-        label: 'Open',
+        labelKey: 'Open',
     },
     {
         key: 'stateClosed',
-        label: 'Closed',
+        labelKey: 'Closed',
     },
     {
         key: 'stateInProgress',
-        label: 'In Progress',
+        labelKey: 'In Progress',
     },
 ]
 
@@ -130,13 +130,13 @@ function HomeTableHeader({
                                 className='tableHeaderFilterToggle'
                             />
                             <Dropdown.Menu className='tableHeaderFilterMenu'>
-                                <div className='fw-bold mb-2'>Role In Project</div>
+                                <div className='fw-bold mb-2'>{t('Role In Project')}</div>
                                 {ROLE_OPTIONS.map((option) => (
                                     <Form.Check
                                         key={option.key}
                                         type='checkbox'
                                         id={`role-${option.key}`}
-                                        label={option.label}
+                                        label={t(option.labelKey)}
                                         checked={roles?.includes(option.key) ?? false}
                                         onChange={(e) => handleRoleChange(option.key, e.target.checked)}
                                         className='mb-1'
@@ -149,7 +149,7 @@ function HomeTableHeader({
                                         key={option.key}
                                         type='checkbox'
                                         id={`clearing-${option.key}`}
-                                        label={option.label}
+                                        label={t(option.labelKey)}
                                         checked={clearingStates?.includes(option.key) ?? false}
                                         onChange={(e) => handleClearingStateChange(option.key, e.target.checked)}
                                         className='mb-1'

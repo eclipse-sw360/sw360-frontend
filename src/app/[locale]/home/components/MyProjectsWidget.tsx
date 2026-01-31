@@ -23,17 +23,41 @@ import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
+const ALL_ROLE_KEYS = [
+    'createdBy',
+    'moderator',
+    'contributor',
+    'projectOwner',
+    'leadArchitect',
+    'projectResponsible',
+    'securityResponsible',
+]
+
+const ALL_CLEARING_STATE_KEYS = [
+    'stateOpen',
+    'stateClosed',
+    'stateInProgress',
+]
+
 export default function MyProjectsWidget(): ReactNode {
     const t = useTranslations('default')
     const [reload, setReload] = useState(false)
-    const [roles, setRoles] = useState<string[]>([])
-    const [clearingStates, setClearingStates] = useState<string[]>([])
+    const [roles, setRoles] = useState<string[]>([
+        ...ALL_ROLE_KEYS,
+    ])
+    const [clearingStates, setClearingStates] = useState<string[]>([
+        ...ALL_CLEARING_STATE_KEYS,
+    ])
     const [appliedFilters, setAppliedFilters] = useState<{
         roles: string[]
         clearingStates: string[]
     }>({
-        roles: [],
-        clearingStates: [],
+        roles: [
+            ...ALL_ROLE_KEYS,
+        ],
+        clearingStates: [
+            ...ALL_CLEARING_STATE_KEYS,
+        ],
     })
 
     const handleSearch = () => {
@@ -141,29 +165,14 @@ export default function MyProjectsWidget(): ReactNode {
                     ),
                 }
 
-                const allRoleKeys = [
-                    'createdBy',
-                    'moderator',
-                    'contributor',
-                    'projectOwner',
-                    'leadArchitect',
-                    'projectResponsible',
-                    'securityResponsible',
-                ]
-                const allClearingStateKeys = [
-                    'stateOpen',
-                    'stateClosed',
-                    'stateInProgress',
-                ]
-
                 if (appliedFilters.roles.length > 0) {
-                    allRoleKeys.forEach((key) => {
+                    ALL_ROLE_KEYS.forEach((key) => {
                         queryParams[key] = appliedFilters.roles.includes(key) ? 'true' : 'false'
                     })
                 }
 
                 if (appliedFilters.clearingStates.length > 0) {
-                    allClearingStateKeys.forEach((key) => {
+                    ALL_CLEARING_STATE_KEYS.forEach((key) => {
                         queryParams[key] = appliedFilters.clearingStates.includes(key) ? 'true' : 'false'
                     })
                 }

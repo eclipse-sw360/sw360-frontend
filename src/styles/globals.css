@@ -649,6 +649,11 @@ body {
     padding: 10px;
 }
 
+.tableHeader .dropdown .dropdown-menu.tableHeaderFilterMenu .form-check-label {
+    font-weight: normal;
+    text-transform: none;
+}
+
 .subscriptionBox {
     border: 1px solid #2e5aac;
     background-color: #eef2fa;
