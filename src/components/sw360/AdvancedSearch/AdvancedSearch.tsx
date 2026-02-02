@@ -34,18 +34,20 @@ interface Field {
 interface Props {
     title: string
     fields?: Array<Field>
-    enableExactMatch?: boolean
 }
 
 interface SearchParams {
     [k: string]: string
 }
 
-function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = true }: Props): JSX.Element {
+function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
     const params = Object.fromEntries(useSearchParams())
-    const [searchParams, setSearchParam] = useState<SearchParams>(params)
+    const [searchParams, setSearchParam] = useState<SearchParams>({
+        ...params,
+        luceneSearch: params.luceneSearch || 'true',
+    })
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')
     const [isUsersPage, setIsUsersPage] = useState(false)
     const [isPackagesPage, setIsPackagesPage] = useState(false)
@@ -79,8 +81,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = 
                 searchUrl.searchParams.append(key, value)
             }
         })
-        const encodedUrl = encodeURI(searchUrl.toString().replace(/%40/g, '@'))
-        router.push(encodedUrl)
+        router.push(searchUrl.toString())
     }
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -248,38 +249,31 @@ function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = 
                 <div className='card-body'>
                     <Form onSubmit={handleSubmit}>
                         {fields?.map((field) => renderField(field))}
-
-                        {enableExactMatch && (
-                            <Form.Group
-                                className='mb-3'
-                                hidden={isUsersPage}
-                            >
-                                <Form.Check
-                                    type='checkbox'
-                                    label={t('Exact Match')}
-                                    id='exactMatch'
-                                    checked={searchParams.exactMatch === 'true'}
-                                    onChange={(e) => {
-                                        setSearchParam((prev) => ({
-                                            ...prev,
-                                            exactMatch: e.target.checked ? 'true' : '',
-                                        }))
-                                    }}
-                                    style={{
-                                        fontWeight: 'bold',
-                                        fontSize: '14px',
-                                        display: 'inline-block',
-                                        marginRight: '5px',
-                                    }}
-                                />
-                                <ShowInfoOnHover text={t('Exact_Match_Info')} />
-                            </Form.Group>
-                        )}
+                        <Form.Group
+                            className='mb-3'
+                            hidden={isUsersPage}
+                        >
+                            <Form.Check
+                                inline
+                                type='checkbox'
+                                label={t('Exact Match')}
+                                id='exactMatch'
+                                checked={searchParams.luceneSearch === 'false'}
+                                onChange={(e) => {
+                                    setSearchParam((prev) => ({
+                                        ...prev,
+                                        luceneSearch: e.target.checked ? 'false' : 'true',
+                                    }))
+                                }}
+                            />
+                            <ShowInfoOnHover text={t('Exact_Match_Info')} />
+                        </Form.Group>
                         <Form.Group
                             className='mb-3'
                             hidden={!isPackagesPage}
                         >
                             <Form.Check
+                                inline
                                 type='checkbox'
                                 label={t('Orphan Package')}
                                 id='orphanPackage'
@@ -290,12 +284,6 @@ function AdvancedSearch({ title = 'Advanced Search', fields, enableExactMatch = 
                                         orphanPackage: e.target.checked ? 'true' : '',
                                     }))
                                 }
-                                style={{
-                                    fontWeight: 'bold',
-                                    fontSize: '14px',
-                                    display: 'inline-block',
-                                    marginRight: '5px',
-                                }}
                             />
                             <ShowInfoOnHover text={t('Orphan package info')} />
                         </Form.Group>

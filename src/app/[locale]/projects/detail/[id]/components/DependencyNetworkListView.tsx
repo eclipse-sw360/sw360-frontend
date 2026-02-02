@@ -183,16 +183,15 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
-    const [showProcessing, setShowProcessing] = useState(false)
+    // Track loading state for API call and data readiness separately
+    const [isLoading, setIsLoading] = useState(true)
+    const [isDataReady, setIsDataReady] = useState(false)
+
+    // Show processing until API call completes AND data is ready to render
+    const showProcessing = isLoading || !isDataReady
 
     const [listViewData, setListViewData] = useState<ListViewData[]>([])
     const [rowData, setRowData] = useState<ListViewData[]>([])
-    const memoizedRowData = useMemo(
-        () => rowData,
-        [
-            rowData,
-        ],
-    )
     const [search, setSearch] = useState<{
         search: string
     }>({
@@ -416,10 +415,15 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
             return true
         })
         setRowData(data)
+        // Mark data as ready only after setting row data
+        if (listViewData.length > 0 || !isLoading) {
+            setIsDataReady(true)
+        }
     }, [
         search,
         columnFilters,
         listViewData,
+        isLoading,
     ])
 
     const table = useReactTable({
@@ -449,10 +453,9 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = memoizedRowData.length === 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        // Reset loading states when starting new fetch
+        setIsLoading(true)
+        setIsDataReady(false)
 
         void (async () => {
             try {
@@ -474,12 +477,14 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                setIsLoading(false)
             }
         })()
+
+        return () => controller.abort()
     }, [
         projectId,
+        session.status,
     ])
 
     const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {

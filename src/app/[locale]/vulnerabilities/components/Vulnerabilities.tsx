@@ -375,7 +375,6 @@ function Vulnerabilities(): ReactNode {
                         <AdvancedSearch
                             title='Advanced Filter'
                             fields={advancedSearch}
-                            enableExactMatch={false}
                         />
                     </div>
                     <div className='col-lg-10'>

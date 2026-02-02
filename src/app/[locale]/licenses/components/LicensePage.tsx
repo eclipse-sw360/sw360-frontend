@@ -81,15 +81,20 @@ function LicensePage(): ReactNode {
         () => [
             {
                 id: 'shortName',
+                accessorKey: 'shortName',
                 header: t('License Shortname'),
                 cell: ({ row }) => {
-                    const { shortName } = row.original
+                    const { shortName, _links } = row.original
+                    const licenseId = _links?.self?.href?.split('/').filter(Boolean).at(-1)
+                    if (!licenseId) {
+                        return <>{shortName || '--'}</>
+                    }
                     return (
                         <Link
-                            href={`/licenses/detail?id=${shortName}`}
+                            href={`/licenses/detail?id=${encodeURIComponent(licenseId)}`}
                             className='link'
                         >
-                            {shortName}
+                            {shortName || licenseId || '--'}
                         </Link>
                     )
                 },

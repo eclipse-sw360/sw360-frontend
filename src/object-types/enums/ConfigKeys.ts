@@ -30,6 +30,7 @@ enum ConfigKeys {
     IS_ADMIN_PRIVATE_ACCESS_ENABLED = 'admin.private.project.access.enabled',
     IS_PACKAGE_PORTLET_ENABLED = 'package.portlet.enabled',
     RELEASE_SOURCECODE_URL_SKIP_DOMAINS = 'release.sourcecodeurl.skip.domains',
+    REST_API_TOKEN_LENGTH = 'rest.apitoken.length',
 }
 
 export default ConfigKeys
