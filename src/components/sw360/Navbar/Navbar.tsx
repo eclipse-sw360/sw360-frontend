@@ -116,7 +116,7 @@ function Navbar(): JSX.Element {
                             alt='SW360 Logo'
                         />
                     </BSNavbar.Brand>
-                    <BSNavbar.Toggle aria-controls='navbarScroll' />
+                    {pathname != '/' && <BSNavbar.Toggle aria-controls='navbarScroll' />}
                     <BSNavbar.Collapse id='navbarScroll'>
                         {pathname != '/' && (
                             <Nav
