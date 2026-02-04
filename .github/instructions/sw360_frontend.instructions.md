@@ -1,3 +1,7 @@
+---
+applyTo: "**/*"
+---
+
 # SW360 Frontend Copilot Instructions
 
 > **Optimized for GitHub Copilot ASK, EDIT, and Agent modes**
@@ -571,7 +575,7 @@ See `.env` and `docs/templates/template.env` for full list.
 ## Git Workflow
 
 For commit message format, branch naming conventions, and PR guidelines, see:
-**[git-commit-instructions.md](./git-commit-instructions.md)**
+**[git-commit.instructions.md](./git-commit.instructions.md)**
 
 ---
 
