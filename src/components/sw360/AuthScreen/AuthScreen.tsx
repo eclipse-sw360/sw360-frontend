@@ -16,7 +16,8 @@ import { signIn, useSession } from 'next-auth/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 import { ReactNode, useState } from 'react'
-import { Alert, Button, Form, Modal } from 'react-bootstrap'
+import { Alert, Button, Form, InputGroup, Modal } from 'react-bootstrap'
+import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa'
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { AUTH_PROVIDER } from '@/utils/env'
 
@@ -29,6 +30,7 @@ function AuthScreen(): ReactNode {
     const [emailAddress, setEmailAddress] = useState<string>('@sw360.org')
     const [password, setPassword] = useState<string>('')
     const { status } = useSession()
+    const [showPassword, setShowPassword] = useState<boolean>(false)
 
     const handleClose = () => setDialogShow(false)
     const handleShow = () => {
@@ -145,14 +147,27 @@ function AuthScreen(): ReactNode {
                                 required
                             />
                         </Form.Group>
-                        <Form.Group className='mb-3'>
+                        <Form.Group
+                            className='mb-3'
+                            controlId='formBasicPassword'
+                        >
                             <Form.Label>{t('Password')}</Form.Label>
-                            <Form.Control
-                                type='password'
-                                placeholder=''
-                                onChange={(event) => setPassword(event.target.value)}
-                                required
-                            />
+                            <InputGroup>
+                                <Form.Control
+                                    type={showPassword ? 'text' : 'password'} // Toggle type
+                                    placeholder=''
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    required
+                                />
+                                <Button
+                                    variant='outline-secondary'
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    id='button-addon2'
+                                >
+                                    {/* You can replace these with <Eye /> / <EyeSlash /> icons */}
+                                    {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                                </Button>
+                            </InputGroup>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
