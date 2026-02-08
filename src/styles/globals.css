@@ -637,23 +637,6 @@ body {
     padding-top: 20px;
 }
 
-.tableHeader .dropdown .tableHeaderFilterToggle.btn {
-    text-decoration: none;
-    cursor: pointer;
-    padding: 0;
-    color: #5d8ea9;
-}
-
-.tableHeader .dropdown .dropdown-menu.tableHeaderFilterMenu {
-    min-width: 250px;
-    padding: 10px;
-}
-
-.tableHeader .dropdown .dropdown-menu.tableHeaderFilterMenu .form-check-label {
-    font-weight: normal;
-    text-transform: none;
-}
-
 .subscriptionBox {
     border: 1px solid #2e5aac;
     background-color: #eef2fa;
@@ -2487,4 +2470,44 @@ input[checked] + .slider:before {
 
 .auth-modal-width {
     width: 70%;
+}
+
+/* Password visibility toggle styles */
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input {
+    padding-right: 2.5rem !important;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    transition: color 0.2s ease-in-out;
+}
+
+.password-toggle-btn:hover {
+    color: var(--sw360-primary-color);
+}
+
+.password-toggle-btn:focus {
+    outline: 2px solid var(--sw360-primary-color);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+.password-toggle-btn svg {
+    width: 20px;
+    height: 20px;
 }
