@@ -36,8 +36,8 @@ importers:
         specifier: 1.2.0
         version: 1.2.0
       html-react-parser:
-        specifier: ^5.2.12
-        version: 5.2.12(@types/react@19.2.2)(react@19.2.1)
+        specifier: ^5.2.17
+        version: 5.2.17(@types/react@19.2.2)(react@19.2.1)
       http-status-codes:
         specifier: ^2.3.0
         version: 2.3.0
@@ -1394,11 +1394,11 @@ packages:
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
-  html-dom-parser@5.1.4:
-    resolution: {integrity: sha512-UGjp7y8jSrDU2RdN2J9FDOo3X+WBu+LkS/I3TjjFW020ocZWjPvave+RKk1zeuY2sUWy5fh6zHgXHthzDGlFNQ==}
+  html-dom-parser@5.1.8:
+    resolution: {integrity: sha512-MCIUng//mF2qTtGHXJWr6OLfHWmg3Pm8ezpfiltF83tizPWY17JxT4dRLE8lykJ5bChJELoY3onQKPbufJHxYA==}
 
-  html-react-parser@5.2.12:
-    resolution: {integrity: sha512-tvamxqkg5va1t9Wnq8OdikpIZrcgdatNd2rxQt0oEzb+IpbsWR1I7ddPd6CkwqZjiv8zKDzm8oiqqxy+KknQEQ==}
+  html-react-parser@5.2.17:
+    resolution: {integrity: sha512-m+K/7Moq1jodAB4VL0RXSOmtwLUYoAsikZhwd+hGQe5Vtw2dbWfpFd60poxojMU0Tsh9w59mN1QLEcoHz0Dx9w==}
     peerDependencies:
       '@types/react': 19.2.2
       react: 0.14 || 15 || 16 || 17 || 18 || 19
@@ -3517,15 +3517,15 @@ snapshots:
     dependencies:
       react-is: 16.13.1
 
-  html-dom-parser@5.1.4:
+  html-dom-parser@5.1.8:
     dependencies:
       domhandler: 5.0.3
       htmlparser2: 10.1.0
 
-  html-react-parser@5.2.12(@types/react@19.2.2)(react@19.2.1):
+  html-react-parser@5.2.17(@types/react@19.2.2)(react@19.2.1):
     dependencies:
       domhandler: 5.0.3
-      html-dom-parser: 5.1.4
+      html-dom-parser: 5.1.8
       react: 19.2.1
       react-property: 2.0.2
       style-to-js: 1.1.21
