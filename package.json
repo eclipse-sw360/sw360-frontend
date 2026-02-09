@@ -21,7 +21,7 @@
     "classnames": "^2.5.1",
     "country-list": "^2.4.1",
     "crypto-js": "^4.2.0",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.4",
     "flag-icons": "^7.3.2",
     "he": "1.2.0",
     "html-react-parser": "^5.2.12",
