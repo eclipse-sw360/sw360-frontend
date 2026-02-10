@@ -52,6 +52,7 @@ function Project(): JSX.Element {
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [hasClearingRequest, setHasClearingRequest] = useState(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
         show: false,
         importType: 'SPDX',
@@ -77,8 +78,10 @@ function Project(): JSX.Element {
         status,
     ])
 
-    const handleDeleteProject = (projectId: string) => {
+    const handleDeleteProject = (projectId: string, clearingRequestId?: string, clearingState?: string) => {
         setDeleteProjectId(projectId)
+        const hasOpenCR = clearingRequestId && (clearingState === 'OPEN' || clearingState === 'IN_PROGRESS')
+        setHasClearingRequest(!!hasOpenCR)
         setDeleteDialogOpen(true)
     }
 
@@ -305,7 +308,13 @@ function Project(): JSX.Element {
                                             <BsFillTrashFill
                                                 className='btn-icon'
                                                 size={20}
-                                                onClick={() => handleDeleteProject(id)}
+                                                onClick={() => {
+                                                    if (projectClearingRequestId && projectClearingRequestId !== '') {
+                                                        handleDeleteProject(id, projectClearingRequestId, clearingState)
+                                                    } else {
+                                                        handleDeleteProject(id)
+                                                    }
+                                                }}
                                             />
                                         </span>
                                     </OverlayTrigger>
@@ -676,6 +685,7 @@ function Project(): JSX.Element {
                     projectId={deleteProjectId}
                     show={deleteDialogOpen}
                     setShow={setDeleteDialogOpen}
+                    hasClearingRequest={hasClearingRequest}
                 />
             )}
             <Breadcrumb name={t('Projects')} />
