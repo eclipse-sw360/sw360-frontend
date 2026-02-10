@@ -30,9 +30,10 @@ interface Props {
     projectId: string
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
+    hasClearingRequest?: boolean
 }
 
-function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
+function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = false }: Props): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const [project, setProject] = useState<Project>()
@@ -214,6 +215,14 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
                                         })}
                                     </Form.Label>
                                     <br />
+                                    {hasClearingRequest && (
+                                        <Alert
+                                            variant='warning'
+                                            className='mb-3'
+                                        >
+                                            <strong>{t('Warning')}:</strong> {t('Project has open clearing requests')}
+                                        </Alert>
+                                    )}
                                     <Form.Label
                                         className='mb-1'
                                         visuallyHidden={visuallyHideLinkedData}

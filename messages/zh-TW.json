@@ -455,6 +455,7 @@
     "Do you really want to delete this client": "您真的想刪除這個客戶嗎",
     "Do you really want to delete this item": "您真的想刪除此項目嗎？",
     "Do you really want to delete this obligation": "您真的想刪除這項義務嗎",
+    "Project has open clearing requests": "項目有未完成的清理請求",
     "Do you really want to export SBOM": "您是否真的想為項目<strong> {projectName} </strong>（<strong> {projectversion} </strong>）導出SBOM？",
     "Do you really want to import all OSADL license obligations": "您真的想進口所有OSADL許可證義務嗎",
     "Do you really want to import all SPDX all licenses": "您真的想導入所有SPDX所有許可證嗎",

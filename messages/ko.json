@@ -455,6 +455,7 @@
     "Do you really want to delete this client": "이 클라이언트를 정말로 삭제하고 싶습니까?",
     "Do you really want to delete this item": "이 항목을 정말로 삭제하고 싶습니까?",
     "Do you really want to delete this obligation": "이 의무를 삭제하고 싶습니까?",
+    "Project has open clearing requests": "프로젝트에 열린 클리어링 요청이 있습니다",
     "Do you really want to export SBOM": "프로젝트 <strong> {projectName} </strong> (<strong> {projectVersion} </strong>)에 대해 SBOM을 내보내고 싶습니까?",
     "Do you really want to import all OSADL license obligations": "모든 OSADL 라이센스 의무를 가져오고 싶습니까?",
     "Do you really want to import all SPDX all licenses": "모든 SPDX 모든 라이센스를 가져오고 싶습니까?",
