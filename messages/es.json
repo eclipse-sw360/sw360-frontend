@@ -455,6 +455,7 @@
     "Do you really want to delete this client": "¿De verdad quieres eliminar este cliente?",
     "Do you really want to delete this item": "¿Realmente quieres eliminar este artículo?",
     "Do you really want to delete this obligation": "¿De verdad quieres eliminar esta obligación?",
+    "Project has open clearing requests": "El proyecto tiene solicitudes de clearing abiertas",
     "Do you really want to export SBOM": "¿Realmente quieres exportar SBOM para el proyecto <strong> {ProjectName} </strong> (<strong> {ProjectVersion} </strong>)?",
     "Do you really want to import all OSADL license obligations": "¿Realmente quieres importar todas las obligaciones de licencia de OSADL?",
     "Do you really want to import all SPDX all licenses": "¿Realmente quieres importar todas las licencias SPDX?",

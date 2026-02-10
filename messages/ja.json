@@ -455,6 +455,7 @@
     "Do you really want to delete this client": "本当にこのクライアントを削除したいですか",
     "Do you really want to delete this item": "本当にこのアイテムを削除したいですか？",
     "Do you really want to delete this obligation": "あなたは本当にこの義務を削除したいですか？",
+    "Project has open clearing requests": "プロジェクトにはオープンなクリアリングリクエストがあります",
     "Do you really want to export SBOM": "プロジェクトのためにSBOMを本当にエクスポートしたいですか<strong> {ProjectName} </strong>（<strong> {Projectersion} </strong>）？",
     "Do you really want to import all OSADL license obligations": "すべてのOSADLライセンス義務を本当に輸入したいですか",
     "Do you really want to import all SPDX all licenses": "あなたは本当にすべてのSPDXすべてのライセンスをインポートしたいですか",
