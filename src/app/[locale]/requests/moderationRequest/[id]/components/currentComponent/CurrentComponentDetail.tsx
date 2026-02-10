@@ -49,14 +49,6 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const [changeLogId, setChangeLogId] = useState('')
     const session = useSession()
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const tabList = [
         {
             id: CommonTabIds.SUMMARY,
