@@ -58,7 +58,7 @@ function Footer(): JSX.Element {
                     |
                     <Link
                         className='footer-href'
-                        href='/resource/mkdocs/index.html'
+                        href='https://www.eclipse.org/sw360/docs/'
                         rel='noopener noreferrer'
                         target='_blank'
                     >
@@ -68,7 +68,7 @@ function Footer(): JSX.Element {
                     |
                     <Link
                         className='footer-href'
-                        href='/resource/docs/api-guide.html'
+                        href={`${SW360_API_URL}/resource/swagger-ui/index.html#/`}
                         rel='noopener noreferrer'
                         target='_blank'
                     >
