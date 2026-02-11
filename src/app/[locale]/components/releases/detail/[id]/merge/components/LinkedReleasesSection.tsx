@@ -116,7 +116,7 @@ export default function LinkedReleasesSection({
                     <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>
                         {t('Linked Releases')}
                     </h6>
-                    <div className='border border-top-0 border-blue p-2'>
+                    <div className='border border-blue p-2'>
                         {linkedReleaseMergeList.map((c) => {
                             if (c.presentInSource && c.presentInTarget) {
                                 return (

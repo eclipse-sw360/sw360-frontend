@@ -20,6 +20,7 @@ import ExternalIdsSection from './ExternalIdsSection'
 import GeneralSection from './GeneralSection'
 import LinkedReleasesSection from './LinkedReleasesSection'
 import ClearingDetailsSection from './ClearingDetailsSection'
+import RequestInformation from './RequestInformation'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
@@ -117,6 +118,12 @@ export default function MergeReleaseDataCheck({
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
                     <ClearingDetailsSection
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <RequestInformation
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
