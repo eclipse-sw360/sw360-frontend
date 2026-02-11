@@ -134,7 +134,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
             return
         }
         setImportState(ImportSBOMState.IMPORTING)
-        prepareImport().catch((err) => console.log(err))
+        prepareImport().catch((err) => console.error(err))
     }
 
     const closeModal = () => {

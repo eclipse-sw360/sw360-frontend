@@ -104,6 +104,12 @@
         "noUnsafeNegation": "error",
         "noUselessRegexBackrefs": "error",
         "noWith": "error",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["error", "warn"]
+          }
+        },
         "useAwait": "error",
         "useGetterReturn": "error",
         "useNamespaceKeyword": "error"
