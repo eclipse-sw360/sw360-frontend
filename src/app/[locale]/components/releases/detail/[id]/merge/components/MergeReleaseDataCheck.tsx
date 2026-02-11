@@ -24,6 +24,7 @@ import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'
 import ECCInformation from './ECCInformation'
 import CommercialDetailAdmin from './CommercialDetailAdmin'
+import CotsOssInformation from './CotsOssInformation'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
@@ -145,6 +146,12 @@ export default function MergeReleaseDataCheck({
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
                     <CommercialDetailAdmin
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <CotsOssInformation
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
