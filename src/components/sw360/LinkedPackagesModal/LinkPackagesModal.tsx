@@ -47,7 +47,6 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
-            console.log('hello')
             void signOut()
         }
     }, [
@@ -193,9 +192,9 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
             const next =
                 typeof updater === 'function'
                     ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
+                        pageIndex: pageableQueryParam.page,
+                        pageSize: pageableQueryParam.page_entries,
+                    })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -221,9 +220,9 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
                         ...pageableQueryParam,
                         ...(searchText && searchText !== ''
                             ? {
-                                  searchText: searchText,
-                                  luceneSearch: !exactMatch,
-                              }
+                                searchText: searchText,
+                                luceneSearch: !exactMatch,
+                            }
                             : {}),
                         allDetails: true,
                     }).map(([key, value]) => [

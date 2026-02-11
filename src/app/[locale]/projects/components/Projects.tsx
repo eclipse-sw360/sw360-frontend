@@ -509,9 +509,9 @@ function Project(): JSX.Element {
             const next =
                 typeof updater === 'function'
                     ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
+                        pageIndex: pageableQueryParam.page,
+                        pageSize: pageableQueryParam.page_entries,
+                    })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -557,7 +557,7 @@ function Project(): JSX.Element {
                 }
             }
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
     }
 

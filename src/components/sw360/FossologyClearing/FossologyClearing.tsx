@@ -334,7 +334,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         if (show === true) {
             if (release === undefined) {
                 fetchRelease()
-                checkFossologyProcessStatus().catch((err) => console.log(err))
+                checkFossologyProcessStatus().catch((err) => console.error(err))
             } else {
                 if (progressStatus.percent >= PERCENT_DONE) {
                     showMessage(clearingMessages.CLEARING_SUCCESS)
@@ -346,7 +346,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     progressStatus.percent === 0 &&
                     numberOfSourceAttachment.current == 1
                 ) {
-                    handleFossologyClearing({}).catch((err) => console.log(err))
+                    handleFossologyClearing({}).catch((err) => console.error(err))
                 }
 
                 if (progressStatus.percent >= PERCENT_DONE) {
@@ -404,11 +404,11 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     <div>
                         {t('Found source attachment')}:
                         {release &&
-                        numberOfSourceAttachment.current === 1 &&
-                        release._embedded['sw360:attachments'] !== undefined
+                            numberOfSourceAttachment.current === 1 &&
+                            release._embedded['sw360:attachments'] !== undefined
                             ? release._embedded['sw360:attachments']
-                                  .filter((attachment: Attachment) => attachment.attachmentType === 'SOURCE')
-                                  .at(0)?.filename
+                                .filter((attachment: Attachment) => attachment.attachmentType === 'SOURCE')
+                                .at(0)?.filename
                             : 'unknown'}
                     </div>
                     <div className='row mt-2'>

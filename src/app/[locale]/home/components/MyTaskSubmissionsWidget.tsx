@@ -199,9 +199,9 @@ function MyTaskSubmissionsWidget(): ReactNode {
             const next =
                 typeof updater === 'function'
                     ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
+                        pageIndex: pageableQueryParam.page,
+                        pageSize: pageableQueryParam.page_entries,
+                    })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -217,7 +217,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
     })
 
     const handleDeleteProject = (id: string) => {
-        console.log(id)
+        // TODO: Implement delete functionality
     }
 
     return (
