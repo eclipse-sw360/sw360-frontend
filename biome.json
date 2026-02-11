@@ -107,7 +107,10 @@
         "noConsole": {
           "level": "error",
           "options": {
-            "allow": ["error", "warn"]
+            "allow": [
+              "error",
+              "warn"
+            ]
           }
         },
         "useAwait": "error",

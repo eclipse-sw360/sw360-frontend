@@ -76,8 +76,8 @@ const EditDocumentCreationInformation = ({
     const addDocumentReferences = () => {
         const arrayExternals: ExternalDocumentReferences[] = externalDocumentRefs
             ? [
-                ...externalDocumentRefs,
-            ]
+                  ...externalDocumentRefs,
+              ]
             : []
         setIncreIndex(externalDocumentRefs ? externalDocumentRefs.length : 0)
         setNumberIndex(externalDocumentRefs ? externalDocumentRefs.length : 0)
@@ -316,17 +316,17 @@ const EditDocumentCreationInformation = ({
     const updateCheckSum = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         const externals: ExternalDocumentReferences[] = externalDocumentRefs
             ? externalDocumentRefs.map((externalDocument, index) => {
-                if (index === indexExternalDocumentRef) {
-                    return {
-                        ...externalDocument,
-                        checksum: {
-                            ...externalDocument.checksum,
-                            [e.target.name]: e.target.value,
-                        },
-                    }
-                }
-                return externalDocument
-            })
+                  if (index === indexExternalDocumentRef) {
+                      return {
+                          ...externalDocument,
+                          checksum: {
+                              ...externalDocument.checksum,
+                              [e.target.name]: e.target.value,
+                          },
+                      }
+                  }
+                  return externalDocument
+              })
             : []
         setExternalDocumentRefs(externals)
         setSPDXPayload({
@@ -343,14 +343,14 @@ const EditDocumentCreationInformation = ({
     ) => {
         const externals: ExternalDocumentReferences[] = externalDocumentRefs
             ? externalDocumentRefs.map((externalDocument, index) => {
-                if (index === indexExternalDocumentRef) {
-                    return {
-                        ...externalDocument,
-                        [e.target.name]: e.target.value,
-                    }
-                }
-                return externalDocument
-            })
+                  if (index === indexExternalDocumentRef) {
+                      return {
+                          ...externalDocument,
+                          [e.target.name]: e.target.value,
+                      }
+                  }
+                  return externalDocument
+              })
             : []
 
         setExternalDocumentRefs(externals)
@@ -629,7 +629,7 @@ const EditDocumentCreationInformation = ({
                                                 value={
                                                     externalDocumentRefs
                                                         ? (externalDocumentRefs[indexExternalDocumentRef]
-                                                            ?.externalDocumentId ?? '')
+                                                              ?.externalDocumentId ?? '')
                                                         : ''
                                                 }
                                             />
@@ -662,7 +662,7 @@ const EditDocumentCreationInformation = ({
                                                 value={
                                                     externalDocumentRefs
                                                         ? (externalDocumentRefs[indexExternalDocumentRef]
-                                                            ?.spdxDocument ?? '')
+                                                              ?.spdxDocument ?? '')
                                                         : ''
                                                 }
                                             />
@@ -703,7 +703,7 @@ const EditDocumentCreationInformation = ({
                                                         value={
                                                             externalDocumentRefs
                                                                 ? (externalDocumentRefs[indexExternalDocumentRef]
-                                                                    ?.checksum?.algorithm ?? '')
+                                                                      ?.checksum?.algorithm ?? '')
                                                                 : ''
                                                         }
                                                     />
@@ -723,7 +723,7 @@ const EditDocumentCreationInformation = ({
                                                         value={
                                                             externalDocumentRefs
                                                                 ? (externalDocumentRefs[indexExternalDocumentRef]
-                                                                    ?.checksum?.checksumValue ?? '')
+                                                                      ?.checksum?.checksumValue ?? '')
                                                                 : ''
                                                         }
                                                     />
