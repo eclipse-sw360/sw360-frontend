@@ -17,7 +17,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 import { ReactNode, useState } from 'react'
 import { Alert, Button, Form, InputGroup, Modal } from 'react-bootstrap'
-import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa'
+import { BsEye, BsEyeSlash } from 'react-icons/bs'
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { AUTH_PROVIDER } from '@/utils/env'
 
@@ -154,7 +154,7 @@ function AuthScreen(): ReactNode {
                             <Form.Label>{t('Password')}</Form.Label>
                             <InputGroup>
                                 <Form.Control
-                                    type={showPassword ? 'text' : 'password'} // Toggle type
+                                    type={showPassword ? 'text' : 'password'}
                                     placeholder=''
                                     onChange={(event) => setPassword(event.target.value)}
                                     required
@@ -164,8 +164,7 @@ function AuthScreen(): ReactNode {
                                     onClick={() => setShowPassword(!showPassword)}
                                     id='button-addon2'
                                 >
-                                    {/* You can replace these with <Eye /> / <EyeSlash /> icons */}
-                                    {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                                    {showPassword ? <BsEye /> : <BsEyeSlash />}
                                 </Button>
                             </InputGroup>
                         </Form.Group>
