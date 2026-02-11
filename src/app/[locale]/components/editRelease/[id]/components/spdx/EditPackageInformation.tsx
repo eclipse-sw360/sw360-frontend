@@ -1008,8 +1008,8 @@ const EditPackageInformation = ({
                                             CommonUtils.isNullEmptyOrUndefinedString(packageInformation.SPDXID)
                                                 ? 'Package-'
                                                 : packageInformation.SPDXID.startsWith('SPDXRef-')
-                                                    ? packageInformation.SPDXID.substring(8)
-                                                    : packageInformation.SPDXID
+                                                  ? packageInformation.SPDXID.substring(8)
+                                                  : packageInformation.SPDXID
                                         }
                                     />
                                 </div>
@@ -1135,8 +1135,8 @@ const EditPackageInformation = ({
                                                 )
                                                     ? ''
                                                     : isNotNoneOrNoasserttionString(packageInformation.downloadLocation)
-                                                        ? packageInformation.downloadLocation
-                                                        : ''
+                                                      ? packageInformation.downloadLocation
+                                                      : ''
                                             }
                                             disabled={
                                                 packageDownloadLocationNone || packageDownloadLocationNoasserttion
@@ -1287,11 +1287,11 @@ const EditPackageInformation = ({
                                                     !CommonUtils.isNullOrUndefined(
                                                         packageInformation.packageVerificationCode,
                                                     ) &&
-                                                        packageInformation.packageVerificationCode.excludedFiles !==
+                                                    packageInformation.packageVerificationCode.excludedFiles !==
                                                         undefined
                                                         ? packageInformation.packageVerificationCode.excludedFiles
-                                                            .toString()
-                                                            .replaceAll(',', '\n')
+                                                              .toString()
+                                                              .replaceAll(',', '\n')
                                                         : ''
                                                 }
                                             ></textarea>
@@ -1361,8 +1361,8 @@ const EditPackageInformation = ({
                                                 CommonUtils.isNullEmptyOrUndefinedString(packageInformation.homepage)
                                                     ? ''
                                                     : isNotNoneOrNoasserttionString(packageInformation.homepage)
-                                                        ? packageInformation.homepage
-                                                        : ''
+                                                      ? packageInformation.homepage
+                                                      : ''
                                             }
                                             disabled={packageHomePageNone || packageHomePageNoasserttion}
                                         />
@@ -1478,8 +1478,8 @@ const EditPackageInformation = ({
                                                 )
                                                     ? ''
                                                     : isNotNoneOrNoasserttionString(packageInformation.licenseConcluded)
-                                                        ? packageInformation.licenseConcluded
-                                                        : ''
+                                                      ? packageInformation.licenseConcluded
+                                                      : ''
                                             }
                                             disabled={concludedLicenseNone || concludedLicenseNoasserttion}
                                         />
@@ -1574,12 +1574,12 @@ const EditPackageInformation = ({
                                                     !packageInformation.licenseInfoFromFiles
                                                         ? ''
                                                         : isNotNoneOrNoasserttion(
-                                                            packageInformation.licenseInfoFromFiles,
-                                                        )
-                                                            ? packageInformation.licenseInfoFromFiles
+                                                                packageInformation.licenseInfoFromFiles,
+                                                            )
+                                                          ? packageInformation.licenseInfoFromFiles
                                                                 .toString()
                                                                 .replaceAll(',', '\n')
-                                                            : ''
+                                                          : ''
                                                 }
                                                 disabled={
                                                     allLicensesInformationNone ||
@@ -1687,8 +1687,8 @@ const EditPackageInformation = ({
                                                 )
                                                     ? ''
                                                     : isNotNoneOrNoasserttionString(packageInformation.licenseDeclared)
-                                                        ? packageInformation.licenseDeclared
-                                                        : ''
+                                                      ? packageInformation.licenseDeclared
+                                                      : ''
                                             }
                                             disabled={declaredLicenseNone || declaredLicenseNoasserttion}
                                         />
@@ -1802,8 +1802,8 @@ const EditPackageInformation = ({
                                                 )
                                                     ? ''
                                                     : isNotNoneOrNoasserttionString(packageInformation.copyrightText)
-                                                        ? packageInformation.copyrightText
-                                                        : ''
+                                                      ? packageInformation.copyrightText
+                                                      : ''
                                             }
                                             disabled={copyrightTextNone || copyrightTextNoasserttion}
                                         ></textarea>

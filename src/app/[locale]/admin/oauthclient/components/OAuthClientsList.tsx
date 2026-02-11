@@ -90,7 +90,6 @@ function OAuthClientsList(): ReactNode {
             const session = await getSession()
 
             if (CommonUtils.isNullOrUndefined(session)) {
-
                 setLoading(false)
                 return signOut()
             }

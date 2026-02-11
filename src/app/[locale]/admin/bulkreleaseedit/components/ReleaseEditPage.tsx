@@ -399,9 +399,9 @@ export default function BulkReleaseEdit(): JSX.Element {
                             allDetails: true,
                             ...(search !== ''
                                 ? {
-                                    luceneSearch: true,
-                                    name: search,
-                                }
+                                      luceneSearch: true,
+                                      name: search,
+                                  }
                                 : {}),
                             ...pageableQueryParam,
                         }).map(([key, value]) => [
@@ -475,9 +475,9 @@ export default function BulkReleaseEdit(): JSX.Element {
             const next =
                 typeof updater === 'function'
                     ? updater({
-                        pageIndex: pageableQueryParam.page,
-                        pageSize: pageableQueryParam.page_entries,
-                    })
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
                     : updater
 
             setPageableQueryParam((prev) => ({
