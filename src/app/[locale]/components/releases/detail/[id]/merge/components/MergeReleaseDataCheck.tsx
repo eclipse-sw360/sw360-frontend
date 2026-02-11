@@ -23,6 +23,7 @@ import ClearingDetailsSection from './ClearingDetailsSection'
 import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'
 import ECCInformation from './ECCInformation'
+import CommercialDetailAdmin from './CommercialDetailAdmin'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
@@ -138,6 +139,12 @@ export default function MergeReleaseDataCheck({
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
                     <ECCInformation
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <CommercialDetailAdmin
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}

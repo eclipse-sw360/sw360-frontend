@@ -49,12 +49,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.binariesOriginalFromCommunity === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -104,12 +104,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.binariesOriginalFromCommunity === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -122,12 +122,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.binariesSelfMade === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -177,12 +177,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.binariesSelfMade === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -195,12 +195,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.componentLicenseInformation === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -250,12 +250,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.componentLicenseInformation === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -268,12 +268,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.sourceCodeDelivery === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -323,12 +323,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.sourceCodeDelivery === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -341,12 +341,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.sourceCodeOriginalFromCommunity === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -396,12 +396,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.sourceCodeOriginalFromCommunity === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -414,12 +414,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.sourceCodeToolMade === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -469,12 +469,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.sourceCodeToolMade === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -487,12 +487,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.sourceCodeSelfMade === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -542,12 +542,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.sourceCodeSelfMade === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -560,12 +560,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.screenshotOfWebSite === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -615,12 +615,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.screenshotOfWebSite === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -633,12 +633,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.finalizedLicenseScanReport === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -688,12 +688,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.finalizedLicenseScanReport === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -706,12 +706,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.licenseScanReportResult === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -761,12 +761,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.licenseScanReportResult === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -779,12 +779,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.legalEvaluation === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -834,12 +834,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.legalEvaluation === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -852,12 +852,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.licenseAgreement === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -907,12 +907,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.licenseAgreement === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -925,12 +925,12 @@ export default function ClearingDetailsSection({
                                 {finalReleasePayload.clearingInformation?.componentClearingReport === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
@@ -980,12 +980,12 @@ export default function ClearingDetailsSection({
                                 {sourceReleaseDetail?.clearingInformation?.componentClearingReport === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
-                                        Yes
+                                        {t('Yes')}
                                     </>
                                     :
                                     <>
                                         <BsXCircle color='red' />
-                                        No
+                                        {t('No')}
                                     </>
                                 }
                             </div>
