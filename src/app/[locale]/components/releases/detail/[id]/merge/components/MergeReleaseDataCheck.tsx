@@ -22,6 +22,7 @@ import LinkedReleasesSection from './LinkedReleasesSection'
 import ClearingDetailsSection from './ClearingDetailsSection'
 import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'
+import ECCInformation from './ECCInformation'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
@@ -131,6 +132,12 @@ export default function MergeReleaseDataCheck({
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
                     <SupplementalInformation
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <ECCInformation
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
