@@ -15,6 +15,7 @@ import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
+import DateField from '@/components/DateField'
 import { CreateClearingRequestPayload } from '@/object-types'
 
 interface Props {
@@ -26,7 +27,6 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
     const t = useTranslations('default')
     const { status } = useSession()
     const [message, setMessage] = useState('')
-    const [minDate, setMinDate] = useState('')
     const [variant, setVariant] = useState('success')
     const [isCritical, setIsCritical] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
@@ -45,19 +45,6 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
         }
     }, [
         status,
-    ])
-
-    useEffect(() => {
-        const calculateMinDate = () => {
-            const currentDate = new Date()
-            if (!isCritical) {
-                currentDate.setDate(currentDate.getDate() + 21)
-            }
-            return currentDate.toISOString().split('T')[0]
-        }
-        setMinDate(calculateMinDate())
-    }, [
-        isCritical,
     ])
 
     const handleError = useCallback(() => {
@@ -85,7 +72,6 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
 
     const handleCloseDialog = () => {
         setShow(!show)
-        setMinDate('')
         setIsCritical(false)
         setIsDisabled(false)
         setShowMessage(false)
@@ -174,30 +160,25 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
                         <Row className='mb-3'>
                             <Col md={6}>
                                 <Form.Group className='mb-2'>
-                                    <Form.Label
-                                        style={{
-                                            fontWeight: 'bold',
-                                        }}
-                                    >
-                                        {t('Preferred Clearing Date')} :
-                                        <span
-                                            className='text-red'
-                                            style={{
-                                                color: '#F7941E',
-                                            }}
-                                        >
-                                            *
-                                        </span>
-                                    </Form.Label>
-                                    <Form.Control
-                                        type='date'
+                                    <DateField
                                         id='createClearingRequest.requestedClearingDate'
                                         name='requestedClearingDate'
+                                        label={`${t('Preferred Clearing Date')} *`}
+                                        placeholder='YYYY-MM-DD'
                                         value={createClearingRequestPayload.requestedClearingDate ?? ''}
-                                        onChange={updateInputField}
-                                        disabled={isDisabled}
-                                        min={minDate}
-                                        required
+                                        onChange={(normalized) => {
+                                            setCreateClearingRequestPayload({
+                                                ...createClearingRequestPayload,
+                                                requestedClearingDate: normalized,
+                                            })
+                                        }}
+                                        minDate={(() => {
+                                            const date = new Date()
+                                            if (!isCritical) {
+                                                date.setDate(date.getDate() + 21)
+                                            }
+                                            return date
+                                        })()}
                                     />
                                     <div
                                         className='form-text'
