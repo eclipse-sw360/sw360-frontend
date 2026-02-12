@@ -10,7 +10,7 @@
 'use client'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import type { JSX } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 
 import { useConfigValue } from '@/contexts'
 import { ProjectPayload, UIConfigKeys } from '@/object-types'
@@ -34,6 +34,15 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
             [event.target.name]: event.target.value,
         })
     }
+
+    const [localDeadline, setLocalDeadline] = useState<string>(projectPayload.preevaluationDeadline ?? '')
+    const [deadlineError, setDeadlineError] = useState<string>('')
+
+    useEffect(() => {
+        setLocalDeadline(projectPayload.preevaluationDeadline ?? '')
+    }, [
+        projectPayload.preevaluationDeadline,
+    ])
 
     return (
         <>
@@ -110,13 +119,65 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                             onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
                                 e.target.type = 'date'
                             }}
-                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                                e.target.type = 'text'
+                            onBlur={() => {
+                                const raw = (localDeadline ?? '').trim()
+                                let normalized = ''
+
+                                if (raw) {
+                                    const cleaned = raw.replace(/\//g, '-')
+                                    const m = cleaned.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/)
+                                    if (m) {
+                                        const y = Number(m[1])
+                                        const mo = Number(m[2])
+                                        const d = Number(m[3])
+                                        const dt = new Date(y, mo - 1, d)
+                                        if (
+                                            !Number.isNaN(dt.getTime()) &&
+                                            dt.getFullYear() === y &&
+                                            dt.getMonth() === mo - 1 &&
+                                            dt.getDate() === d
+                                        ) {
+                                            const mm = String(mo).padStart(2, '0')
+                                            const dd = String(d).padStart(2, '0')
+                                            normalized = `${String(y).padStart(4, '0')}-${mm}-${dd}`
+                                        }
+                                    }
+                                }
+
+                                if (normalized) {
+                                    setProjectPayload({
+                                        ...projectPayload,
+                                        preevaluationDeadline: normalized,
+                                    })
+                                    setDeadlineError('')
+                                } else if (raw) {
+                                    // Invalid input: revert to previous valid date and show error
+                                    setLocalDeadline(projectPayload.preevaluationDeadline ?? '')
+                                    setDeadlineError(t('Invalid date format, Use YYYY/MM/DD'))
+                                } else {
+                                    // empty input -> clear value
+                                    setProjectPayload({
+                                        ...projectPayload,
+                                        preevaluationDeadline: '',
+                                    })
+                                    setDeadlineError('')
+                                }
                             }}
                             name='preevaluationDeadline'
-                            value={projectPayload.preevaluationDeadline}
-                            onChange={updateInputField}
+                            value={localDeadline}
+                            onChange={(e) => {
+                                setLocalDeadline(e.target.value)
+                                setDeadlineError('')
+                            }}
                         />
+                        {deadlineError && (
+                            <div
+                                className='form-text text-danger'
+                                id='addProjects.deadlinePreEvaluation.error'
+                            >
+                                {deadlineError}
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className='row with-divider py-3'>
@@ -127,12 +188,9 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         {t('Clearing summary')}
                     </label>
                     <textarea
-                        className='form-control'
+                        className='form-control textarea-summary'
                         aria-label='Clearing Summary'
                         id='addProjects.clearingSummary'
-                        style={{
-                            height: '120px',
-                        }}
                         name='clearingSummary'
                         value={projectPayload.clearingSummary}
                         onChange={updateInputField}
