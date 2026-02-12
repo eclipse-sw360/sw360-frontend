@@ -255,7 +255,7 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 htmlFor='vcs_url'
                                 className='form-label fw-bold'
                             >
-                                {t('VCS/Repository URL')}
+                                {t('VCS')}/{t('Repository URL')}
                             </label>
                             <input
                                 type='URL'

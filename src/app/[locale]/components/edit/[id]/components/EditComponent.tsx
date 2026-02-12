@@ -27,9 +27,10 @@ import {
     ComponentPayload,
     DocumentTypes,
     Embedded,
+    ErrorDetails,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
@@ -104,22 +105,23 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}`,
                     Object.fromEntries(params),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const component = (await response.json()) as Component
                 setComponent(component)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                ApiUtils.reportError(error)
             }
         })()
         void (async () => {
@@ -141,8 +143,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                 if (!CommonUtils.isNullOrUndefined(dataAttachments)) {
                     setAttachmentData(dataAttachments._embedded['sw360:attachments'])
                 }
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                ApiUtils.reportError(error)
             }
         })()
 
