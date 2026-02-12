@@ -18,9 +18,9 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import styles from '@/app/[locale]/requests/requestDetail.module.css'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
+import { ErrorDetails, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
@@ -79,16 +79,20 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     ])
 
     const fetchData = async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == StatusCodes.OK) {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const response = await ApiUtils.GET(url, session.user.access_token)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
             const data = (await response.json()) as ModerationRequestDetails
             return data
-        } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
-        } else {
-            notFound()
+        } catch (error) {
+            ApiUtils.reportError(error)
         }
     }
 

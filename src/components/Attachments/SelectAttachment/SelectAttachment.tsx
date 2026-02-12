@@ -147,11 +147,8 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                 <br />
                 <div style={{}}>
                     {files.map((file, j) => (
-                        <>
-                            <div
-                                key={file.name}
-                                className={`${styles['div-list-file']}`}
-                            >
+                        <div key={file.name}>
+                            <div className={`${styles['div-list-file']}`}>
                                 <div className={`${styles['div-filename']}`}>
                                     {file.name} ({file.size}b)
                                 </div>
@@ -167,7 +164,7 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                             </div>
                             <br />
                             <br />
-                        </>
+                        </div>
                     ))}
                 </div>
             </Modal.Body>
