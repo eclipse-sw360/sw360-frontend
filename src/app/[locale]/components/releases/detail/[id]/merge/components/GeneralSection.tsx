@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
-import { ListFieldProcessComponent, ReleaseDetail, Vendor } from '@/object-types'
+import { ListFieldProcessComponent, Release, ReleaseDetail, Vendor } from '@/object-types'
 
 export default function GeneralSection({
     targetRelease,
@@ -23,8 +23,8 @@ export default function GeneralSection({
 }: {
     targetRelease: ReleaseDetail | null
     sourceReleaseDetail: ReleaseDetail | null
-    finalReleasePayload: ReleaseDetail | null
-    setFinalReleasePayload: Dispatch<SetStateAction<null | ReleaseDetail>>
+    finalReleasePayload: Release | null
+    setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
     const t = useTranslations('default')
     const [programmingMergeList, setProgrammingMergeList] = useState<ListFieldProcessComponent[]>([])
@@ -461,20 +461,20 @@ export default function GeneralSection({
                     <div className='border border-top-0 border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('Created By')}</div>
                         <div className='d-flex row'>
-                            <div className='mt-2 col text-end'>{finalReleasePayload.createdBy}</div>
+                            <div className='mt-2 col text-end'>{finalReleasePayload.createBy}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.createdBy === targetRelease.createdBy ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
-                                ) : finalReleasePayload.createdBy === targetRelease.createdBy ? (
+                                ) : finalReleasePayload.createBy === targetRelease.createdBy ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
                                             setFinalReleasePayload({
                                                 ...finalReleasePayload,
-                                                createdBy: sourceReleaseDetail.createdBy,
+                                                createBy: sourceReleaseDetail.createdBy,
                                             })
                                         }
                                     >
@@ -486,7 +486,7 @@ export default function GeneralSection({
                                         onClick={() =>
                                             setFinalReleasePayload({
                                                 ...finalReleasePayload,
-                                                createdBy: targetRelease.createdBy,
+                                                createBy: targetRelease.createdBy,
                                             })
                                         }
                                     >
@@ -966,20 +966,20 @@ export default function GeneralSection({
                     <div className='border border-top-0 border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('CPE ID')}</div>
                         <div className='d-flex row'>
-                            <div className='mt-2 col text-end'>{finalReleasePayload.cpeId}</div>
+                            <div className='mt-2 col text-end'>{finalReleasePayload.cpeid}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail.cpeId === targetRelease.cpeId ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
-                                ) : finalReleasePayload.cpeId === targetRelease.cpeId ? (
+                                ) : finalReleasePayload.cpeid === targetRelease.cpeId ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
                                             setFinalReleasePayload({
                                                 ...finalReleasePayload,
-                                                cpeId: sourceReleaseDetail.cpeId,
+                                                cpeid: sourceReleaseDetail.cpeId,
                                             })
                                         }
                                     >
@@ -991,7 +991,7 @@ export default function GeneralSection({
                                         onClick={() =>
                                             setFinalReleasePayload({
                                                 ...finalReleasePayload,
-                                                cpeId: targetRelease.cpeId,
+                                                cpeid: targetRelease.cpeId,
                                             })
                                         }
                                     >
@@ -1210,7 +1210,7 @@ export default function GeneralSection({
                                         className='green'
                                     />
                                 ) : finalReleasePayload.sourceCodeDownloadurl ===
-                                  targetRelease.sourceCodeDownloadurl ? (
+                                    targetRelease.sourceCodeDownloadurl ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -1331,13 +1331,13 @@ export default function GeneralSection({
                                 {sourceReleaseDetail._embedded['sw360:vendors']?.[0]._links?.self.href
                                     .split('/')
                                     .at(-1) ===
-                                targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
+                                    targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : (vendor._links?.self.href.split('/').at(-1) ?? undefined) ===
-                                  targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
+                                    targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() => {
@@ -1378,16 +1378,14 @@ export default function GeneralSection({
                             <div className='mt-2 col text-start'>
                                 {sourceReleaseDetail._embedded['sw360:vendors']?.[0]
                                     ? `${sourceReleaseDetail._embedded['sw360:vendors']?.[0].fullName ?? ''}
-                                       ${
-                                           sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName
-                                               ? ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})`
-                                               : ''
-                                       }
-                                       ${
-                                           sourceReleaseDetail._embedded['sw360:vendors']?.[0].url
-                                               ? `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}`
-                                               : ''
-                                       }`
+                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName
+                                        ? ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})`
+                                        : ''
+                                    }
+                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url
+                                        ? `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}`
+                                        : ''
+                                    }`
                                     : ''}
                             </div>
                         </div>
@@ -1398,10 +1396,9 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>
                                 {finalReleasePayload.repository
                                     ? `${finalReleasePayload.repository?.url ? finalReleasePayload.repository?.url : ''}
-                                    ${
-                                        finalReleasePayload.repository?.repositorytype
-                                            ? `(${finalReleasePayload.repository?.repositorytype})`
-                                            : ''
+                                    ${finalReleasePayload.repository?.repositorytype
+                                        ? `(${finalReleasePayload.repository?.repositorytype})`
+                                        : ''
                                     }`
                                     : ''}
                             </div>
@@ -1440,10 +1437,9 @@ export default function GeneralSection({
                             <div className='mt-2 col text-start'>
                                 {sourceReleaseDetail.repository
                                     ? `${sourceReleaseDetail.repository?.url ? sourceReleaseDetail.repository?.url : ''}
-                                    ${
-                                        sourceReleaseDetail.repository?.repositorytype
-                                            ? `(${sourceReleaseDetail.repository?.repositorytype})`
-                                            : ''
+                                    ${sourceReleaseDetail.repository?.repositorytype
+                                        ? `(${sourceReleaseDetail.repository?.repositorytype})`
+                                        : ''
                                     }`
                                     : ''}
                             </div>

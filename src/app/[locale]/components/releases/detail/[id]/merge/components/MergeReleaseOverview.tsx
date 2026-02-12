@@ -21,6 +21,7 @@ import {
     Embedded,
     ErrorDetails,
     MergeOrSplitActionType,
+    Release,
     ReleaseDetail,
     UserGroupType,
 } from '@/object-types'
@@ -62,10 +63,12 @@ function MergeReleaseOverview({
     const [targetRelease, setTargetRelease] = useState<null | ReleaseDetail>(null)
     const [sourceRelease, setSourceRelease] = useState<null | ReleaseDetail>(null)
     const [componentId, setComponentId] = useState<null | string>(null)
-    const [finalReleasePayload, setFinalReleasePayload] = useState<null | ReleaseDetail>(null)
+    const [finalReleasePayload, setFinalReleasePayload] = useState<null | Release>(null)
     const [error, setError] = useState<null | string>(null)
     const [loading] = useState(false)
     const { status, data: session } = useSession()
+    const [sourceAttachments, setSourceAttachments] = useState<Array<Attachment>>([])
+    const [targetAttachments, setTargetAttachments] = useState<Array<Attachment>>([])
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -78,36 +81,36 @@ function MergeReleaseOverview({
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-        ;(async () => {
-            try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
+            ; (async () => {
+                try {
+                    const session = await getSession()
+                    if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                    const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
 
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status === StatusCodes.OK) {
-                    const singleRelease = (await response.json()) as ReleaseDetail
-                    const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
-                    if (CommonUtils.isNullOrUndefined(compId) || compId === '') {
-                        MessageService.error(t('Component ID is missing for the target release'))
+                    if (response.status === StatusCodes.UNAUTHORIZED) {
+                        return signOut()
+                    } else if (response.status === StatusCodes.OK) {
+                        const singleRelease = (await response.json()) as ReleaseDetail
+                        const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
+                        if (CommonUtils.isNullOrUndefined(compId) || compId === '') {
+                            MessageService.error(t('Component ID is missing for the target release'))
+                            router.push(`releases/${releaseId}`)
+                        }
+                        setComponentId(compId)
+                        setTargetRelease(singleRelease)
+                    } else {
+                        const err = (await response.json()) as ErrorDetails
+                        throw new ApiError(err.message, {
+                            status: response.status,
+                        })
+                    }
+                } catch (error) {
+                    ApiUtils.reportError(error)
+                    if (!(error instanceof ApiError && error.isAborted)) {
                         router.push(`releases/${releaseId}`)
                     }
-                    setComponentId(compId)
-                    setTargetRelease(singleRelease)
-                } else {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
                 }
-            } catch (error) {
-                ApiUtils.reportError(error)
-                if (!(error instanceof ApiError && error.isAborted)) {
-                    router.push(`releases/${releaseId}`)
-                }
-            }
-        })()
+            })()
 
         return () => controller.abort()
     }, [
@@ -144,11 +147,13 @@ function MergeReleaseOverview({
                 return false
             }
             const sourceAttachmentResponse = await fetchData(`releases/${sourceRelease.id}/attachments`)
+            setSourceAttachments(sourceAttachmentResponse?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]))
             const sourceAttachmentsList =
                 sourceAttachmentResponse?._embedded?.['sw360:attachments']?.filter(
                     (att: Attachment) => att.attachmentType === 'SOURCE',
                 ) ?? []
             const targetAttachmentResponse = await fetchData(`releases/${releaseId}/attachments`)
+            setTargetAttachments(targetAttachmentResponse?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]))
             const targetAttachmentsList =
                 targetAttachmentResponse?._embedded?.['sw360:attachments']?.filter(
                     (att: Attachment) => att.attachmentType === 'SOURCE',
@@ -228,6 +233,8 @@ function MergeReleaseOverview({
                             sourceRelease={sourceRelease}
                             finalReleasePayload={finalReleasePayload}
                             setFinalReleasePayload={setFinalReleasePayload}
+                            targetAttachments={targetAttachments}
+                            sourceAttachments={sourceAttachments}
                         />
                     )}
                     <div className='d-flex justify-content-end mb-3'>

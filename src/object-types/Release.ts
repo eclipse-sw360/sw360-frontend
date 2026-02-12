@@ -67,6 +67,7 @@ interface Release {
     comment?: string
     linkedPackages?: LinkedPackageData[]
     packageIds?: string[]
+    subscribers?: Array<string> | null
 }
 
 export default Release

@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2, BsCheck2Circle, BsXCircle } from 'react-icons/bs'
-import { ReleaseDetail } from '@/object-types'
+import { Release, ReleaseDetail } from '@/object-types'
 
 export default function CommercialDetailAdmin({
     targetRelease,
@@ -23,8 +23,8 @@ export default function CommercialDetailAdmin({
 }: {
     targetRelease: ReleaseDetail | null
     sourceReleaseDetail: ReleaseDetail | null
-    finalReleasePayload: ReleaseDetail | null
-    setFinalReleasePayload: Dispatch<SetStateAction<null | ReleaseDetail>>
+    finalReleasePayload: Release | null
+    setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
     const t = useTranslations('default')
     const session = useSession()
@@ -46,7 +46,7 @@ export default function CommercialDetailAdmin({
                         <div className='fw-bold text-blue'>{t('Usage Right Available')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload._embedded['sw360:cotsDetail']?.usageRightAvailable === true ?
+                                {finalReleasePayload?.cotsDetails?.usageRightAvailable === true ?
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
@@ -65,7 +65,7 @@ export default function CommercialDetailAdmin({
                                         size={20}
                                         className='green'
                                     />
-                                ) : finalReleasePayload?._embedded['sw360:cotsDetail']?.usageRightAvailable ===
+                                ) : finalReleasePayload?.cotsDetails?.usageRightAvailable ===
                                     targetRelease?._embedded['sw360:cotsDetail']?.usageRightAvailable ? (
                                     <button
                                         className='btn btn-secondary px-2'
@@ -119,7 +119,7 @@ export default function CommercialDetailAdmin({
                         <div className='fw-bold text-blue'>{t('COTS Responsible')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload._embedded['sw360:cotsDetail']?.cotsResponsible}
+                                {finalReleasePayload?.cotsDetails?.cotsResponsible}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.cotsResponsible ===
@@ -128,7 +128,7 @@ export default function CommercialDetailAdmin({
                                         size={20}
                                         className='green'
                                     />
-                                ) : finalReleasePayload?._embedded['sw360:cotsDetail']?.cotsResponsible ===
+                                ) : finalReleasePayload?.cotsDetails?.cotsResponsible ===
                                     targetRelease?._embedded['sw360:cotsDetail']?.cotsResponsible ? (
                                     <button
                                         className='btn btn-secondary px-2'
@@ -172,7 +172,7 @@ export default function CommercialDetailAdmin({
                         <div className='fw-bold text-blue'>{t('COTS Clearing Deadline')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload._embedded['sw360:cotsDetail']?.clearingDeadline}
+                                {finalReleasePayload?.cotsDetails?.clearingDeadline}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.clearingDeadline ===
@@ -181,7 +181,7 @@ export default function CommercialDetailAdmin({
                                         size={20}
                                         className='green'
                                     />
-                                ) : finalReleasePayload?._embedded['sw360:cotsDetail']?.clearingDeadline ===
+                                ) : finalReleasePayload?.cotsDetails?.clearingDeadline ===
                                     targetRelease?._embedded['sw360:cotsDetail']?.clearingDeadline ? (
                                     <button
                                         className='btn btn-secondary px-2'
@@ -225,7 +225,7 @@ export default function CommercialDetailAdmin({
                         <div className='fw-bold text-blue'>{t('COTS Clearing Report URL')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload._embedded['sw360:cotsDetail']?.licenseClearingReportURL}
+                                {finalReleasePayload?.cotsDetails?.licenseClearingReportURL}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ===
@@ -234,7 +234,7 @@ export default function CommercialDetailAdmin({
                                         size={20}
                                         className='green'
                                     />
-                                ) : finalReleasePayload?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ===
+                                ) : finalReleasePayload?.cotsDetails?.licenseClearingReportURL ===
                                     targetRelease?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ? (
                                     <button
                                         className='btn btn-secondary px-2'

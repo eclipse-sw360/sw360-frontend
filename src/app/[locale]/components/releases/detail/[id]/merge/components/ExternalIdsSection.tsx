@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
-import { ListFieldProcessComponent, ReleaseDetail } from '@/object-types'
+import { ListFieldProcessComponent, Release, ReleaseDetail } from '@/object-types'
 
 export default function ExternalIdsSection({
     targetRelease,
@@ -23,8 +23,8 @@ export default function ExternalIdsSection({
 }: {
     targetRelease: ReleaseDetail | null
     sourceReleaseDetail: ReleaseDetail | null
-    finalReleasePayload: ReleaseDetail | null
-    setFinalReleasePayload: Dispatch<SetStateAction<null | ReleaseDetail>>
+    finalReleasePayload: Release | null
+    setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
     const t = useTranslations('default')
     const session = useSession()
@@ -120,7 +120,7 @@ export default function ExternalIdsSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.externalIds?.[id.value] ===
-                                        targetRelease.externalIds?.[id.value] ? (
+                                            targetRelease.externalIds?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {
@@ -164,7 +164,7 @@ export default function ExternalIdsSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.externalIds?.[id.value] !==
-                                        sourceReleaseDetail.externalIds?.[id.value] ? (
+                                            sourceReleaseDetail.externalIds?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {

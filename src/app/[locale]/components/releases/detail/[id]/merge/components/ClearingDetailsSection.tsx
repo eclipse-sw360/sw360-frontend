@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2, BsCheck2Circle, BsXCircle } from 'react-icons/bs'
-import { ReleaseDetail } from '@/object-types'
+import { Release, ReleaseDetail } from '@/object-types'
 
 export default function ClearingDetailsSection({
     targetRelease,
@@ -23,8 +23,8 @@ export default function ClearingDetailsSection({
 }: {
     targetRelease: ReleaseDetail | null
     sourceReleaseDetail: ReleaseDetail | null
-    finalReleasePayload: ReleaseDetail | null
-    setFinalReleasePayload: Dispatch<SetStateAction<null | ReleaseDetail>>
+    finalReleasePayload: Release | null
+    setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
     const t = useTranslations('default')
     const session = useSession()

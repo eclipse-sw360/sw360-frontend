@@ -12,7 +12,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Attachment, ErrorDetails, ReleaseDetail } from '@/object-types'
+import { Attachment, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
 import AdditionalDataSection from './AdditionalDataSection'
@@ -25,17 +25,22 @@ import SupplementalInformation from './SupplementalInformation'
 import ECCInformation from './ECCInformation'
 import CommercialDetailAdmin from './CommercialDetailAdmin'
 import CotsOssInformation from './CotsOssInformation'
+import Attachments from './Attachments'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
     sourceRelease,
+    targetAttachments,
+    sourceAttachments,
     finalReleasePayload,
     setFinalReleasePayload,
 }: {
     targetRelease: ReleaseDetail | null
     sourceRelease: ReleaseDetail | null
-    finalReleasePayload: ReleaseDetail | null
-    setFinalReleasePayload: Dispatch<SetStateAction<null | ReleaseDetail>>
+    targetAttachments: Attachment[]
+    sourceAttachments: Attachment[]
+    finalReleasePayload: Release | null
+    setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
     // const t = useTranslations('default')
     const session = useSession()
@@ -156,6 +161,14 @@ export default function MergeReleaseDataCheck({
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
                         setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <Attachments
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                        targetAttachments={targetAttachments}
+                        sourceAttachments={sourceAttachments}
                     />
                 </>
             )}
