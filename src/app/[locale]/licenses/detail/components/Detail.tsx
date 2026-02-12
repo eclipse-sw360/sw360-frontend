@@ -22,6 +22,7 @@ import { BsCheck2Circle } from 'react-icons/bs'
 import { LicenseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import styles from '../detail.module.css'
 
 interface Props {
     license: LicenseDetail
@@ -67,7 +68,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
     return (
         <div className='col'>
             {license.checked === false && (
-                <div className='alert license-detail-checked'>
+                <div className={`alert ${styles['isChecked']}`}>
                     {t('This license is')} <b>UNCHECKED</b>
                 </div>
             )}
@@ -189,7 +190,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                                 />
                                 <Button
                                     variant='secondary'
-                                    className='license-detail-button-save'
+                                    className={`${styles['button-save']}`}
                                     type='submit'
                                     onClick={() => void updateExternalLicenseLink()}
                                 >
