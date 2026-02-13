@@ -10,22 +10,22 @@
 
 import { useTranslations } from 'next-intl'
 import { type JSX } from 'react'
-
+import styles from './TitleLinkedReleases.module.css'
 export default function TitleLinkedReleases(): JSX.Element {
     const t = useTranslations('default')
     return (
         <>
-            <div className='row linked-releases-title-second'>
-                <div className='linked-releases-filename'>
+            <div className={`row ${styles['div-title-second']}`}>
+                <div className={`${styles['div-filename']}`}>
                     <p className='fw-bold mt-2'>{t('Vendor Name')}</p>
                 </div>
-                <div className='linked-releases-filename'>
+                <div className={`${styles['div-filename']}`}>
                     <p className='fw-bold mt-2'>{t('Release name')}</p>
                 </div>
-                <div className='linked-releases-filename'>
+                <div className={`${styles['div-filename']}`}>
                     <p className='fw-bold mt-2'>{t('Release version')}</p>
                 </div>
-                <div className='linked-releases-filename'>
+                <div className={`${styles['div-filename']}`}>
                     <p className='fw-bold mt-2'>{t('Release Relation')}</p>
                 </div>
             </div>

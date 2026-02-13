@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { CommonTabIds, LinkedVulnerability, ReleaseTabIds, VulnerabilitiesVerificationState } from '@/object-types'
 import { CommonUtils } from '@/utils'
+import styles from './SideBar.module.css'
 
 interface Tab {
     name: string
@@ -77,13 +78,13 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                     return (
                         <a
                             key={index}
-                            className={`list-group-item sidebar-tab ${selectedTab === tab.id ? 'sidebar-tab-active' : ''}`}
+                            className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
                             id={tab.id}
                             onClick={handleSelectTab}
                         >
                             {t(tab.name as never)}
                             <span
-                                id='numberOfVulnerabilitiesDiv'
+                                id={styles.numberOfVulnerabilitiesDiv}
                                 className='badge badge-light'
                             >
                                 {`${numberOfCheckedOrUncheckedVulnerabilities} + ${numberOfIncorrectVulnerabilities}`}
@@ -94,21 +95,18 @@ const SideBar = ({ selectedTab, setSelectedTab, tabList, vulnerabilities, eccSta
                     return (
                         <a
                             key={index}
-                            className={`list-group-item sidebar-tab ${selectedTab === tab.id ? 'sidebar-tab-active' : ''}`}
+                            className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
                             id={tab.id}
                             onClick={handleSelectTab}
                         >
-                            {tab.name}{' '}
-                            <span
-                                className={`clearing-state-${(eccStatus ?? '').toLowerCase().replace(/_/g, '-')}`}
-                            ></span>
+                            {tab.name} <span className={`${styles[eccStatus ?? '']}`}></span>
                         </a>
                     )
                 }
                 return (
                     <a
                         key={index}
-                        className={`list-group-item sidebar-tab ${selectedTab === tab.id ? 'sidebar-tab-active' : ''}`}
+                        className={`list-group-item ${styles.tab} ${selectedTab === tab.id ? styles.active : ''}`}
                         id={tab.id}
                         onClick={handleSelectTab}
                     >
