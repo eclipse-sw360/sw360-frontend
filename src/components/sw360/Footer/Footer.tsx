@@ -16,6 +16,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import Link from 'next/link'
 import { type JSX, useEffect, useState } from 'react'
 import { SW360_API_URL } from '@/utils/env'
+import styles from './footer.module.css'
 
 function Footer(): JSX.Element {
     const [buildVersion, setBuildVersion] = useState<string>('')
@@ -43,11 +44,11 @@ function Footer(): JSX.Element {
 
     return (
         <>
-            <footer className='sw360-footer footer d-flex flex-column'>
-                <div className='powered-by pt-3'>
+            <footer className={`${styles.sw360footer} footer d-flex flex-column`}>
+                <div className={`${styles.poweredBy} "pt-3"`}>
                     Powered-by
                     <Link
-                        className='footer-href'
+                        className={styles.footerHref}
                         href='http://www.github.com/eclipse/sw360'
                         rel='noopener noreferrer'
                         target='_blank'
@@ -57,7 +58,7 @@ function Footer(): JSX.Element {
                     </Link>{' '}
                     |
                     <Link
-                        className='footer-href'
+                        className={styles.footerHref}
                         href='https://www.eclipse.org/sw360/docs/'
                         rel='noopener noreferrer'
                         target='_blank'
@@ -67,7 +68,7 @@ function Footer(): JSX.Element {
                     </Link>{' '}
                     |
                     <Link
-                        className='footer-href'
+                        className={styles.footerHref}
                         href={`${SW360_API_URL}/resource/swagger-ui/index.html#/`}
                         rel='noopener noreferrer'
                         target='_blank'
@@ -77,7 +78,7 @@ function Footer(): JSX.Element {
                     </Link>{' '}
                     |
                     <Link
-                        className='footer-href'
+                        className={styles.footerHref}
                         href='https://github.com/eclipse/sw360/issues'
                         rel='noopener noreferrer'
                         target='_blank'
@@ -86,7 +87,7 @@ function Footer(): JSX.Element {
                         Public Issue Tracker
                     </Link>
                 </div>
-                <div className='footer-version'>
+                <div className={styles.footerVersion}>
                     Version: {buildVersion ? buildVersion : '-'} - ApiVersion: {apiVersion ? apiVersion : '-'}
                 </div>
             </footer>
