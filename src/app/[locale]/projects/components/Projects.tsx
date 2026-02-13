@@ -228,10 +228,10 @@ function Project(): JSX.Element {
                     return (
                         <>
                             {id && (
-                                <span className='d-flex justify-content-evenly'>
+                                <span className='action-icons'>
                                     <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                         <span
-                                            className='d-inline-block'
+                                            className='action-icon'
                                             onClick={() => handleEditProject(id)}
                                         >
                                             <BsPencil
@@ -240,10 +240,11 @@ function Project(): JSX.Element {
                                             />
                                         </span>
                                     </OverlayTrigger>
+                                    <span className='seperator'> | </span>
                                     {projectClearingRequestId && projectClearingRequestId !== '' ? (
                                         <OverlayTrigger overlay={<Tooltip>{t('View Clearing Request')}</Tooltip>}>
                                             <span
-                                                className='d-inline-block'
+                                                className='action-icon'
                                                 onClick={() => {
                                                     setClearingRequestId(projectClearingRequestId)
                                                     setShowViewCRModal(true)
@@ -258,7 +259,7 @@ function Project(): JSX.Element {
                                     ) : crIsAllowed ? (
                                         <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
                                             <span
-                                                className='d-inline-block'
+                                                className='action-icon'
                                                 onClick={() => {
                                                     setCreateCRProjectId(id)
                                                     setShowCreateCRModal(true)
@@ -280,7 +281,7 @@ function Project(): JSX.Element {
                                                 </Tooltip>
                                             }
                                         >
-                                            <span className={'d-inline-block'}>
+                                            <span className='action-icon icon-disabled'>
                                                 <BsCheck2Square
                                                     size={20}
                                                     className='btn-icon overlay-trigger icon-disabled'
@@ -288,20 +289,21 @@ function Project(): JSX.Element {
                                             </span>
                                         </OverlayTrigger>
                                     )}
+                                    <span className='seperator'> | </span>
                                     <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
                                         <Link
                                             href={`/projects/duplicate/${id}`}
-                                            className='overlay-trigger'
+                                            className='action-icon'
                                         >
                                             <BsClipboard
-                                                className='btn-icon mt-0'
+                                                className='btn-icon'
                                                 size={20}
                                             />
                                         </Link>
                                     </OverlayTrigger>
-
+                                    <span className='seperator'> | </span>
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                        <span className='d-inline-block'>
+                                        <span className='action-icon'>
                                             <BsFillTrashFill
                                                 className='btn-icon'
                                                 size={20}

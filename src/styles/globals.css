@@ -384,6 +384,45 @@ body {
     color: #6c757d !important;
 }
 
+.action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.action-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.action-icon + .action-icon {
+    position: relative;
+}
+
+.action-icon + .action-icon::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 4px;
+    bottom: 4px;
+    width: 1px;
+    background: #d5d9e1;
+}
+
+.action-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.action-icon.icon-disabled {
+    cursor: not-allowed;
+}
+
 .btn-icon:hover {
     text-decoration: underline !important;
     color: var(--sw360-primary-color) !important;
@@ -2487,4 +2526,8 @@ input[checked] + .slider:before {
 
 .auth-modal-width {
     width: 70%;
+}
+
+.seperator {
+    color: rgb(230, 230, 230);
 }
