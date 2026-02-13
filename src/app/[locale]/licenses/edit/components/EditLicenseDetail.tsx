@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Embedded, ErrorDetails, LicensePayload, LicenseType } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import styles from './LicenseDetails.module.css'
 
 interface Props {
     inputValid: boolean
@@ -100,7 +101,7 @@ const EditLicenseDetail = ({
             }}
         >
             <div
-                className='header mb-1'
+                className={`${styles['header']} mb-1`}
                 style={{
                     paddingTop: '0.5rem',
                     height: '45px',
