@@ -390,6 +390,7 @@
     "Deactivate User": "사용자 비활성화",
     "Deactive User": "비활성화된 사용자",
     "Deadline for pre-evaluation": "사전 평가를 위한 Deadline",
+    "Invalid date format, Use YYYY/MM/DD": "잘못된 날짜 형식입니다. YYYY/MM/DD 형식을 사용하세요",
     "Decline Request": "요청 거절",
     "Deep": "깊은",
     "Deep Level CLX": "딥 레벨(CLX)",

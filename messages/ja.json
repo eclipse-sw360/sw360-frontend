@@ -390,6 +390,7 @@
     "Deactivate User": "ユーザーを非アクティブ化する",
     "Deactive User": "非アクティブなユーザー",
     "Deadline for pre-evaluation": "Deadline for pre-evaluation",
+    "Invalid date format, Use YYYY/MM/DD": "無効な日付形式です。YYYY/MM/DD を使用してください",
     "Decline Request": "リクエストを拒否する",
     "Deep": "深い",
     "Deep Level CLX": "ディープレベル (CLX)",
