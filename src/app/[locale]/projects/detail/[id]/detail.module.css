@@ -1,0 +1,78 @@
+/*
+  Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+.dropdown-btn button {
+    background: none !important;
+    border: 0px !important;
+    padding: 0px !important;
+}
+
+.dropdown-btn button:focus {
+    background: none !important;
+    border: 0px !important;
+}
+
+.dropdown-btn button:hover {
+    background: none !important;
+    border: 0px !important;
+}
+
+.dropdown-btn button::after {
+    display: none !important;
+}
+
+.dropdown-btn svg {
+    color: white !important;
+}
+
+.selection {
+    padding-left: 2.5rem;
+}
+
+.dropdown-btn > div {
+    font-size: 0.875rem !important;
+    width: 240px !important;
+}
+
+.table-search-box {
+    width: 15%;
+}
+
+.table-search-box label {
+    width: 60px;
+}
+
+.table-search-box input {
+    line-height: 1.2rem !important;
+}
+
+.expanded-all-message {
+    padding: 0.5rem !important;
+    margin-bottom: 0px !important;
+}
+
+.expanded-all-message [type='button'] {
+    padding: 17px !important;
+}
+
+.list-view-search-box {
+    width: 25%;
+    right: 0px;
+}
+
+.list-view-search-box label {
+    width: 60px;
+}
+
+.list-view-search-box input {
+    width: 83%;
+    line-height: 1.2rem !important;
+}
