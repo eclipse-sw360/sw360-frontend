@@ -1,0 +1,111 @@
+/*
+  Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
+  Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+  License-Filename: LICENSE
+*/
+
+#preferences-tittle {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    color: #fff;
+    background-color: #5d8ea9;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.checkbox {
+    cursor: pointer;
+    height: 14px;
+    width: 14px;
+    border: 1px solid gray !important;
+}
+
+.checkbox + label {
+    position: relative;
+    top: -0.1rem;
+}
+
+.label {
+    color: #272833;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.label:hover {
+    cursor: pointer;
+    color: #5d8ea9;
+}
+
+.checkbox:disabled:checked {
+    background-color: gray;
+}
+
+.checkbox:disabled + label:hover {
+    cursor: not-allowed;
+}
+
+.section {
+    border: 1px solid #cdced9;
+    box-shadow: 0 1px 3px -1px rgb(0 0 0 / 60%);
+}
+
+.accordion-header {
+    background-color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #6b6c7e;
+    border-bottom: 1px solid lightgray;
+}
+
+.accordion-header button:focus {
+    box-shadow: none !important;
+}
+
+.accordion-header button {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 15px;
+    justify-content: left;
+    background-color: #fff;
+}
+
+.accordion-header button[aria-expanded='true'] {
+    color: #000000;
+}
+
+.accordion-header button[aria-expanded='false'] {
+    background-color: #ffffff !important;
+}
+
+.accordion-header button[aria-expanded='false']:hover {
+    background-color: rgba(247, 148, 30, 0.12) !important;
+}
+
+.accordion-body {
+    background-color: white;
+    padding: 1rem 1rem 1.5rem 1rem;
+    font-size: 0.91rem;
+}
+
+.accordion-item {
+    box-shadow: 0 1px 3px -1px rgb(0 0 0 / 60%);
+}
+
+.decorator {
+    color: #5d8ea9;
+    border-bottom: 1px solid #5d8ea9;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}

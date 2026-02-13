@@ -32,7 +32,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-
+import styles from '../detail.module.css'
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
@@ -254,7 +254,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
 
     return (
         license && (
-            <div className='container license-detail-row'>
+            <div className={`container ${styles['row-license-detail']}`}>
                 <div className='row'>
                     <div className='col-2 sidebar'>
                         <SideBar

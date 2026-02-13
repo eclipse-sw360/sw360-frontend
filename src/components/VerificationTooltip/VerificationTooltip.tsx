@@ -10,6 +10,7 @@
 
 import { type JSX, ReactNode, useState } from 'react'
 import { VerificationStateInfo } from '@/object-types'
+import styles from './VerificationTooltip.module.css'
 
 interface Props {
     verificationStateInfos: Array<VerificationStateInfo>
@@ -19,19 +20,19 @@ interface Props {
 const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationStateInfo }) => {
     return (
         <li>
-            <span className='verification-tooltip-header'>
+            <span className={styles.formatedMessageForVulHeader}>
                 <b>{stateInfo.verificationState} </b>
                 <span className='formatedMessageForVulDate'>({stateInfo.checkedOn})</span>
             </span>
-            <span className='verification-tooltip-item'>
+            <span className={styles.formatedMessageForVulItem}>
                 <i>Checked By: </i>
                 <span>{stateInfo.checkedBy}</span>
             </span>
-            <span className='verification-tooltip-item'>
+            <span className={styles.formatedMessageForVulItem}>
                 <i>Action: </i>
                 <span></span>
             </span>
-            <span className='verification-tooltip-item'>
+            <span className={styles.formatedMessageForVulItem}>
                 <p>
                     <i>Comment: </i>
                     {stateInfo.comment}
@@ -45,14 +46,14 @@ const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.E
     const [show, setShow] = useState(false)
     return (
         <div
-            className='verification-tooltip'
+            className={styles.tooltip}
             onMouseOver={() => setShow(true)}
             onMouseLeave={() => setShow(false)}
         >
             {show && (
-                <div className='verification-tooltip-content'>
+                <div className={`${styles['tooltip-content']}`}>
                     <ol
-                        className='verification-tooltip-list'
+                        className={styles.formatedMessageForVul}
                         reversed
                     >
                         {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (

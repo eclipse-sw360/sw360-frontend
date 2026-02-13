@@ -21,6 +21,7 @@ import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import CommonUtils from '@/utils/common.utils'
 import AttachmentRowData from '../AttachmentRowData'
+import styles from './SelectAttachment.module.css'
 
 interface Props {
     show: boolean
@@ -120,14 +121,14 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                 <Modal.Title>{t('Upload Attachment')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className='attachment-modal-body-first'>
-                    <div className='attachment-modal-body-second'>
+                <div className={`${styles['modal-body-first']}`}>
+                    <div className={`${styles['modal-body-second']}`}>
                         <span>{t('Drop a File Here')}</span>
                         <br />
                         {t('Or')}
                         <br />
                         <input
-                            className='attachment-input-hidden'
+                            className={`${styles['input']}`}
                             ref={inputRef}
                             type='file'
                             placeholder={t('Upload Attachment')}
@@ -135,7 +136,7 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                             onChange={handleFileChange}
                         />
                         <button
-                            className='attachment-button-browse'
+                            className={`${styles['button-browse']}`}
                             onClick={handleButtonClick}
                         >
                             {t('Browse')}
@@ -149,12 +150,12 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                         <>
                             <div
                                 key={file.name}
-                                className='attachment-list-file'
+                                className={`${styles['div-list-file']}`}
                             >
-                                <div className='attachment-filename'>
+                                <div className={`${styles['div-filename']}`}>
                                     {file.name} ({file.size}b)
                                 </div>
-                                <div className='attachment-button-delete'>
+                                <div className={`${styles['button-delete']}`}>
                                     <Button
                                         variant='danger'
                                         size='sm'

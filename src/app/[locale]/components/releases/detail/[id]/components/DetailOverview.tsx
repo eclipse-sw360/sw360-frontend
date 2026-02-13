@@ -45,7 +45,7 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-
+import styles from '../detail.module.css'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -374,7 +374,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     <Dropdown>
                                         <Dropdown.Toggle variant='primary'>
                                             <span
-                                                className={`badge-circle clearing-state-${release.clearingState.toLowerCase()}`}
+                                                className={`${styles['badge-circle']} ${styles[release.clearingState]}`}
                                             ></span>
                                             {`${t('Version')} ${release.version}`}
                                         </Dropdown.Toggle>
@@ -386,10 +386,12 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 ]) => (
                                                     <Dropdown.Item
                                                         key={index}
-                                                        className='release-dropdown-item'
+                                                        className={styles['dropdown-item']}
                                                     >
                                                         <span
-                                                            className={`badge-circle clearing-state-${(item.clearingState ?? 'new').toLowerCase()}`}
+                                                            className={`${styles['badge-circle']} ${
+                                                                styles[item.clearingState ?? 'NEW']
+                                                            }`}
                                                         ></span>
                                                         <Link href={`/components/releases/detail/${item.id}`}>
                                                             {`${t('Version')} ${item.version}`}
