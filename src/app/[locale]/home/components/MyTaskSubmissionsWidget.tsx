@@ -217,7 +217,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
     })
 
     const handleDeleteProject = (id: string) => {
-        // TODO: Implement delete functionality
+        console.log(id)
     }
 
     return (
