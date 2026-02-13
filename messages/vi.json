@@ -455,6 +455,7 @@
     "Do you really want to delete this client": "Bạn có thực sự muốn xóa máy khách này không",
     "Do you really want to delete this item": "Bạn có thực sự muốn xóa mục này?",
     "Do you really want to delete this obligation": "Bạn có thực sự muốn xóa nghĩa vụ này không",
+    "Project has open clearing requests": "Dự án có các yêu cầu clearing đang mở",
     "Do you really want to export SBOM": "Bạn có thực sự muốn xuất SBOM cho dự án <strong> {ProjectName} </strong> (<strong> {chiếu} </strong>)?",
     "Do you really want to import all OSADL license obligations": "Bạn có thực sự muốn nhập tất cả các nghĩa vụ giấy phép OSADL",
     "Do you really want to import all SPDX all licenses": "Bạn có thực sự muốn nhập tất cả SPDX tất cả các giấy phép",

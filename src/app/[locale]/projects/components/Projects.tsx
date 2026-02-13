@@ -52,6 +52,7 @@ function Project(): JSX.Element {
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [hasClearingRequest, setHasClearingRequest] = useState(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
         show: false,
         importType: 'SPDX',
@@ -77,8 +78,9 @@ function Project(): JSX.Element {
         status,
     ])
 
-    const handleDeleteProject = (projectId: string) => {
+    const handleDeleteProject = (projectId: string, clearingRequestId?: string) => {
         setDeleteProjectId(projectId)
+        setHasClearingRequest(!!clearingRequestId)
         setDeleteDialogOpen(true)
     }
 
@@ -305,7 +307,7 @@ function Project(): JSX.Element {
                                             <BsFillTrashFill
                                                 className='btn-icon'
                                                 size={20}
-                                                onClick={() => handleDeleteProject(id)}
+                                                onClick={() => handleDeleteProject(id, projectClearingRequestId)}
                                             />
                                         </span>
                                     </OverlayTrigger>
@@ -676,6 +678,7 @@ function Project(): JSX.Element {
                     projectId={deleteProjectId}
                     show={deleteDialogOpen}
                     setShow={setDeleteDialogOpen}
+                    hasClearingRequest={hasClearingRequest}
                 />
             )}
             <Breadcrumb name={t('Projects')} />

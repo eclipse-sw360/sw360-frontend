@@ -73,6 +73,7 @@ function EditProject({
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [hasClearingRequest, setHasClearingRequest] = useState(false)
 
     const session = useSession()
 
@@ -356,6 +357,36 @@ function EditProject({
                     return notFound()
                 }
                 const project = (await response.json()) as Project
+
+                // Check if project has open clearing request
+                if (project.clearingRequestId && project.clearingRequestId !== '') {
+                    try {
+                        const crResponse = await ApiUtils.GET(
+                            `clearingrequests/${project.clearingRequestId}`,
+                            session.data.user.access_token,
+                        )
+                        if (crResponse.status === StatusCodes.OK) {
+                            const clearingRequest = await crResponse.json()
+                            // Check if clearing request is open or in progress
+                            const clearingState = clearingRequest.clearingState?.toUpperCase()
+                            const hasOpenCR = clearingState === 'OPEN' || clearingState === 'IN_PROGRESS'
+                            setHasClearingRequest(hasOpenCR)
+                        } else if (crResponse.status === StatusCodes.NOT_FOUND) {
+                            // Clearing request ID exists but CR is not found - corrupted data
+                            console.warn(
+                                `Clearing request ${project.clearingRequestId} not found but referenced in project`,
+                            )
+                            setHasClearingRequest(true) // Show warning about the issue
+                        } else {
+                            setHasClearingRequest(false)
+                        }
+                    } catch (e) {
+                        console.warn('Error checking clearing request status:', e)
+                        // If project has a clearing request ID, assume there's an issue
+                        setHasClearingRequest(true)
+                    }
+                }
+
                 if (project.externalIds !== undefined) {
                     setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
                 }
@@ -710,6 +741,7 @@ function EditProject({
                                 projectId={projectId}
                                 show={deleteDialogOpen}
                                 setShow={setDeleteDialogOpen}
+                                hasClearingRequest={hasClearingRequest}
                             />
                         )}
                         {projectId && (
