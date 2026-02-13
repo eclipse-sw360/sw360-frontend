@@ -879,8 +879,8 @@ function EditProject({
                                                     <Tab.Pane eventKey='linkedPackages'>
                                                         <LinkedPackages
                                                             projectId={projectId}
-                                                            projectPayload={projectPayload}
-                                                            setProjectPayload={setProjectPayload}
+                                                            payload={projectPayload}
+                                                            setPayload={setProjectPayload}
                                                         />
                                                     </Tab.Pane>
                                                     <Tab.Pane eventKey='attachments'>
