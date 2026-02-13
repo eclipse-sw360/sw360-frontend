@@ -85,7 +85,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
 
     const handleSubmit = () => {
         deleteLicense().catch((err) => {
-            console.log(err)
+            console.error(err)
         })
     }
 

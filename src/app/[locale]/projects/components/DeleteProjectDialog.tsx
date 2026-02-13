@@ -126,7 +126,7 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
 
     const handleSubmit = () => {
         deleteProject().catch((err) => {
-            console.log(err)
+            console.error(err)
         })
     }
 

@@ -217,6 +217,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
     })
 
     const handleDeleteProject = (id: string) => {
+        // biome-ignore lint/suspicious/noConsole: useful for debugging until implementation is complete
         console.log(id)
     }
 

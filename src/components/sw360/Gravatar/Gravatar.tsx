@@ -38,9 +38,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
         fetch(gravatarUrl)
             .then((response) => response.blob())
             .then((blob) => {
-                const imageUrl = URL.createObjectURL(blob)
                 setGravatarImage(gravatarUrl)
-                console.log(imageUrl)
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
     }, [

@@ -124,7 +124,7 @@ export default function LicenseTypesDetail(): ReactNode {
                 }
 
                 const data = (await response.json()) as EmbeddedLicenseTypes
-                console.log(data['_embedded']?.['sw360:licenseTypes'])
+
                 setLicenseTypes(
                     CommonUtils.isNullOrUndefined(data?.['_embedded']?.['sw360:licenseTypes'])
                         ? []

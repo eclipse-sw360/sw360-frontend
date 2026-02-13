@@ -101,7 +101,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                             data-toggle='tooltip'
                             title='Copy to clipboard'
                             onClick={() => {
-                                navigator.clipboard.writeText(releaseId).catch((err) => console.log(err))
+                                navigator.clipboard.writeText(releaseId).catch((err) => console.error(err))
                             }}
                         >
                             <BsClipboard
