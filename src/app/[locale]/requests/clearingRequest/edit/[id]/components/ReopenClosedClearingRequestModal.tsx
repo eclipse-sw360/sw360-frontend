@@ -9,7 +9,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { StatusCodes } from 'http-status-codes'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
@@ -17,13 +18,15 @@ import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import DateField from '@/components/DateField'
 import { CreateClearingRequestPayload } from '@/object-types'
+import { ApiUtils, CommonUtils } from '@/utils/index'
 
 interface Props {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
+    clearingRequestId: string
 }
 
-export default function ReopenClosedClearingRequestModal({ show, setShow }: Props): ReactNode {
+export default function ReopenClosedClearingRequestModal({ show, setShow, clearingRequestId }: Props): ReactNode {
     const t = useTranslations('default')
     const { status } = useSession()
     const [message, setMessage] = useState('')
@@ -60,10 +63,33 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
         setShowMessage(true)
     }
 
-    const reopenClearingRequest = () => {
-        // Yet to implement
-
-        handleError()
+    const reopenClearingRequest = async () => {
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const response = await ApiUtils.PATCH(
+                `clearingrequest/${clearingRequestId}`,
+                {
+                    clearingState: 'NEW',
+                    requestedClearingDate: createClearingRequestPayload.requestedClearingDate,
+                    clearingType: createClearingRequestPayload.clearingType,
+                    priority: createClearingRequestPayload.priority,
+                    requestingUserComment: createClearingRequestPayload.requestingUserComment,
+                },
+                session.user.access_token,
+            )
+            if (response.status == StatusCodes.OK) {
+                displayMessage('success', t('Clearing Request reopened successfully'))
+                setIsDisabled(true)
+                setReloadPage(true)
+            } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                await signOut()
+            } else {
+                handleError()
+            }
+        } catch {
+            handleError()
+        }
     }
 
     const handleSubmit = () => {
@@ -304,8 +330,9 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
                         className='login-btn'
                         variant='primary'
                         disabled={
-                            createClearingRequestPayload.clearingType !== undefined ||
-                            createClearingRequestPayload.requestedClearingDate !== undefined
+                            isDisabled ||
+                            !createClearingRequestPayload.clearingType ||
+                            !createClearingRequestPayload.requestedClearingDate
                         }
                         onClick={() => handleSubmit()}
                         hidden={reloadPage}
