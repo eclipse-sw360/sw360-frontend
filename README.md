@@ -41,3 +41,12 @@ Everything will run with an internal docker network called `sw360` and ports 300
 ```bash
 docker compose up -d
 ```
+
+## Default Credentials
+
+After starting the containers, you can login to the SW360 frontend with the default admin credentials:
+
+**Email:** `setup@sw360.org`  
+**Password:** `sw360fossie`
+
+These credentials are automatically created when the backend initializes for the first time.

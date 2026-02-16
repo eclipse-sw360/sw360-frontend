@@ -44,6 +44,10 @@ If everything went well, the localhost port 3000 will be opened in your host and
 http://localhost:3000
 ```
 
+**Default Login Credentials** (when using Docker Compose):
+- Email: `setup@sw360.org`
+- Password: `sw360fossie`
+
 ### Source license headers and copyrights
 
 Every file need to have the conformant license headers. To do that:
