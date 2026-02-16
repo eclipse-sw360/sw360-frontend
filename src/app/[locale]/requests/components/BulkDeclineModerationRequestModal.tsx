@@ -282,7 +282,7 @@ export default function BulkDeclineModerationRequestModal({
                 MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
         } catch (error) {
-            console.log(error)
+            console.error(error)
         } finally {
             setShowProcessing(false)
         }
@@ -357,7 +357,7 @@ export default function BulkDeclineModerationRequestModal({
                 MessageService.error(t('Mandatory fields are empty please provide required data'))
             }
         } catch (error) {
-            console.log(error)
+            console.error(error)
         } finally {
             setShowProcessing(false)
         }
