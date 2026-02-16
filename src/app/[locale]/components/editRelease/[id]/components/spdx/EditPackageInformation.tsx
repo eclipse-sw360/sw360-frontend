@@ -286,7 +286,6 @@ const EditPackageInformation = ({
         } else {
             setIsTypeCateGoryEmpty(true)
         }
-        console.log(isTypeCateGoryEmpty)
     }
 
     const addReferences = () => {
@@ -536,7 +535,6 @@ const EditPackageInformation = ({
                 setAllLicensesInformationNone(true)
                 setAllLicensesInformationNoasserttion(false)
             } else if (packageInformation.licenseInfoFromFiles.toString() === 'NOASSERTION') {
-                console.log(allLicensesInformation)
                 setAllLicensesInformation([])
                 setAllLicensesInformationExist(false)
                 setAllLicensesInformationNone(false)

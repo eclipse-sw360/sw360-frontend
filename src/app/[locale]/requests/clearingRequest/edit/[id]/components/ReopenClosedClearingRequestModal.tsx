@@ -75,7 +75,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
 
     const reopenClearingRequest = () => {
         // Yet to implement
-        console.log('reopen closed CR')
+
         handleError()
     }
 
