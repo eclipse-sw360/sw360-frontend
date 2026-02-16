@@ -63,8 +63,20 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
             {
                 id: 'vendor',
                 header: t('Vendor'),
-                accessorKey: 'vendor',
-                cell: (info) => info.getValue(),
+                // Render vendor from `defaultVendor` (preferred) or fall back to embedded `sw360:vendors`.
+                // Prefer `fullName` first, then `shortName`, then id.
+                cell: ({ row }) => {
+                    const defVendor = row.original.defaultVendor
+                    const embeddedVendor = row.original._embedded?.['sw360:vendors']?.[0]
+                    const name =
+                        defVendor?.fullName?.trim() ||
+                        defVendor?.shortName ||
+                        embeddedVendor?.fullName?.trim() ||
+                        embeddedVendor?.shortName ||
+                        row.original.defaultVendorId ||
+                        ''
+                    return <>{name}</>
+                },
                 enableSorting: true,
                 meta: {
                     width: '20%',
