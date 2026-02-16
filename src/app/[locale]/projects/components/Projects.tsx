@@ -559,7 +559,7 @@ function Project(): JSX.Element {
                 }
             }
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
     }
 
