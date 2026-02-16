@@ -10,7 +10,9 @@
 
   SPDX-License-Identifier: EPL-2.0
   License-Filename: LICENSE
-*/ body {
+*/
+
+body {
     background-color: #fafafa;
     color: #272833;
     font-family:
