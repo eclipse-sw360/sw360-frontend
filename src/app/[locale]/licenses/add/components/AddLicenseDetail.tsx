@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Embedded, LicensePayload, LicenseType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import styles from './LicenseDetails.module.css'
 
 interface Props {
     licensePayload: LicensePayload
@@ -113,7 +114,7 @@ const AddLicenseDetail = ({
             }}
         >
             <div
-                className='header mb-1'
+                className={`${styles['header']} mb-1`}
                 style={{
                     paddingTop: '0.5rem',
                     height: '45px',

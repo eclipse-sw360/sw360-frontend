@@ -88,18 +88,28 @@ function handleError(error: unknown): ApiError {
         return error
     }
 
-    if (error instanceof TypeError) {
-        return new ApiError('Network error - please check your connection', {
-            code: 'NETWORK_ERROR',
-            isRetryable: true,
+    // Firefox throws TypeError for aborted fetches, Chrome throws DOMException('AbortError')
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal#browser_compatibility
+    if (
+        typeof error === 'object' &&
+        error !== null &&
+        ((error instanceof DOMException && error.name === 'AbortError') ||
+            // Firefox: TypeError with message 'NetworkError when attempting to fetch resource.'
+            (error instanceof TypeError &&
+                typeof error.message === 'string' &&
+                error.message.match(/aborted|abort|networkerror when attempting to fetch resource/i)))
+    ) {
+        return new ApiError('Request aborted', {
+            code: 'ABORTED',
+            isAborted: true,
             cause: error,
         })
     }
 
-    if (error instanceof DOMException && error.name === 'AbortError') {
-        return new ApiError('Request aborted', {
-            code: 'ABORTED',
-            isAborted: true,
+    if (error instanceof TypeError) {
+        return new ApiError('Network error - please check your connection', {
+            code: 'NETWORK_ERROR',
+            isRetryable: true,
             cause: error,
         })
     }

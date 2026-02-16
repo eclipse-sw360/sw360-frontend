@@ -23,8 +23,7 @@ import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { BsPencil } from 'react-icons/bs'
-import { FaFile } from 'react-icons/fa'
+import { FaFile, FaPencilAlt } from 'react-icons/fa'
 import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
@@ -607,7 +606,7 @@ export default function ListView({
                                     href={url}
                                     className='overlay-trigger'
                                 >
-                                    <BsPencil className='btn-icon' />
+                                    <FaPencilAlt className='btn-icon' />
                                 </Link>
                             </OverlayTrigger>
                             {row.original.type === 'release' && (
@@ -778,22 +777,15 @@ export default function ListView({
                 </Modal.Header>
                 <Modal.Body>
                     {licenseFiles.length > 0 ? (
-                        <ul className='list-unstyled'>
-                            {licenseFiles.map((file) => (
-                                <li
-                                    key={file}
-                                    className='d-flex align-items-center mb-2'
-                                >
-                                    <FaFile className='me-2 text-secondary' />
-                                    <span>{file}</span>
-                                </li>
+                        <ul>
+                            {licenseFiles.map((file, index) => (
+                                <li key={index}>{file}</li>
                             ))}
                         </ul>
                     ) : (
-                        <p className='text-muted'>{t('No license files available')}</p>
+                        <p>{t('No license files available')}</p>
                     )}
                 </Modal.Body>
-
                 <Modal.Footer>
                     <Button
                         variant='secondary'

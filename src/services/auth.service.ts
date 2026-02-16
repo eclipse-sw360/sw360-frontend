@@ -62,7 +62,7 @@ const generateToken = async (userData: UserCredentialInfo): Promise<null | AuthT
         }
         return sw360token
     } catch (e) {
-        console.log(e)
+        console.error(e)
         return null
     }
 }

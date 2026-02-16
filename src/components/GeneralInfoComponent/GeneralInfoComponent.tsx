@@ -250,6 +250,24 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 value={componentPayload.homepage ?? ''}
                             />
                         </div>
+                        <div className='col-lg-4'>
+                            <label
+                                htmlFor='vcs_url'
+                                className='form-label fw-bold'
+                            >
+                                {t('VCS')}/{t('Repository URL')}
+                            </label>
+                            <input
+                                type='URL'
+                                className='form-control'
+                                placeholder={t('Enter VCS URL')}
+                                id='vcs_url'
+                                aria-describedby='vcs_url'
+                                name='vcs'
+                                onChange={updateField}
+                                value={componentPayload.vcs ?? ''}
+                            />
+                        </div>
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>
