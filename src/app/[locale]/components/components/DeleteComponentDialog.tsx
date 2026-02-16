@@ -19,7 +19,7 @@ import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { ActionType, Component } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 const DEFAULT_COMPONENT_INFO: Component = {
     id: '',
@@ -70,12 +70,18 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         setShowMessage(true)
     }
 
-    const handleError = useCallback(() => {
-        displayMessage('danger', t('Error when processing'))
-        setReloadPage(true)
-    }, [
-        t,
-    ])
+    const handleError = useCallback(
+        (error?: unknown) => {
+            if (error && error instanceof ApiError && error.isAborted) {
+                return
+            }
+            displayMessage('danger', t('Error when processing'))
+            setReloadPage(true)
+        },
+        [
+            t,
+        ],
+    )
 
     const deleteComponent = async () => {
         if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
@@ -117,36 +123,38 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
             } else {
                 handleError()
             }
-        } catch {
-            handleError()
+        } catch (e) {
+            handleError(e)
         }
     }
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
-            if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const componentsResponse = await ApiUtils.GET(
-                `components/${componentId}`,
-                session.user.access_token,
-                signal,
-            )
-            if (componentsResponse.status === StatusCodes.OK) {
-                const component = (await componentsResponse.json()) as Component
-                setComponent(component)
-                setDependencies({
-                    releases: component['releaseIds'] ? component['releaseIds'].length : 0,
-                    attachments:
-                        component._embedded && component._embedded['sw360:attachments']
-                            ? component._embedded['sw360:attachments'].length
-                            : 0,
-                })
-            } else if (componentsResponse.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
-            } else {
-                setComponent(DEFAULT_COMPONENT_INFO)
-                handleError()
+            try {
+                if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return
+                const componentsResponse = await ApiUtils.GET(
+                    `components/${componentId}`,
+                    session.user.access_token,
+                    signal,
+                )
+                if (componentsResponse.status === StatusCodes.OK) {
+                    const component = (await componentsResponse.json()) as Component
+                    setComponent(component)
+                    setDependencies({
+                        releases: component['releaseIds'] ? component['releaseIds'].length : 0,
+                        attachments:
+                            component._embedded && component._embedded['sw360:attachments']
+                                ? component._embedded['sw360:attachments'].length
+                                : 0,
+                    })
+                } else {
+                    setComponent(DEFAULT_COMPONENT_INFO)
+                    handleError()
+                }
+            } catch (error: unknown) {
+                handleError(error)
             }
         },
         [
