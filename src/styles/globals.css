@@ -10,9 +10,7 @@
 
   SPDX-License-Identifier: EPL-2.0
   License-Filename: LICENSE
-*/
-
-body {
+*/ body {
     background-color: #fafafa;
     color: #272833;
     font-family:
@@ -384,6 +382,11 @@ body {
     color: #6c757d !important;
 }
 
+.btn-icon:hover {
+    text-decoration: underline !important;
+    color: var(--sw360-primary-color) !important;
+}
+
 .action-icon {
     display: inline-flex;
     align-items: center;
@@ -421,11 +424,6 @@ body {
 
 .action-icon.icon-disabled {
     cursor: not-allowed;
-}
-
-.btn-icon:hover {
-    text-decoration: underline !important;
-    color: var(--sw360-primary-color) !important;
 }
 
 .icon-disabled {
