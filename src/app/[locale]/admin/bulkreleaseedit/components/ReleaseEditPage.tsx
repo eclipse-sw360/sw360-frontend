@@ -118,7 +118,6 @@ function UpdateReleaseModal({
 
     const handleSetVendorData = (vendorResponse: Vendor) => {
         setVendor(vendorResponse)
-        console.log(vendorResponse)
         setRelease({
             ...release,
             vendorId: vendorResponse._links?.self.href.split('/').at(-1),

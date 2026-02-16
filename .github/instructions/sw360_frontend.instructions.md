@@ -575,7 +575,7 @@ See `.env` and `docs/templates/template.env` for full list.
 ## Git Workflow
 
 For commit message format, branch naming conventions, and PR guidelines, see:
-**[git-commit.instructions.md](./git-commit.instructions.md)**
+**[git-commit-instructions.md](./git-commit-instructions.md)**
 
 ---
 

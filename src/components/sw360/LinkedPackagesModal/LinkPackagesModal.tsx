@@ -47,7 +47,6 @@ export default function LinkPackagesModal({ projectPayload, setProjectPayload, s
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
-            console.log('hello')
             void signOut()
         }
     }, [
