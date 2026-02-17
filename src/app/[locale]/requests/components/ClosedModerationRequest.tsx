@@ -38,14 +38,6 @@ function ClosedModerationRequest(): ReactNode {
     const session = useSession()
     const params = useSearchParams()
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const formatDate = (timestamp: number | undefined): string | null => {
         if (timestamp === undefined) {
             return null

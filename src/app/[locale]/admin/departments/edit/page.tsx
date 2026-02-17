@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
@@ -35,15 +35,6 @@ const EditDepartmentPage = (): JSX.Element => {
     const [memberEmails, setMemberEmails] = useState<string[] | undefined>(undefined)
     const [emailSuggestions, setEmailSuggestions] = useState<string[]>([])
     const allEmails = useRef<string[]>([])
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleUpdateDepartmentMembers = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()

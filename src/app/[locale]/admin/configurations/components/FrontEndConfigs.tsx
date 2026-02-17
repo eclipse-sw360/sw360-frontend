@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
@@ -29,16 +29,7 @@ const FrontEndConfigs = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
     const [arrayKeyStates, setArrayKeyStates] = useState<ProcessedUiConfig>({} as ProcessedUiConfig)
-    const { status } = useSession()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const fetchUiConfig = useCallback(async () => {
         const session = await getSession()

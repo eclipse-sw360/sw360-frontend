@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, SideBar } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -89,15 +89,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         attachments: null,
         comment: '',
     })
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
+    // ...existing code...
 
     useEffect(() => {
         const controller = new AbortController()

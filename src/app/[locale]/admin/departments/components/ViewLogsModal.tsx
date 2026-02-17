@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
@@ -28,15 +28,6 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
     const [logFilesDate, setLogFilesDate] = useState<string[]>([])
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
     const [logFileContents, setLogFileContents] = useState<string[]>([])
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const fetchLogFiles = useCallback(async () => {
         const session = await getSession()
