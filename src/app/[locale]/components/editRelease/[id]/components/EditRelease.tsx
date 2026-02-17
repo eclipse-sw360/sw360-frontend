@@ -45,6 +45,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
+import EditLinkedPackages from './EditLinkedPackage'
 import EditSPDXDocument from './EditSPDXDocument'
 import ReleaseEditSummary from './ReleaseEditSummary'
 import ReleaseEditTabs from './ReleaseEditTabs'
@@ -171,6 +172,21 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 setRelease(release)
                 setDeletingRelease(releaseId)
                 setComponentId(CommonUtils.getIdFromUrl(release['_links']['sw360:component']['href']))
+                const embeddedPkgs = release._embedded?.['sw360:packages'] ?? []
+                const linkedPackages = embeddedPkgs
+                    .map((p) => ({
+                        packageId: CommonUtils.getIdFromUrl(p._links?.self?.href),
+                        name: p.name ?? '',
+                        version: p.version ?? '',
+                        licenseIds: [],
+                        packageManager: '',
+                    }))
+                    .filter((p) => p.packageId)
+
+                setReleasePayload((prev) => ({
+                    ...prev,
+                    linkedPackages,
+                }))
 
                 if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
                     setTabList(ReleaseEditTabs.WITH_COMMERCIAL_DETAILS)
@@ -240,7 +256,11 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         releaseId,
     ])
 
-    const [releasePayload, setReleasePayload] = useState<Release>({
+    const [releasePayload, setReleasePayload] = useState<
+        Release & {
+            packageIds?: string[]
+        }
+    >({
         name: '',
         cpeid: '',
         version: '',
@@ -418,18 +438,37 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 }
             }
         }
+        try {
+            const eccInfo = releasePayload.eccInformation
+            const sanitizedEccInformation: ECCInformation | undefined = eccInfo
+                ? {
+                      ...eccInfo,
+                      eccStatus: eccInfo.eccStatus?.trim() !== '' ? eccInfo.eccStatus : undefined,
+                  }
+                : undefined
+            const { linkedPackages, clearingState, attachments, clearingInformation, cotsDetails, ...cleanPayload } =
+                releasePayload
 
-        const response = await ApiUtils.PATCH(`releases/${releaseId}`, releasePayload, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
-            const release = (await response.json()) as ReleaseDetail
-            MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
-            router.push('/components/releases/detail/' + releaseId)
-        } else if (response.status === StatusCodes.ACCEPTED) {
-            MessageService.success(t('Moderation request is created'))
-            router.push('/components/releases/detail/' + releaseId)
-        } else {
-            const data = await response.json()
-            MessageService.error(data.message)
+            const finalPayload: Release = {
+                ...cleanPayload,
+                eccInformation: sanitizedEccInformation,
+            }
+            const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload, session.user.access_token)
+
+            if (response.status === StatusCodes.OK) {
+                const release = (await response.json()) as ReleaseDetail
+                MessageService.success(`Release ${release.name} (${release.version}) updated successfully!`)
+                router.push('/components/releases/detail/' + releaseId)
+            } else if (response.status === StatusCodes.ACCEPTED) {
+                MessageService.success(t('Moderation request is created'))
+                router.push('/components/releases/detail/' + releaseId)
+            } else {
+                const data = await response.json()
+                MessageService.error(data.message)
+            }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e)
+            MessageService.error(msg)
         }
     }
 
@@ -585,6 +624,15 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                 <LinkedReleases
                                     actionType={ActionType.EDIT}
                                     release={release}
+                                    releasePayload={releasePayload}
+                                    setReleasePayload={setReleasePayload}
+                                />
+                            </div>
+                            <div
+                                className='row'
+                                hidden={selectedTab !== ReleaseTabIds.LINKED_PACKAGES ? true : false}
+                            >
+                                <EditLinkedPackages
                                     releasePayload={releasePayload}
                                     setReleasePayload={setReleasePayload}
                                 />
