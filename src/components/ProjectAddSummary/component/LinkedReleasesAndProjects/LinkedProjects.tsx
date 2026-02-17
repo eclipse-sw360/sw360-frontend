@@ -188,7 +188,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                             }}
                             onClick={() => handleClickDelete(row.original[0])}
                             title={t('Delete')}
-                            aria-label={t('Delete')}
+                            aria-label={t('Delete linked project')}
                         >
                             <FaTrashAlt />
                         </button>
