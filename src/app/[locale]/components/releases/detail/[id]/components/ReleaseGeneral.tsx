@@ -19,6 +19,7 @@ import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
+import styles from '../detail.module.css'
 
 interface Props {
     release: ReleaseDetail
@@ -100,7 +101,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                             data-toggle='tooltip'
                             title='Copy to clipboard'
                             onClick={() => {
-                                navigator.clipboard.writeText(releaseId).catch((err) => console.log(err))
+                                navigator.clipboard.writeText(releaseId).catch((err) => console.error(err))
                             }}
                         >
                             <BsClipboard
@@ -248,7 +249,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                                 color: 'gray',
                                             }}
                                             size={20}
-                                            className='release-detail-info'
+                                            className={styles.info}
                                         />
                                     </span>
                                 ),
@@ -273,7 +274,7 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                                     color: 'gray',
                                                 }}
                                                 size={20}
-                                                className='release-detail-info'
+                                                className={styles.info}
                                             />
                                         </span>
                                     ),

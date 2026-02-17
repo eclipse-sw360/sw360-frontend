@@ -395,7 +395,7 @@ export default function LinkProjects({
                         <p>
                             {t('Click')}{' '}
                             <Link
-                                href={'#'}
+                                href={`/projects/edit/${projectId}?tab=linkedProjectsAndReleases`}
                                 className='text-link'
                             >
                                 {t('here')}

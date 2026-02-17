@@ -19,6 +19,7 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 import { Attachment, FossologyProcessInfo, FossologyProcessStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import styles from './fossologyClearing.module.css'
 
 interface Props {
     show: boolean
@@ -333,7 +334,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         if (show === true) {
             if (release === undefined) {
                 fetchRelease()
-                checkFossologyProcessStatus().catch((err) => console.log(err))
+                checkFossologyProcessStatus().catch((err) => console.error(err))
             } else {
                 if (progressStatus.percent >= PERCENT_DONE) {
                     showMessage(clearingMessages.CLEARING_SUCCESS)
@@ -345,7 +346,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     progressStatus.percent === 0 &&
                     numberOfSourceAttachment.current == 1
                 ) {
-                    handleFossologyClearing({}).catch((err) => console.log(err))
+                    handleFossologyClearing({}).catch((err) => console.error(err))
                 }
 
                 if (progressStatus.percent >= PERCENT_DONE) {
@@ -389,7 +390,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     >
                         {message.content}
                     </Alert>
-                    <div className='fossology-guide form-text'>
+                    <div className={`${styles.guide} form-text`}>
                         <h3>{t('How it works')}:</h3>
                         <p>{t('basic_fossology_process')}:</p>
                         <ol>

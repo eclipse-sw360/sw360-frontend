@@ -20,6 +20,7 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 
 import { Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import styles from '../components.module.css'
 
 interface Props {
     show: boolean
@@ -134,7 +135,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
             return
         }
         setImportState(ImportSBOMState.IMPORTING)
-        prepareImport().catch((err) => console.log(err))
+        prepareImport().catch((err) => console.error(err))
     }
 
     const closeModal = () => {
@@ -177,9 +178,9 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                             {t('wrong_spdx_information')}.
                         </div>
                         <div>
-                            <div className='modal-body-first'>
+                            <div className={`${styles['modal-body-first']}`}>
                                 <div
-                                    className='modal-body-second'
+                                    className={`${styles['modal-body-second']}`}
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
                                 >
@@ -188,7 +189,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                                     {t('Or')}
                                     <br />
                                     <input
-                                        className='sbom-input'
+                                        className={`${styles['input']}`}
                                         ref={inputRef as React.Ref<HTMLInputElement>}
                                         type='file'
                                         accept='.rdf,.spdx'
@@ -196,7 +197,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                                         placeholder={t('Drop a File Here')}
                                     />
                                     <button
-                                        className='button-browse'
+                                        className={`${styles['button-browse']}`}
                                         onClick={handleBrowseFile}
                                     >
                                         {t('Browse')}

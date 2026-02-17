@@ -88,15 +88,14 @@ function OAuthClientsList(): ReactNode {
         setLoading(true)
         try {
             const session = await getSession()
-            console.log('Session:', session)
+
             if (CommonUtils.isNullOrUndefined(session)) {
-                console.log('Session is null or undefined')
                 setLoading(false)
                 return signOut()
             }
 
             const response = await sendOAuthClientRequest(session.user.access_token)
-            console.log('Response:', response)
+
             if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as OAuthClient[]
                 setClients(data)

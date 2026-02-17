@@ -14,6 +14,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect } from 'react'
 import { LicensePayload } from '@/object-types'
+import styles from './LicenseDetails.module.css'
 
 interface Props {
     inputValid: boolean
@@ -48,7 +49,7 @@ const EditLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Prop
             }}
         >
             <div
-                className='header mb-1'
+                className={`${styles['header']} mb-1`}
                 style={{
                     paddingTop: '0.5rem',
                     height: '45px',
