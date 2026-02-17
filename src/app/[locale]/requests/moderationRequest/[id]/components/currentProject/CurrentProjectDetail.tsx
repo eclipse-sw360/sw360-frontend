@@ -10,8 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
@@ -22,8 +21,8 @@ import LicenseClearing from '@/app/[locale]/projects/detail/[id]/components/Lice
 import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
 import Attachments from '@/components/Attachments/Attachments'
-import { AdministrationDataType, SummaryDataType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { AdministrationDataType, ErrorDetails, SummaryDataType } from '@/object-types'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 export default function CurrentProjectDetail({
     projectId,
@@ -48,18 +47,18 @@ export default function CurrentProjectDetail({
         const signal = controller.signal
 
         void (async () => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return
             try {
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
                     session.user.access_token,
                     signal,
                 )
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as SummaryDataType | AdministrationDataType
@@ -69,8 +68,8 @@ export default function CurrentProjectDetail({
                     id: projectId,
                 } as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                ApiUtils.reportError(error)
             }
         })()
 

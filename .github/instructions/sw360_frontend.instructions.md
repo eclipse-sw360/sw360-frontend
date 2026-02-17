@@ -1,3 +1,7 @@
+---
+applyTo: "**/*"
+---
+
 # SW360 Frontend Copilot Instructions
 
 > **Optimized for GitHub Copilot ASK, EDIT, and Agent modes**

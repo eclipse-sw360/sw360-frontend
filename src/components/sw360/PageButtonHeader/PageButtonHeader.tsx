@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { JSX } from 'react'
 import { PageButtonHeaderProps } from './PageButtonHeader.types'
+import styles from './pagebuttonheader.module.css'
 
 function PageButtonHeader({
     title,
@@ -71,7 +72,7 @@ function PageButtonHeader({
     const t = useTranslations('default')
     return (
         <div
-            className='row buttonheader-toolbar'
+            className={`row ${styles['buttonheader-toolbar']}`}
             style={{
                 display: 'flex',
             }}
@@ -92,15 +93,15 @@ function PageButtonHeader({
                 </div>
             </div>
             {title !== undefined && (
-                <div className='col text-truncate buttonheader-title'>
+                <div className={`col text-truncate ${styles['buttonheader-title']}`}>
                     <div>
                         {title}
                         {checked != undefined && (
                             <>
                                 {checked ? (
-                                    <span className='badge buttonheader-checked'>CHECKED</span>
+                                    <span className={`badge ${styles['checked']}`}>CHECKED</span>
                                 ) : (
-                                    <span className='badge buttonheader-unchecked'>UNCHECKED</span>
+                                    <span className={`badge ${styles['un-checked']}`}>UNCHECKED</span>
                                 )}
                             </>
                         )}
@@ -108,7 +109,7 @@ function PageButtonHeader({
                 </div>
             )}
             {changesLogTab !== undefined && (
-                <div className='list-group-companion changelog-container'>
+                <div className={`list-group-companion ${styles['div-changelog']}`}>
                     <div
                         className='nav nav-pills justify-content-center bg-light font-weight-bold'
                         id='pills-tab'
@@ -119,7 +120,7 @@ function PageButtonHeader({
                     >
                         <div>
                             <a
-                                className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''} changelog-link`}
+                                className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''} ${styles['a-changelog']}`}
                                 onClick={() => setChangesLogTab !== undefined && setChangesLogTab('list-change')}
                             >
                                 {t('Change Log')}
@@ -127,7 +128,7 @@ function PageButtonHeader({
                         </div>
                         <div>
                             <a
-                                className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''} changelog-link`}
+                                className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''} ${styles['a-changes']}`}
                                 onClick={() => {
                                     if (changeLogId !== '' && setChangesLogTab !== undefined) {
                                         setChangesLogTab('view-log')

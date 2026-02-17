@@ -134,7 +134,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
 
     const handleSubmit = () => {
         createClearingRequest().catch((err) => {
-            console.log(err)
+            console.error(err)
         })
     }
 

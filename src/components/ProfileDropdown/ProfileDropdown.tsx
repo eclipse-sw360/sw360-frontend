@@ -14,10 +14,11 @@ import { useTranslations } from 'next-intl'
 import type { JSX } from 'react'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import sw360ProfileIcon from '@/assets/images/profile.svg'
+import navbarStyles from './ProfileDropdown.module.css'
 
 const UserProfile = (
     <Image
-        className='profile-dropdown-image'
+        className={navbarStyles.profileImage}
         src={sw360ProfileIcon as StaticImport}
         alt='Profile'
     />
