@@ -67,7 +67,7 @@ If you want to check your code before push to CI is possible with docker. Just e
 
 ### Commits
 
-All commits are expected to be signed. [Here's Github documentation about signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
+All commits are expected to be signed. [Here's GitHub documentation about signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
 
 Commit header should follow conventional commits format, with type(info): message
 
