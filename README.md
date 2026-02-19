@@ -10,7 +10,7 @@ For new contributors, please read the [contributing guideline](./CONTRIBUTING.md
 
 
 ## Deployment of a test environment
-Before test, a local build with your defined changes in bothe files:
+Before test, a local build with your defined changes in both files:
 
 `docker-compose.yaml`
 ```yaml
