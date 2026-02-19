@@ -15,7 +15,7 @@ Translations can be verified and executed in automated way using [Libre Translat
 
 It is recommended for easy development start usage of VSCode and Docker. A developer container setup is included and the entire setup is done after the devcontainer build.
 
-If you intend to do in a local environment by yourself, the base requirements are pretty baseic, NodeJS LTS version and an editor of your choice. Then run:
+If you intend to do in a local environment by yourself, the base requirements are pretty basic, NodeJS LTS version and an editor of your choice. Then run:
 
 ```bash
 > npm install -G pnpm
@@ -57,7 +57,7 @@ Every file need to have the conformant license headers. To do that:
 // License-Filename: LICENSE
 ```
 
-- Add your copyright on thr NOTICE file
+- Add your copyright on the NOTICE file
 
 If you want to check your code before push to CI is possible with docker. Just execute this command from the root of the projects:
 
@@ -69,7 +69,7 @@ If you want to check your code before push to CI is possible with docker. Just e
 
 All commits are expected to be signed. [Here's Github documentation about signing commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
 
-Commit header should follow convetional commits format, with type(info): message
+Commit header should follow conventional commits format, with type(info): message
 
 Example:
 
@@ -96,7 +96,7 @@ Any other header will be caught on CI, and build will fail.
 - You shall never try to commit package managers lock file
 - You shall never try to commit image files except as SVG
 - You shall use NPM. Yarn and pnpm are as good, but we need deal with one only. You can use on your dev environment, but the default reference for testing is npm
-- You shall NEVER remove the copytright lines from NOTICE unless you are the owner
+- You shall NEVER remove the copyright lines from NOTICE unless you are the owner
 
 ## Icons
 
@@ -128,7 +128,7 @@ Here's a list of commonly used icons and their intended contexts:
 *   **`BsExclamationTriangle`**: Highlighting warnings, caution, or important alerts.
 *   **`BsArrowRepeat`**: Refreshing data, content, or a page.
 *   **`BsFileEarmarkFill`**: Representing a generic document or file.
-*   **`BsPLusLg`**: Adding a new item, expanding a section, or creating a new entry.
+*   **`BsPlusLg`**: Adding a new item, expanding a section, or creating a new entry.
 *   **`BiSort`**: General sorting action. (Note: For specific ascending/descending, please refer to the dedicated icons below.)
 *   **`BsSortDown`**: Sorting data in ascending order (e.g., A-Z, 1-9).
 *   **`BsSortDownAlt`**: Sorting data in descending order (e.g., Z-A, 9-1).
