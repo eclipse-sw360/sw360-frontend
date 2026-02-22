@@ -453,7 +453,7 @@
     "Do you really want to delete the vendor": "Do you really want to delete the vendor <strong>{name}</strong>",
     "Do you really want to delete the vulnerability?": "Do you really want to delete the vulnerability <strong>{id}</strong>?",
     "Do you really want to delete this client": "Do you really want to delete this client",
-    "Do you really want to delete this item": "Do you really want to delete this item?",
+    "Project has open clearing requests": "Project has open clearing requests",
     "Do you really want to delete this obligation": "Do you really want to delete this obligation",
     "Do you really want to export SBOM": "Do you really want to export SBOM for the project <strong>{projectName}</strong> (<strong>{projectVersion}</strong>)?",
     "Do you really want to import all OSADL license obligations": "Do you really want to import all OSADL license obligations",

@@ -73,6 +73,7 @@ function EditProject({
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [hasClearingRequest, setHasClearingRequest] = useState(false)
 
     const session = useSession()
 
@@ -356,6 +357,14 @@ function EditProject({
                     return notFound()
                 }
                 const project = (await response.json()) as Project
+
+                // Check if project has open clearing request using clearingState from project response
+                if (project.clearingRequestId && project.clearingRequestId !== '') {
+                    const clearingState = project.clearingState?.toUpperCase()
+                    const hasOpenCR = clearingState === 'OPEN' || clearingState === 'IN_PROGRESS'
+                    setHasClearingRequest(hasOpenCR)
+                }
+
                 if (project.externalIds !== undefined) {
                     setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
                 }
@@ -710,6 +719,7 @@ function EditProject({
                                 projectId={projectId}
                                 show={deleteDialogOpen}
                                 setShow={setDeleteDialogOpen}
+                                hasClearingRequest={hasClearingRequest}
                             />
                         )}
                         {projectId && (
