@@ -230,10 +230,14 @@ function Project(): JSX.Element {
                     return (
                         <>
                             {id && (
-                                <span className='d-flex justify-content-evenly'>
+                                <span className='d-flex align-items-center justify-content-center'>
                                     <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                         <span
-                                            className='d-inline-block'
+                                            className='d-inline-flex align-items-center justify-content-center'
+                                            style={{
+                                                width: 28,
+                                                height: 28,
+                                            }}
                                             onClick={() => handleEditProject(id)}
                                         >
                                             <BsPencil
@@ -242,10 +246,15 @@ function Project(): JSX.Element {
                                             />
                                         </span>
                                     </OverlayTrigger>
+                                    <span className='border-start align-self-stretch mx-1 my-1' />
                                     {projectClearingRequestId && projectClearingRequestId !== '' ? (
                                         <OverlayTrigger overlay={<Tooltip>{t('View Clearing Request')}</Tooltip>}>
                                             <span
-                                                className='d-inline-block'
+                                                className='d-inline-flex align-items-center justify-content-center'
+                                                style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                }}
                                                 onClick={() => {
                                                     setClearingRequestId(projectClearingRequestId)
                                                     setShowViewCRModal(true)
@@ -260,7 +269,11 @@ function Project(): JSX.Element {
                                     ) : crIsAllowed ? (
                                         <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
                                             <span
-                                                className='d-inline-block'
+                                                className='d-inline-flex align-items-center justify-content-center'
+                                                style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                }}
                                                 onClick={() => {
                                                     setCreateCRProjectId(id)
                                                     setShowCreateCRModal(true)
@@ -282,7 +295,13 @@ function Project(): JSX.Element {
                                                 </Tooltip>
                                             }
                                         >
-                                            <span className={'d-inline-block'}>
+                                            <span
+                                                className='d-inline-flex align-items-center justify-content-center'
+                                                style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                }}
+                                            >
                                                 <BsCheck2Square
                                                     size={20}
                                                     className='btn-icon overlay-trigger icon-disabled'
@@ -290,10 +309,15 @@ function Project(): JSX.Element {
                                             </span>
                                         </OverlayTrigger>
                                     )}
+                                    <span className='border-start align-self-stretch mx-1 my-1' />
                                     <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
                                         <Link
                                             href={`/projects/duplicate/${id}`}
-                                            className='overlay-trigger'
+                                            className='overlay-trigger d-inline-flex align-items-center justify-content-center'
+                                            style={{
+                                                width: 28,
+                                                height: 28,
+                                            }}
                                         >
                                             <BsClipboard
                                                 className='btn-icon mt-0'
@@ -302,8 +326,15 @@ function Project(): JSX.Element {
                                         </Link>
                                     </OverlayTrigger>
 
+                                    <span className='border-start align-self-stretch mx-1 my-1' />
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                        <span className='d-inline-block'>
+                                        <span
+                                            className='d-inline-flex align-items-center justify-content-center'
+                                            style={{
+                                                width: 28,
+                                                height: 28,
+                                            }}
+                                        >
                                             <BsFillTrashFill
                                                 className='btn-icon'
                                                 size={20}
@@ -559,7 +590,7 @@ function Project(): JSX.Element {
                 }
             }
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
     }
 

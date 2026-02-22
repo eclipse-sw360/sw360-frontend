@@ -17,7 +17,7 @@ import { Spinner } from 'react-bootstrap'
 import { BsUpload } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import { ApiError, ApiUtils } from '@/utils'
 
 interface Props {
     onUploadSuccess?: () => void
@@ -69,7 +69,9 @@ export default function BulkUserUpload({ onUploadSuccess }: Props): JSX.Element 
 
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
 
             MessageService.success(t('Users uploaded successfully'))
@@ -80,11 +82,7 @@ export default function BulkUserUpload({ onUploadSuccess }: Props): JSX.Element 
             }
             onUploadSuccess?.()
         } catch (error: unknown) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setUploading(false)
         }

@@ -18,6 +18,7 @@ import { BsArrowCounterclockwise } from 'react-icons/bs'
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 
 import { useLocalStorage } from '@/hooks'
+import styles from './Gravatar.module.css'
 
 function Gravatar({ email }: { email: string }): JSX.Element {
     const [gravatarImage, setGravatarImage] = useLocalStorage<string | undefined | null>('gravatarImage', null)
@@ -37,9 +38,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
         fetch(gravatarUrl)
             .then((response) => response.blob())
             .then((blob) => {
-                const imageUrl = URL.createObjectURL(blob)
                 setGravatarImage(gravatarUrl)
-                console.log(imageUrl)
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
     }, [
@@ -64,7 +63,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
 
     return (
         <>
-            <div className='gravatar'>
+            <div className={styles.gravatar}>
                 <div>
                     <Form.Check
                         type='checkbox'

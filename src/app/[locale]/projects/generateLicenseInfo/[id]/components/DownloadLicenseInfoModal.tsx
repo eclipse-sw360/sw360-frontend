@@ -18,7 +18,6 @@ import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 const relationFilterOptions: FilterOption[] = [
@@ -148,11 +147,7 @@ export default function DownloadLicenseInfoModal({
                 setShow(false)
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setLoading(false)
         }

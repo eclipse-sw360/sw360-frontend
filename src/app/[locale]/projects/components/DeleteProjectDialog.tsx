@@ -127,7 +127,7 @@ function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = fa
 
     const handleSubmit = () => {
         deleteProject().catch((err) => {
-            console.log(err)
+            console.error(err)
         })
     }
 
