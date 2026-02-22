@@ -266,12 +266,12 @@ function GET(
     })
 }
 
-function DELETE(path: string, token: string): Promise<Response> {
+function DELETE(path: string, token: string, data?: object): Promise<Response> {
     return send({
         method: 'DELETE',
         path,
         token,
-        data: null,
+        data: data ?? null,
     })
 }
 
