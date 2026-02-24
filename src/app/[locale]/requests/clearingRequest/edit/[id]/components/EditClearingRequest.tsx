@@ -107,6 +107,9 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                 router.push(`/requests/clearingRequest/detail/${clearingRequestData?.id}`)
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
+            } else {
+                const data = await response.json()
+                MessageService.error(data.message)
             }
         } catch (err) {
             console.error(err)
