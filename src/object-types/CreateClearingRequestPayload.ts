@@ -13,5 +13,5 @@ export default interface CreateClearingRequestPayload {
     clearingType?: string
     priority?: string
     requestingUserComment?: string
-    clearingState: string
+    clearingState?: string
 }
