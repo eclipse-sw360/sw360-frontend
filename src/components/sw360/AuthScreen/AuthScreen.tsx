@@ -22,17 +22,26 @@ import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants
 import { AUTH_PROVIDER } from '@/utils/env'
 
 function AuthScreen(): ReactNode {
+    const defaultEmailAddress = '@sw360.org'
     const router = useRouter()
     const locale = useLocale()
     const t = useTranslations('default')
     const [dialogShow, setDialogShow] = useState<boolean>(false)
     const [messageShow, setMessageShow] = useState<boolean>(false)
-    const [emailAddress, setEmailAddress] = useState<string>('@sw360.org')
+    const [emailAddress, setEmailAddress] = useState<string>(defaultEmailAddress)
     const [password, setPassword] = useState<string>('')
     const { status } = useSession()
     const [showPassword, setShowPassword] = useState<boolean>(false)
 
-    const handleClose = () => setDialogShow(false)
+    const passwordToggleLabel = showPassword ? `${t('Toggle')} ${t('Password')}` : `${t('Show')} ${t('Password')}`
+
+    const handleClose = () => {
+        setDialogShow(false)
+        setShowPassword(false)
+        setEmailAddress(defaultEmailAddress)
+        setPassword('')
+        setMessageShow(false)
+    }
     const handleShow = () => {
         const authProvider = AUTH_PROVIDER
         if (authProvider === 'keycloak') {
@@ -40,16 +49,22 @@ function AuthScreen(): ReactNode {
         } else if (authProvider === 'sw360oauth') {
             void signIn(SW360OAUTH_PROVIDER)
         } else {
+            setEmailAddress(defaultEmailAddress)
+            setPassword('')
+            setMessageShow(false)
+            setShowPassword(false)
             setDialogShow(true)
         }
     }
 
     const handleLogin = async () => {
-        await signIn(CREDENTIALS, {
-            username: emailAddress,
-            password: password,
-            redirect: false,
-        }).then((result) => {
+        try {
+            const result = await signIn(CREDENTIALS, {
+                username: emailAddress,
+                password: password,
+                redirect: false,
+            })
+
             if (result === undefined) {
                 setMessageShow(true)
                 return
@@ -60,7 +75,9 @@ function AuthScreen(): ReactNode {
             } else {
                 setMessageShow(true)
             }
-        })
+        } catch {
+            setMessageShow(true)
+        }
     }
 
     return (
@@ -141,7 +158,7 @@ function AuthScreen(): ReactNode {
                             <Form.Label>{t('Email Address')}</Form.Label>
                             <Form.Control
                                 type='email'
-                                defaultValue='@sw360.org'
+                                value={emailAddress}
                                 onChange={(event) => setEmailAddress(event.target.value)}
                                 autoFocus
                                 required
@@ -156,15 +173,20 @@ function AuthScreen(): ReactNode {
                                 <Form.Control
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder=''
+                                    value={password}
                                     onChange={(event) => setPassword(event.target.value)}
                                     required
                                 />
                                 <Button
                                     variant='outline-secondary'
+                                    type='button'
                                     onClick={() => setShowPassword(!showPassword)}
                                     id='button-addon2'
+                                    aria-pressed={showPassword}
+                                    aria-label={passwordToggleLabel}
+                                    title={passwordToggleLabel}
                                 >
-                                    {showPassword ? <BsEye /> : <BsEyeSlash />}
+                                    {showPassword ? <BsEye size={20} /> : <BsEyeSlash size={20} />}
                                 </Button>
                             </InputGroup>
                         </Form.Group>
