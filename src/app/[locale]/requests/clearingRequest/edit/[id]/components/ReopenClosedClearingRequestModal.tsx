@@ -40,6 +40,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
         clearingType: '',
         priority: 'LOW',
         requestingUserComment: '',
+        clearingState: 'NEW',
     })
 
     useEffect(() => {
@@ -50,12 +51,27 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
         status,
     ])
 
-    const handleError = useCallback(() => {
-        displayMessage('danger', t('Error when processing'))
-        setReloadPage(true)
-    }, [
-        t,
-    ])
+    const handleError = useCallback(
+        async (response?: Response) => {
+            let errorMessage = t('Error when processing')
+            if (response) {
+                try {
+                    const text = await response.text()
+                    const parser = new DOMParser()
+                    const xml = parser.parseFromString(text, 'application/xml')
+                    const msg = xml.querySelector('message')?.textContent
+                    if (msg) errorMessage = msg
+                } catch {
+                    // keep fallback message
+                }
+            }
+            displayMessage('danger', errorMessage)
+            setReloadPage(true)
+        },
+        [
+            t,
+        ],
+    )
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -69,13 +85,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const response = await ApiUtils.PATCH(
                 `clearingrequest/${clearingRequestId}`,
-                {
-                    clearingState: 'NEW',
-                    requestedClearingDate: createClearingRequestPayload.requestedClearingDate,
-                    clearingType: createClearingRequestPayload.clearingType,
-                    priority: createClearingRequestPayload.priority,
-                    requestingUserComment: createClearingRequestPayload.requestingUserComment,
-                },
+                createClearingRequestPayload,
                 session.user.access_token,
             )
             if (response.status == StatusCodes.OK) {
@@ -85,7 +95,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                handleError()
+                handleError(response)
             }
         } catch {
             handleError()
@@ -106,6 +116,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
             clearingType: '',
             priority: '',
             requestingUserComment: '',
+            clearingState: 'NEW',
         })
         if (reloadPage === true) {
             window.location.reload()
