@@ -68,14 +68,14 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
         async (response?: Response) => {
             let errorMessage = t('Error when processing')
             if (response) {
+                const text = await response.text()
                 try {
-                    const text = await response.text()
                     const parser = new DOMParser()
                     const xml = parser.parseFromString(text, 'application/xml')
                     const msg = xml.querySelector('message')?.textContent
-                    if (msg) errorMessage = msg
+                    errorMessage = msg ?? text
                 } catch {
-                    // keep fallback message
+                    errorMessage = text
                 }
             }
             displayMessage('danger', errorMessage)
