@@ -252,7 +252,6 @@ function DeleteProjectDialog({ projectId, show, setShow }: Props): JSX.Element {
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
-                    className='delete-btn'
                     variant='light'
                     onClick={handleCloseDialog}
                 >

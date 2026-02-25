@@ -17,7 +17,6 @@ import { type JSX, useCallback, useEffect, useState } from 'react'
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
-import styles from './LinkedReases.module.css'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
 import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
@@ -90,14 +89,7 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                     releasePayload={releasePayload}
                     setReleasePayload={setReleasePayload}
                 />
-                <div
-                    className={`row ${styles['attachment-table']}`}
-                    style={{
-                        padding: '25px',
-                        fontSize: '0.875rem',
-                        paddingTop: '1px',
-                    }}
-                >
+                <div className='row ps-4 pb-4'>
                     <TitleLinkedReleases />
                     <TableLinkedReleases
                         releaseLinks={releaseLinks}
@@ -108,7 +100,7 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 <div>
                     <button
                         type='button'
-                        className={`fw-bold btn btn-secondary`}
+                        className={`fw-bold btn btn-secondary ms-2`}
                         onClick={handleClickSelectLinkedReleases}
                     >
                         {t('Click to add Releases')}

@@ -143,7 +143,6 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
-                    className='delete-btn'
                     variant='light'
                     onClick={handleCloseDialog}
                 >

@@ -52,7 +52,7 @@ function createChangesCards(changes: Changes[] | undefined | null, transFieldNam
     const templateStringHTML = `
     <div id="template" className="d-none">
       <div className="card border-info">
-        <div className="card-header cardHeader text-white p-1"
+        <div className="card-header text-white p-1"
           id="headingOne" data-toggle="collapse"
           data-target="#collapseOne" aria-expanded="true"
           aria-controls="collapseOne">

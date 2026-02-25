@@ -44,7 +44,6 @@ import {
     TableSearch,
 } from './Table/Components'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
-import ToastMessage from './ToastContainer/Toast'
 
 export {
     AddAdditionalRoles,
@@ -81,6 +80,5 @@ export {
     TableFooter,
     TableSearch,
     ThemeSwitcher,
-    ToastMessage,
     VendorDialog,
 }

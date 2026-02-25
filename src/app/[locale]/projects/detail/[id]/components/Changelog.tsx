@@ -172,9 +172,7 @@ function ChangeLog({
                         />
                         <div
                             id='cardScreen'
-                            style={{
-                                padding: '0px',
-                            }}
+                            className='p-0'
                         ></div>
                     </Tab.Pane>
                 </Tab.Content>

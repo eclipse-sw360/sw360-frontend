@@ -32,7 +32,7 @@ const RestConfigurations = ({ currentConfig, setCurrentConfig }: Props): JSX.Ele
     return (
         <>
             <h6 className='header-underlined'>{t('Rest Configurations')}</h6>
-            <table className='table label-value-table'>
+            <table className='table'>
                 <thead>
                     <tr>
                         <th>{t('Name')}</th>

@@ -24,7 +24,7 @@ const ReleaseVendor = ({ release }: Props): ReactNode => {
     const [toggle, setToggle] = useState(false)
 
     return (
-        <table className='table label-value-table summary-table'>
+        <table className='table summary-table'>
             <thead
                 title='Click to expand or collapse'
                 onClick={() => {

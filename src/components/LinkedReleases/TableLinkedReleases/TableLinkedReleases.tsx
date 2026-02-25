@@ -12,7 +12,6 @@ import { useTranslations } from 'next-intl'
 import React, { type JSX } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { ReleaseLink } from '@/object-types'
-import styles from './TableLinkedReleases.module.css'
 
 interface Props {
     setReleaseLinks: React.Dispatch<React.SetStateAction<ReleaseLink[]>>
@@ -58,10 +57,13 @@ export default function TableLinkedReleases({
             <div className='row'>
                 {releaseLinks.map((item: ReleaseLink, index: number) => {
                     return (
-                        <div key={index}>
-                            <div className={`${styles['div-row']}`}>
+                        <div
+                            key={index}
+                            className='my-1'
+                        >
+                            <div className='d-flex justify-content-between pt-2 px-1 pb-1'>
                                 <input
-                                    className={`${styles['input-field']}`}
+                                    className='form-control me-2'
                                     name='vendor'
                                     value={item.vendor}
                                     type='text'
@@ -69,21 +71,21 @@ export default function TableLinkedReleases({
                                     readOnly
                                 />
                                 <input
-                                    className={`${styles['input-field']}`}
+                                    className='form-control mx-2'
                                     type='text'
                                     value={item.name}
                                     name='name'
                                     readOnly
                                 />
                                 <input
-                                    className={`${styles['input-field']}`}
+                                    className='form-control mx-2'
                                     type='text'
                                     value={item.version}
                                     name='version'
                                     readOnly
                                 />
                                 <select
-                                    className={`${styles['select-relation']}`}
+                                    className='form-select mx-2'
                                     aria-label='releaseRelationship'
                                     id='releaseRelationship'
                                     name='releaseRelationship'
@@ -116,7 +118,7 @@ export default function TableLinkedReleases({
                                     />
                                 </button>
                             </div>
-                            <hr className={`${styles['hr']}`} />
+                            <hr className='my-2' />
                         </div>
                     )
                 })}

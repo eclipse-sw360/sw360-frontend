@@ -552,7 +552,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                     <Modal.Footer className='justify-content-end'>
                         {showMessage === true ? (
                             <Button
-                                className='delete-btn'
                                 variant='primary'
                                 onClick={handleCloseDialog}
                             >
@@ -562,7 +561,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                         ) : (
                             <>
                                 <Button
-                                    className='delete-btn'
                                     variant='light'
                                     onClick={handleCloseDialog}
                                 >
