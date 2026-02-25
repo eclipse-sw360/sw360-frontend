@@ -336,7 +336,10 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
 
     return (
         <>
-            <div className='mb-3'>
+            <div
+                className='mb-3'
+                data-testid='attachments-table'
+            >
                 {table ? (
                     <SW360Table
                         table={table}
