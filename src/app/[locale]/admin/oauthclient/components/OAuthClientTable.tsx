@@ -211,9 +211,6 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </button>
                         </th>
                         <th
-                            style={{
-                                width: '30%',
-                            }}
                             onClick={() => handleSort('description')}
                             className='text-start align-middle'
                         >
@@ -242,9 +239,6 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </span>
                         </th>
                         <th
-                            style={{
-                                width: '25%',
-                            }}
                             onClick={() => handleSort('clientId')}
                             className='text-start align-middle'
                         >
@@ -273,9 +267,6 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </span>
                         </th>
                         <th
-                            style={{
-                                width: '15%',
-                            }}
                             onClick={() => handleSort('authorities')}
                             className='text-start align-middle'
                         >
@@ -304,9 +295,6 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                             </span>
                         </th>
                         <th
-                            style={{
-                                width: '15%',
-                            }}
                             onClick={() => handleSort('scope')}
                             className='text-start align-middle'
                         >
@@ -334,14 +322,7 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
                                 </span>
                             </span>
                         </th>
-                        <th
-                            style={{
-                                width: '10%',
-                            }}
-                            className='align-middle'
-                        >
-                            {t('Actions')}
-                        </th>
+                        <th className='align-middle'>{t('Actions')}</th>
                     </tr>
                 </thead>
                 <tbody>

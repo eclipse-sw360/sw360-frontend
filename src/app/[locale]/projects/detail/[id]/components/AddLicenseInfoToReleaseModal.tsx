@@ -201,7 +201,6 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
-                    className='delete-btn'
                     variant='light'
                     onClick={handleCloseDialog}
                 >

@@ -252,7 +252,6 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
-                    className='delete-btn'
                     variant='light'
                     onClick={handleCloseDialog}
                 >

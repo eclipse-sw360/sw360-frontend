@@ -19,7 +19,6 @@ import { Alert, Button, Modal } from 'react-bootstrap'
 import { Attachment, FossologyProcessInfo, FossologyProcessStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
-import styles from './fossologyClearing.module.css'
 
 interface Props {
     show: boolean
@@ -390,7 +389,10 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     >
                         {message.content}
                     </Alert>
-                    <div className={`${styles.guide} form-text`}>
+                    <Alert
+                        variant='light'
+                        className='border border-info form-text'
+                    >
                         <h3>{t('How it works')}:</h3>
                         <p>{t('basic_fossology_process')}:</p>
                         <ol>
@@ -400,7 +402,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                         </ol>
                         <p></p>
                         <p>{t('hand_when_got_stuck_fossology')}</p>
-                    </div>
+                    </Alert>
                     <div>
                         {t('Found source attachment')}:
                         {release &&

@@ -1693,3 +1693,337 @@ input[checked] + .slider:before {
     color: #ffffff !important;
     border: none !important;
 }
+
+.modal-body-bordered {
+    border: 3px dashed #ddd;
+    padding: 30px;
+}
+
+.badge-circle {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.5rem;
+    vertical-align: center;
+    margin-right: 5px;
+}
+
+.SCAN_AVAILABLE,
+.REPORT_AVAILABLE,
+.UNDER_CLEARING {
+    background-color: #b95000;
+    color: #fff;
+}
+
+.APPROVED {
+    background-color: #287d3c;
+    color: #fff;
+}
+
+.NEW_CLEARING,
+.SENT_TO_CLEARING_TOOL {
+    background-color: #da1414;
+    color: #fff;
+}
+
+.sw360footer {
+    background-color: #30313f;
+    height: 8vh;
+}
+
+.poweredBy {
+    color: white;
+}
+
+.footerVersion {
+    color: #9e9e9e;
+}
+
+#preferences-title {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    color: #fff;
+    background-color: #5d8ea9;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.title-decorator {
+    color: #5d8ea9;
+    border-bottom: 1px solid #5d8ea9;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.preferences-accordion-header {
+    background-color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #6b6c7e;
+    border-bottom: 1px solid lightgray;
+}
+
+.preferences-accordion-header button:focus {
+    box-shadow: none !important;
+}
+
+.preferences-accordion-header button {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 15px;
+    justify-content: left;
+    background-color: #fff;
+}
+
+.preferences-accordion-header button[aria-expanded='true'] {
+    color: #000000;
+}
+
+.preferences-accordion-header button[aria-expanded='false'] {
+    background-color: #ffffff !important;
+}
+
+.preferences-accordion-header button[aria-expanded='false']:hover {
+    background-color: rgba(247, 148, 30, 0.12) !important;
+}
+
+.preferences-accordion-body {
+    background-color: white;
+    padding: 1rem 1rem 1.5rem 1rem;
+    font-size: 0.91rem;
+}
+
+.preferences-accordion-item {
+    box-shadow: 0 1px 3px -1px rgb(0 0 0 / 60%);
+}
+
+.preferences-checkbox {
+    cursor: pointer;
+    height: 14px;
+    width: 14px;
+    border: 1px solid gray !important;
+}
+
+.preferences-checkbox + label {
+    position: relative;
+    top: -0.1rem;
+}
+
+.preferences-label {
+    color: #272833;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.preferences-label:hover {
+    cursor: pointer;
+    color: #5d8ea9;
+}
+
+.sidebar-active {
+    background-color: rgba(247, 148, 30, 0.4) !important;
+    font-weight: 600;
+    color: black !important;
+}
+
+.sidebar-tab {
+    border-radius: 0px !important;
+    padding: 15px;
+    color: #6b6c7e;
+}
+
+.sidebar-tab:hover {
+    background-color: rgba(247, 148, 30, 0.12);
+    color: #495057;
+    text-decoration: none;
+    z-index: 1;
+}
+
+#numberOfVulnerabilitiesDiv {
+    background-color: #f1f2f5;
+    color: #272833;
+    font-size: 100%;
+    margin-left: 0.5rem;
+    border-radius: 10rem;
+}
+
+.APPROVED {
+    background-color: #287d3c;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
+}
+
+.OPEN {
+    background-color: red;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
+}
+
+.IN_PROGRESS {
+    background-color: #b95000;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
+}
+
+.REJECTED::before {
+    content: '!';
+}
+
+.REJECTED {
+    background-color: red;
+    width: 24px;
+    height: 24px;
+    border-radius: 0.2rem;
+    margin: 0 0.5rem;
+    display: inline-block;
+    color: white;
+    padding-left: 5px;
+    font-weight: bold;
+}
+
+.text-small {
+    font-size: 45% !important;
+}
+
+.admin-button {
+    width: 210px;
+}
+
+.obligation-preview {
+    min-height: '100px' !important;
+    background-color: #f8f9fa !important;
+}
+
+.tooltip {
+    position: relative;
+    line-height: 20px;
+}
+
+.tooltip:hover {
+    cursor: pointer;
+}
+
+.tooltip-content {
+    position: absolute;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    text-align: center;
+
+    width: 500px;
+    max-height: 400px;
+    overflow-y: auto;
+    transform: translate(-100%, 30%);
+
+    background-color: #fff;
+    color: #000;
+
+    border-radius: 4px;
+    box-shadow: 4px 4px 4px lightgray;
+    border: 1px solid gray;
+    padding: 6px 10px;
+
+    z-index: 6;
+}
+
+.tooltip-content:before {
+    content: '';
+    position: absolute;
+}
+
+.tooltip-content {
+    bottom: 100%;
+    margin-bottom: 10px;
+}
+
+.tooltip-content:before {
+    top: 100%;
+    margin-left: -4px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #000;
+}
+
+.formatedMessageForVul {
+    list-style-type: decimal;
+}
+
+ol.formatedMessageForVul li:not(:last-of-type) {
+    margin-bottom: 0.35rem;
+}
+
+ol.formatedMessageForVul {
+    list-style-type: decimal;
+    margin-left: -0.6rem;
+}
+
+.formatedMessageForVulItem {
+    display: block;
+    width: 100%;
+    word-wrap: break-word;
+    text-align: left;
+}
+
+.formatedMessageForVulItem i {
+    display: inline-block;
+    margin-top: 0px;
+}
+
+.formatedMessageForVulItem p {
+    display: inline-block;
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
+.formatedMessageForVulHeader {
+    display: block;
+    width: 100%;
+    text-align: left;
+}
+
+.formatedMessageForVulHeader b {
+    font-size: 16px;
+}
+
+#cardHeader {
+    background-color: white !important;
+}
+
+#cardHeader:hover {
+    background-color: bisque !important;
+}
+
+.summary-table-view-cr {
+    border: 1px solid lightgray !important;
+    margin-bottom: 2rem !important;
+    background-color: #5d8ea9 !important;
+    color: white !important;
+    max-width: 120px !important;
+}
+
+.header-button {
+    width: '100%' !important;
+    text-decoration: 'none' !important;
+    color: black !important;
+    padding-left: '10px' !important;
+}
+
+.header-button:hover {
+    color: black !important;
+    background-color: bisque !important;
+}

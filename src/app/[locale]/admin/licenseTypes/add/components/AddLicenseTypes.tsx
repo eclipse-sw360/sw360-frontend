@@ -100,15 +100,7 @@ export default function AddLicenseTypes(): JSX.Element {
                                 htmlFor='add_license_type.title'
                                 className='form-label fw-medium'
                             >
-                                {t('Title')}{' '}
-                                <span
-                                    className='text-red'
-                                    style={{
-                                        color: '#F7941E',
-                                    }}
-                                >
-                                    *
-                                </span>
+                                {t('Title')} <span className='required'>*</span>
                             </label>
                             <input
                                 type='text'
