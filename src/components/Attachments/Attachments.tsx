@@ -157,7 +157,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
             },
             {
                 id: 'createdTeam',
-                header: t('Group'),
+                header: t('Uploader Group'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
                     return <p className='text-center'>{row.original.node.createdTeam ?? ''}</p>
@@ -173,7 +173,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
             },
             {
                 id: 'checkedTeam',
-                header: t('Group'),
+                header: t('Reviewer Group'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
                     return <p className='text-center'>{row.original.node.checkedTeam ?? ''}</p>
