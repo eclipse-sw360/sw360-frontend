@@ -68,14 +68,13 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
         async (response?: Response) => {
             let errorMessage = t('Error when processing')
             if (response) {
-                const text = await response.text()
                 try {
-                    const parser = new DOMParser()
-                    const xml = parser.parseFromString(text, 'application/xml')
-                    const msg = xml.querySelector('message')?.textContent
-                    errorMessage = msg ?? text
+                    const data = (await response.json()) as {
+                        message?: string
+                    }
+                    if (data.message) errorMessage = data.message
                 } catch {
-                    errorMessage = text
+                    errorMessage = t('Error when processing')
                 }
             }
             displayMessage('danger', errorMessage)
@@ -100,6 +99,9 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
                 `clearingrequest/${clearingRequestId}`,
                 createClearingRequestPayload,
                 session.user.access_token,
+                {
+                    Accept: 'application/json',
+                },
             )
             if (response.status == StatusCodes.OK) {
                 displayMessage('success', t('Clearing Request reopened successfully'))
