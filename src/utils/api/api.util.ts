@@ -293,12 +293,20 @@ function PUT(path: string, data: object, token: string): Promise<Response> {
     })
 }
 
-function PATCH(path: string, data: object, token: string): Promise<Response> {
+function PATCH(
+    path: string,
+    data: object,
+    token: string,
+    headers?: {
+        [key: string]: string
+    },
+): Promise<Response> {
     return send({
         method: 'PATCH',
         path,
         data,
         token,
+        headers,
     })
 }
 
