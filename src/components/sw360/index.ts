@@ -28,7 +28,6 @@ import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
 import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
-import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
@@ -73,7 +72,6 @@ export {
     QuickFilter,
     SW360Table,
     SearchUsersModal,
-    SearchVendorsModal,
     SelectCountry,
     SelectUsersDialog,
     ShowInfoOnHover,

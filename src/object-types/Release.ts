@@ -9,7 +9,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Attachment, ClearingInformation, COTSDetails, ECCInformation, Links, Repository, Vendor } from '@/object-types'
+import {
+    Attachment,
+    ClearingInformation,
+    COTSDetails,
+    ECCInformation,
+    LinkedPackageData,
+    Links,
+    Repository,
+    Vendor,
+} from '@/object-types'
 
 interface Release {
     id?: string
@@ -56,6 +65,8 @@ interface Release {
     spdxId?: string
     _links?: Links
     comment?: string
+    linkedPackages?: LinkedPackageData[]
+    packageIds?: string[]
 }
 
 export default Release
