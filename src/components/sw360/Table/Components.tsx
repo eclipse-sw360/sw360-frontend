@@ -9,7 +9,7 @@
 
 import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
+import { ChangeEvent, CSSProperties, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
@@ -253,38 +253,71 @@ export function SW360Table<K>({
     table,
     showProcessing,
     noRecordsFoundMessage,
+    tableClassName,
+    useDefaultTableClasses = true,
+    tableStyle,
+    showNoRecordsFoundMessage = true,
+    wrapperClassName,
+    useDefaultWrapperClass = true,
 }: {
     table: Table<K>
     showProcessing: boolean
     noRecordsFoundMessage?: string
+    tableClassName?: string
+    useDefaultTableClasses?: boolean
+    tableStyle?: CSSProperties
+    showNoRecordsFoundMessage?: boolean
+    wrapperClassName?: string
+    useDefaultWrapperClass?: boolean
 }): ReactNode {
     const t = useTranslations('default')
+    const headerGroups = table.getHeaderGroups()
+    const maxDepth = headerGroups.length - 1
+    const defaultTableClassName = useDefaultTableClasses ? 'sw360-table table-bordered mt-3' : ''
+    const combinedTableClassName = [
+        defaultTableClassName,
+        tableClassName,
+    ]
+        .filter(Boolean)
+        .join(' ')
+    const combinedWrapperClassName = [
+        useDefaultWrapperClass ? 'table-component' : '',
+        'position-relative',
+        wrapperClassName,
+    ]
+        .filter(Boolean)
+        .join(' ')
 
     return (
-        <div className='table-component position-relative'>
+        <div className={combinedWrapperClassName}>
             <table
-                className='sw360-table table-bordered mt-3'
+                className={combinedTableClassName}
                 style={{
                     width: '100%',
                     tableLayout: 'auto',
+                    ...tableStyle,
                 }}
             >
                 <thead>
-                    {table.getHeaderGroups().map((headerGroup) => (
+                    {headerGroups.map((headerGroup) => (
                         <tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => (
-                                <th
-                                    key={header.id}
-                                    colSpan={header.colSpan}
-                                    style={{
-                                        width: (header.column.columnDef.meta as ColumnMeta | undefined)?.width,
-                                    }}
-                                >
-                                    {header.isPlaceholder ? null : (
+                            {headerGroup.headers.map((header) => {
+                                if (header.isPlaceholder) return null
+                                const meta = header.column.columnDef.meta as ColumnMeta | undefined
+                                const isLeafHeader = header.subHeaders.length === 0
+                                const rowSpan = isLeafHeader ? maxDepth - header.depth + 1 : 1
+                                return (
+                                    <th
+                                        key={header.id}
+                                        colSpan={header.colSpan}
+                                        rowSpan={rowSpan}
+                                        className={meta?.headerClassName}
+                                        style={{
+                                            width: meta?.width,
+                                        }}
+                                    >
                                         <div className='d-flex justify-content-between align-items-center'>
-                                            <span>
-                                                {flexRender(header.column.columnDef.header, header.getContext())}
-                                            </span>
+                                            <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
 
                                             {header.column.getCanSort() && (
                                                 <span onClick={header.column.getToggleSortingHandler()}>
@@ -298,14 +331,14 @@ export function SW360Table<K>({
                                                 </span>
                                             )}
                                         </div>
-                                    )}
-                                </th>
-                            ))}
+                                    </th>
+                                )
+                            })}
                         </tr>
                     ))}
                 </thead>
                 <tbody>
-                    {!showProcessing && table.getRowModel().rows.length === 0 && (
+                    {!showProcessing && showNoRecordsFoundMessage && table.getRowModel().rows.length === 0 && (
                         <tr>
                             <td colSpan={table.getVisibleFlatColumns().length}>
                                 <div className='text-center'>
@@ -316,8 +349,16 @@ export function SW360Table<K>({
                     )}
                     {table.getRowModel().rows.map((row) =>
                         row.meta?.isFullSpanRow ? (
-                            <tr key={row.id}>
-                                <td colSpan={table.getVisibleLeafColumns().length}>
+                            <tr
+                                key={row.id}
+                                className={row.meta?.rowClassName}
+                                id={row.meta?.rowId}
+                            >
+                                <td
+                                    colSpan={table.getVisibleLeafColumns().length}
+                                    className={(row.getVisibleCells()[0]?.column.columnDef.meta as ColumnMeta | undefined)
+                                        ?.cellClassName}
+                                >
                                     <div className={table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''}>
                                         {row.getVisibleCells()?.[0] &&
                                             flexRender(
@@ -328,18 +369,28 @@ export function SW360Table<K>({
                                 </td>
                             </tr>
                         ) : (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
-                                        <div
-                                            className={
-                                                table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''
-                                            }
+                            <tr
+                                key={row.id}
+                                className={row.meta?.rowClassName}
+                                id={row.meta?.rowId}
+                            >
+                                {row.getVisibleCells().map((cell) => {
+                                    const meta = cell.column.columnDef.meta as ColumnMeta | undefined
+                                    return (
+                                        <td
+                                            key={cell.id}
+                                            className={meta?.cellClassName}
                                         >
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </div>
-                                    </td>
-                                ))}
+                                            <div
+                                                className={
+                                                    table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''
+                                                }
+                                            >
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </div>
+                                        </td>
+                                    )
+                                })}
                             </tr>
                         ),
                     )}
