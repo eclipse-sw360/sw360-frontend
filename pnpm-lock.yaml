@@ -57,8 +57,8 @@ importers:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.1(react@19.2.4))(react@19.2.4)
       preact:
-        specifier: ^10.28.3
-        version: 10.28.3
+        specifier: ^10.28.4
+        version: 10.28.4
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -1857,8 +1857,8 @@ packages:
     peerDependencies:
       preact: '>=10'
 
-  preact@10.28.3:
-    resolution: {integrity: sha512-tCmoRkPQLpBeWzpmbhryairGnhW9tKV6c6gr/w+RhoRoKEJwsjzipwp//1oCpGPOchvSLaAPlpcJi9MwMmoPyA==}
+  preact@10.28.4:
+    resolution: {integrity: sha512-uKFfOHWuSNpRFVTnljsCluEFq57OKT+0QdOiQo8XWnQ/pSvg7OpX5eNOejELXJMWy+BwM2nobz0FkvzmnpCNsQ==}
 
   prettier-plugin-organize-imports@4.3.0:
     resolution: {integrity: sha512-FxFz0qFhyBsGdIsb697f/EkvHzi5SZOhWAjxcx2dLt+Q532bAlhswcXGYB1yzjZ69kW8UoadFBw7TyNwlq96Iw==}
@@ -3824,8 +3824,8 @@ snapshots:
       next: 16.1.6(react-dom@19.2.1(react@19.2.4))(react@19.2.4)
       oauth: 0.9.15
       openid-client: 5.7.1
-      preact: 10.28.3
-      preact-render-to-string: 5.2.6(preact@10.28.3)
+      preact: 10.28.4
+      preact-render-to-string: 5.2.6(preact@10.28.4)
       react: 19.2.4
       react-dom: 19.2.1(react@19.2.4)
       uuid: 8.3.2
@@ -3962,12 +3962,12 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  preact-render-to-string@5.2.6(preact@10.28.3):
+  preact-render-to-string@5.2.6(preact@10.28.4):
     dependencies:
-      preact: 10.28.3
+      preact: 10.28.4
       pretty-format: 3.8.0
 
-  preact@10.28.3: {}
+  preact@10.28.4: {}
 
   prettier-plugin-organize-imports@4.3.0(prettier@3.8.1)(typescript@5.9.3):
     dependencies:

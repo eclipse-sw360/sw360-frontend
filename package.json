@@ -31,7 +31,7 @@
     "next-auth": "^4.24.13",
     "next-intl": "^4.8.3",
     "next-themes": "^0.4.6",
-    "preact": "^10.28.3",
+    "preact": "^10.28.4",
     "react": "19.2.4",
     "react-bootstrap": "^2.10.10",
     "react-cookie": "^8.0.1",
