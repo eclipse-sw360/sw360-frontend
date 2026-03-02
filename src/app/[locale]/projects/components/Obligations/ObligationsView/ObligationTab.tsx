@@ -245,7 +245,7 @@ export default function ObligationTab({
                 },
             },
             {
-                id: 'id',
+                id: 'comment',
                 header: t('Comment'),
                 cell: ({ row }) => (
                     <input
