@@ -317,7 +317,9 @@ export function SW360Table<K>({
                                         }}
                                     >
                                         <div className='d-flex justify-content-between align-items-center'>
-                                            <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                                            <span>
+                                                {flexRender(header.column.columnDef.header, header.getContext())}
+                                            </span>
 
                                             {header.column.getCanSort() && (
                                                 <span onClick={header.column.getToggleSortingHandler()}>
@@ -356,8 +358,10 @@ export function SW360Table<K>({
                             >
                                 <td
                                     colSpan={table.getVisibleLeafColumns().length}
-                                    className={(row.getVisibleCells()[0]?.column.columnDef.meta as ColumnMeta | undefined)
-                                        ?.cellClassName}
+                                    className={
+                                        (row.getVisibleCells()[0]?.column.columnDef.meta as ColumnMeta | undefined)
+                                            ?.cellClassName
+                                    }
                                 >
                                     <div className={table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''}>
                                         {row.getVisibleCells()?.[0] &&

@@ -255,7 +255,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                                     headerClassName: 'headlabel content-middle sorting',
                                     cellClassName: 'align-middle',
                                 },
-                                cell: ({ row }) => <span className='text-truncate'>{row.original.createdTeam ?? ''}</span>,
+                                cell: ({ row }) => (
+                                    <span className='text-truncate'>{row.original.createdTeam ?? ''}</span>
+                                ),
                             },
                             {
                                 id: 'createdBy',
@@ -264,7 +266,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                                     headerClassName: 'headlabel content-middle sorting',
                                     cellClassName: 'align-middle',
                                 },
-                                cell: ({ row }) => <span className='text-truncate'>{row.original.createdBy ?? ''}</span>,
+                                cell: ({ row }) => (
+                                    <span className='text-truncate'>{row.original.createdBy ?? ''}</span>
+                                ),
                             },
                             {
                                 id: 'createdOn',
@@ -348,7 +352,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                                     headerClassName: 'headlabel content-middle checkedTeam sorting',
                                     cellClassName: 'align-middle checked-team',
                                 },
-                                cell: ({ row }) => <span className='text-truncate'>{row.original.checkedTeam ?? ''}</span>,
+                                cell: ({ row }) => (
+                                    <span className='text-truncate'>{row.original.checkedTeam ?? ''}</span>
+                                ),
                             },
                             {
                                 id: 'checkedBy',
@@ -357,7 +363,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                                     headerClassName: 'headlabel content-middle checkedBy sorting',
                                     cellClassName: 'align-middle checked-by',
                                 },
-                                cell: ({ row }) => <span className='text-truncate'>{row.original.checkedBy ?? ''}</span>,
+                                cell: ({ row }) => (
+                                    <span className='text-truncate'>{row.original.checkedBy ?? ''}</span>
+                                ),
                             },
                             {
                                 id: 'checkedOn',
