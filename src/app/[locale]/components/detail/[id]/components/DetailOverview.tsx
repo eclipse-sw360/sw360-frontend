@@ -16,7 +16,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
@@ -61,6 +61,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
     const [changeLogId, setChangeLogId] = useState('')
     const [changelogTab, setChangelogTab] = useState('list-change')
+    const [refreshSubscriptions, setRefreshSubscriptions] = useState(false)
     const session = useSession()
 
     useEffect(() => {
@@ -70,24 +71,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }, [
         session,
     ])
-
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session.data)) return
-            const response = await ApiUtils.GET(url, session.data.user.access_token)
-            if (response.status === StatusCodes.OK) {
-                const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
-                return data
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        [
-            session,
-        ],
-    )
 
     const downloadBundle = async () => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -99,38 +82,74 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const extractUserEmailFromSession = () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return
         setUserEmail(session.data.user.email)
     }
 
     useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
         void extractUserEmailFromSession()
-        fetchData(`components/${componentId}`)
-            .then((component: Component | undefined) => {
-                if (component === undefined) return
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(`components/${componentId}`, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const component = (await response.json()) as Component
                 setComponent(component)
                 setSubscribers(getSubcribersEmail(component))
-                if (
-                    !CommonUtils.isNullOrUndefined(component['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(component['_embedded']['sw360:attachments'])
-                ) {
-                    setAttachmentNumber(component['_embedded']['sw360:attachments'].length)
-                }
-            })
-            .catch((err) => console.error(err))
+                setAttachmentNumber(component['_embedded']?.['sw360:attachments']?.length ?? 0)
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
 
-        fetchData(`components/${componentId}/vulnerabilities`)
-            .then((data: EmbeddedVulnerabilities | undefined) => {
-                if (data === undefined) return
-
-                if (!CommonUtils.isNullOrUndefined(data)) {
-                    setVulnerData(data['_embedded']?.['sw360:vulnerabilityDTOes'] ?? [])
-                }
-            })
-            .catch((err) => console.error(err))
+        return () => controller.abort()
     }, [
         componentId,
-        fetchData,
+        session,
+    ])
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(
+                    `components/${componentId}/vulnerabilities`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const data = (await response.json()) as EmbeddedVulnerabilities
+                setVulnerData(data['_embedded']?.['sw360:vulnerabilityDTOes'] ?? [])
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        componentId,
+        session,
     ])
 
     const getSubcribersEmail = (component: Component) => {
@@ -146,15 +165,12 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
     const handleSubcriptions = async () => {
         if (CommonUtils.isNullOrUndefined(session.data)) return
-
-        await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.data.user.access_token)
-        fetchData(`components/${componentId}`)
-            .then((component: Component | undefined) => {
-                if (component === undefined) return
-                setComponent(component)
-                setSubscribers(getSubcribersEmail(component))
-            })
-            .catch((e) => console.error(e))
+        try {
+            await ApiUtils.POST(`components/${componentId}/subscriptions`, {}, session.data.user.access_token)
+            setRefreshSubscriptions(!refreshSubscriptions)
+        } catch (error) {
+            ApiUtils.reportError(error)
+        }
     }
 
     const tabList = [
