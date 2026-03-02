@@ -17,15 +17,20 @@ import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { LinkedPackageData, ProjectPayload } from '@/object-types'
+import { LinkedPackageData } from '@/object-types'
 
-interface Props {
-    projectId?: string
-    projectPayload: ProjectPayload
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+interface HasLinkedPackages {
+    linkedPackages?: Record<string, LinkedPackageData>
+    packageIds?: Record<string, LinkedPackageData>
 }
 
-export default function LinkedPackages({ projectPayload, setProjectPayload }: Props): JSX.Element {
+interface Props<T extends HasLinkedPackages> {
+    projectId?: string
+    payload: T
+    setPayload: React.Dispatch<React.SetStateAction<T>>
+}
+
+export default function LinkedPackages<T extends HasLinkedPackages>({ payload, setPayload }: Props<T>): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
     const [tableData, setTableData] = useState<
@@ -40,7 +45,7 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
             [key: string]: LinkedPackageData
         } = {}
 
-        for (const [pid, p] of Object.entries(projectPayload.packageIds ?? {})) {
+        for (const [pid, p] of Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})) {
             if (pid === packageId) {
                 _newLinkedPackageData[pid] = {
                     ...p,
@@ -52,9 +57,15 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
                 }
             }
         }
-        setProjectPayload({
-            ...projectPayload,
-            packageIds: _newLinkedPackageData,
+        setPayload({
+            ...payload,
+            ...(payload.linkedPackages !== undefined
+                ? {
+                      linkedPackages: _newLinkedPackageData,
+                  }
+                : {
+                      packageIds: _newLinkedPackageData,
+                  }),
         })
     }
 
@@ -153,7 +164,7 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
         ],
         [
             t,
-            projectPayload,
+            payload,
         ],
     )
 
@@ -162,22 +173,28 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
             [key: string]: LinkedPackageData
         } = {}
 
-        for (const [pid, p] of Object.entries(projectPayload.packageIds ?? {})) {
+        for (const [pid, p] of Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})) {
             if (pid !== packageId) {
                 _newLinkedPackageData[pid] = p
             }
         }
-        setProjectPayload({
-            ...projectPayload,
-            packageIds: _newLinkedPackageData,
+        setPayload({
+            ...payload,
+            ...(payload.linkedPackages !== undefined
+                ? {
+                      linkedPackages: _newLinkedPackageData,
+                  }
+                : {
+                      packageIds: _newLinkedPackageData,
+                  }),
         })
     }
 
     useEffect(() => {
-        const data = Object.entries(projectPayload.packageIds ?? {})
+        const data = Object.entries(payload.linkedPackages ?? {})
         setTableData(data)
     }, [
-        projectPayload,
+        payload,
     ])
 
     const memoizedData = useMemo(
@@ -195,8 +212,8 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
     return (
         <>
             <LinkPackagesModal
-                projectPayload={projectPayload}
-                setProjectPayload={setProjectPayload}
+                payload={payload}
+                setPayload={setPayload}
                 show={showLinkedPackagesModal}
                 setShow={setShowLinkedPackagesModal}
             />
