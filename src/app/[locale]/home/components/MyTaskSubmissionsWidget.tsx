@@ -15,9 +15,10 @@ import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { BsFillTrashFill } from 'react-icons/bs'
+import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 import type { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
@@ -32,6 +33,10 @@ function MyTaskSubmissionsWidget(): ReactNode {
     const title = t('My Task Submissions')
 
     const [reload, setReload] = useState(false)
+    const [modReqToDelete, setModReqToDelete] = useState<{
+        id: string
+        documentName: string
+    } | null>(null)
     const taskSubmissionStatus: TaskSubmissionStatusMap = {
         INPROGRESS: t('In Progress'),
         APPROVED: t('APPROVED'),
@@ -83,7 +88,12 @@ function MyTaskSubmissionsWidget(): ReactNode {
                                         <BsFillTrashFill
                                             className='btn-icon'
                                             size={20}
-                                            onClick={() => handleDeleteProject(documentId)}
+                                            onClick={() =>
+                                                setModReqToDelete({
+                                                    id: row.original.id,
+                                                    documentName: row.original.documentName,
+                                                })
+                                            }
                                         />
                                     </span>
                                 </OverlayTrigger>
@@ -216,13 +226,81 @@ function MyTaskSubmissionsWidget(): ReactNode {
         },
     })
 
-    const handleDeleteProject = (id: string) => {
-        // biome-ignore lint/suspicious/noConsole: useful for debugging until implementation is complete
-        console.log(id)
+    const handleDeleteModerationRequest = async () => {
+        if (!modReqToDelete?.id) return
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+
+            const response = await ApiUtils.DELETE(`moderationrequest/delete`, session.user.access_token, [
+                modReqToDelete.id,
+            ])
+            if (response.status === StatusCodes.OK) {
+                MessageService.success(t('Moderation request deleted successfully'))
+                setReload((prev) => !prev)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                const data = (await response.json()) as {
+                    message: string
+                }
+                MessageService.error(data.message)
+            } else if (response.status === StatusCodes.UNAUTHORIZED) {
+                return signOut()
+            } else {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+        } catch (error) {
+            ApiUtils.reportError(error)
+        } finally {
+            setModReqToDelete(null)
+        }
     }
 
     return (
         <div>
+            <Modal
+                size='lg'
+                centered
+                show={modReqToDelete !== null}
+                onHide={() => setModReqToDelete(null)}
+            >
+                <Modal.Header
+                    style={{
+                        backgroundColor: '#feefef',
+                        color: '#da1414',
+                    }}
+                    closeButton
+                >
+                    <Modal.Title className='fw-bold'>
+                        <BsQuestionCircle size={20} /> {t('Delete Moderation Request')} ?
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className='fs-5'>
+                    {t.rich('Do you really want to delete the moderation request for', {
+                        name: modReqToDelete?.documentName ?? '',
+                        strong: (chunks) => <b>{chunks}</b>,
+                    })}
+                    ?
+                </Modal.Body>
+                <Modal.Footer>
+                    <button
+                        className='btn btn-dark'
+                        onClick={() => setModReqToDelete(null)}
+                    >
+                        {t('Cancel')}
+                    </button>
+                    <button
+                        className='btn btn-danger'
+                        onClick={() => {
+                            void handleDeleteModerationRequest()
+                        }}
+                    >
+                        {t('Delete Moderation Request')}
+                    </button>
+                </Modal.Footer>
+            </Modal>
             <HomeTableHeader
                 title={title}
                 setReload={setReload}
