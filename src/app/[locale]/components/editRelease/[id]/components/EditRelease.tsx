@@ -178,14 +178,16 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                         packageId: CommonUtils.getIdFromUrl(p._links?.self?.href),
                         name: p.name ?? '',
                         version: p.version ?? '',
-                        licenseIds: [],
-                        packageManager: '',
+                        licenseIds: p.licenseIds ?? [],
+                        packageManager: p.packageManager ?? '',
                     }))
                     .filter((p) => p.packageId)
 
                 setReleasePayload((prev) => ({
                     ...prev,
                     linkedPackages,
+                    clearingInformation: release.clearingInformation,
+                    cotsDetails: release['_embedded']['sw360:cotsDetail'] ?? null,
                 }))
 
                 if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
@@ -446,8 +448,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                       eccStatus: eccInfo.eccStatus?.trim() !== '' ? eccInfo.eccStatus : undefined,
                   }
                 : undefined
-            const { linkedPackages, clearingState, attachments, clearingInformation, cotsDetails, ...cleanPayload } =
-                releasePayload
+            const { linkedPackages, clearingState, ...cleanPayload } = releasePayload
 
             const finalPayload: Release = {
                 ...cleanPayload,
