@@ -16,15 +16,13 @@ import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
+import { Alert, Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
+import { createLinkedProjectsColumns } from '@/components/sw360/LinkedProjectsModal/linkedProjectsColumns'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface AlertData {
     variant: string
@@ -64,127 +62,41 @@ export default function LinkProjects({
         })
     }
 
-    const columns = useMemo<ColumnDef<Project>[]>(
-        () => [
-            {
-                id: 'selectProjectCheckbox',
-                cell: ({ row }) => (
-                    <input
-                        className='form-check-input'
-                        type='checkbox'
-                        checked={linkProjects.has(row.original.id ?? '')}
-                        onChange={() => handleCheckboxes(row.original.id ?? '')}
-                    />
-                ),
-                meta: {
-                    width: '5%',
-                },
-            },
-            {
-                id: 'name',
-                header: t('Project Name'),
-                cell: ({ row }) => {
-                    const { name, version } = row.original
-                    return (
-                        <p>
-                            {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
-                        </p>
-                    )
-                },
-                accessorKey: 'name',
-                enableSorting: true,
-                meta: {
-                    width: '17.5%',
-                },
-            },
-            {
-                id: 'version',
-                header: t('Version'),
-                accessorKey: 'version',
-                cell: (info) => info.getValue(),
-                meta: {
-                    width: '12%',
-                },
-            },
-            {
-                id: 'state',
-                header: t('State'),
-                accessorKey: 'state',
-                cell: ({ row }) => {
-                    const { state, clearingState } = row.original
-                    return (
-                        <>
-                            {state && clearingState && (
-                                <div className='text-center'>
-                                    <OverlayTrigger
-                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
-                                    >
-                                        {state === 'ACTIVE' ? (
-                                            <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
-                                        ) : (
-                                            <span className='badge bg-secondary capsule-left overlay-badge'>
-                                                {'PS'}
-                                            </span>
-                                        )}
-                                    </OverlayTrigger>
-                                    <OverlayTrigger
-                                        overlay={
-                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
-                                        }
-                                    >
-                                        {clearingState === 'OPEN' ? (
-                                            <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
-                                        ) : clearingState === 'IN_PROGRESS' ? (
-                                            <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
-                                        ) : (
-                                            <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
-                                        )}
-                                    </OverlayTrigger>
-                                </div>
-                            )}
-                        </>
-                    )
-                },
-                meta: {
-                    width: '10%',
-                },
-            },
-            {
-                id: 'projectResponsible',
-                header: t('Project Responsible'),
-                accessorKey: 'projectResponsible',
-                cell: ({ row }) => {
-                    const { projectResponsible } = row.original
-                    return (
-                        <>
-                            {projectResponsible && (
-                                <Link
-                                    href={`mailto:${projectResponsible}`}
-                                    className='text-link'
-                                >
-                                    {projectResponsible}
-                                </Link>
-                            )}
-                        </>
-                    )
-                },
-                meta: {
-                    width: '17.5%',
-                },
-            },
-            {
-                id: 'description',
-                header: t('Description'),
-                accessorKey: 'description',
-                cell: (info) => info.getValue(),
-                meta: {
-                    width: '32.5%',
-                },
-            },
+    const handleCheckboxes = (project: Project) => {
+        const projectId = project.id ?? ''
+        const m = new Map(linkProjects)
+        if (linkProjects.has(projectId)) {
+            m.delete(projectId)
+        } else {
+            m.set(projectId, {
+                enableSvm: true,
+                projectRelationship: 'CONTAINED',
+            })
+        }
+        setLinkProjects(m)
+    }
+
+    const selectedProjectIds = useMemo(
+        () => new Set(linkProjects.keys()),
+        [
+            linkProjects,
         ],
+    )
+
+    // Refactor: reuse shared linked-project columns to keep modal/table behavior aligned across pages.
+    const columns = useMemo<ColumnDef<Project>[]>(
+        () =>
+            createLinkedProjectsColumns({
+                t,
+                selectedProjectIds,
+                onToggleProject: handleCheckboxes,
+                getProjectId: (project) => project.id ?? '',
+                nameHeader: 'Project Name',
+                combineNameAndVersion: true,
+            }),
         [
             t,
-            linkProjects,
+            selectedProjectIds,
         ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -291,19 +203,6 @@ export default function LinkProjects({
     }, [
         pageableQueryParam,
     ])
-
-    const handleCheckboxes = (projectId: string) => {
-        const m = new Map(linkProjects)
-        if (linkProjects.has(projectId)) {
-            m.delete(projectId)
-        } else {
-            m.set(projectId, {
-                enableSvm: true,
-                projectRelationship: 'CONTAINED',
-            })
-        }
-        setLinkProjects(m)
-    }
 
     const handleSearch = async (searchValue: string, signal?: AbortSignal) => {
         const timeLimit = memoizedData && memoizedData.length !== 0 ? 700 : 0
