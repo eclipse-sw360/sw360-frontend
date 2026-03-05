@@ -266,30 +266,54 @@ function GET(
     })
 }
 
-function DELETE(path: string, token: string, data?: object): Promise<Response> {
+function DELETE(
+    path: string,
+    token: string,
+    data?: object,
+    headers?: {
+        [key: string]: string
+    },
+): Promise<Response> {
     return send({
         method: 'DELETE',
         path,
         token,
         data: data ?? null,
+        headers,
     })
 }
 
-function POST(path: string, data: object, token: string): Promise<Response> {
+function POST(
+    path: string,
+    data: object,
+    token: string,
+    headers?: {
+        [key: string]: string
+    },
+): Promise<Response> {
     return send({
         method: 'POST',
         path,
         data,
         token,
+        headers,
     })
 }
 
-function PUT(path: string, data: object, token: string): Promise<Response> {
+function PUT(
+    path: string,
+    data: object,
+    token: string,
+    headers?: {
+        [key: string]: string
+    },
+): Promise<Response> {
     return send({
         method: 'PUT',
         path,
         data,
         token,
+        headers,
     })
 }
 
