@@ -29,6 +29,7 @@ import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import MergeReleaseDataCheck from './MergeReleaseDataCheck'
 import MergeReleaseTable from './MergeReleaseTable'
+import MergeReleaseConfirmation from './MergeReleaseConfirmation'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
@@ -235,6 +236,13 @@ function MergeReleaseOverview({
                             setFinalReleasePayload={setFinalReleasePayload}
                             targetAttachments={targetAttachments}
                             sourceAttachments={sourceAttachments}
+                        />
+                    )}
+                    {mergeState === MergeOrSplitActionType.CONFIRM && (
+                        <MergeReleaseConfirmation
+                            targetRelease={targetRelease}
+                            sourceRelease={sourceRelease}
+                            finalReleasePayload={finalReleasePayload}
                         />
                     )}
                     <div className='d-flex justify-content-end mb-3'>
