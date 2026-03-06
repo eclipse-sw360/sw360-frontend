@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, type FormEvent, type ReactElement, SetStateAction, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
-
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
