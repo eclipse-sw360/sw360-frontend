@@ -43,7 +43,10 @@ export default function Attachments({
         session,
     ])
 
+
     useEffect(() => {
+
+        // Setup for 'SOURCE' attachments
         const targetSourceAttachmentFileIds = targetAttachments
             ?.filter(a => a.attachmentType === 'SOURCE')
             .map(a => `${a.sha1}`) ?? []
@@ -52,6 +55,10 @@ export default function Attachments({
             ?.filter(a => a.attachmentType === 'SOURCE')
             .map(a => `${a.sha1}`) ?? []
 
+        const targetSourceAttachmentSet = new Set(targetSourceAttachmentFileIds)
+        const sourceSourceAttachmentSet = new Set(sourceSourceAttachmentFileIds)
+
+        // Setup for non-'SOURCE' attachments 
         const targetOtherAttachmentFileIds = targetAttachments
             ?.filter(a => a.attachmentType !== 'SOURCE')
             .map(a => `${a.sha1}`) ?? []
@@ -60,12 +67,11 @@ export default function Attachments({
             ?.filter(a => a.attachmentType !== 'SOURCE')
             .map(a => `${a.sha1}`) ?? []
 
-        const targetSourceAttachmentSet = new Set(targetSourceAttachmentFileIds)
-        const sourceSourceAttachmentSet = new Set(sourceSourceAttachmentFileIds)
         const targetOtherAttachmentSet = new Set(targetOtherAttachmentFileIds)
         const sourceOtherAttachmentSet = new Set(sourceOtherAttachmentFileIds)
 
         const sourceAttachmentResult = [
+            // Present in BOTH Source and Target
             ...targetSourceAttachmentFileIds
                 .filter(id => sourceSourceAttachmentSet.has(id))
                 .map(id => ({
@@ -75,6 +81,7 @@ export default function Attachments({
                     overWritten: false,
                 })),
 
+            // Present ONLY in Target
             ...targetSourceAttachmentFileIds
                 .filter(id => !sourceSourceAttachmentSet.has(id))
                 .map(id => ({
@@ -84,6 +91,7 @@ export default function Attachments({
                     overWritten: false,
                 })),
 
+            // Present ONLY in Source
             ...sourceSourceAttachmentFileIds
                 .filter(id => !targetSourceAttachmentSet.has(id))
                 .map(id => ({
@@ -93,20 +101,13 @@ export default function Attachments({
                     overWritten: false,
                 })),
         ]
+
         setMatchingSourceAttachmentMergeList(sourceAttachmentResult)
 
-        const OtherAttachmentResult = [
-            ...targetOtherAttachmentFileIds
-                .filter(id => sourceOtherAttachmentSet.has(id))
-                .map(id => ({
-                    value: id,
-                    presentInSource: true,
-                    presentInTarget: true,
-                    overWritten: false,
-                })),
-
-            ...targetOtherAttachmentFileIds
-                .filter(id => !sourceOtherAttachmentSet.has(id))
+        const otherTargetAttachmentsResult = [
+            // Condition 1: attachmentType is 'SOURCE', but ONLY present in Target
+            ...targetSourceAttachmentFileIds
+                .filter(id => !sourceSourceAttachmentSet.has(id))
                 .map(id => ({
                     value: id,
                     presentInSource: false,
@@ -114,6 +115,16 @@ export default function Attachments({
                     overWritten: false,
                 })),
 
+            // Condition 2: All data from targetAttachments where attachmentType !== 'SOURCE'
+            ...targetOtherAttachmentFileIds
+                .map(id => ({
+                    value: id,
+                    presentInSource: sourceOtherAttachmentSet.has(id),
+                    presentInTarget: true,
+                    overWritten: false,
+                })),
+
+            // Condition 3 (NEW): Data from sourceAttachments where attachmentType !== 'SOURCE' AND NOT in Target
             ...sourceOtherAttachmentFileIds
                 .filter(id => !targetOtherAttachmentSet.has(id))
                 .map(id => ({
@@ -123,40 +134,43 @@ export default function Attachments({
                     overWritten: false,
                 })),
         ]
-
-        setOtherAttachmentMergeList(OtherAttachmentResult)
+        setOtherAttachmentMergeList(otherTargetAttachmentsResult)
 
     }, [targetAttachments, sourceAttachments])
 
 
     useEffect(() => {
-        if (!sourceReleaseDetail?._embedded?.['sw360:attachments']) return
+        if (!sourceReleaseDetail?._embedded?.['sw360:attachments']) return;
 
-        // IDs present in both
         const bothIds = matchingSourceAttachmentMergeList
             .filter(d => d.presentInSource && d.presentInTarget)
-            .map(d => d.value)
+            .map(d => d.value);
 
         if (bothIds.length === 0) {
             setFinalReleasePayload(prev => ({
                 ...prev,
-                attachments: []
-            }))
-            return
+                attachments: prev?.attachments ?? []
+            }));
+            return;
         }
 
-        const sourceAttachments =
-            sourceReleaseDetail._embedded['sw360:attachments']
-                .filter(a => a.attachmentType === 'SOURCE')
-                .filter(a => a.sha1 && bothIds.includes(a.sha1))
+        const sourceAttachments = sourceReleaseDetail._embedded['sw360:attachments']
+            .filter(a => a.attachmentType === 'SOURCE')
+            .filter(a => a.sha1 && bothIds.includes(a.sha1))
 
-        // Replace attachments completely (no duplicates possible)
-        setFinalReleasePayload(prev => ({
-            ...prev,
-            attachments: sourceAttachments
-        }))
+        setFinalReleasePayload(prev => {
+            const existingAttachments = prev?.attachments ?? []
+            const allAttachments = [...existingAttachments, ...sourceAttachments]
+            const uniqueMap = new Map(
+                allAttachments.map(item => [item.sha1, item])
+            )
 
-    }, [matchingSourceAttachmentMergeList, sourceReleaseDetail])
+            return {
+                ...prev,
+                attachments: Array.from(uniqueMap.values())
+            }
+        })
+    }, [sourceReleaseDetail, matchingSourceAttachmentMergeList])
 
 
     return (

@@ -92,7 +92,7 @@ export default function MergeReleaseDataCheck({
             ...targetRelease,
             createdBy: targetRelease?._embedded?.['sw360:createdBy']?.email ?? '',
             attachments: targetRelease?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]),
-        } as ReleaseDetail)
+        } as Release)
     }, [
         targetRelease,
         sourceRelease,
