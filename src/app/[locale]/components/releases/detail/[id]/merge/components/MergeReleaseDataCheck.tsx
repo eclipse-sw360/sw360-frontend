@@ -92,6 +92,12 @@ export default function MergeReleaseDataCheck({
             ...targetRelease,
             createdBy: targetRelease?._embedded?.['sw360:createdBy']?.email ?? '',
             attachments: targetRelease?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]),
+            moderators: targetRelease?._embedded?.['sw360:moderators']?.map(
+                (moderator) => moderator.email) ?? ([] as string[]),
+            contributors: targetRelease?._embedded?.['sw360:contributors']?.map(
+                (contributor) => contributor.email) ?? ([] as string[]),
+            subscribers: targetRelease?._embedded?.['sw360:subscribers']?.map(
+                (subscriber) => subscriber.email) ?? ([] as string[]),
         } as Release)
     }, [
         targetRelease,
