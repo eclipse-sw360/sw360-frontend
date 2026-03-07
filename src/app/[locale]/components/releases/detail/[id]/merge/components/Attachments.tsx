@@ -154,13 +154,13 @@ export default function Attachments({
             return;
         }
 
-        const sourceAttachments = sourceReleaseDetail._embedded['sw360:attachments']
+        const sourceAttachmentsData = sourceAttachments
             .filter(a => a.attachmentType === 'SOURCE')
             .filter(a => a.sha1 && bothIds.includes(a.sha1))
 
         setFinalReleasePayload(prev => {
             const existingAttachments = prev?.attachments ?? []
-            const allAttachments = [...existingAttachments, ...sourceAttachments]
+            const allAttachments = [...existingAttachments, ...sourceAttachmentsData]
             const uniqueMap = new Map(
                 allAttachments.map(item => [item.sha1, item])
             )

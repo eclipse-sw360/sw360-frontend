@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -66,7 +66,7 @@ function MergeReleaseOverview({
     const [componentId, setComponentId] = useState<null | string>(null)
     const [finalReleasePayload, setFinalReleasePayload] = useState<null | Release>(null)
     const [error, setError] = useState<null | string>(null)
-    const [loading] = useState(false)
+    const [loading, setLoading] = useState(false)
     const { status, data: session } = useSession()
     const [sourceAttachments, setSourceAttachments] = useState<Array<Attachment>>([])
     const [targetAttachments, setTargetAttachments] = useState<Array<Attachment>>([])
@@ -148,13 +148,21 @@ function MergeReleaseOverview({
                 return false
             }
             const sourceAttachmentResponse = await fetchData(`releases/${sourceRelease.id}/attachments`)
-            setSourceAttachments(sourceAttachmentResponse?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]))
+            setSourceAttachments(sourceAttachmentResponse?._embedded?.['sw360:attachments']?.map(
+                ({ _links, ...attachmentData }) => attachmentData) ?? ([] as Attachment[]),
+            )
+            console.log('sourceAttachments----', sourceAttachments)
             const sourceAttachmentsList =
                 sourceAttachmentResponse?._embedded?.['sw360:attachments']?.filter(
                     (att: Attachment) => att.attachmentType === 'SOURCE',
                 ) ?? []
             const targetAttachmentResponse = await fetchData(`releases/${releaseId}/attachments`)
-            setTargetAttachments(targetAttachmentResponse?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]))
+            setTargetAttachments(
+                targetAttachmentResponse?._embedded?.['sw360:attachments']?.map(
+                    ({ _links, ...attachmentData }) => attachmentData) ?? ([] as Attachment[]),
+            )
+            console.log('targetAttachments----', targetAttachments)
+
             const targetAttachmentsList =
                 targetAttachmentResponse?._embedded?.['sw360:attachments']?.filter(
                     (att: Attachment) => att.attachmentType === 'SOURCE',
@@ -176,6 +184,35 @@ function MergeReleaseOverview({
                 router.push(`releases/${releaseId}`)
             }
             return false
+        }
+    }
+
+    const handleMergeRelease = async () => {
+        try {
+            setLoading(true)
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const payload = {
+                ...(finalReleasePayload ?? {}),
+            }
+            delete payload.subscribers
+            console.log('payload------------', payload)
+            const response = await ApiUtils.PATCH(
+                `releases/mergereleases?mergeTargetId=${targetRelease?.id}&mergeSourceId=${sourceRelease?.id}`,
+                payload,
+                session.user.access_token,
+            )
+            if (response.status !== 200) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+        } catch (error) {
+            ApiUtils.reportError(error)
+        } finally {
+            setLoading(false)
+            // redirect(`components/releases/detail/${releaseId}`)
         }
     }
 
@@ -266,7 +303,7 @@ function MergeReleaseOverview({
                                 <button
                                     type='button'
                                     className='btn btn-primary'
-                                    // onClick={handleMergeRelease}
+                                    onClick={handleMergeRelease}
                                     disabled={loading}
                                 >
                                     {t('Finish')}

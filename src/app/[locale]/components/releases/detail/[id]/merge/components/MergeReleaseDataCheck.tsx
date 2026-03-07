@@ -42,7 +42,6 @@ export default function MergeReleaseDataCheck({
     finalReleasePayload: Release | null
     setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
-    // const t = useTranslations('default')
     const session = useSession()
     const [sourceReleaseDetail, setSourceReleaseDetail] = useState<ReleaseDetail | null>()
 
@@ -88,10 +87,13 @@ export default function MergeReleaseDataCheck({
     ])
 
     useEffect(() => {
+        if (CommonUtils.isNullOrUndefined(targetRelease)) return
+        const { _embedded, _links, ...filtertedTargetRelease } = targetRelease;
         setFinalReleasePayload({
-            ...targetRelease,
+            ...filtertedTargetRelease,
             createdBy: targetRelease?._embedded?.['sw360:createdBy']?.email ?? '',
-            attachments: targetRelease?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]),
+            attachments: targetRelease?._embedded?.['sw360:attachments']?.map(
+                ({ _links, ...attachmentData }) => attachmentData) ?? ([] as Attachment[]),
             moderators: targetRelease?._embedded?.['sw360:moderators']?.map(
                 (moderator) => moderator.email) ?? ([] as string[]),
             contributors: targetRelease?._embedded?.['sw360:contributors']?.map(
