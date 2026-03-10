@@ -45,7 +45,6 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -373,9 +372,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                 >
                                     <Dropdown>
                                         <Dropdown.Toggle variant='primary'>
-                                            <span
-                                                className={`${styles['badge-circle']} ${styles[release.clearingState]}`}
-                                            ></span>
+                                            <span className={`badge-circle ${release.clearingState ?? 'NEW'}`}></span>
                                             {`${t('Version')} ${release.version}`}
                                         </Dropdown.Toggle>
                                         <Dropdown.Menu>
@@ -386,16 +383,12 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 ]) => (
                                                     <Dropdown.Item
                                                         key={index}
-                                                        className={styles['dropdown-item']}
+                                                        href={`/components/releases/detail/${item.id}`}
                                                     >
                                                         <span
-                                                            className={`${styles['badge-circle']} ${
-                                                                styles[item.clearingState ?? 'NEW']
-                                                            }`}
+                                                            className={`badge-circle ${item.clearingState ?? 'NEW'}`}
                                                         ></span>
-                                                        <Link href={`/components/releases/detail/${item.id}`}>
-                                                            {`${t('Version')} ${item.version}`}
-                                                        </Link>
+                                                        {`${t('Version')} ${item.version}`}
                                                     </Dropdown.Item>
                                                 ),
                                             )}

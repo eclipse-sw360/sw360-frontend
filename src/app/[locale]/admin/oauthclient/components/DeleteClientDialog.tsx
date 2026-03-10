@@ -88,15 +88,11 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
         >
             <Modal.Header
                 closeButton
-                style={{
-                    color: 'red',
-                }}
+                className='text-danger'
             >
                 <Modal.Title>
                     <BsQuestionCircle
-                        style={{
-                            marginBottom: '5px',
-                        }}
+                        className='mb-2 me-2'
                         size={20}
                     />
                     {t('Delete Client')} ?
@@ -120,7 +116,6 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
-                    className='delete-btn'
                     variant='light'
                     onClick={handleCloseDialog}
                 >

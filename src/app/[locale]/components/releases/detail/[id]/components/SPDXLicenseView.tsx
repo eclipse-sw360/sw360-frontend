@@ -20,7 +20,6 @@ import Modal from 'react-bootstrap/Modal'
 import { BsInfoCircle } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 
 interface LicenseInfo {
     license: string
@@ -125,7 +124,6 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
                             color: 'gray',
                         }}
                         size={20}
-                        className={styles.info}
                     />
                 )}
             </li>

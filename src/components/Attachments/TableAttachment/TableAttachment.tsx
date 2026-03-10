@@ -163,6 +163,7 @@ function TableAttachment({
                                     name='attachmentType'
                                     className='attachmentType toplabelledInput form-control'
                                     onChange={(e) => handleInputChange(e, index)}
+                                    value={attachment.attachmentType}
                                 >
                                     {Object.keys(AttachmentTypes).map((type: string) => (
                                         <option

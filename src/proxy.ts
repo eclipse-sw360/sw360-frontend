@@ -35,6 +35,7 @@ const roleBasedAccessControl: {
     '/admin': {
         roles: [
             UserGroupType.ADMIN,
+            UserGroupType.SW360_ADMIN,
         ],
         authRequired: true,
     },

@@ -210,20 +210,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
             <Modal.Body>
                 <Form>
                     <Form.Group className='mb-3'>
-                        <Form.Label
-                            style={{
-                                fontWeight: 'bold',
-                            }}
-                        >
+                        <Form.Label className='fw-bold'>
                             {t('Description')}
-                            <span
-                                className='text-red'
-                                style={{
-                                    color: 'red',
-                                }}
-                            >
-                                *
-                            </span>
+                            <span className='text-danger'>*</span>
                         </Form.Label>
                         <Form.Control
                             type='text'
@@ -237,20 +226,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label
-                                    style={{
-                                        fontWeight: 'bold',
-                                    }}
-                                >
+                                <Form.Label className='fw-bold'>
                                     {t('Authorities')}
-                                    <span
-                                        className='text-red'
-                                        style={{
-                                            color: 'red',
-                                        }}
-                                    >
-                                        *
-                                    </span>
+                                    <span className='text-danger'>*</span>
                                 </Form.Label>
                                 <Form.Control
                                     type='text'
@@ -263,20 +241,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                         </Col>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label
-                                    style={{
-                                        fontWeight: 'bold',
-                                    }}
-                                >
+                                <Form.Label className='fw-bold'>
                                     {t('Scope')}
-                                    <span
-                                        className='text-red'
-                                        style={{
-                                            color: 'red',
-                                        }}
-                                    >
-                                        *
-                                    </span>
+                                    <span className='text-danger'>*</span>
                                 </Form.Label>
                                 <div>
                                     <Form.Check
@@ -301,20 +268,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                     <Row>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label
-                                    style={{
-                                        fontWeight: 'bold',
-                                    }}
-                                >
+                                <Form.Label className='fw-bold'>
                                     {t('Access Token Validity')}
-                                    <span
-                                        className='text-red'
-                                        style={{
-                                            color: 'red',
-                                        }}
-                                    >
-                                        *
-                                    </span>
+                                    <span className='text-danger'>*</span>
                                 </Form.Label>
                                 <Row>
                                     <Col>
@@ -344,20 +300,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                         </Col>
                         <Col md={6}>
                             <Form.Group className='mb-3'>
-                                <Form.Label
-                                    style={{
-                                        fontWeight: 'bold',
-                                    }}
-                                >
+                                <Form.Label className='fw-bold'>
                                     {t('Refresh Token Validity')}
-                                    <span
-                                        className='text-red'
-                                        style={{
-                                            color: 'red',
-                                        }}
-                                    >
-                                        *
-                                    </span>
+                                    <span className='text-danger'>*</span>
                                 </Form.Label>
                                 <Row>
                                     <Col>

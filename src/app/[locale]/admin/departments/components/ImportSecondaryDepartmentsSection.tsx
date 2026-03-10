@@ -294,14 +294,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
                         <table className='table import-config-table'>
                             <tbody>
                                 <tr>
-                                    <th
-                                        style={{
-                                            lineHeight: '40px',
-                                        }}
-                                        className='table-header'
-                                    >
-                                        {t('Registration Folder Path')}
-                                    </th>
+                                    <th className='table-header'>{t('Registration Folder Path')}</th>
                                     <td>
                                         <input
                                             id='pathFolderDepartment'

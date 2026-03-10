@@ -125,7 +125,7 @@ const FrontEndConfigs = (): JSX.Element => {
                             {t('UI Element Configurations')}
                             <hr className='my-2 mb-2' />
                         </h6>
-                        <table className='table label-value-table'>
+                        <table className='table'>
                             <thead>
                                 <tr>
                                     <th className='w-25'>{t('Name')}</th>

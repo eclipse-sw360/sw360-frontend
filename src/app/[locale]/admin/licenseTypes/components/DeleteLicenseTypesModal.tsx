@@ -115,20 +115,9 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
                 centered
                 size='lg'
             >
-                <Modal.Header
-                    style={{
-                        backgroundColor: '#FEEFEF',
-                        color: '#da1414',
-                        fontWeight: '700',
-                    }}
-                >
+                <Modal.Header className='alert-danger'>
                     <h5>
-                        <Modal.Title
-                            style={{
-                                fontSize: '1.25rem',
-                                fontWeight: '700',
-                            }}
-                        >
+                        <Modal.Title>
                             <BsQuestionCircle size={20} />
                             &nbsp;
                             {t('Delete License Type')}?
@@ -165,7 +154,6 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
                 </Modal.Body>
                 <Modal.Footer className='justify-content-end'>
                     <Button
-                        className='delete-btn'
                         variant='light'
                         onClick={handleCloseDialog}
                     >

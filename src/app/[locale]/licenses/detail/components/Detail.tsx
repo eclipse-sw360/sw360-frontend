@@ -22,7 +22,6 @@ import { BsCheck2Circle } from 'react-icons/bs'
 import { LicenseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import styles from '../detail.module.css'
 
 interface Props {
     license: LicenseDetail
@@ -68,7 +67,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
     return (
         <div className='col'>
             {license.checked === false && (
-                <div className={`alert ${styles['isChecked']}`}>
+                <div className={`alert alert-danger`}>
                     {t('This license is')} <b>UNCHECKED</b>
                 </div>
             )}
@@ -92,20 +91,12 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                         <td>
                             {' '}
                             {license.checked === true ? (
-                                <span
-                                    style={{
-                                        color: '#287d3c',
-                                    }}
-                                >
+                                <span className='text-success'>
                                     <BsCheck2Circle size={20} />
                                 </span>
                             ) : (
-                                <span
-                                    style={{
-                                        color: 'red',
-                                    }}
-                                >
-                                    <BiXCircle color='red' />
+                                <span className='text-danger'>
+                                    <BiXCircle size={20} />
                                 </span>
                             )}
                         </td>
@@ -119,20 +110,12 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                         <td>
                             {' '}
                             {license.OSIApproved === 'YES' ? (
-                                <span
-                                    style={{
-                                        color: '#287d3c',
-                                    }}
-                                >
+                                <span className='text-success'>
                                     <BsCheck2Circle size={20} /> {t('Yes')}
                                 </span>
                             ) : (
-                                <span
-                                    style={{
-                                        color: 'red',
-                                    }}
-                                >
-                                    <BiXCircle color='red' /> {t('NA')}
+                                <span className='text-danger'>
+                                    <BiXCircle size={20} /> {t('NA')}
                                 </span>
                             )}
                         </td>
@@ -142,40 +125,22 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                         <td>
                             {' '}
                             {license.FSFLibre === 'YES' ? (
-                                <span
-                                    style={{
-                                        color: '#287d3c',
-                                    }}
-                                >
+                                <span className='text-success'>
                                     <BsCheck2Circle size={20} /> {t('Yes')}
                                 </span>
                             ) : (
-                                <span
-                                    style={{
-                                        color: 'red',
-                                    }}
-                                >
-                                    <BiXCircle color='red' /> {t('NA')}
+                                <span className='text-danger'>
+                                    <BiXCircle size={20} /> {t('NA')}
                                 </span>
                             )}
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <p
-                                style={{
-                                    marginTop: '0.5rem',
-                                }}
-                            >
-                                {t('External link for more information')}:
-                            </p>
+                            <p className='mt-1'>{t('External link for more information')}:</p>
                         </td>
                         <td>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                }}
-                            >
+                            <div className='d-flex'>
                                 <input
                                     style={{
                                         width: 'auto',
@@ -190,7 +155,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
                                 />
                                 <Button
                                     variant='secondary'
-                                    className={`${styles['button-save']}`}
+                                    className='ms-3'
                                     type='submit'
                                     onClick={() => void updateExternalLicenseLink()}
                                 >

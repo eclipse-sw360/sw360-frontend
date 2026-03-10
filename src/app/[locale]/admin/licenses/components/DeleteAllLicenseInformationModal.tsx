@@ -86,10 +86,7 @@ export default function DeleteAllLicenseInformationModal({
                 scrollable
             >
                 <Modal.Header
-                    style={{
-                        backgroundColor: '#feefef',
-                        color: '#da1414',
-                    }}
+                    className='alert-danger'
                     closeButton
                 >
                     <Modal.Title id='delete-all-license-info-modal'>
