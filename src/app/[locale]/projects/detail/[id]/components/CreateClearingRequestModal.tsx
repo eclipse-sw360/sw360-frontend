@@ -16,6 +16,7 @@ import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
+import DateField from '@/components/DateField'
 import { ClearingRequestDetails, CreateClearingRequestPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
@@ -33,7 +34,6 @@ interface ClearingRequestDataMap {
 export default function CreateClearingRequestModal({ show, setShow, projectId, projectName }: Props): JSX.Element {
     const t = useTranslations('default')
     const [message, setMessage] = useState<JSX.Element>()
-    const [minDate, setMinDate] = useState('')
     const [variant, setVariant] = useState('success')
     const [reloadPage, setReloadPage] = useState(false)
     const [isDisabled, setIsDisabled] = useState(false)
@@ -56,19 +56,6 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
         }
     }, [
         status,
-    ])
-
-    useEffect(() => {
-        const calculateMinDate = () => {
-            const currentDate = new Date()
-            if (!isCritical) {
-                currentDate.setDate(currentDate.getDate() + 21)
-            }
-            return currentDate.toISOString().split('T')[0]
-        }
-        setMinDate(calculateMinDate())
-    }, [
-        isCritical,
     ])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
@@ -140,7 +127,6 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
 
     const handleCloseDialog = () => {
         setShow(!show)
-        setMinDate('')
         setIsCritical(false)
         setIsDisabled(false)
         setShowMessage(false)
@@ -309,30 +295,25 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                             </Col>
                             <Col md={6}>
                                 <Form.Group className='mb-2'>
-                                    <Form.Label
-                                        style={{
-                                            fontWeight: 'bold',
-                                        }}
-                                    >
-                                        {t('Preferred Clearing Date')} :
-                                        <span
-                                            className='text-red'
-                                            style={{
-                                                color: '#F7941E',
-                                            }}
-                                        >
-                                            *
-                                        </span>
-                                    </Form.Label>
-                                    <Form.Control
-                                        type='date'
+                                    <DateField
                                         id='createClearingRequest.requestedClearingDate'
                                         name='requestedClearingDate'
+                                        label={`${t('Preferred Clearing Date')} *`}
+                                        placeholder='YYYY-MM-DD'
                                         value={createClearingRequestPayload.requestedClearingDate ?? ''}
-                                        onChange={updateInputField}
-                                        disabled={isDisabled}
-                                        min={minDate}
-                                        required
+                                        onChange={(normalized) => {
+                                            setCreateClearingRequestPayload({
+                                                ...createClearingRequestPayload,
+                                                requestedClearingDate: normalized,
+                                            })
+                                        }}
+                                        minDate={(() => {
+                                            const date = new Date()
+                                            if (!isCritical) {
+                                                date.setDate(date.getDate() + 21)
+                                            }
+                                            return date
+                                        })()}
                                     />
                                     <div
                                         className='form-text'

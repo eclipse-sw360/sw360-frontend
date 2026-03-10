@@ -15,5 +15,11 @@
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "chat.tools.terminal.autoApprove": {
+    "/^pnpm biome check$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
   }
 }
