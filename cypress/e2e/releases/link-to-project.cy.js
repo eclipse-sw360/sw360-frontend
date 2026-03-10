@@ -42,8 +42,15 @@ const createRelease = (componentId, version) => {
     cy.createRelease(componentId, version)
 }
 
-const checkUsedByProjectTable = () => {
-    // TODO after fix frontend bug
+const checkUsedByProjectTable = (testData) => {
+    const projectLabel = `${testData.linkedProject.name} (${testData.linkedProject.version})`
+    if (testData.isComponentPage) {
+        cy.get(viewSelectors.tabLinkedReleases).click()
+        cy.get(`a:contains("${testData.release.version}")`).click()
+    }
+    cy.get(viewSelectors.tabSummary).click()
+    cy.get(viewSelectors.projectsUsingTable).should('be.visible')
+    cy.get(viewSelectors.projectsUsingTable).contains(projectLabel)
 }
 
 const execute = (testId) => {
@@ -52,7 +59,7 @@ const execute = (testId) => {
         openLinkModal(testData.release, testData.isComponentPage)
         selectProjectToLink(testData.linkedProject)
         verifySuccessMessage(testData)
-        checkUsedByProjectTable()
+        checkUsedByProjectTable(testData)
     })
 }
 

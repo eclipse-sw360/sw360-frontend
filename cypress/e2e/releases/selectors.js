@@ -123,7 +123,9 @@ export const addEditSelectors = {
 
 //elements of view page
 export const viewSelectors = {
+    tabSummary: '#tab-Summary',
     tabLinkedReleases: '#tab-Releases',
+    tabAttachments: '#tab-Attachments',
     tabClearingDetails: '#tab-ClearingDetails',
     tabEccDetails: '#tab-EccDetails',
     hyperlinkComponentNames: '[data-column-id="name"] > div > .link',
@@ -185,5 +187,7 @@ export const viewSelectors = {
     eccComment: ':nth-child(6) > .col > .table > tbody > :nth-child(5) > :nth-child(2)',
 
     // SuccessMessage when link release to project
-    linkToPJSuccessMessage: '.alert.alert-success'
+    linkToPJSuccessMessage: '.alert.alert-success',
+    attachmentsTable: '[data-testid="attachments-table"]',
+    projectsUsingTable: '[data-testid="projects-using-table"]'
 }
