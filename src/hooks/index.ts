@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import useLocalStorage from './useLocalStorage'
+import { useSW360BackendConfig } from './useSW360BackendConfig'
 import { useUiConfig } from './useUiConfig'
 
-export { useLocalStorage, useUiConfig }
+export { useLocalStorage, useSW360BackendConfig, useUiConfig }

@@ -12,22 +12,22 @@ import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ConfigurationContainers, ProcessedUiConfig, parseRawUiConfig, UiConfiguration } from '@/object-types'
+import { Configuration, ConfigurationContainers } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import { useLocalStorage } from './index'
 
-interface CachedUiConfig {
-    data: ProcessedUiConfig
+interface CachedSW360Config {
+    data: Configuration
     timestamp: number
 }
 
-export function useUiConfig() {
-    const [processedConfig, setProcessedConfig] = useLocalStorage<CachedUiConfig | null>('uiConfig', null)
+export function useSW360BackendConfig() {
+    const [processedConfig, setProcessedConfig] = useLocalStorage<CachedSW360Config | null>('sw360BackendConfig', null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const { status } = useSession()
     const t = useTranslations('default')
-    const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
+    const apiEndpoint = `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`
     const hasFetchedRef = useRef(false)
 
     const CACHE_TTL = 15 * 60 * 1000
@@ -39,7 +39,7 @@ export function useUiConfig() {
         processedConfig,
     ])
 
-    const fetchAndProcessUiConfig = useCallback(
+    const fetchAndProcessSW360Config = useCallback(
         async (force = false) => {
             if (status !== 'authenticated') {
                 setIsLoading(false)
@@ -67,10 +67,9 @@ export function useUiConfig() {
 
             const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
             if (response.status == StatusCodes.OK) {
-                const rawData = (await response.json()) as UiConfiguration
-                const processedData = parseRawUiConfig(rawData)
+                const configData = (await response.json()) as Configuration
                 setProcessedConfig({
-                    data: processedData,
+                    data: configData,
                     timestamp: Date.now(),
                 })
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
@@ -90,7 +89,7 @@ export function useUiConfig() {
 
     useEffect(() => {
         if (status === 'authenticated' && !hasFetchedRef.current) {
-            fetchAndProcessUiConfig()
+            fetchAndProcessSW360Config()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -100,20 +99,20 @@ export function useUiConfig() {
     useEffect(() => {
         const intervalId = setInterval(() => {
             if (status === 'authenticated' && isConfigExpired()) {
-                fetchAndProcessUiConfig(true)
+                fetchAndProcessSW360Config(true)
             }
         }, CACHE_TTL)
 
         return () => clearInterval(intervalId)
     }, [
         status,
-        fetchAndProcessUiConfig,
+        fetchAndProcessSW360Config,
         isConfigExpired,
     ])
 
     return {
         config: processedConfig?.data || null,
         isLoading,
-        refreshConfig: () => fetchAndProcessUiConfig(true),
+        refreshConfig: () => fetchAndProcessSW360Config(true),
     }
 }
