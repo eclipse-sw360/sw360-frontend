@@ -19,6 +19,7 @@ import { Modal } from 'react-bootstrap'
 import { BsExclamationTriangle, BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 
 import { Attachment, AttachmentTypes, Embedded } from '@/object-types'
+import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
 import { ApiUtils, CommonUtils } from '@/utils'
 import AttachmentRowData from './AttachmentRowData'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
@@ -31,12 +32,20 @@ interface Props<T> {
 }
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
+type CommentField = 'createdComment' | 'checkedComment'
+
+interface CommentModalData {
+    rowIndex: number
+    field: CommentField
+    value: string
+}
 
 function EditAttachments<T>({ documentId, documentType, documentPayload, setDocumentPayload }: Props<T>): JSX.Element {
     const t = useTranslations('default')
     const [attachmentsData, setAttachmentsData] = useState<Array<AttachmentRowData>>([])
     const [beforeUpdateAttachmentsCheckStatus, setBeforeUpdateAttachmentsCheckStatus] = useState<Array<string>>([])
     const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
+    const [commentModalData, setCommentModalData] = useState<CommentModalData | null>(null)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [deletingAttachment, setDeletingAttachment] = useState<AttachmentRowData | undefined>(undefined)
     const [deletingAttachmentIndex, setDeletingAttachmentIndex] = useState<number | undefined>(undefined)
@@ -179,35 +188,57 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
         setDeletingAttachmentIndex(index)
     }, [])
 
+    const closeCommentModal = useCallback(() => {
+        setCommentModalData(null)
+    }, [])
+
+    const handleUpdateComment = useCallback(
+        (value: string) => {
+            if (commentModalData === null) {
+                closeCommentModal()
+                return
+            }
+
+            setAttachmentsData((prev) => {
+                if (!prev[commentModalData.rowIndex]) return prev
+                const next = [
+                    ...prev,
+                ]
+                next[commentModalData.rowIndex] = {
+                    ...next[commentModalData.rowIndex],
+                    [commentModalData.field]: value,
+                }
+                return next
+            })
+            closeCommentModal()
+        },
+        [
+            closeCommentModal,
+            commentModalData,
+        ],
+    )
+
     const columns = useMemo<ColumnDef<AttachmentRowData>[]>(
         () => [
             {
                 id: 'attachments',
                 header: t('Attachments'),
-                meta: {
-                    headerClassName: 'headLabel',
-                },
                 columns: [
                     {
                         id: 'filename',
                         header: t('File name'),
-                        meta: {
-                            headerClassName: 'headlabel content-middle sorting_asc',
-                            cellClassName: 'align-middle',
-                        },
+                        meta: { cellClassName: 'align-middle' },
                         cell: ({ row }) => row.original.filename,
                     },
                     {
                         id: 'attachmentType',
                         header: t('Type'),
-                        meta: {
-                            headerClassName: 'headlabel sorting',
-                        },
                         cell: ({ row }) => (
                             <div className='form-group'>
                                 <select
                                     name='attachmentType'
-                                    className='attachmentType toplabelledInput form-control'
+                                    className='form-control'
+                                    value={row.original.attachmentType ?? ''}
                                     onChange={(e) => handleInputChange(e, row.index)}
                                 >
                                     {Object.keys(AttachmentTypes).map((type: string) => (
@@ -225,25 +256,26 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                     {
                         id: 'upload',
                         header: t('Upload'),
-                        meta: {
-                            headerClassName: 'headlabel',
-                        },
                         columns: [
                             {
                                 id: 'createdComment',
                                 header: t('Comment'),
-                                meta: {
-                                    headerClassName: 'headlabel sorting',
-                                },
                                 cell: ({ row }) => (
                                     <div className='form-group'>
                                         <input
                                             type='text'
-                                            className='toplabelledInput form-control'
+                                            className='form-control'
                                             placeholder='Enter comments'
                                             name='createdComment'
-                                            onChange={(e) => handleInputChange(e, row.index)}
                                             value={row.original.createdComment ?? ''}
+                                            onClick={() =>
+                                                setCommentModalData({
+                                                    rowIndex: row.index,
+                                                    field: 'createdComment',
+                                                    value: row.original.createdComment ?? '',
+                                                })
+                                            }
+                                            readOnly
                                         />
                                     </div>
                                 ),
@@ -251,10 +283,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'createdTeam',
                                 header: t('Group'),
-                                meta: {
-                                    headerClassName: 'headlabel content-middle sorting',
-                                    cellClassName: 'align-middle',
-                                },
+                                meta: { cellClassName: 'align-middle' },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.createdTeam ?? ''}</span>
                                 ),
@@ -262,10 +291,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'createdBy',
                                 header: t('Name'),
-                                meta: {
-                                    headerClassName: 'headlabel content-middle sorting',
-                                    cellClassName: 'align-middle',
-                                },
+                                meta: { cellClassName: 'align-middle' },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.createdBy ?? ''}</span>
                                 ),
@@ -273,10 +299,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'createdOn',
                                 header: t('Date'),
-                                meta: {
-                                    headerClassName: 'headlabel content-middle sorting',
-                                    cellClassName: 'align-middle',
-                                },
+                                meta: { cellClassName: 'align-middle' },
                                 cell: ({ row }) => row.original.createdOn ?? '',
                             },
                         ],
@@ -284,22 +307,16 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                     {
                         id: 'approval',
                         header: t('Approval'),
-                        meta: {
-                            headerClassName: 'headlabel',
-                        },
                         columns: [
                             {
                                 id: 'checkStatus',
                                 header: t('Status'),
-                                meta: {
-                                    headerClassName: 'headlabel checkStatus sorting',
-                                    cellClassName: 'checkStatus',
-                                },
+                                meta: { cellClassName: 'checkStatus' },
                                 cell: ({ row }) => (
                                     <div className='form-group'>
                                         <select
                                             name='checkStatus'
-                                            className='toplabelledInput form-control'
+                                            className='form-control'
                                             defaultValue={row.original.checkStatus}
                                             onChange={(e) => handleInputChange(e, row.index)}
                                         >
@@ -328,10 +345,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedComment',
                                 header: t('Comment'),
-                                meta: {
-                                    headerClassName: 'headlabel checkedComment sorting',
-                                    cellClassName: 'checked-comment',
-                                },
+                                meta: { cellClassName: 'checked-comment' },
                                 cell: ({ row }) => (
                                     <div className='form-group'>
                                         <input
@@ -339,8 +353,15 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                                             name='checkedComment'
                                             className='check-comment form-control'
                                             placeholder='Enter comments'
-                                            onChange={(e) => handleInputChange(e, row.index)}
-                                            value={row.original.checkedComment}
+                                            value={row.original.checkedComment ?? ''}
+                                            onClick={() =>
+                                                setCommentModalData({
+                                                    rowIndex: row.index,
+                                                    field: 'checkedComment',
+                                                    value: row.original.checkedComment ?? '',
+                                                })
+                                            }
+                                            readOnly
                                         />
                                     </div>
                                 ),
@@ -348,10 +369,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedTeam',
                                 header: t('Group'),
-                                meta: {
-                                    headerClassName: 'headlabel content-middle checkedTeam sorting',
-                                    cellClassName: 'align-middle checked-team',
-                                },
+                                meta: { cellClassName: 'align-middle checked-team' },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.checkedTeam ?? ''}</span>
                                 ),
@@ -359,10 +377,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedBy',
                                 header: t('Name'),
-                                meta: {
-                                    headerClassName: 'headlabel content-middle checkedBy sorting',
-                                    cellClassName: 'align-middle checked-by',
-                                },
+                                meta: { cellClassName: 'align-middle checked-by' },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.checkedBy ?? ''}</span>
                                 ),
@@ -370,10 +385,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedOn',
                                 header: t('Date'),
-                                meta: {
-                                    headerClassName: 'headlabel content-middle checkedOn sorting',
-                                    cellClassName: 'align-middle checked-on',
-                                },
+                                meta: { cellClassName: 'align-middle checked-on' },
                                 cell: ({ row }) => row.original.checkedOn ?? '',
                             },
                         ],
@@ -381,10 +393,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                     {
                         id: 'actions',
                         header: '',
-                        meta: {
-                            headerClassName: 'headlabel content-middle one',
-                            cellClassName: 'align-middle action delete cursor-pointer',
-                        },
+                        meta: { cellClassName: 'align-middle action delete cursor-pointer' },
                         cell: ({ row }) => (
                             <span
                                 role='button'
@@ -426,6 +435,14 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                 setAttachmentsData={setAttachmentsData}
                 show={dialogOpenSelectAttachment}
                 setShow={setDialogOpenSelectAttachment}
+            />
+            <UpdateCommentModal
+                show={commentModalData !== null}
+                title={t('Enter comments')}
+                initialValue={commentModalData?.value ?? ''}
+                placeholder={t('Enter comments')}
+                onClose={closeCommentModal}
+                onUpdate={handleUpdateComment}
             />
             {deletingAttachmentIndex !== undefined && (
                 <Modal

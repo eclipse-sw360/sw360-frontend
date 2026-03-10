@@ -14,8 +14,9 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import {
     ActionType,
@@ -32,8 +33,6 @@ import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
-import UpdateCommentModal from './UpdateCommentModal'
-
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
@@ -64,6 +63,37 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     }, [
         session,
     ])
+
+    const closeUpdateCommentModal = useCallback(() => {
+        setUpdateCommentModalData(null)
+    }, [])
+
+    const handleUpdateComment = useCallback(
+        (value: string) => {
+            if (updateCommentModalData === null || !payload || !setPayload) {
+                closeUpdateCommentModal()
+                return
+            }
+
+            let obligationValue = payload[updateCommentModalData.obligation] ?? {}
+            obligationValue = {
+                ...obligationValue,
+                comment: value,
+                obligationType: ObligationLevels.LICENSE_OBLIGATION,
+            }
+            setPayload((payload: ObligationEntry) => ({
+                ...payload,
+                [updateCommentModalData.obligation]: obligationValue,
+            }))
+            closeUpdateCommentModal()
+        },
+        [
+            closeUpdateCommentModal,
+            payload,
+            setPayload,
+            updateCommentModalData,
+        ],
+    )
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -658,11 +688,12 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     return (
         <>
             <UpdateCommentModal
-                modalMetaData={updateCommentModalData}
-                setModalMetaData={setUpdateCommentModalData}
-                payload={payload}
-                setPayload={setPayload}
-                obligationTypeName={ObligationLevels.LICENSE_OBLIGATION}
+                show={updateCommentModalData !== null}
+                title={t('Enter obligation comment')}
+                initialValue={updateCommentModalData?.comment ?? ''}
+                placeholder={t('Enter obligation comment')}
+                onClose={closeUpdateCommentModal}
+                onUpdate={handleUpdateComment}
             />
             <LicenseDbObligationsModal
                 show={showLicenseDbObligationsModal}
