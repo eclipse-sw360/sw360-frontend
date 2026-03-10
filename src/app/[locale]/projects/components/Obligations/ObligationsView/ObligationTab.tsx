@@ -15,8 +15,8 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
+import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
 import {
     ActionType,
     ErrorDetails,
@@ -30,7 +30,9 @@ import {
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
+
 interface UpdateCommentModalMetadata {
     obligation: string
     comment?: string
@@ -70,29 +72,32 @@ export default function ObligationTab({
         setUpdateCommentModalData(null)
     }, [])
 
-    const handleUpdateComment = useCallback((value: string) => {
-        if (updateCommentModalData === null || !payload || !setPayload) {
-            closeUpdateCommentModal()
-            return
-        }
+    const handleUpdateComment = useCallback(
+        (value: string) => {
+            if (updateCommentModalData === null || !payload || !setPayload) {
+                closeUpdateCommentModal()
+                return
+            }
 
-        let obligationValue = payload[updateCommentModalData.obligation] ?? {}
-        obligationValue = {
-            ...obligationValue,
-            comment: value,
-            obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
-        }
-        setPayload((payload: ObligationEntry) => ({
-            ...payload,
-            [updateCommentModalData.obligation]: obligationValue,
-        }))
-        closeUpdateCommentModal()
-    }, [
-        closeUpdateCommentModal,
-        payload,
-        setPayload,
-        updateCommentModalData,
-    ])
+            let obligationValue = payload[updateCommentModalData.obligation] ?? {}
+            obligationValue = {
+                ...obligationValue,
+                comment: value,
+                obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+            }
+            setPayload((payload: ObligationEntry) => ({
+                ...payload,
+                [updateCommentModalData.obligation]: obligationValue,
+            }))
+            closeUpdateCommentModal()
+        },
+        [
+            closeUpdateCommentModal,
+            payload,
+            setPayload,
+            updateCommentModalData,
+        ],
+    )
 
     const detailColumns = useMemo<
         ColumnDef<

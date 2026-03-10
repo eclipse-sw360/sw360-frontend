@@ -18,9 +18,10 @@ import { type ChangeEvent, type JSX, useCallback, useEffect, useMemo, useState }
 import { Modal } from 'react-bootstrap'
 import { BsExclamationTriangle, BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 
-import { Attachment, AttachmentTypes, Embedded } from '@/object-types'
 import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
+import { Attachment, AttachmentTypes, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+
 import AttachmentRowData from './AttachmentRowData'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
 
@@ -227,7 +228,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                     {
                         id: 'filename',
                         header: t('File name'),
-                        meta: { cellClassName: 'align-middle' },
+                        meta: {
+                            cellClassName: 'align-middle',
+                        },
                         cell: ({ row }) => row.original.filename,
                     },
                     {
@@ -283,7 +286,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'createdTeam',
                                 header: t('Group'),
-                                meta: { cellClassName: 'align-middle' },
+                                meta: {
+                                    cellClassName: 'align-middle',
+                                },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.createdTeam ?? ''}</span>
                                 ),
@@ -291,7 +296,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'createdBy',
                                 header: t('Name'),
-                                meta: { cellClassName: 'align-middle' },
+                                meta: {
+                                    cellClassName: 'align-middle',
+                                },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.createdBy ?? ''}</span>
                                 ),
@@ -299,7 +306,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'createdOn',
                                 header: t('Date'),
-                                meta: { cellClassName: 'align-middle' },
+                                meta: {
+                                    cellClassName: 'align-middle',
+                                },
                                 cell: ({ row }) => row.original.createdOn ?? '',
                             },
                         ],
@@ -311,7 +320,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkStatus',
                                 header: t('Status'),
-                                meta: { cellClassName: 'checkStatus' },
+                                meta: {
+                                    cellClassName: 'checkStatus',
+                                },
                                 cell: ({ row }) => (
                                     <div className='form-group'>
                                         <select
@@ -345,7 +356,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedComment',
                                 header: t('Comment'),
-                                meta: { cellClassName: 'checked-comment' },
+                                meta: {
+                                    cellClassName: 'checked-comment',
+                                },
                                 cell: ({ row }) => (
                                     <div className='form-group'>
                                         <input
@@ -369,7 +382,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedTeam',
                                 header: t('Group'),
-                                meta: { cellClassName: 'align-middle checked-team' },
+                                meta: {
+                                    cellClassName: 'align-middle checked-team',
+                                },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.checkedTeam ?? ''}</span>
                                 ),
@@ -377,7 +392,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedBy',
                                 header: t('Name'),
-                                meta: { cellClassName: 'align-middle checked-by' },
+                                meta: {
+                                    cellClassName: 'align-middle checked-by',
+                                },
                                 cell: ({ row }) => (
                                     <span className='text-truncate'>{row.original.checkedBy ?? ''}</span>
                                 ),
@@ -385,7 +402,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                             {
                                 id: 'checkedOn',
                                 header: t('Date'),
-                                meta: { cellClassName: 'align-middle checked-on' },
+                                meta: {
+                                    cellClassName: 'align-middle checked-on',
+                                },
                                 cell: ({ row }) => row.original.checkedOn ?? '',
                             },
                         ],
@@ -393,7 +412,9 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                     {
                         id: 'actions',
                         header: '',
-                        meta: { cellClassName: 'align-middle action delete cursor-pointer' },
+                        meta: {
+                            cellClassName: 'align-middle action delete cursor-pointer',
+                        },
                         cell: ({ row }) => (
                             <span
                                 role='button'

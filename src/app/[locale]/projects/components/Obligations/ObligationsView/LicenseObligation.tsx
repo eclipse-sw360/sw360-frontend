@@ -16,8 +16,8 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
+import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
 import {
     ActionType,
     ErrorDetails,
@@ -29,10 +29,12 @@ import {
     PaginationMeta,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
+
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
