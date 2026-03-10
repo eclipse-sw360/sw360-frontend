@@ -16,6 +16,8 @@ declare module '@tanstack/react-table' {
   interface Row<TData extends RowData> {
     meta?: {
       isFullSpanRow?: boolean
+      rowClassName?: string
+      rowId?: string
     }
   }
 

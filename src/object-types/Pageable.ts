@@ -22,6 +22,8 @@ export interface PaginationMeta {
 
 export interface ColumnMeta {
     width?: string
+    headerClassName?: string
+    cellClassName?: string
 }
 
 export interface TypedEntity<K, Type extends string> {

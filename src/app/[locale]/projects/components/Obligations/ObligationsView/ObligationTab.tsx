@@ -13,9 +13,10 @@ import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
+import UpdateCommentModal from '@/components/UpdateCommentModal/UpdateCommentModal'
 import {
     ActionType,
     ErrorDetails,
@@ -29,8 +30,8 @@ import {
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
-import UpdateCommentModal from './UpdateCommentModal'
 
 interface UpdateCommentModalMetadata {
     obligation: string
@@ -66,6 +67,37 @@ export default function ObligationTab({
     }, [
         session,
     ])
+
+    const closeUpdateCommentModal = useCallback(() => {
+        setUpdateCommentModalData(null)
+    }, [])
+
+    const handleUpdateComment = useCallback(
+        (value: string) => {
+            if (updateCommentModalData === null || !payload || !setPayload) {
+                closeUpdateCommentModal()
+                return
+            }
+
+            let obligationValue = payload[updateCommentModalData.obligation] ?? {}
+            obligationValue = {
+                ...obligationValue,
+                comment: value,
+                obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+            }
+            setPayload((payload: ObligationEntry) => ({
+                ...payload,
+                [updateCommentModalData.obligation]: obligationValue,
+            }))
+            closeUpdateCommentModal()
+        },
+        [
+            closeUpdateCommentModal,
+            payload,
+            setPayload,
+            updateCommentModalData,
+        ],
+    )
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -489,11 +521,12 @@ export default function ObligationTab({
     return (
         <>
             <UpdateCommentModal
-                modalMetaData={updateCommentModalData}
-                setModalMetaData={setUpdateCommentModalData}
-                payload={payload}
-                setPayload={setPayload}
-                obligationTypeName={ObligationLevels.ORGANISATION_OBLIGATION}
+                show={updateCommentModalData !== null}
+                title={t('Enter obligation comment')}
+                initialValue={updateCommentModalData?.comment ?? ''}
+                placeholder={t('Enter obligation comment')}
+                onClose={closeUpdateCommentModal}
+                onUpdate={handleUpdateComment}
             />
             <div className='mb-3'>
                 {pageableQueryParam && paginationMeta && detailTable && editTable ? (
