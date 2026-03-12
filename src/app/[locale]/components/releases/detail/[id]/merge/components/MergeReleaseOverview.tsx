@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -196,7 +196,10 @@ function MergeReleaseOverview({
                 ...(finalReleasePayload ?? {}),
             }
             delete payload.subscribers
-            console.log('payload------------', payload)
+            payload.attachments = payload.attachments?.map((attachment) => ({
+                attachmentContentId: attachment.attachmentContentId,
+                filename: attachment.filename
+            }))
             const response = await ApiUtils.PATCH(
                 `releases/mergereleases?mergeTargetId=${targetRelease?.id}&mergeSourceId=${sourceRelease?.id}`,
                 payload,
@@ -208,11 +211,14 @@ function MergeReleaseOverview({
                     status: response.status,
                 })
             }
+            else if (response.status === 200) {
+                MessageService.success(t('Releases merged successfully'))
+                router.push(`components/releases/detail/${releaseId}`)
+            }
         } catch (error) {
             ApiUtils.reportError(error)
         } finally {
             setLoading(false)
-            // redirect(`components/releases/detail/${releaseId}`)
         }
     }
 

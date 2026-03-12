@@ -124,7 +124,8 @@ export default function Attachments({
                     overWritten: false,
                 })),
 
-            // Condition 3 (NEW): Data from sourceAttachments where attachmentType !== 'SOURCE' AND NOT in Target
+            // Condition 3 (NEW): Data from sourceAttachments where
+            // attachmentType !== 'SOURCE' AND NOT in Target
             ...sourceOtherAttachmentFileIds
                 .filter(id => !targetOtherAttachmentSet.has(id))
                 .map(id => ({
