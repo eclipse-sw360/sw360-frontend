@@ -58,7 +58,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as LicenseDetail
             MessageService.success(t('Update external link success'))
-            router.push('/licenses/detail?id=' + data.shortName)
+            router.push('/licenses/detail/' + data.shortName)
         } else {
             MessageService.error(t('Update external link failed'))
         }

@@ -15,21 +15,19 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { PageButtonHeader, SideBar } from 'next-sw360'
+import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
-
 import { LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
-
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import AddLicenseSummary from './AddLicenseSummary'
 
 function AddLicense(): ReactNode {
     const t = useTranslations('default')
-    const [selectedTab, setSelectedTab] = useState<string>(LicenseTabIds.DETAILS)
     const [addObligationDiaglog, setAddObligationDiaglog] = useState<boolean>(false)
     const router = useRouter()
     const [errorShortName, setErrorShortName] = useState<boolean>(false)
@@ -47,6 +45,11 @@ function AddLicense(): ReactNode {
         licenseTypeDatabaseId: '',
     })
     const { status } = useSession()
+    const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? LicenseTabIds.DETAILS)
+    }
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -55,17 +58,6 @@ function AddLicense(): ReactNode {
     }, [
         status,
     ])
-
-    const tabList = [
-        {
-            id: LicenseTabIds.DETAILS,
-            name: 'License',
-        },
-        {
-            id: LicenseTabIds.OBLIGATIONS,
-            name: 'Linked Obligations',
-        },
-    ]
 
     const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
 
@@ -147,73 +139,79 @@ function AddLicense(): ReactNode {
     }
 
     return (
-        <div
-            className='container'
-            style={{
-                maxWidth: '98vw',
-                marginTop: '10px',
-            }}
-        >
-            <div className='row'>
-                <div className='col-2 sidebar'>
-                    <SideBar
-                        selectedTab={selectedTab}
-                        setSelectedTab={setSelectedTab}
-                        tabList={tabList}
-                    />
-                </div>
-                <div className='col'>
-                    <div
-                        className='row'
-                        style={{
-                            marginBottom: '20px',
-                        }}
+        <div className='container page-content'>
+            <Tab.Container
+                activeKey={activeKey}
+                onSelect={(k) => handleSelect(k)}
+            >
+                <Row>
+                    <Col
+                        sm={2}
+                        className='me-3'
                     >
-                        {selectedTab === LicenseTabIds.OBLIGATIONS ? (
-                            <PageButtonHeader
-                                buttons={headerButtonAddObligations}
-                                title='()'
-                                checked={licensePayload.checked}
-                            ></PageButtonHeader>
-                        ) : (
-                            <PageButtonHeader
-                                buttons={headerButtons}
-                                title='()'
-                                checked={licensePayload.checked}
-                            ></PageButtonHeader>
-                        )}
-                    </div>
-                    <div
-                        className='row'
-                        hidden={selectedTab !== LicenseTabIds.DETAILS ? true : false}
-                    >
-                        <AddLicenseSummary
-                            errorShortName={errorShortName}
-                            setErrorShortName={setErrorShortName}
-                            errorFullName={errorFullName}
-                            inputValid={inputValid}
-                            setErrorFullName={setErrorFullName}
-                            licensePayload={licensePayload}
-                            setLicensePayload={setLicensePayload}
-                        />
-                    </div>
-                    <div
-                        className='row'
-                        hidden={selectedTab != LicenseTabIds.OBLIGATIONS ? true : false}
-                    >
-                        <LinkedObligationsDialog
-                            show={addObligationDiaglog}
-                            setShow={setAddObligationDiaglog}
-                            licensePayload={licensePayload}
-                            setLicensePayload={setLicensePayload}
-                        />
-                        <LinkedObligations
-                            licensePayload={licensePayload}
-                            setLicensePayload={setLicensePayload}
-                        />
-                    </div>
-                </div>
-            </div>
+                        <ListGroup>
+                            <ListGroup.Item
+                                action
+                                eventKey={LicenseTabIds.DETAILS}
+                            >
+                                <div className='my-2'>{t('Details')}</div>
+                            </ListGroup.Item>
+                        </ListGroup>
+                        <ListGroup>
+                            <ListGroup.Item
+                                action
+                                eventKey={LicenseTabIds.OBLIGATIONS}
+                            >
+                                <div className='my-2'>{t('Obligations')}</div>
+                            </ListGroup.Item>
+                        </ListGroup>
+                    </Col>
+                    <Col>
+                        <Row className='mb-3'>
+                            {activeKey === LicenseTabIds.OBLIGATIONS ? (
+                                <PageButtonHeader
+                                    buttons={headerButtonAddObligations}
+                                    title='()'
+                                    checked={licensePayload.checked}
+                                ></PageButtonHeader>
+                            ) : (
+                                <PageButtonHeader
+                                    buttons={headerButtons}
+                                    title='()'
+                                    checked={licensePayload.checked}
+                                ></PageButtonHeader>
+                            )}
+                        </Row>
+                        <Row>
+                            <Tab.Content>
+                                <Tab.Pane eventKey={LicenseTabIds.DETAILS}>
+                                    <AddLicenseSummary
+                                        errorShortName={errorShortName}
+                                        setErrorShortName={setErrorShortName}
+                                        errorFullName={errorFullName}
+                                        inputValid={inputValid}
+                                        setErrorFullName={setErrorFullName}
+                                        licensePayload={licensePayload}
+                                        setLicensePayload={setLicensePayload}
+                                    />
+                                </Tab.Pane>
+                                <Tab.Pane eventKey={LicenseTabIds.OBLIGATIONS}>
+                                    <LinkedObligationsDialog
+                                        show={addObligationDiaglog}
+                                        setShow={setAddObligationDiaglog}
+                                        licensePayload={licensePayload}
+                                        setLicensePayload={setLicensePayload}
+                                    />
+                                    <LinkedObligations
+                                        licensePayload={licensePayload}
+                                        setLicensePayload={setLicensePayload}
+                                    />
+                                </Tab.Pane>
+                            </Tab.Content>
+                        </Row>
+                    </Col>
+                </Row>
+            </Tab.Container>
         </div>
     )
 }

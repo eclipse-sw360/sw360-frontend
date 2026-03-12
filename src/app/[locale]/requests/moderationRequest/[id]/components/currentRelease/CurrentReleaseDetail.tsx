@@ -11,17 +11,16 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import ClearingDetails from '@/app/[locale]/components/releases/detail/[id]/components/ClearingDetails'
 import ECCDetails from '@/app/[locale]/components/releases/detail/[id]/components/ECCDetails'
 import LinkedReleases from '@/app/[locale]/components/releases/detail/[id]/components/LinkedReleases'
-import { ReleaseDetailTabs } from '@/app/[locale]/components/releases/detail/[id]/components/ReleaseDetailTabs'
 import Summary from '@/app/[locale]/components/releases/detail/[id]/components/Summary'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
-import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
-import { SideBar } from '@/components/sw360'
 import {
     Attachment,
     Changelogs,
@@ -43,15 +42,13 @@ interface Props {
 }
 
 const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [release, setRelease] = useState<ReleaseDetail>()
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
-    const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
-    const { MODERATION_REQUEST } = ReleaseDetailTabs()
-    const [tabList] = useState(MODERATION_REQUEST)
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [changeLogId, setChangeLogId] = useState('')
     const session = useSession()
+    const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
+    const t = useTranslations('default')
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -60,6 +57,10 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     }, [
         session,
     ])
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? CommonTabIds.SUMMARY)
+    }
 
     const fetchData = async (url: string, signal: AbortSignal) => {
         try {
@@ -178,99 +179,122 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
 
     return release ? (
         <div className='container page-content'>
-            <div className='row'>
-                <div className='col-2 sidebar'>
-                    <SideBar
-                        selectedTab={selectedTab}
-                        setSelectedTab={setSelectedTab}
-                        tabList={tabList}
-                        eccStatus={release.eccInformation?.eccStatus}
-                    />
-                </div>
-                <div className='col'>
-                    <div
-                        className='row'
-                        hidden={selectedTab !== CommonTabIds.SUMMARY}
+            <Tab.Container
+                activeKey={activeKey}
+                onSelect={(k) => handleSelect(k)}
+            >
+                <Row>
+                    <Col
+                        sm={2}
+                        className='me-3'
                     >
-                        <Summary
-                            release={release}
-                            releaseId={releaseId}
-                        />
-                    </div>
-                    <div
-                        className='row'
-                        hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES}
-                    >
-                        <LinkedReleases releaseId={releaseId} />
-                    </div>
-                    <div
-                        className='row'
-                        hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS}
-                    >
-                        <ClearingDetails
-                            release={release}
-                            releaseId={releaseId}
-                            embeddedAttachments={embeddedAttachments}
-                        />
-                    </div>
-                    <div
-                        className='row'
-                        hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS}
-                    >
-                        <ECCDetails release={release} />
-                    </div>
-                    <div
-                        className='row'
-                        hidden={selectedTab != CommonTabIds.ATTACHMENTS}
-                    >
-                        <Attachments
-                            documentId={releaseId}
-                            documentType={DocumentTypes.RELEASE}
-                        />
-                    </div>
-                    <div
-                        className='row'
-                        hidden={selectedTab != CommonTabIds.CHANGE_LOG}
-                    >
-                        <div className='col'>
-                            <div
-                                className='row'
-                                hidden={changelogTab !== 'list-change'}
+                        <ListGroup>
+                            <ListGroup.Item
+                                action
+                                eventKey={CommonTabIds.SUMMARY}
                             >
-                                <ChangeLogList
-                                    setChangeLogId={setChangeLogId}
+                                <div className='my-2'>{t('Summary')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey={ReleaseTabIds.LINKED_RELEASES}
+                            >
+                                <div className='my-2'>{t('Linked Releases')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey={ReleaseTabIds.CLEARING_DETAILS}
+                            >
+                                <div className='my-2'>{t('Clearing Details')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey={ReleaseTabIds.ECC_DETAILS}
+                            >
+                                <div className='my-2'>
+                                    {t('ECC Details')} <span className={release.eccInformation?.eccStatus ?? ''}></span>
+                                </div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey={CommonTabIds.ATTACHMENTS}
+                            >
+                                <div className='my-2'>{t('Attachments')}</div>
+                            </ListGroup.Item>
+                            <ListGroup.Item
+                                action
+                                eventKey={CommonTabIds.CHANGE_LOG}
+                            >
+                                <div className='my-2'>{t('Change Log')}</div>
+                            </ListGroup.Item>
+                        </ListGroup>
+                    </Col>
+                    <Col className='me-3 ms-2'>
+                        <Tab.Content>
+                            <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
+                                <Summary
+                                    release={release}
+                                    releaseId={releaseId}
+                                />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                <LinkedReleases releaseId={releaseId} />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
+                                <ClearingDetails
+                                    release={release}
+                                    releaseId={releaseId}
+                                    embeddedAttachments={embeddedAttachments}
+                                />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey={ReleaseTabIds.ECC_DETAILS}>
+                                <ECCDetails release={release} />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
+                                <Attachments
                                     documentId={releaseId}
-                                    setChangesLogTab={setChangelogTab}
-                                    changeLogList={memoizedData}
-                                    pageableQueryParam={pageableQueryParam}
-                                    setPageableQueryParam={setPageableQueryParam}
-                                    showProcessing={showProcessing}
-                                    paginationMeta={paginationMeta}
+                                    documentType={DocumentTypes.RELEASE}
                                 />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={changelogTab != 'view-log'}
-                            >
-                                <ChangeLogDetail
-                                    changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
-                                />
-                                <div
-                                    id='cardScreen'
-                                    style={{
-                                        padding: '0px',
-                                    }}
-                                ></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <LinkReleaseToProjectModal
-                show={linkProjectModalShow}
-                setShow={setLinkProjectModalShow}
-                releaseId={releaseId}
-            />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey={CommonTabIds.CHANGE_LOG}>
+                                <div className='col'>
+                                    <div
+                                        className='row'
+                                        hidden={changelogTab != 'list-change' ? true : false}
+                                    >
+                                        <ChangeLogList
+                                            setChangeLogId={setChangeLogId}
+                                            documentId={releaseId}
+                                            setChangesLogTab={setChangelogTab}
+                                            changeLogList={memoizedData}
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                            showProcessing={showProcessing}
+                                            paginationMeta={paginationMeta}
+                                        />
+                                    </div>
+                                    <div
+                                        className='row'
+                                        hidden={changelogTab !== 'view-log' ? true : false}
+                                    >
+                                        <ChangeLogDetail
+                                            changeLogData={
+                                                changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]
+                                            }
+                                        />
+                                        <div
+                                            id='cardScreen'
+                                            style={{
+                                                padding: '0px',
+                                            }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </Tab.Pane>
+                        </Tab.Content>
+                    </Col>
+                </Row>
+            </Tab.Container>
         </div>
     ) : (
         <></>

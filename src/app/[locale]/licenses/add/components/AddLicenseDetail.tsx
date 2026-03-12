@@ -96,7 +96,7 @@ const AddLicenseDetail = ({
                 const licenses = (await response.json()) as EmbeddedLicenseTypes
                 setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
             } catch (e) {
-                console.error(e)
+                ApiUtils.reportError(e)
             }
         })()
         return () => controller.abort()
