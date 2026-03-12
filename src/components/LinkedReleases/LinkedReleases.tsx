@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import LinkedReleasesDialog from '../sw360/SearchLinkedReleases/LinkedReleasesDialog'
+import SearchReleasesModal from '../sw360/SearchReleasesModal'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
 import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
@@ -54,6 +54,42 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
         })
     }
 
+    const handleSelectReleases = useCallback(
+        (selectedReleases: ReleaseDetail[]) => {
+            const newReleaseLinks: ReleaseLink[] = selectedReleases.map((release: ReleaseDetail) => ({
+                id: release.id ?? '',
+                name: release.name,
+                version: release.version,
+                mainlineState: release.mainlineState,
+                clearingState: release.clearingState,
+                vendor: release.vendor ? release.vendor.fullName : '',
+                releaseRelationship: 'CONTAINED',
+            }))
+
+            const updatedReleaseLinks = [
+                ...releaseLinks,
+                ...newReleaseLinks,
+            ]
+            setReleaseLinks(updatedReleaseLinks)
+
+            const mapReleaseRelationship = new Map<string, string>()
+            updatedReleaseLinks.forEach((item) => {
+                mapReleaseRelationship.set(item.id, item.releaseRelationship)
+            })
+            const obj = Object.fromEntries(mapReleaseRelationship)
+            setReleasePayload({
+                ...releasePayload,
+                releaseIdToRelationship: obj,
+            })
+            handleReRender()
+        },
+        [
+            releaseLinks,
+            releasePayload,
+            setReleasePayload,
+        ],
+    )
+
     useEffect(() => {
         if (actionType === ActionType.EDIT && release !== undefined) {
             if (
@@ -80,14 +116,11 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                     fontSize: '0.875rem',
                 }}
             >
-                <LinkedReleasesDialog
+                <SearchReleasesModal
                     show={linkedReleasesDiaglog}
-                    releaseLinks={releaseLinks}
-                    setReleaseLinks={setReleaseLinks}
                     setShow={setLinkedReleasesDiaglog}
-                    onReRender={handleReRender}
-                    releasePayload={releasePayload}
-                    setReleasePayload={setReleasePayload}
+                    onSelect={handleSelectReleases}
+                    showExactMatch={false}
                 />
                 <div className='row ps-4 pb-4'>
                     <TitleLinkedReleases />
