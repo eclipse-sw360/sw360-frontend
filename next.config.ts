@@ -9,6 +9,7 @@
 
 import { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
+
 const withNextIntl = createNextIntlPlugin()
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -19,8 +20,9 @@ const csp = `
   img-src 'self' data: https:;
   font-src 'self' data:;
   connect-src 'self' https:${isDev ? ' http://localhost:8080' : ''};
-`.replace(/\s{2,}/g, ' ').trim()
-
+`
+    .replace(/\s{2,}/g, ' ')
+    .trim()
 
 const config: NextConfig = {
     productionBrowserSourceMaps: true,
@@ -29,7 +31,7 @@ const config: NextConfig = {
     typescript: {
         ignoreBuildErrors: false,
     },
-    async headers() {
+    headers() {
         return [
             {
                 // Apply security headers to all routes
@@ -46,9 +48,9 @@ const config: NextConfig = {
                         value: 'nosniff',
                     },
                     {
-                        // Enable XSS protection
+                        // Disable built-in XSS protection to avoid conflicts with modern browsers
                         key: 'X-XSS-Protection',
-                        value: '1; mode=block',
+                        value: '0',
                     },
                     {
                         // Control how much referrer information should be included
