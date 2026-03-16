@@ -32,7 +32,6 @@ import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
-import SideBar from './SideBar/SideBar'
 import {
     ClientSidePageSizeSelector,
     ClientSideTableFooter,
@@ -76,7 +75,6 @@ export {
     SelectCountry,
     SelectUsersDialog,
     ShowInfoOnHover,
-    SideBar,
     TableFooter,
     TableSearch,
     ThemeSwitcher,
