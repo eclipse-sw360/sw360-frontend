@@ -16,16 +16,16 @@ import { Attachment, ErrorDetails, Release, ReleaseDetail } from '@/object-types
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
 import AdditionalDataSection from './AdditionalDataSection'
+import Attachments from './Attachments'
+import ClearingDetailsSection from './ClearingDetailsSection'
+import CommercialDetailAdmin from './CommercialDetailAdmin'
+import CotsOssInformation from './CotsOssInformation'
+import ECCInformation from './ECCInformation'
 import ExternalIdsSection from './ExternalIdsSection'
 import GeneralSection from './GeneralSection'
 import LinkedReleasesSection from './LinkedReleasesSection'
-import ClearingDetailsSection from './ClearingDetailsSection'
 import RequestInformation from './RequestInformation'
 import SupplementalInformation from './SupplementalInformation'
-import ECCInformation from './ECCInformation'
-import CommercialDetailAdmin from './CommercialDetailAdmin'
-import CotsOssInformation from './CotsOssInformation'
-import Attachments from './Attachments'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
@@ -88,18 +88,22 @@ export default function MergeReleaseDataCheck({
 
     useEffect(() => {
         if (CommonUtils.isNullOrUndefined(targetRelease)) return
-        const { _embedded, _links, ...filtertedTargetRelease } = targetRelease;
+        const { _embedded, _links, ...filtertedTargetRelease } = targetRelease
         setFinalReleasePayload({
             ...filtertedTargetRelease,
             createdBy: targetRelease?._embedded?.['sw360:createdBy']?.email ?? '',
-            attachments: targetRelease?._embedded?.['sw360:attachments']?.map(
-                ({ _links, ...attachmentData }) => attachmentData) ?? ([] as Attachment[]),
-            moderators: targetRelease?._embedded?.['sw360:moderators']?.map(
-                (moderator) => moderator.email) ?? ([] as string[]),
-            contributors: targetRelease?._embedded?.['sw360:contributors']?.map(
-                (contributor) => contributor.email) ?? ([] as string[]),
-            subscribers: targetRelease?._embedded?.['sw360:subscribers']?.map(
-                (subscriber) => subscriber.email) ?? ([] as string[]),
+            attachments:
+                targetRelease?._embedded?.['sw360:attachments']?.map(
+                    ({ _links, ...attachmentData }) => attachmentData,
+                ) ?? ([] as Attachment[]),
+            moderators:
+                targetRelease?._embedded?.['sw360:moderators']?.map((moderator) => moderator.email) ?? ([] as string[]),
+            contributors:
+                targetRelease?._embedded?.['sw360:contributors']?.map((contributor) => contributor.email) ??
+                ([] as string[]),
+            subscribers:
+                targetRelease?._embedded?.['sw360:subscribers']?.map((subscriber) => subscriber.email) ??
+                ([] as string[]),
         } as Release)
     }, [
         targetRelease,

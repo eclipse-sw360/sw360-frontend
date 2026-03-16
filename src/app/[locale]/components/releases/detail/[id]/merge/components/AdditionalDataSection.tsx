@@ -121,7 +121,7 @@ export default function AdditionalDataSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.additionalData?.[id.value] ===
-                                            targetRelease.additionalData?.[id.value] ? (
+                                        targetRelease.additionalData?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {
@@ -165,7 +165,7 @@ export default function AdditionalDataSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.additionalData?.[id.value] !==
-                                            sourceReleaseDetail.additionalData?.[id.value] ? (
+                                        sourceReleaseDetail.additionalData?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {

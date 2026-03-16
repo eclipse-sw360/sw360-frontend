@@ -41,18 +41,15 @@ export default function LinkedReleasesSection({
     ])
 
     useEffect(() => {
-
         setLinkedReleaseMergeList([
             ...(targetRelease?._embedded['sw360:releaseLinks']
-                ? targetRelease._embedded['sw360:releaseLinks'].map(
-                    (lr) => `${lr.id}`)
+                ? targetRelease._embedded['sw360:releaseLinks'].map((lr) => `${lr.id}`)
                 : ([] as string[])
             )
                 .filter(
                     (c) =>
                         (sourceReleaseDetail?._embedded['sw360:releaseLinks']
-                            ? sourceReleaseDetail._embedded['sw360:releaseLinks'].map(
-                                (lr) => `${lr.id}`)
+                            ? sourceReleaseDetail._embedded['sw360:releaseLinks'].map((lr) => `${lr.id}`)
                             : ([] as string[])
                         ).indexOf(c) !== -1,
                 )
@@ -64,15 +61,13 @@ export default function LinkedReleasesSection({
                 })),
 
             ...(targetRelease?._embedded['sw360:releaseLinks']
-                ? targetRelease._embedded['sw360:releaseLinks'].map(
-                    (lr) => `${lr.id}`)
+                ? targetRelease._embedded['sw360:releaseLinks'].map((lr) => `${lr.id}`)
                 : ([] as string[])
             )
                 .filter(
                     (c) =>
                         (sourceReleaseDetail?._embedded['sw360:releaseLinks']
-                            ? sourceReleaseDetail._embedded['sw360:releaseLinks'].map(
-                                (lr) => `${lr.id}`)
+                            ? sourceReleaseDetail._embedded['sw360:releaseLinks'].map((lr) => `${lr.id}`)
                             : ([] as string[])
                         ).indexOf(c) === -1,
                 )
@@ -84,15 +79,13 @@ export default function LinkedReleasesSection({
                 })),
 
             ...(sourceReleaseDetail?._embedded['sw360:releaseLinks']
-                ? sourceReleaseDetail._embedded['sw360:releaseLinks'].map(
-                    (lr) => `${lr.id}`)
+                ? sourceReleaseDetail._embedded['sw360:releaseLinks'].map((lr) => `${lr.id}`)
                 : ([] as string[])
             )
                 .filter(
                     (c) =>
                         (targetRelease?._embedded['sw360:releaseLinks']
-                            ? targetRelease._embedded['sw360:releaseLinks'].map(
-                                (lr) => `${lr.id}`)
+                            ? targetRelease._embedded['sw360:releaseLinks'].map((lr) => `${lr.id}`)
                             : ([] as string[])
                         ).indexOf(c) === -1,
                 )
@@ -103,7 +96,6 @@ export default function LinkedReleasesSection({
                     overWritten: false,
                 })),
         ])
-
     }, [
         targetRelease,
         sourceReleaseDetail,
@@ -125,13 +117,8 @@ export default function LinkedReleasesSection({
                                         key={c.value}
                                     >
                                         <div className='mt-2 col text-end'>
-                                            {
-                                                `${targetLinkedReleases.find(
-                                                    lr => lr.id === c.value)?.name}`
-                                            }{
-                                                ` (${targetLinkedReleases.find(
-                                                    lr => lr.id === c.value)?.version})`
-                                            }
+                                            {`${targetLinkedReleases.find((lr) => lr.id === c.value)?.name}`}
+                                            {` (${targetLinkedReleases.find((lr) => lr.id === c.value)?.version})`}
                                         </div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
                                             <BsCheck2
@@ -140,13 +127,8 @@ export default function LinkedReleasesSection({
                                             />
                                         </div>
                                         <div className='mt-2 col text-start'>
-                                            {
-                                                `${sourceLinkedReleases.find(
-                                                    lr => lr.id === c.value)?.name}`
-                                            }{
-                                                ` (${targetLinkedReleases.find(
-                                                    lr => lr.id === c.value)?.version})`
-                                            }
+                                            {`${sourceLinkedReleases.find((lr) => lr.id === c.value)?.name}`}
+                                            {` (${targetLinkedReleases.find((lr) => lr.id === c.value)?.version})`}
                                         </div>
                                     </div>
                                 )
@@ -157,13 +139,10 @@ export default function LinkedReleasesSection({
                                         key={c.value}
                                     >
                                         <div className='mt-2 col text-end'>
-                                            {
-                                                c.overWritten ? '' :
-                                                    `${targetLinkedReleases.find(
-                                                        lr => lr.id === c.value)?.name} (
-                                                    ${targetLinkedReleases.find(
-                                                            lr => lr.id === c.value)?.version})`
-                                            }
+                                            {c.overWritten
+                                                ? ''
+                                                : `${targetLinkedReleases.find((lr) => lr.id === c.value)?.name} (
+                                                    ${targetLinkedReleases.find((lr) => lr.id === c.value)?.version})`}
                                         </div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
                                             {!c.overWritten ? (
@@ -171,15 +150,16 @@ export default function LinkedReleasesSection({
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
                                                         const newRelationshipsObject = Object.fromEntries(
-                                                            Object.entries(finalReleasePayload.releaseIdToRelationship ?? {})
-                                                                .filter(([releaseId, _]) => releaseId !== c.value)
+                                                            Object.entries(
+                                                                finalReleasePayload.releaseIdToRelationship ?? {},
+                                                            ).filter(([releaseId, _]) => releaseId !== c.value),
                                                         )
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             releaseIdToRelationship: newRelationshipsObject,
                                                         })
-                                                        const updatedLinkedReleaseMergeList = linkedReleaseMergeList.map(
-                                                            (lr) => {
+                                                        const updatedLinkedReleaseMergeList =
+                                                            linkedReleaseMergeList.map((lr) => {
                                                                 if (lr.value === c.value) {
                                                                     return {
                                                                         ...lr,
@@ -187,8 +167,7 @@ export default function LinkedReleasesSection({
                                                                     }
                                                                 }
                                                                 return lr
-                                                            },
-                                                        )
+                                                            })
                                                         setLinkedReleaseMergeList(updatedLinkedReleaseMergeList)
                                                     }}
                                                 >
@@ -198,20 +177,22 @@ export default function LinkedReleasesSection({
                                                 <button
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
-                                                        const currentRelationships = finalReleasePayload.releaseIdToRelationship ?? {}
+                                                        const currentRelationships =
+                                                            finalReleasePayload.releaseIdToRelationship ?? {}
                                                         const newRelationshipsObject = {
                                                             ...currentRelationships,
-                                                            [c.value]: targetLinkedReleases.find(
-                                                                (release) =>
-                                                                    release.id === c.value)?.releaseRelationship ?? ''
+                                                            [c.value]:
+                                                                targetLinkedReleases.find(
+                                                                    (release) => release.id === c.value,
+                                                                )?.releaseRelationship ?? '',
                                                         }
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             releaseIdToRelationship: newRelationshipsObject,
                                                         })
 
-                                                        const updatedLinkedReleaseMergeList = linkedReleaseMergeList.map(
-                                                            (lr) => {
+                                                        const updatedLinkedReleaseMergeList =
+                                                            linkedReleaseMergeList.map((lr) => {
                                                                 if (lr.value === c.value) {
                                                                     return {
                                                                         ...lr,
@@ -219,8 +200,7 @@ export default function LinkedReleasesSection({
                                                                     }
                                                                 }
                                                                 return lr
-                                                            },
-                                                        )
+                                                            })
                                                         setLinkedReleaseMergeList(updatedLinkedReleaseMergeList)
                                                     }}
                                                 >
@@ -238,30 +218,32 @@ export default function LinkedReleasesSection({
                                         key={c.value}
                                     >
                                         <div className='mt-2 col text-end'>
-                                            {!c.overWritten ? '' : `${sourceLinkedReleases.find(
-                                                lr => lr.id === c.value)?.name} (
-                                                ${sourceLinkedReleases.find(
-                                                    lr => lr.id === c.value)?.version})`
-                                            }
+                                            {!c.overWritten
+                                                ? ''
+                                                : `${sourceLinkedReleases.find((lr) => lr.id === c.value)?.name} (
+                                                ${sourceLinkedReleases.find((lr) => lr.id === c.value)?.version})`}
                                         </div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
                                             {!c.overWritten ? (
                                                 <button
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
-                                                        const currentRelationships = finalReleasePayload.releaseIdToRelationship ?? {}
+                                                        const currentRelationships =
+                                                            finalReleasePayload.releaseIdToRelationship ?? {}
                                                         const newRelationshipsObject = {
                                                             ...currentRelationships,
-                                                            [c.value]: sourceLinkedReleases.find(
-                                                                (release) => release.id === c.value)?.releaseRelationship ?? ''
+                                                            [c.value]:
+                                                                sourceLinkedReleases.find(
+                                                                    (release) => release.id === c.value,
+                                                                )?.releaseRelationship ?? '',
                                                         }
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             releaseIdToRelationship: newRelationshipsObject,
                                                         })
 
-                                                        const updatedLinkedReleaseMergeList = linkedReleaseMergeList.map(
-                                                            (lr) => {
+                                                        const updatedLinkedReleaseMergeList =
+                                                            linkedReleaseMergeList.map((lr) => {
                                                                 if (lr.value === c.value) {
                                                                     return {
                                                                         ...lr,
@@ -269,8 +251,7 @@ export default function LinkedReleasesSection({
                                                                     }
                                                                 }
                                                                 return lr
-                                                            },
-                                                        )
+                                                            })
                                                         setLinkedReleaseMergeList(updatedLinkedReleaseMergeList)
                                                     }}
                                                 >
@@ -281,16 +262,17 @@ export default function LinkedReleasesSection({
                                                     className='btn btn-secondary px-2'
                                                     onClick={() => {
                                                         const newRelationshipsObject = Object.fromEntries(
-                                                            Object.entries(finalReleasePayload.releaseIdToRelationship ?? {})
-                                                                .filter(([releaseId, _]) => releaseId !== c.value)
+                                                            Object.entries(
+                                                                finalReleasePayload.releaseIdToRelationship ?? {},
+                                                            ).filter(([releaseId, _]) => releaseId !== c.value),
                                                         )
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
                                                             releaseIdToRelationship: newRelationshipsObject,
                                                         })
 
-                                                        const updatedLinkedReleaseMergeList = linkedReleaseMergeList.map(
-                                                            (lr) => {
+                                                        const updatedLinkedReleaseMergeList =
+                                                            linkedReleaseMergeList.map((lr) => {
                                                                 if (lr.value === c.value) {
                                                                     return {
                                                                         ...lr,
@@ -298,8 +280,7 @@ export default function LinkedReleasesSection({
                                                                     }
                                                                 }
                                                                 return lr
-                                                            },
-                                                        )
+                                                            })
                                                         setLinkedReleaseMergeList(updatedLinkedReleaseMergeList)
                                                     }}
                                                 >
@@ -308,11 +289,8 @@ export default function LinkedReleasesSection({
                                             )}
                                         </div>
                                         <div className='mt-2 col text-start'>
-                                            {`${sourceLinkedReleases.find(
-                                                lr => lr.id === c.value)?.name}`
-                                            }{` (${sourceLinkedReleases.find(
-                                                lr => lr.id === c.value)?.version})`
-                                            }
+                                            {`${sourceLinkedReleases.find((lr) => lr.id === c.value)?.name}`}
+                                            {` (${sourceLinkedReleases.find((lr) => lr.id === c.value)?.version})`}
                                         </div>
                                     </div>
                                 )

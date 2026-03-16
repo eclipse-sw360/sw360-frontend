@@ -41,32 +41,34 @@ export default function CommercialDetailAdmin({
         <>
             {targetRelease && sourceReleaseDetail && finalReleasePayload && (
                 <div className='mb-3'>
-                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>{t('Commercial Details Administration')}</h6>
+                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>
+                        {t('Commercial Details Administration')}
+                    </h6>
                     <div className='border border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('Usage Right Available')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload?.cotsDetails?.usageRightAvailable === true ?
+                                {finalReleasePayload?.cotsDetails?.usageRightAvailable === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.usageRightAvailable ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.usageRightAvailable ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.usageRightAvailable ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.usageRightAvailable ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.usageRightAvailable ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.usageRightAvailable ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -75,7 +77,8 @@ export default function CommercialDetailAdmin({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     usageRightAvailable:
-                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']?.usageRightAvailable,
+                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']
+                                                            ?.usageRightAvailable,
                                                 },
                                             })
                                         }
@@ -91,7 +94,8 @@ export default function CommercialDetailAdmin({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     usageRightAvailable:
-                                                        targetRelease?._embedded['sw360:cotsDetail']?.usageRightAvailable,
+                                                        targetRelease?._embedded['sw360:cotsDetail']
+                                                            ?.usageRightAvailable,
                                                 },
                                             })
                                         }
@@ -101,35 +105,33 @@ export default function CommercialDetailAdmin({
                                 )}
                             </div>
                             <div className='mt-2 col text-start'>
-                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.usageRightAvailable === true ?
+                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.usageRightAvailable === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                         </div>
                     </div>
                     <div className='border border-top-0 border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('COTS Responsible')}</div>
                         <div className='d-flex row'>
-                            <div className='mt-2 col text-end'>
-                                {finalReleasePayload?.cotsDetails?.cotsResponsible}
-                            </div>
+                            <div className='mt-2 col text-end'>{finalReleasePayload?.cotsDetails?.cotsResponsible}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.cotsResponsible ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.cotsResponsible ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.cotsResponsible ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.cotsResponsible ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.cotsResponsible ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.cotsResponsible ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -138,7 +140,8 @@ export default function CommercialDetailAdmin({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     cotsResponsible:
-                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']?.cotsResponsible,
+                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']
+                                                            ?.cotsResponsible,
                                                 },
                                             })
                                         }
@@ -176,13 +179,13 @@ export default function CommercialDetailAdmin({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.clearingDeadline ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.clearingDeadline ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.clearingDeadline ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.clearingDeadline ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.clearingDeadline ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.clearingDeadline ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -191,7 +194,8 @@ export default function CommercialDetailAdmin({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     clearingDeadline:
-                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']?.clearingDeadline,
+                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']
+                                                            ?.clearingDeadline,
                                                 },
                                             })
                                         }
@@ -229,13 +233,13 @@ export default function CommercialDetailAdmin({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.licenseClearingReportURL ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.licenseClearingReportURL ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -244,7 +248,8 @@ export default function CommercialDetailAdmin({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     licenseClearingReportURL:
-                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']?.licenseClearingReportURL,
+                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']
+                                                            ?.licenseClearingReportURL,
                                                 },
                                             })
                                         }
@@ -260,7 +265,8 @@ export default function CommercialDetailAdmin({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     licenseClearingReportURL:
-                                                        targetRelease?._embedded['sw360:cotsDetail']?.licenseClearingReportURL,
+                                                        targetRelease?._embedded['sw360:cotsDetail']
+                                                            ?.licenseClearingReportURL,
                                                 },
                                             })
                                         }
@@ -274,9 +280,8 @@ export default function CommercialDetailAdmin({
                             </div>
                         </div>
                     </div>
-                </div >
-            )
-            }
+                </div>
+            )}
         </>
     )
 }

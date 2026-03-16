@@ -41,7 +41,9 @@ export default function SupplementalInformation({
         <>
             {targetRelease && sourceReleaseDetail && finalReleasePayload && (
                 <div className='mb-3'>
-                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>{t('Supplemental Information')}</h6>
+                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>
+                        {t('Supplemental Information')}
+                    </h6>
                     <div className='border border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('External Supplier ID')}</div>
                         <div className='d-flex row'>
@@ -50,13 +52,13 @@ export default function SupplementalInformation({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?.clearingInformation?.externalSupplierID ===
-                                    targetRelease?.clearingInformation?.externalSupplierID ? (
+                                targetRelease?.clearingInformation?.externalSupplierID ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.clearingInformation?.externalSupplierID ===
-                                    targetRelease?.clearingInformation?.externalSupplierID ? (
+                                  targetRelease?.clearingInformation?.externalSupplierID ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -103,13 +105,13 @@ export default function SupplementalInformation({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?.clearingInformation?.countOfSecurityVn ===
-                                    targetRelease?.clearingInformation?.countOfSecurityVn ? (
+                                targetRelease?.clearingInformation?.countOfSecurityVn ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.clearingInformation?.countOfSecurityVn ===
-                                    targetRelease?.clearingInformation?.countOfSecurityVn ? (
+                                  targetRelease?.clearingInformation?.countOfSecurityVn ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -148,9 +150,8 @@ export default function SupplementalInformation({
                             </div>
                         </div>
                     </div>
-                </div >
-            )
-            }
+                </div>
+            )}
         </>
     )
 }

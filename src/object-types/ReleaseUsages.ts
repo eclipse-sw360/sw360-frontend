@@ -8,9 +8,9 @@
 // License-Filename: LICENSE
 
 export default interface ReleaseUsages {
-  projects : number,
-  attachmentUsages : number,
-  projectRatings : number,
-  releaseVulnerabilities : number,
-  releases : number
+    projects: number
+    attachmentUsages: number
+    projectRatings: number
+    releaseVulnerabilities: number
+    releases: number
 }

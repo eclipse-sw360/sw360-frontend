@@ -41,22 +41,22 @@ export default function CotsOssInformation({
         <>
             {targetRelease && sourceReleaseDetail && finalReleasePayload && (
                 <div className='mb-3'>
-                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>{t('COTS OSS Information')}</h6>
+                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>
+                        {t('COTS OSS Information')}
+                    </h6>
                     <div className='border border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('Used License')}</div>
                         <div className='d-flex row'>
-                            <div className='mt-2 col text-end'>
-                                {finalReleasePayload?.cotsDetails?.usedLicense}
-                            </div>
+                            <div className='mt-2 col text-end'>{finalReleasePayload?.cotsDetails?.usedLicense}</div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.usedLicense ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.usedLicense ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.usedLicense ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.usedLicense ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.usedLicense ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.usedLicense ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -99,27 +99,27 @@ export default function CotsOssInformation({
                         <div className='fw-bold text-blue'>{t('Contains OSS')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload?.cotsDetails?.containsOSS === true ?
+                                {finalReleasePayload?.cotsDetails?.containsOSS === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.containsOSS ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.containsOSS ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.containsOSS ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.containsOSS ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.containsOSS ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.containsOSS ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -154,17 +154,17 @@ export default function CotsOssInformation({
                                 )}
                             </div>
                             <div className='mt-2 col text-start'>
-                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.containsOSS === true ?
+                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.containsOSS === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                         </div>
                     </div>
@@ -172,27 +172,27 @@ export default function CotsOssInformation({
                         <div className='fw-bold text-blue'>{t('OSS Contract Signed')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload?.cotsDetails?.ossContractSigned === true ?
+                                {finalReleasePayload?.cotsDetails?.ossContractSigned === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.ossContractSigned ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.ossContractSigned ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.ossContractSigned ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.ossContractSigned ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.ossContractSigned ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.ossContractSigned ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -201,7 +201,8 @@ export default function CotsOssInformation({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     ossContractSigned:
-                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']?.ossContractSigned,
+                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']
+                                                            ?.ossContractSigned,
                                                 },
                                             })
                                         }
@@ -227,17 +228,17 @@ export default function CotsOssInformation({
                                 )}
                             </div>
                             <div className='mt-2 col text-start'>
-                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.ossContractSigned === true ?
+                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.ossContractSigned === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                         </div>
                     </div>
@@ -249,13 +250,13 @@ export default function CotsOssInformation({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.ossInformationURL ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.ossInformationURL ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.ossInformationURL ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.ossInformationURL ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.ossInformationURL ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.ossInformationURL ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -264,7 +265,8 @@ export default function CotsOssInformation({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     ossInformationURL:
-                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']?.ossInformationURL,
+                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']
+                                                            ?.ossInformationURL,
                                                 },
                                             })
                                         }
@@ -298,27 +300,27 @@ export default function CotsOssInformation({
                         <div className='fw-bold text-blue'>{t('Source Code Available')}</div>
                         <div className='d-flex row'>
                             <div className='mt-2 col text-end'>
-                                {finalReleasePayload?.cotsDetails?.sourceCodeAvailable === true ?
+                                {finalReleasePayload?.cotsDetails?.sourceCodeAvailable === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.sourceCodeAvailable ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.sourceCodeAvailable ? (
+                                targetRelease?._embedded['sw360:cotsDetail']?.sourceCodeAvailable ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.cotsDetails?.sourceCodeAvailable ===
-                                    targetRelease?._embedded['sw360:cotsDetail']?.sourceCodeAvailable ? (
+                                  targetRelease?._embedded['sw360:cotsDetail']?.sourceCodeAvailable ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -327,7 +329,8 @@ export default function CotsOssInformation({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     sourceCodeAvailable:
-                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']?.sourceCodeAvailable,
+                                                        sourceReleaseDetail?._embedded['sw360:cotsDetail']
+                                                            ?.sourceCodeAvailable,
                                                 },
                                             })
                                         }
@@ -343,7 +346,8 @@ export default function CotsOssInformation({
                                                 cotsDetails: {
                                                     ...finalReleasePayload.cotsDetails,
                                                     sourceCodeAvailable:
-                                                        targetRelease?._embedded['sw360:cotsDetail']?.sourceCodeAvailable,
+                                                        targetRelease?._embedded['sw360:cotsDetail']
+                                                            ?.sourceCodeAvailable,
                                                 },
                                             })
                                         }
@@ -353,23 +357,22 @@ export default function CotsOssInformation({
                                 )}
                             </div>
                             <div className='mt-2 col text-start'>
-                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.sourceCodeAvailable === true ?
+                                {sourceReleaseDetail?._embedded['sw360:cotsDetail']?.sourceCodeAvailable === true ? (
                                     <>
                                         <BsCheck2Circle color='green' />
                                         {t('Yes')}
                                     </>
-                                    :
+                                ) : (
                                     <>
                                         <BsXCircle color='red' />
                                         {t('No')}
                                     </>
-                                }
+                                )}
                             </div>
                         </div>
                     </div>
-                </div >
-            )
-            }
+                </div>
+            )}
         </>
     )
 }

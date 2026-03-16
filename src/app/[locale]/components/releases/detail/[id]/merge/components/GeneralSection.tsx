@@ -1210,7 +1210,7 @@ export default function GeneralSection({
                                         className='green'
                                     />
                                 ) : finalReleasePayload.sourceCodeDownloadurl ===
-                                    targetRelease.sourceCodeDownloadurl ? (
+                                  targetRelease.sourceCodeDownloadurl ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -1331,13 +1331,13 @@ export default function GeneralSection({
                                 {sourceReleaseDetail._embedded['sw360:vendors']?.[0]._links?.self.href
                                     .split('/')
                                     .at(-1) ===
-                                    targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
+                                targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : (vendor._links?.self.href.split('/').at(-1) ?? undefined) ===
-                                    targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
+                                  targetRelease._embedded['sw360:vendors']?.[0]._links?.self.href.split('/').at(-1) ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() => {
@@ -1378,14 +1378,16 @@ export default function GeneralSection({
                             <div className='mt-2 col text-start'>
                                 {sourceReleaseDetail._embedded['sw360:vendors']?.[0]
                                     ? `${sourceReleaseDetail._embedded['sw360:vendors']?.[0].fullName ?? ''}
-                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName
-                                        ? ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})`
-                                        : ''
-                                    }
-                                       ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url
-                                        ? `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}`
-                                        : ''
-                                    }`
+                                       ${
+                                           sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName
+                                               ? ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})`
+                                               : ''
+                                       }
+                                       ${
+                                           sourceReleaseDetail._embedded['sw360:vendors']?.[0].url
+                                               ? `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}`
+                                               : ''
+                                       }`
                                     : ''}
                             </div>
                         </div>
@@ -1396,9 +1398,10 @@ export default function GeneralSection({
                             <div className='mt-2 col text-end'>
                                 {finalReleasePayload.repository
                                     ? `${finalReleasePayload.repository?.url ? finalReleasePayload.repository?.url : ''}
-                                    ${finalReleasePayload.repository?.repositorytype
-                                        ? `(${finalReleasePayload.repository?.repositorytype})`
-                                        : ''
+                                    ${
+                                        finalReleasePayload.repository?.repositorytype
+                                            ? `(${finalReleasePayload.repository?.repositorytype})`
+                                            : ''
                                     }`
                                     : ''}
                             </div>
@@ -1437,9 +1440,10 @@ export default function GeneralSection({
                             <div className='mt-2 col text-start'>
                                 {sourceReleaseDetail.repository
                                     ? `${sourceReleaseDetail.repository?.url ? sourceReleaseDetail.repository?.url : ''}
-                                    ${sourceReleaseDetail.repository?.repositorytype
-                                        ? `(${sourceReleaseDetail.repository?.repositorytype})`
-                                        : ''
+                                    ${
+                                        sourceReleaseDetail.repository?.repositorytype
+                                            ? `(${sourceReleaseDetail.repository?.repositorytype})`
+                                            : ''
                                     }`
                                     : ''}
                             </div>

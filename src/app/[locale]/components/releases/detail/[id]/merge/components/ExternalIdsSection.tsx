@@ -120,7 +120,7 @@ export default function ExternalIdsSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.externalIds?.[id.value] ===
-                                            targetRelease.externalIds?.[id.value] ? (
+                                        targetRelease.externalIds?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {
@@ -164,7 +164,7 @@ export default function ExternalIdsSection({
                                     </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         {finalReleasePayload.externalIds?.[id.value] !==
-                                            sourceReleaseDetail.externalIds?.[id.value] ? (
+                                        sourceReleaseDetail.externalIds?.[id.value] ? (
                                             <button
                                                 className='btn btn-secondary px-2'
                                                 onClick={() => {

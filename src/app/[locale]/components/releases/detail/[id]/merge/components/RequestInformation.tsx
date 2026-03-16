@@ -41,7 +41,9 @@ export default function RequestInformation({
         <>
             {targetRelease && sourceReleaseDetail && finalReleasePayload && (
                 <div className='mb-3'>
-                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>{t('Request Information')}</h6>
+                    <h6 className='border-bottom fw-bold text-uppercase text-blue border-blue mb-2'>
+                        {t('Request Information')}
+                    </h6>
                     <div className='border border-blue p-2'>
                         <div className='fw-bold text-blue'>{t('Request ID')}</div>
                         <div className='d-flex row'>
@@ -50,13 +52,13 @@ export default function RequestInformation({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?.clearingInformation?.requestID ===
-                                    targetRelease?.clearingInformation?.requestID ? (
+                                targetRelease?.clearingInformation?.requestID ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.clearingInformation?.requestID ===
-                                    targetRelease?.clearingInformation?.requestID ? (
+                                  targetRelease?.clearingInformation?.requestID ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -64,8 +66,7 @@ export default function RequestInformation({
                                                 ...finalReleasePayload,
                                                 clearingInformation: {
                                                     ...finalReleasePayload.clearingInformation,
-                                                    requestID:
-                                                        sourceReleaseDetail?.clearingInformation?.requestID,
+                                                    requestID: sourceReleaseDetail?.clearingInformation?.requestID,
                                                 },
                                             })
                                         }
@@ -80,8 +81,7 @@ export default function RequestInformation({
                                                 ...finalReleasePayload,
                                                 clearingInformation: {
                                                     ...finalReleasePayload.clearingInformation,
-                                                    requestID:
-                                                        targetRelease?.clearingInformation?.requestID,
+                                                    requestID: targetRelease?.clearingInformation?.requestID,
                                                 },
                                             })
                                         }
@@ -103,13 +103,13 @@ export default function RequestInformation({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?.clearingInformation?.additionalRequestInfo ===
-                                    targetRelease?.clearingInformation?.additionalRequestInfo ? (
+                                targetRelease?.clearingInformation?.additionalRequestInfo ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.clearingInformation?.additionalRequestInfo ===
-                                    targetRelease?.clearingInformation?.additionalRequestInfo ? (
+                                  targetRelease?.clearingInformation?.additionalRequestInfo ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -156,13 +156,13 @@ export default function RequestInformation({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?.clearingInformation?.procStart ===
-                                    targetRelease?.clearingInformation?.procStart ? (
+                                targetRelease?.clearingInformation?.procStart ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.clearingInformation?.procStart ===
-                                    targetRelease?.clearingInformation?.procStart ? (
+                                  targetRelease?.clearingInformation?.procStart ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -170,8 +170,7 @@ export default function RequestInformation({
                                                 ...finalReleasePayload,
                                                 clearingInformation: {
                                                     ...finalReleasePayload.clearingInformation,
-                                                    procStart:
-                                                        sourceReleaseDetail?.clearingInformation?.procStart,
+                                                    procStart: sourceReleaseDetail?.clearingInformation?.procStart,
                                                 },
                                             })
                                         }
@@ -186,8 +185,7 @@ export default function RequestInformation({
                                                 ...finalReleasePayload,
                                                 clearingInformation: {
                                                     ...finalReleasePayload.clearingInformation,
-                                                    procStart:
-                                                        targetRelease?.clearingInformation?.procStart,
+                                                    procStart: targetRelease?.clearingInformation?.procStart,
                                                 },
                                             })
                                         }
@@ -209,13 +207,13 @@ export default function RequestInformation({
                             </div>
                             <div className='col-12 col-md-2 mx-5 text-center'>
                                 {sourceReleaseDetail?.clearingInformation?.evaluated ===
-                                    targetRelease?.clearingInformation?.evaluated ? (
+                                targetRelease?.clearingInformation?.evaluated ? (
                                     <BsCheck2
                                         size={20}
                                         className='green'
                                     />
                                 ) : finalReleasePayload?.clearingInformation?.evaluated ===
-                                    targetRelease?.clearingInformation?.evaluated ? (
+                                  targetRelease?.clearingInformation?.evaluated ? (
                                     <button
                                         className='btn btn-secondary px-2'
                                         onClick={() =>
@@ -223,8 +221,7 @@ export default function RequestInformation({
                                                 ...finalReleasePayload,
                                                 clearingInformation: {
                                                     ...finalReleasePayload.clearingInformation,
-                                                    evaluated:
-                                                        sourceReleaseDetail?.clearingInformation?.evaluated,
+                                                    evaluated: sourceReleaseDetail?.clearingInformation?.evaluated,
                                                 },
                                             })
                                         }
@@ -239,8 +236,7 @@ export default function RequestInformation({
                                                 ...finalReleasePayload,
                                                 clearingInformation: {
                                                     ...finalReleasePayload.clearingInformation,
-                                                    evaluated:
-                                                        targetRelease?.clearingInformation?.evaluated,
+                                                    evaluated: targetRelease?.clearingInformation?.evaluated,
                                                 },
                                             })
                                         }
@@ -254,9 +250,8 @@ export default function RequestInformation({
                             </div>
                         </div>
                     </div>
-                </div >
-            )
-            }
+                </div>
+            )}
         </>
     )
 }

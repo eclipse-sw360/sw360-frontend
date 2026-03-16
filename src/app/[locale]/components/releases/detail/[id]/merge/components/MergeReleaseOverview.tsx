@@ -28,9 +28,9 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import MergeReleaseConfirmation from './MergeReleaseConfirmation'
 import MergeReleaseDataCheck from './MergeReleaseDataCheck'
 import MergeReleaseTable from './MergeReleaseTable'
-import MergeReleaseConfirmation from './MergeReleaseConfirmation'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
@@ -74,7 +74,6 @@ function MergeReleaseOverview({
     const [releaseUsages, setReleaseUsages] = useState<null | ReleaseUsages>(null)
     const [heavyUsage, setHeavyUsage] = useState(false)
 
-
     const fetchData = useCallback(
         async (url: string) => {
             if (CommonUtils.isNullOrUndefined(session)) return
@@ -94,9 +93,10 @@ function MergeReleaseOverview({
     )
 
     const activeEntries = useMemo(() => {
-        return Object.entries(releaseUsages || {})
-            .filter(([_, value]) => value > 0)
-    }, [releaseUsages])
+        return Object.entries(releaseUsages || {}).filter(([_, value]) => value > 0)
+    }, [
+        releaseUsages,
+    ])
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -109,36 +109,36 @@ function MergeReleaseOverview({
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-            ; (async () => {
-                try {
-                    const session = await getSession()
-                    if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                    const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
 
-                    if (response.status === StatusCodes.UNAUTHORIZED) {
-                        return signOut()
-                    } else if (response.status === StatusCodes.OK) {
-                        const singleRelease = (await response.json()) as ReleaseDetail
-                        const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
-                        if (CommonUtils.isNullOrUndefined(compId) || compId === '') {
-                            MessageService.error(t('Component ID is missing for the target release'))
-                            router.push(`releases/${releaseId}`)
-                        }
-                        setComponentId(compId)
-                        setTargetRelease(singleRelease)
-                    } else {
-                        const err = (await response.json()) as ErrorDetails
-                        throw new ApiError(err.message, {
-                            status: response.status,
-                        })
-                    }
-                } catch (error) {
-                    ApiUtils.reportError(error)
-                    if (!(error instanceof ApiError && error.isAborted)) {
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status === StatusCodes.OK) {
+                    const singleRelease = (await response.json()) as ReleaseDetail
+                    const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
+                    if (CommonUtils.isNullOrUndefined(compId) || compId === '') {
+                        MessageService.error(t('Component ID is missing for the target release'))
                         router.push(`releases/${releaseId}`)
                     }
+                    setComponentId(compId)
+                    setTargetRelease(singleRelease)
+                } else {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
-            })()
+            } catch (error) {
+                ApiUtils.reportError(error)
+                if (!(error instanceof ApiError && error.isAborted)) {
+                    router.push(`releases/${releaseId}`)
+                }
+            }
+        })()
 
         return () => controller.abort()
     }, [
@@ -148,32 +148,33 @@ function MergeReleaseOverview({
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-            ; (async () => {
-                try {
-                    const session = await getSession()
-                    if (CommonUtils.isNullOrUndefined(session))
-                        return signOut()
-                    const response = await ApiUtils.GET(
-                        `releases/${releaseId}/usageInformationForMerge`, session.user.access_token, signal)
-                    if (response.status === StatusCodes.UNAUTHORIZED) {
-                        return signOut()
-                    }
-                    else if (response.status === StatusCodes.OK) {
-                        const releaseUsage = (await response.json()) as ReleaseUsages
-                        setReleaseUsages(releaseUsage)
-                    } else {
-                        const err = (await response.json()) as ErrorDetails
-                        throw new ApiError(err.message, {
-                            status: response.status,
-                        })
-                    }
-                } catch (error) {
-                    ApiUtils.reportError(error)
-                    if (!(error instanceof ApiError && error.isAborted)) {
-                        router.push(`releases/${releaseId}`)
-                    }
+        ;(async () => {
+            try {
+                const session = await getSession()
+                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                const response = await ApiUtils.GET(
+                    `releases/${releaseId}/usageInformationForMerge`,
+                    session.user.access_token,
+                    signal,
+                )
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    return signOut()
+                } else if (response.status === StatusCodes.OK) {
+                    const releaseUsage = (await response.json()) as ReleaseUsages
+                    setReleaseUsages(releaseUsage)
+                } else {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
-            })()
+            } catch (error) {
+                ApiUtils.reportError(error)
+                if (!(error instanceof ApiError && error.isAborted)) {
+                    router.push(`releases/${releaseId}`)
+                }
+            }
+        })()
 
         return () => controller.abort()
     }, [
@@ -186,7 +187,7 @@ function MergeReleaseOverview({
             setHeavyUsage(isHeavy)
         }
     }, [
-        activeEntries
+        activeEntries,
     ])
 
     const checkMergeReleaseEligibility = async (): Promise<boolean> => {
@@ -201,8 +202,10 @@ function MergeReleaseOverview({
                 return false
             }
             const sourceAttachmentResponse = await fetchData(`releases/${sourceRelease.id}/attachments`)
-            setSourceAttachments(sourceAttachmentResponse?._embedded?.['sw360:attachments']?.map(
-                ({ _links, ...attachmentData }) => attachmentData) ?? ([] as Attachment[]),
+            setSourceAttachments(
+                sourceAttachmentResponse?._embedded?.['sw360:attachments']?.map(
+                    ({ _links, ...attachmentData }) => attachmentData,
+                ) ?? ([] as Attachment[]),
             )
 
             const sourceAttachmentsList =
@@ -212,7 +215,8 @@ function MergeReleaseOverview({
             const targetAttachmentResponse = await fetchData(`releases/${releaseId}/attachments`)
             setTargetAttachments(
                 targetAttachmentResponse?._embedded?.['sw360:attachments']?.map(
-                    ({ _links, ...attachmentData }) => attachmentData) ?? ([] as Attachment[]),
+                    ({ _links, ...attachmentData }) => attachmentData,
+                ) ?? ([] as Attachment[]),
             )
 
             const targetAttachmentsList =
@@ -250,7 +254,7 @@ function MergeReleaseOverview({
             delete payload.subscribers
             payload.attachments = payload.attachments?.map((attachment) => ({
                 attachmentContentId: attachment.attachmentContentId,
-                filename: attachment.filename
+                filename: attachment.filename,
             }))
             const response = await ApiUtils.PATCH(
                 `releases/mergereleases?mergeTargetId=${targetRelease?.id}&mergeSourceId=${sourceRelease?.id}`,
@@ -262,8 +266,7 @@ function MergeReleaseOverview({
                 throw new ApiError(err.message, {
                     status: response.status,
                 })
-            }
-            else if (response.status === 200) {
+            } else if (response.status === 200) {
                 MessageService.success(t('Releases merged successfully'))
                 router.push(`/components/releases/detail/${targetRelease?.id}`)
             }
@@ -287,8 +290,11 @@ function MergeReleaseOverview({
                     <div className='d-flex justify-content-between text-center mb-3'>
                         <div
                             className={`p-2 border rounded-2 col-12 col-md
-                                    ${mergeState === MergeOrSplitActionType.CHOOSE_SOURCE ?
-                                    'merge-split-active' : 'merge-split'}`}
+                                    ${
+                                        mergeState === MergeOrSplitActionType.CHOOSE_SOURCE
+                                            ? 'merge-split-active'
+                                            : 'merge-split'
+                                    }`}
                             role='alert'
                         >
                             <h6 className='fw-bold'>1. {t('Choose source')}</h6>
@@ -296,8 +302,11 @@ function MergeReleaseOverview({
                         </div>
                         <div
                             className={`mx-4 p-2 border rounded-2 col-12 col-md
-                                    ${mergeState === MergeOrSplitActionType.PROCESS_DATA ?
-                                    'merge-split-active' : 'merge-split'}`}
+                                    ${
+                                        mergeState === MergeOrSplitActionType.PROCESS_DATA
+                                            ? 'merge-split-active'
+                                            : 'merge-split'
+                                    }`}
                             role='alert'
                         >
                             <h6 className='fw-bold'>2. {t('Merge data')}</h6>
@@ -305,8 +314,11 @@ function MergeReleaseOverview({
                         </div>
                         <div
                             className={`p-2 border rounded-2 col-12 col-md
-                                    ${mergeState === MergeOrSplitActionType.CONFIRM ?
-                                    'merge-split-active' : 'merge-split'}`}
+                                    ${
+                                        mergeState === MergeOrSplitActionType.CONFIRM
+                                            ? 'merge-split-active'
+                                            : 'merge-split'
+                                    }`}
                             role='alert'
                         >
                             <h6 className='fw-bold'>3. {t('Confirm')}</h6>
@@ -321,30 +333,29 @@ function MergeReleaseOverview({
                             {error}
                         </div>
                     )}
-                    {
-                        (mergeState === MergeOrSplitActionType.PROCESS_DATA ||
-                            mergeState === MergeOrSplitActionType.CONFIRM) &&
-                            activeEntries.length > 0 ?
-                            (
-                                <div className={`${heavyUsage ? 'subscriptionBoxDanger' : 'subscriptionBox'} my-2`}
-                                    aria-disabled='true'>
-                                    {t('The following documents will be affected')}
-                                    <ul className="mt-2 mb-0">
-                                        {activeEntries.map(([key, value]) => (
-                                            <li key={key}>
-                                                <strong>{value}</strong> {` ${key}(s)`}
-                                            </li>
-                                        ))}
-                                    </ul>
+                    {(mergeState === MergeOrSplitActionType.PROCESS_DATA ||
+                        mergeState === MergeOrSplitActionType.CONFIRM) &&
+                    activeEntries.length > 0 ? (
+                        <div
+                            className={`${heavyUsage ? 'subscriptionBoxDanger' : 'subscriptionBox'} my-2`}
+                            aria-disabled='true'
+                        >
+                            {t('The following documents will be affected')}
+                            <ul className='mt-2 mb-0'>
+                                {activeEntries.map(([key, value]) => (
+                                    <li key={key}>
+                                        <strong>{value}</strong> {` ${key}(s)`}
+                                    </li>
+                                ))}
+                            </ul>
 
-                                    {heavyUsage && (
-                                        <div className="mt-2 small font-weight-bold">
-                                            {t('More than 1000 documents affected')}
-                                        </div>
-                                    )}
+                            {heavyUsage && (
+                                <div className='mt-2 small font-weight-bold'>
+                                    {t('More than 1000 documents affected')}
                                 </div>
-                            ) : null
-                    }
+                            )}
+                        </div>
+                    ) : null}
                     {mergeState === MergeOrSplitActionType.CHOOSE_SOURCE && (
                         <MergeReleaseTable
                             release={sourceRelease}
