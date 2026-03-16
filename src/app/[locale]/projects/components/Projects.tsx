@@ -10,16 +10,31 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    ExpandedState,
+    getCoreRowModel,
+    getExpandedRowModel,
+    HeaderContext,
+    SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-icons/bs'
+import {
+    BsCaretDownFill,
+    BsCaretRightFill,
+    BsCheck2Square,
+    BsClipboard,
+    BsFillTrashFill,
+    BsPencil,
+} from 'react-icons/bs'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import {
@@ -44,6 +59,10 @@ import ImportSBOMModal from './ImportSBOMModal'
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
 type LicenseClearingMap = Record<string, LicenseClearingData>
 
+interface ProjectWithSubRows extends TypeProject {
+    subRows?: ProjectWithSubRows[]
+}
+
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
@@ -59,12 +78,16 @@ function Project(): JSX.Element {
         show: false,
         importType: 'SPDX',
     })
+    const [expandedState, setExpandedState] = useState<ExpandedState>({})
+    const [linkedProjectsData, setLinkedProjectsData] = useState<Record<string, TypeProject[]>>({})
 
     // Configs from backend
     const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT)
     const clearingRequestDisabledGroups = useConfigValue(
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
+    const enableLinkedProjectsDisplay = useConfigKeyValue(ConfigKeys.ENABLE_LINKED_PROJECTS_DISPLAY)
+    const showLinkedProjects = enableLinkedProjectsDisplay?.toLowerCase() === 'true'
 
     const [showCreateCRModal, setShowCreateCRModal] = useState(false)
     const [createCRProjectId, setCreateCRProjectId] = useState('')
@@ -97,8 +120,175 @@ function Project(): JSX.Element {
         MessageService.success(t('You are editing the original document'))
     }
 
-    const columns = useMemo<ColumnDef<TypeProject>[]>(
+    const fetchLinkedProjects = useCallback(async (projectId: string) => {
+        // Check if already fetched
+        setLinkedProjectsData((prev) => {
+            if (prev[projectId]) return prev // Already fetched
+
+            // Mark as being fetched
+            return {
+                ...prev,
+                [projectId]: [],
+            }
+        })
+
+        try {
+            const session = await getSession()
+            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+
+            const response = await ApiUtils.GET(
+                `projects/${projectId}/linkedProjects?transitive=false`,
+                session.user.access_token,
+            )
+
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+
+            const data = (await response.json()) as EmbeddedProjects
+            const linkedProjects = data['_embedded']?.['sw360:projects'] ?? []
+
+            setLinkedProjectsData((prev) => ({
+                ...prev,
+                [projectId]: linkedProjects,
+            }))
+        } catch (error) {
+            ApiUtils.reportError(error)
+        }
+    }, [])
+
+    const columns = useMemo<ColumnDef<ProjectWithSubRows>[]>(
         () => [
+            ...(showLinkedProjects
+                ? [
+                      {
+                          id: 'expand',
+                          header: ({ table }: HeaderContext<ProjectWithSubRows, unknown>) => {
+                              const expandableRows = table.getCoreRowModel().rows.filter((r) => r.getCanExpand())
+                              if (expandableRows.length === 0) return null
+                              const allExpandableExpanded = expandableRows.every((r) => r.getIsExpanded())
+                              return (
+                                  <OverlayTrigger
+                                      overlay={
+                                          <Tooltip>
+                                              {allExpandableExpanded ? t('Collapse All') : t('Expand All')}
+                                          </Tooltip>
+                                      }
+                                  >
+                                      <button
+                                          onClick={() => {
+                                              if (allExpandableExpanded) {
+                                                  setExpandedState({})
+                                              } else {
+                                                  const newState: Record<string, boolean> = {}
+                                                  expandableRows.forEach((r) => {
+                                                      const projectId = r.original['_links']?.['self']?.['href']
+                                                          ?.split('/')
+                                                          .at(-1)
+                                                      if (projectId) {
+                                                          newState[r.id] = true
+                                                          void fetchLinkedProjects(projectId)
+                                                      }
+                                                  })
+                                                  setExpandedState(newState)
+                                              }
+                                          }}
+                                          style={{
+                                              background: 'none',
+                                              border: 'none',
+                                              cursor: 'pointer',
+                                              padding: 0,
+                                          }}
+                                          aria-label={allExpandableExpanded ? t('Collapse All') : t('Expand All')}
+                                      >
+                                          {allExpandableExpanded ? (
+                                              <BsCaretDownFill size={16} />
+                                          ) : (
+                                              <BsCaretRightFill size={16} />
+                                          )}
+                                      </button>
+                                  </OverlayTrigger>
+                              )
+                          },
+                          cell: ({
+                              row,
+                          }: {
+                              row: {
+                                  id: string
+                                  original: ProjectWithSubRows
+                                  getCanExpand: () => boolean
+                                  getIsExpanded: () => boolean
+                                  toggleExpanded: () => void
+                                  depth: number
+                              }
+                          }) => {
+                              // Only show expand button for top-level rows (depth=0) that have linked projects
+                              if (row.depth !== 0) {
+                                  return (
+                                      <div
+                                          style={{
+                                              width: '24px',
+                                          }}
+                                      />
+                                  )
+                              }
+
+                              const hasLinkedProjects =
+                                  row.original.linkedProjects && Object.keys(row.original.linkedProjects).length > 0
+
+                              if (!hasLinkedProjects) {
+                                  return (
+                                      <div
+                                          style={{
+                                              width: '24px',
+                                          }}
+                                      />
+                                  )
+                              }
+
+                              return (
+                                  <button
+                                      onClick={() => {
+                                          if (!row.getIsExpanded()) {
+                                              // Fetch linked projects on first expand
+                                              const projectId = row.original['_links']?.['self']?.['href']
+                                                  ?.split('/')
+                                                  .at(-1)
+                                              if (projectId) void fetchLinkedProjects(projectId)
+                                          }
+                                          row.toggleExpanded()
+                                      }}
+                                      style={{
+                                          background: 'none',
+                                          border: 'none',
+                                          cursor: 'pointer',
+                                          padding: 0,
+                                      }}
+                                      aria-label={row.getIsExpanded() ? t('Collapse') : t('Expand')}
+                                  >
+                                      {row.getIsExpanded() ? (
+                                          <BsCaretDownFill
+                                              size={14}
+                                              className='text-secondary'
+                                          />
+                                      ) : (
+                                          <BsCaretRightFill
+                                              size={14}
+                                              className='text-secondary'
+                                          />
+                                      )}
+                                  </button>
+                              )
+                          },
+                          meta: {
+                              width: '3%',
+                          },
+                      } as ColumnDef<ProjectWithSubRows>,
+                  ]
+                : []),
             {
                 id: 'name',
                 accessorKey: 'name',
@@ -108,16 +298,22 @@ function Project(): JSX.Element {
                     const { name, version } = row.original
                     const id = row.original['_links']['self']['href'].split('/').at(-1)
                     return (
-                        <Link
-                            href={`/projects/detail/${id}`}
-                            className='text-link'
+                        <span
+                            style={{
+                                paddingLeft: row.depth > 0 ? `${row.depth * 20}px` : undefined,
+                            }}
                         >
-                            {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
-                        </Link>
+                            <Link
+                                href={`/projects/detail/${id}`}
+                                className='text-link'
+                            >
+                                {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
+                            </Link>
+                        </span>
                     )
                 },
                 meta: {
-                    width: '17.5%',
+                    width: showLinkedProjects ? '14.5%' : '17.5%',
                 },
             },
             {
@@ -365,6 +561,7 @@ function Project(): JSX.Element {
         [
             t,
             licenseClearingData,
+            showLinkedProjects,
         ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -378,13 +575,41 @@ function Project(): JSX.Element {
         totalPages: 0,
         number: 0,
     })
-    const [projectData, setProjectData] = useState<TypeProject[]>(() => [])
-    const memoizedData = useMemo(
-        () => projectData,
-        [
-            projectData,
-        ],
-    )
+    const [projectData, setProjectData] = useState<ProjectWithSubRows[]>(() => [])
+    const memoizedData = useMemo(() => {
+        if (!showLinkedProjects) return projectData
+
+        // Add subRows from linkedProjectsData
+        return projectData.map((project) => {
+            const id = project['_links']?.['self']?.['href']?.split('/').at(-1)
+            if (!id) return project
+
+            // Check if this project has linked projects
+            const hasLinkedProjects = project.linkedProjects && Object.keys(project.linkedProjects).length > 0
+            if (!hasLinkedProjects) {
+                return project
+            }
+
+            // Get fetched linked projects data
+            const linkedProjects = linkedProjectsData[id]
+            if (!linkedProjects || linkedProjects.length === 0) {
+                // Return project but mark it as expandable (subRows will be fetched on expand)
+                return {
+                    ...project,
+                    subRows: [], // Empty array to make row expandable
+                }
+            }
+
+            return {
+                ...project,
+                subRows: linkedProjects,
+            }
+        })
+    }, [
+        projectData,
+        showLinkedProjects,
+        linkedProjectsData,
+    ])
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -494,13 +719,34 @@ function Project(): JSX.Element {
         projectData,
     ])
 
-    const table = useReactTable({
+    const table = useReactTable<ProjectWithSubRows>({
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getRowId: (
+            row: ProjectWithSubRows,
+            _index: number,
+            parent?: {
+                id: string
+            },
+        ) =>
+            parent
+                ? `${parent.id}_${row['_links']?.['self']?.['href']?.split('/').at(-1) ?? ''}`
+                : (row['_links']?.['self']?.['href']?.split('/').at(-1) ?? ''),
+        ...(showLinkedProjects && {
+            getExpandedRowModel: getExpandedRowModel(),
+            getSubRows: (row: ProjectWithSubRows) => row.subRows,
+            getRowCanExpand: (row) => {
+                return !!(row.original.linkedProjects && Object.keys(row.original.linkedProjects).length > 0)
+            },
+            onExpandedChange: setExpandedState,
+        }),
 
         // table state config
         state: {
+            ...(showLinkedProjects && {
+                expanded: expandedState,
+            }),
             columnVisibility: {
                 actions: !(session?.user?.userGroup === UserGroupType.SECURITY_USER),
                 licenseClearing: !(session?.user?.userGroup === UserGroupType.SECURITY_USER),
