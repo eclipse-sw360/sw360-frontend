@@ -76,7 +76,7 @@ function PageButtonHeader({
                 display: 'flex',
             }}
         >
-            <div className='col-auto'>
+            <div className='col-auto px-0'>
                 <div
                     className='btn-toolbar'
                     role='toolbar'

@@ -31,6 +31,7 @@ enum ConfigKeys {
     IS_PACKAGE_PORTLET_ENABLED = 'package.portlet.enabled',
     RELEASE_SOURCECODE_URL_SKIP_DOMAINS = 'release.sourcecodeurl.skip.domains',
     REST_API_TOKEN_LENGTH = 'rest.apitoken.length',
+    ENABLE_LINKED_PROJECTS_DISPLAY = 'enable.linked.projects.display',
 }
 
 export default ConfigKeys

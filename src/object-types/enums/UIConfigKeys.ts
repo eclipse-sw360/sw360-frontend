@@ -25,6 +25,7 @@ export enum UIConfigKeys {
     UI_PROJECT_EXTERNALKEYS = 'ui.project.externalkeys',
     UI_CLEARING_TEAMS = 'ui.clearing.teams',
     UI_CLEARING_TEAM_UNKNOWN_ENABLED = 'ui.clearing.team.unknown.enabled',
+    ENABLE_LINKED_PROJECTS_DISPLAY = 'enable.linked.projects.display',
     UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP = 'ui.org.eclipse.sw360.disable.clearing.request.for.project.group',
     UI_CUSTOMMAP_COMPONENT_ROLES = 'ui.custommap.component.roles',
     UI_CUSTOMMAP_PROJECT_ROLES = 'ui.custommap.project.roles',

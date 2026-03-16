@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import OnOffSwitch from '@/app/[locale]/admin/configurations/components/OnOffSwitch'
+import { useUiConfigContext } from '@/contexts'
 import {
     ConfigurationContainers,
     ProcessedUiConfig,
@@ -30,6 +31,7 @@ const FrontEndConfigs = (): JSX.Element => {
     const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
     const [arrayKeyStates, setArrayKeyStates] = useState<ProcessedUiConfig>({} as ProcessedUiConfig)
     const { status } = useSession()
+    const { refreshConfig } = useUiConfigContext()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
 
     useEffect(() => {
@@ -80,6 +82,7 @@ const FrontEndConfigs = (): JSX.Element => {
         const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig, session.user.access_token)
         if (response.status == StatusCodes.OK) {
             MessageService.success(t('Updated frontend configurations successfully'))
+            refreshConfig()
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
             await signOut()
         } else {
@@ -410,6 +413,20 @@ const FrontEndConfigs = (): JSX.Element => {
                                         />
                                     </td>
                                     <td>{t('ui_rest_apitoken_generator_enable')}</td>
+                                </tr>
+                                <tr id='enable-linked-projects-display'>
+                                    <td className='align-middle fw-bold'>{t('Enable Linked Projects Display')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            checked={
+                                                currentUiConfig[UIConfigKeys.ENABLE_LINKED_PROJECTS_DISPLAY] === 'true'
+                                            }
+                                            propKey={UIConfigKeys.ENABLE_LINKED_PROJECTS_DISPLAY}
+                                        />
+                                    </td>
+                                    <td>{t('enable_linked_projects_display')}</td>
                                 </tr>
                             </tbody>
                         </table>
