@@ -11,13 +11,13 @@
 
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
+import { Alert, Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
+import { createLinkedProjectsColumns } from '@/components/sw360/LinkedProjectsModal/linkedProjectsColumns'
 import {
     Embedded,
     ErrorDetails,
@@ -43,9 +43,6 @@ interface Props {
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 export default function LinkProjectsModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
@@ -68,126 +65,43 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
         projectPayload,
     ])
 
-    const columns = useMemo<ColumnDef<Project>[]>(
-        () => [
-            {
-                id: 'select',
-                cell: ({ row }) => (
-                    <div className='form-check'>
-                        <input
-                            className='form-check-input'
-                            type='checkbox'
-                            name='projectId'
-                            value={row.original._links.self.href.split('/').at(-1) ?? ''}
-                            id={row.original._links.self.href.split('/').at(-1) ?? ''}
-                            title=''
-                            placeholder='Project Id'
-                            checked={linkProjects.has(row.original._links.self.href.split('/').at(-1) ?? '')}
-                            onChange={() => handleCheckboxes(row.original)}
-                        />
-                    </div>
-                ),
-                meta: {
-                    width: '7%',
-                },
-            },
-            {
-                id: 'name',
-                header: t('Name'),
-                accessorKey: 'name',
-                cell: (info) => info.getValue(),
-                meta: {
-                    width: '15%',
-                },
-            },
-            {
-                id: 'version',
-                header: t('Version'),
-                accessorKey: 'version',
-                cell: (info) => info.getValue(),
-                meta: {
-                    width: '15%',
-                },
-            },
-            {
-                id: 'state',
-                header: t('State'),
-                accessorKey: 'state',
-                cell: ({ row }) => {
-                    const { state, clearingState } = row.original
-                    return (
-                        <>
-                            {state && clearingState && (
-                                <div className='text-center'>
-                                    <OverlayTrigger
-                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
-                                    >
-                                        {state === 'ACTIVE' ? (
-                                            <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
-                                        ) : (
-                                            <span className='badge bg-secondary capsule-left overlay-badge'>
-                                                {'PS'}
-                                            </span>
-                                        )}
-                                    </OverlayTrigger>
-                                    <OverlayTrigger
-                                        overlay={
-                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
-                                        }
-                                    >
-                                        {clearingState === 'OPEN' ? (
-                                            <span className='badge bg-danger capsule-right overlay-badge'>{'CS'}</span>
-                                        ) : clearingState === 'IN_PROGRESS' ? (
-                                            <span className='badge bg-warning capsule-right overlay-badge'>{'CS'}</span>
-                                        ) : (
-                                            <span className='badge bg-success capsule-right overlay-badge'>{'CS'}</span>
-                                        )}
-                                    </OverlayTrigger>
-                                </div>
-                            )}
-                        </>
-                    )
-                },
-                meta: {
-                    width: '10%',
-                },
-            },
-            {
-                id: 'projectResponsible',
-                header: t('Project Responsible'),
-                accessorKey: 'projectResponsible',
-                cell: ({ row }) => {
-                    const { projectResponsible } = row.original
-                    return (
-                        <>
-                            {projectResponsible && (
-                                <Link
-                                    href={`mailto:${projectResponsible}`}
-                                    className='text-link'
-                                >
-                                    {projectResponsible}
-                                </Link>
-                            )}
-                        </>
-                    )
-                },
-                meta: {
-                    width: '13%',
-                },
-            },
-            {
-                id: 'description',
-                header: t('Description'),
-                accessorKey: 'description',
-                cell: (info) => info.getValue(),
-                meta: {
-                    width: '40%',
-                },
-            },
+    const getProjectId = (project: Project): string => project._links.self.href.split('/').at(-1) ?? ''
+
+    const handleCheckboxes = (project: Project) => {
+        const m = new Map(linkProjects)
+        const projectId = getProjectId(project)
+        if (linkProjects.has(projectId)) {
+            m.delete(projectId)
+        } else {
+            m.set(projectId, {
+                enableSvm: project.enableSvm ?? false,
+                name: project.name ?? '',
+                projectRelationship: 'CONTAINED',
+                version: project.version ?? '',
+            } as LinkedProjectData)
+        }
+        setLinkProjects(m)
+    }
+
+    const selectedProjectIds = useMemo(
+        () => new Set(linkProjects.keys()),
+        [
+            linkProjects,
         ],
+    )
+
+    // Refactor: both link-project modals now use one shared column factory for consistent table UI.
+    const columns = useMemo<ColumnDef<Project>[]>(
+        () =>
+            createLinkedProjectsColumns({
+                t,
+                selectedProjectIds,
+                onToggleProject: handleCheckboxes,
+                getProjectId: getProjectId,
+            }),
         [
             t,
-            linkProjects,
+            selectedProjectIds,
         ],
     )
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -341,21 +255,6 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
             ...projectPayload,
             linkedProjects: Object.fromEntries(linkProjects),
         })
-    }
-
-    const handleCheckboxes = (project: Project) => {
-        const m = new Map(linkProjects)
-        if (linkProjects.has(project._links.self.href.split('/').at(-1) ?? '')) {
-            m.delete(project._links.self.href.split('/').at(-1) ?? '')
-        } else {
-            m.set(project._links.self.href.split('/').at(-1) ?? '', {
-                enableSvm: project.enableSvm ?? false,
-                name: project.name ?? '',
-                projectRelationship: 'CONTAINED',
-                version: project.version ?? '',
-            } as LinkedProjectData)
-        }
-        setLinkProjects(m)
     }
 
     const closeModal = () => {
