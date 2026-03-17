@@ -12,6 +12,7 @@
 // Server/Client side env
 export const SW360_API_URL: string | undefined = process.env.NEXT_PUBLIC_SW360_API_URL
 export const AUTH_PROVIDER: string | undefined = process.env.NEXT_PUBLIC_SW360_AUTH_PROVIDER
+export const TENANT_NAME: string | undefined = process.env.NEXT_PUBLIC_TENANT_NAME
 
 // Server side env
 export const SW360_REST_CLIENT_ID: string | undefined = process.env.SW360_REST_CLIENT_ID
