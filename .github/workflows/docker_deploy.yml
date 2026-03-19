@@ -10,21 +10,32 @@
 name: Docker Build
 
 on:
-#  schedule:
-#    - cron: '0 0 * * *' # Midnight
+  schedule:
+    - cron: '0 0 * * *' # Midnight
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Dockerfile'
   push:
+    branches:
+      - main
     tags:
-      - 'v*'
+      - '*'
+    paths-ignore:
+      - '**.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
 
-permissions: write-all
+permissions:
+  contents: read
 
 jobs:
   docker_push:
-    if: ${{ github.event.schedule }} == '0 0 * * *'
     name: Build Docker Image
     runs-on: ubuntu-24.04
     permissions:
@@ -37,18 +48,19 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Checkout main repository
+      - name: Checkout source code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set environment variables
-        run: |
-          echo "ORG_BASE_NAME=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
-          echo "GIT_REVISION=$(git describe --abbrev=6 --always --tags --match=[0-9]*)" >> $GITHUB_ENV
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - name: pnpm-setup
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
-          node-version: '22' # or your required version
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: '24'
+          cache: 'pnpm'
 
       - name: Run npx auth secret
         run: |
@@ -72,16 +84,29 @@ jobs:
         uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
         with:
           images: |
-            ${{ env.REGISTRY }}/${{ env.ORG_BASE_NAME }}
+            ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=schedule,pattern={{date 'YYYYMMDD'}}
+            type=schedule,pattern=nightly
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=ref,event=tag
+            type=raw,value=main,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.licenses=EPL-2.0
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 
       - name: Build sw360 build container
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           load: false
-          tags: |
-            ${{ steps.meta_runtime.outputs.tags }}
+          tags: ${{ steps.meta_runtime.outputs.tags }}
           labels: ${{ steps.meta_runtime.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_SW360_API_URL=http://localhost:8080
           cache-from: type=gha,scope=runtime
           cache-to: type=gha,scope=runtime,mode=max
+          provenance: mode=max
+          sbom: true

@@ -73,7 +73,7 @@
       "biome check --reporter=summary"
     ],
     "**/*.{css,scss,md,html,json}": [
-      "biome format"
+      "biome format --no-errors-on-unmatched"
     ]
   },
   "commitlint": {
