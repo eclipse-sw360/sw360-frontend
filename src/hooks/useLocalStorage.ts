@@ -29,12 +29,26 @@ function useLocalStorage<T>(
     }
 
     useEffect(() => {
+        const parseStoredItem = (item: string | null): T => {
+            if (item === null) {
+                return initialValue
+            }
+
+            try {
+                return JSON.parse(item) as T
+            } catch (error) {
+                console.error(error)
+                window.localStorage.removeItem(key)
+                return initialValue
+            }
+        }
+
         const item = window.localStorage.getItem(key)
-        setStoredValue(item !== null ? (JSON.parse(item) as T) : initialValue)
+        setStoredValue(parseStoredItem(item))
 
         const handleStorageChange = () => {
             const currentItem = window.localStorage.getItem(key)
-            setStoredValue(currentItem !== null ? (JSON.parse(currentItem) as T) : initialValue)
+            setStoredValue(parseStoredItem(currentItem))
         }
 
         window.addEventListener('storage', handleStorageChange)
