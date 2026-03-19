@@ -12,17 +12,23 @@
 ARG VARIANT=24-slim
 FROM node:${VARIANT} AS build
 
-RUN npm install -g pnpm
+ARG NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
+
+# define run-time args
+ARG NEXT_PUBLIC_SW360_API_URL
+ARG NEXT_PUBLIC_SW360_AUTH_PROVIDER=sw360basic
+
+# define build-time args
+ARG NEXTAUTH_URL=http://localhost:3000
+ARG AUTH_SECRET=mysecret
+
+RUN npm config set registry $NPM_CONFIG_REGISTRY \
+ && npm install -g pnpm
 
 WORKDIR /frontend
 
 # Prepare the build environment
 COPY . .
-
-# define build-time args
-ARG NEXT_PUBLIC_SW360_API_URL
-ARG NEXTAUTH_URL
-ARG AUTH_SECRET
 
 RUN pnpm install
 RUN pnpm build --experimental-analyze --turbo --profile
@@ -32,10 +38,23 @@ ARG VARIANT=24-slim
 FROM node:${VARIANT}
 WORKDIR /frontend
 
+ARG NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
+
 COPY --from=build /frontend/next.config.ts .
 COPY --from=build /frontend/public ./public
 COPY --from=build /frontend/.next/standalone ./
 COPY --from=build /frontend/.next/static ./.next/static
+
+# Runtime ENV to configure
+ENV SW360_REST_CLIENT_ID=""
+ENV SW360_REST_CLIENT_SECRET=""
+ENV SW360_KEYCLOAK_CLIENT_ID=""
+ENV SW360_KEYCLOAK_CLIENT_SECRET=""
+ENV AUTH_ISSUER=""
+
+# ENVs used at build time, not runtime
+ENV NEXT_PUBLIC_SW360_API_URL=""
+ENV NEXT_PUBLIC_SW360_AUTH_PROVIDER=""
 
 CMD ["node", "server.js"]
 EXPOSE 3000

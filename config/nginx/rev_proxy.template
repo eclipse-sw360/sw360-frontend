@@ -1,0 +1,47 @@
+error_log  /dev/stdout info;
+access_log /dev/stdout;
+
+server_tokens off;
+
+# Copied from https://grafana.com/tutorials/run-grafana-behind-a-proxy/
+# This is required to proxy Grafana Live WebSocket connections.
+map $http_upgrade $connection_upgrade {
+  default upgrade;
+  '' close;
+}
+
+server {
+    listen 443 ssl default_server;
+    keepalive_timeout 70;
+    server_name ${SERVER_DOMAIN};
+
+    # Snakeoil certificate configuration
+    ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+    ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+
+    # Optimize SSL
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+
+    # Proxy for frontend
+    location / {
+        proxy_pass http://sw360-frontend:3000/;
+        include    proxy_params;
+    }
+
+    # Proxy for backend
+    location /authorization {
+        proxy_pass http://sw360:8080/authorization;
+        include    proxy_params;
+    }
+    location /resource {
+        proxy_pass http://sw360:8080/resource;
+        include    proxy_params;
+    }
+
+    # Proxy for KeyCloak
+    location /kc {
+        proxy_pass http://keycloak:8533/kc;
+        include    proxy_params;
+    }
+}
