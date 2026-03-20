@@ -156,7 +156,14 @@ function AddProjects(): JSX.Element {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
         try {
-            const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)
+            // Ensure we send the latest input value even if state update hasn't re-rendered yet.
+            const clearingTeamInput = document.getElementById('addProjects.clearingTeam') as HTMLInputElement | null
+            const clearingTeamValue = clearingTeamInput?.value?.trim()
+            const payloadToCreate = {
+                ...projectPayload,
+                clearingTeam: clearingTeamValue ?? projectPayload.clearingTeam,
+            }
+            const response = await ApiUtils.POST(createUrl, payloadToCreate, session.user.access_token)
 
             if (response.status == StatusCodes.CREATED) {
                 const data = (await response.json()) as Project

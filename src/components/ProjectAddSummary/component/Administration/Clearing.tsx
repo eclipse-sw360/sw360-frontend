@@ -74,25 +74,26 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         >
                             {t('Clearing Team')}
                         </label>
-                        <select
-                            className='form-select'
+                        <input
+                            type='text'
+                            className='form-control'
                             id='addProjects.clearingTeam'
                             aria-label='Clearing Team'
                             name='clearingTeam'
-                            value={projectPayload.clearingTeam ?? 'UNKNOWN'}
+                            value={projectPayload.clearingTeam ?? ''}
                             onChange={updateInputField}
-                        >
-                            {unknownClearingTeamEnabled && <option value={'Unknown'}>{t('Unknown')}</option>}
-                            {projectClearingTeams &&
-                                projectClearingTeams.map((team) => (
-                                    <option
-                                        value={team}
-                                        key={team}
-                                    >
-                                        {team}
-                                    </option>
-                                ))}
-                        </select>
+                            placeholder={t('Clearing Team')}
+                            list='clearing-teams'
+                        />
+                        <datalist id='clearing-teams'>
+                            {unknownClearingTeamEnabled && <option value='Unknown' />}
+                            {projectClearingTeams?.map((team) => (
+                                <option
+                                    value={team}
+                                    key={team}
+                                />
+                            ))}
+                        </datalist>
                     </div>
                     <div className='col-lg-4'>
                         <label

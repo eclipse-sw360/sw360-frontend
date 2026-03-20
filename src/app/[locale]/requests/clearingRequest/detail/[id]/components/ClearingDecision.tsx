@@ -74,10 +74,15 @@ export default function ClearingDecision({ data }: Readonly<Props>): ReactNode |
                 <tr>
                     <td>{t('Clearing Team')}:</td>
                     <td>
-                        {data?.clearingTeam !== undefined && data?._embedded?.clearingTeam?.fullName !== undefined ? (
-                            <Link href={`mailto:${data._embedded.clearingTeam.email}`}>
-                                {data._embedded.clearingTeam.fullName}
-                            </Link>
+                        {data?.clearingTeam !== undefined ? (
+                            data?._embedded?.clearingTeam?.fullName !== undefined &&
+                            data?._embedded?.clearingTeam?.email !== undefined ? (
+                                <Link href={`mailto:${data._embedded.clearingTeam.email}`}>
+                                    {data._embedded.clearingTeam.fullName}
+                                </Link>
+                            ) : (
+                                data.clearingTeam
+                            )
                         ) : (
                             ''
                         )}

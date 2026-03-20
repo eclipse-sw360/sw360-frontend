@@ -9,6 +9,13 @@
 
 interface AdministrationDataType {
     clearingState?: string
+    clearingTeam?: string
+    _embedded?: {
+        clearingTeam?: {
+            email?: string
+            fullName?: string
+        }
+    }
     clearingDetails?: string
     preevaluationDeadline?: string
     clearingSummary?: string
@@ -23,11 +30,6 @@ interface AdministrationDataType {
     deliveryStart?: string
     phaseOutSince?: string
     licenseInfoHeaderText?: string
-    _embedded?: {
-        clearingTeam?: {
-            email: string
-        }
-    }
 }
 
 export default AdministrationDataType

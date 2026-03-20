@@ -200,6 +200,7 @@ function EditProject({
         ownerGroup: '',
         ownerCountry: '',
         clearingState: '',
+        clearingTeam: '',
         businessUnit: '',
         preevaluationDeadline: '',
         clearingSummary: '',
@@ -482,6 +483,7 @@ function EditProject({
                     ownerGroup: project.ownerGroup ?? '',
                     ownerCountry: project.ownerCountry ?? '',
                     clearingState: project.clearingState ?? 'OPEN',
+                    clearingTeam: project.clearingTeam ?? '',
                     businessUnit: project.businessUnit ?? '',
                     preevaluationDeadline: project.preevaluationDeadline ?? '',
                     clearingSummary: project.clearingSummary ?? '',
@@ -591,12 +593,19 @@ function EditProject({
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             const dataToUpdate = payload ?? projectPayload
+            // Ensure we send the latest input value even if state update hasn't re-rendered yet.
+            const clearingTeamInput = document.getElementById('addProjects.clearingTeam') as HTMLInputElement | null
+            const clearingTeamValue = clearingTeamInput?.value?.trim()
+            const payloadToUpdate = {
+                ...dataToUpdate,
+                clearingTeam: clearingTeamValue ?? dataToUpdate.clearingTeam,
+            }
             const requests = [
                 ApiUtils.PATCH(
                     isDependencyNetworkFeatureEnabled === true
                         ? `projects/network/${projectId}`
                         : `projects/${projectId}`,
-                    dataToUpdate,
+                    payloadToUpdate,
                     session.data.user.access_token,
                 ),
             ]
@@ -665,13 +674,13 @@ function EditProject({
             }
             if (allOk) {
                 MessageService.success(
-                    t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
+                    t('Project') + ` ${payloadToUpdate.name} (${payloadToUpdate.version}) ` + t('updated successfully'),
                 )
                 router.push(`/projects/detail/${projectId}`)
             } else {
                 MessageService.error(
                     t('There are some errors while updating project') +
-                        ` ${dataToUpdate.name} (${dataToUpdate.version})!`,
+                        ` ${payloadToUpdate.name} (${payloadToUpdate.version})!`,
                 )
             }
         } catch (error: unknown) {

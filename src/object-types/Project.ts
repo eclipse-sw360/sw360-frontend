@@ -29,6 +29,7 @@ export interface Project {
     }
     businessUnit?: string
     clearingState?: string
+    clearingTeam?: string
     clearingSummary?: string
     clearingRequestId?: string
     contributors?: string[]

@@ -33,6 +33,35 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
     const [toggleLicenseInfoHeader, setToggleLicenseInfoHeader] = useState(false)
     const { status } = useSession()
 
+    // summaryAdministration payload shape has changed in backend (clearingTeam was user/email -> plain string).
+    // Keep UI resilient by checking multiple possible field paths.
+    const clearingTeamValue = (() => {
+        const anyData = data as unknown as {
+            clearingTeam?: string
+            clearingTeamName?: string
+            clearingTeamEmail?: string
+            _embedded?: {
+                clearingTeam?: unknown
+            }
+        }
+
+        const embedded = anyData._embedded?.clearingTeam
+        if (typeof embedded === 'string') return embedded
+        if (embedded && typeof embedded === 'object') {
+            const e = embedded as Record<string, unknown>
+            return (
+                (anyData.clearingTeam as string | undefined) ??
+                (anyData.clearingTeamName as string | undefined) ??
+                (anyData.clearingTeamEmail as string | undefined) ??
+                (e.fullName as string | undefined) ??
+                (e.name as string | undefined) ??
+                (e.email as string | undefined)
+            )
+        }
+
+        return anyData.clearingTeam ?? anyData.clearingTeamName ?? anyData.clearingTeamEmail ?? ''
+    })()
+
     useEffect(() => {
         if (status === 'unauthenticated') {
             signOut()
@@ -71,7 +100,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                     </tr>
                     <tr>
                         <td>{t('Clearing Team')}:</td>
-                        <td>{data._embedded?.clearingTeam?.email ?? ''}</td>
+                        <td>{clearingTeamValue}</td>
                     </tr>
                     <tr>
                         <td>{t('Deadline for pre-evaluation')}:</td>
