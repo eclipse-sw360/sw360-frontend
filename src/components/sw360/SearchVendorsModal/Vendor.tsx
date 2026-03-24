@@ -11,4 +11,9 @@ export interface Vendor {
     fullName: string
     shortName: string
     url: string
+    _links?: {
+        self: {
+            href: string
+        }
+    }
 }
