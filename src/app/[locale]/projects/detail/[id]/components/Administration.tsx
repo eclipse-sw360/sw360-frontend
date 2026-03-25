@@ -71,7 +71,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                     </tr>
                     <tr>
                         <td>{t('Clearing Team')}:</td>
-                        <td>{data._embedded?.clearingTeam?.email ?? ''}</td>
+                        <td>{data?.clearingTeam ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Deadline for pre-evaluation')}:</td>
