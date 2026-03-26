@@ -77,7 +77,7 @@ export default function ViewClearingRequestModal({
                     notFound()
                 }
             } catch (e) {
-                console.error(e)
+                ApiUtils.reportError(e)
             }
         })()
         return () => controller.abort(signal)
