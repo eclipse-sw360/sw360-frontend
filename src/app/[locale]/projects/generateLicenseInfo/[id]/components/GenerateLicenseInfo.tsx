@@ -1025,29 +1025,41 @@ function GenerateLicenseInfo({
                                 <Tab.Content className='mt-3'>
                                     <Tab.Pane eventKey='show_all'>
                                         <div className='mb-3'>
-                                            {table ? (
+                                            {showProcessing ? (
+                                                <div className='col-12 mt-1 text-center'>
+                                                    <Spinner className='spinner' />
+                                                </div>
+                                            ) : !showProcessing &&
+                                              memoizedAttachmentUsages !== undefined &&
+                                              data.length === 0 ? (
+                                                <div className='col-12 mt-1 text-center'>
+                                                    <p>{t('No license files available')}</p>
+                                                </div>
+                                            ) : (
                                                 <SW360Table
                                                     table={table}
                                                     showProcessing={showProcessing}
                                                 />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
                                             )}
                                         </div>
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='only_approved'>
                                         <div className='mb-3'>
-                                            {table ? (
+                                            {showProcessing ? (
+                                                <div className='col-12 mt-1 text-center'>
+                                                    <Spinner className='spinner' />
+                                                </div>
+                                            ) : !showProcessing &&
+                                              memoizedAttachmentUsages !== undefined &&
+                                              data.length === 0 ? (
+                                                <div className='col-12 mt-1 text-center'>
+                                                    <p>{t('No license files available')}</p>
+                                                </div>
+                                            ) : (
                                                 <SW360Table
                                                     table={table}
                                                     showProcessing={showProcessing}
                                                 />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
                                             )}
                                         </div>
                                     </Tab.Pane>

@@ -698,15 +698,19 @@ function GenerateSourceCodeBundle({
                             )}
                         </div>
                         <div className='mb-3'>
-                            {table ? (
+                            {showProcessing ? (
+                                <div className='col-12 mt-1 text-center'>
+                                    <Spinner className='spinner' />
+                                </div>
+                            ) : !showProcessing && memoizedAttachmentUsages !== undefined && data.length === 0 ? (
+                                <div className='col-12 mt-1 text-center'>
+                                    <p>{t('No Records Found')}</p>
+                                </div>
+                            ) : (
                                 <SW360Table
                                     table={table}
                                     showProcessing={showProcessing}
                                 />
-                            ) : (
-                                <div className='col-12 mt-1 text-center'>
-                                    <Spinner className='spinner' />
-                                </div>
                             )}
                         </div>
                     </div>
