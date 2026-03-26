@@ -119,10 +119,21 @@ export default function Attachments({
                 overWritten: false,
             })),
 
-            // Condition 3 (NEW): Data from sourceAttachments where
+            // Condition 3: Data from sourceAttachments where
             // attachmentType !== 'SOURCE' AND NOT in Target
             ...sourceOtherAttachmentFileIds
                 .filter((id) => !targetOtherAttachmentSet.has(id))
+                .map((id) => ({
+                    value: id,
+                    presentInSource: true,
+                    presentInTarget: false,
+                    overWritten: false,
+                })),
+
+            // Condition 4: Data from sourceAttachments where
+            // attachmentType is 'SOURCE' but NOT in Target
+            ...sourceSourceAttachmentFileIds
+                .filter((id) => !targetSourceAttachmentSet.has(id))
                 .map((id) => ({
                     value: id,
                     presentInSource: true,
