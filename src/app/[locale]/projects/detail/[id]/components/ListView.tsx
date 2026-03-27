@@ -322,7 +322,7 @@ export default function ListView({
                         setLicenseFiles(files)
                     }
                 } catch (error) {
-                    console.error('Error fetching license files:', error)
+                    ApiUtils.reportError(error)
                 }
             }
         },
