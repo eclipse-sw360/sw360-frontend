@@ -66,6 +66,7 @@ export default interface ReleaseDetail {
     spdxId?: string
     vendorId?: string
     vendor?: Vendor
+    cotsDetails?: COTSDetails
     _links: {
         'sw360:component': {
             href: string
