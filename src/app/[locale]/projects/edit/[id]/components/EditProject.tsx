@@ -498,6 +498,8 @@ function EditProject({
                     phaseOutSince: project.phaseOutSince ?? '',
                     licenseInfoHeaderText: project.licenseInfoHeaderText ?? '',
                     securityResponsibles: project.securityResponsibles ?? [],
+                    enableSvm: project.enableSvm ?? false,
+                    enableVulnerabilitiesDisplay: project.enableVulnerabilitiesDisplay ?? false,
                     contributors: (project._embedded?.['sw360:contributors'] ?? []).map((user) => user.email),
                     moderators: (project._embedded?.['sw360:moderators'] ?? []).map((user) => user.email),
                     projectOwner: project.projectOwner ?? '',
