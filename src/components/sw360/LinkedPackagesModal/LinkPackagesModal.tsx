@@ -257,7 +257,13 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
     const payloadSetter = () => {
         setPayload({
             ...payload,
-            linkedPackages: Object.fromEntries(linkPackages),
+            ...(payload.linkedPackages !== undefined
+                ? {
+                      linkedPackages: Object.fromEntries(linkPackages),
+                  }
+                : {
+                      packageIds: Object.fromEntries(linkPackages),
+                  }),
         })
     }
 
@@ -267,15 +273,14 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
         if (linkPackages.has(packageId)) {
             m.delete(packageId)
         } else {
+            const existingEntry = (payload.linkedPackages ?? payload.packageIds ?? {})[packageId]
             m.set(packageId, {
-                ...{
-                    packageId: packageId,
-                    name: pkg.name ?? '',
-                    version: pkg.version ?? '',
-                    licenseIds: pkg.licenseIds ?? [],
-                    packageManager: pkg.packageManager ?? '',
-                },
-                comment: '',
+                packageId: packageId,
+                name: pkg.name ?? '',
+                version: pkg.version ?? '',
+                licenseIds: pkg.licenseIds ?? [],
+                packageManager: pkg.packageManager ?? '',
+                comment: existingEntry?.comment ?? '',
             })
         }
         setLinkPackages(m)
