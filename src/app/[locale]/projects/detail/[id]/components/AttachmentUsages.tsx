@@ -626,7 +626,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                                     <input
                                                         type='checkbox'
                                                         className='form-check-input'
-                                                        disabled={!isLicenseInfoEnabled(attachmentType)}
+                                                        disabled={!isLicenseInfoEnabled(attachmentType ?? '')}
                                                         checked={
                                                             saveUsagesPayload.selected.indexOf(
                                                                 `${
@@ -696,7 +696,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                             <input
                                                 type='checkbox'
                                                 className='form-check-input'
-                                                disabled={!isSourceCodeBundleEnabled(attachmentType)}
+                                                disabled={!isSourceCodeBundleEnabled(attachmentType ?? '')}
                                                 checked={
                                                     saveUsagesPayload.selected.indexOf(
                                                         `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${attachmentContentId}`,
@@ -747,7 +747,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                             <input
                                                 type='checkbox'
                                                 className='form-check-input'
-                                                disabled={!isSourceCodeBundleEnabled(attachmentType)}
+                                                disabled={!isSourceCodeBundleEnabled(attachmentType ?? '')}
                                                 checked={
                                                     saveUsagesPayload.selected.indexOf(
                                                         `${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${attachmentContentId}`,

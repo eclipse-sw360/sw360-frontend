@@ -134,12 +134,6 @@ function AddAdditionalRoles({
         }
     }
 
-    const defaultValue = () => {
-        return documentType === DocumentTypes.COMPONENT || documentType === DocumentTypes.RELEASE
-            ? 'Committer'
-            : 'Stakeholder'
-    }
-
     return (
         <>
             <DeleteItemWarning
@@ -167,14 +161,12 @@ function AddAdditionalRoles({
                                     name='key'
                                     value={elem.key}
                                     aria-label={t('Additional Role')}
-                                    defaultValue={defaultValue()}
                                     onChange={(e) => handleInputChange(e, j)}
                                 >
                                     {documentType === DocumentTypes.COMPONENT
                                         ? componentAdditionalRoles.map((value, key) => (
                                               <option
                                                   value={value}
-                                                  selected={elem.key === value}
                                                   key={key}
                                               >
                                                   {value}
@@ -193,7 +185,6 @@ function AddAdditionalRoles({
                                           : projectAdditionalRoles.map((value, key) => (
                                                 <option
                                                     value={value}
-                                                    selected={elem.key === value}
                                                     key={key}
                                                 >
                                                     {value}
