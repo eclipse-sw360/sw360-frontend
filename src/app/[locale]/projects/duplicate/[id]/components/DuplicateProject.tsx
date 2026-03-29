@@ -312,6 +312,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     moderators: (project._embedded?.['sw360:moderators'] ?? []).map((user) => user.email),
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
+                    projectManager: project._embedded?.projectManager?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
                     linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
                         (acc, proj) => {
