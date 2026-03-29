@@ -22,7 +22,6 @@ export interface PaginationMeta {
 
 export interface ColumnMeta {
     width?: string
-    headerClassName?: string
     cellClassName?: string
 }
 

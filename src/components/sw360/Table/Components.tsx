@@ -311,7 +311,6 @@ export function SW360Table<K>({
                                         key={header.id}
                                         colSpan={header.colSpan}
                                         rowSpan={rowSpan}
-                                        className={meta?.headerClassName}
                                         style={{
                                             width: meta?.width,
                                         }}
