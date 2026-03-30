@@ -15,10 +15,11 @@ const isDev = process.env.NODE_ENV === 'development'
 
 const csp = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline';
+  script-src 'self'${isDev ? " 'unsafe-eval' 'unsafe-inline'" : ''};
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https:;
   font-src 'self' data:;
+  object-src 'none';
   connect-src 'self' https:${isDev ? ' http://localhost:8080' : ''};
 `
     .replace(/\s{2,}/g, ' ')
