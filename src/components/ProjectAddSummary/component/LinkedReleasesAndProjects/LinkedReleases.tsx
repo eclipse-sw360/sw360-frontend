@@ -15,8 +15,8 @@ import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
-import LinkedReleasesModal from '@/components/sw360/LinkedReleasesModal/LinkedReleasesModal'
-import { LinkedReleaseData, ProjectPayload } from '@/object-types'
+import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
+import { LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -111,6 +111,34 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
                     linkedReleases: remainingReleases,
                 }
             })
+        },
+        [
+            setProjectPayload,
+        ],
+    )
+
+    const handleSelectReleases = useCallback(
+        (selectedReleases: ReleaseDetail[]) => {
+            const newLinkedReleases: Record<string, LinkedReleaseData> = {}
+            selectedReleases.forEach((release) => {
+                if (release.id) {
+                    newLinkedReleases[release.id] = {
+                        name: release.name ?? '',
+                        version: release.version ?? '',
+                        mainlineState: release.mainlineState ?? '',
+                        releaseRelation: 'UNKNOWN',
+                        comment: '',
+                    }
+                }
+            })
+
+            setProjectPayload((prev) => ({
+                ...prev,
+                linkedReleases: {
+                    ...prev.linkedReleases,
+                    ...newLinkedReleases,
+                },
+            }))
         },
         [
             setProjectPayload,
@@ -247,11 +275,10 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
 
     return (
         <>
-            <LinkedReleasesModal
-                projectPayload={projectPayload}
-                setProjectPayload={setProjectPayload}
+            <SearchReleasesModal
                 show={showLinkedReleasesModal}
                 setShow={setShowLinkedReleasesModal}
+                onSelect={handleSelectReleases}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>

@@ -16,10 +16,10 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
-import { ErrorDetails, Package } from '@/object-types'
+import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
+import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import AddMainLicenseModal from './AddMainLicenseModal'
-import AddReleaseModal from './AddReleaseModal'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -102,6 +102,17 @@ export default function CreateOrEditPackage({
         return ''
     }
 
+    const handleSelectRelease = (selectedReleases: ReleaseDetail[]) => {
+        if (selectedReleases.length > 0) {
+            const release = selectedReleases[0]
+            setPackagePayload((prev) => ({
+                ...prev,
+                releaseId: release.id ?? '',
+            }))
+            setReleaseNameVersion(`${release.name} (${release.version})`)
+        }
+    }
+
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setPackagePayload((prev) => ({
             ...prev,
@@ -141,11 +152,12 @@ export default function CreateOrEditPackage({
                 setModalMetaData={setDeletePackageModalMetaData}
                 isEditPage={isEditPage}
             />
-            <AddReleaseModal
-                setPackagePayload={setPackagePayload}
+            <SearchReleasesModal
                 show={showLinkedReleasesModal}
                 setShow={setShowLinkedReleasesModal}
-                setReleaseNameVersion={setReleaseNameVersion}
+                onSelect={handleSelectRelease}
+                multiSelect={false}
+                showExactMatch={true}
             />
             <AddMainLicenseModal
                 showMainLicenseModal={showMainLicenseModal}
