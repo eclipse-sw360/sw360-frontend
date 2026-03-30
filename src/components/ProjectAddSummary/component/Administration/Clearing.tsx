@@ -10,10 +10,11 @@
 'use client'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import type { JSX } from 'react'
+import { type JSX, useEffect } from 'react'
 
 import { useConfigValue } from '@/contexts'
 import { ProjectPayload, UIConfigKeys } from '@/object-types'
+import { CommonUtils } from '@/utils/index'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -27,6 +28,25 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
     // Configs from backend
     const projectClearingTeams = useConfigValue(UIConfigKeys.UI_CLEARING_TEAMS) as string[] | null
     const unknownClearingTeamEnabled = useConfigValue(UIConfigKeys.UI_CLEARING_TEAM_UNKNOWN_ENABLED) as boolean | null
+
+    useEffect(() => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(projectPayload.clearingTeam)) {
+            if (!CommonUtils.isNullEmptyOrUndefinedArray(projectClearingTeams)) {
+                setProjectPayload({
+                    ...projectPayload,
+                    clearingTeam: projectClearingTeams[1],
+                })
+            } else if (unknownClearingTeamEnabled) {
+                setProjectPayload({
+                    ...projectPayload,
+                    clearingTeam: 'UNKNOWN',
+                })
+            }
+        }
+    }, [
+        projectClearingTeams,
+        unknownClearingTeamEnabled,
+    ])
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -82,7 +102,7 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                             value={projectPayload.clearingTeam ?? 'UNKNOWN'}
                             onChange={updateInputField}
                         >
-                            {unknownClearingTeamEnabled && <option value={'Unknown'}>{t('Unknown')}</option>}
+                            {unknownClearingTeamEnabled && <option value={'UNKNOWN'}>{t('Unknown')}</option>}
                             {projectClearingTeams &&
                                 projectClearingTeams.map((team) => (
                                     <option

@@ -251,7 +251,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
     }
 
     const filterAttachmentByType = (attachments: Array<Attachment>, types: Array<string>) => {
-        return attachments.filter((attachment) => types.includes(attachment.attachmentType))
+        return attachments.filter((attachment) => types.includes(attachment.attachmentType ?? ''))
     }
 
     useEffect(() => {
