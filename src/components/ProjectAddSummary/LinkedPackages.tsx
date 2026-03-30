@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { SW360Table } from '@/components/sw360'
@@ -20,7 +20,6 @@ import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackag
 import { LinkedPackageData } from '@/object-types'
 
 interface HasLinkedPackages {
-    linkedPackages?: Record<string, LinkedPackageData>
     packageIds?: Record<string, LinkedPackageData>
 }
 
@@ -40,34 +39,58 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
         ][]
     >([])
 
-    const handleComments = (packageId: string, updatedComment: string) => {
-        const _newLinkedPackageData: {
-            [key: string]: LinkedPackageData
-        } = {}
+    const handleComments = useCallback(
+        (packageId: string, updatedComment: string) => {
+            setPayload((prev) => {
+                const _newLinkedPackageData: {
+                    [key: string]: LinkedPackageData
+                } = {}
 
-        for (const [pid, p] of Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})) {
-            if (pid === packageId) {
-                _newLinkedPackageData[pid] = {
-                    ...p,
-                    comment: updatedComment,
+                for (const [pid, p] of Object.entries(prev.packageIds ?? {})) {
+                    if (pid === packageId) {
+                        _newLinkedPackageData[pid] = {
+                            ...p,
+                            comment: updatedComment,
+                        }
+                    } else {
+                        _newLinkedPackageData[pid] = {
+                            ...p,
+                        }
+                    }
                 }
-            } else {
-                _newLinkedPackageData[pid] = {
-                    ...p,
+                return {
+                    ...prev,
+                    packageIds: _newLinkedPackageData,
                 }
-            }
-        }
-        setPayload({
-            ...payload,
-            ...(payload.linkedPackages !== undefined
-                ? {
-                      linkedPackages: _newLinkedPackageData,
-                  }
-                : {
-                      packageIds: _newLinkedPackageData,
-                  }),
-        })
-    }
+            })
+        },
+        [
+            setPayload,
+        ],
+    )
+
+    const handleDeletePackage = useCallback(
+        (packageId: string) => {
+            setPayload((prev) => {
+                const _newLinkedPackageData: {
+                    [key: string]: LinkedPackageData
+                } = {}
+
+                for (const [pid, p] of Object.entries(prev.packageIds ?? {})) {
+                    if (pid !== packageId) {
+                        _newLinkedPackageData[pid] = p
+                    }
+                }
+                return {
+                    ...prev,
+                    packageIds: _newLinkedPackageData,
+                }
+            })
+        },
+        [
+            setPayload,
+        ],
+    )
 
     const columns = useMemo<
         ColumnDef<
@@ -164,34 +187,13 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
         ],
         [
             t,
-            payload,
+            handleComments,
+            handleDeletePackage,
         ],
     )
 
-    const handleDeletePackage = (packageId: string) => {
-        const _newLinkedPackageData: {
-            [key: string]: LinkedPackageData
-        } = {}
-
-        for (const [pid, p] of Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})) {
-            if (pid !== packageId) {
-                _newLinkedPackageData[pid] = p
-            }
-        }
-        setPayload({
-            ...payload,
-            ...(payload.linkedPackages !== undefined
-                ? {
-                      linkedPackages: _newLinkedPackageData,
-                  }
-                : {
-                      packageIds: _newLinkedPackageData,
-                  }),
-        })
-    }
-
     useEffect(() => {
-        const data = Object.entries(payload.linkedPackages ?? {})
+        const data = Object.entries(payload.packageIds ?? {})
         setTableData(data)
     }, [
         payload,
