@@ -471,6 +471,7 @@ function EditProject({
                     tag: project.tag ?? '',
                     description: project.description ?? '',
                     domain: project.domain ?? '',
+                    clearingTeam: project.clearingTeam ?? '',
                     vendorId: project.vendorId ?? '',
                     modifiedOn: project.modifiedOn ?? '',
                     modifiedBy: project.modifiedBy ?? '',

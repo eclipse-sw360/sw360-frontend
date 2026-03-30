@@ -15,14 +15,14 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { AddAdditionalRoles, AddKeyValue, SearchUsersModal, SideBar } from 'next-sw360'
+import { AddAdditionalRoles, AddKeyValue, SearchUsersModal } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
+import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
 import { useConfigValue } from '@/contexts'
 import {
-    CommonTabIds,
     Component,
     ComponentPayload,
     DocumentTypes,
@@ -38,7 +38,6 @@ function AddComponent(): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
     const { data: session, status } = useSession()
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
     const [vendor, setVendor] = useState<Vendor>({
@@ -84,13 +83,6 @@ function AddComponent(): ReactNode {
     }, [
         status,
     ])
-
-    const tabList = [
-        {
-            id: CommonTabIds.SUMMARY,
-            name: 'Summary',
-        },
-    ]
 
     // Configs from backend
     const componentExternalIdSuggestions =
@@ -144,25 +136,25 @@ function AddComponent(): ReactNode {
                 }}
             >
                 <div className='container page-content'>
-                    <div className='row'>
-                        <div className='col-2 sidebar'>
-                            <SideBar
-                                selectedTab={selectedTab}
-                                setSelectedTab={setSelectedTab}
-                                tabList={tabList}
-                            />
-                        </div>
-
-                        <div className='col'>
-                            <div
-                                className='row'
-                                style={{
-                                    marginBottom: '20px',
-                                }}
+                    <Tab.Container defaultActiveKey='summary'>
+                        <Row>
+                            <Col
+                                sm={2}
+                                className='me-3'
                             >
-                                <div className='col-auto'>
+                                <ListGroup>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='summary'
+                                    >
+                                        <div className='my-2'>{t('Summary')}</div>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Col>
+                            <Col className='me-3'>
+                                <Row className='mb-3'>
                                     <div
-                                        className='btn-toolbar'
+                                        className='px-0 btn-toolbar'
                                         role='toolbar'
                                     >
                                         <div
@@ -190,48 +182,52 @@ function AddComponent(): ReactNode {
                                             </button>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className='col'>
-                                <GeneralInfoComponent
-                                    vendor={vendor}
-                                    setVendor={setVendor}
-                                    componentPayload={componentPayload}
-                                    setComponentPayload={setComponentPayload}
-                                />
-                                <RolesInformation
-                                    componentOwner={componentOwner}
-                                    setComponentOwner={setComponentOwner}
-                                    moderators={moderators}
-                                    setModerators={setModerators}
-                                    componentPayload={componentPayload}
-                                    setComponentPayload={setComponentPayload}
-                                />
-                                <div className='row mb-4'>
-                                    <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
-                                </div>
-                                <div className='row mb-4'>
-                                    <AddKeyValue
-                                        header={t('External Ids')}
-                                        keyName={'external id'}
-                                        setData={setExternalIds}
-                                        data={externalIds}
-                                        setObject={setDataExternalIds}
-                                        keySuggestions={componentExternalIdSuggestions}
-                                    />
-                                </div>
-                                <div className='row mb-4'>
-                                    <AddKeyValue
-                                        header={t('Additional Data')}
-                                        keyName={'additional data'}
-                                        setData={setAddtionalData}
-                                        data={addtionalData}
-                                        setObject={setDataAddtionalData}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                </Row>
+                                <Row>
+                                    <Tab.Content>
+                                        <Tab.Pane eventKey='summary'>
+                                            <GeneralInfoComponent
+                                                vendor={vendor}
+                                                setVendor={setVendor}
+                                                componentPayload={componentPayload}
+                                                setComponentPayload={setComponentPayload}
+                                            />
+                                            <RolesInformation
+                                                componentOwner={componentOwner}
+                                                setComponentOwner={setComponentOwner}
+                                                moderators={moderators}
+                                                setModerators={setModerators}
+                                                componentPayload={componentPayload}
+                                                setComponentPayload={setComponentPayload}
+                                            />
+                                            <div className='row mb-4'>
+                                                <AddAdditionalRoles documentType={DocumentTypes.COMPONENT} />
+                                            </div>
+                                            <div className='row mb-4'>
+                                                <AddKeyValue
+                                                    header={t('External Ids')}
+                                                    keyName={'external id'}
+                                                    setData={setExternalIds}
+                                                    data={externalIds}
+                                                    setObject={setDataExternalIds}
+                                                    keySuggestions={componentExternalIdSuggestions}
+                                                />
+                                            </div>
+                                            <div className='row mb-4'>
+                                                <AddKeyValue
+                                                    header={t('Additional Data')}
+                                                    keyName={'additional data'}
+                                                    setData={setAddtionalData}
+                                                    data={addtionalData}
+                                                    setObject={setDataAddtionalData}
+                                                />
+                                            </div>
+                                        </Tab.Pane>
+                                    </Tab.Content>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Tab.Container>
                 </div>
             </form>
         </>

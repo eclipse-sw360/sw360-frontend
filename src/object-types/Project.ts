@@ -24,6 +24,7 @@ export interface Project {
     id?: string
     name: string
     considerReleasesFromExternalList?: boolean
+    clearingTeam?: string
     additionalData?: {
         [k: string]: string
     }

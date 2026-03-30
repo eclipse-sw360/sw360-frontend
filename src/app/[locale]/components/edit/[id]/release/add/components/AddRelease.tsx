@@ -12,11 +12,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useRouter } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { PageButtonHeader, SideBar } from 'next-sw360'
+import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
+import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import {
@@ -32,7 +33,6 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import ReleaseAddSummary from './ReleaseAddSummary'
-import ReleaseAddTabs from './ReleaseAddTab'
 
 interface Props {
     componentId?: string
@@ -58,8 +58,6 @@ const cotsDetails: COTSDetails = {
 function AddRelease({ componentId }: Props): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
-    const [tabList, setTabList] = useState(ReleaseAddTabs.WITHOUT_COMMERCIAL_DETAILS)
 
     const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
@@ -104,6 +102,21 @@ function AddRelease({ componentId }: Props): ReactNode {
     }>({})
 
     const { status } = useSession()
+    const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
+    const params = useSearchParams()
+    const [withCotsDetails, setWithCotsDetails] = useState(false)
+
+    useEffect(() => {
+        const fragment = params.get('tab') ?? CommonTabIds.SUMMARY
+        setActiveKey(fragment)
+    }, [
+        params,
+    ])
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? CommonTabIds.SUMMARY)
+        router.push(`?tab=${key}`)
+    }
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -130,7 +143,7 @@ function AddRelease({ componentId }: Props): ReactNode {
                     name: component.name,
                 })
                 if (component.componentType === 'COTS') {
-                    setTabList(ReleaseAddTabs.WITH_COMMERCIAL_DETAILS)
+                    setWithCotsDetails(true)
                 }
             } catch (e) {
                 console.error(e)
@@ -172,67 +185,78 @@ function AddRelease({ componentId }: Props): ReactNode {
 
     return (
         <>
-            <div
-                className='container'
-                style={{
-                    maxWidth: '98vw',
-                    marginTop: '10px',
-                }}
-            >
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
-                        />
-                    </div>
-                    <div className='col'>
-                        <div
-                            className='row'
-                            style={{
-                                marginBottom: '20px',
-                            }}
+            <div className='container page-content'>
+                <Tab.Container
+                    activeKey={activeKey}
+                    onSelect={(k) => handleSelect(k)}
+                >
+                    <Row>
+                        <Col
+                            sm={2}
+                            className='me-3'
                         >
-                            <PageButtonHeader buttons={headerButtons}></PageButtonHeader>
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                        >
-                            <ReleaseAddSummary
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                                vendor={vendor}
-                                setVendor={setVendor}
-                                mainLicenses={mainLicenses}
-                                setMainLicenses={setMainLicenses}
-                                otherLicenses={otherLicenses}
-                                setOtherLicenses={setOtherLicenses}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
-                        >
-                            <LinkedReleases
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}
-                        >
-                            <AddCommercialDetails
-                                releasePayload={releasePayload}
-                                setReleasePayload={setReleasePayload}
-                                cotsResponsible={cotsResponsible}
-                                setCotsResponsible={setCotsResponsible}
-                            />
-                        </div>
-                    </div>
-                </div>
+                            <ListGroup>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.SUMMARY}
+                                >
+                                    <div className='my-2'>{t('Summary')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                >
+                                    <div className='my-2'>{t('Linked Releases')}</div>
+                                </ListGroup.Item>
+                                {withCotsDetails && (
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}
+                                    >
+                                        <div className='my-2'>{t('Commercial Details')}</div>
+                                    </ListGroup.Item>
+                                )}
+                            </ListGroup>
+                        </Col>
+                        <Col>
+                            <Row>
+                                <PageButtonHeader buttons={headerButtons}></PageButtonHeader>
+                            </Row>
+                            <Row>
+                                <Tab.Content>
+                                    <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
+                                        <ReleaseAddSummary
+                                            releasePayload={releasePayload}
+                                            setReleasePayload={setReleasePayload}
+                                            vendor={vendor}
+                                            setVendor={setVendor}
+                                            mainLicenses={mainLicenses}
+                                            setMainLicenses={setMainLicenses}
+                                            otherLicenses={otherLicenses}
+                                            setOtherLicenses={setOtherLicenses}
+                                        />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                        <LinkedReleases
+                                            releasePayload={releasePayload}
+                                            setReleasePayload={setReleasePayload}
+                                        />
+                                    </Tab.Pane>
+                                    {withCotsDetails && (
+                                        <Tab.Pane eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}>
+                                            <AddCommercialDetails
+                                                releasePayload={releasePayload}
+                                                setReleasePayload={setReleasePayload}
+                                                cotsResponsible={cotsResponsible}
+                                                setCotsResponsible={setCotsResponsible}
+                                            />
+                                        </Tab.Pane>
+                                    )}
+                                </Tab.Content>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Tab.Container>
             </div>
         </>
     )
