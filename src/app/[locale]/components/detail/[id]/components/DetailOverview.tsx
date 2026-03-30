@@ -13,23 +13,22 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
-import { PageButtonHeader, SideBar } from '@/components/sw360'
+import { PageButtonHeader } from '@/components/sw360'
 import {
     Changelogs,
     CommonTabIds,
     Component,
-    ComponentTabIds,
     DocumentTypes,
     Embedded,
     ErrorDetails,
@@ -53,7 +52,9 @@ interface Props {
 
 const DetailOverview = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
+    const searchParams = useSearchParams()
+    const router = useRouter()
     const [component, setComponent] = useState<Component | undefined>(undefined)
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
@@ -71,6 +72,18 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }, [
         session,
     ])
+
+    useEffect(() => {
+        const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
+        setActiveKey(fragment)
+    }, [
+        searchParams,
+    ])
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? CommonTabIds.SUMMARY)
+        router.push(`?tab=${key}`)
+    }
 
     const downloadBundle = async () => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -172,31 +185,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             ApiUtils.reportError(error)
         }
     }
-
-    const tabList = [
-        {
-            id: CommonTabIds.SUMMARY,
-            name: 'Summary',
-        },
-        {
-            id: ComponentTabIds.RELEASE_OVERVIEW,
-            name: 'Release Overview',
-        },
-        {
-            id: CommonTabIds.ATTACHMENTS,
-            name: 'Attachments',
-            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
-        },
-        {
-            id: CommonTabIds.VULNERABILITIES,
-            name: 'Vulnerabilities',
-        },
-        {
-            id: CommonTabIds.CHANGE_LOG,
-            name: 'Change Log',
-            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
-        },
-    ]
 
     const headerButtons = {
         Edit: {
@@ -331,27 +319,56 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 <Breadcrumb.Item active>{component.name}</Breadcrumb.Item>
             </Breadcrumb>
             <div className='container page-content'>
-                <div className='row'>
-                    <div className='col-2 sidebar'>
-                        <SideBar
-                            selectedTab={selectedTab}
-                            setSelectedTab={setSelectedTab}
-                            tabList={tabList}
-                            vulnerabilities={vulnerData}
-                        />
-                    </div>
-                    <div className='col'>
-                        <div
-                            className='row'
-                            style={{
-                                marginBottom: '20px',
-                            }}
+                <Tab.Container
+                    activeKey={activeKey}
+                    onSelect={(k) => handleSelect(k)}
+                    mountOnEnter={true}
+                    unmountOnExit={true}
+                >
+                    <Row>
+                        <Col
+                            sm={2}
+                            className='me-3'
                         >
+                            <ListGroup>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.SUMMARY}
+                                >
+                                    <div className='my-2'>{t('Summary')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.RELEASES}
+                                >
+                                    <div className='my-2'>{t('Release Overview')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.ATTACHMENTS}
+                                >
+                                    <div className='my-2'>{t('Attachments')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.VULNERABILITIES}
+                                >
+                                    <div className='my-2'>{t('Vulnerabilities')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.CHANGE_LOG}
+                                >
+                                    <div className='my-2'>{t('Change Log')}</div>
+                                </ListGroup.Item>
+                            </ListGroup>
+                        </Col>
+                        <Col className='me-3'>
                             <PageButtonHeader
                                 title={component.name}
                                 buttons={headerButtons}
                             >
-                                {selectedTab === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
+                                {activeKey === CommonTabIds.ATTACHMENTS && attachmentNumber > 0 && (
                                     <div
                                         className='list-group-companion'
                                         data-belong-to='tab-Attachments'
@@ -371,7 +388,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                         </div>
                                     </div>
                                 )}
-                                {selectedTab === CommonTabIds.CHANGE_LOG && (
+                                {activeKey === CommonTabIds.CHANGE_LOG && (
                                     <div
                                         className='nav nav-pills justify-content-center bg-light font-weight-bold'
                                         id='pills-tab'
@@ -404,75 +421,66 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                     </div>
                                 )}
                             </PageButtonHeader>
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                        >
-                            <Summary
-                                component={component}
-                                componentId={componentId}
-                            />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== ComponentTabIds.RELEASE_OVERVIEW ? true : false}
-                        >
-                            <ReleaseOverview componentId={componentId} />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
-                        >
-                            <Attachments
-                                documentId={componentId}
-                                documentType={DocumentTypes.COMPONENT}
-                            />
-                        </div>
-                        <div
-                            className='containers'
-                            hidden={selectedTab !== CommonTabIds.VULNERABILITIES ? true : false}
-                        >
-                            <ComponentVulnerabilities vulnerData={vulnerData} />
-                        </div>
-                        <div
-                            className='row'
-                            hidden={selectedTab !== CommonTabIds.CHANGE_LOG ? true : false}
-                        >
-                            <div className='col'>
-                                <div
-                                    className='row'
-                                    hidden={changelogTab !== 'list-change' ? true : false}
-                                >
-                                    <ChangeLogList
-                                        setChangeLogId={setChangeLogId}
-                                        documentId={componentId}
-                                        setChangesLogTab={setChangelogTab}
-                                        changeLogList={memoizedData}
-                                        pageableQueryParam={pageableQueryParam}
-                                        setPageableQueryParam={setPageableQueryParam}
-                                        showProcessing={showProcessing}
-                                        paginationMeta={paginationMeta}
-                                    />
-                                </div>
-                                <div
-                                    className='row'
-                                    hidden={changelogTab !== 'view-log' ? true : false}
-                                >
-                                    <ChangeLogDetail
-                                        changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
-                                    />
-                                    <div
-                                        id='cardScreen'
-                                        style={{
-                                            padding: '0px',
-                                        }}
-                                    ></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <Row>
+                                <Tab.Content>
+                                    <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
+                                        <Summary
+                                            component={component}
+                                            componentId={componentId}
+                                        />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey={CommonTabIds.RELEASES}>
+                                        <ReleaseOverview componentId={componentId} />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
+                                        <Attachments
+                                            documentId={componentId}
+                                            documentType={DocumentTypes.COMPONENT}
+                                        />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey={CommonTabIds.VULNERABILITIES}>
+                                        <ComponentVulnerabilities vulnerData={vulnerData} />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey={CommonTabIds.CHANGE_LOG}>
+                                        <div className='col'>
+                                            <div
+                                                className='row'
+                                                hidden={changelogTab !== 'list-change' ? true : false}
+                                            >
+                                                <ChangeLogList
+                                                    setChangeLogId={setChangeLogId}
+                                                    documentId={componentId}
+                                                    setChangesLogTab={setChangelogTab}
+                                                    changeLogList={memoizedData}
+                                                    pageableQueryParam={pageableQueryParam}
+                                                    setPageableQueryParam={setPageableQueryParam}
+                                                    showProcessing={showProcessing}
+                                                    paginationMeta={paginationMeta}
+                                                />
+                                            </div>
+                                            <div
+                                                className='row'
+                                                hidden={changelogTab !== 'view-log' ? true : false}
+                                            >
+                                                <ChangeLogDetail
+                                                    changeLogData={
+                                                        changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]
+                                                    }
+                                                />
+                                                <div
+                                                    id='cardScreen'
+                                                    style={{
+                                                        padding: '0px',
+                                                    }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    </Tab.Pane>
+                                </Tab.Content>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Tab.Container>
             </div>
         </>
     )

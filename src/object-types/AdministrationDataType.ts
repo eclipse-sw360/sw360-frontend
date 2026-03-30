@@ -23,11 +23,7 @@ interface AdministrationDataType {
     deliveryStart?: string
     phaseOutSince?: string
     licenseInfoHeaderText?: string
-    _embedded?: {
-        clearingTeam?: {
-            email: string
-        }
-    }
+    clearingTeam?: string
 }
 
 export default AdministrationDataType

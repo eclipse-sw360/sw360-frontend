@@ -11,7 +11,7 @@
 interface AttachmentRowData {
     attachmentContentId?: string
     filename: string
-    attachmentType: string
+    attachmentType?: string
     createdBy?: string
     createdTeam?: string
     createdComment?: string

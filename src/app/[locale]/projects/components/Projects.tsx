@@ -21,8 +21,9 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
-import { useConfigValue } from '@/contexts'
+import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import {
+    ConfigKeys,
     Embedded,
     ErrorDetails,
     PageableQueryParam,
@@ -31,6 +32,7 @@ import {
     UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
+import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
@@ -59,6 +61,7 @@ function Project(): JSX.Element {
     })
 
     // Configs from backend
+    const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT)
     const clearingRequestDisabledGroups = useConfigValue(
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
@@ -570,34 +573,39 @@ function Project(): JSX.Element {
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            if (withLinkedRelease === false) {
-                const response = await ApiUtils.GET('reports?module=PROJECTS', session.user.access_token)
-                if (response.status == StatusCodes.OK) {
-                    MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == StatusCodes.FORBIDDEN) {
+
+            const mailEnabled = mailRequestForProjectReport === 'true'
+            const url = withLinkedRelease ? 'reports?module=PROJECTS&withLinkedRelease=true' : 'reports?module=PROJECTS'
+
+            if (!mailEnabled) {
+                // If mail is not enabled, download the file immediately
+                const currentDate = new Date().toISOString().split('T')[0]
+                const fileName = `Projects-${currentDate}.xlsx`
+                const statusCode = await DownloadService.download(url, session, fileName)
+                if (statusCode === StatusCodes.OK) {
+                    MessageService.success(t('Spreadsheet download is successful'))
+                } else if (statusCode === StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
+                } else if (statusCode === StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                } else if (statusCode === StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             } else {
-                const response = await ApiUtils.GET(
-                    'reports?module=PROJECTS&withLinkedRelease=true',
-                    session.user.access_token,
-                )
-                if (response.status == StatusCodes.OK) {
+                // If mail is enabled, just send the request and show message
+                const response = await ApiUtils.GET(url, session.user.access_token)
+                if (response.status === StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
-                } else if (response.status == StatusCodes.FORBIDDEN) {
+                } else if (response.status === StatusCodes.FORBIDDEN) {
                     MessageService.warn(t('Access Denied'))
-                } else if (response.status == StatusCodes.INTERNAL_SERVER_ERROR) {
+                } else if (response.status === StatusCodes.INTERNAL_SERVER_ERROR) {
                     MessageService.error(t('Internal server error'))
-                } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                } else if (response.status === StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Unauthorized request'))
                 }
             }
         } catch (e) {
-            console.error(e)
+            ApiUtils.reportError(e)
         }
     }
 
