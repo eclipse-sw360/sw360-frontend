@@ -73,6 +73,7 @@ export default function LicenseDbObligationsModal({
                 await signOut()
             } else if (response.status === StatusCodes.CREATED) {
                 MessageService.success(t('Added obligations successfully'))
+                setRefresh((prev) => !prev)
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -132,9 +133,9 @@ export default function LicenseDbObligationsModal({
                         <input
                             className='form-check-input'
                             type='checkbox'
-                            value={row.original.node[0] ?? ''}
-                            checked={obligationIds.indexOf(row.original.node[0] ?? '') !== -1}
-                            onChange={() => handleCheckboxes(row.original.node[0] ?? '')}
+                            value={row.original.node[1].id ?? ''}
+                            checked={obligationIds.indexOf(row.original.node[1].id ?? '') !== -1}
+                            onChange={() => handleCheckboxes(row.original.node[1].id ?? '')}
                         />
                     </div>
                 ),
@@ -470,7 +471,7 @@ export default function LicenseDbObligationsModal({
                         await addObligationsToLicense()
                         handleCloseDialog()
                     }}
-                    disabled={loading}
+                    disabled={loading || obligationIds.length === 0}
                 >
                     {t('Add')}{' '}
                     {loading === true && (
