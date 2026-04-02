@@ -88,6 +88,7 @@ import Release from './Release'
 import ReleaseDetail from './ReleaseDetail'
 import ReleaseLink from './ReleaseLink'
 import ReleaseNode from './ReleaseNode'
+import ReleaseUsages from './ReleaseUsages'
 import Repository from './Repository'
 import RequestContent from './RequestContent'
 import Resources from './Resources'
@@ -210,6 +211,7 @@ export type {
     ReleaseDetail,
     ReleaseLink,
     ReleaseNode,
+    ReleaseUsages,
     Repository,
     RequestContent,
     RequestedAction,

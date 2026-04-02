@@ -160,10 +160,12 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                 />
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
-                                <BsGit
-                                    size={20}
-                                    className='btn-icon'
-                                />
+                                <Link href={`/components/releases/detail/${id}/merge`}>
+                                    <BsGit
+                                        size={20}
+                                        className='btn-icon'
+                                    />
+                                </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                 <span className='d-inline-block'>
