@@ -9,18 +9,21 @@
 
 import { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
+
 const withNextIntl = createNextIntlPlugin()
 const isDev = process.env.NODE_ENV === 'development'
 
 const csp = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline';
+  script-src 'self'${isDev ? " 'unsafe-eval' 'unsafe-inline'" : ''};
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https:;
   font-src 'self' data:;
+  object-src 'none';
   connect-src 'self' https:${isDev ? ' http://localhost:8080' : ''};
-`.replace(/\s{2,}/g, ' ').trim()
-
+`
+    .replace(/\s{2,}/g, ' ')
+    .trim()
 
 const config: NextConfig = {
     productionBrowserSourceMaps: true,
@@ -29,6 +32,7 @@ const config: NextConfig = {
     typescript: {
         ignoreBuildErrors: false,
     },
+    // biome-ignore-start lint: Next.js config requires this async method pattern for custom headers
     async headers() {
         return [
             {
@@ -46,9 +50,9 @@ const config: NextConfig = {
                         value: 'nosniff',
                     },
                     {
-                        // Enable XSS protection
+                        // Disable built-in XSS protection to avoid conflicts with modern browsers
                         key: 'X-XSS-Protection',
-                        value: '1; mode=block',
+                        value: '0',
                     },
                     {
                         // Control how much referrer information should be included
@@ -74,6 +78,7 @@ const config: NextConfig = {
             },
         ]
     },
+    // biome-ignore-end lint: Next.js config requires this async method pattern for custom headers
 }
 
 export default withNextIntl(config)
