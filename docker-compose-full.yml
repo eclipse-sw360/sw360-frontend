@@ -41,6 +41,8 @@ services:
     image: docker.io/library/couchdb:3.5-nouveau
     restart: unless-stopped
     container_name: couchdb_nouveau
+    volumes:
+      - ./config/couchdb/nouveau.yaml:/opt/nouveau/etc/nouveau.yaml
     ports:
       - "5987:5987"
       - "5988:5988"

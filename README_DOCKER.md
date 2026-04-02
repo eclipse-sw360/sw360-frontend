@@ -144,6 +144,7 @@ CouchDB settings are mounted as `.ini` files:
 * [sw360_log.ini](config/couchdb/sw360_log.ini) - Logging level
 * [nouveau.ini](config/couchdb/nouveau.ini) - Nouveau full-text search
   configuration (connects to the `couchdb-nouveau` sidecar)
+* [nouveau.yaml](config/couchdb/nouveau.yaml) - Fix for CouchDB h2c connections.
 
 ## Full Stack Setup
 
