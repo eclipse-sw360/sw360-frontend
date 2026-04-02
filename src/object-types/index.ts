@@ -118,6 +118,7 @@ import SPDXDocument from './spdx/SPDXDocument'
 import ToastData from './ToastData'
 import { ProcessedUiConfig, parseRawUiConfig, UiConfiguration } from './UiConfiguration'
 import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
+import UpdateCommentModalMetadata from './UpdateCommentModalMetadata'
 import { User, UserPayload } from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
@@ -231,6 +232,7 @@ export type {
     TypedEntity,
     UiConfiguration,
     UpdateClearingRequestPayload,
+    UpdateCommentModalMetadata,
     User,
     UserCredentialInfo,
     UserPayload,
