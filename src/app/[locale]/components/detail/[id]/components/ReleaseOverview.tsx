@@ -147,10 +147,12 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                 </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
-                                <BsClipboard
-                                    className='btn-icon'
-                                    size={20}
-                                />
+                                <Link href={`/components/editRelease/${id}?duplicate=true`}>
+                                    <BsClipboard
+                                        className='btn-icon'
+                                        size={20}
+                                    />
+                                </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Link Project')}</Tooltip>}>
                                 <BsLink45Deg

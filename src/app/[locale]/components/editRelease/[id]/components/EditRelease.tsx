@@ -44,6 +44,7 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
+import AddRelease from '../../../edit/[id]/release/add/components/AddRelease'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
 import EditLinkedPackages from './EditLinkedPackage'
@@ -59,6 +60,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
     const params = useSearchParams()
+    const isDuplicate = params.get('duplicate') === 'true'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
@@ -84,7 +86,9 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? CommonTabIds.SUMMARY)
-        router.push(`?tab=${key}`)
+        const current = new URLSearchParams(params.toString())
+        current.set('tab', key ?? CommonTabIds.SUMMARY)
+        router.push(`?${current.toString()}`)
     }
 
     const [SPDXPayload, setSPDXPayload] = useState<SPDX>({
@@ -108,6 +112,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     }
 
     useEffect(() => {
+        if (isDuplicate) return
         void (async () => {
             try {
                 const session = await getSession()
@@ -515,7 +520,14 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         setDeleteModalOpen(true)
     }
 
-    const headerButtons = {
+    const headerButtons: {
+        [key: string]: {
+            link: string
+            name: string
+            type: string
+            onClick?: () => void
+        }
+    } = {
         'Update Release': {
             link: '',
             type: 'primary',
@@ -538,6 +550,15 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const param = useParams()
     const locale = (param.locale as string) || 'en'
     const componentsPath = `/${locale}/components`
+
+    if (isDuplicate) {
+        return (
+            <AddRelease
+                duplicateFromReleaseId={releaseId}
+                cancelLink={`/components/releases/detail/${releaseId}`}
+            />
+        )
+    }
 
     return (
         release && (
