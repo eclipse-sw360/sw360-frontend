@@ -59,12 +59,13 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
     const params = useSearchParams()
+    const isDuplicate = params.get('duplicate') === 'true'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
-    const { status } = useSession()
+    const { data: session, status } = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
 
     useEffect(() => {
@@ -467,6 +468,38 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         }
     }
 
+    const createDuplicate = async () => {
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return signOut()
+        }
+        try {
+            const { linkedPackages, clearingState, clearingInformation, eccInformation, attachments, ...cleanPayload } =
+                releasePayload
+
+            const finalPayload: Release = {
+                ...cleanPayload,
+                attachments: null,
+            }
+            const response = await ApiUtils.POST('releases', finalPayload, session.user.access_token)
+
+            if (response.status === StatusCodes.CREATED) {
+                const newRelease = (await response.json()) as ReleaseDetail
+                const newReleaseId = CommonUtils.getIdFromUrl(newRelease._links.self.href)
+                MessageService.success(`Release ${newRelease.name} (${newRelease.version}) created successfully!`)
+                router.push('/components/releases/detail/' + newReleaseId)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                MessageService.warn(t('Release is Duplicate'))
+            } else {
+                const data = await response.json()
+                MessageService.error(data.message)
+            }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e)
+            MessageService.error(msg)
+        }
+    }
+
     const checkUpdateEligibility = async (releaseId: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -515,25 +548,46 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         setDeleteModalOpen(true)
     }
 
-    const headerButtons = {
-        'Update Release': {
-            link: '',
-            type: 'primary',
-            onClick: checkPreRequisite,
-            name: t('Update Release'),
-        },
-        'Delete Release': {
-            link: '',
-            type: 'danger',
-            onClick: handleDeleteRelease,
-            name: t('Delete Release'),
-        },
-        Cancel: {
-            link: '/components/releases/detail/' + releaseId,
-            type: 'secondary',
-            name: t('Cancel'),
-        },
-    }
+    const headerButtons: {
+        [key: string]: {
+            link: string
+            name: string
+            type: string
+            onClick?: () => void
+        }
+    } = isDuplicate
+        ? {
+              'Create Release': {
+                  link: '',
+                  type: 'primary',
+                  onClick: createDuplicate,
+                  name: t('Create Release'),
+              },
+              Cancel: {
+                  link: '/components/releases/detail/' + releaseId,
+                  type: 'secondary',
+                  name: t('Cancel'),
+              },
+          }
+        : {
+              'Update Release': {
+                  link: '',
+                  type: 'primary',
+                  onClick: checkPreRequisite,
+                  name: t('Update Release'),
+              },
+              'Delete Release': {
+                  link: '',
+                  type: 'danger',
+                  onClick: handleDeleteRelease,
+                  name: t('Delete Release'),
+              },
+              Cancel: {
+                  link: '/components/releases/detail/' + releaseId,
+                  type: 'secondary',
+                  name: t('Cancel'),
+              },
+          }
 
     const param = useParams()
     const locale = (param.locale as string) || 'en'
@@ -587,7 +641,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                     >
                                         <div className='my-2'>{t('Summary')}</div>
                                     </ListGroup.Item>
-                                    {isSPDXFeatureEnabled && (
+                                    {!isDuplicate && isSPDXFeatureEnabled && (
                                         <ListGroup.Item
                                             action
                                             eventKey={ReleaseTabIds.SPDX_DOCUMENT}
@@ -601,33 +655,41 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                     >
                                         <div className='my-2'>{t('Linked Releases')}</div>
                                     </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.LINKED_PACKAGES}
-                                    >
-                                        <div className='my-2'>{t('Linked Packages')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.CLEARING_DETAILS}
-                                    >
-                                        <div className='my-2'>{t('Clearing Details')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.ECC_DETAILS}
-                                    >
-                                        <div className='my-2'>
-                                            {t('ECC Details')}{' '}
-                                            <span className={release.eccInformation?.eccStatus ?? ''}></span>
-                                        </div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={CommonTabIds.ATTACHMENTS}
-                                    >
-                                        <div className='my-2'>{t('Attachments')}</div>
-                                    </ListGroup.Item>
+                                    {!isDuplicate && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.LINKED_PACKAGES}
+                                        >
+                                            <div className='my-2'>{t('Linked Packages')}</div>
+                                        </ListGroup.Item>
+                                    )}
+                                    {!isDuplicate && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.CLEARING_DETAILS}
+                                        >
+                                            <div className='my-2'>{t('Clearing Details')}</div>
+                                        </ListGroup.Item>
+                                    )}
+                                    {!isDuplicate && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.ECC_DETAILS}
+                                        >
+                                            <div className='my-2'>
+                                                {t('ECC Details')}{' '}
+                                                <span className={release.eccInformation?.eccStatus ?? ''}></span>
+                                            </div>
+                                        </ListGroup.Item>
+                                    )}
+                                    {!isDuplicate && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={CommonTabIds.ATTACHMENTS}
+                                        >
+                                            <div className='my-2'>{t('Attachments')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                     {release.componentType === 'COTS' && (
                                         <ListGroup.Item
                                             action
@@ -665,7 +727,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                                 clearingInformation={clearingInformation}
                                             />
                                         </Tab.Pane>
-                                        {isSPDXFeatureEnabled === true && (
+                                        {!isDuplicate && isSPDXFeatureEnabled === true && (
                                             <Tab.Pane eventKey={ReleaseTabIds.SPDX_DOCUMENT}>
                                                 <EditSPDXDocument
                                                     releaseId={releaseId}
@@ -689,34 +751,42 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                                 setReleasePayload={setReleasePayload}
                                             />
                                         </Tab.Pane>
-                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
-                                            <EditLinkedPackages
-                                                releasePayload={releasePayload}
-                                                setReleasePayload={setReleasePayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
-                                            <EditClearingDetails
-                                                releasePayload={releasePayload}
-                                                setReleasePayload={setReleasePayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey={ReleaseTabIds.ECC_DETAILS}>
-                                            <EditECCDetails
-                                                releasePayload={releasePayload}
-                                                setReleasePayload={setReleasePayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
-                                            {releasePayload.componentId !== null && (
-                                                <EditAttachments
-                                                    documentId={releaseId}
-                                                    documentType={DocumentTypes.RELEASE}
-                                                    documentPayload={releasePayload}
-                                                    setDocumentPayload={setReleasePayload}
+                                        {!isDuplicate && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
+                                                <EditLinkedPackages
+                                                    releasePayload={releasePayload}
+                                                    setReleasePayload={setReleasePayload}
                                                 />
-                                            )}
-                                        </Tab.Pane>
+                                            </Tab.Pane>
+                                        )}
+                                        {!isDuplicate && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
+                                                <EditClearingDetails
+                                                    releasePayload={releasePayload}
+                                                    setReleasePayload={setReleasePayload}
+                                                />
+                                            </Tab.Pane>
+                                        )}
+                                        {!isDuplicate && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.ECC_DETAILS}>
+                                                <EditECCDetails
+                                                    releasePayload={releasePayload}
+                                                    setReleasePayload={setReleasePayload}
+                                                />
+                                            </Tab.Pane>
+                                        )}
+                                        {!isDuplicate && (
+                                            <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
+                                                {releasePayload.componentId !== null && (
+                                                    <EditAttachments
+                                                        documentId={releaseId}
+                                                        documentType={DocumentTypes.RELEASE}
+                                                        documentPayload={releasePayload}
+                                                        setDocumentPayload={setReleasePayload}
+                                                    />
+                                                )}
+                                            </Tab.Pane>
+                                        )}
                                         {release.componentType === 'COTS' && (
                                             <Tab.Pane eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}>
                                                 <AddCommercialDetails
