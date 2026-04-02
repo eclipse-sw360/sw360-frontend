@@ -18,7 +18,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import { useConfigValue } from '@/contexts'
-import { DocumentTypes, InputKeyValue, Release, UIConfigKeys, Vendor } from '@/object-types'
+import { DocumentTypes, InputKeyValue, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 
 interface Props {
@@ -42,6 +42,7 @@ interface Props {
             [k: string]: string
         }>
     >
+    releaseDetail?: ReleaseDetail
 }
 
 function ReleaseAddSummary({
@@ -53,6 +54,7 @@ function ReleaseAddSummary({
     setMainLicenses,
     otherLicenses,
     setOtherLicenses,
+    releaseDetail,
 }: Props): ReactNode {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
@@ -81,6 +83,29 @@ function ReleaseAddSummary({
         }
     }, [
         status,
+    ])
+
+    useEffect(() => {
+        if (!releaseDetail) return
+        if (releaseDetail.roles) {
+            setRoles(CommonUtils.convertObjectToMapRoles(releaseDetail.roles))
+        }
+        if (releaseDetail.externalIds) {
+            setExternalIds(CommonUtils.convertObjectToMap(releaseDetail.externalIds))
+        }
+        if (releaseDetail.additionalData) {
+            setAddtionalData(CommonUtils.convertObjectToMap(releaseDetail.additionalData))
+        }
+        if (releaseDetail._embedded?.['sw360:contributors']) {
+            setContributors(
+                CommonUtils.extractEmailsAndFullNamesFromUsers(releaseDetail._embedded['sw360:contributors']),
+            )
+        }
+        if (releaseDetail._embedded?.['sw360:moderators']) {
+            setModerators(CommonUtils.extractEmailsAndFullNamesFromUsers(releaseDetail._embedded['sw360:moderators']))
+        }
+    }, [
+        releaseDetail,
     ])
 
     const setDataRoles = (roles: InputKeyValue[]) => {
