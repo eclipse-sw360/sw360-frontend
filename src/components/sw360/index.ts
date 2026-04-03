@@ -26,6 +26,7 @@ import PageSpinner from './PageSpinner/PageSpinner'
 import PillsInput from './PillsInput/PillsInput'
 import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
+import SearchReleasesModal from './SearchReleasesModal'
 import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
@@ -69,6 +70,7 @@ export {
     ProfileDropdown,
     QuickFilter,
     SW360Table,
+    SearchReleasesModal,
     SearchUsersModal,
     SelectCountry,
     SelectUsersDialog,
