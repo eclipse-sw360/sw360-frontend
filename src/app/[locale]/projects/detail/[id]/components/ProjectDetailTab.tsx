@@ -50,6 +50,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
     const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
     const [obligationsLoading, setObligationsLoading] = useState<boolean>(false)
+    const [vulnerabilitiesTotal, setVulnerabilitiesTotal] = useState<number>(0)
+    const [vulnerabilitiesChecked, setVulnerabilitiesChecked] = useState<number>(0)
+    const [vulnerabilitiesLoading, setVulnerabilitiesLoading] = useState<boolean>(false)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
     const router = useRouter()
@@ -228,6 +231,55 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         session.data?.user?.access_token,
     ])
 
+    useEffect(() => {
+        if (session.status === 'loading') return
+
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const fetchVulnerabilityCount = async () => {
+            setVulnerabilitiesLoading(true)
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) {
+                    void signOut()
+                    return
+                }
+
+                const resp = await ApiUtils.GET(
+                    `projects/${projectId}/vulnerabilitiesCount`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                const body = (await resp.json().catch(() => ({}))) as {
+                    totalVulnerabilities?: number
+                    checkedVulnerabilities?: number
+                    message?: string
+                    error?: string
+                }
+
+                if (resp.status !== StatusCodes.OK) {
+                    throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
+                        status: resp.status,
+                    })
+                }
+
+                setVulnerabilitiesTotal(body?.totalVulnerabilities ?? 0)
+                setVulnerabilitiesChecked(body?.checkedVulnerabilities ?? 0)
+            } catch (error) {
+                ApiUtils.reportError(error)
+            } finally {
+                setVulnerabilitiesLoading(false)
+            }
+        }
+
+        void fetchVulnerabilityCount()
+        return () => controller.abort()
+    }, [
+        projectId,
+        session.status,
+        session.data?.user?.access_token,
+    ])
+
     return (
         <>
             <ImportSBOMModal
@@ -362,7 +414,31 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='vulnerabilities'
                                 >
-                                    <div className='my-2'>{t('Vulnerabilities')}</div>
+                                    <div className='my-2 d-flex align-items-center'>
+                                        <span className='me-2'>{t('Vulnerabilities')}</span>
+                                        <span
+                                            id='vulnerabilitiesCount'
+                                            className={`badge ${
+                                                vulnerabilitiesChecked === vulnerabilitiesTotal &&
+                                                vulnerabilitiesTotal > 0
+                                                    ? 'obligations-badge--success'
+                                                    : vulnerabilitiesChecked === 0
+                                                      ? 'obligations-badge--danger'
+                                                      : 'obligations-badge'
+                                            }`}
+                                            aria-live='polite'
+                                        >
+                                            {vulnerabilitiesLoading ? (
+                                                <span
+                                                    className='spinner-border spinner-border-sm'
+                                                    role='status'
+                                                    aria-hidden='true'
+                                                ></span>
+                                            ) : (
+                                                `${vulnerabilitiesChecked} / ${vulnerabilitiesTotal}`
+                                            )}
+                                        </span>
+                                    </div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
