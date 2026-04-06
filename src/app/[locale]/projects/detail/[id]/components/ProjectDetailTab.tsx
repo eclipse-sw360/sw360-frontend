@@ -17,6 +17,7 @@ import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
+import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import {
     ActionType,
     AdministrationDataType,
@@ -230,41 +231,28 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         session.data?.user?.access_token,
     ])
 
-    const renderSidebarCount = ({
-        badgeClassName,
-        countId,
-        isLoading,
-        label,
-        value,
-    }: {
-        badgeClassName: string
-        countId: string
-        isLoading: boolean
-        label: string
-        value: string
-    }) => (
-        <div className='d-flex align-items-center my-2'>
-            <span className='me-2'>{label}</span>
-            <span
-                id={countId}
-                className={`badge ${badgeClassName}`}
-                aria-live='polite'
-            >
-                {isLoading ? (
-                    <span
-                        className='spinner-border spinner-border-sm'
-                        role='status'
-                        aria-hidden='true'
-                    ></span>
-                ) : (
-                    value
-                )}
-            </span>
-        </div>
-    )
+    const isVulnerabilitiesDisplayEnabled = summaryData?.enableVulnerabilitiesDisplay ?? false
+    const isVulnerabilityMonitoringEnabled = summaryData?.enableSvm ?? false
+    const hasSecurityResponsibles = (summaryData?._embedded?.securityResponsibles?.length ?? 0) > 0
+    const isMonitoringScenario =
+        isVulnerabilitiesDisplayEnabled && isVulnerabilityMonitoringEnabled && hasSecurityResponsibles
+
+    const vulnerabilitiesBadgeClassName =
+        isVulnerabilitiesDisplayEnabled && isMonitoringScenario ? 'obligations-badge--danger' : 'obligations-badge'
+
+    const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
+        ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
+        : '?/?'
 
     useEffect(() => {
         if (session.status === 'loading') return
+
+        if (!isVulnerabilitiesDisplayEnabled) {
+            setVulnerabilitiesTotal(0)
+            setVulnerabilitiesRatedCount(0)
+            setVulnerabilitiesLoading(false)
+            return
+        }
 
         const controller = new AbortController()
         const signal = controller.signal
@@ -327,6 +315,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         projectId,
         session.status,
         session.data?.user?.access_token,
+        isVulnerabilitiesDisplayEnabled,
     ])
 
     return (
@@ -405,18 +394,19 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
-                                    {renderSidebarCount({
-                                        badgeClassName:
+                                    <SidebarCountBadge
+                                        badgeClassName={
                                             obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
                                                 ? 'obligations-badge--success'
                                                 : obligationsNonOpenCount === 0
                                                   ? 'obligations-badge--danger'
-                                                  : 'obligations-badge',
-                                        countId: 'obligationsCount',
-                                        isLoading: obligationsLoading,
-                                        label: t('Obligations'),
-                                        value: `${obligationsNonOpenCount} / ${obligationsTotal}`,
-                                    })}
+                                                  : 'obligations-badge'
+                                        }
+                                        countId='obligationsCount'
+                                        isLoading={obligationsLoading}
+                                        label={t('Obligations')}
+                                        value={`${obligationsNonOpenCount} / ${obligationsTotal}`}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
@@ -458,17 +448,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='vulnerabilities'
                                 >
-                                    {renderSidebarCount({
-                                        badgeClassName:
-                                            vulnerabilitiesRatedCount === vulnerabilitiesTotal &&
-                                            vulnerabilitiesTotal > 0
-                                                ? 'obligations-badge--success'
-                                                : 'obligations-badge--danger',
-                                        countId: 'vulnerabilitiesCount',
-                                        isLoading: vulnerabilitiesLoading,
-                                        label: t('Vulnerabilities'),
-                                        value: `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`,
-                                    })}
+                                    <SidebarCountBadge
+                                        badgeClassName={vulnerabilitiesBadgeClassName}
+                                        countId='vulnerabilitiesCount'
+                                        isLoading={vulnerabilitiesLoading && isVulnerabilitiesDisplayEnabled}
+                                        label={t('Vulnerabilities')}
+                                        value={vulnerabilitiesCountValue}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
