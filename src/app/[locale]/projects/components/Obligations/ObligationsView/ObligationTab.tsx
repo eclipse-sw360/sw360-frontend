@@ -15,7 +15,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
+import { PaddedCell, PageSizeSelector, SW360Table, TableFooter, UpdateCommentModal } from '@/components/sw360'
 import {
     ActionType,
     ErrorDetails,
@@ -26,16 +26,11 @@ import {
     ObligationType,
     PageableQueryParam,
     PaginationMeta,
+    UpdateCommentModalMetadata,
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
-import UpdateCommentModal from './UpdateCommentModal'
-
-interface UpdateCommentModalMetadata {
-    obligation: string
-    comment?: string
-}
 
 interface Props {
     projectId: string
@@ -253,8 +248,9 @@ export default function ObligationTab({
                         value={payload?.[row.original.node[0]]?.comment ?? row.original.node[1].comment ?? ''}
                         onClick={() => {
                             setUpdateCommentModalData({
-                                comment: payload?.[row.original.node[0]]?.comment ?? row.original.node[1].comment ?? '',
-                                obligation: row.original.node[0],
+                                initialCommentValue:
+                                    payload?.[row.original.node[0]]?.comment ?? row.original.node[1].comment ?? '',
+                                id: row.original.node[0],
                             })
                         }}
                         className='form-control'
@@ -491,9 +487,20 @@ export default function ObligationTab({
             <UpdateCommentModal
                 modalMetaData={updateCommentModalData}
                 setModalMetaData={setUpdateCommentModalData}
-                payload={payload}
-                setPayload={setPayload}
-                obligationTypeName={ObligationLevels.ORGANISATION_OBLIGATION}
+                setCommentInPayload={(comment: string) => {
+                    if (payload && updateCommentModalData?.id && setPayload) {
+                        let obligationValue = payload[updateCommentModalData.id]
+                        obligationValue = {
+                            ...obligationValue,
+                            comment: comment,
+                            obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                        }
+                        setPayload((payload: ObligationEntry) => ({
+                            ...payload,
+                            [updateCommentModalData.id]: obligationValue,
+                        }))
+                    }
+                }}
             />
             <div className='mb-3'>
                 {pageableQueryParam && paginationMeta && detailTable && editTable ? (
