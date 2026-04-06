@@ -26,6 +26,7 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import {
     ActionType,
     DocumentTypes,
+    ErrorDetails,
     InputKeyValue,
     LinkedPackageData,
     LinkedProjectData,
@@ -40,7 +41,7 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -653,7 +654,6 @@ function EditProject({
                 }
             }
             const responses = await Promise.all(requests)
-            let allOk = true
             for (const r of responses) {
                 if (
                     !(
@@ -662,21 +662,17 @@ function EditProject({
                         r.status === StatusCodes.ACCEPTED
                     )
                 ) {
-                    allOk = false
-                    break
+                    const err = (await r.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: r.status,
+                    })
                 }
             }
-            if (allOk) {
-                MessageService.success(
-                    t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
-                )
-                router.push(`/projects/detail/${projectId}`)
-            } else {
-                MessageService.error(
-                    t('There are some errors while updating project') +
-                        ` ${dataToUpdate.name} (${dataToUpdate.version})!`,
-                )
-            }
+
+            MessageService.success(
+                t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
+            )
+            router.push(`/projects/detail/${projectId}`)
         } catch (error: unknown) {
             ApiUtils.reportError(error)
         }
