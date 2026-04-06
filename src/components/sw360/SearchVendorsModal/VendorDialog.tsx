@@ -33,7 +33,7 @@ type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [showAddVendor, setShowAddVendor] = useState(false)
-    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [searchText, setSearchText] = useState<string>('')
     const handleCloseDialog = () => {
         setShow(!show)
         setSelectedVendor(vendor)
@@ -157,14 +157,15 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     }
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (!show || session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
         void searchVendor(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
+        session.status,
+        show,
     ])
 
     const table = useReactTable({
@@ -272,7 +273,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                                     className='form-control'
                                     placeholder={t('Enter search text')}
                                     aria-describedby='Search Vendor'
-                                    value={searchText ?? ''}
+                                    value={searchText}
                                     onChange={(event) => {
                                         setSearchText(event.target.value)
                                     }}
@@ -283,7 +284,6 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                                     type='button'
                                     className='btn btn-secondary me-2'
                                     onClick={() => {
-                                        if (searchText === undefined) setSearchText('')
                                         void searchVendor()
                                     }}
                                 >

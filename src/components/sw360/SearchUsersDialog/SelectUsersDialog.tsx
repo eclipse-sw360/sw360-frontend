@@ -17,7 +17,7 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
@@ -46,9 +46,18 @@ const SelectUsersDialog = ({
     const [selectingUsers, setSelectingUsers] = useState<{
         [k: string]: string
     }>({})
-    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [searchText, setSearchText] = useState<string>('')
     const [exactMatch, setExactMatch] = useState(false)
     const session = useSession()
+    const usersCacheRef = useRef<
+        Map<
+            string,
+            {
+                page: PaginationMeta | undefined
+                users: User[]
+            }
+        >
+    >(new Map())
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -59,9 +68,12 @@ const SelectUsersDialog = ({
     ])
 
     useEffect(() => {
-        setSelectingUsers(selectedUsers)
+        if (show) {
+            setSelectingUsers(selectedUsers)
+        }
     }, [
         selectedUsers,
+        show,
     ])
 
     const handleSelectUser = (user: User) => {
@@ -188,14 +200,15 @@ const SelectUsersDialog = ({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (!show || session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
+        session.status,
+        show,
     ])
 
     const table = useReactTable({
@@ -291,6 +304,18 @@ const SelectUsersDialog = ({
                     ]),
                 ),
             )
+
+            const cacheKey = JSON.stringify({
+                queryUrl,
+                exactMatch,
+            })
+            const cachedResult = usersCacheRef.current.get(cacheKey)
+            if (cachedResult !== undefined) {
+                setPaginationMeta(cachedResult.page)
+                setUserData(cachedResult.users)
+                return
+            }
+
             const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
@@ -301,9 +326,14 @@ const SelectUsersDialog = ({
 
             const data = (await response.json()) as EmbeddedUsers
             setPaginationMeta(data.page)
-            setUserData(
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:users']) ? [] : data['_embedded']['sw360:users'],
-            )
+            const fetchedUsers = CommonUtils.isNullOrUndefined(data['_embedded']['sw360:users'])
+                ? []
+                : data['_embedded']['sw360:users']
+            setUserData(fetchedUsers)
+            usersCacheRef.current.set(cacheKey, {
+                page: data.page,
+                users: fetchedUsers,
+            })
         } catch (error) {
             ApiUtils.reportError(error)
         } finally {
@@ -327,7 +357,7 @@ const SelectUsersDialog = ({
             page_entries: 10,
             sort: '',
         })
-        setSearchText(undefined)
+        setSearchText('')
     }
 
     const resetSelection = () => {
@@ -345,7 +375,7 @@ const SelectUsersDialog = ({
             page_entries: 10,
             sort: '',
         })
-        setSearchText(undefined)
+        setSearchText('')
     }
 
     return (
@@ -397,7 +427,6 @@ const SelectUsersDialog = ({
                                 <Button
                                     variant='secondary'
                                     onClick={() => {
-                                        if (!searchText) setSearchText('')
                                         handleSearch()
                                     }}
                                 >
