@@ -96,7 +96,8 @@
       "@types/react": "19.2.14",
       "@types/react-dom": "19.2.3",
       "@eslint/plugin-kit": "^0.3.3",
-      "biome": "-"
+      "biome": "-",
+      "lodash": ">=4.18.0"
     },
     "ignoredBuiltDependencies": [
       "cypress",
