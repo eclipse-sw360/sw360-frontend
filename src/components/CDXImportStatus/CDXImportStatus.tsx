@@ -13,7 +13,7 @@
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { JSX, useEffect } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
@@ -37,16 +37,31 @@ const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element
     ])
 
     const Clipboard = ({ text }: { text: string }) => {
+        const [copied, setCopied] = useState(false)
+
+        async function handleCopy() {
+            try {
+                await navigator.clipboard.writeText(text)
+                setCopied(true)
+            } catch (e) {
+                console.error(e)
+            }
+        }
         return (
-            <OverlayTrigger overlay={<Tooltip>{t('Copy to Clipboard')}</Tooltip>}>
+            <OverlayTrigger
+                trigger={[
+                    'hover',
+                    'focus',
+                ]}
+                placement='top'
+                overlay={(props) => <Tooltip {...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>}
+                onToggle={(show) => {
+                    if (show) setCopied(false)
+                }}
+            >
                 <span className='d-inline-block'>
                     <BsClipboard
-                        onClick={() => {
-                            void navigator.clipboard.writeText(text)
-                        }}
-                        style={{
-                            cursor: 'pointer',
-                        }}
+                        onClick={handleCopy}
                         size={20}
                     />
                 </span>
