@@ -13,6 +13,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useState } from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
@@ -27,6 +28,41 @@ interface Props {
 const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
+
+    const Clipboard = ({ text }: { text: string }) => {
+        const [copied, setCopied] = useState(false)
+
+        async function handleCopy() {
+            try {
+                await navigator.clipboard.writeText(text)
+                setCopied(true)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        return (
+            <OverlayTrigger
+                trigger={[
+                    'hover',
+                    'focus',
+                ]}
+                placement='top'
+                overlay={(props) => <Tooltip {...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>}
+                onToggle={(show) => {
+                    if (show) setCopied(false)
+                }}
+            >
+                <span className='d-inline-block'>
+                    <BsClipboard
+                        onClick={handleCopy}
+                        size={20}
+                    />
+                </span>
+            </OverlayTrigger>
+        )
+    }
+
     return (
         <table className='table summary-table'>
             <thead
@@ -43,22 +79,7 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                 <tr>
                     <td>Id:</td>
                     <td id='documentId'>
-                        {componentId}
-                        <button
-                            id='copyToClipboard'
-                            type='button'
-                            className='btn btn-sm'
-                            data-toggle='tooltip'
-                            title='Copy to clipboard'
-                        >
-                            <BsClipboard
-                                style={{
-                                    color: 'gray',
-                                    width: '20px',
-                                }}
-                                size={20}
-                            />
-                        </button>
+                        {componentId} <Clipboard text={componentId} />
                     </td>
                 </tr>
                 <tr>
