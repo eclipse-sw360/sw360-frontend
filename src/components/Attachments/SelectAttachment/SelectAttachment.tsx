@@ -20,13 +20,12 @@ import { Attachment, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import CommonUtils from '@/utils/common.utils'
-import AttachmentRowData from '../AttachmentRowData'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    attachmentsData: Array<AttachmentRowData>
-    setAttachmentsData: React.Dispatch<React.SetStateAction<Array<AttachmentRowData>>>
+    attachmentsData: Array<Attachment>
+    setAttachmentsData: React.Dispatch<React.SetStateAction<Array<Attachment>>>
 }
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
@@ -90,7 +89,6 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                 checkedTeam: '',
                 checkedBy: '',
                 checkedOn: '',
-                isAddedNew: true,
             })
         })
         setAttachmentsData([

@@ -43,6 +43,7 @@ import {
     TableSearch,
 } from './Table/Components'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
+import UpdateCommentModal from './UpdateCommentModal'
 
 export {
     AddAdditionalRoles,
@@ -79,4 +80,5 @@ export {
     TableSearch,
     ThemeSwitcher,
     VendorDialog,
+    UpdateCommentModal,
 }

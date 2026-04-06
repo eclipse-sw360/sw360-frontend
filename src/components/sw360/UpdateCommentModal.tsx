@@ -7,31 +7,24 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
-import { ObligationEntry } from '@/object-types'
-
-interface UpdateCommentModalMetadata {
-    obligation: string
-    comment?: string
-}
+import { UpdateCommentModalMetadata } from '@/object-types'
 
 interface UpdateCommentModalProps {
     modalMetaData: UpdateCommentModalMetadata | null
     setModalMetaData: Dispatch<SetStateAction<UpdateCommentModalMetadata | null>>
-    payload?: ObligationEntry
-    setPayload?: Dispatch<SetStateAction<ObligationEntry>>
-    obligationTypeName: string | null
+    setCommentInPayload?: (s: string) => void
 }
 
 export default function UpdateCommentModal({
     modalMetaData,
     setModalMetaData,
-    payload,
-    setPayload,
-    obligationTypeName,
+    setCommentInPayload,
 }: UpdateCommentModalProps) {
     const t = useTranslations('default')
     const [commentText, setCommentText] = useState('')
@@ -46,7 +39,7 @@ export default function UpdateCommentModal({
     ])
 
     useEffect(() => {
-        setCommentText(modalMetaData?.comment ?? '')
+        setCommentText(modalMetaData?.initialCommentValue ?? '')
     }, [
         modalMetaData,
     ])
@@ -62,7 +55,7 @@ export default function UpdateCommentModal({
             size='lg'
         >
             <Modal.Header closeButton>
-                <Modal.Title>{t('Enter obligation comment')}</Modal.Title>
+                <Modal.Title>{t('Enter comment')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <input
@@ -72,7 +65,7 @@ export default function UpdateCommentModal({
                         setCommentText(e.target.value)
                     }}
                     className='form-control'
-                    placeholder={t('Enter obligation comment')}
+                    placeholder={t('Enter comment')}
                 />
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
@@ -90,17 +83,8 @@ export default function UpdateCommentModal({
                     type='button'
                     className='fw-bold btn btn-primary me-2'
                     onClick={() => {
-                        if (modalMetaData !== null && payload && setPayload) {
-                            let obligationValue = payload[modalMetaData.obligation] ?? {}
-                            obligationValue = {
-                                ...obligationValue,
-                                comment: commentText,
-                                obligationType: obligationTypeName ?? '',
-                            }
-                            setPayload((payload: ObligationEntry) => ({
-                                ...payload,
-                                [modalMetaData.obligation]: obligationValue,
-                            }))
+                        if (modalMetaData !== null && setCommentInPayload) {
+                            setCommentInPayload(commentText)
                             setCommentText('')
                             setModalMetaData(null)
                         }
