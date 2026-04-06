@@ -60,6 +60,8 @@ interface ProjectPayload {
     projectManager?: string
     projectOwner?: string
     securityResponsibles?: string[]
+    enableSvm?: boolean
+    enableVulnerabilitiesDisplay?: boolean
     considerReleasesFromExternalList?: boolean
     packageIds?: {
         [key: string]: LinkedPackageData
