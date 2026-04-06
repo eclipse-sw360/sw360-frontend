@@ -11,6 +11,7 @@
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import type { JSX } from 'react'
+import DateField from '@/components/DateField'
 import { ProjectPayload } from '@/object-types'
 
 interface Props {
@@ -68,101 +69,69 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                         </div>
                     </div>
                     <div className='col-lg-4'>
-                        <label
-                            htmlFor='addProjects.systemTestBeginDate'
-                            className='form-label fw-bold'
-                        >
-                            {t('System test begin date')}
-                        </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            aria-label='Deadline for pre-evaluation'
+                        <DateField
                             id='addProjects.systemTestBeginDate'
-                            placeholder='System test begin date YYYY-MM-DD'
-                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-                                e.target.type = 'date'
-                            }}
-                            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                                e.target.type = 'text'
-                            }}
                             name='systemTestStart'
-                            value={projectPayload.systemTestStart}
-                            onChange={updateInputField}
+                            ariaLabel={t('System test begin date')}
+                            label={t('System test begin date')}
+                            placeholder='System test begin date YYYY-MM-DD'
+                            value={projectPayload.systemTestStart ?? ''}
+                            onChange={(val) =>
+                                setProjectPayload({
+                                    ...projectPayload,
+                                    systemTestStart: val,
+                                })
+                            }
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label
-                            htmlFor='addProjects.systemTestEndDate'
-                            className='form-label fw-bold'
-                        >
-                            {t('System test end date')}
-                        </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            aria-label='Deadline for pre-evaluation'
+                        <DateField
                             id='addProjects.systemTestEndDate'
-                            placeholder='System test end date YYYY-MM-DD'
-                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-                                e.target.type = 'date'
-                            }}
-                            onBlur={(e) => {
-                                e.target.type = 'text'
-                            }}
                             name='systemTestEnd'
-                            value={projectPayload.systemTestEnd}
-                            onChange={updateInputField}
+                            ariaLabel={t('System test end date')}
+                            label={t('System test end date')}
+                            placeholder='System test end date YYYY-MM-DD'
+                            value={projectPayload.systemTestEnd ?? ''}
+                            onChange={(val) =>
+                                setProjectPayload({
+                                    ...projectPayload,
+                                    systemTestEnd: val,
+                                })
+                            }
                         />
                     </div>
                 </div>
                 <div className='row with-divider py-3'>
                     <div className='col-lg-4'>
-                        <label
-                            htmlFor='addProjects.systemTestBeginDate'
-                            className='form-label fw-bold'
-                        >
-                            {t('Delivery start date')}
-                        </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            aria-label='Deadline for pre-evaluation'
+                        <DateField
                             id='addProjects.systemTestBeginDate'
-                            placeholder='Delivery start date YYYY-MM-DD'
-                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-                                e.target.type = 'date'
-                            }}
-                            onBlur={(e) => {
-                                e.target.type = 'text'
-                            }}
                             name='deliveryStart'
-                            value={projectPayload.deliveryStart}
-                            onChange={updateInputField}
+                            ariaLabel={t('Delivery start date')}
+                            label={t('Delivery start date')}
+                            placeholder='Delivery start date YYYY-MM-DD'
+                            value={projectPayload.deliveryStart ?? ''}
+                            onChange={(val) =>
+                                setProjectPayload({
+                                    ...projectPayload,
+                                    deliveryStart: val,
+                                })
+                            }
                         />
                     </div>
                     <div className='col-lg-4'>
-                        <label
-                            htmlFor='addProjects.phaseOutDate'
-                            className='form-label fw-bold'
-                        >
-                            {t('Phase-out date')}
-                        </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            aria-label='Deadline for pre-evaluation'
+                        <DateField
                             id='addProjects.phaseOutDate'
-                            placeholder='Phase-out since YYYY-MM-DD'
-                            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-                                e.target.type = 'date'
-                            }}
-                            onBlur={(e) => {
-                                e.target.type = 'text'
-                            }}
                             name='phaseOutSince'
-                            value={projectPayload.phaseOutSince}
-                            onChange={updateInputField}
+                            ariaLabel={t('Phase-out date')}
+                            label={t('Phase-out date')}
+                            placeholder='Phase-out since YYYY-MM-DD'
+                            value={projectPayload.phaseOutSince ?? ''}
+                            onChange={(val) =>
+                                setProjectPayload({
+                                    ...projectPayload,
+                                    phaseOutSince: val,
+                                })
+                            }
                         />
                     </div>
                 </div>
