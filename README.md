@@ -1,4 +1,5 @@
 # Eclipse SW360 Frontend
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10706/badge)](https://www.bestpractices.dev/projects/10706)
 
 This is the main UI interface for SW360 project.
 
