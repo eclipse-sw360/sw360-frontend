@@ -67,8 +67,8 @@ importers:
         specifier: ^2.10.10
         version: 2.10.10(@types/react@19.2.14)(react-dom@19.2.1(react@19.2.4))(react@19.2.4)
       react-cookie:
-        specifier: ^8.0.1
-        version: 8.0.1(@types/react@19.2.14)(react@19.2.4)
+        specifier: ^8.1.0
+        version: 8.1.0(@types/react@19.2.14)(react@19.2.4)
       react-dom:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.4)
@@ -1107,8 +1107,8 @@ packages:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
-  cookie@1.0.2:
-    resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
 
   core-util-is@1.0.2:
@@ -1950,8 +1950,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-cookie@8.0.1:
-    resolution: {integrity: sha512-QNdAd0MLuAiDiLcDU/2s/eyKmmfMHtjPUKJ2dZ/5CcQ9QKUium4B3o61/haq6PQl/YWFqC5PO8GvxeHKhy3GFA==}
+  react-cookie@8.1.0:
+    resolution: {integrity: sha512-Qs+gD3gpQmUXnJUZafhJtNWhhNdi8OYbOAF5YQRAZa/D171ILOIEMfXDz/tmhkE+nOthllmqryHH6I/qmvIYWQ==}
     peerDependencies:
       react: '>= 16.3.0'
 
@@ -2259,8 +2259,8 @@ packages:
     resolution: {integrity: sha512-lRfVq8fE8gz6QMBuDM6a+LO3IAzTi05H6gCVaUpir2E1Rwpo4ZUog45KpNXKC/Mn3Yb9UDuHumeFTo9iV/D9FQ==}
     engines: {node: '>=18'}
 
-  universal-cookie@8.0.1:
-    resolution: {integrity: sha512-B6ks9FLLnP1UbPPcveOidfvB9pHjP+wekP2uRYB9YDfKVpvcjKgy1W5Zj+cEXJ9KTPnqOKGfVDQBmn8/YCQfRg==}
+  universal-cookie@8.1.0:
+    resolution: {integrity: sha512-65+kikQAWq7gsJbirwB7dk6e8xeug1hx3++x2dQoymdXcV7fYv0yChOgHCg01ZwP3fE3sYeq6EWCSpFv3HLl9g==}
 
   universalify@2.0.1:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
@@ -3258,7 +3258,7 @@ snapshots:
 
   cookie@0.7.2: {}
 
-  cookie@1.0.2: {}
+  cookie@1.1.1: {}
 
   core-util-is@1.0.2: {}
 
@@ -4098,12 +4098,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  react-cookie@8.0.1(@types/react@19.2.14)(react@19.2.4):
+  react-cookie@8.1.0(@types/react@19.2.14)(react@19.2.4):
     dependencies:
       '@types/hoist-non-react-statics': 3.3.7(@types/react@19.2.14)
       hoist-non-react-statics: 3.3.2
       react: 19.2.4
-      universal-cookie: 8.0.1
+      universal-cookie: 8.1.0
     transitivePeerDependencies:
       - '@types/react'
 
@@ -4413,9 +4413,9 @@ snapshots:
 
   unicorn-magic@0.1.0: {}
 
-  universal-cookie@8.0.1:
+  universal-cookie@8.1.0:
     dependencies:
-      cookie: 1.0.2
+      cookie: 1.1.1
 
   universalify@2.0.1: {}
 
