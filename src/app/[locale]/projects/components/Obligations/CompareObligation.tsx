@@ -392,6 +392,10 @@ export default function CompareObligation({
                                     variant='secondary'
                                     onClick={() => {
                                         if (!searchText) setSearchText('')
+                                        setPageableQueryParam((prev) => ({
+                                            ...prev,
+                                            page: 0,
+                                        }))
                                         handleSearch()
                                     }}
                                 >
