@@ -20,6 +20,7 @@ import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
+import { extractPackageManagerFromPurl } from '../../../components/purlUtils'
 
 function EditPackage({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
@@ -58,11 +59,20 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
             setUpdatingPackage(true)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
+
+            const normalizedPurl = packagePayload?.purl?.trim()
+            const packageManager = extractPackageManagerFromPurl(normalizedPurl)
+            if (!normalizedPurl || !packageManager) {
+                MessageService.error(t('Enter PURL'))
+                return
+            }
+
             const response = await ApiUtils.PATCH(
                 `packages/${packageId}`,
                 {
                     ...packagePayload,
-                    packageManager: packagePayload?.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase(),
+                    purl: normalizedPurl,
+                    packageManager,
                 },
                 session.user.access_token,
             )
@@ -72,9 +82,16 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                const res = (await response.json()) as Record<string, string>
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                let res: Record<string, string> = {}
+                try {
+                    res = (await response.json()) as Record<string, string>
+                } catch {
+                    // Keep empty response fallback for non-JSON error payloads.
+                }
+                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }
+        } catch (e) {
+            ApiUtils.reportError(e)
         } finally {
             setUpdatingPackage(false)
         }
