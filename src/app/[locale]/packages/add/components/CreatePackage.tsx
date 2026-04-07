@@ -61,7 +61,13 @@ function CreatePackage(): ReactNode {
                 },
                 session.user.access_token,
             )
-            const res = (await response.json()) as Record<string, string>
+            let res: Record<string, string> = {}
+            try {
+                res = (await response.json()) as Record<string, string>
+            } catch {
+                // Keep empty response fallback for non-JSON error payloads.
+            }
+
             if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Package created successfully'))
                 if (res.id) {
@@ -69,10 +75,12 @@ function CreatePackage(): ReactNode {
                 } else {
                     handleGoBack()
                 }
+            } else if (response.status === StatusCodes.CONFLICT) {
+                MessageService.error(t('A package with the same name and version already exists'))
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }
         } catch (e) {
             console.error(e)

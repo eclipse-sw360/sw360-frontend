@@ -66,14 +66,22 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
                 },
                 session.user.access_token,
             )
+            let res: Record<string, string> = {}
+            try {
+                res = (await response.json()) as Record<string, string>
+            } catch {
+                // Keep empty response fallback for non-JSON error payloads.
+            }
+
             if (response.status == StatusCodes.OK) {
                 MessageService.success(t('Package updated successfully'))
                 router.push(`/packages/detail/${packageId}`)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                MessageService.error(t('A package with the same name and version already exists'))
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                const res = (await response.json()) as Record<string, string>
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }
         } finally {
             setUpdatingPackage(false)
