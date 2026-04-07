@@ -15,6 +15,9 @@ on:
     paths-ignore:
       - '**.md'
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     name: Validate Pull Request Commits
