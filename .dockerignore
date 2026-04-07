@@ -8,6 +8,4 @@ NOTICE
 CODE_OF_CONDUCT.md
 Dockerfile
 .dockerignore
-.git
 .env
-node_modules

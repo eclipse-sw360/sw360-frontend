@@ -63,6 +63,18 @@ NEXT_PUBLIC_SW360_API_URL=https://sw360.example.org docker compose build
 > in the client-side JavaScript bundle during `pnpm build`. Changing it after
 > the build has **no effect** - the image must be rebuilt.
 
+### Secure build
+The docker image also uses secrets like `AUTH_SECRET` and
+`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` which should be rotated between builds. You
+can provide the values for the same in your environment variable with
+recommended random values (or equivalent predefined values).
+
+```shell
+export AUTH_SECRET=$(openssl rand -base64 32)
+export NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=$(openssl rand -base64 32)
+docker compose build
+```
+
 ## Configuration
 
 ### Frontend Environment Variables
