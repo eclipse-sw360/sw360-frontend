@@ -24,16 +24,11 @@ const MailConfigurations = ({ currentConfig, setCurrentConfig }: Props): JSX.Ele
 
     return (
         <>
-            <h6
-                className='fw-bold text-uppercase'
-                style={{
-                    color: '#5D8EA9',
-                }}
-            >
+            <h6 className='fw-bold text-uppercase text-blue'>
                 {t('Mail Configurations')}
                 <hr className='my-2 mb-2' />
             </h6>
-            <table className='table label-value-table'>
+            <table className='table'>
                 <thead>
                     <tr>
                         <th>{t('Name')}</th>

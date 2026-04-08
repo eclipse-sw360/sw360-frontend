@@ -14,12 +14,12 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsInfoCircle } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
 import { LicenseDetail, ReleaseDetail, User } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 
 interface Props {
     release: ReleaseDetail
@@ -38,6 +38,39 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
     }, [
         status,
     ])
+
+    const Clipboard = ({ text }: { text: string }) => {
+        const [copied, setCopied] = useState(false)
+
+        async function handleCopy() {
+            try {
+                await navigator.clipboard.writeText(text)
+                setCopied(true)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        return (
+            <OverlayTrigger
+                trigger={[
+                    'hover',
+                    'focus',
+                ]}
+                placement='top'
+                overlay={(props) => <Tooltip {...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>}
+                onToggle={(show) => {
+                    if (show) setCopied(false)
+                }}
+            >
+                <span className='d-inline-block'>
+                    <BsClipboard
+                        onClick={handleCopy}
+                        size={20}
+                    />
+                </span>
+            </OverlayTrigger>
+        )
+    }
 
     const renderArrayOfUsers = (users: Array<User>) => {
         return Object.entries(users)
@@ -92,26 +125,8 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
             <tbody hidden={toggle}>
                 <tr>
                     <td>Id:</td>
-                    <td id='documentId'>
-                        {releaseId}
-                        <button
-                            id='copyToClipboard'
-                            type='button'
-                            className='btn btn-sm'
-                            data-toggle='tooltip'
-                            title='Copy to clipboard'
-                            onClick={() => {
-                                navigator.clipboard.writeText(releaseId).catch((err) => console.error(err))
-                            }}
-                        >
-                            <BsClipboard
-                                style={{
-                                    color: 'gray',
-                                    width: '20px',
-                                }}
-                                size={20}
-                            />
-                        </button>
+                    <td>
+                        {releaseId} <Clipboard text={releaseId} />
                     </td>
                 </tr>
                 <tr>
@@ -249,7 +264,6 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                                 color: 'gray',
                                             }}
                                             size={20}
-                                            className={styles.info}
                                         />
                                     </span>
                                 ),
@@ -274,7 +288,6 @@ const ReleaseGeneral = ({ release, releaseId }: Props): ReactNode => {
                                                     color: 'gray',
                                                 }}
                                                 size={20}
-                                                className={styles.info}
                                             />
                                         </span>
                                     ),

@@ -12,25 +12,36 @@
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Attachment, ErrorDetails, ReleaseDetail } from '@/object-types'
+import { Attachment, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
 import AdditionalDataSection from './AdditionalDataSection'
+import Attachments from './Attachments'
+import ClearingDetailsSection from './ClearingDetailsSection'
+import CommercialDetailAdmin from './CommercialDetailAdmin'
+import CotsOssInformation from './CotsOssInformation'
+import ECCInformation from './ECCInformation'
 import ExternalIdsSection from './ExternalIdsSection'
 import GeneralSection from './GeneralSection'
+import LinkedReleasesSection from './LinkedReleasesSection'
+import RequestInformation from './RequestInformation'
+import SupplementalInformation from './SupplementalInformation'
 
 export default function MergeReleaseDataCheck({
     targetRelease,
     sourceRelease,
+    targetAttachments,
+    sourceAttachments,
     finalReleasePayload,
     setFinalReleasePayload,
 }: {
     targetRelease: ReleaseDetail | null
     sourceRelease: ReleaseDetail | null
-    finalReleasePayload: ReleaseDetail | null
-    setFinalReleasePayload: Dispatch<SetStateAction<null | ReleaseDetail>>
+    targetAttachments: Attachment[]
+    sourceAttachments: Attachment[]
+    finalReleasePayload: Release | null
+    setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
-    // const t = useTranslations('default')
     const session = useSession()
     const [sourceReleaseDetail, setSourceReleaseDetail] = useState<ReleaseDetail | null>()
 
@@ -76,11 +87,24 @@ export default function MergeReleaseDataCheck({
     ])
 
     useEffect(() => {
+        if (CommonUtils.isNullOrUndefined(targetRelease)) return
+        const { _embedded, _links, ...filtertedTargetRelease } = targetRelease
         setFinalReleasePayload({
-            ...targetRelease,
+            ...filtertedTargetRelease,
             createdBy: targetRelease?._embedded?.['sw360:createdBy']?.email ?? '',
-            attachments: targetRelease?._embedded?.['sw360:attachments'] ?? ([] as Attachment[]),
-        } as ReleaseDetail)
+            attachments:
+                targetRelease?._embedded?.['sw360:attachments']?.map(
+                    ({ _links, ...attachmentData }) => attachmentData,
+                ) ?? ([] as Attachment[]),
+            moderators:
+                targetRelease?._embedded?.['sw360:moderators']?.map((moderator) => moderator.email) ?? ([] as string[]),
+            contributors:
+                targetRelease?._embedded?.['sw360:contributors']?.map((contributor) => contributor.email) ??
+                ([] as string[]),
+            subscribers:
+                targetRelease?._embedded?.['sw360:subscribers']?.map((subscriber) => subscriber.email) ??
+                ([] as string[]),
+        } as Release)
     }, [
         targetRelease,
         sourceRelease,
@@ -107,6 +131,56 @@ export default function MergeReleaseDataCheck({
                         sourceReleaseDetail={sourceReleaseDetail}
                         finalReleasePayload={finalReleasePayload}
                         setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <LinkedReleasesSection
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <ClearingDetailsSection
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <RequestInformation
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <SupplementalInformation
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <ECCInformation
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <CommercialDetailAdmin
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <CotsOssInformation
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                    />
+                    <Attachments
+                        targetRelease={targetRelease}
+                        sourceReleaseDetail={sourceReleaseDetail}
+                        finalReleasePayload={finalReleasePayload}
+                        setFinalReleasePayload={setFinalReleasePayload}
+                        targetAttachments={targetAttachments}
+                        sourceAttachments={sourceAttachments}
                     />
                 </>
             )}

@@ -13,11 +13,11 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useParams } from 'next/navigation'
+import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { Dropdown } from 'react-bootstrap'
+import { Col, Dropdown, ListGroup, Row, Tab } from 'react-bootstrap'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
 import LinkedPackagesTab from '@/app/[locale]/components/releases/detail/[id]/components/LinkedPackagesTab'
@@ -26,7 +26,7 @@ import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDet
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
-import { PageButtonHeader, SideBar } from '@/components/sw360'
+import { PageButtonHeader } from '@/components/sw360'
 import {
     Attachment,
     Changelogs,
@@ -42,15 +42,14 @@ import {
     ReleaseTabIds,
     User,
     UserGroupType,
+    VulnerabilitiesVerificationState,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import styles from '../detail.module.css'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
 import LinkedReleases from './LinkedReleases'
-import { ReleaseDetailTabs } from './ReleaseDetailTabs'
 import Summary from './Summary'
 import SPDXDocumentTab from './spdx/SPDXDocumentTab'
 
@@ -65,24 +64,48 @@ interface Props {
 
 const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const t = useTranslations('default')
-    const {
-        WITH_COMMERCIAL_DETAILS,
-        WITH_SPDX,
-        WITHOUT_COMMERCIAL_DETAILS_AND_SPDX,
-        WITH_COMMERCIAL_DETAILS_AND_SPDX,
-    } = ReleaseDetailTabs()
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
+    const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
+    const searchParams = useSearchParams()
+    const router = useRouter()
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
-    const [tabList, setTabList] = useState(WITHOUT_COMMERCIAL_DETAILS_AND_SPDX)
     const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
     const [changeLogId, setChangeLogId] = useState('')
     const [changelogTab, setChangelogTab] = useState('list-change')
     const session = useSession()
+    const [vulInfo, setVulInfo] = useState([
+        0,
+        0,
+    ])
+
+    useEffect(() => {
+        if (!CommonUtils.isNullEmptyOrUndefinedArray(vulnerData)) {
+            let numberOfCheckOrUnchecked = 0
+            let numberOfIncorrect = 0
+            vulnerData.forEach((vulnerability: LinkedVulnerability) => {
+                const verificationState =
+                    vulnerability.releaseVulnerabilityRelation.verificationStateInfo?.at(-1)?.verificationState
+                if (
+                    verificationState == VulnerabilitiesVerificationState.CHECKED ||
+                    verificationState == VulnerabilitiesVerificationState.NOT_CHECKED
+                ) {
+                    numberOfCheckOrUnchecked++
+                } else {
+                    numberOfIncorrect++
+                }
+            })
+            setVulInfo([
+                numberOfCheckOrUnchecked,
+                numberOfIncorrect,
+            ])
+        }
+    }, [
+        vulnerData,
+    ])
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -91,6 +114,18 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [
         session,
     ])
+
+    useEffect(() => {
+        const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
+        setActiveKey(fragment)
+    }, [
+        searchParams,
+    ])
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? CommonTabIds.SUMMARY)
+        router.push(`?tab=${key}`)
+    }
 
     const fetchData = useCallback(
         async (url: string) => {
@@ -146,17 +181,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                     setEmbeddedAttachments(release._embedded['sw360:attachments'])
                 }
 
-                if (release.componentType === 'COTS' && isSPDXFeatureEnabled !== true) {
-                    setTabList(WITH_COMMERCIAL_DETAILS)
-                }
-
-                if (release.componentType === 'COTS' && isSPDXFeatureEnabled === true) {
-                    setTabList(WITH_COMMERCIAL_DETAILS_AND_SPDX)
-                }
-
-                if (release.componentType !== 'COTS' && isSPDXFeatureEnabled === true) {
-                    setTabList(WITH_SPDX)
-                }
                 return release
             })
             .then((release: ReleaseDetail) => {
@@ -296,7 +320,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
     const headerButtons = {
         'Edit release': {
-            link: `/components/editRelease/${releaseId}?tab=${selectedTab}`,
+            link: `/components/editRelease/${releaseId}`,
             type: 'primary',
             name: t('Edit release'),
             disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
@@ -334,6 +358,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     return (
         release && (
             <>
+                <LinkReleaseToProjectModal
+                    show={linkProjectModalShow}
+                    setShow={setLinkProjectModalShow}
+                    releaseId={releaseId}
+                />
                 <Breadcrumb className='container page-content'>
                     <Breadcrumb.Item
                         linkAs={Link}
@@ -350,227 +379,274 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                     <Breadcrumb.Item active>{`${release.name} (${release.version})`}</Breadcrumb.Item>
                 </Breadcrumb>
                 <div className='container page-content'>
-                    <div className='row'>
-                        <div className='col-2 sidebar'>
-                            <SideBar
-                                selectedTab={selectedTab}
-                                setSelectedTab={setSelectedTab}
-                                tabList={tabList}
-                                vulnerabilities={vulnerData}
-                                eccStatus={release.eccInformation?.eccStatus}
-                            />
-                        </div>
-                        <div className='col'>
-                            <div
-                                className='row'
-                                style={{
-                                    marginBottom: '20px',
-                                }}
+                    <Tab.Container
+                        activeKey={activeKey}
+                        onSelect={(k) => handleSelect(k)}
+                    >
+                        <Row>
+                            <Col
+                                sm={2}
+                                className='me-3'
                             >
-                                <div
-                                    className='col-auto pe-0 btn-group'
-                                    role='group'
-                                >
-                                    <Dropdown>
-                                        <Dropdown.Toggle variant='primary'>
-                                            <span
-                                                className={`${styles['badge-circle']} ${styles[release.clearingState]}`}
-                                            ></span>
-                                            {`${t('Version')} ${release.version}`}
-                                        </Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            {Object.entries(releasesSameComponent).map(
-                                                ([index, item]: [
-                                                    string,
-                                                    ReleaseLink,
-                                                ]) => (
-                                                    <Dropdown.Item
-                                                        key={index}
-                                                        className={styles['dropdown-item']}
-                                                    >
-                                                        <span
-                                                            className={`${styles['badge-circle']} ${
-                                                                styles[item.clearingState ?? 'NEW']
-                                                            }`}
-                                                        ></span>
-                                                        <Link href={`/components/releases/detail/${item.id}`}>
-                                                            {`${t('Version')} ${item.version}`}
-                                                        </Link>
-                                                    </Dropdown.Item>
-                                                ),
-                                            )}
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                </div>
-                                <div className='col'>
-                                    <PageButtonHeader
-                                        title={`${release.name} ${release.version}`}
-                                        buttons={headerButtons}
+                                <ListGroup>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={CommonTabIds.SUMMARY}
                                     >
-                                        {selectedTab === CommonTabIds.ATTACHMENTS && embeddedAttachments.length > 0 && (
-                                            <div
-                                                className='list-group-companion'
-                                                data-belong-to='tab-Attachments'
+                                        <div className='my-2'>{t('Summary')}</div>
+                                    </ListGroup.Item>
+                                    {isSPDXFeatureEnabled && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.SPDX_DOCUMENT}
+                                        >
+                                            <div className='my-2'>{t('SPDX Document')}</div>
+                                        </ListGroup.Item>
+                                    )}
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                    >
+                                        <div className='my-2'>{t('Linked Releases')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={ReleaseTabIds.LINKED_PACKAGES}
+                                    >
+                                        <div className='my-2'>{t('Linked Packages')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={ReleaseTabIds.CLEARING_DETAILS}
+                                    >
+                                        <div className='my-2'>{t('Clearing Details')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={ReleaseTabIds.ECC_DETAILS}
+                                    >
+                                        <div className='my-2'>
+                                            {t('ECC Details')}{' '}
+                                            <span className={release.eccInformation?.eccStatus ?? ''}></span>
+                                        </div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={CommonTabIds.ATTACHMENTS}
+                                    >
+                                        <div className='my-2'>{t('Attachments')}</div>
+                                    </ListGroup.Item>
+                                    {release.componentType === 'COTS' && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}
+                                        >
+                                            <div className='my-2'>{t('Commercial Details')}</div>
+                                        </ListGroup.Item>
+                                    )}
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={CommonTabIds.VULNERABILITIES}
+                                    >
+                                        <div className='my-2'>
+                                            {t('Vulnerabilities')}{' '}
+                                            <span
+                                                id='numberOfVulnerabilitiesDiv'
+                                                className='badge badge-light'
                                             >
-                                                <div
-                                                    className='btn-group'
-                                                    role='group'
-                                                >
-                                                    <button
-                                                        id='downloadAttachmentBundle'
-                                                        type='button'
-                                                        className='btn btn-secondary'
-                                                        onClick={() => void downloadBundle()}
+                                                {`${vulInfo?.[0] ?? 0} + ${vulInfo?.[1] ?? 0}`}
+                                            </span>
+                                        </div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={CommonTabIds.CHANGE_LOG}
+                                    >
+                                        <div className='my-2'>{t('Change Log')}</div>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Col>
+                            <Col className='me-3 ms-2'>
+                                <Row>
+                                    <Col
+                                        className='col-auto ps-0 btn-group'
+                                        role='group'
+                                    >
+                                        <Dropdown>
+                                            <Dropdown.Toggle variant='primary'>
+                                                <span
+                                                    className={`badge-circle ${release.clearingState ?? 'NEW'}`}
+                                                ></span>
+                                                {`${t('Version')} ${release.version}`}
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu>
+                                                {Object.entries(releasesSameComponent).map(
+                                                    ([index, item]: [
+                                                        string,
+                                                        ReleaseLink,
+                                                    ]) => (
+                                                        <Dropdown.Item
+                                                            key={index}
+                                                            href={`/components/releases/detail/${item.id}`}
+                                                        >
+                                                            <span
+                                                                className={`badge-circle ${item.clearingState ?? 'NEW'}`}
+                                                            ></span>
+                                                            {`${t('Version')} ${item.version}`}
+                                                        </Dropdown.Item>
+                                                    ),
+                                                )}
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </Col>
+                                    <Col>
+                                        <PageButtonHeader
+                                            title={`${release.name} ${release.version}`}
+                                            buttons={headerButtons}
+                                        >
+                                            {activeKey === CommonTabIds.ATTACHMENTS &&
+                                                embeddedAttachments.length > 0 && (
+                                                    <div
+                                                        className='list-group-companion'
+                                                        data-belong-to='tab-Attachments'
                                                     >
-                                                        {t('Download Attachment Bundle')}
-                                                    </button>
+                                                        <div
+                                                            className='btn-group'
+                                                            role='group'
+                                                        >
+                                                            <button
+                                                                id='downloadAttachmentBundle'
+                                                                type='button'
+                                                                className='btn btn-secondary'
+                                                                onClick={() => void downloadBundle()}
+                                                            >
+                                                                {t('Download Attachment Bundle')}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            {activeKey === CommonTabIds.CHANGE_LOG && (
+                                                <div
+                                                    className='nav nav-pills justify-content-center bg-light font-weight-bold'
+                                                    id='pills-tab'
+                                                    role='tablist'
+                                                >
+                                                    <a
+                                                        className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
+                                                        onClick={() => setChangelogTab('list-change')}
+                                                        style={{
+                                                            color: '#F7941E',
+                                                            fontWeight: 'bold',
+                                                        }}
+                                                    >
+                                                        {t('Change Log')}
+                                                    </a>
+                                                    <a
+                                                        className={`nav-item nav-link ${changelogTab === 'view-log' ? 'active' : ''}`}
+                                                        onClick={() => {
+                                                            if (changelogTab !== '') {
+                                                                setChangelogTab('view-log')
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            color: '#F7941E',
+                                                            fontWeight: 'bold',
+                                                        }}
+                                                    >
+                                                        {t('Changes')}
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </PageButtonHeader>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Tab.Content>
+                                        <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
+                                            <Summary
+                                                release={release}
+                                                releaseId={releaseId}
+                                            />
+                                        </Tab.Pane>
+                                        {isSPDXFeatureEnabled && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.SPDX_DOCUMENT}>
+                                                <SPDXDocumentTab releaseId={releaseId} />
+                                            </Tab.Pane>
+                                        )}
+                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                            <LinkedReleases releaseId={releaseId} />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
+                                            <LinkedPackagesTab releaseId={releaseId} />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
+                                            <ClearingDetails
+                                                release={release}
+                                                releaseId={releaseId}
+                                                embeddedAttachments={embeddedAttachments}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey={ReleaseTabIds.ECC_DETAILS}>
+                                            <ECCDetails release={release} />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
+                                            <Attachments
+                                                documentId={releaseId}
+                                                documentType={DocumentTypes.RELEASE}
+                                            />
+                                        </Tab.Pane>
+                                        {release.componentType === 'COTS' && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}>
+                                                <CommercialDetails
+                                                    costDetails={release._embedded['sw360:cotsDetail']}
+                                                />
+                                            </Tab.Pane>
+                                        )}
+                                        <Tab.Pane eventKey={CommonTabIds.VULNERABILITIES}>
+                                            <ComponentVulnerabilities vulnerData={vulnerData} />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey={CommonTabIds.CHANGE_LOG}>
+                                            <div className='col'>
+                                                <div
+                                                    className='row'
+                                                    hidden={changelogTab != 'list-change' ? true : false}
+                                                >
+                                                    <ChangeLogList
+                                                        setChangeLogId={setChangeLogId}
+                                                        documentId={releaseId}
+                                                        setChangesLogTab={setChangelogTab}
+                                                        changeLogList={memoizedData}
+                                                        pageableQueryParam={pageableQueryParam}
+                                                        setPageableQueryParam={setPageableQueryParam}
+                                                        showProcessing={showProcessing}
+                                                        paginationMeta={paginationMeta}
+                                                    />
+                                                </div>
+                                                <div
+                                                    className='row'
+                                                    hidden={changelogTab !== 'view-log' ? true : false}
+                                                >
+                                                    <ChangeLogDetail
+                                                        changeLogData={
+                                                            changeLogList.filter(
+                                                                (d: Changelogs) => d.id === changeLogId,
+                                                            )[0]
+                                                        }
+                                                    />
+                                                    <div
+                                                        id='cardScreen'
+                                                        style={{
+                                                            padding: '0px',
+                                                        }}
+                                                    ></div>
                                                 </div>
                                             </div>
-                                        )}
-                                        {selectedTab === CommonTabIds.CHANGE_LOG && (
-                                            <div
-                                                className='nav nav-pills justify-content-center bg-light font-weight-bold'
-                                                id='pills-tab'
-                                                role='tablist'
-                                            >
-                                                <a
-                                                    className={`nav-item nav-link ${changelogTab === 'list-change' ? 'active' : ''}`}
-                                                    onClick={() => setChangelogTab('list-change')}
-                                                    style={{
-                                                        color: '#F7941E',
-                                                        fontWeight: 'bold',
-                                                    }}
-                                                >
-                                                    {t('Change Log')}
-                                                </a>
-                                                <a
-                                                    className={`nav-item nav-link ${changelogTab === 'view-log' ? 'active' : ''}`}
-                                                    onClick={() => {
-                                                        if (changelogTab !== '') {
-                                                            setChangelogTab('view-log')
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        color: '#F7941E',
-                                                        fontWeight: 'bold',
-                                                    }}
-                                                >
-                                                    {t('Changes')}
-                                                </a>
-                                            </div>
-                                        )}
-                                    </PageButtonHeader>
-                                </div>
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                            >
-                                <Summary
-                                    release={release}
-                                    releaseId={releaseId}
-                                />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== ReleaseTabIds.SPDX_DOCUMENT ? true : false}
-                            >
-                                <SPDXDocumentTab releaseId={releaseId} />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== ReleaseTabIds.LINKED_RELEASES ? true : false}
-                            >
-                                <LinkedReleases releaseId={releaseId} />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== ReleaseTabIds.LINKED_PACKAGES ? true : false}
-                            >
-                                <LinkedPackagesTab releaseId={releaseId} />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== ReleaseTabIds.CLEARING_DETAILS ? true : false}
-                            >
-                                <ClearingDetails
-                                    release={release}
-                                    releaseId={releaseId}
-                                    embeddedAttachments={embeddedAttachments}
-                                />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== ReleaseTabIds.ECC_DETAILS ? true : false}
-                            >
-                                <ECCDetails release={release} />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab != CommonTabIds.ATTACHMENTS ? true : false}
-                            >
-                                <Attachments
-                                    documentId={releaseId}
-                                    documentType={DocumentTypes.RELEASE}
-                                />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab != ReleaseTabIds.COMMERCIAL_DETAILS ? true : false}
-                            >
-                                <CommercialDetails costDetails={release._embedded['sw360:cotsDetail']} />
-                            </div>
-                            <div
-                                className='containers'
-                                hidden={selectedTab != CommonTabIds.VULNERABILITIES ? true : false}
-                            >
-                                <ComponentVulnerabilities vulnerData={vulnerData} />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab != CommonTabIds.CHANGE_LOG ? true : false}
-                            >
-                                <div className='col'>
-                                    <div
-                                        className='row'
-                                        hidden={changelogTab != 'list-change' ? true : false}
-                                    >
-                                        <ChangeLogList
-                                            setChangeLogId={setChangeLogId}
-                                            documentId={releaseId}
-                                            setChangesLogTab={setChangelogTab}
-                                            changeLogList={memoizedData}
-                                            pageableQueryParam={pageableQueryParam}
-                                            setPageableQueryParam={setPageableQueryParam}
-                                            showProcessing={showProcessing}
-                                            paginationMeta={paginationMeta}
-                                        />
-                                    </div>
-                                    <div
-                                        className='row'
-                                        hidden={changelogTab !== 'view-log' ? true : false}
-                                    >
-                                        <ChangeLogDetail
-                                            changeLogData={
-                                                changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]
-                                            }
-                                        />
-                                        <div
-                                            id='cardScreen'
-                                            style={{
-                                                padding: '0px',
-                                            }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <LinkReleaseToProjectModal
-                        show={linkProjectModalShow}
-                        setShow={setLinkProjectModalShow}
-                        releaseId={releaseId}
-                    />
+                                        </Tab.Pane>
+                                    </Tab.Content>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Tab.Container>
                 </div>
             </>
         )

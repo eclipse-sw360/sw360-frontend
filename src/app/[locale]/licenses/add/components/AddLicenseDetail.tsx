@@ -18,7 +18,6 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Embedded, LicensePayload, LicenseType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import styles from './LicenseDetails.module.css'
 
 interface Props {
     licensePayload: LicensePayload
@@ -97,7 +96,7 @@ const AddLicenseDetail = ({
                 const licenses = (await response.json()) as EmbeddedLicenseTypes
                 setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
             } catch (e) {
-                console.error(e)
+                ApiUtils.reportError(e)
             }
         })()
         return () => controller.abort()
@@ -114,7 +113,7 @@ const AddLicenseDetail = ({
             }}
         >
             <div
-                className={`${styles['header']} mb-1`}
+                className='header mb-2'
                 style={{
                     paddingTop: '0.5rem',
                     height: '45px',

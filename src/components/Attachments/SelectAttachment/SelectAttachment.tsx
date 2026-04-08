@@ -20,14 +20,12 @@ import { Attachment, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import CommonUtils from '@/utils/common.utils'
-import AttachmentRowData from '../AttachmentRowData'
-import styles from './SelectAttachment.module.css'
 
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    attachmentsData: Array<AttachmentRowData>
-    setAttachmentsData: React.Dispatch<React.SetStateAction<Array<AttachmentRowData>>>
+    attachmentsData: Array<Attachment>
+    setAttachmentsData: React.Dispatch<React.SetStateAction<Array<Attachment>>>
 }
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
@@ -91,7 +89,6 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                 checkedTeam: '',
                 checkedBy: '',
                 checkedOn: '',
-                isAddedNew: true,
             })
         })
         setAttachmentsData([
@@ -121,14 +118,14 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                 <Modal.Title>{t('Upload Attachment')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className={`${styles['modal-body-first']}`}>
-                    <div className={`${styles['modal-body-second']}`}>
+                <div className='modal-body-bordered'>
+                    <div className='text-center'>
                         <span>{t('Drop a File Here')}</span>
                         <br />
                         {t('Or')}
                         <br />
                         <input
-                            className={`${styles['input']}`}
+                            className='d-none'
                             ref={inputRef}
                             type='file'
                             placeholder={t('Upload Attachment')}
@@ -136,7 +133,7 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                             onChange={handleFileChange}
                         />
                         <button
-                            className={`${styles['button-browse']}`}
+                            className='btn btn-secondary'
                             onClick={handleButtonClick}
                         >
                             {t('Browse')}
@@ -148,19 +145,18 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
                 <div style={{}}>
                     {files.map((file, j) => (
                         <div key={file.name}>
-                            <div className={`${styles['div-list-file']}`}>
-                                <div className={`${styles['div-filename']}`}>
+                            <div className='position-relative'>
+                                <div className='position-absolute bottom-0 start-0'>
                                     {file.name} ({file.size}b)
                                 </div>
-                                <div className={`${styles['button-delete']}`}>
-                                    <Button
-                                        variant='danger'
-                                        size='sm'
-                                        onClick={() => handleRemoveClick(j)}
-                                    >
-                                        Delete
-                                    </Button>
-                                </div>
+                                <Button
+                                    variant='danger'
+                                    size='sm'
+                                    onClick={() => handleRemoveClick(j)}
+                                    className='position-absolute bottom-0 end-0'
+                                >
+                                    Delete
+                                </Button>
                             </div>
                             <br />
                             <br />

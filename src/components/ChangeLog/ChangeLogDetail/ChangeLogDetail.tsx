@@ -91,7 +91,7 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
             {changeLogData !== undefined && (
                 <>
                     <table
-                        className='table label-value-table'
+                        className='table'
                         style={{
                             marginBottom: '2rem',
                         }}

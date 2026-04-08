@@ -31,7 +31,6 @@ import {
 import { ApiUtils, CommonUtils } from '@/utils/index'
 
 import AnnotationInformation from './AnnotationInformation'
-import styles from './CssButton.module.css'
 import DocumentCreationInformationDetail from './DocumentCreationInformation'
 import OtherLicensingInformationDetectedDetail from './OtherLicensingInformationDetectedDetail'
 import PackageInformationDetail from './PackageInformationDetail'
@@ -239,13 +238,13 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
             >
                 <div className='btn-group'>
                     <button
-                        className={`btn ${isModeFull ? styles['btn-full'] : styles['btn-lite']}`}
+                        className={`btn ${isModeFull ? 'btn-info' : 'btn-light'}`}
                         onClick={changeModeFull}
                     >
                         {t('SPDX Full')}
                     </button>
                     <button
-                        className={`btn ${isModeFull ? styles['btn-lite'] : styles['btn-full']}`}
+                        className={`btn ${isModeFull ? 'btn-light' : 'btn-info'}`}
                         onClick={changeModeLite}
                     >
                         {t('SPDX Lite')}

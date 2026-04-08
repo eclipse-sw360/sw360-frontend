@@ -77,33 +77,14 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps): Rea
                     onUpdateNodeElement={updateNodeElement}
                 />
 
-                <div
-                    className='row'
-                    style={{
-                        marginBottom: '10px',
-                    }}
-                >
+                <div className='row'>
                     <div className='col-md-4'>
-                        <label
-                            className='form-label'
-                            style={{
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            {'Preview'}
-                        </label>
-                        <div
-                            className='border p-3'
-                            style={{
-                                minHeight: '100px',
-                                backgroundColor: '#f8f9fa',
-                                whiteSpace: 'pre-wrap',
-                            }}
-                        >
+                        <label className='form-label fw-bold'>{'Preview'}</label>
+                        <pre className='border p-3 obligation-preview'>
                             {title}
                             <br />
                             {treeText}
-                        </div>
+                        </pre>
                     </div>
                 </div>
             </div>

@@ -127,7 +127,7 @@ export default function Roles({
     }
 
     const handleClearContributors = () => {
-        setModerators({})
+        setContributors({})
         setProjectPayload({
             ...projectPayload,
             contributors: [],
@@ -143,7 +143,7 @@ export default function Roles({
     }
 
     const handleClearSecurityResponsibles = () => {
-        setModerators({})
+        setSecurityResponsibles({})
         setProjectPayload({
             ...projectPayload,
             securityResponsibles: [],

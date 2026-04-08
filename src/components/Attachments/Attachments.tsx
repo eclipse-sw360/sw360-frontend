@@ -26,6 +26,7 @@ import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
+import ReleaseCheckStates from '../../object-types/enums/ReleaseCheckStates'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
@@ -176,7 +177,11 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 header: t('Reviewer Group'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
-                    return <p className='text-center'>{row.original.node.checkedTeam ?? ''}</p>
+                    if (row.original.node.checkStatus === ReleaseCheckStates.ACCEPTED) {
+                        return <p className='text-center text-success'>{row.original.node.checkedTeam ?? ''}</p>
+                    } else if (row.original.node.checkStatus === ReleaseCheckStates.REJECTED) {
+                        return <p className='text-center text-danger'>{row.original.node.checkedTeam ?? ''}</p>
+                    }
                 },
             },
             {
@@ -184,14 +189,25 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 header: t('Checked By'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
-                    return (
-                        <Link
-                            href={`mailto:${row.original.node.checkedBy ?? ''}`}
-                            className='text-link w-100 text-center'
-                        >
-                            {row.original.node.checkedBy ?? ''}
-                        </Link>
-                    )
+                    if (row.original.node.checkStatus === ReleaseCheckStates.ACCEPTED) {
+                        return (
+                            <Link
+                                href={`mailto:${row.original.node.checkedBy ?? ''}`}
+                                className='text-link text-center text-success'
+                            >
+                                {row.original.node.checkedBy ?? ''}
+                            </Link>
+                        )
+                    } else if (row.original.node.checkStatus === ReleaseCheckStates.REJECTED) {
+                        return (
+                            <Link
+                                href={`mailto:${row.original.node.checkedBy ?? ''}`}
+                                className='text-link w-100 text-center text-danger'
+                            >
+                                {row.original.node.checkedBy ?? ''}
+                            </Link>
+                        )
+                    }
                 },
             },
             {
