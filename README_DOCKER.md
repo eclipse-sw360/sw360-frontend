@@ -72,7 +72,7 @@ Frontend runtime configuration is stored in
 
 | Variable | Description | Default |
 |---|---|---|
-| `NEXTAUTH_SECRET` | Secret used to encrypt session tokens. **Change this in production.** | `secret` |
+| `AUTH_SECRET` | Secret used to encrypt session tokens. **Change this in production.** | `secret` |
 | `NEXTAUTH_URL` | Public URL where the frontend is accessed | `http://localhost:3000` |
 | `NEXTAUTH_URL_INTERNAL` | Internal URL for server-side auth callbacks (Docker network) | `http://sw360-frontend:3000` |
 | `NEXT_PUBLIC_SW360_API_URL` | Backend REST API URL (client-side, set at build time) | `http://localhost:8080` |
@@ -106,7 +106,7 @@ additional variables in
 | `SW360_REST_CLIENT_SECRET` | OAuth2 client secret | `autorization-secret` |
 | `AUTH_ISSUER` | OAuth2 issuer URL | _(commented out)_ |
 
-Check backend documentaions for more details.
+Check backend documentations for more details.
 
 #### `keycloak` - Keycloak OpenID Connect
 
@@ -149,7 +149,7 @@ CouchDB settings are mounted as `.ini` files:
 ## Full Stack Setup
 
 The [docker-compose-full.yml](docker-compose-full.yml) extends the basic setup
-with Keycloak, PostgreSQL, and an Nginx reverse proxy. This is the **recommended
+with Keycloak, PostgreSQL, and a Nginx reverse proxy. This is the **recommended
 setup for production-like deployments**.
 
 ```sh

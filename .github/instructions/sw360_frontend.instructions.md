@@ -568,8 +568,6 @@ pnpm lint            # Run Biome linter
 | `NEXTAUTH_URL` | Frontend URL |
 | `NEXTAUTH_SECRET` | Session encryption secret |
 
-See `.env` and `docs/templates/template.env` for full list.
-
 ---
 
 ## Git Workflow
