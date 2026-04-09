@@ -11,7 +11,7 @@ header:
   license:
     spdx-id: EPL-2.0
     copyright-owner: SW360 Frontend Authors
-    copyright-year: '2023'
+    copyright-year: '2023-2026'
     software-name: sw360-frontend
     pattern: |
       This program and the accompanying materials are made
@@ -39,13 +39,11 @@ header:
     - '**/testdata/**'
     - 'cypress/fixtures/**'
     - 'LICENSE'
-    - 'node_modulesw'
     - 'NOTICE'
-    - 'eslint.config.mjs'
     - 'pnpm-lock.yaml'
     - 'pnpm-workspace.yaml'
     - 'docs/templates/**'
-    - 'configs/**'
+    - 'config/**'
 
   comment: on-failure
 

@@ -10,4 +10,4 @@
 import ApiUtils, { ApiError } from './api/api.util'
 import CommonUtils from './common.utils'
 
-export { ApiUtils, ApiError, CommonUtils }
+export { ApiError, ApiUtils, CommonUtils }
