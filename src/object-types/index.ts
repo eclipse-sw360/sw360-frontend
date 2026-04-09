@@ -118,6 +118,7 @@ import SPDXDocument from './spdx/SPDXDocument'
 import ToastData from './ToastData'
 import { ProcessedUiConfig, parseRawUiConfig, UiConfiguration } from './UiConfiguration'
 import UpdateClearingRequestPayload from './UpdateClearingRequestPayload'
+import UpdateCommentModalMetadata from './UpdateCommentModalMetadata'
 import { User, UserPayload } from './User'
 import UserCredentialInfo from './UserCredentialInfo'
 import Vendor from './Vendor'
@@ -136,8 +137,6 @@ export type {
     AttachmentUsage,
     AttachmentUsages,
     AuthToken,
-    COTSDetails,
-    CVEReference,
     Changelogs,
     CheckSum,
     ClearingDetailsCount,
@@ -145,16 +144,18 @@ export type {
     ClearingRequest,
     ClearingRequestComments,
     ClearingRequestDetails,
+    COTSDetails,
     ColumnMeta,
     Component,
     ComponentPayload,
     Configuration,
     CreateClearingRequestPayload,
     Creator,
+    CVEReference,
     DocumentCreationInformation,
     DocumentState,
-    ECCInterface,
     ECCInformation,
+    ECCInterface,
     Embedded,
     ErrorDetails,
     ExternalDocumentReferences,
@@ -218,19 +219,20 @@ export type {
     Resources,
     RestrictedResource,
     RolesType,
-    SPDX,
-    SPDXDocument,
     SaveUsagesPayload,
     SearchDuplicatesResponse,
     SearchResult,
     Session,
     SnippetInformation,
     SnippetRange,
+    SPDX,
+    SPDXDocument,
     SummaryDataType,
     ToastData,
     TypedEntity,
     UiConfiguration,
     UpdateClearingRequestPayload,
+    UpdateCommentModalMetadata,
     User,
     UserCredentialInfo,
     UserPayload,
@@ -242,10 +244,7 @@ export type {
     VulnerabilityRatingAndActionPayload,
     VulnerabilityTrackingStatus,
 }
-
 // Special functions for populate data
-export { NavList, Preferences, parseRawUiConfig }
-
 export {
     ActionType,
     ArrayTypeUIConfigKeys,
@@ -258,13 +257,16 @@ export {
     DocumentTypes,
     LicenseTabIds,
     MergeOrSplitActionType,
+    NavList,
     ObligationType,
+    Preferences,
     ProjectVulnerabilityTabType,
+    parseRawUiConfig,
     ReleaseClearingStateMapping,
     ReleaseTabIds,
     RequestDocumentTypes,
+    RequestType,
     UIConfigKeys,
     UserGroupType,
     VulnerabilitiesVerificationState,
-    RequestType,
 }

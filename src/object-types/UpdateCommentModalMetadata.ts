@@ -1,4 +1,4 @@
-// Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ApiUtils, { ApiError } from './api/api.util'
-import CommonUtils from './common.utils'
-
-export { ApiError, ApiUtils, CommonUtils }
+export default interface UpdateCommentModalMetadata {
+    initialCommentValue: string
+    id: string
+}

@@ -243,6 +243,10 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                                 className={`fw-bold btn btn-light button-plain me-2`}
                                 onClick={() => {
                                     if (!searchText) setSearchText('')
+                                    setPageableQueryParam((prev) => ({
+                                        ...prev,
+                                        page: 0,
+                                    }))
                                     handleSearch()
                                 }}
                             >
