@@ -37,6 +37,19 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const handleCloseDialog = () => {
         setShow(!show)
         setSelectedVendor(vendor)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
+        setVendorData([])
     }
     const session = useSession()
     const [selectedVendor, setSelectedVendor] = useState<Vendor>(vendor)
@@ -284,6 +297,10 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                                     className='btn btn-secondary me-2'
                                     onClick={() => {
                                         if (searchText === undefined) setSearchText('')
+                                        setPageableQueryParam((prev) => ({
+                                            ...prev,
+                                            page: 0,
+                                        }))
                                         void searchVendor()
                                     }}
                                 >
