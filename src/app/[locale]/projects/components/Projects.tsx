@@ -621,7 +621,11 @@ function Project(): JSX.Element {
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
             const mailEnabled = mailRequestForProjectReport === 'true'
-            const url = withLinkedRelease ? 'reports?module=PROJECTS&withLinkedRelease=true' : 'reports?module=PROJECTS'
+            const searchParamsString = params.toString()
+            const baseUrl = withLinkedRelease
+                ? 'reports?module=PROJECTS&withlinkedreleases=true'
+                : 'reports?module=PROJECTS'
+            const url = searchParamsString ? `${baseUrl}&${searchParamsString}` : baseUrl
 
             if (!mailEnabled) {
                 // If mail is not enabled, download the file immediately
