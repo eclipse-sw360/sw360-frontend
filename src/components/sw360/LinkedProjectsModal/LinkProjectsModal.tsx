@@ -26,6 +26,7 @@ import {
     PaginationMeta,
     Project,
     ProjectPayload,
+    SearchResult,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
@@ -42,6 +43,7 @@ interface Props {
 }
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
+type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -52,6 +54,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
+    const [byNameOnly, setByNameOnly] = useState(true)
     const session = useSession()
 
     useEffect(() => {
@@ -294,41 +297,94 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
+            setShowProcessing(true)
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
-            const queryUrl = CommonUtils.createUrlWithParams(
-                `projects`,
-                Object.fromEntries(
-                    Object.entries({
-                        ...pageableQueryParam,
-                        ...(searchText && searchText !== ''
-                            ? {
-                                  searchText: searchText,
-                                  luceneSearch: !exactMatch,
-                              }
-                            : {}),
-                        allDetails: true,
-                    }).map(([key, value]) => [
-                        key,
-                        String(value),
-                    ]),
-                ),
-            )
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-            if (response.status !== StatusCodes.OK) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message, {
-                    status: response.status,
-                })
-            }
+            if (byNameOnly) {
+                // Search by name only using /projects endpoint
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `projects`,
+                    Object.fromEntries(
+                        Object.entries({
+                            ...pageableQueryParam,
+                            ...(searchText && searchText !== ''
+                                ? {
+                                      name: searchText,
+                                      luceneSearch: !exactMatch,
+                                  }
+                                : {}),
+                            allDetails: true,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
 
-            const data = (await response.json()) as EmbeddedProjects
-            setPaginationMeta(data.page)
-            setProjectData(
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
-                    ? []
-                    : data['_embedded']['sw360:projects'],
-            )
+                const data = (await response.json()) as EmbeddedProjects
+                setPaginationMeta(data.page)
+                setProjectData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                        ? []
+                        : data['_embedded']['sw360:projects'],
+                )
+            } else {
+                // Full-text search using /search endpoint
+                const params = new URLSearchParams()
+                if (searchText && searchText !== '') {
+                    params.append('searchText', searchText)
+                }
+                params.append('typeMasks', 'project')
+                if (exactMatch) {
+                    params.append('typeMasks', 'document')
+                }
+                Object.entries(pageableQueryParam)
+                    .filter(([k]) => k !== 'sort')
+                    .forEach(([key, value]) => params.append(key, String(value)))
+
+                const response = await ApiUtils.GET(
+                    `search?${params.toString()}`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const data = (await response.json()) as EmbeddedSearchResults
+                setPaginationMeta(data.page)
+
+                // Fetch full project details for search results
+                const searchResults = data['_embedded']?.['sw360:searchResults'] ?? []
+                const projectIds = searchResults.filter((r) => r.type === 'project').map((r) => r.id)
+
+                if (projectIds.length === 0) {
+                    setProjectData([])
+                    return
+                }
+
+                // Fetch full details for each project
+                const accessToken = session.data?.user.access_token
+                if (!accessToken) return
+
+                const projectPromises = projectIds.map((id) =>
+                    ApiUtils.GET(`projects/${id}`, accessToken, signal)
+                        .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
+                        .catch(() => null),
+                )
+                const projects = (await Promise.all(projectPromises)).filter((p): p is Project => p !== null)
+                setProjectData(projects)
+            }
         } catch (error) {
             ApiUtils.reportError(error)
         } finally {
@@ -363,6 +419,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
         setProjectData([])
         setAlert(null)
         setExactMatch(false)
+        setByNameOnly(true)
         setPaginationMeta({
             size: 0,
             totalElements: 0,
@@ -420,13 +477,29 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                         name='exact-match'
                                         type='checkbox'
                                         id='exact-match'
+                                        checked={exactMatch}
                                         onChange={() => setExactMatch(!exactMatch)}
                                     />
-                                    <Form.Label
-                                        className='pt-2'
-                                        value={exactMatch}
-                                    >
+                                    <Form.Label className='pt-2'>
                                         {t('Exact Match')}{' '}
+                                        <sup>
+                                            <BsInfoCircle size={20} />
+                                        </sup>
+                                    </Form.Label>
+                                </Form.Group>
+                            </Col>
+                            <Col xs='auto'>
+                                <Form.Group controlId='by-name-only-group'>
+                                    <Form.Check
+                                        inline
+                                        name='by-name-only'
+                                        type='checkbox'
+                                        id='by-name-only'
+                                        checked={byNameOnly}
+                                        onChange={() => setByNameOnly(!byNameOnly)}
+                                    />
+                                    <Form.Label className='pt-2'>
+                                        {t('By Name Only')}{' '}
                                         <sup>
                                             <BsInfoCircle size={20} />
                                         </sup>
