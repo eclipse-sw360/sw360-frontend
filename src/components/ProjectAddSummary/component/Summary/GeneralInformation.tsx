@@ -11,7 +11,7 @@
 
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
-import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
@@ -41,6 +41,34 @@ export default function GeneralInformation({
         useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) === null
             ? true
             : (useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) as boolean)
+
+    const hasSecurityResponsibles =
+        Array.isArray(projectPayload.securityResponsibles) && projectPayload.securityResponsibles.length > 0
+
+    useEffect(() => {
+        if (!hasSecurityResponsibles && projectPayload.enableSvm) {
+            setProjectPayload((prev) => ({
+                ...prev,
+                enableSvm: false,
+            }))
+        }
+    }, [
+        hasSecurityResponsibles,
+    ])
+
+    const handleEnableSvmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setProjectPayload({
+            ...projectPayload,
+            enableSvm: event.target.checked,
+        })
+    }
+
+    const handleEnableVulnerabilitiesDisplayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setProjectPayload({
+            ...projectPayload,
+            enableVulnerabilitiesDisplay: event.target.checked,
+        })
+    }
 
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -351,9 +379,11 @@ export default function GeneralInformation({
                         <input
                             className='form-check-input'
                             type='checkbox'
-                            value=''
                             id='addProjects.enableSecurityVulnerabilityMonitoring'
-                            disabled={true}
+                            name='enableSvm'
+                            disabled={!hasSecurityResponsibles}
+                            checked={projectPayload.enableSvm ?? false}
+                            onChange={handleEnableSvmChange}
                             aria-describedby='addProjects.enableSecurityVulnerabilityMonitoring.HelpBlock'
                         />
                         <label
@@ -388,8 +418,10 @@ export default function GeneralInformation({
                         <input
                             className='form-check-input'
                             type='checkbox'
-                            value=''
                             id='addProjects.enableDisplayingVulnerabilities'
+                            name='enableVulnerabilitiesDisplay'
+                            checked={projectPayload.enableVulnerabilitiesDisplay ?? false}
+                            onChange={handleEnableVulnerabilitiesDisplayChange}
                         />
                         <label
                             className='form-check-label fw-medium ms-2'

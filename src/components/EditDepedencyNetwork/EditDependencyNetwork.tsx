@@ -19,7 +19,7 @@ import { BsArrowCounterclockwise, BsFillTrashFill, BsInfoCircle, BsPlusLg, BsQue
 import { Embedded, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import SearchReleasesModal from '../sw360/SearchReleasesModal/SearchReleasesModal'
+import SearchReleasesModal from '../sw360/SearchReleasesModal'
 import LinkedReleasesTable from './LinkedReleasesTable'
 
 interface CheckCyclicLinkPayload {
@@ -799,7 +799,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                     projectId={projectId}
                     show={showReleaseModal}
                     setShow={setShowReleaseModal}
-                    setSelectedReleases={setSelectedReleases}
+                    onSelect={setSelectedReleases}
+                    showSubProjectReleases={true}
                 />
                 <Modal
                     className='modal-danger'

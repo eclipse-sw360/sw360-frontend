@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 # License-Filename: LICENSE
 
-ARG VARIANT=22-slim
+ARG VARIANT=24-slim@sha256:b506e7321f176aae77317f99d67a24b272c1f09f1d10f1761f2773447d8da26c
 FROM node:${VARIANT}
 
 ARG USERNAME=devel
@@ -32,7 +32,7 @@ RUN echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 # Add pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@latest-10
 
 USER ${USERNAME}
 WORKDIR $HOMEDIR

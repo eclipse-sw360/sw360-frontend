@@ -398,6 +398,10 @@ const SelectUsersDialog = ({
                                     variant='secondary'
                                     onClick={() => {
                                         if (!searchText) setSearchText('')
+                                        setPageableQueryParam((prev) => ({
+                                            ...prev,
+                                            page: 0,
+                                        }))
                                         handleSearch()
                                     }}
                                 >

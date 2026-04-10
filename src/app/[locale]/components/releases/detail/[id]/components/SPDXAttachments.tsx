@@ -283,7 +283,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
                 const attachments = CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:attachments'])
                     ? []
-                    : data['_embedded']['sw360:attachments']
+                    : data['_embedded']['sw360:attachments'].filter((att) => att.checkStatus !== 'REJECTED')
                 const isrAttachments = filterAttachmentByType(attachments, [
                     AttachmentTypes.INITIAL_SCAN_REPORT,
                 ])
