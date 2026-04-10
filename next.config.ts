@@ -7,6 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import * as child_process from 'node:child_process'
 import { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
@@ -76,6 +77,10 @@ const config: NextConfig = {
                 ],
             },
         ]
+    },
+    generateBuildId: async () => {
+        // Only use commits that changed the src directory
+        return child_process.execSync('git rev-list HEAD -- src | head -1').toString().trim()
     },
     // biome-ignore-end lint: Next.js config requires this async method pattern for custom headers
 }
