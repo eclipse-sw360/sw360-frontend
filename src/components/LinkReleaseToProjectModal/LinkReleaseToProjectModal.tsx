@@ -504,6 +504,10 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                         variant='secondary'
                                         onClick={() => {
                                             if (!searchText) setSearchText('')
+                                            setPageableQueryParam((prev) => ({
+                                                ...prev,
+                                                page: 0,
+                                            }))
                                             handleSearch()
                                         }}
                                     >

@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.4
 
-# Copyright (c) Helio Chissini de Castro, 2025. Part of the SW360 Frontend Project.
+# SPDX-FileContributor: Gaurav Mishra
+# SPDX-FileCopyrightText: (C) 2026 Siemens AG
 
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -37,7 +38,7 @@ services:
       start_period: 60s
 
   couchdb-nouveau:
-    image: couchdb:3.5-nouveau
+    image: docker.io/library/couchdb:3.5-nouveau
     restart: unless-stopped
     container_name: couchdb_nouveau
     volumes:
@@ -49,7 +50,7 @@ services:
       - sw360net
 
   couchdb:
-    image: couchdb:3.5
+    image: docker.io/library/couchdb:3.5
     restart: unless-stopped
     container_name: couchdb
     env_file:
@@ -91,9 +92,77 @@ services:
     depends_on:
       - sw360
 
+  keycloak:
+    image: "ghcr.io/eclipse-sw360/sw360/keycloak:26.5.5"
+    container_name: keycloak
+    restart: unless-stopped
+    env_file: ./config/keycloak/.env.keycloak
+    secrets:
+      - COUCHDB_SECRETS
+# Uncomment following for development
+#    command:
+#      - start-dev --debug
+    depends_on:
+      - postgres
+    ports:
+      - "8533:8533"
+    networks:
+      - sw360net
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # PG for KeyCloak
+  postgres:
+    image: docker.io/library/postgres:18.3-alpine
+    container_name: postgres
+    restart: unless-stopped
+    env_file: ./config/postgres/.env.postgres
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/POSTGRES_PASSWORD
+    networks:
+      - sw360net
+    volumes:
+      - postgres_storage:/var/lib/postgresql
+    secrets:
+      - POSTGRES_PASSWORD
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready --dbname $$POSTGRES_DB --username $$POSTGRES_USER" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx reverse proxy
+  web:
+    image: docker.io/library/nginx:1.29.8-trixie
+    container_name: sw360_web
+    restart: unless-stopped
+    env_file: ./config/nginx/.env.web
+    volumes:
+      - ./config/nginx/rev_proxy.template:/etc/nginx/templates/default.conf.template:ro
+      - ./config/nginx/proxy_params:/etc/nginx/proxy_params:ro
+    command: >
+      /bin/bash -c "
+        apt-get update && apt-get install -y ssl-cert &&
+        nginx -g 'daemon off;'
+      "
+    ports:
+      # If ports changed, update nginx/proxy_params
+      - "443:443"
+    networks:
+      - sw360net
+    depends_on:
+      - sw360-frontend
+      - sw360
+      - keycloak
+
 volumes:
   couchdb: {}
   etc: {}
+  postgres_storage: {}
 
 networks:
   sw360net:
@@ -105,3 +174,5 @@ secrets:
     file: ./config/sw360/default_secrets
   COUCHDB_SECRETS:
     file: ./config/couchdb/default_secrets
+  POSTGRES_PASSWORD:
+    file: ./config/postgres/postgresql_password

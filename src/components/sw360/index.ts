@@ -43,6 +43,7 @@ import {
     TableSearch,
 } from './Table/Components'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
+import UpdateCommentModal from './UpdateCommentModal'
 
 export {
     AddAdditionalRoles,
@@ -69,14 +70,15 @@ export {
     PillsInput,
     ProfileDropdown,
     QuickFilter,
-    SW360Table,
     SearchReleasesModal,
     SearchUsersModal,
     SelectCountry,
     SelectUsersDialog,
     ShowInfoOnHover,
+    SW360Table,
     TableFooter,
     TableSearch,
     ThemeSwitcher,
+    UpdateCommentModal,
     VendorDialog,
 }

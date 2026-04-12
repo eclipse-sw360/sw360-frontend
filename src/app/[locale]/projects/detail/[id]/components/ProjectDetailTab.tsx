@@ -246,7 +246,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setShow={setShow}
                 projectId={projectId}
             />
-            {summaryData?.name ? <Breadcrumb name={summaryData?.name} /> : <Breadcrumb name={' '} />}
+            {summaryData?.name ? (
+                <Breadcrumb
+                    name={`${summaryData.name}${
+                        CommonUtils.isNullEmptyOrUndefinedString(summaryData.version) ? '' : ` (${summaryData.version})`
+                    }`}
+                />
+            ) : (
+                <Breadcrumb name={' '} />
+            )}
             <div className='container page-content'>
                 <Tab.Container
                     activeKey={activeKey}
