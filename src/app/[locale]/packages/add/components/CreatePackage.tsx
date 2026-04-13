@@ -20,6 +20,7 @@ import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
+import { getPackageSubmitErrorMessage } from '../../components/packageSubmitError'
 
 function CreatePackage(): ReactNode {
     const t = useTranslations('default')
@@ -52,17 +53,17 @@ function CreatePackage(): ReactNode {
             setCreatingPackage(true)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const { packageManager: _packageManager, ...packageRequestPayload } = packagePayload
             const response = await ApiUtils.POST(
                 'packages',
                 {
-                    ...packagePayload,
+                    ...packageRequestPayload,
                     createdBy: session.user.email,
-                    packageManager: packagePayload.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase(),
                 },
                 session.user.access_token,
             )
-            const res = (await response.json()) as Record<string, string>
             if (response.status == StatusCodes.CREATED) {
+                const res = (await response.json()) as Record<string, string>
                 MessageService.success(t('Package created successfully'))
                 if (res.id) {
                     router.push(`/packages/detail/${res.id}`)
@@ -72,7 +73,12 @@ function CreatePackage(): ReactNode {
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                const errorMessage = await getPackageSubmitErrorMessage(
+                    response,
+                    packageRequestPayload.purl,
+                    t('Something went wrong'),
+                )
+                MessageService.error(`${t('Something went wrong')}: ${errorMessage}`)
             }
         } catch (e) {
             console.error(e)
