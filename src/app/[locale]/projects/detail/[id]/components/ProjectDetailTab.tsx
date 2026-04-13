@@ -23,6 +23,7 @@ import {
     AdministrationDataType,
     ClearingDetailsCount,
     ErrorDetails,
+    PageableQueryParam,
     SummaryDataType,
     UserGroupType,
 } from '@/object-types'
@@ -237,8 +238,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const isMonitoringScenario =
         isVulnerabilitiesDisplayEnabled && isVulnerabilityMonitoringEnabled && hasSecurityResponsibles
 
-    const vulnerabilitiesBadgeClassName =
-        isVulnerabilitiesDisplayEnabled && isMonitoringScenario ? 'obligations-badge--danger' : 'obligations-badge'
+    const vulnerabilitiesBadgeClassName = isMonitoringScenario ? 'obligations-badge--danger' : 'obligations-badge'
 
     const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
         ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
@@ -269,39 +269,60 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                     void signOut()
                     return
                 }
+                let page = 0
+                let totalPages = 1
+                let totalElements = 0
+                let ratedCount = 0
 
-                const url = CommonUtils.createUrlWithParams(`projects/${projectId}/vulnerabilitySummary`, {
-                    page: '0',
-                    page_entries: '9999',
-                })
+                while (page < totalPages) {
+                    const pageableQueryParam: PageableQueryParam = {
+                        page,
+                        page_entries: 10,
+                        sort: '',
+                    }
+                    const queryUrl = CommonUtils.createUrlWithParams(
+                        `projects/${projectId}/vulnerabilitySummary`,
+                        Object.fromEntries(
+                            Object.entries(pageableQueryParam).map(([key, value]) => [
+                                key,
+                                String(value),
+                            ]),
+                        ),
+                    )
 
-                const resp = await ApiUtils.GET(url, session.data.user.access_token, signal)
-                const body = (await resp.json().catch(() => ({}))) as {
-                    _embedded?: {
-                        'sw360:vulnerabilitySummaries'?: Array<{
-                            projectRelevance?: string | null
-                        }>
+                    const resp = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                    const body = (await resp.json().catch(() => ({}))) as {
+                        _embedded?: {
+                            'sw360:vulnerabilitySummaries'?: Array<{
+                                projectRelevance?: string | null
+                            }>
+                        }
+                        page?: {
+                            totalElements?: number
+                            totalPages?: number
+                        }
+                        message?: string
+                        error?: string
                     }
-                    page?: {
-                        totalElements?: number
+
+                    if (resp.status !== StatusCodes.OK) {
+                        throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
+                            status: resp.status,
+                        })
                     }
-                    message?: string
-                    error?: string
+
+                    const vulnerabilities = body?._embedded?.['sw360:vulnerabilitySummaries'] ?? []
+                    ratedCount += vulnerabilities.filter((vulnerability) =>
+                        isRated(vulnerability.projectRelevance),
+                    ).length
+                    totalElements =
+                        typeof body?.page?.totalElements === 'number' ? body.page.totalElements : totalElements
+                    totalPages = typeof body?.page?.totalPages === 'number' ? body.page.totalPages : totalPages
+                    page += 1
                 }
 
-                if (resp.status !== StatusCodes.OK) {
-                    throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
-                        status: resp.status,
-                    })
-                }
-
-                const vulnerabilities = body?._embedded?.['sw360:vulnerabilitySummaries'] ?? []
-                const serverTotal = body?.page?.totalElements
-                const total = typeof serverTotal === 'number' ? serverTotal : vulnerabilities.length
-                const rated = vulnerabilities.filter((vulnerability) => isRated(vulnerability.projectRelevance)).length
-
-                setVulnerabilitiesTotal(total)
-                setVulnerabilitiesRatedCount(rated)
+                setVulnerabilitiesTotal(totalElements)
+                setVulnerabilitiesRatedCount(ratedCount)
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
