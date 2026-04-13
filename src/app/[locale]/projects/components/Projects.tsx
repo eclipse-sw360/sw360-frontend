@@ -14,7 +14,7 @@ import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tansta
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -47,9 +47,14 @@ type LicenseClearingMap = Record<string, LicenseClearingData>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
+interface GroupEntry {
+    key: string
+    text: string
+}
+
 function Project(): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const session = useSession()
     const params = useSearchParams()
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
@@ -72,13 +77,19 @@ function Project(): JSX.Element {
     const [showViewCRModal, setShowViewCRModal] = useState(false)
     const [clearingRequestId, setClearingRequestId] = useState('')
     const [licenseClearingData, setLicenseClearingData] = useState<LicenseClearingMap>({})
+    const [projectGroups, setProjectGroups] = useState<GroupEntry[]>([
+        {
+            key: 'None',
+            text: t('None'),
+        },
+    ])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     const handleDeleteProject = (projectId: string, clearingRequestId?: string, clearingState?: string) => {
@@ -388,6 +399,41 @@ function Project(): JSX.Element {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
+        if (session.status !== 'authenticated') return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET('projects/groups', session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+                const data = (await response.json()) as string[]
+                const mappedData = data.map(
+                    (d: string) =>
+                        ({
+                            key: d,
+                            text: d,
+                        }) as GroupEntry,
+                )
+                setProjectGroups(mappedData)
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        session,
+    ])
+
+    useEffect(() => {
+        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -398,8 +444,7 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
@@ -414,7 +459,7 @@ function Project(): JSX.Element {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -441,6 +486,7 @@ function Project(): JSX.Element {
     }, [
         pageableQueryParam,
         params.toString(),
+        session,
     ])
 
     useEffect(() => {
@@ -455,6 +501,7 @@ function Project(): JSX.Element {
 
     // Fetch license clearing counts in batch after project data is loaded
     useEffect(() => {
+        if (session.status !== 'authenticated') return
         if (projectData.length === 0) {
             setLicenseClearingData({})
             return
@@ -462,8 +509,7 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
                 const projectIds = projectData
                     .map((project) => project['_links']['self']['href'].split('/').at(-1))
@@ -474,7 +520,7 @@ function Project(): JSX.Element {
                 const response = await ApiUtils.POST(
                     'projects/licenseClearingCount',
                     projectIds,
-                    session.user.access_token,
+                    session.data.user.access_token,
                 )
 
                 if (response.status !== StatusCodes.OK) {
@@ -492,6 +538,7 @@ function Project(): JSX.Element {
         })()
     }, [
         projectData,
+        session,
     ])
 
     const table = useReactTable({
@@ -502,8 +549,8 @@ function Project(): JSX.Element {
         // table state config
         state: {
             columnVisibility: {
-                actions: !(session?.user?.userGroup === UserGroupType.SECURITY_USER),
-                licenseClearing: !(session?.user?.userGroup === UserGroupType.SECURITY_USER),
+                actions: !(session.data?.user?.userGroup === UserGroupType.SECURITY_USER),
+                licenseClearing: !(session.data?.user?.userGroup === UserGroupType.SECURITY_USER),
             },
             pagination: {
                 pageIndex: pageableQueryParam.page,
@@ -571,8 +618,7 @@ function Project(): JSX.Element {
 
     const exportProjectSpreadsheet = async ({ withLinkedRelease }: { withLinkedRelease: boolean }) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
             const mailEnabled = mailRequestForProjectReport === 'true'
             const searchParamsString = params.toString()
@@ -585,7 +631,7 @@ function Project(): JSX.Element {
                 // If mail is not enabled, download the file immediately
                 const currentDate = new Date().toISOString().split('T')[0]
                 const fileName = `Projects-${currentDate}.xlsx`
-                const statusCode = await DownloadService.download(url, session, fileName)
+                const statusCode = await DownloadService.download(url, session.data, fileName)
                 if (statusCode === StatusCodes.OK) {
                     MessageService.success(t('Spreadsheet download is successful'))
                 } else if (statusCode === StatusCodes.FORBIDDEN) {
@@ -597,7 +643,7 @@ function Project(): JSX.Element {
                 }
             } else {
                 // If mail is enabled, just send the request and show message
-                const response = await ApiUtils.GET(url, session.user.access_token)
+                const response = await ApiUtils.GET(url, session.data.user.access_token)
                 if (response.status === StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
                 } else if (response.status === StatusCodes.FORBIDDEN) {
@@ -661,12 +707,7 @@ function Project(): JSX.Element {
         },
         {
             fieldName: t('Group'),
-            value: [
-                {
-                    key: 'None',
-                    text: t('None'),
-                },
-            ],
+            value: projectGroups,
             paramName: 'group',
         },
         {
@@ -752,8 +793,8 @@ function Project(): JSX.Element {
                                             className='btn btn-primary'
                                             onClick={handleAddProject}
                                             disabled={
-                                                status === 'authenticated' &&
-                                                session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                session.status === 'authenticated' &&
+                                                session.data?.user?.userGroup === UserGroupType.SECURITY_USER
                                             }
                                         >
                                             {t('Add Project')}
@@ -762,8 +803,8 @@ function Project(): JSX.Element {
                                             <Dropdown.Toggle
                                                 variant='secondary'
                                                 hidden={
-                                                    status === 'authenticated' &&
-                                                    session?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    session.status === 'authenticated' &&
+                                                    session.data?.user?.userGroup === UserGroupType.SECURITY_USER
                                                 }
                                             >
                                                 {t('Import SBOM')}
