@@ -19,19 +19,19 @@ interface Props {
 const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationStateInfo }) => {
     return (
         <li>
-            <span className='verification-tooltip-header'>
+            <span className='formatedMessageForVulHeader'>
                 <b>{stateInfo.verificationState} </b>
                 <span className='formatedMessageForVulDate'>({stateInfo.checkedOn})</span>
             </span>
-            <span className='verification-tooltip-item'>
+            <span className='formatedMessageForVulItem'>
                 <i>Checked By: </i>
                 <span>{stateInfo.checkedBy}</span>
             </span>
-            <span className='verification-tooltip-item'>
+            <span className='formatedMessageForVulItem'>
                 <i>Action: </i>
                 <span></span>
             </span>
-            <span className='verification-tooltip-item'>
+            <span className='formatedMessageForVulItem'>
                 <p>
                     <i>Comment: </i>
                     {stateInfo.comment}
@@ -45,14 +45,14 @@ const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.E
     const [show, setShow] = useState(false)
     return (
         <div
-            className='verification-tooltip'
+            className='tooltip'
             onMouseOver={() => setShow(true)}
             onMouseLeave={() => setShow(false)}
         >
             {show && (
-                <div className='verification-tooltip-content'>
+                <div className='tooltip-content'>
                     <ol
-                        className='verification-tooltip-list'
+                        className='formatedMessageForVul'
                         reversed
                     >
                         {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (

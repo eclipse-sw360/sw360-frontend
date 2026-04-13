@@ -37,9 +37,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
         fetch(gravatarUrl)
             .then((response) => response.blob())
             .then((blob) => {
-                const imageUrl = URL.createObjectURL(blob)
                 setGravatarImage(gravatarUrl)
-                console.log(imageUrl)
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
     }, [
@@ -64,7 +62,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
 
     return (
         <>
-            <div className='gravatar'>
+            <div className='d-flex justify-content-between align-items-center'>
                 <div>
                     <Form.Check
                         type='checkbox'

@@ -17,8 +17,7 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, TableSea
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ReleaseDetail } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releaseLinks'>
 
@@ -150,7 +149,9 @@ export default function MergeReleaseTable({
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedReleases
@@ -163,11 +164,7 @@ export default function MergeReleaseTable({
                           : [],
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

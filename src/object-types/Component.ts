@@ -23,7 +23,6 @@ interface Component {
     ownerAccountingUnit?: string
     ownerGroup?: string
     ownerCountry?: string
-    vcsUrl?: string
     visbility?: string
     externalIds?: {
         [k: string]: string
@@ -39,6 +38,7 @@ interface Component {
     softwarePlatforms?: Array<string>
     operatingSystems?: Array<string>
     homepage?: string
+    vcs?: string
     mailinglist?: string
     wiki?: string
     blog?: string

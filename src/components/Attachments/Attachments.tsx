@@ -24,9 +24,9 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
+import ReleaseCheckStates from '../../object-types/enums/ReleaseCheckStates'
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
@@ -58,14 +58,12 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 setImportStatusData(data)
             } else {
                 const err = (await res.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: res.status,
+                })
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -160,7 +158,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
             },
             {
                 id: 'createdTeam',
-                header: t('Group'),
+                header: t('Uploader Group'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
                     return <p className='text-center'>{row.original.node.createdTeam ?? ''}</p>
@@ -176,10 +174,14 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
             },
             {
                 id: 'checkedTeam',
-                header: t('Group'),
+                header: t('Reviewer Group'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
-                    return <p className='text-center'>{row.original.node.checkedTeam ?? ''}</p>
+                    if (row.original.node.checkStatus === ReleaseCheckStates.ACCEPTED) {
+                        return <p className='text-center text-success'>{row.original.node.checkedTeam ?? ''}</p>
+                    } else if (row.original.node.checkStatus === ReleaseCheckStates.REJECTED) {
+                        return <p className='text-center text-danger'>{row.original.node.checkedTeam ?? ''}</p>
+                    }
                 },
             },
             {
@@ -187,14 +189,25 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 header: t('Checked By'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
-                    return (
-                        <Link
-                            href={`mailto:${row.original.node.checkedBy ?? ''}`}
-                            className='text-link w-100 text-center'
-                        >
-                            {row.original.node.checkedBy ?? ''}
-                        </Link>
-                    )
+                    if (row.original.node.checkStatus === ReleaseCheckStates.ACCEPTED) {
+                        return (
+                            <Link
+                                href={`mailto:${row.original.node.checkedBy ?? ''}`}
+                                className='text-link text-center text-success'
+                            >
+                                {row.original.node.checkedBy ?? ''}
+                            </Link>
+                        )
+                    } else if (row.original.node.checkStatus === ReleaseCheckStates.REJECTED) {
+                        return (
+                            <Link
+                                href={`mailto:${row.original.node.checkedBy ?? ''}`}
+                                className='text-link w-100 text-center text-danger'
+                            >
+                                {row.original.node.checkedBy ?? ''}
+                            </Link>
+                        )
+                    }
                 },
             },
             {
@@ -277,7 +290,9 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 )
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedAttachments
@@ -297,11 +312,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                           ),
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

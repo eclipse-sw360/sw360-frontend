@@ -16,11 +16,10 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
-import { ErrorDetails, Package } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
+import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import AddMainLicenseModal from './AddMainLicenseModal'
-import AddReleaseModal from './AddReleaseModal'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -103,6 +102,17 @@ export default function CreateOrEditPackage({
         return ''
     }
 
+    const handleSelectRelease = (selectedReleases: ReleaseDetail[]) => {
+        if (selectedReleases.length > 0) {
+            const release = selectedReleases[0]
+            setPackagePayload((prev) => ({
+                ...prev,
+                releaseId: release.id ?? '',
+            }))
+            setReleaseNameVersion(`${release.name} (${release.version})`)
+        }
+    }
+
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setPackagePayload((prev) => ({
             ...prev,
@@ -118,18 +128,16 @@ export default function CreateOrEditPackage({
                     const response = await ApiUtils.GET(`packages/${packageId}/usage`, session.data.user.access_token)
                     if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                         const err = (await response.json()) as ErrorDetails
-                        throw new Error(err.message)
+                        throw new ApiError(err.message, {
+                            status: response.status,
+                        })
                     }
                     if (response.status !== StatusCodes.NO_CONTENT) {
                         const data = (await response.json()) as IsPackageUsed
                         setIsPackageUsed(data.isUsed)
                     }
                 } catch (error) {
-                    if (error instanceof DOMException && error.name === 'AbortError') {
-                        return
-                    }
-                    const message = error instanceof Error ? error.message : String(error)
-                    MessageService.error(message)
+                    ApiUtils.reportError(error)
                 }
             })()
         }
@@ -144,11 +152,12 @@ export default function CreateOrEditPackage({
                 setModalMetaData={setDeletePackageModalMetaData}
                 isEditPage={isEditPage}
             />
-            <AddReleaseModal
-                setPackagePayload={setPackagePayload}
+            <SearchReleasesModal
                 show={showLinkedReleasesModal}
                 setShow={setShowLinkedReleasesModal}
-                setReleaseNameVersion={setReleaseNameVersion}
+                onSelect={handleSelectRelease}
+                multiSelect={false}
+                showExactMatch={true}
             />
             <AddMainLicenseModal
                 showMainLicenseModal={showMainLicenseModal}

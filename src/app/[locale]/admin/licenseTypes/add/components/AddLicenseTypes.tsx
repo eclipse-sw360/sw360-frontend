@@ -51,11 +51,7 @@ export default function AddLicenseTypes(): JSX.Element {
                 MessageService.error(t('Something went wrong'))
             }
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         }
     }
 
@@ -104,15 +100,7 @@ export default function AddLicenseTypes(): JSX.Element {
                                 htmlFor='add_license_type.title'
                                 className='form-label fw-medium'
                             >
-                                {t('Title')}{' '}
-                                <span
-                                    className='text-red'
-                                    style={{
-                                        color: '#F7941E',
-                                    }}
-                                >
-                                    *
-                                </span>
+                                {t('Title')} <span className='required'>*</span>
                             </label>
                             <input
                                 type='text'

@@ -11,7 +11,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ConfigurationContainers, ProcessedUiConfig, parseRawUiConfig, UiConfiguration } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
@@ -28,6 +28,7 @@ export function useUiConfig() {
     const { status } = useSession()
     const t = useTranslations('default')
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
+    const hasFetchedRef = useRef(false)
 
     const CACHE_TTL = 15 * 60 * 1000
 
@@ -50,7 +51,12 @@ export function useUiConfig() {
                 return
             }
 
+            if (!force && hasFetchedRef.current) {
+                return
+            }
+
             setIsLoading(true)
+            hasFetchedRef.current = true
 
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
@@ -83,12 +89,12 @@ export function useUiConfig() {
     )
 
     useEffect(() => {
-        if (status === 'authenticated') {
+        if (status === 'authenticated' && !hasFetchedRef.current) {
             fetchAndProcessUiConfig()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         status,
-        fetchAndProcessUiConfig,
     ])
 
     useEffect(() => {

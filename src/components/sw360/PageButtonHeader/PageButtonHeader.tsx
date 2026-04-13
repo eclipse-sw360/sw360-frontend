@@ -71,12 +71,12 @@ function PageButtonHeader({
     const t = useTranslations('default')
     return (
         <div
-            className='row buttonheader-toolbar'
+            className='row mb-2 d-flex align-items-center'
             style={{
                 display: 'flex',
             }}
         >
-            <div className='col-auto'>
+            <div className='col-auto px-0'>
                 <div
                     className='btn-toolbar'
                     role='toolbar'
@@ -98,9 +98,9 @@ function PageButtonHeader({
                         {checked != undefined && (
                             <>
                                 {checked ? (
-                                    <span className='badge buttonheader-checked'>CHECKED</span>
+                                    <span className='badge bg-success text-small'>CHECKED</span>
                                 ) : (
-                                    <span className='badge buttonheader-unchecked'>UNCHECKED</span>
+                                    <span className='badge bg-danger text-small'>UNCHECKED</span>
                                 )}
                             </>
                         )}
@@ -108,7 +108,7 @@ function PageButtonHeader({
                 </div>
             )}
             {changesLogTab !== undefined && (
-                <div className='list-group-companion changelog-container'>
+                <div className='list-group-companion w-auto mw-100'>
                     <div
                         className='nav nav-pills justify-content-center bg-light font-weight-bold'
                         id='pills-tab'
@@ -119,7 +119,7 @@ function PageButtonHeader({
                     >
                         <div>
                             <a
-                                className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''} changelog-link`}
+                                className={`nav-item nav-link ${changesLogTab == 'list-change' ? 'active' : ''}`}
                                 onClick={() => setChangesLogTab !== undefined && setChangesLogTab('list-change')}
                             >
                                 {t('Change Log')}
@@ -127,7 +127,7 @@ function PageButtonHeader({
                         </div>
                         <div>
                             <a
-                                className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''} changelog-link`}
+                                className={`nav-item nav-link ${changesLogTab == 'view-log' ? 'active' : ''}`}
                                 onClick={() => {
                                     if (changeLogId !== '' && setChangesLogTab !== undefined) {
                                         setChangesLogTab('view-log')

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.4/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -13,6 +13,7 @@
       "Dockerfile",
       "tsconfig.json",
       "package.json",
+      "next.config.ts",
       "**/*.md"
     ]
   },
@@ -104,6 +105,15 @@
         "noUnsafeNegation": "error",
         "noUselessRegexBackrefs": "error",
         "noWith": "error",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": [
+              "error",
+              "warn"
+            ]
+          }
+        },
         "useAwait": "error",
         "useGetterReturn": "error",
         "useNamespaceKeyword": "error"

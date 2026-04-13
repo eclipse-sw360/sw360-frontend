@@ -19,7 +19,7 @@ const ShowInfoOnHover = ({ text }: { text: string | ReactNode }): JSX.Element =>
                 placement='bottom'
             >
                 <span className='d-inline-block'>
-                    <BsInfoCircle size={20} />
+                    <BsInfoCircle size={15} />
                 </span>
             </OverlayTrigger>
         </>

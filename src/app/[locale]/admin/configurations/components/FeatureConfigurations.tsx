@@ -23,6 +23,7 @@ import AttachmentStorageConfigurations from './AttachmentStorageConfigurations'
 import MailConfigurations from './MailConfigurations'
 import OnOffSwitch from './OnOffSwitch'
 import PackageManagementConfigurations from './PackageManagementConfigurations'
+import RestConfigurations from './RestConfigurations'
 import SelectUserGroup from './SelectUserGroup'
 
 const FeatureConfigurations = (): JSX.Element => {
@@ -64,6 +65,18 @@ const FeatureConfigurations = (): JSX.Element => {
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
         if (currentConfig === undefined) return
+
+        // Validate API Token Length
+        const apiTokenLength = parseInt(currentConfig[ConfigKeys.REST_API_TOKEN_LENGTH])
+        if (
+            currentConfig[ConfigKeys.REST_API_TOKEN_LENGTH] !== undefined &&
+            currentConfig[ConfigKeys.REST_API_TOKEN_LENGTH] !== '' &&
+            (isNaN(apiTokenLength) || apiTokenLength < 20)
+        ) {
+            MessageService.error(t('API Token Length must be at least 20'))
+            return
+        }
+
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
@@ -99,16 +112,11 @@ const FeatureConfigurations = (): JSX.Element => {
                 />
                 {currentConfig ? (
                     <>
-                        <h6
-                            className='fw-bold text-uppercase'
-                            style={{
-                                color: '#5D8EA9',
-                            }}
-                        >
+                        <h6 className='fw-bold text-uppercase text-blue'>
                             {t('Feature Configurations')}
                             <hr className='my-2 mb-2' />
                         </h6>
-                        <table className='table label-value-table'>
+                        <table className='table'>
                             <thead>
                                 <tr>
                                     <th>{t('Name')}</th>
@@ -297,6 +305,10 @@ const FeatureConfigurations = (): JSX.Element => {
                             setCurrentConfig={setCurrentConfig}
                         />
                         <MailConfigurations
+                            currentConfig={currentConfig}
+                            setCurrentConfig={setCurrentConfig}
+                        />
+                        <RestConfigurations
                             currentConfig={currentConfig}
                             setCurrentConfig={setCurrentConfig}
                         />

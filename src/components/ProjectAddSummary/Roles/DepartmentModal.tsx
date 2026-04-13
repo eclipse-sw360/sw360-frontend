@@ -17,9 +17,8 @@ import { SW360Table } from 'next-sw360'
 import React, { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { ErrorDetails } from '@/object-types'
-import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { ApiError, ApiUtils } from '@/utils/index'
 
 interface Props {
     show: boolean
@@ -119,7 +118,9 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
                 const response = await ApiUtils.GET('users/groupList', session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const departmentGroups = (await response.json()) as DepartmentGroups
@@ -137,11 +138,7 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
 
                 setDepartments(transformedDepartments)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

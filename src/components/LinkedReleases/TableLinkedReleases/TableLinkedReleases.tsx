@@ -57,10 +57,13 @@ export default function TableLinkedReleases({
             <div className='row'>
                 {releaseLinks.map((item: ReleaseLink, index: number) => {
                     return (
-                        <div key={index}>
-                            <div className='linked-releases-div-row'>
+                        <div
+                            key={index}
+                            className='my-1'
+                        >
+                            <div className='d-flex justify-content-between pt-2 px-1 pb-1'>
                                 <input
-                                    className='linked-releases-input-field'
+                                    className='form-control me-2'
                                     name='vendor'
                                     value={item.vendor}
                                     type='text'
@@ -68,21 +71,21 @@ export default function TableLinkedReleases({
                                     readOnly
                                 />
                                 <input
-                                    className='linked-releases-input-field'
+                                    className='form-control mx-2'
                                     type='text'
                                     value={item.name}
                                     name='name'
                                     readOnly
                                 />
                                 <input
-                                    className='linked-releases-input-field'
+                                    className='form-control mx-2'
                                     type='text'
                                     value={item.version}
                                     name='version'
                                     readOnly
                                 />
                                 <select
-                                    className='linked-releases-select-relation'
+                                    className='form-select mx-2'
                                     aria-label='releaseRelationship'
                                     id='releaseRelationship'
                                     name='releaseRelationship'
@@ -115,7 +118,7 @@ export default function TableLinkedReleases({
                                     />
                                 </button>
                             </div>
-                            <hr className='linked-releases-hr' />
+                            <hr className='my-2' />
                         </div>
                     )
                 })}

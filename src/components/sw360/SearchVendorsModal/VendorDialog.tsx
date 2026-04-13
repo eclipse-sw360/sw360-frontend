@@ -10,16 +10,15 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { Dispatch, type JSX, SetStateAction, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import AddVendorDialog from './AddVendor'
 
 interface Props {
@@ -34,10 +33,23 @@ type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [showAddVendor, setShowAddVendor] = useState(false)
-    const [searchText, setSearchText] = useState('')
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const handleCloseDialog = () => {
         setShow(!show)
         setSelectedVendor(vendor)
+        setPaginationMeta({
+            size: 0,
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+        })
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: '',
+        })
+        setSearchText(undefined)
+        setVendorData([])
     }
     const session = useSession()
     const [selectedVendor, setSelectedVendor] = useState<Vendor>(vendor)
@@ -115,7 +127,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     )
     const [showProcessing, setShowProcessing] = useState(false)
 
-    const searchVendor = async () => {
+    const searchVendor = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
@@ -124,7 +136,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 Object.fromEntries(
                     Object.entries({
                         ...pageableQueryParam,
-                        ...(searchText !== ''
+                        ...(searchText !== undefined && searchText !== ''
                             ? {
                                   searchText: searchText,
                               }
@@ -135,10 +147,12 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                     ]),
                 ),
             )
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token)
+            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
-                throw new Error(err.message)
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
             }
 
             const data = (await response.json()) as EmbeddedVendors
@@ -149,15 +163,22 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                     : data['_embedded']['sw360:vendors'],
             )
         } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') {
-                return
-            }
-            const message = error instanceof Error ? error.message : String(error)
-            MessageService.error(message)
+            ApiUtils.reportError(error)
         } finally {
             setShowProcessing(false)
         }
     }
+
+    useEffect(() => {
+        if (session.status === 'loading' || searchText === undefined) return
+        const controller = new AbortController()
+        const signal = controller.signal
+        void searchVendor(signal)
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        session,
+    ])
 
     const table = useReactTable({
         data: memoizedData,
@@ -170,6 +191,15 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 pageIndex: pageableQueryParam.page,
                 pageSize: pageableQueryParam.page_entries,
             },
+            sorting:
+                pageableQueryParam.sort !== ''
+                    ? [
+                          {
+                              id: pageableQueryParam.sort.split(',')[0],
+                              desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                          },
+                      ]
+                    : [],
         },
 
         // server side pagination config
@@ -186,9 +216,38 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
 
             setPageableQueryParam((prev) => ({
                 ...prev,
-                page: next.pageIndex + 1,
+                page: next.pageIndex,
                 page_entries: next.pageSize,
             }))
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        onSortingChange: (updater) => {
+            const current: SortingState =
+                pageableQueryParam.sort !== ''
+                    ? [
+                          {
+                              id: pageableQueryParam.sort.split(',')[0],
+                              desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                          },
+                      ]
+                    : []
+            const newSorting = typeof updater === 'function' ? updater(current) : updater
+            if (newSorting.length === 0) {
+                setPageableQueryParam((prev) => ({
+                    ...prev,
+                    sort: '',
+                    page: 0,
+                }))
+            } else {
+                const { id, desc } = newSorting[0]
+                setPageableQueryParam((prev) => ({
+                    ...prev,
+                    sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    page: 0,
+                }))
+            }
         },
 
         meta: {
@@ -226,7 +285,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                                     className='form-control'
                                     placeholder={t('Enter search text')}
                                     aria-describedby='Search Vendor'
-                                    value={searchText}
+                                    value={searchText ?? ''}
                                     onChange={(event) => {
                                         setSearchText(event.target.value)
                                     }}
@@ -236,7 +295,14 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                                 <button
                                     type='button'
                                     className='btn btn-secondary me-2'
-                                    onClick={searchVendor}
+                                    onClick={() => {
+                                        if (searchText === undefined) setSearchText('')
+                                        setPageableQueryParam((prev) => ({
+                                            ...prev,
+                                            page: 0,
+                                        }))
+                                        void searchVendor()
+                                    }}
                                 >
                                     {t('Search')}
                                 </button>

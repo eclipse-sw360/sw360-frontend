@@ -380,9 +380,9 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                 </>
                             )}
                         </div>
-                        <div className='modal-body-first'>
+                        <div className='modal-body-bordered'>
                             <div
-                                className='modal-body-second'
+                                className='text-center'
                                 onDragOver={handleDragOver}
                                 onDrop={handleDrop}
                             >
@@ -391,7 +391,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                                 {t('Or')}
                                 <br />
                                 <input
-                                    className='sbom-input'
+                                    className='d-none'
                                     ref={inputRef}
                                     type='file'
                                     onChange={handleFileChange}

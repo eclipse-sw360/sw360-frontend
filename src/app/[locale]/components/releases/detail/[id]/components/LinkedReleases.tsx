@@ -20,8 +20,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { PaddedCell, SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, NestedRows, ReleaseLink } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
 interface Props {
@@ -84,7 +83,9 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const releaseData = (await response.json()) as EmbeddedReleaseLinks
@@ -99,11 +100,7 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
                 })
                 setData(convertedTreeData)
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)

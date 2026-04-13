@@ -19,7 +19,7 @@ import { BsArrowCounterclockwise, BsFillTrashFill, BsInfoCircle, BsPlusLg, BsQue
 import { Embedded, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
-import SearchReleasesModal from '../sw360/SearchReleasesModal/SearchReleasesModal'
+import SearchReleasesModal from '../sw360/SearchReleasesModal'
 import LinkedReleasesTable from './LinkedReleasesTable'
 
 interface CheckCyclicLinkPayload {
@@ -718,7 +718,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     return (
         <div className='row mb-4'>
-            <div className='dependency-network-title mb-2'>
+            <div className='header'>
                 <h6 className='fw-bold text-uppercase'>
                     {t('Linked Releases')}
                     <hr className='my-2 mb-2' />
@@ -747,7 +747,6 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                             onClose={() => closeMessage()}
                             variant={message.variant}
                             dismissible
-                            className='dependency-network-message'
                         >
                             <b>
                                 <BsInfoCircle size={20} /> {message.variant === 'danger' ? t('Warning') : t('Success')}:
@@ -800,7 +799,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                     projectId={projectId}
                     show={showReleaseModal}
                     setShow={setShowReleaseModal}
-                    setSelectedReleases={setSelectedReleases}
+                    onSelect={setSelectedReleases}
+                    showSubProjectReleases={true}
                 />
                 <Modal
                     className='modal-danger'

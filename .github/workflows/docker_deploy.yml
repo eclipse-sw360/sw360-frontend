@@ -13,53 +13,53 @@ on:
 #  schedule:
 #    - cron: '0 0 * * *' # Midnight
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Dockerfile'
   push:
+    branches:
+      - main
     tags:
-      - 'v*'
+      - '*'
+    paths-ignore:
+      - '**.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
 
-permissions: write-all
+permissions:
+  contents: read
 
 jobs:
   docker_push:
-    if: ${{ github.event.schedule }} == '0 0 * * *'
     name: Build Docker Image
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
         with:
           egress-policy: audit
 
-      - name: Checkout main repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - name: Set environment variables
-        run: |
-          echo "ORG_BASE_NAME=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
-          echo "GIT_REVISION=$(git describe --abbrev=6 --always --tags --match=[0-9]*)" >> $GITHUB_ENV
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22' # or your required version
-
-      - name: Run npx auth secret
-        run: |
-          cp docs/templates/template.env .env.local
-          npx auth secret
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -69,19 +69,45 @@ jobs:
       # SW360 Frontend
       - name: Extract components metadata (tags, labels) runtime image
         id: meta_runtime
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
         with:
           images: |
-            ${{ env.REGISTRY }}/${{ env.ORG_BASE_NAME }}
+            ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=schedule,pattern={{date 'YYYYMMDD'}}
+            type=schedule,pattern=nightly
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=ref,event=tag
+            type=raw,value=main,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.licenses=EPL-2.0
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 
-      - name: Build sw360 build container
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      - name: Build sw360 frontend build container
+        id: build_frontend
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           load: false
-          tags: |
-            ${{ steps.meta_runtime.outputs.tags }}
+          tags: ${{ steps.meta_runtime.outputs.tags }}
           labels: ${{ steps.meta_runtime.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_SW360_API_URL=http://localhost:8080
           cache-from: type=gha,scope=runtime
           cache-to: type=gha,scope=runtime,mode=max
+          provenance: mode=max
+          sbom: true
+
+      - name: Sign the image
+        if: github.event_name != 'pull_request'
+        env:
+          TAGS: ${{ steps.meta_runtime.outputs.tags }}
+          DIGEST: ${{ steps.build_frontend.outputs.digest }}
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}

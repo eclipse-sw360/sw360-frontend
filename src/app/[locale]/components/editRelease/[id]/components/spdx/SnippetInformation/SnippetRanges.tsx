@@ -43,8 +43,6 @@ function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props)
         const list: SnippetRange[] = [
             ...inputList,
         ]
-        console.log(inputList)
-        console.log(list)
         list[index][name as keyof SnippetRangeInput] = value
         setInputList(list)
         setDataSnippetRanges(list)

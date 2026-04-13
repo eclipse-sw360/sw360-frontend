@@ -30,7 +30,7 @@ const Text = ({ license }: Props): ReactNode => {
                 <tbody>
                     <tr>
                         <td>
-                            <pre className='license-detail-pre-text'>{license.text ?? ''}</pre>
+                            <pre>{license.text ?? ''}</pre>
                         </td>
                     </tr>
                 </tbody>

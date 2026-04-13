@@ -15,17 +15,17 @@ export default function TitleLinkedReleases(): JSX.Element {
     const t = useTranslations('default')
     return (
         <>
-            <div className='row linked-releases-title-second'>
-                <div className='linked-releases-filename'>
+            <div className={`row`}>
+                <div className='col pt-2 table-header'>
                     <p className='fw-bold mt-2'>{t('Vendor Name')}</p>
                 </div>
-                <div className='linked-releases-filename'>
+                <div className='col pt-2 table-header'>
                     <p className='fw-bold mt-2'>{t('Release name')}</p>
                 </div>
-                <div className='linked-releases-filename'>
+                <div className='col pt-2 table-header'>
                     <p className='fw-bold mt-2'>{t('Release version')}</p>
                 </div>
-                <div className='linked-releases-filename'>
+                <div className='col pt-2 table-header'>
                     <p className='fw-bold mt-2'>{t('Release Relation')}</p>
                 </div>
             </div>

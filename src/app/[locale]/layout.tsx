@@ -19,7 +19,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { Footer, GlobalMessages, Navbar } from 'next-sw360'
 import { type JSX, ReactNode } from 'react'
-import { UiConfigProvider } from '@/contexts'
+import { SW360BackendConfigProvider, UiConfigProvider } from '@/contexts'
 import { Providers } from '../provider'
 
 export const metadata: Metadata = {
@@ -44,17 +44,19 @@ async function RootLayout({ children }: Props): Promise<JSX.Element> {
             <body>
                 <Providers>
                     <NextIntlClientProvider messages={messages}>
-                        <UiConfigProvider>
-                            <div
-                                id='container'
-                                className='d-flex flex-column min-vh-100'
-                            >
-                                <GlobalMessages />
-                                <Navbar />
-                                {children}
-                                <Footer />
-                            </div>
-                        </UiConfigProvider>
+                        <SW360BackendConfigProvider>
+                            <UiConfigProvider>
+                                <div
+                                    id='container'
+                                    className='d-flex flex-column min-vh-100'
+                                >
+                                    <GlobalMessages />
+                                    <Navbar />
+                                    {children}
+                                    <Footer />
+                                </div>
+                            </UiConfigProvider>
+                        </SW360BackendConfigProvider>
                     </NextIntlClientProvider>
                 </Providers>
             </body>

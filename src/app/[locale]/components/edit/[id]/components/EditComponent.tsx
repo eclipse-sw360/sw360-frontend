@@ -15,8 +15,9 @@ import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { PageButtonHeader, SideBar } from 'next-sw360'
+import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
+import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import {
@@ -27,9 +28,10 @@ import {
     ComponentPayload,
     DocumentTypes,
     Embedded,
+    ErrorDetails,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
@@ -40,26 +42,10 @@ interface Props {
 
 type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
-const tabList = [
-    {
-        id: CommonTabIds.SUMMARY,
-        name: 'Summary',
-    },
-    {
-        id: CommonTabIds.RELEASES,
-        name: 'Release',
-    },
-    {
-        id: CommonTabIds.ATTACHMENTS,
-        name: 'Attachments',
-    },
-]
-
 const EditComponent = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
     const router = useRouter()
-    const [selectedTab, setSelectedTab] = useState<string>(CommonTabIds.SUMMARY)
     const [component, setComponent] = useState<Component>()
     const [attachmentData, setAttachmentData] = useState<Array<Attachment>>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -104,22 +90,23 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}`,
                     Object.fromEntries(params),
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
                 const component = (await response.json()) as Component
                 setComponent(component)
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                ApiUtils.reportError(error)
             }
         })()
         void (async () => {
@@ -141,8 +128,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                 if (!CommonUtils.isNullOrUndefined(dataAttachments)) {
                     setAttachmentData(dataAttachments._embedded['sw360:attachments'])
                 }
-            } catch (e) {
-                console.error(e)
+            } catch (error) {
+                ApiUtils.reportError(error)
             }
         })()
 
@@ -246,63 +233,73 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                     updateEntity={updateComponent}
                     setEntityPayload={setComponentPayload}
                 />
+                <DeleteComponentDialog
+                    componentId={componentId}
+                    show={deleteDialogOpen}
+                    setShow={setDeleteDialogOpen}
+                    actionType={ActionType.EDIT}
+                />
                 <div className='container page-content'>
-                    <div className='row'>
-                        <DeleteComponentDialog
-                            componentId={componentId}
-                            show={deleteDialogOpen}
-                            setShow={setDeleteDialogOpen}
-                            actionType={ActionType.EDIT}
-                        />
-                        <div className='col-2 sidebar'>
-                            <SideBar
-                                selectedTab={selectedTab}
-                                setSelectedTab={setSelectedTab}
-                                tabList={tabList}
-                            />
-                        </div>
-                        <div className='col'>
-                            <div
-                                className='row'
-                                style={{
-                                    marginBottom: '20px',
-                                }}
+                    <Tab.Container defaultActiveKey={CommonTabIds.SUMMARY}>
+                        <Row>
+                            <Col
+                                sm={2}
+                                className='me-3'
                             >
-                                <PageButtonHeader
-                                    title={component.name}
-                                    buttons={headerButtons}
-                                ></PageButtonHeader>
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== CommonTabIds.SUMMARY ? true : false}
-                            >
-                                <ComponentEditSummary
-                                    attachmentData={attachmentData}
-                                    componentId={componentId}
-                                    componentPayload={componentPayload}
-                                    setComponentPayload={setComponentPayload}
-                                />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== CommonTabIds.RELEASES ? true : false}
-                            >
-                                <Releases componentId={componentId} />
-                            </div>
-                            <div
-                                className='row'
-                                hidden={selectedTab !== CommonTabIds.ATTACHMENTS ? true : false}
-                            >
-                                <EditAttachments
-                                    documentId={componentId}
-                                    documentType={DocumentTypes.COMPONENT}
-                                    documentPayload={componentPayload}
-                                    setDocumentPayload={setComponentPayload}
-                                />
-                            </div>
-                        </div>
-                    </div>
+                                <ListGroup>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={CommonTabIds.SUMMARY}
+                                    >
+                                        <div className='my-2'>{t('Summary')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={CommonTabIds.RELEASES}
+                                    >
+                                        <div className='my-2'>{t('Release')}</div>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={CommonTabIds.ATTACHMENTS}
+                                    >
+                                        <div className='my-2'>{t('Attachments')}</div>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Col>
+                            <Col>
+                                <Row className='mb-3'>
+                                    <PageButtonHeader
+                                        title={component.name}
+                                        buttons={headerButtons}
+                                    ></PageButtonHeader>
+                                </Row>
+                                <Row className='mt-3'>
+                                    <Tab.Content>
+                                        <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
+                                            <ComponentEditSummary
+                                                attachmentData={attachmentData}
+                                                componentId={componentId}
+                                                componentPayload={componentPayload}
+                                                setComponentPayload={setComponentPayload}
+                                            />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey={CommonTabIds.RELEASES}>
+                                            <Releases componentId={componentId} />
+                                        </Tab.Pane>
+                                        <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
+                                            <EditAttachments
+                                                documentId={componentId}
+                                                documentType={DocumentTypes.COMPONENT}
+                                                documentPayload={componentPayload}
+                                                setDocumentPayload={setComponentPayload}
+                                            />
+                                        </Tab.Pane>
+                                    </Tab.Content>
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Tab.Container>
                 </div>
             </>
         )

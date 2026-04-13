@@ -12,7 +12,6 @@
 import { Session } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { ApiUtils, CommonUtils } from '@/utils'
-import MessageService from './message.service'
 
 const download = async (
     url: string,
@@ -39,11 +38,7 @@ const download = async (
         setTimeout(() => window.URL.revokeObjectURL(objectURL), 0)
         return response.status
     } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-            return
-        }
-        const message = error instanceof Error ? error.message : String(error)
-        MessageService.error(message)
+        ApiUtils.reportError(error)
     }
 }
 

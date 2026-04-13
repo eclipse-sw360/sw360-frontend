@@ -282,13 +282,13 @@ const EditSPDXDocument = ({
             >
                 <div className='btn-group'>
                     <button
-                        className={`btn ${isModeFull ? 'spdx-btn-full' : 'spdx-btn-lite'}`}
+                        className={`btn ${isModeFull ? 'btn-info' : 'btn-light'}`}
                         onClick={changeModeFull}
                     >
                         {t('SPDX Full')}
                     </button>
                     <button
-                        className={`btn ${isModeFull ? 'spdx-btn-lite' : 'spdx-btn-full'}`}
+                        className={`btn ${isModeFull ? 'btn-light' : 'btn-info'}`}
                         onClick={changeModeLite}
                     >
                         {t('SPDX Lite')}

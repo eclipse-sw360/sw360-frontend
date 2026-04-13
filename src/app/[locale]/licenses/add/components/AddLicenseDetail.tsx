@@ -96,7 +96,7 @@ const AddLicenseDetail = ({
                 const licenses = (await response.json()) as EmbeddedLicenseTypes
                 setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
             } catch (e) {
-                console.error(e)
+                ApiUtils.reportError(e)
             }
         })()
         return () => controller.abort()
@@ -113,7 +113,7 @@ const AddLicenseDetail = ({
             }}
         >
             <div
-                className='header mb-1'
+                className='header mb-2'
                 style={{
                     paddingTop: '0.5rem',
                     height: '45px',

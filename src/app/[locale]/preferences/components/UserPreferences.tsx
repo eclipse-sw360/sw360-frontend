@@ -13,7 +13,6 @@
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
 import { Alert } from 'react-bootstrap'
-
 import NotificationSettings from './NotificationSettings'
 
 interface NotificationSetting {
@@ -38,7 +37,7 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
                 <div className='form-check'>
                     <input
                         type='checkbox'
-                        className='form-check-input preferences-checkbox'
+                        className={`form-check-input preferences-checkbox`}
                         id='wants_mail_notification'
                         name='wantsMailNotification'
                         checked={notificationSetting.wantsMailNotification}
@@ -50,7 +49,7 @@ const UserPreferences = ({ notificationSetting, setNotificationSetting }: Props)
                         }
                     />
                     <label
-                        className='form-check-label preferences-label'
+                        className={`form-check-label preferences-label`}
                         htmlFor='wants_mail_notification'
                     >
                         {t('Enable E-Mail Notifications')}

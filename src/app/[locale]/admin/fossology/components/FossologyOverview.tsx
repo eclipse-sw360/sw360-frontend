@@ -75,11 +75,7 @@ export default function FossologyOverview(): ReactNode {
                 }
             })
             .catch((error) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
             .finally(() => {
                 setLoading(false)
@@ -98,11 +94,7 @@ export default function FossologyOverview(): ReactNode {
                 }
             })
             .catch((error) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
     }, [
         fetchData,
@@ -185,23 +177,9 @@ export default function FossologyOverview(): ReactNode {
                                         <Spinner className='spinner' />
                                     </div>
                                 ) : fossologyStatus === 'Success' ? (
-                                    <span
-                                        className='badge bg-success capsule-right'
-                                        style={{
-                                            fontSize: '0.8rem',
-                                        }}
-                                    >
-                                        {t(`${fossologyStatus}`)}
-                                    </span>
+                                    <span className='badge bg-success capsule-right'>{t(`${fossologyStatus}`)}</span>
                                 ) : (
-                                    <span
-                                        className='badge bg-danger capsule-right'
-                                        style={{
-                                            fontSize: '0.8rem',
-                                        }}
-                                    >
-                                        {t(`${fossologyStatus}`)}
-                                    </span>
+                                    <span className='badge bg-danger capsule-right'>{t(`${fossologyStatus}`)}</span>
                                 )}
                             </td>
                             <td>{t('checked on saved configuration')}</td>
@@ -225,7 +203,7 @@ export default function FossologyOverview(): ReactNode {
                             id='fossologyConfig.url'
                             name='url'
                             required
-                            value={fossologyConfigData.url}
+                            value={fossologyConfigData?.url ?? ''}
                             onChange={updateInputField}
                         />
                     </div>
@@ -242,7 +220,7 @@ export default function FossologyOverview(): ReactNode {
                             id='fossologyConfig.folderId'
                             name='folderId'
                             required
-                            value={fossologyConfigData.folderId}
+                            value={fossologyConfigData?.folderId ?? ''}
                             onChange={updateInputField}
                         />
                     </div>

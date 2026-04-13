@@ -26,13 +26,12 @@ import PageSpinner from './PageSpinner/PageSpinner'
 import PillsInput from './PillsInput/PillsInput'
 import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
+import SearchReleasesModal from './SearchReleasesModal'
 import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
 import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
-import SearchVendorsModal from './SearchVendorsModal/SearchVendorsModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
-import SideBar from './SideBar/SideBar'
 import {
     ClientSidePageSizeSelector,
     ClientSideTableFooter,
@@ -44,7 +43,7 @@ import {
     TableSearch,
 } from './Table/Components'
 import ThemeSwitcher from './ThemeSwitcher/ThemeSwitcher'
-import ToastMessage from './ToastContainer/Toast'
+import UpdateCommentModal from './UpdateCommentModal'
 
 export {
     AddAdditionalRoles,
@@ -71,16 +70,15 @@ export {
     PillsInput,
     ProfileDropdown,
     QuickFilter,
-    SW360Table,
+    SearchReleasesModal,
     SearchUsersModal,
-    SearchVendorsModal,
     SelectCountry,
     SelectUsersDialog,
     ShowInfoOnHover,
-    SideBar,
+    SW360Table,
     TableFooter,
     TableSearch,
     ThemeSwitcher,
-    ToastMessage,
+    UpdateCommentModal,
     VendorDialog,
 }

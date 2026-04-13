@@ -48,7 +48,7 @@ const AddLicenseText = ({ licensePayload, setLicensePayload, inputValid }: Props
             }}
         >
             <div
-                className='header mb-1'
+                className='header mb-2'
                 style={{
                     paddingTop: '0.5rem',
                     height: '45px',

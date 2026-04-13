@@ -12,20 +12,24 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
-import { LinkedPackageData, ProjectPayload } from '@/object-types'
+import { LinkedPackageData } from '@/object-types'
 
-interface Props {
-    projectId?: string
-    projectPayload: ProjectPayload
-    setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+interface HasLinkedPackages {
+    packageIds?: Record<string, LinkedPackageData>
 }
 
-export default function LinkedPackages({ projectPayload, setProjectPayload }: Props): JSX.Element {
+interface Props<T extends HasLinkedPackages> {
+    projectId?: string
+    payload: T
+    setPayload: React.Dispatch<React.SetStateAction<T>>
+}
+
+export default function LinkedPackages<T extends HasLinkedPackages>({ payload, setPayload }: Props<T>): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedPackagesModal, setShowLinkedPackagesModal] = useState(false)
     const [tableData, setTableData] = useState<
@@ -35,28 +39,58 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
         ][]
     >([])
 
-    const handleComments = (packageId: string, updatedComment: string) => {
-        const _newLinkedPackageData: {
-            [key: string]: LinkedPackageData
-        } = {}
+    const handleComments = useCallback(
+        (packageId: string, updatedComment: string) => {
+            setPayload((prev) => {
+                const _newLinkedPackageData: {
+                    [key: string]: LinkedPackageData
+                } = {}
 
-        for (const [pid, p] of Object.entries(projectPayload.packageIds ?? {})) {
-            if (pid === packageId) {
-                _newLinkedPackageData[pid] = {
-                    ...p,
-                    comment: updatedComment,
+                for (const [pid, p] of Object.entries(prev.packageIds ?? {})) {
+                    if (pid === packageId) {
+                        _newLinkedPackageData[pid] = {
+                            ...p,
+                            comment: updatedComment,
+                        }
+                    } else {
+                        _newLinkedPackageData[pid] = {
+                            ...p,
+                        }
+                    }
                 }
-            } else {
-                _newLinkedPackageData[pid] = {
-                    ...p,
+                return {
+                    ...prev,
+                    packageIds: _newLinkedPackageData,
                 }
-            }
-        }
-        setProjectPayload({
-            ...projectPayload,
-            packageIds: _newLinkedPackageData,
-        })
-    }
+            })
+        },
+        [
+            setPayload,
+        ],
+    )
+
+    const handleDeletePackage = useCallback(
+        (packageId: string) => {
+            setPayload((prev) => {
+                const _newLinkedPackageData: {
+                    [key: string]: LinkedPackageData
+                } = {}
+
+                for (const [pid, p] of Object.entries(prev.packageIds ?? {})) {
+                    if (pid !== packageId) {
+                        _newLinkedPackageData[pid] = p
+                    }
+                }
+                return {
+                    ...prev,
+                    packageIds: _newLinkedPackageData,
+                }
+            })
+        },
+        [
+            setPayload,
+        ],
+    )
 
     const columns = useMemo<
         ColumnDef<
@@ -153,31 +187,16 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
         ],
         [
             t,
-            projectPayload,
+            handleComments,
+            handleDeletePackage,
         ],
     )
 
-    const handleDeletePackage = (packageId: string) => {
-        const _newLinkedPackageData: {
-            [key: string]: LinkedPackageData
-        } = {}
-
-        for (const [pid, p] of Object.entries(projectPayload.packageIds ?? {})) {
-            if (pid !== packageId) {
-                _newLinkedPackageData[pid] = p
-            }
-        }
-        setProjectPayload({
-            ...projectPayload,
-            packageIds: _newLinkedPackageData,
-        })
-    }
-
     useEffect(() => {
-        const data = Object.entries(projectPayload.packageIds ?? {})
+        const data = Object.entries(payload.packageIds ?? {})
         setTableData(data)
     }, [
-        projectPayload,
+        payload,
     ])
 
     const memoizedData = useMemo(
@@ -195,8 +214,8 @@ export default function LinkedPackages({ projectPayload, setProjectPayload }: Pr
     return (
         <>
             <LinkPackagesModal
-                projectPayload={projectPayload}
-                setProjectPayload={setProjectPayload}
+                payload={payload}
+                setPayload={setPayload}
                 show={showLinkedPackagesModal}
                 setShow={setShowLinkedPackagesModal}
             />

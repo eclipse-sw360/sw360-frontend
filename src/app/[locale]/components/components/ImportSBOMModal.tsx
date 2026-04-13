@@ -134,7 +134,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
             return
         }
         setImportState(ImportSBOMState.IMPORTING)
-        prepareImport().catch((err) => console.log(err))
+        prepareImport().catch((err) => console.error(err))
     }
 
     const closeModal = () => {
@@ -177,9 +177,9 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                             {t('wrong_spdx_information')}.
                         </div>
                         <div>
-                            <div className='modal-body-first'>
+                            <div className='modal-body-bordered'>
                                 <div
-                                    className='modal-body-second'
+                                    className='text-center'
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
                                 >
@@ -188,7 +188,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                                     {t('Or')}
                                     <br />
                                     <input
-                                        className='sbom-input'
+                                        className='d-none'
                                         ref={inputRef as React.Ref<HTMLInputElement>}
                                         type='file'
                                         accept='.rdf,.spdx'
@@ -196,7 +196,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
                                         placeholder={t('Drop a File Here')}
                                     />
                                     <button
-                                        className='button-browse'
+                                        className='btn btn-secondary'
                                         onClick={handleBrowseFile}
                                     >
                                         {t('Browse')}

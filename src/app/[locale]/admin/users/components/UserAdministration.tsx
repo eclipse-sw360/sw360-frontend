@@ -23,7 +23,8 @@ import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { ApiError, ApiUtils } from '@/utils/index'
+import BulkUserUpload from './BulkUserUpload'
 import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
@@ -36,6 +37,7 @@ export default function UserAdminstration(): JSX.Element {
     const [departments, setDepartments] = useState<Array<string | undefined>>([])
     const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] =
         useState<boolean>(false)
+    const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
     const params = useSearchParams()
     const session = useSession()
 
@@ -51,6 +53,10 @@ export default function UserAdminstration(): JSX.Element {
         router.push('/admin/users/add')
     }
 
+    const handleUploadSuccess = useCallback(() => {
+        setRefreshTrigger((prev) => prev + 1)
+    }, [])
+
     const downloadUsers = () => {
         getSession()
             .then((session) => {
@@ -60,11 +66,7 @@ export default function UserAdminstration(): JSX.Element {
                 })
             })
             .catch((error: unknown) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
     }
 
@@ -94,11 +96,7 @@ export default function UserAdminstration(): JSX.Element {
                 }
             })
             .catch((error) => {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             })
     }, [])
 
@@ -300,7 +298,9 @@ export default function UserAdminstration(): JSX.Element {
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
-                    throw new Error(err.message)
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
 
                 const data = (await response.json()) as EmbeddedUsers
@@ -312,11 +312,7 @@ export default function UserAdminstration(): JSX.Element {
                         : data['_embedded']['sw360:users'],
                 )
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') {
-                    return
-                }
-                const message = error instanceof Error ? error.message : String(error)
-                MessageService.error(message)
+                ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
                 setShowProcessing(false)
@@ -328,6 +324,7 @@ export default function UserAdminstration(): JSX.Element {
         pageableQueryParam,
         params.toString(),
         session,
+        refreshTrigger,
     ])
 
     useEffect(() => {
@@ -531,6 +528,7 @@ export default function UserAdminstration(): JSX.Element {
                                 </div>
                             )}
                         </div>
+                        <BulkUserUpload onUploadSuccess={handleUploadSuccess} />
                     </div>
                 </div>
             </div>

@@ -10,17 +10,15 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { RequestContent } from '@/object-types'
+import MessageService from '@/services/message.service'
 import { SW360_API_URL } from '@/utils/env'
 
 const base = SW360_API_URL + '/resource/api'
 
 // Configuration constants
-const DEFAULT_TIMEOUT_MS = 30000 // 30 seconds
+const DEFAULT_TIMEOUT_MS = 0 // No timeout by default
 const DEFAULT_RETRIES = 3
 const RETRY_STATUS_CODES = [
-    StatusCodes.REQUEST_TIMEOUT,
-    StatusCodes.TOO_MANY_REQUESTS,
-    StatusCodes.INTERNAL_SERVER_ERROR,
     StatusCodes.BAD_GATEWAY,
     StatusCodes.SERVICE_UNAVAILABLE,
     StatusCodes.GATEWAY_TIMEOUT,
@@ -33,6 +31,7 @@ export class ApiError extends Error {
     public status?: number
     public code: string
     public isRetryable: boolean
+    public isAborted: boolean
     public cause?: unknown
 
     constructor(
@@ -41,6 +40,7 @@ export class ApiError extends Error {
             status?: number
             code?: string
             isRetryable?: boolean
+            isAborted?: boolean
             cause?: unknown
         } = {},
     ) {
@@ -49,6 +49,7 @@ export class ApiError extends Error {
         this.status = options.status
         this.code = options.code ?? 'UNKNOWN_ERROR'
         this.isRetryable = options.isRetryable ?? false
+        this.isAborted = options.isAborted ?? false
         this.cause = options.cause
     }
 }
@@ -75,10 +76,7 @@ function isRetryableError(error: unknown): boolean {
         // Network errors (failed to fetch)
         return true
     }
-    if (error instanceof DOMException && error.name === 'AbortError') {
-        // Timeout - could be temporary
-        return true
-    }
+    // Note: AbortError from timeout is handled separately in send() if needed
     return false
 }
 
@@ -90,17 +88,27 @@ function handleError(error: unknown): ApiError {
         return error
     }
 
-    if (error instanceof TypeError) {
-        return new ApiError('Network error - please check your connection', {
-            code: 'NETWORK_ERROR',
-            isRetryable: true,
+    // Firefox throws TypeError for aborted fetches, Chrome throws DOMException('AbortError')
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal#browser_compatibility
+    if (
+        typeof error === 'object' &&
+        error !== null &&
+        ((error instanceof DOMException && error.name === 'AbortError') ||
+            // Firefox: TypeError with message 'NetworkError when attempting to fetch resource.'
+            (error instanceof TypeError &&
+                typeof error.message === 'string' &&
+                error.message.match(/aborted|abort|networkerror when attempting to fetch resource/i)))
+    ) {
+        return new ApiError('Request aborted', {
+            code: 'ABORTED',
+            isAborted: true,
             cause: error,
         })
     }
 
-    if (error instanceof DOMException && error.name === 'AbortError') {
-        return new ApiError('Request timed out', {
-            code: 'TIMEOUT',
+    if (error instanceof TypeError) {
+        return new ApiError('Network error - please check your connection', {
+            code: 'NETWORK_ERROR',
             isRetryable: true,
             cause: error,
         })
@@ -258,12 +266,12 @@ function GET(
     })
 }
 
-function DELETE(path: string, token: string): Promise<Response> {
+function DELETE(path: string, token: string, data?: object): Promise<Response> {
     return send({
         method: 'DELETE',
         path,
         token,
-        data: null,
+        data: data ?? null,
     })
 }
 
@@ -300,6 +308,13 @@ const ApiUtils = {
     POST,
     PUT,
     PATCH,
+    reportError: (error: unknown) => {
+        const apiError = handleError(error)
+        if (apiError.isAborted) {
+            return
+        }
+        MessageService.error(apiError.message)
+    },
 }
 
 export default ApiUtils

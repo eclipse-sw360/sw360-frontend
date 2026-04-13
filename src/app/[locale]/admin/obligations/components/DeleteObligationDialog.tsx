@@ -106,7 +106,6 @@ function DeleteObligationDialog({ obligationId, show, setShow }: Props): ReactNo
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
                 <Button
-                    className='delete-btn'
                     variant='light'
                     onClick={handleCloseDialog}
                 >

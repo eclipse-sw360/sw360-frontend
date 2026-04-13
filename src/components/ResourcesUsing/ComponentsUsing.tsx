@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { type JSX, ReactNode, useMemo } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { Alert, Spinner } from 'react-bootstrap'
 import { Component } from '@/object-types'
 import { SW360Table } from '../sw360'
 
@@ -112,7 +112,7 @@ const ComponentsUsing = ({ componentsUsing, documentName, showProcessing }: Prop
 
     return (
         <>
-            <h5 className='resource-using-title'>{`${documentName} ${t('IS USED BY THE FOLLOWING COMPONENTS')}`}</h5>
+            <Alert variant='primary'>{`${documentName} ${t('IS USED BY THE FOLLOWING COMPONENTS')}`}</Alert>
             <div className='mb-3'>
                 {table ? (
                     <SW360Table

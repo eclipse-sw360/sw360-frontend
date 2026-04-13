@@ -289,7 +289,6 @@ const EditDocumentCreationInformation = ({
         if (externalDocumentRefs.length == 1) {
             setExternalDocumentRefs([])
         } else {
-            console.log(externalDocumentRefs)
             let externalDocuments: ExternalDocumentReferences[] = []
             externalDocuments = externalDocumentRefs.filter(
                 (externalDocumentRef) => numberIndex != externalDocumentRef.index,
