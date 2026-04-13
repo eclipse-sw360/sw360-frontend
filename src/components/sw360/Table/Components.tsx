@@ -198,9 +198,11 @@ function TableFooterUI({
 export function PageSizeSelector({
     pageableQueryParam,
     setPageableQueryParam,
+    totalElements,
 }: {
     pageableQueryParam: PageableQueryParam
     setPageableQueryParam: Dispatch<SetStateAction<PageableQueryParam>>
+    totalElements?: number
 }): ReactNode {
     const setPageSize = (sz: number) =>
         setPageableQueryParam({
@@ -211,22 +213,51 @@ export function PageSizeSelector({
         <PageSelectorUI
             pageSize={pageableQueryParam.page_entries}
             setPageSize={setPageSize}
+            totalElements={totalElements}
         />
     )
 }
 
-export function ClientSidePageSizeSelector<K>({ table }: { table: Table<K> }): ReactNode {
+export function ClientSidePageSizeSelector<K>({
+    table,
+    showAllOption = false,
+}: {
+    table: Table<K>
+    showAllOption?: boolean
+}): ReactNode {
     const setPageSize = (sz: number) => table.setPageSize(sz)
+    const totalElements = showAllOption ? table.getRowCount() : undefined
     return (
         <PageSelectorUI
             pageSize={table.getState().pagination.pageSize}
             setPageSize={setPageSize}
+            totalElements={totalElements}
         />
     )
 }
 
-function PageSelectorUI({ pageSize, setPageSize }: { pageSize: number; setPageSize: (size: number) => void }) {
+function PageSelectorUI({
+    pageSize,
+    setPageSize,
+    totalElements,
+}: {
+    pageSize: number
+    setPageSize: (size: number) => void
+    totalElements?: number
+}) {
     const t = useTranslations('default')
+    const standardOptions = [
+        10,
+        25,
+        50,
+        100,
+    ]
+    const isAllSelected =
+        totalElements !== undefined &&
+        totalElements > 0 &&
+        !standardOptions.includes(pageSize) &&
+        pageSize >= totalElements
+
     return (
         <div className='table-component mt-3 mb-3'>
             <div className='dataTables_length'>
@@ -234,13 +265,16 @@ function PageSelectorUI({ pageSize, setPageSize }: { pageSize: number; setPageSi
                 <label className='mx-2'>
                     <select
                         className='form-select'
-                        value={pageSize}
+                        value={isAllSelected && totalElements ? totalElements : pageSize}
                         onChange={(e) => setPageSize(Number(e.target.value))}
                     >
                         <option value={10}>10</option>
                         <option value={25}>25</option>
                         <option value={50}>50</option>
                         <option value={100}>100</option>
+                        {totalElements !== undefined && totalElements > 0 && (
+                            <option value={totalElements}>{t('All')}</option>
+                        )}
                     </select>
                 </label>
                 <span>{t('entries')}</span>

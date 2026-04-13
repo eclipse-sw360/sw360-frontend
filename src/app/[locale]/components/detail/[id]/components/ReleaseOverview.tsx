@@ -273,7 +273,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
             <div className='mb-3'>
                 {table ? (
                     <>
-                        <ClientSidePageSizeSelector table={table} />
+                        <ClientSidePageSizeSelector
+                            table={table}
+                            showAllOption={true}
+                        />
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
