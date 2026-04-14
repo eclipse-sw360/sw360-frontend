@@ -174,7 +174,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 mainLicenseIds: [],
                 otherLicenseIds: [],
             }
-            tableData.forEach((t) => {
+            memoizedData.forEach((t) => {
                 if (t.id === attachmentId) {
                     payload.mainLicenseIds = t.licenseInfo?.licenseIds ?? []
                     payload.otherLicenseIds = t.licenseInfo?.otherLicenseIds ?? []

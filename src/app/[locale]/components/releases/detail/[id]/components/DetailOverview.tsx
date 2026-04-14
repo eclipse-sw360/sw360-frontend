@@ -40,6 +40,7 @@ import {
     ReleaseDetail,
     ReleaseLink,
     ReleaseTabIds,
+    SrcFileList,
     User,
     UserGroupType,
     VulnerabilitiesVerificationState,
@@ -81,6 +82,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         0,
         0,
     ])
+    const [fileList, setFileList] = useState<SrcFileList | undefined>()
 
     useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedArray(vulnerData)) {
@@ -211,6 +213,41 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         fetchData,
         releaseId,
         session,
+    ])
+
+    useEffect(() => {
+        if (session.status === 'loading' || CommonUtils.isNullOrUndefined(release)) return
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                const response = await ApiUtils.GET(
+                    `releases/${releaseId}/licenseFileList`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK) {
+                    if (response.status === StatusCodes.CONFLICT) return
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const fileData = (await response.json()) as SrcFileList
+                setFileList(fileData)
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        session,
+        releaseId,
+        release,
     ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -566,6 +603,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                             <Summary
                                                 release={release}
                                                 releaseId={releaseId}
+                                                fileList={fileList}
                                             />
                                         </Tab.Pane>
                                         {isSPDXFeatureEnabled && (
