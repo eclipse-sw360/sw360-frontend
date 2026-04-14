@@ -10,16 +10,17 @@
 
 import { ReactNode } from 'react'
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
-import { DocumentTypes, ReleaseDetail } from '@/object-types'
+import { DocumentTypes, ReleaseDetail, SrcFileList } from '@/object-types'
 import ReleaseGeneral from './ReleaseGeneral'
 import ReleaseVendor from './ReleaseVendor'
 
 interface Props {
     release: ReleaseDetail
     releaseId: string
+    fileList?: SrcFileList
 }
 
-const Summary = ({ release, releaseId }: Props): ReactNode => {
+const Summary = ({ release, releaseId, fileList }: Props): ReactNode => {
     return (
         <div className='col'>
             <div>
@@ -29,6 +30,7 @@ const Summary = ({ release, releaseId }: Props): ReactNode => {
                 <ReleaseGeneral
                     release={release}
                     releaseId={releaseId}
+                    fileList={fileList}
                 />
                 <ReleaseVendor release={release} />
                 <ResoucesUsing

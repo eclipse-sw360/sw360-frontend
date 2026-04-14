@@ -18,7 +18,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { BsInfoCircle } from 'react-icons/bs'
-import { ErrorDetails } from '@/object-types'
+import { ErrorDetails, FileList, SrcFileList } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 interface LicenseInfo {
@@ -35,16 +35,6 @@ interface Props {
     attachmentId: string
     releaseId: string
     licenseInfo: LicenseInfo
-}
-
-interface FileList {
-    licName: string
-    srcFiles: string[]
-    licSpdxId: string
-}
-
-interface SrcFileList {
-    data: FileList[]
 }
 
 const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licenseInfo }: Props): ReactNode => {
