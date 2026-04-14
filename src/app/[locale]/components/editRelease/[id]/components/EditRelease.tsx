@@ -59,12 +59,13 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
     const params = useSearchParams()
+    const isDuplicate = params.get('duplicate') === 'true'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
-    const { status } = useSession()
+    const { data: session, status } = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
 
     useEffect(() => {
@@ -467,6 +468,44 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         }
     }
 
+    const createDuplicate = async () => {
+        if (CommonUtils.isNullOrUndefined(session)) {
+            MessageService.error(t('Session has expired'))
+            return signOut()
+        }
+        try {
+            const eccInfo = releasePayload.eccInformation
+            const sanitizedEccInformation: ECCInformation | undefined = eccInfo
+                ? {
+                      ...eccInfo,
+                      eccStatus: eccInfo.eccStatus?.trim() !== '' ? eccInfo.eccStatus : undefined,
+                  }
+                : undefined
+            const { linkedPackages, clearingState, ...cleanPayload } = releasePayload
+
+            const finalPayload: Release = {
+                ...cleanPayload,
+                eccInformation: sanitizedEccInformation,
+            }
+            const response = await ApiUtils.POST('releases', finalPayload, session.user.access_token)
+
+            if (response.status === StatusCodes.CREATED) {
+                const newRelease = (await response.json()) as ReleaseDetail
+                const newReleaseId = CommonUtils.getIdFromUrl(newRelease._links.self.href)
+                MessageService.success(`Release ${newRelease.name} (${newRelease.version}) created successfully!`)
+                router.push('/components/releases/detail/' + newReleaseId)
+            } else if (response.status === StatusCodes.CONFLICT) {
+                MessageService.warn(t('Release is Duplicate'))
+            } else {
+                const data = await response.json()
+                MessageService.error(data.message)
+            }
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e)
+            MessageService.error(msg)
+        }
+    }
+
     const checkUpdateEligibility = async (releaseId: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
@@ -515,25 +554,46 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         setDeleteModalOpen(true)
     }
 
-    const headerButtons = {
-        'Update Release': {
-            link: '',
-            type: 'primary',
-            onClick: checkPreRequisite,
-            name: t('Update Release'),
-        },
-        'Delete Release': {
-            link: '',
-            type: 'danger',
-            onClick: handleDeleteRelease,
-            name: t('Delete Release'),
-        },
-        Cancel: {
-            link: '/components/releases/detail/' + releaseId,
-            type: 'secondary',
-            name: t('Cancel'),
-        },
-    }
+    const headerButtons: {
+        [key: string]: {
+            link: string
+            name: string
+            type: string
+            onClick?: () => void
+        }
+    } = isDuplicate
+        ? {
+              'Create Release': {
+                  link: '',
+                  type: 'primary',
+                  onClick: createDuplicate,
+                  name: t('Create Release'),
+              },
+              Cancel: {
+                  link: '/components/releases/detail/' + releaseId,
+                  type: 'secondary',
+                  name: t('Cancel'),
+              },
+          }
+        : {
+              'Update Release': {
+                  link: '',
+                  type: 'primary',
+                  onClick: checkPreRequisite,
+                  name: t('Update Release'),
+              },
+              'Delete Release': {
+                  link: '',
+                  type: 'danger',
+                  onClick: handleDeleteRelease,
+                  name: t('Delete Release'),
+              },
+              Cancel: {
+                  link: '/components/releases/detail/' + releaseId,
+                  type: 'secondary',
+                  name: t('Cancel'),
+              },
+          }
 
     const param = useParams()
     const locale = (param.locale as string) || 'en'
