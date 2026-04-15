@@ -106,6 +106,33 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
         setFiles(list)
     }
 
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+    }
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        if (e.dataTransfer.items.length !== 0) {
+            if (e.dataTransfer.items[0].kind === 'file') {
+                const f = e.dataTransfer.items[0].getAsFile()
+                if (!CommonUtils.isNullOrUndefined(f))
+                    setFiles((prev) => [
+                        ...prev,
+                        f,
+                    ])
+            } else {
+                return
+            }
+        } else if (e.dataTransfer.files.length !== 0) {
+            setFiles((prev) => [
+                ...prev,
+                e.dataTransfer.files[0],
+            ])
+        } else {
+            return
+        }
+    }
+
     return (
         <Modal
             show={show}
@@ -119,7 +146,11 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
             </Modal.Header>
             <Modal.Body>
                 <div className='modal-body-bordered'>
-                    <div className='text-center'>
+                    <div
+                        className='text-center'
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                    >
                         <span>{t('Drop a File Here')}</span>
                         <br />
                         {t('Or')}
