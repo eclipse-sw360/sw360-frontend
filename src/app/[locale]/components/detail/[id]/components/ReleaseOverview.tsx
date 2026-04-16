@@ -223,12 +223,14 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     })
                 }
 
-                const data = (await response.json()) as EmbeddedLinkedReleases
-                setReleaseData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
-                        ? []
-                        : data['_embedded']['sw360:releaseLinks'],
-                )
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setReleaseData([])
+                    return
+                }
+
+                const data = JSON.parse(responseText) as EmbeddedLinkedReleases
+                setReleaseData(data['_embedded']?.['sw360:releaseLinks'] ?? [])
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
@@ -271,7 +273,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
             <div className='mb-3'>
                 {table ? (
                     <>
-                        <ClientSidePageSizeSelector table={table} />
+                        <ClientSidePageSizeSelector
+                            table={table}
+                            showAllOption={true}
+                        />
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}

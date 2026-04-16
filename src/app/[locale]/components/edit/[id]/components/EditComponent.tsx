@@ -124,10 +124,15 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
-                const dataAttachments: EmbeddedAttachments = (await response.json()) as EmbeddedAttachments
-                if (!CommonUtils.isNullOrUndefined(dataAttachments)) {
-                    setAttachmentData(dataAttachments._embedded['sw360:attachments'])
+
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setAttachmentData([])
+                    return
                 }
+
+                const dataAttachments = JSON.parse(responseText) as EmbeddedAttachments
+                setAttachmentData(dataAttachments._embedded?.['sw360:attachments'] ?? [])
             } catch (error) {
                 ApiUtils.reportError(error)
             }

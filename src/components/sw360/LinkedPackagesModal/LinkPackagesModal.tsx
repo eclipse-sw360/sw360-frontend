@@ -353,6 +353,10 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
                                     variant='secondary'
                                     onClick={() => {
                                         if (!searchText) setSearchText('')
+                                        setPageableQueryParam((prev) => ({
+                                            ...prev,
+                                            page: 0,
+                                        }))
                                         handleSearch()
                                     }}
                                 >
