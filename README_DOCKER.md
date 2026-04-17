@@ -201,9 +201,8 @@ The proxy configuration at
 | `/authorization` | `sw360:8080` | SW360 OAuth2 endpoints |
 | `/kc` | `keycloak:8533` | Keycloak admin and auth |
 
-The template also configures security headers (HSTS, CSP, X-Frame-Options) and
-uses a self-signed snakeoil certificate for TLS. For production, replace the
-certificate paths with your own.
+The template also a self-signed snakeoil certificate for TLS. For production,
+replace the certificate paths with your own.
 
 The server domain is set via `SERVER_DOMAIN` in
 [config/nginx/.env.web](config/nginx/.env.web).
