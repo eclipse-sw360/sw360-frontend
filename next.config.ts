@@ -15,11 +15,12 @@ const isDev = process.env.NODE_ENV === 'development'
 
 const csp = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline';
+  script-src 'self' 'unsafe-inline';
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: https:;
+  img-src 'self' data: https://secure.gravatar.com https://www.gravatar.com;
   font-src 'self' data:;
-  connect-src 'self' https:${isDev ? ' http://localhost:8080' : ''};
+  connect-src 'self' https://www.gravatar.com${isDev ? ' http://localhost:*' : ''};
+  frame-ancestors 'self';
 `
     .replace(/\s{2,}/g, ' ')
     .trim()
