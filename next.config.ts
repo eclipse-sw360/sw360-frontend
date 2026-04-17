@@ -20,7 +20,9 @@ const csp = `
   img-src 'self' data: https://secure.gravatar.com https://www.gravatar.com;
   font-src 'self' data:;
   connect-src 'self' https://www.gravatar.com${isDev ? ' http://localhost:*' : ''};
+  object-src 'none';
   frame-ancestors 'self';
+  require-trusted-types-for 'script';
 `
     .replace(/\s{2,}/g, ' ')
     .trim()
