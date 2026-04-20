@@ -98,7 +98,10 @@ const ProjectsUsing = ({ projectUsings, documentName, restrictedResource, showPr
                     projectUsings.length
                 } visible / ${restrictedResource?.projects ?? 0} restricted) projects.`}
             </Alert>
-            <div className='mb-3'>
+            <div
+                className='mb-3'
+                data-testid='projects-using-table'
+            >
                 {table ? (
                     <SW360Table
                         table={table}

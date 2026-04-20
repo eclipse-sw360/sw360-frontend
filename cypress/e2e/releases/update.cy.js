@@ -8,8 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { updateRelease } from './utils.js';
-import { gotoUpdateReleasePageFromViewComponentPage, gotoViewComponentPage } from '../components/utils.js';
+import { viewSelectors } from './selectors'
+import { updateRelease } from './utils.js'
+import { gotoUpdateReleasePageFromViewComponentPage, gotoViewComponentPage } from '../components/utils.js'
 
 const createComponent = (name, componentType, categories) => {
     return cy.createComponent(name, componentType, categories).then((component) => component.id)
@@ -19,8 +20,25 @@ const createRelease = (componentId, version) => {
     cy.createRelease(componentId, version)
 }
 
-const verifyAfterUpdate = () => {
-    // TODO: Add assertion after fix frontend bug: add attachment
+const verifyAfterUpdate = (testId) => {
+    cy.get(viewSelectors.tabAttachments).click()
+    cy.fixture('releases/update').then((release) => {
+        const attachmentData = release[testId]?.attachment
+        if (!attachmentData || !attachmentData.fileNames) return
+        const fileNames = attachmentData.fileNames
+            .map((filePath) => filePath.split('/').pop())
+            .filter(Boolean)
+        const expectedFiles = attachmentData.shouldUnAttachFile ? fileNames.slice(1) : fileNames
+        const removedFile = attachmentData.shouldUnAttachFile ? fileNames[0] : undefined
+
+        cy.get(viewSelectors.attachmentsTable).should('be.visible')
+        expectedFiles.forEach((fileName) => {
+            cy.get(viewSelectors.attachmentsTable).contains(fileName)
+        })
+        if (removedFile) {
+            cy.get(viewSelectors.attachmentsTable).contains(removedFile).should('not.exist')
+        }
+    })
 }
 
 describe('Update a release', () => {
@@ -38,7 +56,7 @@ describe('Update a release', () => {
         gotoViewComponentPage('Test Comp')
         gotoUpdateReleasePageFromViewComponentPage('v1')
         updateRelease('TC07_ADD_ATTACH_FOR_RELEASE')
-        verifyAfterUpdate()
+        verifyAfterUpdate('TC07_ADD_ATTACH_FOR_RELEASE')
     })
 
     after(() => {
