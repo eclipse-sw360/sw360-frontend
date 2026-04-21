@@ -28,8 +28,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       dotenv:
-        specifier: ^17.3.1
-        version: 17.3.1
+        specifier: ^17.4.2
+        version: 17.4.2
       flag-icons:
         specifier: ^7.3.2
         version: 7.5.0
@@ -49,8 +49,8 @@ importers:
         specifier: 16.2.3
         version: 16.2.3(react-dom@19.2.1(react@19.2.5))(react@19.2.5)
       next-auth:
-        specifier: ^4.24.13
-        version: 4.24.13(next@16.2.3(react-dom@19.2.1(react@19.2.5))(react@19.2.5))(react-dom@19.2.1(react@19.2.5))(react@19.2.5)
+        specifier: ^4.24.14
+        version: 4.24.14(next@16.2.3(react-dom@19.2.1(react@19.2.5))(react@19.2.5))(react-dom@19.2.1(react@19.2.5))(react@19.2.5)
       next-intl:
         specifier: ^4.9.1
         version: 4.9.1(@swc/helpers@0.5.21)(next@16.2.3(react-dom@19.2.1(react@19.2.5))(react@19.2.5))(react@19.2.5)(typescript@5.9.3)
@@ -152,6 +152,10 @@ packages:
 
   '@babel/runtime@7.28.4':
     resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.29.2':
+    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
     engines: {node: '>=6.9.0'}
 
   '@biomejs/biome@2.4.10':
@@ -1240,8 +1244,8 @@ packages:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
 
-  dotenv@17.3.1:
-    resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -1747,8 +1751,8 @@ packages:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
 
-  next-auth@4.24.13:
-    resolution: {integrity: sha512-sgObCfcfL7BzIK76SS5TnQtc3yo2Oifp/yIpfv6fMfeBOiBJkDWF3A2y9+yqnmJ4JKc2C+nMjSjmgDeTwgN1rQ==}
+  next-auth@4.24.14:
+    resolution: {integrity: sha512-YRz6xFDXKUwiXSMMChbrBEWyFktZ1qZXEgeSHQQ3nsy08B4c/xLk6REeutRsIFwkjY/1+ShHnu07DN3JeJguig==}
     peerDependencies:
       '@auth/core': 0.34.3
       next: ^12.2.5 || ^13 || ^14 || ^15 || ^16
@@ -2364,6 +2368,8 @@ snapshots:
 
   '@babel/runtime@7.28.4': {}
 
+  '@babel/runtime@7.29.2': {}
+
   '@biomejs/biome@2.4.10':
     optionalDependencies:
       '@biomejs/cli-darwin-arm64': 2.4.10
@@ -2899,7 +2905,7 @@ snapshots:
 
   '@restart/ui@1.9.4(react-dom@19.2.1(react@19.2.5))(react@19.2.5)':
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.29.2
       '@popperjs/core': 2.11.8
       '@react-aria/ssr': 3.9.10(react@19.2.5)
       '@restart/hooks': 0.5.1(react@19.2.5)
@@ -3400,7 +3406,7 @@ snapshots:
 
   dom-helpers@5.2.1:
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.29.2
       csstype: 3.2.3
 
   dom-serializer@2.0.0:
@@ -3425,7 +3431,7 @@ snapshots:
     dependencies:
       is-obj: 2.0.0
 
-  dotenv@17.3.1: {}
+  dotenv@17.4.2: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -3901,9 +3907,9 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next-auth@4.24.13(next@16.2.3(react-dom@19.2.1(react@19.2.5))(react@19.2.5))(react-dom@19.2.1(react@19.2.5))(react@19.2.5):
+  next-auth@4.24.14(next@16.2.3(react-dom@19.2.1(react@19.2.5))(react@19.2.5))(react-dom@19.2.1(react@19.2.5))(react@19.2.5):
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.29.2
       '@panva/hkdf': 1.2.1
       cookie: 0.7.2
       jose: 4.15.9
@@ -4137,7 +4143,7 @@ snapshots:
 
   react-transition-group@4.4.5(react-dom@19.2.1(react@19.2.5))(react@19.2.5):
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.29.2
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
@@ -4412,7 +4418,7 @@ snapshots:
 
   uncontrollable@7.2.1(react@19.2.5):
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.29.2
       '@types/react': 19.2.14
       invariant: 2.2.4
       react: 19.2.5
