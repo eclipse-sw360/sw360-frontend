@@ -33,7 +33,6 @@ import {
     AttachmentUsages,
     Embedded,
     ErrorDetails,
-    NestedRows,
     Project,
     Release,
     SaveUsagesPayload,
@@ -71,44 +70,64 @@ function isSourceCodeBundleEnabled(type: string): boolean {
     return types.indexOf(type) !== -1
 }
 
-interface ExtendedNestedRows<K> extends NestedRows<K> {
+interface ExtendedNestedRows<K> {
+    node: K
+    children?: ExtendedNestedRows<K>[]
     projectPath?: string
 }
-const releaseMatchesFilter = (release: Release, filter: string, saveUsagesPayload?: SaveUsagesPayload): boolean => {
-    const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
+const releaseMatchesFilter = (
+    release: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>,
+    filter: string,
+    saveUsagesPayload?: SaveUsagesPayload,
+    projectPath?: string,
+): boolean => {
+    const releaseId = release.node.entity._links?.self.href.split('/').at(-1) ?? ''
 
     if (!filter) return true
-    const attachments = release.attachments ?? []
+    const attachments = release.children ?? []
     switch (filter) {
         case 'withCli':
-            return attachments.some((att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX')
+            return attachments.some((a) => {
+                const att = a.node.entity as Attachment
+                return att.attachmentType === 'CLI' || att.attachmentType === 'CLX'
+            })
         case 'withAttachments':
             return attachments.length > 0
         case 'withoutSrc':
-            return !attachments.some((att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC')
+            return !attachments.some((a) => {
+                const att = a.node.entity as Attachment
+                return att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC'
+            })
         case 'withoutAttachments':
             return attachments.length === 0
         case 'withoutCliUsage': {
             if (!saveUsagesPayload || !releaseId) return true
-            const cliAttachments = attachments.filter(
-                (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
-            )
+            const cliAttachments = attachments.filter((a) => {
+                const att = a.node.entity as Attachment
+                return att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR'
+            })
             if (cliAttachments.length === 0) return false
 
-            return !cliAttachments.some((att) =>
-                saveUsagesPayload.selected.includes(`${releaseId}_licenseInfo_${att.attachmentContentId}`),
-            )
+            return cliAttachments.some((a) => {
+                const att = a.node.entity as Attachment
+                const projectPath = a.projectPath
+                return !saveUsagesPayload.selected.includes(
+                    `${projectPath ? `${projectPath}-` : ''}${releaseId}_licenseInfo_${att.attachmentContentId}`,
+                )
+            })
         }
         case 'withoutSourceUsage': {
             if (!saveUsagesPayload || !releaseId) return true
-            const sourceAttachments = attachments.filter(
-                (att) => att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC',
-            )
+            const sourceAttachments = attachments.filter((a) => {
+                const att = a.node.entity as Attachment
+                return att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC'
+            })
             if (sourceAttachments.length === 0) return false
 
-            return !sourceAttachments.some((att) =>
-                saveUsagesPayload.selected.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`),
-            )
+            return sourceAttachments.some((a) => {
+                const att = a.node.entity as Attachment
+                return !saveUsagesPayload.selected.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`)
+            })
         }
         default:
             return true
@@ -159,13 +178,12 @@ const filterRows = (
                 : []
         let matchesFilter = true
         if (node.type === 'release') {
-            const releaseEntity = node.entity as Release
-            matchesFilter = releaseMatchesFilter(releaseEntity, filter, saveUsagesPayload)
+            matchesFilter = releaseMatchesFilter(row, filter, saveUsagesPayload)
         }
         const matchesSearch = rowMatchesSearch(row, term)
         let keepRow = false
         if (node.type === 'project') {
-            keepRow = matchesSearch || filteredChildren.length > 0
+            keepRow = (matchesSearch && !CommonUtils.isNullEmptyOrUndefinedString(term)) || filteredChildren.length > 0
         } else {
             keepRow = matchesFilter && matchesSearch
         }
@@ -338,7 +356,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
                 for (const r of usages['_embedded']['sw360:release']) {
                     for (const att of r.attachments ?? []) {
-                        const usage = usages['_embedded']['sw360:attachmentUsages'][0].filter(
+                        const usage = usages['_embedded']['sw360:attachmentUsages'].filter(
                             (elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId,
                         )
                         for (const u of usage) {
