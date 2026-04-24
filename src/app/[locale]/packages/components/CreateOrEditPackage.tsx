@@ -22,6 +22,7 @@ import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import AddMainLicenseModal from './AddMainLicenseModal'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
+import { extractPackageManagerFromPurl } from './purlUtils'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -114,6 +115,16 @@ export default function CreateOrEditPackage({
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+        if (e.target.name === 'purl') {
+            const purl = e.target.value
+            setPackagePayload((prev) => ({
+                ...prev,
+                purl,
+                packageManager: extractPackageManagerFromPurl(purl) ?? '',
+            }))
+            return
+        }
+
         setPackagePayload((prev) => ({
             ...prev,
             [e.target.name]: e.target.value,
@@ -322,13 +333,15 @@ export default function CreateOrEditPackage({
                                 </span>
                             </label>
                             <input
-                                type='url'
+                                type='text'
                                 className='form-control'
                                 id='createOrEditPackage.purl'
                                 name='purl'
                                 placeholder={t('Enter PURL')}
                                 value={packagePayload.purl ?? ''}
                                 onChange={handleChange}
+                                pattern='^[Pp][Kk][Gg]:[^\s]+$'
+                                title='PURL must start with pkg:'
                                 required
                             />
                         </div>
