@@ -12,7 +12,7 @@ import Release from './Release'
 export interface AttachmentUsages {
     _embedded: {
         'sw360:release': Release[]
-        'sw360:attachmentUsages': AttachmentUsage[][]
+        'sw360:attachmentUsages': AttachmentUsage[]
     }
     linkedProjects?: {
         [key: string]: {
