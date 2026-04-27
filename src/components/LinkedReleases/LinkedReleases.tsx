@@ -14,11 +14,11 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
 import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import SearchReleasesModal from '../sw360/SearchReleasesModal'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
-import TitleLinkedReleases from './TitleLinkedReleases/TitleLinkedReleases'
 
 interface Props {
     release?: ReleaseDetail
@@ -29,13 +29,8 @@ interface Props {
 
 const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [reRender, setReRender] = useState(false)
     const [releaseLinks, setReleaseLinks] = useState<ReleaseLink[]>([])
-    const handleReRender = () => {
-        setReRender(!reRender)
-    }
     const [linkedReleasesDiaglog, setLinkedReleasesDiaglog] = useState(false)
-    const handleClickSelectLinkedReleases = useCallback(() => setLinkedReleasesDiaglog(true), [])
     const { status } = useSession()
 
     useEffect(() => {
@@ -46,13 +41,19 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
         status,
     ])
 
-    const setReleaseIdToRelationshipsToReleasePayLoad = (releaseIdToRelationships: Map<string, string>) => {
-        const obj = Object.fromEntries(releaseIdToRelationships)
-        setReleasePayload({
-            ...releasePayload,
-            releaseIdToRelationship: obj,
-        })
-    }
+    const setReleaseIdToRelationshipsToReleasePayLoad = useCallback(
+        (releaseIdToRelationships: Map<string, string>) => {
+            const obj = Object.fromEntries(releaseIdToRelationships)
+            setReleasePayload({
+                ...releasePayload,
+                releaseIdToRelationship: obj,
+            })
+        },
+        [
+            releasePayload,
+            setReleasePayload,
+        ],
+    )
 
     const handleSelectReleases = useCallback(
         (selectedReleases: ReleaseDetail[]) => {
@@ -81,7 +82,6 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 ...releasePayload,
                 releaseIdToRelationship: obj,
             })
-            handleReRender()
         },
         [
             releaseLinks,
@@ -110,34 +110,59 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
 
     return (
         <>
-            <div
-                className='col'
-                style={{
-                    fontSize: '0.875rem',
-                }}
-            >
-                <SearchReleasesModal
-                    show={linkedReleasesDiaglog}
-                    setShow={setLinkedReleasesDiaglog}
-                    onSelect={handleSelectReleases}
-                    showExactMatch={false}
-                />
-                <div className='row ps-4 pb-4'>
-                    <TitleLinkedReleases />
-                    <TableLinkedReleases
-                        releaseLinks={releaseLinks}
-                        setReleaseLinks={setReleaseLinks}
-                        setReleaseIdToRelationshipsToReleasePayLoad={setReleaseIdToRelationshipsToReleasePayLoad}
-                    />
-                </div>
-                <div>
-                    <button
-                        type='button'
-                        className={`fw-bold btn btn-secondary ms-2`}
-                        onClick={handleClickSelectLinkedReleases}
+            <SearchReleasesModal
+                show={linkedReleasesDiaglog}
+                setShow={setLinkedReleasesDiaglog}
+                onSelect={handleSelectReleases}
+                showExactMatch={false}
+            />
+            <div className='row mb-4'>
+                <div className='row header-1'>
+                    <h6
+                        className='fw-medium'
+                        style={{
+                            color: '#5D8EA9',
+                            paddingLeft: '0px',
+                        }}
                     >
-                        {t('Click to add Releases')}
-                    </button>
+                        {t('LINKED RELEASES')}
+                        <hr
+                            className='my-2 mb-2'
+                            style={{
+                                color: '#5D8EA9',
+                                paddingLeft: '0px',
+                            }}
+                        />
+                    </h6>
+                </div>
+                <div className='mb-3'>
+                    {releaseLinks ? (
+                        <TableLinkedReleases
+                            releaseLinks={releaseLinks}
+                            setReleaseLinks={setReleaseLinks}
+                            setReleaseIdToRelationshipsToReleasePayLoad={setReleaseIdToRelationshipsToReleasePayLoad}
+                        />
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
+                </div>
+                <div
+                    className='row'
+                    style={{
+                        paddingLeft: '0px',
+                    }}
+                >
+                    <div className='col-lg-4'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            onClick={() => setLinkedReleasesDiaglog(true)}
+                        >
+                            {t('Link Releases')}
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
