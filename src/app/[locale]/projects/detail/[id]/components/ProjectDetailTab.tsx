@@ -17,11 +17,13 @@ import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
+import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import {
     ActionType,
     AdministrationDataType,
     ClearingDetailsCount,
     ErrorDetails,
+    PageableQueryParam,
     SummaryDataType,
     UserGroupType,
 } from '@/object-types'
@@ -50,6 +52,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
     const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
     const [obligationsLoading, setObligationsLoading] = useState<boolean>(false)
+    const [vulnerabilitiesTotal, setVulnerabilitiesTotal] = useState<number>(0)
+    const [vulnerabilitiesRatedCount, setVulnerabilitiesRatedCount] = useState<number>(0)
+    const [vulnerabilitiesLoading, setVulnerabilitiesLoading] = useState<boolean>(false)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
     const router = useRouter()
@@ -114,7 +119,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
-        session,
         session,
     ])
 
@@ -228,6 +232,113 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         session.data?.user?.access_token,
     ])
 
+    const isVulnerabilitiesDisplayEnabled = summaryData?.enableVulnerabilitiesDisplay ?? false
+    const isVulnerabilityMonitoringEnabled = summaryData?.enableSvm ?? false
+    const hasSecurityResponsibles = (summaryData?._embedded?.securityResponsibles?.length ?? 0) > 0
+    const isMonitoringScenario =
+        isVulnerabilitiesDisplayEnabled && isVulnerabilityMonitoringEnabled && hasSecurityResponsibles
+
+    const vulnerabilitiesBadgeClassName = isMonitoringScenario ? 'obligations-badge--danger' : 'obligations-badge'
+
+    const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
+        ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
+        : '?/?'
+
+    useEffect(() => {
+        if (session.status === 'loading') return
+
+        if (!isVulnerabilitiesDisplayEnabled) {
+            setVulnerabilitiesTotal(0)
+            setVulnerabilitiesRatedCount(0)
+            setVulnerabilitiesLoading(false)
+            return
+        }
+
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const isRated = (relevance?: string | null) => {
+            const normalized = (relevance ?? '').trim().toUpperCase()
+            return normalized !== '' && normalized !== 'NOT_CHECKED'
+        }
+
+        const fetchCounts = async () => {
+            setVulnerabilitiesLoading(true)
+            try {
+                if (CommonUtils.isNullOrUndefined(session.data)) {
+                    void signOut()
+                    return
+                }
+                let page = 0
+                let totalPages = 1
+                let totalElements = 0
+                let ratedCount = 0
+
+                while (page < totalPages) {
+                    const pageableQueryParam: PageableQueryParam = {
+                        page,
+                        page_entries: 10,
+                        sort: '',
+                    }
+                    const queryUrl = CommonUtils.createUrlWithParams(
+                        `projects/${projectId}/vulnerabilitySummary`,
+                        Object.fromEntries(
+                            Object.entries(pageableQueryParam).map(([key, value]) => [
+                                key,
+                                String(value),
+                            ]),
+                        ),
+                    )
+
+                    const resp = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                    const body = (await resp.json().catch(() => ({}))) as {
+                        _embedded?: {
+                            'sw360:vulnerabilitySummaries'?: Array<{
+                                projectRelevance?: string | null
+                            }>
+                        }
+                        page?: {
+                            totalElements?: number
+                            totalPages?: number
+                        }
+                        message?: string
+                        error?: string
+                    }
+
+                    if (resp.status !== StatusCodes.OK) {
+                        throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
+                            status: resp.status,
+                        })
+                    }
+
+                    const vulnerabilities = body?._embedded?.['sw360:vulnerabilitySummaries'] ?? []
+                    ratedCount += vulnerabilities.filter((vulnerability) =>
+                        isRated(vulnerability.projectRelevance),
+                    ).length
+                    totalElements =
+                        typeof body?.page?.totalElements === 'number' ? body.page.totalElements : totalElements
+                    totalPages = typeof body?.page?.totalPages === 'number' ? body.page.totalPages : totalPages
+                    page += 1
+                }
+
+                setVulnerabilitiesTotal(totalElements)
+                setVulnerabilitiesRatedCount(ratedCount)
+            } catch (error) {
+                ApiUtils.reportError(error)
+            } finally {
+                setVulnerabilitiesLoading(false)
+            }
+        }
+
+        void fetchCounts()
+        return () => controller.abort()
+    }, [
+        projectId,
+        session.status,
+        session.data?.user?.access_token,
+        isVulnerabilitiesDisplayEnabled,
+    ])
+
     return (
         <>
             <ImportSBOMModal
@@ -304,31 +415,19 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
-                                    <div className='my-2 d-flex align-items-center'>
-                                        <span className='me-2'>{t('Obligations')}</span>
-
-                                        <span
-                                            id='obligationsCount'
-                                            className={`badge ${
-                                                obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
-                                                    ? 'obligations-badge--success'
-                                                    : obligationsNonOpenCount === 0
-                                                      ? 'obligations-badge--danger'
-                                                      : 'obligations-badge'
-                                            }`}
-                                            aria-live='polite'
-                                        >
-                                            {obligationsLoading ? (
-                                                <span
-                                                    className='spinner-border spinner-border-sm'
-                                                    role='status'
-                                                    aria-hidden='true'
-                                                ></span>
-                                            ) : (
-                                                `${obligationsNonOpenCount} / ${obligationsTotal}`
-                                            )}
-                                        </span>
-                                    </div>
+                                    <SidebarCountBadge
+                                        badgeClassName={
+                                            obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
+                                                ? 'obligations-badge--success'
+                                                : obligationsNonOpenCount === 0
+                                                  ? 'obligations-badge--danger'
+                                                  : 'obligations-badge'
+                                        }
+                                        countId='obligationsCount'
+                                        isLoading={obligationsLoading}
+                                        label={t('Obligations')}
+                                        value={`${obligationsNonOpenCount} / ${obligationsTotal}`}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
@@ -370,7 +469,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='vulnerabilities'
                                 >
-                                    <div className='my-2'>{t('Vulnerabilities')}</div>
+                                    <SidebarCountBadge
+                                        badgeClassName={vulnerabilitiesBadgeClassName}
+                                        countId='vulnerabilitiesCount'
+                                        isLoading={vulnerabilitiesLoading && isVulnerabilitiesDisplayEnabled}
+                                        label={t('Vulnerabilities')}
+                                        value={vulnerabilitiesCountValue}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action

@@ -23,6 +23,7 @@ import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
+import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import {
     ActionType,
     DocumentTypes,
@@ -784,16 +785,13 @@ function EditProject({
                                                     action
                                                     eventKey='obligations'
                                                 >
-                                                    <div className='d-flex align-items-center my-2'>
-                                                        <span className='me-2'>{t('Obligations')}</span>
-                                                        <span
-                                                            id='obligationsCount'
-                                                            className='badge obligations-badge--danger'
-                                                            aria-live='polite'
-                                                        >
-                                                            {`${obligationsNonOpenCount} / ${obligationsTotal}`}
-                                                        </span>
-                                                    </div>
+                                                    <SidebarCountBadge
+                                                        badgeClassName='obligations-badge--danger'
+                                                        countId='obligationsCount'
+                                                        isLoading={false}
+                                                        label={t('Obligations')}
+                                                        value={`${obligationsNonOpenCount} / ${obligationsTotal}`}
+                                                    />
                                                 </ListGroup.Item>
                                             </ListGroup>
                                         </Col>
