@@ -1673,6 +1673,9 @@
     "ui_software_platforms": "リリースに表示するソフトウェア プラットフォームのリスト",
     "ui_state": "許可されるプロジェクトのライフサイクル状態のリスト",
     "updated successfully": "更新成功！",
+    "Page Not Found": "ページが見つかりません",
+    "Page Not Found Description": "お探しのページは存在しないか、移動された可能性があります。",
+    "Go Back": "戻る",
     "use_license_info_from_file_description": "ファイルからライセンス情報を使用します",
     "vector": "ベクター",
     "wrong_spdx_information": "間違ったSPDXを入力すると情報が正しく登録されません"

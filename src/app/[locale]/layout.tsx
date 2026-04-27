@@ -8,60 +8,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'flag-icons/css/flag-icons.min.css'
-
-import '@/styles/auth.css'
-import '@/styles/globals.css'
-
-import { Metadata } from 'next'
-import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
-import { Footer, GlobalMessages, Navbar } from 'next-sw360'
-import { type JSX, ReactNode } from 'react'
-import { SW360BackendConfigProvider, UiConfigProvider } from '@/contexts'
-import { Providers } from '../provider'
-
-export const metadata: Metadata = {
-    title: {
-        template: '%s | SW360 Frontend',
-        default: 'SW360 Frontend',
-    },
-    description: 'SW360 Compliance Management System Graphical Interface.',
-    metadataBase: new URL('https://eclipse.org/sw360/'),
-}
+import { type ReactNode } from 'react'
 
 type Props = {
     children: ReactNode
 }
 
-async function RootLayout({ children }: Props): Promise<JSX.Element> {
-    const locale = await getLocale()
-    const messages = await getMessages()
-
-    return (
-        <html lang={locale}>
-            <body>
-                <Providers>
-                    <NextIntlClientProvider messages={messages}>
-                        <SW360BackendConfigProvider>
-                            <UiConfigProvider>
-                                <div
-                                    id='container'
-                                    className='d-flex flex-column min-vh-100'
-                                >
-                                    <GlobalMessages />
-                                    <Navbar />
-                                    {children}
-                                    <Footer />
-                                </div>
-                            </UiConfigProvider>
-                        </SW360BackendConfigProvider>
-                    </NextIntlClientProvider>
-                </Providers>
-            </body>
-        </html>
-    )
+function LocaleLayout({ children }: Props): ReactNode {
+    return children
 }
 
-export default RootLayout
+export default LocaleLayout

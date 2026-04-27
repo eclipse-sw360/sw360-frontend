@@ -1673,6 +1673,9 @@
     "ui_software_platforms": "Lista de plataformas de software a serem exibidas em versões",
     "ui_state": "Lista de estados permitidos do ciclo de vida do projeto",
     "updated successfully": "Atualizado com sucesso!",
+    "Page Not Found": "Página não encontrada",
+    "Page Not Found Description": "A página que você está procurando não existe ou pode ter sido movida.",
+    "Go Back": "Voltar",
     "use_license_info_from_file_description": "Use informações de licença de arquivos",
     "vector": "vector",
     "wrong_spdx_information": "Se for inserido o SPDX errado, as informações não serão registradas corretamente"

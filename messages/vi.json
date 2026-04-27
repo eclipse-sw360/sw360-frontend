@@ -1673,6 +1673,9 @@
     "ui_software_platforms": "Danh sách Nền tảng phần mềm sẽ hiển thị trong Bản phát hành",
     "ui_state": "Danh sách các trạng thái vòng đời Dự án được phép",
     "updated successfully": "cập nhật thành công!",
+    "Page Not Found": "Không tìm thấy trang",
+    "Page Not Found Description": "Trang bạn đang tìm kiếm không tồn tại hoặc có thể đã được chuyển đi.",
+    "Go Back": "Quay lại",
     "use_license_info_from_file_description": "Sử dụng thông tin giấy phép từ các tệp",
     "vector": "vectơ",
     "wrong_spdx_information": "Nếu nhập sai SPDX thì thông tin sẽ không được đăng ký chính xác"

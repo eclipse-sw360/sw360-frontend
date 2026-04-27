@@ -1673,6 +1673,9 @@
     "ui_software_platforms": "版本中显示的软件平台列表",
     "ui_state": "允许的项目生命周期状态列表",
     "updated successfully": "更新成功！",
+    "Page Not Found": "页面未找到",
+    "Page Not Found Description": "您要查找的页面不存在或可能已被移动。",
+    "Go Back": "返回",
     "use_license_info_from_file_description": "使用文件中的许可证信息",
     "vector": "向量",
     "wrong_spdx_information": "如果输入错误的SPDX，信息将无法正确注册"
