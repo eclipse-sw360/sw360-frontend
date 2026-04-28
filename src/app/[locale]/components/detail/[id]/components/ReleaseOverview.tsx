@@ -126,56 +126,67 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 enableSorting: false,
                 cell: ({ row }) => {
                     const { id } = row.original
+                    const isViewer = session.data?.user?.userGroup === UserGroupType.VIEWER
                     return (
                         <span className='d-flex justify-content-evenly'>
-                            <Image
-                                src={fossologyIcon as StaticImport}
-                                width={20}
-                                height={20}
-                                style={{
-                                    marginRight: '5px',
-                                }}
-                                alt='Fossology'
-                                onClick={() => handleFossologyClearing(id)}
-                            />
-                            <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                                <Link href={`/components/editRelease/${id}`}>
-                                    <BsPencil
-                                        size={20}
-                                        className='btn-icon'
-                                    />
-                                </Link>
-                            </OverlayTrigger>
+                            {!isViewer && (
+                                <Image
+                                    src={fossologyIcon as StaticImport}
+                                    width={20}
+                                    height={20}
+                                    style={{
+                                        marginRight: '5px',
+                                    }}
+                                    alt='Fossology'
+                                    onClick={() => handleFossologyClearing(id)}
+                                />
+                            )}
+                            {!isViewer && (
+                                <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                    <Link href={`/components/editRelease/${id}`}>
+                                        <BsPencil
+                                            size={20}
+                                            className='btn-icon'
+                                        />
+                                    </Link>
+                                </OverlayTrigger>
+                            )}
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
                                 <BsClipboard
                                     className='btn-icon'
                                     size={20}
                                 />
                             </OverlayTrigger>
-                            <OverlayTrigger overlay={<Tooltip>{t('Link Project')}</Tooltip>}>
-                                <BsLink45Deg
-                                    className='btn-icon'
-                                    size={20}
-                                    onClick={() => handleLinkToProject(id)}
-                                />
-                            </OverlayTrigger>
-                            <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
-                                <Link href={`/components/releases/detail/${id}/merge`}>
-                                    <BsGit
-                                        size={20}
-                                        className='btn-icon'
-                                    />
-                                </Link>
-                            </OverlayTrigger>
-                            <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                <span className='d-inline-block'>
-                                    <BsFillTrashFill
+                            {!isViewer && (
+                                <OverlayTrigger overlay={<Tooltip>{t('Link Project')}</Tooltip>}>
+                                    <BsLink45Deg
                                         className='btn-icon'
                                         size={20}
-                                        onClick={() => handleClickDelete(id)}
+                                        onClick={() => handleLinkToProject(id)}
                                     />
-                                </span>
-                            </OverlayTrigger>
+                                </OverlayTrigger>
+                            )}
+                            {!isViewer && (
+                                <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
+                                    <Link href={`/components/releases/detail/${id}/merge`}>
+                                        <BsGit
+                                            size={20}
+                                            className='btn-icon'
+                                        />
+                                    </Link>
+                                </OverlayTrigger>
+                            )}
+                            {!isViewer && (
+                                <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                    <span className='d-inline-block'>
+                                        <BsFillTrashFill
+                                            className='btn-icon'
+                                            size={20}
+                                            onClick={() => handleClickDelete(id)}
+                                        />
+                                    </span>
+                                </OverlayTrigger>
+                            )}
                         </span>
                     )
                 },
@@ -186,6 +197,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         ],
         [
             t,
+            session,
         ],
     )
 

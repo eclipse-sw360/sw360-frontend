@@ -20,6 +20,7 @@ import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter }
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Dropdown, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-icons/bs'
+import { ViewerGate } from '@/components/AccessControl'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import {
@@ -246,21 +247,23 @@ function Project(): JSX.Element {
                         <>
                             {id && (
                                 <span className='d-flex align-items-center justify-content-center'>
-                                    <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                                        <span
-                                            className='d-inline-flex align-items-center justify-content-center'
-                                            style={{
-                                                width: 28,
-                                                height: 28,
-                                            }}
-                                            onClick={() => handleEditProject(id)}
-                                        >
-                                            <BsPencil
-                                                className='btn-icon'
-                                                size={20}
-                                            />
-                                        </span>
-                                    </OverlayTrigger>
+                                    <ViewerGate>
+                                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                            <span
+                                                className='d-inline-flex align-items-center justify-content-center'
+                                                style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                }}
+                                                onClick={() => handleEditProject(id)}
+                                            >
+                                                <BsPencil
+                                                    className='btn-icon'
+                                                    size={20}
+                                                />
+                                            </span>
+                                        </OverlayTrigger>
+                                    </ViewerGate>
                                     <span className='border-start align-self-stretch mx-1 my-1' />
                                     {projectClearingRequestId && projectClearingRequestId !== '' ? (
                                         <OverlayTrigger overlay={<Tooltip>{t('View Clearing Request')}</Tooltip>}>
@@ -282,24 +285,26 @@ function Project(): JSX.Element {
                                             </span>
                                         </OverlayTrigger>
                                     ) : crIsAllowed ? (
-                                        <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
-                                            <span
-                                                className='d-inline-flex align-items-center justify-content-center'
-                                                style={{
-                                                    width: 28,
-                                                    height: 28,
-                                                }}
-                                                onClick={() => {
-                                                    setCreateCRProjectId(id)
-                                                    setShowCreateCRModal(true)
-                                                }}
-                                            >
-                                                <BsCheck2Square
-                                                    size={20}
-                                                    className='btn-icon overlay-trigger'
-                                                />
-                                            </span>
-                                        </OverlayTrigger>
+                                        <ViewerGate>
+                                            <OverlayTrigger overlay={<Tooltip>{t('Create Clearing Request')}</Tooltip>}>
+                                                <span
+                                                    className='d-inline-flex align-items-center justify-content-center'
+                                                    style={{
+                                                        width: 28,
+                                                        height: 28,
+                                                    }}
+                                                    onClick={() => {
+                                                        setCreateCRProjectId(id)
+                                                        setShowCreateCRModal(true)
+                                                    }}
+                                                >
+                                                    <BsCheck2Square
+                                                        size={20}
+                                                        className='btn-icon overlay-trigger'
+                                                    />
+                                                </span>
+                                            </OverlayTrigger>
+                                        </ViewerGate>
                                     ) : (
                                         <OverlayTrigger
                                             overlay={
@@ -325,44 +330,55 @@ function Project(): JSX.Element {
                                         </OverlayTrigger>
                                     )}
                                     <span className='border-start align-self-stretch mx-1 my-1' />
-                                    <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
-                                        <Link
-                                            href={`/projects/duplicate/${id}`}
-                                            className='overlay-trigger d-inline-flex align-items-center justify-content-center'
-                                            style={{
-                                                width: 28,
-                                                height: 28,
-                                            }}
-                                        >
-                                            <BsClipboard
-                                                className='btn-icon mt-0'
-                                                size={20}
-                                            />
-                                        </Link>
-                                    </OverlayTrigger>
+                                    <ViewerGate>
+                                        <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
+                                            <Link
+                                                href={`/projects/duplicate/${id}`}
+                                                className='overlay-trigger d-inline-flex align-items-center justify-content-center'
+                                                style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                }}
+                                            >
+                                                <BsClipboard
+                                                    className='btn-icon mt-0'
+                                                    size={20}
+                                                />
+                                            </Link>
+                                        </OverlayTrigger>
+                                    </ViewerGate>
 
                                     <span className='border-start align-self-stretch mx-1 my-1' />
-                                    <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                        <span
-                                            className='d-inline-flex align-items-center justify-content-center'
-                                            style={{
-                                                width: 28,
-                                                height: 28,
-                                            }}
-                                        >
-                                            <BsFillTrashFill
-                                                className='btn-icon'
-                                                size={20}
-                                                onClick={() => {
-                                                    if (projectClearingRequestId && projectClearingRequestId !== '') {
-                                                        handleDeleteProject(id, projectClearingRequestId, clearingState)
-                                                    } else {
-                                                        handleDeleteProject(id)
-                                                    }
+                                    <ViewerGate>
+                                        <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                            <span
+                                                className='d-inline-flex align-items-center justify-content-center'
+                                                style={{
+                                                    width: 28,
+                                                    height: 28,
                                                 }}
-                                            />
-                                        </span>
-                                    </OverlayTrigger>
+                                            >
+                                                <BsFillTrashFill
+                                                    className='btn-icon'
+                                                    size={20}
+                                                    onClick={() => {
+                                                        if (
+                                                            projectClearingRequestId &&
+                                                            projectClearingRequestId !== ''
+                                                        ) {
+                                                            handleDeleteProject(
+                                                                id,
+                                                                projectClearingRequestId,
+                                                                clearingState,
+                                                            )
+                                                        } else {
+                                                            handleDeleteProject(id)
+                                                        }
+                                                    }}
+                                                />
+                                            </span>
+                                        </OverlayTrigger>
+                                    </ViewerGate>
                                 </span>
                             )}
                         </>
@@ -794,7 +810,8 @@ function Project(): JSX.Element {
                                             onClick={handleAddProject}
                                             disabled={
                                                 session.status === 'authenticated' &&
-                                                session.data?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                (session.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                    session.data?.user?.userGroup === UserGroupType.VIEWER)
                                             }
                                         >
                                             {t('Add Project')}
@@ -804,7 +821,8 @@ function Project(): JSX.Element {
                                                 variant='secondary'
                                                 hidden={
                                                     session.status === 'authenticated' &&
-                                                    session.data?.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    (session.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                        session.data?.user?.userGroup === UserGroupType.VIEWER)
                                                 }
                                             >
                                                 {t('Import SBOM')}
@@ -833,7 +851,13 @@ function Project(): JSX.Element {
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
-                                    <Dropdown className='col-auto'>
+                                    <Dropdown
+                                        className='col-auto'
+                                        hidden={
+                                            session.status === 'authenticated' &&
+                                            session.data?.user?.userGroup === UserGroupType.VIEWER
+                                        }
+                                    >
                                         <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                         <Dropdown.Menu>
                                             <Dropdown.Item

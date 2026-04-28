@@ -25,6 +25,7 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import { packageManagers } from '@/app/[locale]/packages/components/PackageManagers'
+import { ViewerGate } from '@/components/AccessControl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
 import { ErrorDetails, FilterOption, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
@@ -286,17 +287,19 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 cell: ({ row }) => {
                     return (
                         <span className='d-flex justify-content-evenly'>
-                            <OverlayTrigger overlay={<Tooltip>{t('Edit Package')}</Tooltip>}>
-                                <Link
-                                    href={`/packages/edit/${row.original.id}`}
-                                    className='overlay-trigger'
-                                >
-                                    <BsPencil
-                                        className='btn-icon'
-                                        size={20}
-                                    />
-                                </Link>
-                            </OverlayTrigger>
+                            <ViewerGate>
+                                <OverlayTrigger overlay={<Tooltip>{t('Edit Package')}</Tooltip>}>
+                                    <Link
+                                        href={`/packages/edit/${row.original.id}`}
+                                        className='overlay-trigger'
+                                    >
+                                        <BsPencil
+                                            className='btn-icon'
+                                            size={20}
+                                        />
+                                    </Link>
+                                </OverlayTrigger>
+                            </ViewerGate>
                         </span>
                     )
                 },
