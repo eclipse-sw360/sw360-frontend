@@ -1672,7 +1672,10 @@
     "ui_rest_apitoken_generator_enable": "Permitir la generación de tokens API desde la interfaz de usuario",
     "ui_software_platforms": "Lista de plataformas de software para mostrar en versiones",
     "ui_state": "Lista de estados permitidos del ciclo de vida del proyecto",
-    "updated successfully": "actualizado exitosamente!",
+    "updated successfully": "actualizado con éxito!",
+    "Page Not Found": "Página no encontrada",
+    "Page Not Found Description": "La página que buscas no existe o pudo haber sido movida.",
+    "Go Back": "Volver",
     "use_license_info_from_file_description": "Utilice la información de la licencia de los archivos",
     "vector": "vector",
     "wrong_spdx_information": "Si se introduce el SPDX incorrecto, la información no se registrará correctamente"
