@@ -504,4 +504,5 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(ModerationRequestDetail, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

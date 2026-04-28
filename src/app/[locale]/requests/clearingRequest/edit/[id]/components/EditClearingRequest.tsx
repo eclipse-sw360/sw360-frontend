@@ -291,4 +291,5 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(EditClearingRequest, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])
