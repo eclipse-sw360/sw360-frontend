@@ -499,6 +499,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     }, [
         pageableQueryParam,
         session,
+        refresh,
     ])
 
     useEffect(() => {
