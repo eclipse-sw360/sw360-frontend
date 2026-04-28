@@ -219,4 +219,5 @@ function AddLicense(): ReactNode {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(AddLicense, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

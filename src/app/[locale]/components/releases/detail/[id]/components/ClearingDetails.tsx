@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl'
 import { FossologyClearing } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import fossologyIcon from '@/assets/images/fossology.svg'
-import { Attachment, ReleaseDetail } from '@/object-types'
+import { Attachment, ReleaseDetail, UserGroupType } from '@/object-types'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
 import ClearingInformationStatus from './ClearingInformationStatus'
 import RequestInformation from './RequestInformation'
@@ -36,7 +36,8 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props): Re
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [show, setShow] = useState(false)
-    const { status } = useSession()
+    const { status, data: session } = useSession()
+    const isViewer = session?.user?.userGroup === UserGroupType.VIEWER
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -69,16 +70,18 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props): Re
                         <td>{t('Clearing State')}:</td>
                         <td>
                             {t(release.clearingState as never)}
-                            <Image
-                                src={fossologyIcon as StaticImport}
-                                width={15}
-                                height={15}
-                                style={{
-                                    marginLeft: '5px',
-                                }}
-                                alt='Fossology'
-                                onClick={() => setShow(true)}
-                            />
+                            {!isViewer && (
+                                <Image
+                                    src={fossologyIcon as StaticImport}
+                                    width={15}
+                                    height={15}
+                                    style={{
+                                        marginLeft: '5px',
+                                    }}
+                                    alt='Fossology'
+                                    onClick={() => setShow(true)}
+                                />
+                            )}
                         </td>
                     </tr>
                     <tr>

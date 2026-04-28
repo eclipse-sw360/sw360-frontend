@@ -14,7 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
 import {
@@ -26,7 +26,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils, PermissionUtils } from '@/utils'
+import { RequestedAction } from '@/utils/permission.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import LinkProjects from '../../../components/LinkProjects'
@@ -61,6 +62,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         show: false,
         importType: 'CycloneDx',
     })
+
+    // Check if user can change vulnerability ratings for this project
+    const canChangeVulnerability = useMemo(
+        () => PermissionUtils.getStandardPermissions(RequestedAction.WRITE, summaryData?._embedded, session.data?.user),
+        [
+            summaryData,
+            session.data?.user,
+        ],
+    )
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -301,7 +311,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     eventKey='obligations'
                                     hidden={
                                         session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                        (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                            session?.data.user?.userGroup === UserGroupType.VIEWER)
                                     }
                                 >
                                     <div className='my-2 d-flex align-items-center'>
@@ -335,7 +346,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     eventKey='ecc'
                                     hidden={
                                         session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                        (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                            session?.data.user?.userGroup === UserGroupType.VIEWER)
                                     }
                                 >
                                     <div className='my-2'>{t('ECC')}</div>
@@ -343,6 +355,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilityTrackingStatus'
+                                    hidden={
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.VIEWER
+                                    }
                                 >
                                     <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
                                 </ListGroup.Item>
@@ -369,6 +385,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilities'
+                                    hidden={
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.VIEWER
+                                    }
                                 >
                                     <div className='my-2'>{t('Vulnerabilities')}</div>
                                 </ListGroup.Item>
@@ -394,7 +414,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             onClick={() => handleEditProject(projectId)}
                                             disabled={
                                                 session.status === 'authenticated' &&
-                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                    session?.data.user?.userGroup === UserGroupType.VIEWER)
                                             }
                                         >
                                             {t('Edit Projects')}
@@ -405,7 +426,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             onClick={() => setShow(true)}
                                             disabled={
                                                 session.status === 'authenticated' &&
-                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                    session?.data.user?.userGroup === UserGroupType.VIEWER)
                                             }
                                         >
                                             {t('Link to Projects')}
@@ -417,7 +439,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 className='px-2'
                                                 hidden={
                                                     session.status === 'authenticated' &&
-                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                        session?.data.user?.userGroup === UserGroupType.VIEWER)
                                                 }
                                             >
                                                 {t('Import SBOM')}
@@ -484,7 +507,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 className='px-2'
                                                 hidden={
                                                     session.status === 'authenticated' &&
-                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                        session?.data.user?.userGroup === UserGroupType.VIEWER)
                                                 }
                                             >
                                                 {t('Export SBOM')}
@@ -607,6 +631,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                     enableVulnerabilitiesDisplay:
                                                         summaryData.enableVulnerabilitiesDisplay ?? false,
                                                 }}
+                                                canChangeVulnerability={canChangeVulnerability}
                                             />
                                         )}
                                     </Tab.Pane>

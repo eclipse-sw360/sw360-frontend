@@ -11,6 +11,7 @@
 
 import { withAuth } from 'next-auth/middleware'
 import createMiddleware from 'next-intl/middleware'
+import { type RoutePermission, routePermissions } from '@/config/permissions'
 import { UserGroupType } from '@/object-types'
 import { routing } from './i18n/routing'
 import { locales } from './object-types/Constants'
@@ -18,65 +19,38 @@ import { CommonUtils } from './utils'
 
 const LOGIN_PAGE_PATH = '/'
 
-interface RouteProtection {
-    roles?: UserGroupType[] // Roles required for this path
-    authRequired?: boolean // True if any authentication is required
-}
-
-/*
-    - Add configuration for role based access of different routes here
-    - A route prefix not in this config object will be treated as a public 
-      route by default
-    - A longest prefix match will be performed on the paths to determine access
-*/
-const roleBasedAccessControl: {
-    [pathPrefix: string]: RouteProtection
-} = {
-    '/admin': {
-        roles: [
-            UserGroupType.ADMIN,
-            UserGroupType.SW360_ADMIN,
-        ],
-        authRequired: true,
-    },
-    '/home': {
-        authRequired: true,
-    },
-    '/projects': {
-        authRequired: true,
-    },
-    '/components': {
-        authRequired: true,
-    },
-    '/licenses': {
-        authRequired: true,
-    },
-    '/ecc': {
-        authRequired: true,
-    },
-    '/vulnerabilities': {
-        authRequired: true,
-    },
-    '/requests': {
-        authRequired: true,
-    },
-    '/search': {
-        authRequired: true,
-    },
-    '/preferences': {
-        authRequired: true,
-    },
-}
-
-const getProtectionConfig = (pathname: string): RouteProtection | null => {
-    const matchingPaths = Object.keys(roleBasedAccessControl)
+/**
+ * Get the route protection configuration for a given pathname
+ * Uses longest prefix matching to find the most specific route config
+ */
+const getProtectionConfig = (pathname: string): RoutePermission | null => {
+    const matchingPaths = Object.keys(routePermissions)
         .filter((prefix) => pathname.startsWith(prefix))
         .sort((a, b) => b.length - a.length) // Sort by length for longest prefix matching
 
     if (matchingPaths.length > 0) {
-        return roleBasedAccessControl[matchingPaths[0]]
+        return routePermissions[matchingPaths[0]]
     }
     return null
+}
+
+/**
+ * Evaluate if a user role is allowed based on route permission config
+ * Blocked roles (blacklist) take precedence over allowed roles (whitelist)
+ */
+const isRoleAllowed = (userRole: UserGroupType, config: RoutePermission): boolean => {
+    // Check blocked roles first (blacklist takes precedence)
+    if (config.blockedRoles && config.blockedRoles.includes(userRole)) {
+        return false
+    }
+
+    // Check allowed roles (whitelist)
+    if (config.allowedRoles && config.allowedRoles.length > 0) {
+        return config.allowedRoles.includes(userRole)
+    }
+
+    // No specific role restrictions, allow by default
+    return true
 }
 
 const intlMiddleware = createMiddleware(routing)
@@ -97,24 +71,19 @@ const authMiddleware = withAuth(
 
                 const protectionConfig = getProtectionConfig(pathWithoutLocale)
 
-                // if protection config is not found or authRequired flag is undefined or false, it is a public page
-                if (CommonUtils.isNullOrUndefined(protectionConfig?.authRequired) || !protectionConfig.authRequired) {
+                // If no protection config exists, it's a public page - allow access
+                if (CommonUtils.isNullOrUndefined(protectionConfig)) {
                     return true
                 }
 
-                // if authentication is required but token is not found, deny access
+                // Protection config exists - require authentication
                 if (CommonUtils.isNullOrUndefined(token)) {
                     return false
                 }
 
-                // if authentication is required but role based access is not required, allow
-                if (!protectionConfig.roles || protectionConfig.roles.length === 0) {
-                    return true
-                }
-
-                // check access permissions based on role
+                // Check role-based access
                 const userGroup = token.userGroup as UserGroupType
-                return protectionConfig.roles.includes(userGroup)
+                return isRoleAllowed(userGroup, protectionConfig)
             },
         },
         pages: {

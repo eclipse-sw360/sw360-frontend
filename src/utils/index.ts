@@ -9,5 +9,6 @@
 
 import ApiUtils, { ApiError } from './api/api.util'
 import CommonUtils from './common.utils'
+import PermissionUtils from './permission.utils'
 
-export { ApiError, ApiUtils, CommonUtils }
+export { ApiError, ApiUtils, CommonUtils, PermissionUtils }

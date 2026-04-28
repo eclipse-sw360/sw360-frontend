@@ -13,8 +13,8 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
-import { CommonUtils } from '@/utils'
+import { usePermissionContext } from '@/contexts'
+import { ClearingRequestDetails, UpdateClearingRequestPayload } from '@/object-types'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails | undefined
@@ -32,7 +32,9 @@ export default function EditClearingRequestInfo({
     setUpdateClearingRequestPayload,
 }: Props): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const { status } = useSession()
+    const { hasCapability } = usePermissionContext()
+    const canEditClearingRequestDetails = hasCapability('canEditClearingRequestDetails')
     const [, setMinDate] = useState('')
     const [dialogOpenRequestingUser, setDialogOpenRequestingUser] = useState(false)
     const [requestingUserData, setRequestingUserData] = useState<{
@@ -88,10 +90,7 @@ export default function EditClearingRequestInfo({
                                 name='requestingUser'
                                 onClick={() => setDialogOpenRequestingUser(true)}
                                 value={updateClearingRequestPayload.requestingUser}
-                                disabled={
-                                    CommonUtils.isNullOrUndefined(session) ||
-                                    session.user.userGroup === UserGroupType.USER
-                                }
+                                disabled={!canEditClearingRequestDetails}
                             />
                             <SelectUsersDialog
                                 show={dialogOpenRequestingUser}
@@ -123,10 +122,7 @@ export default function EditClearingRequestInfo({
                                 name='clearingType'
                                 value={updateClearingRequestPayload.clearingType}
                                 onChange={updateInputField}
-                                disabled={
-                                    CommonUtils.isNullOrUndefined(session) ||
-                                    session.user.userGroup === UserGroupType.USER
-                                }
+                                disabled={!canEditClearingRequestDetails}
                                 required
                             >
                                 <option value='DEEP'>{t('Deep Level CLX')}</option>

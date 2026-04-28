@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,13 +11,17 @@
 
 'use client'
 import { SessionProvider } from 'next-auth/react'
-
 import type { JSX } from 'react'
+import { PermissionProvider } from '@/contexts'
 
 type Props = {
     children?: React.ReactNode
 }
 
 export const Providers = ({ children }: Props): JSX.Element => {
-    return <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
+    return (
+        <SessionProvider refetchOnWindowFocus={false}>
+            <PermissionProvider>{children}</PermissionProvider>
+        </SessionProvider>
+    )
 }

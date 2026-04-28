@@ -104,14 +104,18 @@ const ComponentIndex = (): ReactNode => {
             link: '/components/add',
             type: 'primary',
             name: t('Add Component'),
-            disable: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable:
+                session?.user?.userGroup === UserGroupType.SECURITY_USER ||
+                session?.user?.userGroup === UserGroupType.VIEWER,
         },
         'Import SBOM': {
             link: '#',
             type: 'secondary',
             onClick: handleClickImportSBOM,
             name: t('Import SBOM'),
-            hidden: session?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden:
+                session?.user?.userGroup === UserGroupType.SECURITY_USER ||
+                session?.user?.userGroup === UserGroupType.VIEWER,
         },
     }
 
@@ -283,6 +287,7 @@ const ComponentIndex = (): ReactNode => {
                             }}
                             className='btn-group'
                             role='group'
+                            hidden={status === 'authenticated' && session?.user?.userGroup === UserGroupType.VIEWER}
                         >
                             <Dropdown>
                                 <Dropdown.Toggle

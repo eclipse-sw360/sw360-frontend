@@ -540,4 +540,5 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(DuplicateProject, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

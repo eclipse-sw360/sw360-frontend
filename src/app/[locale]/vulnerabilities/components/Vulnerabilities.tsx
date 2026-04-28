@@ -19,6 +19,8 @@ import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { usePermissionContext } from '@/contexts'
 import {
     Embedded,
     ErrorDetails,
@@ -39,6 +41,8 @@ function Vulnerabilities(): ReactNode {
     const [vulnerabilityToBeDeleted, setVulnerabilityToBeDeleted] = useState<null | string>(null)
     const router = useRouter()
     const { data: session, status } = useSession()
+    const { hasCapability } = usePermissionContext()
+    const canCreateVulnerabilities = hasCapability('canCreateVulnerabilities')
     const [reloadKey, setReloadKey] = useState(1)
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -384,10 +388,7 @@ function Vulnerabilities(): ReactNode {
                                     <button
                                         className='btn btn-primary col-auto'
                                         onClick={handleAddVulnerability}
-                                        disabled={
-                                            status === 'authenticated' &&
-                                            session?.user?.userGroup === UserGroupType.SECURITY_USER
-                                        }
+                                        disabled={!canCreateVulnerabilities}
                                     >
                                         {t('Add Vulnerability')}
                                     </button>
@@ -427,4 +428,6 @@ function Vulnerabilities(): ReactNode {
     )
 }
 
-export default Vulnerabilities
+export default AccessControl(Vulnerabilities, [
+    UserGroupType.VIEWER,
+])

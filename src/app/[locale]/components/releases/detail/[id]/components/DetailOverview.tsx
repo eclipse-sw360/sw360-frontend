@@ -360,7 +360,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             link: `/components/editRelease/${releaseId}`,
             type: 'primary',
             name: t('Edit release'),
-            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable:
+                session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
+                session?.data?.user?.userGroup === UserGroupType.VIEWER,
         },
         'Link To Project': {
             link: '',
@@ -369,7 +371,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 setLinkProjectModalShow(true)
             },
             name: t('Link To Project'),
-            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable:
+                session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
+                session?.data?.user?.userGroup === UserGroupType.VIEWER,
         },
         Merge: {
             link: `/components/releases/detail/${releaseId}/merge`,
@@ -377,7 +381,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             name: t('Merge'),
             hidden:
                 session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
-                session?.data?.user?.userGroup === UserGroupType.USER,
+                session?.data?.user?.userGroup === UserGroupType.USER ||
+                session?.data?.user?.userGroup === UserGroupType.VIEWER,
         },
         Subscribe: {
             link: '',
