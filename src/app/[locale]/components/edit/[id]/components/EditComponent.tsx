@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import { useDocumentTitle } from '@/hooks'
@@ -28,6 +29,7 @@ import {
     ComponentPayload,
     ErrorDetails,
     InputKeyValue,
+    UserGroupType,
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -352,4 +354,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     )
 }
 
-export default EditComponent
+// Pass notAllowedUserGroups to AccessControl to restrict access
+export default AccessControl(EditComponent, [
+    UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
+])
