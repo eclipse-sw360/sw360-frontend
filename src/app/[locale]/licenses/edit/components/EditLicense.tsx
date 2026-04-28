@@ -257,4 +257,5 @@ function EditLicense({ licenseId }: Props): ReactNode {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(EditLicense, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

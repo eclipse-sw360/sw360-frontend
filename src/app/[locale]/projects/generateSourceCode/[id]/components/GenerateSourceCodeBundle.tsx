@@ -701,4 +701,5 @@ function GenerateSourceCodeBundle({
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(GenerateSourceCodeBundle, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])
