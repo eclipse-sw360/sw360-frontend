@@ -32,14 +32,15 @@ export default function TableLinkedReleases({
     const t = useTranslations('default')
 
     const updateReleaseRelationship = useCallback(
-        (index: number, updatedReleaseRelationship: string) => {
-            const updated = [
-                ...releaseLinks,
-            ]
-            updated[index] = {
-                ...updated[index],
-                releaseRelationship: updatedReleaseRelationship,
-            }
+        (releaseId: string, updatedReleaseRelationship: string) => {
+            const updated = releaseLinks.map((item) =>
+                item.id === releaseId
+                    ? {
+                          ...item,
+                          releaseRelationship: updatedReleaseRelationship,
+                      }
+                    : item,
+            )
             setReleaseLinks(updated)
 
             const map = new Map<string, string>()
@@ -56,11 +57,8 @@ export default function TableLinkedReleases({
     )
 
     const handleClickDelete = useCallback(
-        (index: number) => {
-            const updated = [
-                ...releaseLinks,
-            ]
-            updated.splice(index, 1)
+        (releaseId: string) => {
+            const updated = releaseLinks.filter((item) => item.id !== releaseId)
             setReleaseLinks(updated)
 
             const map = new Map<string, string>()
@@ -76,39 +74,42 @@ export default function TableLinkedReleases({
         ],
     )
 
-    const columns = useMemo<
-        ColumnDef<
-            ReleaseLink & {
-                __index: number
-            }
-        >[]
-    >(
+    const columns = useMemo<ColumnDef<ReleaseLink>[]>(
         () => [
             {
                 id: 'vendor',
                 header: t('Vendor'),
                 cell: ({ row }) => <>{row.original.vendor}</>,
+                meta: {
+                    width: '23%',
+                },
             },
             {
                 id: 'name',
                 header: t('Name'),
                 cell: ({ row }) => <>{row.original.name}</>,
+                meta: {
+                    width: '23%',
+                },
             },
             {
                 id: 'version',
                 header: t('Version'),
                 cell: ({ row }) => <>{row.original.version}</>,
+                meta: {
+                    width: '23%',
+                },
             },
             {
                 id: 'releaseRelationship',
-                header: t('Release Relationship'),
+                header: t('Release Relation'),
                 cell: ({ row }) => (
                     <div className='form-dropdown'>
                         <select
                             className='form-select'
                             value={row.original.releaseRelationship}
                             onChange={(event) => {
-                                updateReleaseRelationship(row.original.__index, event.target.value)
+                                updateReleaseRelationship(row.original.id, event.target.value)
                             }}
                             required
                         >
@@ -126,6 +127,9 @@ export default function TableLinkedReleases({
                         </select>
                     </div>
                 ),
+                meta: {
+                    width: '23%',
+                },
             },
             {
                 id: 'actions',
@@ -133,18 +137,17 @@ export default function TableLinkedReleases({
                 cell: ({ row }) => (
                     <button
                         type='button'
-                        className='btn btn-secondary'
-                        style={{
-                            border: 'none',
-                            minWidth: 'fit-content',
-                        }}
-                        onClick={() => handleClickDelete(row.original.__index)}
+                        className='btn btn-secondary p-0 border-0 d-inline-flex align-items-center justify-content-center'
+                        onClick={() => handleClickDelete(row.original.id)}
                         title={t('Delete')}
                         aria-label={t('Delete linked release')}
                     >
                         <FaTrashAlt />
                     </button>
                 ),
+                meta: {
+                    width: '8%',
+                },
             },
         ],
         [
@@ -155,11 +158,7 @@ export default function TableLinkedReleases({
     )
 
     const memoizedData = useMemo(
-        () =>
-            releaseLinks.map((item, index) => ({
-                ...item,
-                __index: index,
-            })),
+        () => releaseLinks,
         [
             releaseLinks,
         ],

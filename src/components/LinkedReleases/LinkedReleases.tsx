@@ -117,22 +117,10 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 showExactMatch={false}
             />
             <div className='row mb-4'>
-                <div className='row header-1'>
-                    <h6
-                        className='fw-medium'
-                        style={{
-                            color: '#5D8EA9',
-                            paddingLeft: '0px',
-                        }}
-                    >
+                <div className='row header-1 p-0'>
+                    <h6 className='fw-medium linked-releases-heading p-0'>
                         {t('LINKED RELEASES')}
-                        <hr
-                            className='my-2 mb-2'
-                            style={{
-                                color: '#5D8EA9',
-                                paddingLeft: '0px',
-                            }}
-                        />
+                        <hr className='my-2 mb-2 linked-releases-divider' />
                     </h6>
                 </div>
                 <div className='mb-3'>
@@ -148,19 +136,14 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                         </div>
                     )}
                 </div>
-                <div
-                    className='row'
-                    style={{
-                        paddingLeft: '0px',
-                    }}
-                >
+                <div className='row p-0'>
                     <div className='col-lg-4'>
                         <button
                             type='button'
                             className='btn btn-secondary'
                             onClick={() => setLinkedReleasesDiaglog(true)}
                         >
-                            {t('Link Releases')}
+                            {t('Click to add Releases')}
                         </button>
                     </div>
                 </div>
