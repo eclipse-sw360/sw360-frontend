@@ -1292,6 +1292,10 @@ svg.action:hover {
     color: white !important;
 }
 
+.linked-releases-table-compact-col {
+    width: 5%;
+}
+
 .import-department-success {
     background-color: #edf9f0 !important;
     border: 1px solid #5aca75 !important;
