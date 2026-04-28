@@ -250,4 +250,5 @@ function ECC(): ReactNode {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(ECC, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

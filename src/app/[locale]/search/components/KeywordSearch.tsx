@@ -16,9 +16,10 @@ import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } 
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import icons from '@/assets/icons/icons.svg'
-import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, SearchResult, UserGroupType } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 
 interface SEARCH_STATE {
     project: boolean
@@ -185,6 +186,21 @@ function KeywordSearch({
 
     const [searchOptions, dispatch] = useReducer(reducer, initialState)
     const [searchText, setSearchText] = useState(querySearchText)
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
+
+    const isViewer = userIdentity?.userGroup === UserGroupType.VIEWER
 
     useEffect(() => {
         if (querySearchText === searchText) {
@@ -421,32 +437,34 @@ function KeywordSearch({
                                 {'Packages'}
                             </label>
                         </div>
-                        <div className='form-check mt-1'>
-                            <input
-                                className='form-check-input'
-                                type='checkbox'
-                                checked={searchOptions.obligation}
-                                onChange={() =>
-                                    dispatch({
-                                        type: 'TOGGLE_OBLIGATIONS',
-                                    })
-                                }
-                                id='keyboard-check-obligations'
-                            />
-                            <label
-                                className='form-check-label fw-medium'
-                                htmlFor='keyboard-check-obligations'
-                            >
-                                <svg
-                                    className='obligation_icon mb-1'
-                                    height={18}
-                                    width={18}
+                        {!isViewer && (
+                            <div className='form-check mt-1'>
+                                <input
+                                    className='form-check-input'
+                                    type='checkbox'
+                                    checked={searchOptions.obligation}
+                                    onChange={() =>
+                                        dispatch({
+                                            type: 'TOGGLE_OBLIGATIONS',
+                                        })
+                                    }
+                                    id='keyboard-check-obligations'
+                                />
+                                <label
+                                    className='form-check-label fw-medium'
+                                    htmlFor='keyboard-check-obligations'
                                 >
-                                    <use href={`${icons.src}#oblig`}></use>
-                                </svg>{' '}
-                                {t('Obligations')}
-                            </label>
-                        </div>
+                                    <svg
+                                        className='obligation_icon mb-1'
+                                        height={18}
+                                        width={18}
+                                    >
+                                        <use href={`${icons.src}#oblig`}></use>
+                                    </svg>{' '}
+                                    {t('Obligations')}
+                                </label>
+                            </div>
+                        )}
                         <div className='form-check mt-1'>
                             <input
                                 className='form-check-input'

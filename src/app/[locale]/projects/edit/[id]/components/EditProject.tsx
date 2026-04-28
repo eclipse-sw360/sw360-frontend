@@ -879,4 +879,5 @@ function EditProject({
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(EditProject, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

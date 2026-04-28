@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -10,8 +11,8 @@
 
 'use client'
 import { SessionProvider } from 'next-auth/react'
-
 import type { JSX } from 'react'
+import { PermissionProvider } from '@/contexts'
 import SessionStatusHandler from './SessionStatusHandler'
 
 type Props = {
@@ -32,7 +33,7 @@ export const Providers = ({ children, refetchIntervalSeconds }: Props): JSX.Elem
             refetchInterval={resolvedRefetchIntervalSeconds}
         >
             <SessionStatusHandler />
-            {children}
+            <PermissionProvider>{children}</PermissionProvider>
         </SessionProvider>
     )
 }

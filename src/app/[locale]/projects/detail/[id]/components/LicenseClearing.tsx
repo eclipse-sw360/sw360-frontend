@@ -30,6 +30,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
 import DependencyNetworkTreeView from './DependencyNetworkTreeView'
@@ -73,6 +74,19 @@ function LicenseClearing({
     const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState<boolean>(true)
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const isLoadingClearingData = isLoadingLicenseClearing || isLoadingLinkedProjects
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     // Configs from backend
     const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
@@ -82,7 +96,9 @@ function LicenseClearing({
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
     const crIsAllowed = CommonUtils.isCrAllowed(businessUnit, clearingState, clearingRequestDisabledGroups, visibility)
-    const disableCrButton = !crIsAllowed
+    const isViewer = userIdentity?.userGroup === UserGroupType.VIEWER
+    // Disable Create CR button for VIEWER (View CR is still allowed)
+    const disableCrButton = !crIsAllowed || (!clearingRequestId && isViewer)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -246,7 +262,10 @@ function LicenseClearing({
                                 </Nav.Link>
                             </Nav.Item>
                             <Nav.Item className='px-2'>
-                                <Dropdown className='col-auto'>
+                                <Dropdown
+                                    className='col-auto'
+                                    hidden={isViewer}
+                                >
                                     <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
                                         <Dropdown.Item onClick={() => exportProjectSpreadsheet(false)}>
@@ -259,7 +278,10 @@ function LicenseClearing({
                                 </Dropdown>
                             </Nav.Item>
                             <Nav.Item>
-                                <Dropdown className='col-auto'>
+                                <Dropdown
+                                    className='col-auto'
+                                    hidden={isViewer}
+                                >
                                     <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
                                         <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
@@ -272,7 +294,10 @@ function LicenseClearing({
                                 </Dropdown>
                             </Nav.Item>
                             <Nav.Item>
-                                <Dropdown className='col-auto'>
+                                <Dropdown
+                                    className='col-auto'
+                                    hidden={isViewer}
+                                >
                                     <Dropdown.Toggle variant='secondary'>
                                         {t('Generate Source Code Bundle')}
                                     </Dropdown.Toggle>
