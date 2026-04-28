@@ -128,7 +128,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         contributors: [],
         projectOwner: '',
         leadArchitect: '',
-        projectManager: '',
+        projectResponsible: '',
     })
 
     useEffect(() => {
@@ -311,6 +311,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     contributors: (project._embedded?.['sw360:contributors'] ?? []).map((user) => user.email),
                     moderators: (project._embedded?.['sw360:moderators'] ?? []).map((user) => user.email),
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
+                    projectResponsible: project._embedded?.projectManager?.email ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
                     linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
