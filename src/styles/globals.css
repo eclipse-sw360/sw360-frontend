@@ -1292,14 +1292,6 @@ svg.action:hover {
     color: white !important;
 }
 
-.linked-releases-heading {
-    color: #5d8ea9;
-}
-
-.linked-releases-divider {
-    color: #5d8ea9;
-}
-
 .linked-releases-table-compact-col {
     width: 5%;
 }

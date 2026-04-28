@@ -117,12 +117,7 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 showExactMatch={false}
             />
             <div className='row mb-4'>
-                <div className='row header-1 p-0'>
-                    <h6 className='fw-medium linked-releases-heading p-0'>
-                        {t('LINKED RELEASES')}
-                        <hr className='my-2 mb-2 linked-releases-divider' />
-                    </h6>
-                </div>
+                <h6 className='header-underlined mb-2'>{t('LINKED RELEASES')}</h6>
                 <div className='mb-3'>
                     {releaseLinks ? (
                         <TableLinkedReleases
