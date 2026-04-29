@@ -20,6 +20,7 @@ import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
+import { getPackageSubmitErrorMessage } from '../../../components/packageSubmitError'
 
 function EditPackage({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
@@ -58,12 +59,10 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
             setUpdatingPackage(true)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            const { packageManager: _packageManager, ...packageRequestPayload } = packagePayload ?? {}
             const response = await ApiUtils.PATCH(
                 `packages/${packageId}`,
-                {
-                    ...packagePayload,
-                    packageManager: packagePayload?.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase(),
-                },
+                packageRequestPayload,
                 session.user.access_token,
             )
             if (response.status == StatusCodes.OK) {
@@ -72,8 +71,12 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                const res = (await response.json()) as Record<string, string>
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                const errorMessage = await getPackageSubmitErrorMessage(
+                    response,
+                    packageRequestPayload.purl,
+                    t('Something went wrong'),
+                )
+                MessageService.error(`${t('Something went wrong')}: ${errorMessage}`)
             }
         } finally {
             setUpdatingPackage(false)
