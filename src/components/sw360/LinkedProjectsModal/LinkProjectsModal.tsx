@@ -9,13 +9,13 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import {
@@ -34,9 +34,20 @@ interface AlertData {
     message: JSX.Element
 }
 
-interface Props {
+// Type definitions for different modes
+interface CallbackModeProps {
+    mode: 'callback'
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+}
+
+interface DirectModeProps {
+    mode: 'direct'
+    projectId: string
+    onSuccess?: () => void
+}
+
+type Props = (CallbackModeProps | DirectModeProps) & {
     show: boolean
     setShow: (show: boolean) => void
 }
@@ -46,69 +57,136 @@ type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function LinkProjectsModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
+export default function LinkProjectsModal(props: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
-    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [searchValue, setSearchValue] = useState<string>('')
     const [exactMatch, setExactMatch] = useState(false)
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: 'name,asc',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [projectData, setProjectData] = useState<Project[] | undefined>()
+    const [showProcessing, setShowProcessing] = useState(false)
+    const [linking, setLinking] = useState(false)
+    const topRef = useRef<HTMLDivElement | null>(null)
     const session = useSession()
+    const isDirect = props.mode === 'direct'
+    const isCallback = props.mode === 'callback'
 
+    // Initialize linked projects from projectPayload if in callback mode
+    useEffect(() => {
+        if (isCallback) {
+            setLinkProjects(new Map(Object.entries(props.projectPayload.linkedProjects ?? {})))
+        } else {
+            setLinkProjects(new Map())
+        }
+    }, [
+        isCallback,
+        props,
+    ])
+
+    // Auth check
     useEffect(() => {
         if (session.status === 'unauthenticated') {
             void signOut()
         }
     }, [
-        session,
+        session.status,
     ])
 
-    useEffect(() => {
-        setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
-    }, [
-        projectPayload,
-    ])
+    const scrollToTop = useCallback(() => {
+        topRef.current?.scrollTo({
+            top: 0,
+            left: 0,
+        })
+    }, [])
+
+    const memoizedData = useMemo(
+        () => projectData,
+        [
+            projectData,
+        ],
+    )
 
     const columns = useMemo<ColumnDef<Project>[]>(
         () => [
             {
                 id: 'select',
-                cell: ({ row }) => (
-                    <div className='form-check'>
-                        <input
-                            className='form-check-input'
-                            type='checkbox'
-                            name='projectId'
-                            value={row.original._links.self.href.split('/').at(-1) ?? ''}
-                            id={row.original._links.self.href.split('/').at(-1) ?? ''}
-                            title=''
-                            placeholder='Project Id'
-                            checked={linkProjects.has(row.original._links.self.href.split('/').at(-1) ?? '')}
-                            onChange={() => handleCheckboxes(row.original)}
-                        />
-                    </div>
-                ),
+                cell: ({ row }) => {
+                    const projectId = isDirect
+                        ? (row.original.id ?? '')
+                        : (row.original._links.self.href.split('/').at(-1) ?? '')
+                    return (
+                        <div className='form-check'>
+                            <input
+                                className='form-check-input'
+                                type='checkbox'
+                                name='projectId'
+                                value={projectId}
+                                id={projectId}
+                                title=''
+                                placeholder='Project Id'
+                                checked={linkProjects.has(projectId)}
+                                onChange={() => handleCheckboxes(row.original)}
+                            />
+                        </div>
+                    )
+                },
                 meta: {
                     width: '7%',
                 },
             },
             {
                 id: 'name',
-                header: t('Name'),
+                header: t('Project Name'),
                 accessorKey: 'name',
-                cell: (info) => info.getValue(),
+                cell: ({ row }) => {
+                    const { name, version } = row.original
+                    return isDirect ? (
+                        <p>
+                            {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
+                        </p>
+                    ) : (
+                        name
+                    )
+                },
+                enableSorting: true,
                 meta: {
-                    width: '15%',
+                    width: isDirect ? '17.5%' : '15%',
                 },
             },
-            {
-                id: 'version',
-                header: t('Version'),
-                accessorKey: 'version',
-                cell: (info) => info.getValue(),
-                meta: {
-                    width: '15%',
-                },
-            },
+            ...(isCallback
+                ? [
+                      {
+                          id: 'version',
+                          header: t('Version'),
+                          accessorKey: 'version',
+                          cell: (info) => info.getValue(),
+                          meta: {
+                              width: '15%',
+                          },
+                      } as ColumnDef<Project>,
+                  ]
+                : [
+                      {
+                          id: 'version',
+                          header: t('Version'),
+                          accessorKey: 'version',
+                          cell: (info) => info.getValue(),
+                          meta: {
+                              width: '12%',
+                          },
+                      } as ColumnDef<Project>,
+                  ]),
             {
                 id: 'state',
                 header: t('State'),
@@ -172,7 +250,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                     )
                 },
                 meta: {
-                    width: '13%',
+                    width: isCallback ? '13%' : '17.5%',
                 },
             },
             {
@@ -181,50 +259,23 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                 accessorKey: 'description',
                 cell: (info) => info.getValue(),
                 meta: {
-                    width: '40%',
+                    width: isCallback ? '40%' : '32.5%',
                 },
             },
         ],
         [
             t,
             linkProjects,
+            isDirect,
+            isCallback,
         ],
     )
-    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
-        page: 0,
-        page_entries: 10,
-        sort: 'name,asc',
-    })
-    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
-        size: 0,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-    })
-    const [projectData, setProjectData] = useState<Project[]>(() => [])
-    const memoizedData = useMemo(
-        () => projectData,
-        [
-            projectData,
-        ],
-    )
-    const [showProcessing, setShowProcessing] = useState(false)
-
-    useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
-        const controller = new AbortController()
-        const signal = controller.signal
-        handleSearch(signal)
-        return () => controller.abort()
-    }, [
-        pageableQueryParam,
-        session,
-    ])
 
     const table = useReactTable({
-        data: memoizedData,
+        data: memoizedData ?? [],
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
 
         // table state config
         state: {
@@ -263,7 +314,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
 
                 return {
                     ...prev,
-                    sort: '',
+                    sort: 'name,asc',
                 }
             })
         },
@@ -292,64 +343,136 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
         },
     })
 
-    const handleSearch = async (signal?: AbortSignal) => {
-        try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+    const handleSearch = useCallback(
+        async (searchVal: string = '', signal?: AbortSignal) => {
+            const timeLimit = memoizedData && memoizedData.length !== 0 ? 700 : 0
+            const timeout = setTimeout(() => {
+                setShowProcessing(true)
+            }, timeLimit)
 
-            const queryUrl = CommonUtils.createUrlWithParams(
-                `projects`,
-                Object.fromEntries(
-                    Object.entries({
-                        ...pageableQueryParam,
-                        ...(searchText && searchText !== ''
-                            ? {
-                                  searchText: searchText,
-                                  luceneSearch: !exactMatch,
-                              }
-                            : {}),
-                        allDetails: true,
-                    }).map(([key, value]) => [
-                        key,
-                        String(value),
-                    ]),
-                ),
-            )
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-            if (response.status !== StatusCodes.OK) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message, {
-                    status: response.status,
-                })
+            try {
+                const currentSession = isDirect ? await getSession() : session.data
+                if (CommonUtils.isNullOrUndefined(currentSession)) return signOut()
+
+                const url = CommonUtils.createUrlWithParams(
+                    'projects',
+                    Object.fromEntries(
+                        Object.entries({
+                            ...pageableQueryParam,
+                            ...(isCallback && searchVal && searchVal !== ''
+                                ? {
+                                      searchText: searchVal,
+                                      luceneSearch: !exactMatch,
+                                  }
+                                : isCallback
+                                  ? {}
+                                  : CommonUtils.isNullEmptyOrUndefinedString(searchVal)
+                                    ? {}
+                                    : {
+                                          name: searchVal,
+                                          luceneSearch: !exactMatch,
+                                      }),
+                            ...(isCallback
+                                ? {
+                                      allDetails: true,
+                                  }
+                                : {}),
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+
+                const response = await ApiUtils.GET(url, currentSession.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const data = (await response.json()) as EmbeddedProjects
+                setPaginationMeta(
+                    data.page ?? {
+                        size: 0,
+                        totalElements: 0,
+                        totalPages: 0,
+                        number: 0,
+                    },
+                )
+                setProjectData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                        ? []
+                        : data['_embedded']['sw360:projects'],
+                )
+            } catch (error) {
+                if (error instanceof ApiError && error.isAborted) {
+                    return
+                }
+                if (isCallback) {
+                    ApiUtils.reportError(error)
+                } else {
+                    const message =
+                        error instanceof ApiError
+                            ? error.message
+                            : error instanceof Error
+                              ? error.message
+                              : String(error)
+                    setAlert({
+                        variant: 'danger',
+                        message: (
+                            <>
+                                <p>{message}</p>
+                            </>
+                        ),
+                    })
+                }
+            } finally {
+                setShowProcessing(false)
+                clearTimeout(timeout)
             }
+        },
+        [
+            memoizedData,
+            pageableQueryParam,
+            session.data,
+            isDirect,
+            isCallback,
+            exactMatch,
+        ],
+    )
 
-            const data = (await response.json()) as EmbeddedProjects
-            setPaginationMeta(data.page)
-            setProjectData(
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
-                    ? []
-                    : data['_embedded']['sw360:projects'],
-            )
-        } catch (error) {
-            ApiUtils.reportError(error)
-        } finally {
-            setShowProcessing(false)
-        }
-    }
+    // Auto-search on pagination/sorting changes
+    useEffect(() => {
+        if (isCallback && !props.show) return
+        if (isDirect && memoizedData === undefined) return
 
-    const projectPayloadSetter = () => {
-        setProjectPayload({
-            ...projectPayload,
-            linkedProjects: Object.fromEntries(linkProjects),
-        })
-    }
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void handleSearch(searchValue, signal)
+
+        return () => controller.abort()
+    }, [
+        pageableQueryParam,
+        isCallback,
+        isDirect,
+        memoizedData,
+        props.show,
+        handleSearch,
+        searchValue,
+    ])
 
     const handleCheckboxes = (project: Project) => {
+        const projectId = isDirect ? (project.id ?? '') : (project._links.self.href.split('/').at(-1) ?? '')
         const m = new Map(linkProjects)
-        if (linkProjects.has(project._links.self.href.split('/').at(-1) ?? '')) {
-            m.delete(project._links.self.href.split('/').at(-1) ?? '')
+
+        if (linkProjects.has(projectId)) {
+            m.delete(projectId)
         } else {
-            m.set(project._links.self.href.split('/').at(-1) ?? '', {
-                enableSvm: project.enableSvm ?? false,
+            m.set(projectId, {
+                enableSvm: project.enableSvm ?? true,
                 name: project.name ?? '',
                 projectRelationship: 'CONTAINED',
                 version: project.version ?? '',
@@ -358,145 +481,233 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
         setLinkProjects(m)
     }
 
-    const closeModal = () => {
-        setShow(false)
-        setProjectData([])
-        setAlert(null)
-        setExactMatch(false)
+    const handleLinkProjectsCallback = () => {
+        if (isCallback) {
+            props.setProjectPayload({
+                ...props.projectPayload,
+                linkedProjects: Object.fromEntries(linkProjects),
+            })
+        }
+    }
+
+    const handleLinkProjectsDirect = async () => {
+        if (!isDirect) return
+
+        setLinking(true)
+        try {
+            const currentSession = await getSession()
+            if (CommonUtils.isNullOrUndefined(currentSession)) return signOut()
+
+            const data = {
+                linkedProjects: Object.fromEntries(linkProjects),
+            }
+
+            const response = await ApiUtils.PATCH(`projects/${props.projectId}`, data, currentSession.user.access_token)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+
+            const res = (await response.json()) as Project
+            setAlert({
+                variant: 'success',
+                message: (
+                    <>
+                        <p>
+                            {`${t('The projects have been successfully linked to project')} `}
+                            <span className='fw-bold'>{res.name}</span>.{' '}
+                        </p>
+                        <p>
+                            {t('Click')}{' '}
+                            <Link
+                                href={`/projects/edit/${props.projectId}?tab=linkedProjectsAndReleases`}
+                                className='text-link'
+                            >
+                                {t('here')}
+                            </Link>{' '}
+                            {t('to edit the project relation')}.
+                        </p>
+                    </>
+                ),
+            })
+            props.onSuccess?.()
+        } catch (error) {
+            if (error instanceof ApiError && error.isAborted) {
+                return
+            }
+            const message =
+                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
+            setAlert({
+                variant: 'danger',
+                message: (
+                    <>
+                        <p>{message}</p>
+                    </>
+                ),
+            })
+        } finally {
+            setLinking(false)
+        }
+    }
+
+    const cleanup = () => {
+        props.setShow(false)
+        setProjectData(undefined)
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: 'name,asc',
+        })
         setPaginationMeta({
             size: 0,
             totalElements: 0,
             totalPages: 0,
             number: 0,
         })
-        setPageableQueryParam({
-            page: 0,
-            page_entries: 10,
-            sort: '',
-        })
-        setSearchText(undefined)
+        setAlert(null)
+        setLinkProjects(new Map())
+        setExactMatch(false)
+        setSearchValue('')
+        setShowProcessing(false)
     }
 
     return (
-        <Modal
-            size='lg'
-            centered
-            show={show}
-            onHide={() => {
-                closeModal()
-            }}
-            aria-labelledby={t('Link Projects')}
-            scrollable
-        >
-            <Modal.Header closeButton>
-                <Modal.Title id='linked-projects-modal'>{t('Link Projects')}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {alert && (
-                    <Alert
-                        variant={alert.variant}
-                        id='linkProjects.alert'
-                    >
-                        {alert.message}
-                    </Alert>
-                )}
-                <Form>
-                    <Col>
-                        <Row className='mb-3'>
-                            <Col xs={6}>
-                                <Form.Control
-                                    type='text'
-                                    placeholder={`${t('Enter Search Text')}...`}
-                                    name='searchValue'
-                                    onChange={(event) => {
-                                        setSearchText(event.target.value)
-                                    }}
-                                />
-                            </Col>
-                            <Col xs='auto'>
-                                <Form.Group controlId='exact-match-group'>
-                                    <Form.Check
-                                        inline
-                                        name='exact-match'
-                                        type='checkbox'
-                                        id='exact-match'
-                                        onChange={() => setExactMatch(!exactMatch)}
+        <>
+            <Modal
+                size='lg'
+                centered
+                show={props.show}
+                onHide={cleanup}
+                aria-labelledby={t('Link Projects')}
+                scrollable
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id='linked-projects-modal'>{t('Link Projects')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body ref={topRef}>
+                    {alert && (
+                        <Alert
+                            variant={alert.variant}
+                            id='linkProjects.alert'
+                        >
+                            {alert.message}
+                        </Alert>
+                    )}
+                    <Form>
+                        <Col>
+                            <Row className='mb-3'>
+                                <Col xs={6}>
+                                    <Form.Control
+                                        type='text'
+                                        placeholder={`${t('Enter Search Text')}...`}
+                                        name='searchValue'
+                                        value={searchValue}
+                                        onChange={(event) => {
+                                            setSearchValue(event.target.value)
+                                        }}
                                     />
-                                    <Form.Label
-                                        className='pt-2'
-                                        value={exactMatch}
+                                </Col>
+                                <Col xs='auto'>
+                                    <Form.Group controlId='exact-match-group'>
+                                        <Form.Check
+                                            inline
+                                            name='exact-match'
+                                            type='checkbox'
+                                            id='exact-match'
+                                            onChange={() => setExactMatch(!exactMatch)}
+                                        />
+                                        <Form.Label
+                                            className='pt-2'
+                                            value={exactMatch}
+                                        >
+                                            {t('Exact Match')}{' '}
+                                            <sup>
+                                                <BsInfoCircle size={20} />
+                                            </sup>
+                                        </Form.Label>
+                                    </Form.Group>
+                                </Col>
+                                <Col xs='auto'>
+                                    <Button
+                                        variant='secondary'
+                                        onClick={() => {
+                                            void handleSearch(searchValue)
+                                        }}
                                     >
-                                        {t('Exact Match')}{' '}
-                                        <sup>
-                                            <BsInfoCircle size={20} />
-                                        </sup>
-                                    </Form.Label>
-                                </Form.Group>
-                            </Col>
-                            <Col xs='auto'>
-                                <Button
-                                    variant='secondary'
-                                    onClick={() => {
-                                        if (!searchText) setSearchText('')
-                                        setPageableQueryParam((prev) => ({
-                                            ...prev,
-                                            page: 0,
-                                        }))
-                                        handleSearch()
-                                    }}
-                                >
-                                    {t('Search')}
-                                </Button>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <div className='mb-3'>
-                                {pageableQueryParam && table && paginationMeta ? (
-                                    <>
-                                        <PageSizeSelector
-                                            pageableQueryParam={pageableQueryParam}
-                                            setPageableQueryParam={setPageableQueryParam}
-                                        />
-                                        <SW360Table
-                                            table={table}
-                                            showProcessing={showProcessing}
-                                        />
-                                        <TableFooter
-                                            pageableQueryParam={pageableQueryParam}
-                                            setPageableQueryParam={setPageableQueryParam}
-                                            paginationMeta={paginationMeta}
-                                        />
-                                    </>
-                                ) : (
-                                    <div className='col-12 mt-1 text-center'>
-                                        <Spinner className='spinner' />
-                                    </div>
-                                )}
-                            </div>
-                        </Row>
-                    </Col>
-                </Form>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button
-                    variant='dark'
-                    onClick={() => {
-                        closeModal()
-                    }}
-                >
-                    {t('Close')}
-                </Button>
-                <Button
-                    variant='primary'
-                    onClick={() => {
-                        projectPayloadSetter()
-                        closeModal()
-                    }}
-                    disabled={linkProjects.size === 0}
-                >
-                    {t('Link Projects')}
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                                        {t('Search')}
+                                    </Button>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <div className='mb-3'>
+                                    {isCallback &&
+                                    (memoizedData === undefined || memoizedData.length === 0) &&
+                                    showProcessing ? (
+                                        <div className='col-12 mt-1 text-center'>
+                                            <Spinner className='spinner' />
+                                        </div>
+                                    ) : isDirect && memoizedData === undefined && showProcessing ? (
+                                        <div className='col-12 mt-1 text-center'>
+                                            <Spinner className='spinner' />
+                                        </div>
+                                    ) : memoizedData !== undefined ? (
+                                        <>
+                                            <PageSizeSelector
+                                                pageableQueryParam={pageableQueryParam}
+                                                setPageableQueryParam={setPageableQueryParam}
+                                            />
+                                            <SW360Table
+                                                table={table}
+                                                showProcessing={showProcessing}
+                                            />
+                                            <TableFooter
+                                                pageableQueryParam={pageableQueryParam}
+                                                setPageableQueryParam={setPageableQueryParam}
+                                                paginationMeta={paginationMeta}
+                                            />
+                                        </>
+                                    ) : (
+                                        <div className='col-12 mt-1 text-center'>
+                                            <Spinner className='spinner' />
+                                        </div>
+                                    )}
+                                </div>
+                            </Row>
+                        </Col>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant='dark'
+                        onClick={cleanup}
+                    >
+                        {t('Close')}
+                    </Button>
+                    <Button
+                        variant='primary'
+                        onClick={() => {
+                            if (isCallback) {
+                                handleLinkProjectsCallback()
+                                cleanup()
+                            } else if (isDirect) {
+                                void handleLinkProjectsDirect()
+                                scrollToTop()
+                            }
+                        }}
+                        disabled={linkProjects.size === 0 || (isDirect && linking)}
+                    >
+                        {t('Link Projects')}
+                        {isDirect && linking && (
+                            <Spinner
+                                className='ms-1'
+                                size='sm'
+                            />
+                        )}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     )
 }
