@@ -34,7 +34,7 @@
     "preact": "^10.29.1",
     "react": "19.2.5",
     "react-bootstrap": "^2.10.10",
-    "react-cookie": "^8.1.0",
+    "react-cookie": "^8.1.2",
     "react-dom": "19.2.5",
     "rxjs": "^7.8.2"
   },
