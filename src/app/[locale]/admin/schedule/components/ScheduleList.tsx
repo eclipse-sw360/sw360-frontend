@@ -25,6 +25,7 @@ export default function VendorsList(): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const { status } = useSession()
+    const svmConfigValue = useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -90,10 +91,7 @@ export default function VendorsList(): JSX.Element {
         }
     }
 
-    const isSvmEnabled =
-        useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) === null
-            ? true
-            : (useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING) as boolean)
+    const isSvmEnabled = svmConfigValue === null ? true : (svmConfigValue as boolean)
 
     return (
         <>
