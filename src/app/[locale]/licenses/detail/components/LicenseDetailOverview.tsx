@@ -162,7 +162,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: '',
+        sort: 'changeTimestamp,desc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
