@@ -97,6 +97,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             <ReopenClosedClearingRequestModal
                 show={showReopenClearingRequestModal}
                 setShow={setShowReopenClearingRequestModal}
+                clearingRequestId={clearingRequestData?.id ?? clearingRequestId}
             />
             <Breadcrumb className='container page-content'>
                 <Breadcrumb.Item
