@@ -95,6 +95,7 @@ jobs:
           labels: ${{ steps.meta_runtime.outputs.labels }}
           build-args: |
             NEXT_PUBLIC_SW360_API_URL=http://localhost:8080
+            NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
           cache-from: type=gha,scope=runtime
           cache-to: type=gha,scope=runtime,mode=max
           provenance: mode=max

@@ -21,31 +21,46 @@ ARG NEXT_PUBLIC_SW360_AUTH_PROVIDER=sw360basic
 # define build-time args
 ARG NEXTAUTH_URL=http://localhost:3000
 ARG AUTH_SECRET=mysecret
+ARG NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=""
+ENV NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=$NEXT_SERVER_ACTIONS_ENCRYPTION_KEY
+ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm config set registry $NPM_CONFIG_REGISTRY \
- && npm install -g pnpm@latest-10
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y  \
+    git=1:2.39.5-0+deb12u3  \
+ && rm -rf /var/lib/apt/lists/* \
+ && npm config set registry $NPM_CONFIG_REGISTRY \
+ && npm install -g pnpm@10.33.0
 
 WORKDIR /frontend
 
 # Prepare the build environment
 COPY . .
 
-RUN pnpm install
-RUN pnpm build --experimental-analyze --turbo --profile
+RUN pnpm install \
+ && pnpm exec next telemetry disable
+RUN --mount=type=bind,source=.git,target=/frontend/.git \
+    pnpm reproducible-build
 
 # Runtime
 ARG VARIANT=24-slim@sha256:b506e7321f176aae77317f99d67a24b272c1f09f1d10f1761f2773447d8da26c
 FROM node:${VARIANT}
+
+ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /frontend
 
 ARG NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
 
-COPY --from=build /frontend/next.config.ts .
 COPY --from=build /frontend/public ./public
 COPY --from=build /frontend/.next/standalone ./
 COPY --from=build /frontend/.next/static ./.next/static
 
+# Final bit-for-bit normalization of directory and file timestamps
+RUN /bin/bash -o pipefail -c "find . -depth -print0 | xargs -0 touch -ht 197001010000.00"
+
 # Runtime ENV to configure
+ARG AUTH_SECRET=mysecret
+ENV AUTH_SECRET=$AUTH_SECRET
 ENV SW360_REST_CLIENT_ID=""
 ENV SW360_REST_CLIENT_SECRET=""
 ENV SW360_KEYCLOAK_CLIENT_ID=""
