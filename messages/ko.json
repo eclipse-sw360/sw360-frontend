@@ -1677,6 +1677,9 @@
     "ui_software_platforms": "릴리스에 표시할 소프트웨어 플랫폼 목록",
     "ui_state": "허용되는 프로젝트 수명 주기 상태 목록",
     "updated successfully": "성공적으로 업데이트되었습니다!",
+    "Page Not Found": "페이지를 찾을 수 없습니다",
+    "Page Not Found Description": "요청하신 페이지가 없거나 이동되었을 수 있습니다.",
+    "Go Back": "뒤로 가기",
     "use_license_info_from_file_description": "파일에서 라이센스 정보를 사용합니다",
     "vector": "벡터 벡터",
     "wrong_spdx_information": "잘못된 SPDX가 입력되면 정보가 올바르게 등록되지 않습니다."
