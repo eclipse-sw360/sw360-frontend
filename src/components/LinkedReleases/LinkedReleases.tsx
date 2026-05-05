@@ -114,7 +114,6 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 show={linkedReleasesDiaglog}
                 setShow={setLinkedReleasesDiaglog}
                 onSelect={handleSelectReleases}
-                showExactMatch={false}
             />
             <div className='row mb-4'>
                 <h6 className='header-underlined mb-2'>{t('LINKED RELEASES')}</h6>
