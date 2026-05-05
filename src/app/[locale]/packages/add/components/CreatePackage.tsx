@@ -13,8 +13,9 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { ListGroup, Tab } from 'react-bootstrap'
+
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -22,7 +23,7 @@ import { ApiUtils, CommonUtils } from '@/utils'
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
 import { extractPackageManagerFromPurl } from '../../components/purlUtils'
 
-function CreatePackage(): ReactNode {
+function CreatePackage(): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const d = new Date()
@@ -53,11 +54,12 @@ function CreatePackage(): ReactNode {
             setCreatingPackage(true)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.user?.access_token)) return signOut()
 
             const normalizedPurl = packagePayload.purl?.trim()
             const packageManager = extractPackageManagerFromPurl(normalizedPurl)
             if (!normalizedPurl || !packageManager) {
-                MessageService.error(t('Enter PURL'))
+                MessageService.error(t('Enter a valid PURL'))
                 return
             }
 
@@ -66,7 +68,7 @@ function CreatePackage(): ReactNode {
                 {
                     ...packagePayload,
                     purl: normalizedPurl,
-                    createdBy: session.user.email,
+                    createdBy: session.user.email ?? '',
                     packageManager,
                 },
                 session.user.access_token,
@@ -74,8 +76,8 @@ function CreatePackage(): ReactNode {
             let res: Record<string, string> = {}
             try {
                 res = (await response.json()) as Record<string, string>
-            } catch {
-                // Keep empty response fallback for non-JSON error payloads.
+            } catch (error) {
+                console.warn('Failed to parse package create error response as JSON.', error)
             }
             if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Package created successfully'))

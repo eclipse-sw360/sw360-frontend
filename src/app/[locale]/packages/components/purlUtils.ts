@@ -7,19 +7,21 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { PackageURL } from 'packageurl-js'
+
 export const extractPackageManagerFromPurl = (purl?: string): string | undefined => {
     if (!purl) {
         return undefined
     }
 
     const normalizedPurl = purl.trim()
-    if (!normalizedPurl.toLowerCase().startsWith('pkg:')) {
+    if (!normalizedPurl) {
         return undefined
     }
 
-    const packageDescriptor = normalizedPurl.slice(4)
-    const separatorIndex = packageDescriptor.search(/[/@?]/)
-    const packageManager = separatorIndex >= 0 ? packageDescriptor.slice(0, separatorIndex) : packageDescriptor
-
-    return packageManager ? packageManager.toUpperCase() : undefined
+    try {
+        return PackageURL.fromString(normalizedPurl).type.toUpperCase()
+    } catch {
+        return undefined
+    }
 }
