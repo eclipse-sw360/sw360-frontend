@@ -13,15 +13,17 @@ import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
+
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
+import { extractPackageManagerFromPurl } from '../../../components/purlUtils'
 
-function EditPackage({ packageId }: { packageId: string }): ReactNode {
+function EditPackage({ packageId }: { packageId: string }): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
@@ -58,11 +60,21 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
             setUpdatingPackage(true)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.user?.access_token)) return signOut()
+
+            const normalizedPurl = packagePayload?.purl?.trim()
+            const packageManager = extractPackageManagerFromPurl(normalizedPurl)
+            if (!normalizedPurl || !packageManager) {
+                MessageService.error(t('Enter a valid PURL'))
+                return
+            }
+
             const response = await ApiUtils.PATCH(
                 `packages/${packageId}`,
                 {
                     ...packagePayload,
-                    packageManager: packagePayload?.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase(),
+                    purl: normalizedPurl,
+                    packageManager,
                 },
                 session.user.access_token,
             )
@@ -72,9 +84,16 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                const res = (await response.json()) as Record<string, string>
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                let res: Record<string, string> = {}
+                try {
+                    res = (await response.json()) as Record<string, string>
+                } catch (error) {
+                    console.warn('Failed to parse package edit error response as JSON.', error)
+                }
+                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }
+        } catch (e) {
+            ApiUtils.reportError(e)
         } finally {
             setUpdatingPackage(false)
         }

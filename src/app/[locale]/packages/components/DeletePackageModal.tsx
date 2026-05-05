@@ -13,9 +13,10 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type ReactElement, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
+
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 
@@ -28,7 +29,7 @@ interface DeletePackageModalMetData {
 
 interface AlertData {
     variant: string
-    message: JSX.Element
+    message: ReactElement
 }
 
 export default function DeletePackageModal({
@@ -41,7 +42,7 @@ export default function DeletePackageModal({
     setModalMetaData: Dispatch<SetStateAction<DeletePackageModalMetData>>
     isEditPage: boolean
     onDeleteSuccess?: (packageId: string) => void
-}): ReactNode {
+}): ReactElement {
     const t = useTranslations('default')
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [deleting, setDeleting] = useState<boolean | null>(null)
@@ -91,9 +92,7 @@ export default function DeletePackageModal({
                             <p>
                                 {t('Package')}{' '}
                                 <strong>
-                                    {`${modalMetaData.packageName}${
-                                        modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''
-                                    }`}
+                                    {`${modalMetaData.packageName}${modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''}`}
                                 </strong>{' '}
                                 {t('deleted successfully')}!
                             </p>
@@ -177,9 +176,7 @@ export default function DeletePackageModal({
                     <p>
                         {`${t('Do you really want to delete the package')} `}
                         <span className='fw-medium'>
-                            {`${modalMetaData.packageName}${
-                                modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''
-                            }`}
+                            {`${modalMetaData.packageName}${modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''}`}
                         </span>
                         ?
                     </p>
