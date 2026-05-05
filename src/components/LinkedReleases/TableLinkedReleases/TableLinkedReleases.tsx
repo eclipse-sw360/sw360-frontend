@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,9 +9,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
+import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import React, { type JSX } from 'react'
-import { BsFillTrashFill } from 'react-icons/bs'
+import { type JSX, useCallback, useMemo } from 'react'
+import { FaTrashAlt } from 'react-icons/fa'
+import { SW360Table } from '@/components/sw360'
 import { ReleaseLink } from '@/object-types'
 
 interface Props {
@@ -25,104 +30,155 @@ export default function TableLinkedReleases({
     setReleaseIdToRelationshipsToReleasePayLoad,
 }: Props): JSX.Element {
     const t = useTranslations('default')
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
-        const { name, value } = e.target
-        const list = [
-            ...releaseLinks,
-        ]
-        list[index][name as keyof ReleaseLink] = value as never
-        const map = new Map<string, string>()
-        list.forEach((item) => {
-            map.set(item.id, item.releaseRelationship)
-        })
-        setReleaseLinks(list)
-        setReleaseIdToRelationshipsToReleasePayLoad(map)
-    }
 
-    const handleClickDelete = (index: number) => {
-        const list: ReleaseLink[] = [
-            ...releaseLinks,
-        ]
-        list.splice(index, 1)
-        const map = new Map<string, string>()
-        list.forEach((item) => {
-            map.set(item.id, item.releaseRelationship)
-        })
-        setReleaseLinks(list)
-        setReleaseIdToRelationshipsToReleasePayLoad(map)
-    }
+    const updateReleaseRelationship = useCallback(
+        (releaseId: string, updatedReleaseRelationship: string) => {
+            const updated = releaseLinks.map((item) =>
+                item.id === releaseId
+                    ? {
+                          ...item,
+                          releaseRelationship: updatedReleaseRelationship,
+                      }
+                    : item,
+            )
+            setReleaseLinks(updated)
+
+            const map = new Map<string, string>()
+            updated.forEach((item) => {
+                map.set(item.id, item.releaseRelationship)
+            })
+            setReleaseIdToRelationshipsToReleasePayLoad(map)
+        },
+        [
+            releaseLinks,
+            setReleaseLinks,
+            setReleaseIdToRelationshipsToReleasePayLoad,
+        ],
+    )
+
+    const handleClickDelete = useCallback(
+        (releaseId: string) => {
+            const updated = releaseLinks.filter((item) => item.id !== releaseId)
+            setReleaseLinks(updated)
+
+            const map = new Map<string, string>()
+            updated.forEach((item) => {
+                map.set(item.id, item.releaseRelationship)
+            })
+            setReleaseIdToRelationshipsToReleasePayLoad(map)
+        },
+        [
+            releaseLinks,
+            setReleaseLinks,
+            setReleaseIdToRelationshipsToReleasePayLoad,
+        ],
+    )
+
+    const columns = useMemo<ColumnDef<ReleaseLink>[]>(
+        () => [
+            {
+                id: 'vendor',
+                header: t('Vendor'),
+                cell: ({ row }) => <>{row.original.vendor}</>,
+                meta: {
+                    width: '23%',
+                },
+            },
+            {
+                id: 'name',
+                header: t('Name'),
+                cell: ({ row }) => <>{row.original.name}</>,
+                meta: {
+                    width: '23%',
+                },
+            },
+            {
+                id: 'version',
+                header: t('Version'),
+                cell: ({ row }) => <>{row.original.version}</>,
+                meta: {
+                    width: '23%',
+                },
+            },
+            {
+                id: 'releaseRelationship',
+                header: t('Release Relation'),
+                cell: ({ row }) => (
+                    <div className='form-dropdown'>
+                        <select
+                            className='form-select'
+                            value={row.original.releaseRelationship}
+                            onChange={(event) => {
+                                updateReleaseRelationship(row.original.id, event.target.value)
+                            }}
+                            required
+                        >
+                            <option value='CONTAINED'>{t('CONTAINED')}</option>
+                            <option value='REFERRED'>{t('REFERRED')}</option>
+                            <option value='UNKNOWN'>{t('UNKNOWN')}</option>
+                            <option value='DYNAMICALLY_LINKED'>{t('DYNAMICALLY_LINKED')}</option>
+                            <option value='STATICALLY_LINKED'>{t('STATICALLY_LINKED')}</option>
+                            <option value='SIDE_BY_SIDE'>{t('SIDE_BY_SIDE')}</option>
+                            <option value='STANDALONE'>{t('STANDALONE')}</option>
+                            <option value='INTERNAL_USE'>{t('INTERNAL_USE')}</option>
+                            <option value='OPTIONAL'>{t('OPTIONAL')}</option>
+                            <option value='TO_BE_REPLACED'>{t('TO_BE_REPLACED')}</option>
+                            <option value='CODE_SNIPPET'>{t('CODE_SNIPPET')}</option>
+                        </select>
+                    </div>
+                ),
+                meta: {
+                    width: '23%',
+                },
+            },
+            {
+                id: 'actions',
+                header: t('Actions'),
+                cell: ({ row }) => (
+                    <button
+                        type='button'
+                        className='btn btn-secondary p-0 border-0 d-inline-flex align-items-center justify-content-center'
+                        onClick={() => handleClickDelete(row.original.id)}
+                        title={t('Delete')}
+                        aria-label={t('Delete linked release')}
+                    >
+                        <FaTrashAlt />
+                    </button>
+                ),
+                meta: {
+                    width: '8%',
+                },
+            },
+        ],
+        [
+            t,
+            updateReleaseRelationship,
+            handleClickDelete,
+        ],
+    )
+
+    const memoizedData = useMemo(
+        () => releaseLinks,
+        [
+            releaseLinks,
+        ],
+    )
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+    })
+
+    // Always render the table. Let SW360Table show an empty state when there are
+    // no releases so users see the table structure instead of nothing.
 
     return (
         <>
-            <div className='row'>
-                {releaseLinks.map((item: ReleaseLink, index: number) => {
-                    return (
-                        <div
-                            key={index}
-                            className='my-1'
-                        >
-                            <div className='d-flex justify-content-between pt-2 px-1 pb-1'>
-                                <input
-                                    className='form-control me-2'
-                                    name='vendor'
-                                    value={item.vendor}
-                                    type='text'
-                                    placeholder='Enter Vendor'
-                                    readOnly
-                                />
-                                <input
-                                    className='form-control mx-2'
-                                    type='text'
-                                    value={item.name}
-                                    name='name'
-                                    readOnly
-                                />
-                                <input
-                                    className='form-control mx-2'
-                                    type='text'
-                                    value={item.version}
-                                    name='version'
-                                    readOnly
-                                />
-                                <select
-                                    className='form-select mx-2'
-                                    aria-label='releaseRelationship'
-                                    id='releaseRelationship'
-                                    name='releaseRelationship'
-                                    value={item.releaseRelationship}
-                                    onChange={(e) => handleInputChange(e, index)}
-                                >
-                                    <option value='CONTAINED'>{t('CONTAINED')}</option>
-                                    <option value='REFERRED'> {t('REFERRED')}</option>
-                                    <option value='UNKNOWN'>{t('UNKNOWN')}</option>
-                                    <option value='DYNAMICALLY_LINKED'>{t('DYNAMICALLY_LINKED')}</option>
-                                    <option value='STATICALLY_LINKED'> {t('STATICALLY_LINKED')}</option>
-                                    <option value='SIDE_BY_SIDE'>{t('SIDE_BY_SIDE')}</option>
-                                    <option value='STANDALONE'>{t('STANDALONE')}</option>
-                                    <option value='INTERNAL_USE'> {t('INTERNAL_USE')}</option>
-                                    <option value='OPTIONAL'>{t('OPTIONAL')}</option>
-                                    <option value='TO_BE_REPLACED'>{t('TO_BE_REPLACED')}</option>
-                                    <option value='CODE_SNIPPET'> {t('CODE_SNIPPET')}</option>
-                                </select>
-                                <button
-                                    type='button'
-                                    onClick={() => handleClickDelete(index)}
-                                    style={{
-                                        border: 'none',
-                                    }}
-                                    className={`fw-bold btn btn-secondary`}
-                                >
-                                    <BsFillTrashFill
-                                        className='bi bi-trash3-fill'
-                                        size={20}
-                                    />
-                                </button>
-                            </div>
-                            <hr className='my-2' />
-                        </div>
-                    )
-                })}
-            </div>
+            <SW360Table
+                table={table}
+                showProcessing={false}
+            />
         </>
     )
 }

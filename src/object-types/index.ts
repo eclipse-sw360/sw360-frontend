@@ -53,6 +53,7 @@ import { ArrayTypeUIConfigKeys, UIConfigKeys } from './enums/UIConfigKeys'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 import ErrorDetails from './error'
+import { FileList, SrcFileList } from './FileList'
 import FossologyConfig from './FossologyConfig'
 import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
@@ -160,6 +161,7 @@ export type {
     ErrorDetails,
     ExternalDocumentReferences,
     ExternalReference,
+    FileList,
     FilterOption,
     FossologyConfig,
     FossologyProcessInfo,
@@ -227,6 +229,7 @@ export type {
     SnippetRange,
     SPDX,
     SPDXDocument,
+    SrcFileList,
     SummaryDataType,
     ToastData,
     TypedEntity,

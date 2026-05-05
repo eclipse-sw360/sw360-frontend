@@ -43,6 +43,10 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+.textarea-summary {
+    height: 120px;
+}
+
 :root {
     --font-family-sans-serif:
         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
@@ -1292,6 +1296,10 @@ svg.action:hover {
     color: white !important;
 }
 
+.linked-releases-table-compact-col {
+    width: 5%;
+}
+
 .import-department-success {
     background-color: #edf9f0 !important;
     border: 1px solid #5aca75 !important;
@@ -2001,4 +2009,27 @@ ol.formatedMessageForVul {
 .header-button:hover {
     color: black !important;
     background-color: bisque !important;
+}
+
+.datefield-calendar-popover {
+    z-index: 1050;
+}
+
+.datefield-clear-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    z-index: 2;
+}
+
+.datefield-clear-btn:hover {
+    color: #dc3545;
 }

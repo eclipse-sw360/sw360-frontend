@@ -11,21 +11,21 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import { Embedded, ErrorDetails, ReleaseLink, UserGroupType } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink, UserGroupType } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
@@ -78,7 +78,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 id: 'name',
                 header: t('Name'),
                 accessorKey: 'name',
-                enableSorting: false,
+                enableSorting: true,
                 cell: (info) => info.getValue(),
                 meta: {
                     width: '20%',
@@ -87,6 +87,8 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
             {
                 id: 'version',
                 header: t('Version'),
+                accessorKey: 'version',
+                enableSorting: true,
                 cell: ({ row }) => {
                     const { version, id } = row.original
                     return (
@@ -105,7 +107,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
             {
                 id: 'clearingState',
                 header: t('Clearing State'),
+                accessorKey: 'clearingState',
+                enableSorting: true,
                 cell: ({ row }) => <>{Capitalize(row.original.clearingState ?? '')}</>,
+
                 meta: {
                     width: '20%',
                 },
@@ -114,7 +119,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 id: 'mainlineState',
                 header: t('Release Mainline State'),
                 accessorKey: 'mainlineState',
-                enableSorting: false,
+                enableSorting: true,
                 cell: ({ row }) => <>{Capitalize(row.original.mainlineState ?? '')}</>,
                 meta: {
                     width: '20%',
@@ -189,6 +194,17 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         ],
     )
 
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: 'version,asc',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
     const [releaseData, setReleaseData] = useState<ReleaseLink[]>(() => [])
     const memoizedData = useMemo(
         () => releaseData,
@@ -199,7 +215,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
+        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -211,11 +227,16 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(
+                const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
-                    session.data.user.access_token,
-                    signal,
+                    Object.fromEntries(
+                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
                 )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -223,12 +244,21 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     })
                 }
 
-                const data = (await response.json()) as EmbeddedLinkedReleases
-                setReleaseData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releaseLinks'])
-                        ? []
-                        : data['_embedded']['sw360:releaseLinks'],
-                )
+                const responseText = await response.text()
+                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
+                    setReleaseData([])
+                    setPaginationMeta({
+                        size: 0,
+                        totalElements: 0,
+                        totalPages: 0,
+                        number: 0,
+                    })
+                    return
+                }
+
+                const data = JSON.parse(responseText) as EmbeddedLinkedReleases
+                setPaginationMeta(data.page)
+                setReleaseData(data['_embedded']?.['sw360:releaseLinks'] ?? [])
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
@@ -241,6 +271,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     }, [
         session,
         componentId,
+        pageableQueryParam,
     ])
 
     const table = useReactTable({
@@ -256,10 +287,64 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     calledFromModerationRequestDetail === undefined ||
                     calledFromModerationRequestDetail === false,
             },
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: pageableQueryParam.sort
+                ? [
+                      {
+                          id: pageableQueryParam.sort.split(',')[0],
+                          desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                      },
+                  ]
+                : [],
         },
 
-        // client side pagination
-        getPaginationRowModel: getPaginationRowModel(),
+        // server side sorting config
+        manualSorting: true,
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = prev.sort
+                    ? [
+                          {
+                              id: prev.sort.split(',')[0],
+                              desc: prev.sort.split(',')[1] === 'desc',
+                          },
+                      ]
+                    : []
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
+        },
+
+        // server side pagination config
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
 
         meta: {
             rowHeightConstant: true,
@@ -269,19 +354,21 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     return (
         <>
             <div className='mb-3'>
-                {table ? (
-                    <>
-                        <ClientSidePageSizeSelector table={table} />
-                        <SW360Table
-                            table={table}
-                            showProcessing={showProcessing}
-                        />
-                        <ClientSideTableFooter table={table} />
-                    </>
-                ) : (
-                    <div className='col-12 mt-1 text-center'>
-                        <Spinner className='spinner' />
-                    </div>
+                <PageSizeSelector
+                    pageableQueryParam={pageableQueryParam}
+                    setPageableQueryParam={setPageableQueryParam}
+                    totalElements={paginationMeta?.totalElements}
+                />
+                <SW360Table
+                    table={table}
+                    showProcessing={showProcessing}
+                />
+                {paginationMeta && (
+                    <TableFooter
+                        pageableQueryParam={pageableQueryParam}
+                        setPageableQueryParam={setPageableQueryParam}
+                        paginationMeta={paginationMeta}
+                    />
                 )}
             </div>
             <DeleteReleaseModal

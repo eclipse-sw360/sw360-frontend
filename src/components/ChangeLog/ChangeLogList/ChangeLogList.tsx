@@ -9,7 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useMemo } from 'react'
@@ -43,7 +43,7 @@ const ChangeLogList = ({
     const columns = useMemo<ColumnDef<Changelogs>[]>(
         () => [
             {
-                id: 'date',
+                id: 'changeTimestamp',
                 header: t('Date'),
                 accessorKey: 'changeTimestamp',
                 cell: (info) => info.getValue(),
@@ -55,6 +55,7 @@ const ChangeLogList = ({
                 id: 'id',
                 header: t('Change Log Id'),
                 accessorKey: 'id',
+                enableSorting: false,
                 cell: (info) => info.getValue(),
                 meta: {
                     width: '20%',
@@ -80,6 +81,7 @@ const ChangeLogList = ({
                 id: 'userEdited',
                 header: t('User'),
                 accessorKey: 'userEdited',
+                enableSorting: false,
                 cell: (info) => info.getValue(),
                 meta: {
                     width: '20%',
@@ -133,6 +135,12 @@ const ChangeLogList = ({
                 pageIndex: pageableQueryParam.page,
                 pageSize: pageableQueryParam.page_entries,
             },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
         },
 
         // server side pagination config
@@ -152,6 +160,34 @@ const ChangeLogList = ({
                 page: next.pageIndex + 1,
                 page_entries: next.pageSize,
             }))
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
         },
 
         meta: {

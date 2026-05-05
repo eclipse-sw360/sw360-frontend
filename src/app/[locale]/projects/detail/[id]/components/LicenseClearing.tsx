@@ -113,7 +113,7 @@ function LicenseClearing({
 
             const mailEnabled = mailRequestForProjectReport === 'true'
             const url = withLinkedRelease
-                ? `reports?module=PROJECTS&withLinkedRelease=true&projectId=${projectId}`
+                ? `reports?module=PROJECTS&withlinkedreleases=true&projectId=${projectId}`
                 : `reports?module=PROJECTS&projectId=${projectId}`
 
             if (!mailEnabled) {

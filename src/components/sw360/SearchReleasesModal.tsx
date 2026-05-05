@@ -24,9 +24,9 @@ import {
     TableFooter,
 } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
-import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
+import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
-import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail, SearchResult } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 interface SearchReleasesModalProps {
@@ -40,6 +40,7 @@ interface SearchReleasesModalProps {
 }
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
+type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -50,13 +51,13 @@ export default function SearchReleasesModal({
     onSelect,
     multiSelect = true,
     projectId,
-    showExactMatch = true,
     showSubProjectReleases = false,
 }: SearchReleasesModalProps): JSX.Element {
     const t = useTranslations('default')
     const [selectedReleases, setSelectedReleases] = useState<Array<ReleaseDetail>>([])
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
+    const [byNameOnly, setByNameOnly] = useState(true)
     const [onlySubProjectReleases, setOnlySubProjectReleases] = useState(false)
     const session = useSession()
 
@@ -256,39 +257,91 @@ export default function SearchReleasesModal({
             setShowProcessing(true)
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
-            const queryUrl = CommonUtils.createUrlWithParams(
-                `releases`,
-                Object.fromEntries(
-                    Object.entries({
-                        ...pageableQueryParam,
-                        ...(searchText && searchText !== ''
-                            ? {
-                                  searchText: searchText,
-                                  luceneSearch: !exactMatch,
-                              }
-                            : {}),
-                        allDetails: true,
-                    }).map(([key, value]) => [
-                        key,
-                        String(value),
-                    ]),
-                ),
-            )
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-            if (response.status !== StatusCodes.OK) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message, {
-                    status: response.status,
-                })
-            }
+            if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
+                // Search by name only using /releases endpoint
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `releases`,
+                    Object.fromEntries(
+                        Object.entries({
+                            ...pageableQueryParam,
+                            ...(searchText && searchText !== ''
+                                ? {
+                                      name: searchText,
+                                      luceneSearch: !exactMatch,
+                                  }
+                                : {}),
+                            allDetails: true,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
 
-            const data = (await response.json()) as EmbeddedReleases
-            setPaginationMeta(data.page)
-            setReleaseData(
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
-                    ? []
-                    : data['_embedded']['sw360:releases'],
-            )
+                const data = (await response.json()) as EmbeddedReleases
+                setPaginationMeta(data.page)
+                setReleaseData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
+                        ? []
+                        : data['_embedded']['sw360:releases'],
+                )
+            } else {
+                // Full-text search using /search endpoint
+                const params = new URLSearchParams()
+                if (searchText && searchText !== '') {
+                    params.append('searchText', searchText)
+                }
+                params.append('typeMasks', 'release')
+                if (!exactMatch) {
+                    params.append('typeMasks', 'document')
+                }
+                Object.entries(pageableQueryParam)
+                    .filter(([k]) => k !== 'sort')
+                    .forEach(([key, value]) => params.append(key, String(value)))
+
+                const response = await ApiUtils.GET(
+                    `search?${params.toString()}`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const data = (await response.json()) as EmbeddedSearchResults
+                setPaginationMeta(data.page)
+
+                // Fetch full release details for search results
+                const searchResults = data['_embedded']?.['sw360:searchResults'] ?? []
+                const releaseIds = searchResults.filter((r) => r.type === 'release').map((r) => r.id)
+
+                if (releaseIds.length === 0) {
+                    setReleaseData([])
+                    return
+                }
+
+                // Fetch full details for each release
+                const accessToken = session.data?.user.access_token
+                if (!accessToken) return
+
+                const releasePromises = releaseIds.map((id) =>
+                    ApiUtils.GET(`releases/${id}`, accessToken, signal)
+                        .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
+                        .catch(() => null),
+                )
+                const releases = (await Promise.all(releasePromises)).filter((r): r is ReleaseDetail => r !== null)
+                setReleaseData(releases)
+            }
         } catch (error) {
             ApiUtils.reportError(error)
         } finally {
@@ -331,6 +384,7 @@ export default function SearchReleasesModal({
         setReleaseData([])
         setSelectedReleases([])
         setExactMatch(false)
+        setByNameOnly(true)
         setOnlySubProjectReleases(false)
         setPaginationMeta({
             size: 0,
@@ -364,112 +418,156 @@ export default function SearchReleasesModal({
                 <Modal.Title id='linked-projects-modal'>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
-                    <Col>
-                        <Row className='mb-3'>
-                            <Col xs={6}>
-                                <Form.Control
-                                    type='text'
-                                    placeholder={`${t('Enter Search Text')}...`}
-                                    name='searchValue'
-                                    onChange={(event) => {
-                                        setSearchText(event.target.value)
-                                    }}
-                                />
-                            </Col>
-                            <Col xs='auto'>
+                <Col>
+                    <Row className='mb-3'>
+                        <Col xs={6}>
+                            <Form.Control
+                                type='text'
+                                placeholder={`${t('Enter Search Text')}...`}
+                                name='searchValue'
+                                onChange={(event) => {
+                                    setSearchText(event.target.value)
+                                }}
+                            />
+                        </Col>
+                        {showSubProjectReleases && projectId && (
+                            <Col ls='auto'>
                                 <Button
                                     type='button'
                                     variant='secondary'
-                                    onClick={() => {
-                                        if (!searchText) setSearchText('')
-                                        setPageableQueryParam((prev) => ({
-                                            ...prev,
-                                            page: 0,
-                                        }))
-                                        handleSearch()
-                                    }}
+                                    onClick={() => void getLinkedReleasesOfSubProjects()}
                                 >
-                                    {t('Search')}
+                                    {t(`Releases of linked projects`)}
                                 </Button>
                             </Col>
-                            {showSubProjectReleases && projectId && (
-                                <Col ls='auto'>
-                                    <Button
-                                        type='button'
-                                        variant='secondary'
-                                        onClick={() => void getLinkedReleasesOfSubProjects()}
+                        )}
+                        <Col xs='auto'>
+                            <Form.Group controlId='exact-match-group'>
+                                <Form.Check
+                                    inline
+                                    name='exact-match'
+                                    type='checkbox'
+                                    id='exact-match-release'
+                                    checked={exactMatch}
+                                    onChange={() => setExactMatch(!exactMatch)}
+                                />
+                                <Form.Label className='pt-2'>
+                                    {t('Restricted Search')}{' '}
+                                    <OverlayTrigger
+                                        overlay={
+                                            <Tooltip>
+                                                <div>
+                                                    {t(
+                                                        'In case By Name Only is unchecked checking this will search for elements with name and description matching the input Otherwise the entire document will be searched',
+                                                    )}
+                                                </div>
+                                                {t(
+                                                    'In case By Name Only is checked Checking this will search for elements with name exactly matching the input',
+                                                )}
+                                                .
+                                            </Tooltip>
+                                        }
+                                        placement='top'
                                     >
-                                        {t(`Releases of linked projects`)}
-                                    </Button>
-                                </Col>
-                            )}
-                        </Row>
-                        {showExactMatch && (
-                            <Row>
-                                <Form.Group controlId='exact-match-group'>
-                                    <Form.Check
-                                        inline
-                                        name='exact-match'
-                                        type='checkbox'
-                                        id='exact-match'
-                                        onChange={() => setExactMatch(!exactMatch)}
-                                    />
-                                    <Form.Label className='pt-2'>
-                                        {t('Exact Match')}{' '}
                                         <sup>
                                             <BsInfoCircle size={20} />
                                         </sup>
-                                    </Form.Label>
-                                </Form.Group>
-                            </Row>
+                                    </OverlayTrigger>
+                                </Form.Label>
+                            </Form.Group>
+                        </Col>
+                        <Col xs='auto'>
+                            <Form.Group controlId='by-name-only-group'>
+                                <Form.Check
+                                    inline
+                                    name='by-name-only'
+                                    type='checkbox'
+                                    id='by-name-only-release'
+                                    checked={byNameOnly}
+                                    onChange={() => setByNameOnly(!byNameOnly)}
+                                />
+                                <Form.Label className='pt-2'>
+                                    {t('By Name Only')}{' '}
+                                    <OverlayTrigger
+                                        overlay={
+                                            <Tooltip>
+                                                {t(
+                                                    'The search result will display elements with name matching the input',
+                                                )}
+                                            </Tooltip>
+                                        }
+                                        placement='top'
+                                    >
+                                        <sup>
+                                            <BsInfoCircle size={20} />
+                                        </sup>
+                                    </OverlayTrigger>
+                                </Form.Label>
+                            </Form.Group>
+                        </Col>
+                        <Col xs='auto'>
+                            <Button
+                                type='button'
+                                variant='secondary'
+                                onClick={() => {
+                                    if (!searchText) setSearchText('')
+                                    setPageableQueryParam((prev) => ({
+                                        ...prev,
+                                        page: 0,
+                                    }))
+                                    handleSearch()
+                                }}
+                                className='mt-2'
+                            >
+                                {t('Search')}
+                            </Button>
+                        </Col>
+                    </Row>
+                    <Row>
+                        {onlySubProjectReleases ? (
+                            <div className='mb-3'>
+                                {table ? (
+                                    <>
+                                        <ClientSidePageSizeSelector table={table} />
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                        <ClientSideTableFooter table={table} />
+                                    </>
+                                ) : (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className='mb-3'>
+                                {pageableQueryParam && table && paginationMeta ? (
+                                    <>
+                                        <PageSizeSelector
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                        />
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                        <TableFooter
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                            paginationMeta={paginationMeta}
+                                        />
+                                    </>
+                                ) : (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )}
+                            </div>
                         )}
-                        <Row>
-                            {onlySubProjectReleases ? (
-                                <div className='mb-3'>
-                                    {table ? (
-                                        <>
-                                            <ClientSidePageSizeSelector table={table} />
-                                            <SW360Table
-                                                table={table}
-                                                showProcessing={showProcessing}
-                                            />
-                                            <ClientSideTableFooter table={table} />
-                                        </>
-                                    ) : (
-                                        <div className='col-12 mt-1 text-center'>
-                                            <Spinner className='spinner' />
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className='mb-3'>
-                                    {pageableQueryParam && table && paginationMeta ? (
-                                        <>
-                                            <PageSizeSelector
-                                                pageableQueryParam={pageableQueryParam}
-                                                setPageableQueryParam={setPageableQueryParam}
-                                            />
-                                            <SW360Table
-                                                table={table}
-                                                showProcessing={showProcessing}
-                                            />
-                                            <TableFooter
-                                                pageableQueryParam={pageableQueryParam}
-                                                setPageableQueryParam={setPageableQueryParam}
-                                                paginationMeta={paginationMeta}
-                                            />
-                                        </>
-                                    ) : (
-                                        <div className='col-12 mt-1 text-center'>
-                                            <Spinner className='spinner' />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </Row>
-                    </Col>
-                </Form>
+                    </Row>
+                </Col>
             </Modal.Body>
             <Modal.Footer>
                 <Button
