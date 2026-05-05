@@ -223,6 +223,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
     return (
         <>
             <LinkProjectsModal
+                mode='callback'
                 projectPayload={projectPayload}
                 setProjectPayload={setProjectPayload}
                 show={showLinkedProjectsModal}
