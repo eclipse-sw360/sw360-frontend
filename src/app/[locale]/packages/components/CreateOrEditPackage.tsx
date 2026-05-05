@@ -14,8 +14,9 @@ import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type FormEvent, type ReactElement, SetStateAction, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
+
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
@@ -52,7 +53,7 @@ export default function CreateOrEditPackage({
     isPending,
     isEditPage,
     packageId,
-}: Props): ReactNode {
+}: Props): ReactElement {
     const router = useRouter()
     const t = useTranslations('default')
     const [releaseNameVersion, setReleaseNameVersion] = useState<string>('')
@@ -135,8 +136,10 @@ export default function CreateOrEditPackage({
         if (isEditPage && !CommonUtils.isNullOrUndefined(packageId) && session.status !== 'loading') {
             void (async () => {
                 try {
-                    if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                    const response = await ApiUtils.GET(`packages/${packageId}/usage`, session.data.user.access_token)
+                    const sessionData = session.data
+                    if (CommonUtils.isNullOrUndefined(sessionData?.user?.access_token)) return signOut()
+
+                    const response = await ApiUtils.GET(`packages/${packageId}/usage`, sessionData.user.access_token)
                     if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                         const err = (await response.json()) as ErrorDetails
                         throw new ApiError(err.message, {
@@ -180,7 +183,7 @@ export default function CreateOrEditPackage({
                 id='add_or_edit_package_form_submit'
                 method='post'
                 className='mb-3'
-                onSubmit={(e) => {
+                onSubmit={(e: FormEvent<HTMLFormElement>) => {
                     e.preventDefault()
                     handleSubmit()
                 }}
@@ -323,7 +326,7 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.purl'
                                 className='form-label fw-medium'
                             >
-                                {`PURL (${t('Package URL')})`}{' '}
+                                {`PURL (${t('Package URL')})`} <ShowInfoOnHover text={t('PURL format hint')} />
                                 <span
                                     style={{
                                         color: 'red',
@@ -337,11 +340,11 @@ export default function CreateOrEditPackage({
                                 className='form-control'
                                 id='createOrEditPackage.purl'
                                 name='purl'
-                                placeholder={t('Enter PURL')}
+                                placeholder={t('Enter a valid PURL')}
                                 value={packagePayload.purl ?? ''}
                                 onChange={handleChange}
                                 pattern='^[Pp][Kk][Gg]:[^\s]+$'
-                                title='PURL must start with pkg:'
+                                title={t('PURL format hint')}
                                 required
                             />
                         </div>
