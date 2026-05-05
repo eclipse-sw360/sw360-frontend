@@ -12,16 +12,17 @@
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
-import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project, SearchResult } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
+type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -43,18 +44,19 @@ export default function LinkProjects({
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, object>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
-    const searchValueRef = useRef<HTMLInputElement>(null)
     const [exactMatch, setExactMatch] = useState(false)
+    const [searchText, setSearchText] = useState<string | undefined>(undefined)
+    const [byNameOnly, setByNameOnly] = useState(true)
     const topRef = useRef<HTMLDivElement | null>(null)
     const [linking, setLinking] = useState(false)
-    const { status } = useSession()
+    const session = useSession()
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     const scrollToTop = () => {
@@ -280,16 +282,14 @@ export default function LinkProjects({
     })
 
     useEffect(() => {
-        if (memoizedData === undefined) return
-
+        if (session.status === 'loading' || searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
-
-        void handleSearch(searchValueRef.current?.value ?? '', signal)
-
+        handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
+        session,
     ])
 
     const handleCheckboxes = (projectId: string) => {
@@ -305,65 +305,100 @@ export default function LinkProjects({
         setLinkProjects(m)
     }
 
-    const handleSearch = async (searchValue: string, signal?: AbortSignal) => {
-        const timeLimit = memoizedData && memoizedData.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+    const handleSearch = async (signal?: AbortSignal) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            setShowProcessing(true)
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
-            const url = CommonUtils.createUrlWithParams(
-                `projects`,
-                Object.fromEntries(
-                    Object.entries({
-                        ...pageableQueryParam,
-                        ...(CommonUtils.isNullEmptyOrUndefinedString(searchValue)
-                            ? {}
-                            : {
-                                  name: searchValue,
-                                  luceneSearch: !exactMatch,
-                              }),
-                    }).map(([key, value]) => [
-                        key,
-                        String(value),
-                    ]),
-                ),
-            )
+            if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
+                // Search by name only using /projects endpoint
+                const queryUrl = CommonUtils.createUrlWithParams(
+                    `projects`,
+                    Object.fromEntries(
+                        Object.entries({
+                            ...pageableQueryParam,
+                            ...(searchText && searchText !== ''
+                                ? {
+                                      name: searchText,
+                                      luceneSearch: !exactMatch,
+                                  }
+                                : {}),
+                            allDetails: true,
+                        }).map(([key, value]) => [
+                            key,
+                            String(value),
+                        ]),
+                    ),
+                )
+                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
 
-            const response = await ApiUtils.GET(url, session.user.access_token, signal)
-            if (response.status !== StatusCodes.OK) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message, {
-                    status: response.status,
-                })
+                const data = (await response.json()) as EmbeddedProjects
+                setPaginationMeta(data.page)
+                setProjectData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                        ? []
+                        : data['_embedded']['sw360:projects'],
+                )
+            } else {
+                // Full-text search using /search endpoint
+                const params = new URLSearchParams()
+                if (searchText && searchText !== '') {
+                    params.append('searchText', searchText)
+                }
+                params.append('typeMasks', 'project')
+                if (!exactMatch) {
+                    params.append('typeMasks', 'document')
+                }
+                Object.entries(pageableQueryParam)
+                    .filter(([k]) => k !== 'sort')
+                    .forEach(([key, value]) => params.append(key, String(value)))
+
+                const response = await ApiUtils.GET(
+                    `search?${params.toString()}`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const data = (await response.json()) as EmbeddedSearchResults
+                setPaginationMeta(data.page)
+
+                // Fetch full project details for search results
+                const searchResults = data['_embedded']?.['sw360:searchResults'] ?? []
+                const projectIds = searchResults.filter((r) => r.type === 'project').map((r) => r.id)
+
+                if (projectIds.length === 0) {
+                    setProjectData([])
+                    return
+                }
+
+                // Fetch full details for each project
+                const accessToken = session.data?.user.access_token
+                if (!accessToken) return
+
+                const projectPromises = projectIds.map((id) =>
+                    ApiUtils.GET(`projects/${id}`, accessToken, signal)
+                        .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
+                        .catch(() => null),
+                )
+                const projects = (await Promise.all(projectPromises)).filter((p): p is Project => p !== null)
+                setProjectData(projects)
             }
-
-            const data = (await response.json()) as EmbeddedProjects
-            setPaginationMeta(data.page)
-            setProjectData(
-                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
-                    ? []
-                    : data['_embedded']['sw360:projects'],
-            )
         } catch (error) {
-            if (error instanceof ApiError && error.isAborted) {
-                return
-            }
-            const message =
-                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
-            setAlert({
-                variant: 'danger',
-                message: (
-                    <>
-                        <p>{message}</p>
-                    </>
-                ),
-            })
+            ApiUtils.reportError(error)
         } finally {
             setShowProcessing(false)
-            clearTimeout(timeout)
         }
     }
 
@@ -373,10 +408,9 @@ export default function LinkProjects({
             const data = {
                 linkedProjects: Object.fromEntries(linkProjects),
             }
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
-            const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.user.access_token)
+            const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.data.user.access_token)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -464,33 +498,87 @@ export default function LinkProjects({
                                     type='text'
                                     placeholder={`${t('Enter Search Text')}...`}
                                     name='searchValue'
-                                    ref={searchValueRef}
+                                    onChange={(event) => {
+                                        setSearchText(event.target.value)
+                                    }}
                                 />
                             </Col>
                             <Col xs='auto'>
-                                <Form.Group controlId='exact-match-group'>
+                                <Form.Group>
                                     <Form.Check
                                         inline
                                         name='exact-match'
                                         type='checkbox'
                                         id='exact-match'
+                                        checked={exactMatch}
                                         onChange={() => setExactMatch(!exactMatch)}
                                     />
-                                    <Form.Label
-                                        className='pt-2'
-                                        value={exactMatch}
-                                    >
-                                        {t('Exact Match')}{' '}
-                                        <sup>
-                                            <BsInfoCircle size={20} />
-                                        </sup>
+                                    <Form.Label className='pt-2'>
+                                        {t('Restricted Search')}{' '}
+                                        <OverlayTrigger
+                                            overlay={
+                                                <Tooltip>
+                                                    <div>
+                                                        {t(
+                                                            'In case By Name Only is unchecked checking this will search for elements with name and description matching the input Otherwise the entire document will be searched',
+                                                        )}
+                                                    </div>
+                                                    {t(
+                                                        'In case By Name Only is checked Checking this will search for elements with name exactly matching the input',
+                                                    )}
+                                                    .
+                                                </Tooltip>
+                                            }
+                                            placement='top'
+                                        >
+                                            <sup>
+                                                <BsInfoCircle size={20} />
+                                            </sup>
+                                        </OverlayTrigger>
+                                    </Form.Label>
+                                </Form.Group>
+                            </Col>
+                            <Col xs='auto'>
+                                <Form.Group>
+                                    <Form.Check
+                                        inline
+                                        name='by-name-only'
+                                        type='checkbox'
+                                        id='by-name-only'
+                                        checked={byNameOnly}
+                                        onChange={() => setByNameOnly(!byNameOnly)}
+                                    />
+                                    <Form.Label className='pt-2'>
+                                        {t('By Name Only')}{' '}
+                                        <OverlayTrigger
+                                            overlay={
+                                                <Tooltip>
+                                                    {t(
+                                                        'The search result will display elements with name matching the input',
+                                                    )}
+                                                </Tooltip>
+                                            }
+                                            placement='top'
+                                        >
+                                            <sup>
+                                                <BsInfoCircle size={20} />
+                                            </sup>
+                                        </OverlayTrigger>
                                     </Form.Label>
                                 </Form.Group>
                             </Col>
                             <Col xs='auto'>
                                 <Button
                                     variant='secondary'
-                                    onClick={() => void handleSearch(searchValueRef.current?.value ?? '')}
+                                    onClick={() => {
+                                        if (!searchText) setSearchText('')
+                                        setPageableQueryParam((prev) => ({
+                                            ...prev,
+                                            page: 0,
+                                        }))
+                                        handleSearch()
+                                    }}
+                                    className='mt-2'
                                 >
                                     {t('Search')}
                                 </Button>

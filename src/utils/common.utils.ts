@@ -114,6 +114,8 @@ const getEmailsModerators = (users: User[]): string[] => {
 
 /**
  * Converts an object to a map of key-value pairs.
+ * Special handling for 'package-url' key: if the value is a JSON array string,
+ * it will be expanded into multiple entries with the same key.
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
  */
@@ -121,6 +123,23 @@ const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
     const map = new Map(Object.entries(data))
     const inputs: InputKeyValue[] = []
     map.forEach((value, key) => {
+        // Special handling for package-url: expand JSON array into multiple entries
+        if (key === 'package-url' && value.trimStart().startsWith('[')) {
+            try {
+                const urls = JSON.parse(value) as string[]
+                if (Array.isArray(urls)) {
+                    urls.forEach((url) => {
+                        inputs.push({
+                            key: key,
+                            value: url,
+                        })
+                    })
+                    return
+                }
+            } catch {
+                // If parsing fails, treat as regular value
+            }
+        }
         const input: InputKeyValue = {
             key: key,
             value: value,

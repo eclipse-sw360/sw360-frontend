@@ -171,7 +171,6 @@ export default function CreateOrEditPackage({
                 setShow={setShowLinkedReleasesModal}
                 onSelect={handleSelectRelease}
                 multiSelect={false}
-                showExactMatch={true}
             />
             <AddMainLicenseModal
                 showMainLicenseModal={showMainLicenseModal}

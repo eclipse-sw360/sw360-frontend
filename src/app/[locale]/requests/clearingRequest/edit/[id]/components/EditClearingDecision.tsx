@@ -13,6 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
+import DateField from '@/components/DateField'
 import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
@@ -33,7 +34,6 @@ export default function EditClearingDecision({
 }: Props): ReactNode {
     const t = useTranslations('default')
     const { data: session, status } = useSession()
-    const [minDate, setMinDate] = useState('')
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
 
@@ -44,11 +44,6 @@ export default function EditClearingDecision({
     }, [
         status,
     ])
-
-    useEffect(() => {
-        const currentDate = new Date()
-        setMinDate(currentDate.toISOString().split('T')[0])
-    }, [])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)
@@ -157,19 +152,19 @@ export default function EditClearingDecision({
                 <tr>
                     <td>{t('Agreed Clearing Date')}:</td>
                     <td>
-                        <input
-                            type='date'
-                            className='form-control'
-                            aria-label='Agreed Clearing Date YYYY-MM-DD'
+                        <DateField
                             id='agreedClearingDate'
-                            aria-describedby='agreedClearingDate'
                             name='agreedClearingDate'
-                            value={updateClearingRequestPayload.agreedClearingDate}
-                            disabled={
-                                CommonUtils.isNullOrUndefined(session) || session.user.userGroup === UserGroupType.USER
-                            }
-                            onChange={updateInputField}
-                            min={minDate}
+                            ariaLabel='Agreed Clearing Date YYYY-MM-DD'
+                            placeholder='YYYY-MM-DD'
+                            value={updateClearingRequestPayload.agreedClearingDate ?? ''}
+                            onChange={(normalized) => {
+                                setUpdateClearingRequestPayload({
+                                    ...updateClearingRequestPayload,
+                                    agreedClearingDate: normalized,
+                                })
+                            }}
+                            minDate={new Date()}
                         />
                     </td>
                 </tr>
