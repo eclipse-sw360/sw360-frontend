@@ -300,7 +300,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
             setShowProcessing(true)
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
-            if (byNameOnly) {
+            if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects`,
@@ -342,7 +342,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                     params.append('searchText', searchText)
                 }
                 params.append('typeMasks', 'project')
-                if (exactMatch) {
+                if (!exactMatch) {
                     params.append('typeMasks', 'document')
                 }
                 Object.entries(pageableQueryParam)
@@ -471,7 +471,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                 />
                             </Col>
                             <Col xs='auto'>
-                                <Form.Group controlId='exact-match-group'>
+                                <Form.Group>
                                     <Form.Check
                                         inline
                                         name='exact-match'
@@ -481,15 +481,32 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                         onChange={() => setExactMatch(!exactMatch)}
                                     />
                                     <Form.Label className='pt-2'>
-                                        {t('Exact Match')}{' '}
-                                        <sup>
-                                            <BsInfoCircle size={20} />
-                                        </sup>
+                                        {t('Restricted Search')}{' '}
+                                        <OverlayTrigger
+                                            overlay={
+                                                <Tooltip>
+                                                    <div>
+                                                        {t(
+                                                            'In case By Name Only is unchecked checking this will search for elements with name and description matching the input Otherwise the entire document will be searched',
+                                                        )}
+                                                    </div>
+                                                    {t(
+                                                        'In case By Name Only is checked Checking this will search for elements with name exactly matching the input',
+                                                    )}
+                                                    .
+                                                </Tooltip>
+                                            }
+                                            placement='top'
+                                        >
+                                            <sup>
+                                                <BsInfoCircle size={20} />
+                                            </sup>
+                                        </OverlayTrigger>
                                     </Form.Label>
                                 </Form.Group>
                             </Col>
                             <Col xs='auto'>
-                                <Form.Group controlId='by-name-only-group'>
+                                <Form.Group>
                                     <Form.Check
                                         inline
                                         name='by-name-only'
@@ -500,9 +517,20 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                     />
                                     <Form.Label className='pt-2'>
                                         {t('By Name Only')}{' '}
-                                        <sup>
-                                            <BsInfoCircle size={20} />
-                                        </sup>
+                                        <OverlayTrigger
+                                            overlay={
+                                                <Tooltip>
+                                                    {t(
+                                                        'The search result will display elements with name matching the input',
+                                                    )}
+                                                </Tooltip>
+                                            }
+                                            placement='top'
+                                        >
+                                            <sup>
+                                                <BsInfoCircle size={20} />
+                                            </sup>
+                                        </OverlayTrigger>
                                     </Form.Label>
                                 </Form.Group>
                             </Col>
@@ -517,6 +545,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                         }))
                                         handleSearch()
                                     }}
+                                    className='mt-2'
                                 >
                                     {t('Search')}
                                 </Button>

@@ -24,7 +24,7 @@ import {
     TableFooter,
 } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
-import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
+import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail, SearchResult } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
@@ -51,7 +51,6 @@ export default function SearchReleasesModal({
     onSelect,
     multiSelect = true,
     projectId,
-    showExactMatch = true,
     showSubProjectReleases = false,
 }: SearchReleasesModalProps): JSX.Element {
     const t = useTranslations('default')
@@ -258,7 +257,7 @@ export default function SearchReleasesModal({
             setShowProcessing(true)
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
-            if (byNameOnly) {
+            if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /releases endpoint
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `releases`,
@@ -300,7 +299,7 @@ export default function SearchReleasesModal({
                     params.append('searchText', searchText)
                 }
                 params.append('typeMasks', 'release')
-                if (exactMatch) {
+                if (!exactMatch) {
                     params.append('typeMasks', 'document')
                 }
                 Object.entries(pageableQueryParam)
@@ -419,133 +418,156 @@ export default function SearchReleasesModal({
                 <Modal.Title id='linked-projects-modal'>{t('Link Releases')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
-                    <Col>
-                        <Row className='mb-3'>
-                            <Col xs={6}>
-                                <Form.Control
-                                    type='text'
-                                    placeholder={`${t('Enter Search Text')}...`}
-                                    name='searchValue'
-                                    onChange={(event) => {
-                                        setSearchText(event.target.value)
-                                    }}
-                                />
-                            </Col>
-                            <Col xs='auto'>
+                <Col>
+                    <Row className='mb-3'>
+                        <Col xs={6}>
+                            <Form.Control
+                                type='text'
+                                placeholder={`${t('Enter Search Text')}...`}
+                                name='searchValue'
+                                onChange={(event) => {
+                                    setSearchText(event.target.value)
+                                }}
+                            />
+                        </Col>
+                        {showSubProjectReleases && projectId && (
+                            <Col ls='auto'>
                                 <Button
                                     type='button'
                                     variant='secondary'
-                                    onClick={() => {
-                                        if (!searchText) setSearchText('')
-                                        setPageableQueryParam((prev) => ({
-                                            ...prev,
-                                            page: 0,
-                                        }))
-                                        handleSearch()
-                                    }}
+                                    onClick={() => void getLinkedReleasesOfSubProjects()}
                                 >
-                                    {t('Search')}
+                                    {t(`Releases of linked projects`)}
                                 </Button>
                             </Col>
-                            {showSubProjectReleases && projectId && (
-                                <Col ls='auto'>
-                                    <Button
-                                        type='button'
-                                        variant='secondary'
-                                        onClick={() => void getLinkedReleasesOfSubProjects()}
-                                    >
-                                        {t(`Releases of linked projects`)}
-                                    </Button>
-                                </Col>
-                            )}
-                        </Row>
-                        {showExactMatch && (
-                            <Row className='mb-3'>
-                                <Col xs='auto'>
-                                    <Form.Group controlId='exact-match-group'>
-                                        <Form.Check
-                                            inline
-                                            name='exact-match'
-                                            type='checkbox'
-                                            id='exact-match-release'
-                                            checked={exactMatch}
-                                            onChange={() => setExactMatch(!exactMatch)}
-                                        />
-                                        <Form.Label className='pt-2'>
-                                            {t('Exact Match')}{' '}
-                                            <sup>
-                                                <BsInfoCircle size={20} />
-                                            </sup>
-                                        </Form.Label>
-                                    </Form.Group>
-                                </Col>
-                                <Col xs='auto'>
-                                    <Form.Group controlId='by-name-only-group'>
-                                        <Form.Check
-                                            inline
-                                            name='by-name-only'
-                                            type='checkbox'
-                                            id='by-name-only-release'
-                                            checked={byNameOnly}
-                                            onChange={() => setByNameOnly(!byNameOnly)}
-                                        />
-                                        <Form.Label className='pt-2'>
-                                            {t('By Name Only')}{' '}
-                                            <sup>
-                                                <BsInfoCircle size={20} />
-                                            </sup>
-                                        </Form.Label>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
                         )}
-                        <Row>
-                            {onlySubProjectReleases ? (
-                                <div className='mb-3'>
-                                    {table ? (
-                                        <>
-                                            <ClientSidePageSizeSelector table={table} />
-                                            <SW360Table
-                                                table={table}
-                                                showProcessing={showProcessing}
-                                            />
-                                            <ClientSideTableFooter table={table} />
-                                        </>
-                                    ) : (
-                                        <div className='col-12 mt-1 text-center'>
-                                            <Spinner className='spinner' />
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className='mb-3'>
-                                    {pageableQueryParam && table && paginationMeta ? (
-                                        <>
-                                            <PageSizeSelector
-                                                pageableQueryParam={pageableQueryParam}
-                                                setPageableQueryParam={setPageableQueryParam}
-                                            />
-                                            <SW360Table
-                                                table={table}
-                                                showProcessing={showProcessing}
-                                            />
-                                            <TableFooter
-                                                pageableQueryParam={pageableQueryParam}
-                                                setPageableQueryParam={setPageableQueryParam}
-                                                paginationMeta={paginationMeta}
-                                            />
-                                        </>
-                                    ) : (
-                                        <div className='col-12 mt-1 text-center'>
-                                            <Spinner className='spinner' />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </Row>
-                    </Col>
-                </Form>
+                        <Col xs='auto'>
+                            <Form.Group controlId='exact-match-group'>
+                                <Form.Check
+                                    inline
+                                    name='exact-match'
+                                    type='checkbox'
+                                    id='exact-match-release'
+                                    checked={exactMatch}
+                                    onChange={() => setExactMatch(!exactMatch)}
+                                />
+                                <Form.Label className='pt-2'>
+                                    {t('Restricted Search')}{' '}
+                                    <OverlayTrigger
+                                        overlay={
+                                            <Tooltip>
+                                                <div>
+                                                    {t(
+                                                        'In case By Name Only is unchecked checking this will search for elements with name and description matching the input Otherwise the entire document will be searched',
+                                                    )}
+                                                </div>
+                                                {t(
+                                                    'In case By Name Only is checked Checking this will search for elements with name exactly matching the input',
+                                                )}
+                                                .
+                                            </Tooltip>
+                                        }
+                                        placement='top'
+                                    >
+                                        <sup>
+                                            <BsInfoCircle size={20} />
+                                        </sup>
+                                    </OverlayTrigger>
+                                </Form.Label>
+                            </Form.Group>
+                        </Col>
+                        <Col xs='auto'>
+                            <Form.Group controlId='by-name-only-group'>
+                                <Form.Check
+                                    inline
+                                    name='by-name-only'
+                                    type='checkbox'
+                                    id='by-name-only-release'
+                                    checked={byNameOnly}
+                                    onChange={() => setByNameOnly(!byNameOnly)}
+                                />
+                                <Form.Label className='pt-2'>
+                                    {t('By Name Only')}{' '}
+                                    <OverlayTrigger
+                                        overlay={
+                                            <Tooltip>
+                                                {t(
+                                                    'The search result will display elements with name matching the input',
+                                                )}
+                                            </Tooltip>
+                                        }
+                                        placement='top'
+                                    >
+                                        <sup>
+                                            <BsInfoCircle size={20} />
+                                        </sup>
+                                    </OverlayTrigger>
+                                </Form.Label>
+                            </Form.Group>
+                        </Col>
+                        <Col xs='auto'>
+                            <Button
+                                type='button'
+                                variant='secondary'
+                                onClick={() => {
+                                    if (!searchText) setSearchText('')
+                                    setPageableQueryParam((prev) => ({
+                                        ...prev,
+                                        page: 0,
+                                    }))
+                                    handleSearch()
+                                }}
+                                className='mt-2'
+                            >
+                                {t('Search')}
+                            </Button>
+                        </Col>
+                    </Row>
+                    <Row>
+                        {onlySubProjectReleases ? (
+                            <div className='mb-3'>
+                                {table ? (
+                                    <>
+                                        <ClientSidePageSizeSelector table={table} />
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                        <ClientSideTableFooter table={table} />
+                                    </>
+                                ) : (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className='mb-3'>
+                                {pageableQueryParam && table && paginationMeta ? (
+                                    <>
+                                        <PageSizeSelector
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                        />
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                        <TableFooter
+                                            pageableQueryParam={pageableQueryParam}
+                                            setPageableQueryParam={setPageableQueryParam}
+                                            paginationMeta={paginationMeta}
+                                        />
+                                    </>
+                                ) : (
+                                    <div className='col-12 mt-1 text-center'>
+                                        <Spinner className='spinner' />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </Row>
+                </Col>
             </Modal.Body>
             <Modal.Footer>
                 <Button
