@@ -83,6 +83,7 @@ import Package from './Package'
 import { ColumnMeta, FilterOption, NestedRows, PageableQueryParam, PaginationMeta, TypedEntity } from './Pageable'
 import Preferences from './Preferences'
 import { Project, ProjectLinkedRelease } from './Project'
+import ProjectDetailTabCounts from './ProjectDetailTabCounts'
 import ProjectPayload from './ProjectPayload'
 import { ProjectData, ProjectVulnerability, VulnerabilityRatingAndActionPayload } from './ProjectVulnerabilityTypes'
 import Release from './Release'
@@ -205,6 +206,7 @@ export type {
     ProcessedUiConfig,
     Project,
     ProjectData,
+    ProjectDetailTabCounts,
     ProjectLinkedRelease,
     ProjectPayload,
     ProjectVulnerability,

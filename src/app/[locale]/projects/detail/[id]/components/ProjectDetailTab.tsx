@@ -23,7 +23,7 @@ import {
     AdministrationDataType,
     ClearingDetailsCount,
     ErrorDetails,
-    PageableQueryParam,
+    ProjectDetailTabCounts,
     SummaryDataType,
     UserGroupType,
 } from '@/object-types'
@@ -169,58 +169,38 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         const controller = new AbortController()
         const signal = controller.signal
 
-        const isOpen = (s?: string | null) => (s ?? '').trim().toUpperCase() === 'OPEN'
-
         const fetchCounts = async () => {
             setObligationsLoading(true)
+            setVulnerabilitiesLoading(true)
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) {
                     void signOut()
                     return
                 }
 
-                const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
-                    page: '0',
-                    page_entries: '9999',
-                })
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/tabCounts`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                const body = (await response.json().catch(() => ({}))) as ProjectDetailTabCounts | ErrorDetails
 
-                const resp = await ApiUtils.GET(url, session.data.user.access_token, signal)
-                const body = (await resp.json().catch(() => ({}))) as {
-                    obligations?: Record<
-                        string,
-                        {
-                            status?: string
-                        }
-                    >
-                    page?: {
-                        totalElements?: number
-                    }
-                    message?: string
-                    error?: string
-                }
-
-                if (resp.status !== StatusCodes.OK) {
-                    throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
-                        status: resp.status,
+                if (response.status !== StatusCodes.OK) {
+                    throw new ApiError(('message' in body ? body.message : undefined) ?? `Status ${response.status}`, {
+                        status: response.status,
                     })
                 }
 
-                const obligations = body?.obligations ?? {}
-                const entries = Object.values(obligations) as Array<{
-                    status?: string
-                }>
-
-                const serverTotal = body?.page?.totalElements
-                const total = typeof serverTotal === 'number' ? serverTotal : entries.length
-
-                const nonOpen = entries.filter((e) => !isOpen(e?.status)).length
-
-                setObligationsTotal(total)
-                setObligationsNonOpenCount(nonOpen)
+                const data = body as ProjectDetailTabCounts
+                setObligationsTotal(data.obligationCount)
+                setObligationsNonOpenCount(data.obligationNonOpenCount)
+                setVulnerabilitiesTotal(Math.max(0, data.vulnerabilityCount))
+                setVulnerabilitiesRatedCount(Math.max(0, data.vulnerabilityRatedCount))
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
                 setObligationsLoading(false)
+                setVulnerabilitiesLoading(false)
             }
         }
 
@@ -233,111 +213,18 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     ])
 
     const isVulnerabilitiesDisplayEnabled = summaryData?.enableVulnerabilitiesDisplay ?? false
-    const isVulnerabilityMonitoringEnabled = summaryData?.enableSvm ?? false
-    const hasSecurityResponsibles = (summaryData?._embedded?.securityResponsibles?.length ?? 0) > 0
-    const isMonitoringScenario =
-        isVulnerabilitiesDisplayEnabled && isVulnerabilityMonitoringEnabled && hasSecurityResponsibles
 
-    const vulnerabilitiesBadgeClassName = isMonitoringScenario ? 'obligations-badge--danger' : 'obligations-badge'
+    const vulnerabilitiesBadgeClassName = !isVulnerabilitiesDisplayEnabled
+        ? 'obligations-badge'
+        : vulnerabilitiesRatedCount === vulnerabilitiesTotal && vulnerabilitiesTotal > 0
+          ? 'obligations-badge--success'
+          : vulnerabilitiesRatedCount === 0
+            ? 'obligations-badge--danger'
+            : 'obligations-badge'
 
     const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
         ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
         : '?/?'
-
-    useEffect(() => {
-        if (session.status === 'loading') return
-
-        if (!isVulnerabilitiesDisplayEnabled) {
-            setVulnerabilitiesTotal(0)
-            setVulnerabilitiesRatedCount(0)
-            setVulnerabilitiesLoading(false)
-            return
-        }
-
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        const isRated = (relevance?: string | null) => {
-            const normalized = (relevance ?? '').trim().toUpperCase()
-            return normalized !== '' && normalized !== 'NOT_CHECKED'
-        }
-
-        const fetchCounts = async () => {
-            setVulnerabilitiesLoading(true)
-            try {
-                if (CommonUtils.isNullOrUndefined(session.data)) {
-                    void signOut()
-                    return
-                }
-                let page = 0
-                let totalPages = 1
-                let totalElements = 0
-                let ratedCount = 0
-
-                while (page < totalPages) {
-                    const pageableQueryParam: PageableQueryParam = {
-                        page,
-                        page_entries: 10,
-                        sort: '',
-                    }
-                    const queryUrl = CommonUtils.createUrlWithParams(
-                        `projects/${projectId}/vulnerabilitySummary`,
-                        Object.fromEntries(
-                            Object.entries(pageableQueryParam).map(([key, value]) => [
-                                key,
-                                String(value),
-                            ]),
-                        ),
-                    )
-
-                    const resp = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
-                    const body = (await resp.json().catch(() => ({}))) as {
-                        _embedded?: {
-                            'sw360:vulnerabilitySummaries'?: Array<{
-                                projectRelevance?: string | null
-                            }>
-                        }
-                        page?: {
-                            totalElements?: number
-                            totalPages?: number
-                        }
-                        message?: string
-                        error?: string
-                    }
-
-                    if (resp.status !== StatusCodes.OK) {
-                        throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
-                            status: resp.status,
-                        })
-                    }
-
-                    const vulnerabilities = body?._embedded?.['sw360:vulnerabilitySummaries'] ?? []
-                    ratedCount += vulnerabilities.filter((vulnerability) =>
-                        isRated(vulnerability.projectRelevance),
-                    ).length
-                    totalElements =
-                        typeof body?.page?.totalElements === 'number' ? body.page.totalElements : totalElements
-                    totalPages = typeof body?.page?.totalPages === 'number' ? body.page.totalPages : totalPages
-                    page += 1
-                }
-
-                setVulnerabilitiesTotal(totalElements)
-                setVulnerabilitiesRatedCount(ratedCount)
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                setVulnerabilitiesLoading(false)
-            }
-        }
-
-        void fetchCounts()
-        return () => controller.abort()
-    }, [
-        projectId,
-        session.status,
-        session.data?.user?.access_token,
-        isVulnerabilitiesDisplayEnabled,
-    ])
 
     return (
         <>
@@ -472,7 +359,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     <SidebarCountBadge
                                         badgeClassName={vulnerabilitiesBadgeClassName}
                                         countId='vulnerabilitiesCount'
-                                        isLoading={vulnerabilitiesLoading && isVulnerabilitiesDisplayEnabled}
+                                        isLoading={vulnerabilitiesLoading}
                                         label={t('Vulnerabilities')}
                                         value={vulnerabilitiesCountValue}
                                     />
