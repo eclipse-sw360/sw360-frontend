@@ -33,9 +33,7 @@ import {
     LinkedReleaseData,
     ObligationEntry,
     Project,
-    ProjectLinkedRelease,
     ProjectPayload,
-    ReleaseDetail,
     User,
     UserGroupType,
     Vendor,
@@ -259,34 +257,6 @@ function EditProject({
         })
     }
 
-    const setObjectToMap = async (linkedReleases: ProjectLinkedRelease[]) => {
-        try {
-            const linkedReleasesObject: {
-                [key: string]: LinkedReleaseData
-            } = {}
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-            for (const l of linkedReleases) {
-                const releaseId = l['release']?.split('/').pop()
-                if (releaseId === undefined) continue
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token)
-                const releaseData = (await response.json()) as ReleaseDetail
-                linkedReleasesObject[releaseId] = {
-                    name: releaseData.name,
-                    version: releaseData.version,
-                    releaseRelation: l.relation ?? '',
-                    mainlineState: l.mainlineState ?? '',
-                    comment: l.comment ?? '',
-                }
-            }
-            setProjectPayload((prevProjectPayload) => ({
-                ...prevProjectPayload,
-                linkedReleases: linkedReleasesObject,
-            }))
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
     const fetchUserData = useCallback(async (url: string) => {
         if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
         const response = await ApiUtils.GET(url, session.data.user.access_token)
@@ -382,10 +352,6 @@ function EditProject({
                     setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
                 }
 
-                if (project.linkedReleases !== undefined) {
-                    void setObjectToMap(project.linkedReleases)
-                }
-
                 if (project['_embedded']?.['leadArchitect'] !== undefined) {
                     setLeadArchitect({
                         [project['_embedded']['leadArchitect'].email]:
@@ -463,6 +429,20 @@ function EditProject({
                     })
                 }
 
+                const releaseData: {
+                    [k: string]: LinkedReleaseData
+                } = {}
+                for (const r of project._embedded?.['sw360:releases'] ?? []) {
+                    const rel = (project.linkedReleases ?? []).filter((rel) => rel.release.split('/').at(-1) === r.id)
+                    releaseData[r.id ?? ''] = {
+                        name: r.name,
+                        version: r.version,
+                        comment: rel?.[0].comment,
+                        releaseRelation: rel?.[0].relation,
+                        mainlineState: rel?.[0].mainlineState,
+                    } as LinkedReleaseData
+                }
+
                 const projectPayloadData: ProjectPayload = {
                     name: project.name,
                     version: project.version ?? '',
@@ -506,7 +486,7 @@ function EditProject({
                     projectOwner: project.projectOwner ?? '',
                     projectResponsible: project.projectResponsible ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
-                    linkedReleases: projectPayload.linkedReleases ?? {},
+                    linkedReleases: releaseData,
                     linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
                         (acc, proj) => {
                             acc[proj.id ?? ''] = {
