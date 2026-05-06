@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -42,6 +43,33 @@ function createElementFromHTML(htmlString: string) {
 
     // Change this to div.childNodes to support multiple top-level nodes.
     return div.firstChild
+}
+
+function replaceKeysWithLinks(fieldValue: unknown, fieldName: string): void {
+    if (!fieldValue || typeof fieldValue !== 'object') return
+
+    const obj = fieldValue as Record<string, Record<string, string>>
+    const keys = Object.keys(obj)
+
+    for (const key of keys) {
+        let href: string | null = null
+
+        if (fieldName.toLowerCase().includes('project')) {
+            href = `/projects/detail/${key}`
+        } else if (fieldName.toLowerCase().includes('component')) {
+            href = `/components/detail/${key}`
+        } else if (fieldName.toLowerCase().includes('release')) {
+            href = `/components/releases/detail/${key}`
+        } else if (fieldName.toLowerCase().includes('package')) {
+            href = `/packages/detail/${key}`
+        }
+
+        if (href) {
+            const linkKey = `<a class='text-link' href='${href}' target='_blank'>${key}</a>`
+            obj[linkKey] = obj[key]
+            delete obj[key]
+        }
+    }
 }
 
 function createChangesCards(changes: Changes[] | undefined | null, transFieldName: string): void {
@@ -106,6 +134,9 @@ function createChangesCards(changes: Changes[] | undefined | null, transFieldNam
             const changesTable = templateTableHtml?.cloneNode(true) as HTMLElement
             changesTable.classList.remove('d-none')
             changesTable.removeAttribute('id')
+            replaceKeysWithLinks(changes[i].fieldValueOld, changes[i].fieldName)
+            replaceKeysWithLinks(changes[i].fieldValueNew, changes[i].fieldName)
+
             changeLogObjDifferentiator(
                 changes[i].fieldValueOld,
                 changesTable.querySelectorAll('td')[0],
