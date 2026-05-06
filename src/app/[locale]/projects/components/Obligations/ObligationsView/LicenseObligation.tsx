@@ -663,7 +663,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                         obligationValue = {
                             ...obligationValue,
                             comment: comment,
-                            obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                            obligationType: ObligationLevels.LICENSE_OBLIGATION,
                         }
                         setPayload((payload: ObligationEntry) => ({
                             ...payload,
