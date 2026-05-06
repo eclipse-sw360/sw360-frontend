@@ -19,6 +19,7 @@ import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
+import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     Embedded,
     ErrorDetails,
@@ -427,4 +428,6 @@ function Vulnerabilities(): ReactNode {
     )
 }
 
-export default Vulnerabilities
+export default AccessControl(Vulnerabilities, [
+    UserGroupType.VIEWER,
+])

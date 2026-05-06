@@ -53,7 +53,7 @@ function LicenseClearing({
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
-    const { status } = useSession()
+    const { status, data: session } = useSession()
 
     // Configs from backend
     const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT)
@@ -61,7 +61,9 @@ function LicenseClearing({
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
     const crIsAllowed = CommonUtils.isCrAllowed(businessUnit, clearingState, clearingRequestDisabledGroups, visibility)
-    const disableCrButton = !crIsAllowed
+    const isViewer = session?.user?.userGroup === UserGroupType.VIEWER
+    // Disable Create CR button for VIEWER (View CR is still allowed)
+    const disableCrButton = !crIsAllowed || (!clearingRequestId && isViewer)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -187,7 +189,10 @@ function LicenseClearing({
                                 </Nav.Link>
                             </Nav.Item>
                             <Nav.Item className='px-2'>
-                                <Dropdown className='col-auto'>
+                                <Dropdown
+                                    className='col-auto'
+                                    hidden={isViewer}
+                                >
                                     <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
                                         <Dropdown.Item onClick={() => exportProjectSpreadsheet(false)}>
@@ -200,7 +205,10 @@ function LicenseClearing({
                                 </Dropdown>
                             </Nav.Item>
                             <Nav.Item>
-                                <Dropdown className='col-auto'>
+                                <Dropdown
+                                    className='col-auto'
+                                    hidden={isViewer}
+                                >
                                     <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
                                         <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
@@ -213,7 +221,10 @@ function LicenseClearing({
                                 </Dropdown>
                             </Nav.Item>
                             <Nav.Item>
-                                <Dropdown className='col-auto'>
+                                <Dropdown
+                                    className='col-auto'
+                                    hidden={isViewer}
+                                >
                                     <Dropdown.Toggle variant='secondary'>
                                         {t('Generate Source Code Bundle')}
                                     </Dropdown.Toggle>

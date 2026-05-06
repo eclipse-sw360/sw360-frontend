@@ -301,7 +301,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     eventKey='obligations'
                                     hidden={
                                         session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                        (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                            session?.data.user?.userGroup === UserGroupType.VIEWER)
                                     }
                                 >
                                     <div className='my-2 d-flex align-items-center'>
@@ -335,7 +336,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     eventKey='ecc'
                                     hidden={
                                         session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                        (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                            session?.data.user?.userGroup === UserGroupType.VIEWER)
                                     }
                                 >
                                     <div className='my-2'>{t('ECC')}</div>
@@ -343,6 +345,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilityTrackingStatus'
+                                    hidden={
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.VIEWER
+                                    }
                                 >
                                     <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
                                 </ListGroup.Item>
@@ -369,6 +375,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilities'
+                                    hidden={
+                                        session.status === 'authenticated' &&
+                                        session?.data.user?.userGroup === UserGroupType.VIEWER
+                                    }
                                 >
                                     <div className='my-2'>{t('Vulnerabilities')}</div>
                                 </ListGroup.Item>
@@ -394,7 +404,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             onClick={() => handleEditProject(projectId)}
                                             disabled={
                                                 session.status === 'authenticated' &&
-                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                    session?.data.user?.userGroup === UserGroupType.VIEWER)
                                             }
                                         >
                                             {t('Edit Projects')}
@@ -405,7 +416,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             onClick={() => setShow(true)}
                                             disabled={
                                                 session.status === 'authenticated' &&
-                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                    session?.data.user?.userGroup === UserGroupType.VIEWER)
                                             }
                                         >
                                             {t('Link to Projects')}
@@ -417,7 +429,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 className='px-2'
                                                 hidden={
                                                     session.status === 'authenticated' &&
-                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                        session?.data.user?.userGroup === UserGroupType.VIEWER)
                                                 }
                                             >
                                                 {t('Import SBOM')}
@@ -484,7 +497,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 className='px-2'
                                                 hidden={
                                                     session.status === 'authenticated' &&
-                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
+                                                    (session?.data.user?.userGroup === UserGroupType.SECURITY_USER ||
+                                                        session?.data.user?.userGroup === UserGroupType.VIEWER)
                                                 }
                                             >
                                                 {t('Export SBOM')}
