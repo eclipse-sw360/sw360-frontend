@@ -493,7 +493,7 @@ export default function ObligationTab({
                         obligationValue = {
                             ...obligationValue,
                             comment: comment,
-                            obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                            obligationType: obligationType,
                         }
                         setPayload((payload: ObligationEntry) => ({
                             ...payload,
