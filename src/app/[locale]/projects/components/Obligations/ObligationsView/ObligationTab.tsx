@@ -30,7 +30,6 @@ import {
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
 
 interface Props {
     projectId: string
@@ -197,7 +196,7 @@ export default function ObligationTab({
                                 obligationValue = {
                                     ...obligationValue,
                                     status: e.target.value,
-                                    obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                                    obligationType,
                                 }
                                 setPayload((payload: ObligationEntry) => ({
                                     ...payload,

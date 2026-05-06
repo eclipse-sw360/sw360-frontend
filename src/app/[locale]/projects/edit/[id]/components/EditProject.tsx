@@ -33,6 +33,7 @@ import {
     LinkedProjectData,
     LinkedReleaseData,
     ObligationEntry,
+    ObligationType,
     Project,
     ProjectPayload,
     User,
@@ -41,7 +42,6 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
 
@@ -587,47 +587,55 @@ function EditProject({
             ]
             if (Object.keys(obligations).length !== 0) {
                 for (const key in obligations) {
-                    if (obligations[key]?.obligationType === ObligationLevels.LICENSE_OBLIGATION) {
+                    if (obligations[key]?.obligationType === ObligationType.LICENSE_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateLicenseObligation`,
-                                obligations,
+                                {
+                                    [key]: obligations[key],
+                                },
                                 session.data.user.access_token,
                             ),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationLevels.COMPONENT_OBLIGATION) {
+                    } else if (obligations[key]?.obligationType === ObligationType.COMPONENT_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=component`,
-                                obligations,
+                                {
+                                    [key]: obligations[key],
+                                },
                                 session.data.user.access_token,
                             ),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationLevels.PROJECT_OBLIGATION) {
+                    } else if (obligations[key]?.obligationType === ObligationType.PROJECT_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=project`,
-                                obligations,
+                                {
+                                    [key]: obligations[key],
+                                },
                                 session.data.user.access_token,
                             ),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationLevels.ORGANISATION_OBLIGATION) {
+                    } else if (obligations[key]?.obligationType === ObligationType.ORGANISATION_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
                             ApiUtils.PATCH(
                                 `projects/${projectId}/updateObligation?obligationLevel=organization`,
-                                obligations,
+                                {
+                                    [key]: obligations[key],
+                                },
                                 session.data.user.access_token,
                             ),
                         )
