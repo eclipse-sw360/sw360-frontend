@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -106,6 +107,108 @@ function createChangesCards(changes: Changes[] | undefined | null, transFieldNam
             const changesTable = templateTableHtml?.cloneNode(true) as HTMLElement
             changesTable.classList.remove('d-none')
             changesTable.removeAttribute('id')
+            let oldFieldValueLinkToDetail = ''
+            let newFieldValueLinkToDetail = ''
+
+            if (
+                changes[i].fieldValueOld &&
+                changes[i].fieldValueOld !== null &&
+                typeof changes[i].fieldValueOld === 'object'
+            ) {
+                Object.keys(changes[i].fieldValueOld).forEach((key: string, _) => {
+                    if (changes[i].fieldName.toLowerCase().includes('project')) {
+                        oldFieldValueLinkToDetail =
+                            "<a class='text-link' href='/projects/detail/" + key + "' target='_blank'>" + key + '</a>'
+                        const fieldValueOld = changes[i].fieldValueOld as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueOld[oldFieldValueLinkToDetail] = fieldValueOld[key]
+                        delete fieldValueOld[key]
+                    } else if (changes[i].fieldName.toLowerCase().includes('component')) {
+                        oldFieldValueLinkToDetail =
+                            "<a class='text-link' href='/components/detail/" + key + "' target='_blank'>" + key + '</a>'
+                        const fieldValueOld = changes[i].fieldValueOld as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueOld[oldFieldValueLinkToDetail] = fieldValueOld[key]
+                        delete fieldValueOld[key]
+                    } else if (changes[i].fieldName.toLowerCase().includes('release')) {
+                        oldFieldValueLinkToDetail =
+                            "<a class='text-link' href='/components/releases/detail/" +
+                            key +
+                            "' target='_blank'>" +
+                            key +
+                            '</a>'
+                        const fieldValueOld = changes[i].fieldValueOld as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueOld[oldFieldValueLinkToDetail] = fieldValueOld[key]
+                        delete fieldValueOld[key]
+                    } else if (changes[i].fieldName.toLowerCase().includes('package')) {
+                        oldFieldValueLinkToDetail =
+                            "<a class='text-link' href='/packages/detail/" + key + "' target='_blank'>" + key + '</a>'
+                        const fieldValueOld = changes[i].fieldValueOld as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueOld[oldFieldValueLinkToDetail] = fieldValueOld[key]
+                        delete fieldValueOld[key]
+                    }
+                })
+            }
+            if (
+                changes[i].fieldValueNew &&
+                changes[i].fieldValueNew !== null &&
+                typeof changes[i].fieldValueNew === 'object'
+            ) {
+                Object.keys(changes[i].fieldValueNew).forEach((key: string, _) => {
+                    if (changes[i].fieldName.toLowerCase().includes('project')) {
+                        newFieldValueLinkToDetail =
+                            "<a class='text-link' href='/projects/detail/" + key + "' target='_blank'>" + key + '</a>'
+                        const fieldValueNew = changes[i].fieldValueNew as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueNew[newFieldValueLinkToDetail] = fieldValueNew[key]
+                        delete fieldValueNew[key]
+                    } else if (changes[i].fieldName.toLowerCase().includes('component')) {
+                        newFieldValueLinkToDetail =
+                            "<a class='text-link' href='/components/detail/" + key + "' target='_blank'>" + key + '</a>'
+                        const fieldValueNew = changes[i].fieldValueNew as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueNew[newFieldValueLinkToDetail] = fieldValueNew[key]
+                        delete fieldValueNew[key]
+                    } else if (changes[i].fieldName.toLowerCase().includes('release')) {
+                        newFieldValueLinkToDetail =
+                            "<a class='text-link' href='/components/releases/detail/" +
+                            key +
+                            "' target='_blank'>" +
+                            key +
+                            '</a>'
+                        const fieldValueNew = changes[i].fieldValueNew as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueNew[newFieldValueLinkToDetail] = fieldValueNew[key]
+                        delete fieldValueNew[key]
+                    } else if (changes[i].fieldName.toLowerCase().includes('package')) {
+                        newFieldValueLinkToDetail =
+                            "<a class='text-link' href='/packages/detail/" + key + "' target='_blank'>" + key + '</a>'
+                        const fieldValueNew = changes[i].fieldValueNew as unknown as Record<
+                            string,
+                            Record<string, string>
+                        >
+                        fieldValueNew[newFieldValueLinkToDetail] = fieldValueNew[key]
+                        delete fieldValueNew[key]
+                    }
+                })
+            }
+
             changeLogObjDifferentiator(
                 changes[i].fieldValueOld,
                 changesTable.querySelectorAll('td')[0],
