@@ -79,7 +79,7 @@ const FileListView = ({
                                 </div>
                                 <ul>
                                     {CommonUtils.isNullEmptyOrUndefinedArray(
-                                        fileList?.data.filter((l) => l.licName === licId)?.[0].srcFiles,
+                                        fileList?.data.filter((l) => l.licName === licId)?.[0]?.srcFiles,
                                     ) ? (
                                         <li>{t('Source file information not found in ISR')}</li>
                                     ) : (

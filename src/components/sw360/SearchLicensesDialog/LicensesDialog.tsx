@@ -72,7 +72,7 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                         checked={Object.keys(selectedLicenses).includes(
                             row.original._links?.self.href.split('/').at(-1) ?? '',
                         )}
-                        onClick={() => {
+                        onChange={() => {
                             handleCheckbox(row.original)
                         }}
                     ></Form.Check>
