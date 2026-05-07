@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import { ActionType, ObligationEntry, ObligationType } from '@/object-types'
+import AllObligations from './AllObligations'
 import LicenseObligation from './LicenseObligation'
 import ObligationTab from './ObligationTab'
 
@@ -43,6 +44,14 @@ export default function ObligationView({ projectId, actionType, payload, setPayl
             mountOnEnter={true}
             unmountOnExit={true}
         >
+            {actionType === ActionType.DETAIL && (
+                <Tab
+                    eventKey='all-obligations'
+                    title={t('All Obligations')}
+                >
+                    <AllObligations projectId={projectId} />
+                </Tab>
+            )}
             <Tab
                 eventKey='license-obligation'
                 title={t('License Obligation')}
