@@ -111,7 +111,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                                 row.original.attachment.attachmentType !== 'ISR' && (
                                     <Button
                                         variant='primary'
-                                        onClick={() => void handleAddSpdxLicenses(row.original.id)}
+                                        onClick={() => void handleAddSpdxLicenses(row.original)}
                                     >
                                         {t('Add License To Release')}
                                     </Button>
@@ -166,20 +166,15 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         ],
     )
 
-    const handleAddSpdxLicenses = async (attachmentId: string) => {
+    const handleAddSpdxLicenses = async (att: CellData) => {
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             setShowProcessing(true)
             const payload: SpdxLicensesPayload = {
-                mainLicenseIds: [],
-                otherLicenseIds: [],
+                mainLicenseIds: att.licenseInfo?.licenseIds ?? [],
+                otherLicenseIds: att.licenseInfo?.otherLicenseIds ?? [],
             }
-            memoizedData.forEach((t) => {
-                if (t.id === attachmentId) {
-                    payload.mainLicenseIds = t.licenseInfo?.licenseIds ?? []
-                    payload.otherLicenseIds = t.licenseInfo?.otherLicenseIds ?? []
-                }
-            })
+
             const response = await ApiUtils.POST(
                 `releases/${releaseId}/spdxLicenses`,
                 payload,
@@ -193,7 +188,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
             }
             setTableData((prev) => {
                 return prev.map((t) => {
-                    if (t.id === attachmentId) {
+                    if (t.id === att.id) {
                         return {
                             ...t,
                             status: {
