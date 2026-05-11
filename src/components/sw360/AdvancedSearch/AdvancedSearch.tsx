@@ -29,6 +29,7 @@ interface Field {
     paramName: string
     enableAutocomplete?: boolean
     autocompleteSuggestions?: string[]
+    infoHoverText?: string
 }
 
 interface Props {
@@ -91,6 +92,13 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
 
     const renderField = (field: Field) => {
         const fieldLabel = field.fieldName
+        const fieldLabelWithInfo = (
+            <span className='d-inline-flex align-items-center gap-1'>
+                <span>{fieldLabel}</span>
+                {field.infoHoverText && <ShowInfoOnHover text={field.infoHoverText} />}
+            </span>
+        )
+
         switch (field.paramName) {
             case 'createdOn':
                 if (Array.isArray(field.value)) {
@@ -100,7 +108,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                 className='mb-3'
                                 controlId={field.paramName}
                             >
-                                <Form.Label className='label'>{fieldLabel}</Form.Label>
+                                <Form.Label className='label'>{fieldLabelWithInfo}</Form.Label>
                                 <Form.Select
                                     aria-label={field.fieldName}
                                     className='form-control'
@@ -172,7 +180,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                             className='mb-3'
                             controlId={field.paramName}
                         >
-                            <Form.Label className='label'>{fieldLabel}</Form.Label>
+                            <Form.Label className='label'>{fieldLabelWithInfo}</Form.Label>
                             {typeof field.enableAutocomplete !== 'undefined' &&
                             field.enableAutocomplete &&
                             field.autocompleteSuggestions ? (
@@ -212,7 +220,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                             className='mb-3'
                             controlId={field.paramName}
                         >
-                            <Form.Label className='label'>{fieldLabel}</Form.Label>
+                            <Form.Label className='label'>{fieldLabelWithInfo}</Form.Label>
                             <Form.Select
                                 className='form-control'
                                 size='sm'

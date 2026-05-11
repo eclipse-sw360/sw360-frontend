@@ -709,6 +709,7 @@ function Project(): JSX.Element {
             fieldName: t('Group'),
             value: projectGroups,
             paramName: 'group',
+            infoHoverText: t('Advanced_Search_Group_Empty_Info'),
         },
         {
             fieldName: t('State'),
@@ -750,6 +751,7 @@ function Project(): JSX.Element {
             fieldName: t('Tag'),
             value: '',
             paramName: 'tag',
+            infoHoverText: t('Advanced_Search_Tag_Empty_Info'),
         },
         {
             fieldName: t('Additional Data'),
