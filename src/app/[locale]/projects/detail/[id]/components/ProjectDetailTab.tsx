@@ -17,11 +17,13 @@ import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
+import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import {
     ActionType,
     AdministrationDataType,
     ClearingDetailsCount,
     ErrorDetails,
+    ProjectDetailTabCounts,
     SummaryDataType,
     UserGroupType,
 } from '@/object-types'
@@ -50,6 +52,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
     const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
     const [obligationsLoading, setObligationsLoading] = useState<boolean>(false)
+    const [vulnerabilitiesTotal, setVulnerabilitiesTotal] = useState<number>(0)
+    const [vulnerabilitiesRatedCount, setVulnerabilitiesRatedCount] = useState<number>(0)
+    const [vulnerabilitiesLoading, setVulnerabilitiesLoading] = useState<boolean>(false)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
     const [show, setShow] = useState(false)
     const router = useRouter()
@@ -115,7 +120,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }, [
         projectId,
         session,
-        session,
     ])
 
     useEffect(() => {
@@ -165,58 +169,38 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         const controller = new AbortController()
         const signal = controller.signal
 
-        const isOpen = (s?: string | null) => (s ?? '').trim().toUpperCase() === 'OPEN'
-
         const fetchCounts = async () => {
             setObligationsLoading(true)
+            setVulnerabilitiesLoading(true)
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) {
                     void signOut()
                     return
                 }
 
-                const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
-                    page: '0',
-                    page_entries: '9999',
-                })
+                const response = await ApiUtils.GET(
+                    `projects/${projectId}/tabCounts`,
+                    session.data.user.access_token,
+                    signal,
+                )
+                const body = (await response.json().catch(() => ({}))) as ProjectDetailTabCounts | ErrorDetails
 
-                const resp = await ApiUtils.GET(url, session.data.user.access_token, signal)
-                const body = (await resp.json().catch(() => ({}))) as {
-                    obligations?: Record<
-                        string,
-                        {
-                            status?: string
-                        }
-                    >
-                    page?: {
-                        totalElements?: number
-                    }
-                    message?: string
-                    error?: string
-                }
-
-                if (resp.status !== StatusCodes.OK) {
-                    throw new ApiError(body?.message ?? body?.error ?? `Status ${resp.status}`, {
-                        status: resp.status,
+                if (response.status !== StatusCodes.OK) {
+                    throw new ApiError(('message' in body ? body.message : undefined) ?? `Status ${response.status}`, {
+                        status: response.status,
                     })
                 }
 
-                const obligations = body?.obligations ?? {}
-                const entries = Object.values(obligations) as Array<{
-                    status?: string
-                }>
-
-                const serverTotal = body?.page?.totalElements
-                const total = typeof serverTotal === 'number' ? serverTotal : entries.length
-
-                const nonOpen = entries.filter((e) => !isOpen(e?.status)).length
-
-                setObligationsTotal(total)
-                setObligationsNonOpenCount(nonOpen)
+                const data = body as ProjectDetailTabCounts
+                setObligationsTotal(data.obligationCount)
+                setObligationsNonOpenCount(data.obligationNonOpenCount)
+                setVulnerabilitiesTotal(Math.max(0, data.vulnerabilityCount))
+                setVulnerabilitiesRatedCount(Math.max(0, data.vulnerabilityRatedCount))
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
                 setObligationsLoading(false)
+                setVulnerabilitiesLoading(false)
             }
         }
 
@@ -227,6 +211,20 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         session.status,
         session.data?.user?.access_token,
     ])
+
+    const isVulnerabilitiesDisplayEnabled = summaryData?.enableVulnerabilitiesDisplay ?? false
+
+    const vulnerabilitiesBadgeClassName = !isVulnerabilitiesDisplayEnabled
+        ? 'obligations-badge'
+        : vulnerabilitiesRatedCount === vulnerabilitiesTotal && vulnerabilitiesTotal > 0
+          ? 'obligations-badge--success'
+          : vulnerabilitiesRatedCount === 0
+            ? 'obligations-badge--danger'
+            : 'obligations-badge'
+
+    const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
+        ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
+        : '?/?'
 
     return (
         <>
@@ -304,31 +302,19 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         session?.data.user?.userGroup === UserGroupType.SECURITY_USER
                                     }
                                 >
-                                    <div className='my-2 d-flex align-items-center'>
-                                        <span className='me-2'>{t('Obligations')}</span>
-
-                                        <span
-                                            id='obligationsCount'
-                                            className={`badge ${
-                                                obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
-                                                    ? 'obligations-badge--success'
-                                                    : obligationsNonOpenCount === 0
-                                                      ? 'obligations-badge--danger'
-                                                      : 'obligations-badge'
-                                            }`}
-                                            aria-live='polite'
-                                        >
-                                            {obligationsLoading ? (
-                                                <span
-                                                    className='spinner-border spinner-border-sm'
-                                                    role='status'
-                                                    aria-hidden='true'
-                                                ></span>
-                                            ) : (
-                                                `${obligationsNonOpenCount} / ${obligationsTotal}`
-                                            )}
-                                        </span>
-                                    </div>
+                                    <SidebarCountBadge
+                                        badgeClassName={
+                                            obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
+                                                ? 'obligations-badge--success'
+                                                : obligationsNonOpenCount === 0
+                                                  ? 'obligations-badge--danger'
+                                                  : 'obligations-badge'
+                                        }
+                                        countId='obligationsCount'
+                                        isLoading={obligationsLoading}
+                                        label={t('Obligations')}
+                                        value={`${obligationsNonOpenCount} / ${obligationsTotal}`}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
@@ -370,7 +356,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     action
                                     eventKey='vulnerabilities'
                                 >
-                                    <div className='my-2'>{t('Vulnerabilities')}</div>
+                                    <SidebarCountBadge
+                                        badgeClassName={vulnerabilitiesBadgeClassName}
+                                        countId='vulnerabilitiesCount'
+                                        isLoading={vulnerabilitiesLoading}
+                                        label={t('Vulnerabilities')}
+                                        value={vulnerabilitiesCountValue}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
