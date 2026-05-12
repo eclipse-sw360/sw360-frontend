@@ -166,10 +166,6 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
                         <ChangeLogDetail
                             changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
                         />
-                        <div
-                            id='cardScreen'
-                            className='p-0'
-                        ></div>
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>

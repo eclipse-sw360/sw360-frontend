@@ -10,11 +10,11 @@
 // License-Filename: LICENSE
 
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import PrettyFormatData from '@/components/PrettyFormatData/PrettyFormatData'
 import { Changelogs } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
-import createChangesCards from '../CreateChangeCard'
+import CreateChangesCards from '../CreateChangeCard'
 
 interface Props {
     changeLogData: Changelogs | undefined
@@ -23,18 +23,6 @@ interface Props {
 const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
-
-    useEffect(() => {
-        if (!CommonUtils.isNullEmptyOrUndefinedArray(changeLogData?.changes)) {
-            const changes = changeLogData.changes
-            createChangesCards(changes, t('Field Name'))
-        } else {
-            createChangesCards([], t('Field Name'))
-        }
-    }, [
-        changeLogData,
-        t,
-    ])
 
     const handleReferenceDoc = () => {
         if (
@@ -166,6 +154,7 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
                             </tr>
                         </tbody>
                     </table>
+                    <CreateChangesCards changes={changeLogData.changes} />
                 </>
             )}
         </>
