@@ -97,6 +97,7 @@ import RestrictedResource from './RestrictedResource'
 import RolesType from './RolesType'
 import SearchDuplicatesResponse from './SearchDuplicateResponse'
 import SearchResult from './SearchResult'
+import { ServiceDetail, ServiceDetailsResponse } from './ServiceDetails'
 import Session from './Session'
 import SummaryDataType from './SummaryDataType'
 import Annotations from './spdx/Annotations'
@@ -224,6 +225,8 @@ export type {
     SaveUsagesPayload,
     SearchDuplicatesResponse,
     SearchResult,
+    ServiceDetail,
+    ServiceDetailsResponse,
     Session,
     SnippetInformation,
     SnippetRange,
