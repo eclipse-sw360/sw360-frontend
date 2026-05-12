@@ -2033,3 +2033,31 @@ ol.formatedMessageForVul {
 .datefield-clear-btn:hover {
     color: #dc3545;
 }
+
+.old-val-change {
+    background-color: #ffeef0 !important;
+}
+
+.new-val-change {
+    background-color: #e6ffed !important;
+}
+
+.change-text {
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+    overflow-x: hidden;
+}
+
+.old-val-change-highlight {
+    background-color: #f9b2ba;
+}
+
+.new-val-change-highlight {
+    background-color: #a6f1b8;
+}
+
+.table-fixed {
+    table-layout: fixed;
+    width: 100%;
+}

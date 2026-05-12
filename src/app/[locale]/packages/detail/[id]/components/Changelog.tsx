@@ -159,12 +159,6 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
                         <ChangeLogDetail
                             changeLogData={changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]}
                         />
-                        <div
-                            id='cardScreen'
-                            style={{
-                                padding: '0px',
-                            }}
-                        ></div>
                     </Tab.Pane>
                 </Tab.Content>
             </Tab.Container>

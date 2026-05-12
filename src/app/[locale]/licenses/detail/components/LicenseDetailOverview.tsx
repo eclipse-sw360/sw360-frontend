@@ -380,12 +380,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                                                         changeLogList.filter((d: Changelogs) => d.id === changeLogId)[0]
                                                     }
                                                 />
-                                                <div
-                                                    id='cardScreen'
-                                                    style={{
-                                                        padding: '0px',
-                                                    }}
-                                                ></div>
                                             </div>
                                         </div>
                                     </Tab.Pane>
