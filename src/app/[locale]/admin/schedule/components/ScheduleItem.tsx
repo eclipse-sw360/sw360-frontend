@@ -12,23 +12,38 @@
 import { useTranslations } from 'next-intl'
 import { JSX } from 'react'
 import { Table } from 'react-bootstrap'
+import { ServiceDetail } from '@/object-types'
+
+const secondsToHHMMSS = (totalSeconds: number): string => {
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
 
 export const ScheduleItem = ({
-    scheduleUrl,
-    cancelUrl,
+    serviceName,
     scheduleLabel,
     cancelLabel,
     status,
     handleScheduleService,
+    serviceDetail,
 }: {
-    scheduleUrl: string
-    cancelUrl: string
+    serviceName: string
     scheduleLabel: string
     cancelLabel: string
     status: string
-    handleScheduleService: (url: string, message: string) => void
+    handleScheduleService: (serviceName: string, action: 'schedule' | 'unschedule', message: string) => void
+    serviceDetail?: ServiceDetail
 }): JSX.Element => {
     const t = useTranslations('default')
+
+    const scheduleOffset =
+        serviceDetail !== undefined ? `${secondsToHHMMSS(serviceDetail.firstOffsetSeconds)} (hh:mm:ss)` : '—'
+
+    const interval = serviceDetail !== undefined ? `${secondsToHHMMSS(serviceDetail.intervalSeconds)} (hh:mm:ss)` : '—'
+
+    const nextSync = serviceDetail !== undefined ? serviceDetail.nextSynchronization : '—'
 
     return (
         <>
@@ -36,37 +51,30 @@ export const ScheduleItem = ({
                 <tbody>
                     <tr className='border-bottom'>
                         <td className='p-3 text-white fw-bold w-50 sw360-background'>{t('Schedule Offset')}</td>
-                        <td
-                            className='p-3'
-                            style={{
-                                width: '60%',
-                            }}
-                        >
-                            00:00:00 (hh:mm:ss)
-                        </td>
+                        <td className='p-3 w-50'>{scheduleOffset}</td>
                     </tr>
                     <tr className='border-bottom'>
                         <td className='p-3 text-white fw-bold w-50 sw360-background'>{t('Interval')}</td>
-                        <td className='p-3 w-20'>24:00:00 (hh:mm:ss)</td>
+                        <td className='p-3 w-50'>{interval}</td>
                     </tr>
                     <tr className='border-bottom'>
                         <td className='p-3 text-white fw-bold w-50 sw360-background'>{t('Next Synchronization')}</td>
-                        <td className='p-3 w-50'>Sat Feb 01 00:00:00 GMT 2025</td>
+                        <td className='p-3 w-50'>{nextSync}</td>
                     </tr>
                 </tbody>
             </Table>
             <div className='my-1 ms-1'>
                 <button
                     className='btn btn-primary me-2 px-5 my-2'
-                    onClick={() => handleScheduleService(scheduleUrl, `Task scheduled successfully!`)}
-                    disabled={status !== 'authenticated'}
+                    onClick={() => handleScheduleService(serviceName, 'schedule', `Task scheduled successfully!`)}
+                    disabled={status !== 'authenticated' || serviceDetail?.isScheduled === true}
                 >
                     {scheduleLabel}
                 </button>
                 <button
                     className='btn btn-secondary me-2 px-5 my-2'
-                    onClick={() => handleScheduleService(cancelUrl, `Task unscheduled successfully!`)}
-                    disabled={status !== 'authenticated'}
+                    onClick={() => handleScheduleService(serviceName, 'unschedule', `Task unscheduled successfully!`)}
+                    disabled={status !== 'authenticated' || serviceDetail?.isScheduled === false}
                 >
                     {cancelLabel}
                 </button>
