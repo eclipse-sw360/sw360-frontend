@@ -15,6 +15,11 @@
     "check": "biome check",
     "check::fix": "biome check --fix",
     "test": "cypress open",
+    "test:pw": "npx playwright test",
+    "test:pw:ui": "npx playwright test --ui",
+    "test:pw:headed": "npx playwright test --headed",
+    "test:pw:debug": "npx playwright test --debug",
+    "test:pw:codegen": "npx playwright codegen http://localhost:3000",
     "prepare": "husky"
   },
   "dependencies": {
@@ -47,10 +52,11 @@
     "@biomejs/biome": "2.4.16",
     "@commitlint/cli": "21.0.2",
     "@commitlint/config-conventional": "19.8.0",
+    "@playwright/test": "^1.60.0",
     "@types/country-list": "^2.1.4",
     "@types/crypto-js": "^4.2.2",
     "@types/he": "^1.2.3",
-    "@types/node": "^26.1.0",
+    "@types/node": "26.0.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "bootstrap": "^5.3.8",
@@ -62,7 +68,7 @@
     "prettier": "^3.8.4",
     "prettier-plugin-organize-imports": "^4.3.0",
     "react-icons": "^5.6.0",
-    "systeminformation": "^5.31.13",
+    "systeminformation": "5.31.13",
     "ts-node": "^10.9.2",
     "tsc-files": "^1.1.4",
     "typescript": "^6.0.3"

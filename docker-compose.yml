@@ -38,9 +38,15 @@ services:
       start_period: 60s
 
   couchdb-nouveau:
+    # CouchDB 3.5 with Nouveau (Lucene 10)
+    # nouveau_index_upgrader enabled in sw360_setup.ini to handle missing lucene_version
+    # See: https://github.com/apache/couchdb/issues/6054
     image: couchdb:3.5-nouveau
     restart: unless-stopped
     container_name: couchdb_nouveau
+    volumes:
+      - nouveau_data:/opt/nouveau/data/nouveau
+      - ./config/couchdb/nouveau.yaml:/opt/nouveau/etc/nouveau.yaml
     ports:
       - "5987:5987"
       - "5988:5988"
@@ -48,6 +54,10 @@ services:
       - sw360net
 
   couchdb:
+    # Main CouchDB database - uses base image (not nouveau image which is Java-only)
+    # Nouveau search is handled by separate couchdb-nouveau container
+    # Note: SW360 backend needs to specify lucene_version:10 in design docs
+    # See: https://github.com/eclipse-sw360/sw360/issues/4314
     image: couchdb:3.5
     restart: unless-stopped
     container_name: couchdb
@@ -93,6 +103,7 @@ services:
 volumes:
   couchdb: {}
   etc: {}
+  nouveau_data: {}
 
 networks:
   sw360net:

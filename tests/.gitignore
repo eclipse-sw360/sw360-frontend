@@ -1,0 +1,15 @@
+# Auth state files (generated during test runs)
+.auth/
+
+# Test results and reports
+results/
+reports/
+
+# Temporary browser profiles
+.chrome-cors/
+
+# Local test environment variables (do not commit)
+.env.local
+
+# Playwright state
+.last-run.json
