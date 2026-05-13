@@ -251,4 +251,5 @@ function MergeOverview({
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(MergeOverview, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

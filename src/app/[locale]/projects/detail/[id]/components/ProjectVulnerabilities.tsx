@@ -35,7 +35,13 @@ const extractLinkedProjects = (projectPayload: Project[], projectData: ProjectDa
     }
 }
 
-export default function ProjectVulnerabilities({ projectData }: { projectData: ProjectData }): JSX.Element {
+export default function ProjectVulnerabilities({
+    projectData,
+    canChangeVulnerability = false,
+}: {
+    projectData: ProjectData
+    canChangeVulnerability?: boolean
+}): JSX.Element {
     const { data: session, status } = useSession()
     const [data, setData] = useState<ProjectData[]>([])
 
@@ -99,6 +105,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                         <VulnerabilityTab
                             projectData={projectData}
                             tabType={ProjectVulnerabilityTabType.SUMMARY}
+                            canChangeVulnerability={canChangeVulnerability}
                         />
                     </Tab>
                 )}
@@ -111,6 +118,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                         <VulnerabilityTab
                             projectData={e}
                             tabType={ProjectVulnerabilityTabType.PROJECT}
+                            canChangeVulnerability={canChangeVulnerability}
                         />
                     </Tab>
                 ))}

@@ -14,8 +14,8 @@ import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import DateField from '@/components/DateField'
-import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
-import { CommonUtils } from '@/utils'
+import { usePermissionContext } from '@/contexts'
+import { ClearingRequestDetails, UpdateClearingRequestPayload } from '@/object-types'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails | undefined
@@ -33,7 +33,9 @@ export default function EditClearingDecision({
     setUpdateClearingRequestPayload,
 }: Props): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const { status } = useSession()
+    const { hasCapability } = usePermissionContext()
+    const canEditClearingRequestDetails = hasCapability('canEditClearingRequestDetails')
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
 
@@ -109,9 +111,7 @@ export default function EditClearingDecision({
                             name='priority'
                             value={updateClearingRequestPayload.priority}
                             onChange={updateInputField}
-                            disabled={
-                                CommonUtils.isNullOrUndefined(session) || session.user.userGroup === UserGroupType.USER
-                            }
+                            disabled={!canEditClearingRequestDetails}
                             required
                         >
                             <option value='LOW'>{t('Low')}</option>

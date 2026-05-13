@@ -262,4 +262,5 @@ function SplitOverview({
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(SplitOverview, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

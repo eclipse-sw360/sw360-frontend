@@ -18,7 +18,7 @@ import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
-import { ErrorDetails, UIConfigKeys } from '@/object-types'
+import { ErrorDetails, UIConfigKeys, UserGroupType } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import TokensTable from './TokensTable'
 
@@ -33,11 +33,12 @@ const UserAccessToken = (): ReactNode => {
         ],
     })
     const [generatedToken, setGeneratedToken] = useState<string>('')
-    const { status } = useSession()
+    const { data: session, status } = useSession()
 
     // Config values from backend
     const apiTokenGenerator = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE)
-    const writeAuthorityAllowed = apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
+    const isViewer = session?.user?.userGroup === UserGroupType.VIEWER
+    const writeAuthorityAllowed = isViewer ? false : apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
