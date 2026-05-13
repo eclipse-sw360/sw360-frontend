@@ -12,6 +12,7 @@ import createNextIntlPlugin from 'next-intl/plugin'
 
 const withNextIntl = createNextIntlPlugin()
 const isDev = process.env.NODE_ENV === 'development'
+const sw360ApiUrl = process.env.NEXT_PUBLIC_SW360_API_URL || ''
 
 const csp = `
   default-src 'self';
@@ -19,7 +20,7 @@ const csp = `
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https://secure.gravatar.com https://www.gravatar.com;
   font-src 'self' data:;
-  connect-src 'self' https://www.gravatar.com${isDev ? ' http://localhost:*' : ''};
+  connect-src 'self' https://www.gravatar.com${isDev ? ' http://localhost:*' : ''}${sw360ApiUrl ? ` ${sw360ApiUrl}` : ''};
   object-src 'none';
   frame-ancestors 'self';
   ${isDev ? '' : "require-trusted-types-for 'script'"};
