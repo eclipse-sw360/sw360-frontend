@@ -14,7 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
 import {
@@ -26,7 +26,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, ApiUtils, CommonUtils, PermissionUtils } from '@/utils'
+import { RequestedAction } from '@/utils/permission.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import LinkProjects from '../../../components/LinkProjects'
@@ -61,6 +62,14 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         show: false,
         importType: 'CycloneDx',
     })
+
+    const canChangeVulnerability = useMemo(
+        () => PermissionUtils.getStandardPermissions(RequestedAction.WRITE, summaryData?._embedded, session.data?.user),
+        [
+            summaryData,
+            session.data?.user,
+        ],
+    )
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -607,6 +616,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                     enableVulnerabilitiesDisplay:
                                                         summaryData.enableVulnerabilitiesDisplay ?? false,
                                                 }}
+                                                canChangeVulnerability={canChangeVulnerability}
                                             />
                                         )}
                                     </Tab.Pane>
