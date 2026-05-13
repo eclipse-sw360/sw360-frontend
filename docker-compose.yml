@@ -38,9 +38,15 @@ services:
       start_period: 60s
 
   couchdb-nouveau:
-    image: couchdb:3.5-nouveau
+    # TODO: Upgrade to couchdb:3.5-nouveau once eclipse-sw360/sw360 supports Lucene 10 indexes
+    # Pin to 3.5.1: CouchDB 3.5.2+ uses Lucene 10, incompatible with SW360's Lucene 9 index definitions 
+    # See: https://docs.couchdb.org/en/stable/ddocs/nouveau.html#lucene-version-upgrade
+    image: couchdb:3.5.1-nouveau
     restart: unless-stopped
     container_name: couchdb_nouveau
+    volumes:
+      - nouveau_data:/opt/nouveau/data/nouveau
+      - ./config/couchdb/nouveau.yaml:/opt/nouveau/etc/nouveau.yaml
     ports:
       - "5987:5987"
       - "5988:5988"
@@ -93,6 +99,7 @@ services:
 volumes:
   couchdb: {}
   etc: {}
+  nouveau_data: {}
 
 networks:
   sw360net:

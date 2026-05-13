@@ -1,0 +1,21 @@
+# Nouveau server configuration
+# CouchDB 3.5 expects h2c (HTTP/2 cleartext) connections to Nouveau
+
+maxIndexesOpen: 3000
+commitIntervalSeconds: 30
+idleSeconds: 60
+rootDir: ./data/nouveau
+
+logging:
+  level: INFO
+
+server:
+  applicationConnectors:
+    - type: h2c
+      bindHost: 0.0.0.0
+      port: 5987
+      useDateHeader: false
+  adminConnectors:
+    - type: http
+      bindHost: 0.0.0.0
+      port: 5988
