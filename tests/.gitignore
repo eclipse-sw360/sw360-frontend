@@ -1,0 +1,12 @@
+# Auth state files (generated during test runs)
+.auth/
+
+# Test results and reports
+results/
+reports/
+
+# Temporary browser profiles
+.chrome-cors/
+
+# Playwright state
+.last-run.json
