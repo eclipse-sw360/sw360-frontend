@@ -57,11 +57,7 @@ export default function DeletePackageModal({
     ])
 
     const handleGoBack = () => {
-        if (window.history.length > 1) {
-            router.back()
-        } else {
-            router.push('/packages')
-        }
+        router.push('/packages')
     }
 
     const deletePackage = async () => {
