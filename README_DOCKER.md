@@ -130,6 +130,19 @@ The SW360 backend container is configured via
 [backend Docker documentation](https://github.com/eclipse-sw360/sw360/blob/main/README_DOCKER.md#environment-variables)
 for a full list of variables.
 
+For the full stack, keep the backend trusted issuer list aligned with the token
+issuers used by the selected frontend authentication provider:
+
+```env
+SW360_SECURITY_JWT_TRUSTED_ISSUERS=http://localhost:8080/authorization,http://localhost:8083/realms/sw360
+```
+
+The SW360 Authorization Server issuer is required for `sw360oauth` tokens. Add
+the Keycloak realm issuer when `NEXT_PUBLIC_SW360_AUTH_PROVIDER=keycloak`, or
+when integrations call the REST API with Keycloak-issued Bearer tokens. Issuer
+values must exactly match the JWT `iss` claim and must be reachable from the
+`sw360` container for discovery/JWKS lookup.
+
 Sensitive backend values are stored as Docker secrets in
 [config/sw360/default_secrets](config/sw360/default_secrets).
 
