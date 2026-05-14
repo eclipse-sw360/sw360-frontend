@@ -47,6 +47,10 @@ code {
     height: 120px;
 }
 
+.oauth-client-response-json {
+    max-height: 60vh;
+}
+
 :root {
     --font-family-sans-serif:
         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,

@@ -14,8 +14,10 @@
 import { StatusCodes } from 'http-status-codes'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
+import { SelectUsersDialog } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
+import { Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
+import { BsClipboard } from 'react-icons/bs'
 import { OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
@@ -63,6 +65,13 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
     const t = useTranslations('default')
     const [formState, setFormState] = useState<FormState>(defaultState)
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [selectedOwner, setSelectedOwner] = useState<{
+        [k: string]: string
+    }>({})
+    const [showOwnerDialog, setShowOwnerDialog] = useState(false)
+    const [createdClientResponseJson, setCreatedClientResponseJson] = useState<string | null>(null)
+    const [showCreatedClientResponse, setShowCreatedClientResponse] = useState(false)
+    const [copied, setCopied] = useState(false)
     const { status } = useSession()
 
     useEffect(() => {
@@ -82,6 +91,7 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
 
     useEffect(() => {
         if (client !== null) {
+            const ownerEmail = client.owner_email ?? ''
             setFormState({
                 description: client.description,
                 authorities: client.authorities.join(', '),
@@ -92,11 +102,21 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
                 accessTokenUnit: 'Seconds',
                 refreshTokenUnit: 'Seconds',
             })
+            setSelectedOwner(
+                ownerEmail === ''
+                    ? {}
+                    : {
+                          [ownerEmail]: ownerEmail,
+                      },
+            )
         } else {
             setFormState(defaultState)
+            setSelectedOwner({})
         }
+        setErrors({})
     }, [
         show,
+        client,
     ])
 
     const convertTokenValidity = (value: string, fromUnit: 'Days' | 'Seconds', toUnit: 'Days' | 'Seconds') => {
@@ -118,15 +138,28 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         setShow(!show)
     }
 
+    const selectedOwnerEmail = Object.keys(selectedOwner)[0] ?? ''
+
+    const selectedOwnerDisplayName = (() => {
+        if (selectedOwnerEmail === '') return ''
+        const selectedOwnerName = selectedOwner[selectedOwnerEmail]
+        return selectedOwnerName === '' || selectedOwnerName === selectedOwnerEmail
+            ? selectedOwnerEmail
+            : `${selectedOwnerName} (${selectedOwnerEmail})`
+    })()
+
     const calculateValidity = (value: string, unit: 'Days' | 'Seconds') =>
         Number(value) * (unit === 'Seconds' ? 1 : 86400)
 
-    const requestBody = {
-        ...(client && {
-            client_id: client.client_id,
-            client_secret: client.client_secret,
-        }),
+    const requestBody: OAuthClient = {
+        client_id: client?.client_id ?? '',
+        client_secret: client?.client_secret ?? '',
         description: formState.description,
+        ...(client === null && selectedOwnerEmail !== ''
+            ? {
+                  owner_email: selectedOwnerEmail,
+              }
+            : {}),
         access_token_validity: calculateValidity(formState.accessTokenValidity, formState.accessTokenUnit),
         refresh_token_validity: calculateValidity(formState.refreshTokenValidity, formState.refreshTokenUnit),
         authorities: [
@@ -138,7 +171,7 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         ].filter(Boolean),
     }
 
-    const sendOAuthClientRequest = async (data: object, token: string): Promise<Response> => {
+    const sendOAuthClientRequest = async (data: OAuthClient, token: string): Promise<Response> => {
         return await fetch(`${SW360_API_URL}/authorization/client-management`, {
             method: 'POST',
             headers: {
@@ -155,6 +188,9 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
 
         if (!formState.description.trim()) {
             newErrors.description = t('Description is required')
+        }
+        if (client === null && selectedOwnerEmail === '') {
+            newErrors.ownerEmail = t('Owner user is required')
         }
         if (!formState.authorities.trim()) {
             newErrors.authorities = t('Authorities is required')
@@ -186,168 +222,273 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
 
         const response = await sendOAuthClientRequest(requestBody, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
+        if (response.status === StatusCodes.OK || response.status === StatusCodes.CREATED) {
+            const responseBody: unknown = await response.json()
             MessageService.success(
                 client === null ? t('OAuth client created successfully') : t('OAuth client updated successfully'),
             )
             setShow(false)
+            if (client === null) {
+                setCreatedClientResponseJson(JSON.stringify(responseBody, null, 2))
+                setShowCreatedClientResponse(true)
+            }
         } else {
             MessageService.error(t('Failed to create OAuth client'))
         }
     }
 
+    async function handleCopy() {
+        if (createdClientResponseJson === null) return
+        try {
+            await navigator.clipboard.writeText(createdClientResponseJson)
+            setCopied(true)
+        } catch (e) {
+            MessageService.error(t('Failed to copy to clipboard'))
+            console.error(e)
+        }
+    }
+
     return (
-        <Modal
-            show={show}
-            onHide={handleClose}
-            backdrop='static'
-            centered
-            size='lg'
-        >
-            <Modal.Header closeButton>
-                <Modal.Title>{client === null ? t('Create new client') : t('Edit client')}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
-                    <Form.Group className='mb-3'>
-                        <Form.Label className='fw-bold'>
-                            {t('Description')}
-                            <span className='text-danger'>*</span>
-                        </Form.Label>
+        <>
+            <Modal
+                show={show}
+                onHide={handleClose}
+                backdrop='static'
+                centered
+                size='lg'
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>{client === null ? t('Create new client') : t('Edit client')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className='mb-3'>
+                            <Form.Label className='fw-bold'>
+                                {t('Description')}
+                                <span className='text-danger'>*</span>
+                            </Form.Label>
+                            <Form.Control
+                                type='text'
+                                placeholder='Enter Description'
+                                value={formState.description}
+                                onChange={(e) => updateField('description', e.target.value)}
+                                isInvalid={!!errors.description}
+                            />
+                            <Form.Control.Feedback type='invalid'>{errors.description}</Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                            <Form.Label className='fw-bold'>
+                                {t('Owner Email')}
+                                {client === null && <span className='text-danger'>*</span>}
+                            </Form.Label>
+                            <Row>
+                                <Col>
+                                    <Form.Control
+                                        type='text'
+                                        id='ownerEmail'
+                                        name='ownerEmail'
+                                        value={selectedOwnerDisplayName}
+                                        placeholder={t('Select Owner')}
+                                        isInvalid={!!errors.ownerEmail}
+                                        readOnly={true}
+                                        disabled={client !== null}
+                                        onClick={() => setShowOwnerDialog(true)}
+                                    />
+                                    <Form.Control.Feedback type='invalid'>{errors.ownerEmail}</Form.Control.Feedback>
+                                    <SelectUsersDialog
+                                        show={showOwnerDialog}
+                                        setShow={setShowOwnerDialog}
+                                        setSelectedUsers={setSelectedOwner}
+                                        selectedUsers={selectedOwner}
+                                        multiple={false}
+                                    />
+                                </Col>
+                            </Row>
+                        </Form.Group>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className='mb-3'>
+                                    <Form.Label className='fw-bold'>
+                                        {t('Authorities')}
+                                        <span className='text-danger'>*</span>
+                                    </Form.Label>
+                                    <Form.Control
+                                        type='text'
+                                        value={formState.authorities}
+                                        onChange={(e) => updateField('authorities', e.target.value)}
+                                        isInvalid={!!errors.authorities}
+                                    />
+                                    <Form.Control.Feedback type='invalid'>{errors.authorities}</Form.Control.Feedback>
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className='mb-3'>
+                                    <Form.Label className='fw-bold'>
+                                        {t('Scope')}
+                                        <span className='text-danger'>*</span>
+                                    </Form.Label>
+                                    <div>
+                                        <Form.Check
+                                            type='checkbox'
+                                            label='Read Access'
+                                            checked={formState.readAccess}
+                                            onChange={(e) => updateField('readAccess', e.target.checked)}
+                                            isInvalid={!!errors.scope}
+                                        />
+                                        <Form.Check
+                                            type='checkbox'
+                                            label='Write Access'
+                                            checked={formState.writeAccess}
+                                            onChange={(e) => updateField('writeAccess', e.target.checked)}
+                                            isInvalid={!!errors.scope}
+                                        />
+                                        {errors.scope && <div className='text-danger small'>{errors.scope}</div>}
+                                    </div>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className='mb-3'>
+                                    <Form.Label className='fw-bold'>
+                                        {t('Access Token Validity')}
+                                        <span className='text-danger'>*</span>
+                                    </Form.Label>
+                                    <Row>
+                                        <Col>
+                                            <Form.Control
+                                                type='number'
+                                                placeholder='Enter access token validity'
+                                                value={formState.accessTokenValidity}
+                                                onChange={(e) => updateField('accessTokenValidity', e.target.value)}
+                                                isInvalid={!!errors.accessTokenValidity}
+                                            />
+                                            <Form.Control.Feedback type='invalid'>
+                                                {errors.accessTokenValidity}
+                                            </Form.Control.Feedback>
+                                        </Col>
+                                        <Col>
+                                            <Form.Control
+                                                as='select'
+                                                value={formState.accessTokenUnit}
+                                                onChange={handleTokenUnitChange(TokenType.Access)}
+                                            >
+                                                <option>{TokenUnit.Days}</option>
+                                                <option>{TokenUnit.Seconds}</option>
+                                            </Form.Control>
+                                        </Col>
+                                    </Row>
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className='mb-3'>
+                                    <Form.Label className='fw-bold'>
+                                        {t('Refresh Token Validity')}
+                                        <span className='text-danger'>*</span>
+                                    </Form.Label>
+                                    <Row>
+                                        <Col>
+                                            <Form.Control
+                                                type='number'
+                                                placeholder='Enter refresh token validity'
+                                                value={formState.refreshTokenValidity}
+                                                onChange={(e) => updateField('refreshTokenValidity', e.target.value)}
+                                                isInvalid={!!errors.refreshTokenValidity}
+                                            />
+                                            <Form.Control.Feedback type='invalid'>
+                                                {errors.refreshTokenValidity}
+                                            </Form.Control.Feedback>
+                                        </Col>
+                                        <Col>
+                                            <Form.Control
+                                                as='select'
+                                                value={formState.refreshTokenUnit}
+                                                onChange={handleTokenUnitChange(TokenType.Refresh)}
+                                            >
+                                                <option>{TokenUnit.Days}</option>
+                                                <option>{TokenUnit.Seconds}</option>
+                                            </Form.Control>
+                                        </Col>
+                                    </Row>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant='secondary'
+                        onClick={handleClose}
+                    >
+                        {t('Cancel')}
+                    </Button>
+                    <Button
+                        variant='primary'
+                        onClick={() => void handleSubmit()}
+                    >
+                        {client === null ? t('Create') : t('Update')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal
+                show={showCreatedClientResponse}
+                onHide={() => setShowCreatedClientResponse(false)}
+                backdrop='static'
+                centered
+                size='lg'
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('Created OAuth client')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>
+                        {t.rich('COPY_CLIENT_SECRET', {
+                            strong: (chunks) => <strong>{chunks}</strong>,
+                        })}{' '}
+                        <span className='text-danger fw-bold'>*</span>
+                    </p>
+                    <div className='position-relative'>
                         <Form.Control
-                            type='text'
-                            placeholder='Enter Description'
-                            value={formState.description}
-                            onChange={(e) => updateField('description', e.target.value)}
-                            isInvalid={!!errors.description}
+                            as='textarea'
+                            readOnly
+                            rows={16}
+                            value={createdClientResponseJson ?? ''}
+                            className='oauth-client-response-json font-monospace bg-light pe-5'
                         />
-                        <Form.Control.Feedback type='invalid'>{errors.description}</Form.Control.Feedback>
-                    </Form.Group>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group className='mb-3'>
-                                <Form.Label className='fw-bold'>
-                                    {t('Authorities')}
-                                    <span className='text-danger'>*</span>
-                                </Form.Label>
-                                <Form.Control
-                                    type='text'
-                                    value={formState.authorities}
-                                    onChange={(e) => updateField('authorities', e.target.value)}
-                                    isInvalid={!!errors.authorities}
-                                />
-                                <Form.Control.Feedback type='invalid'>{errors.authorities}</Form.Control.Feedback>
-                            </Form.Group>
-                        </Col>
-                        <Col md={6}>
-                            <Form.Group className='mb-3'>
-                                <Form.Label className='fw-bold'>
-                                    {t('Scope')}
-                                    <span className='text-danger'>*</span>
-                                </Form.Label>
-                                <div>
-                                    <Form.Check
-                                        type='checkbox'
-                                        label='Read Access'
-                                        checked={formState.readAccess}
-                                        onChange={(e) => updateField('readAccess', e.target.checked)}
-                                        isInvalid={!!errors.scope}
-                                    />
-                                    <Form.Check
-                                        type='checkbox'
-                                        label='Write Access'
-                                        checked={formState.writeAccess}
-                                        onChange={(e) => updateField('writeAccess', e.target.checked)}
-                                        isInvalid={!!errors.scope}
-                                    />
-                                    {errors.scope && <div className='text-danger small'>{errors.scope}</div>}
-                                </div>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group className='mb-3'>
-                                <Form.Label className='fw-bold'>
-                                    {t('Access Token Validity')}
-                                    <span className='text-danger'>*</span>
-                                </Form.Label>
-                                <Row>
-                                    <Col>
-                                        <Form.Control
-                                            type='number'
-                                            placeholder='Enter access token validity'
-                                            value={formState.accessTokenValidity}
-                                            onChange={(e) => updateField('accessTokenValidity', e.target.value)}
-                                            isInvalid={!!errors.accessTokenValidity}
-                                        />
-                                        <Form.Control.Feedback type='invalid'>
-                                            {errors.accessTokenValidity}
-                                        </Form.Control.Feedback>
-                                    </Col>
-                                    <Col>
-                                        <Form.Control
-                                            as='select'
-                                            value={formState.accessTokenUnit}
-                                            onChange={handleTokenUnitChange(TokenType.Access)}
-                                        >
-                                            <option>{TokenUnit.Days}</option>
-                                            <option>{TokenUnit.Seconds}</option>
-                                        </Form.Control>
-                                    </Col>
-                                </Row>
-                            </Form.Group>
-                        </Col>
-                        <Col md={6}>
-                            <Form.Group className='mb-3'>
-                                <Form.Label className='fw-bold'>
-                                    {t('Refresh Token Validity')}
-                                    <span className='text-danger'>*</span>
-                                </Form.Label>
-                                <Row>
-                                    <Col>
-                                        <Form.Control
-                                            type='number'
-                                            placeholder='Enter refresh token validity'
-                                            value={formState.refreshTokenValidity}
-                                            onChange={(e) => updateField('refreshTokenValidity', e.target.value)}
-                                            isInvalid={!!errors.refreshTokenValidity}
-                                        />
-                                        <Form.Control.Feedback type='invalid'>
-                                            {errors.refreshTokenValidity}
-                                        </Form.Control.Feedback>
-                                    </Col>
-                                    <Col>
-                                        <Form.Control
-                                            as='select'
-                                            value={formState.refreshTokenUnit}
-                                            onChange={handleTokenUnitChange(TokenType.Refresh)}
-                                        >
-                                            <option>{TokenUnit.Days}</option>
-                                            <option>{TokenUnit.Seconds}</option>
-                                        </Form.Control>
-                                    </Col>
-                                </Row>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                </Form>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button
-                    variant='secondary'
-                    onClick={handleClose}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    variant='primary'
-                    onClick={handleSubmit}
-                >
-                    {client === null ? t('Create') : t('Update')}
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                        <OverlayTrigger
+                            trigger={[
+                                'hover',
+                                'focus',
+                            ]}
+                            placement='top'
+                            overlay={(props) => (
+                                <Tooltip {...props}>{copied ? t('Copied') : t('Copy to Clipboard')}</Tooltip>
+                            )}
+                            onToggle={(show) => {
+                                if (show) setCopied(false)
+                            }}
+                        >
+                            <Button
+                                variant='link'
+                                className='position-absolute top-0 end-0 m-2 p-1 text-body'
+                                onClick={() => void handleCopy()}
+                                aria-label={t('Copy to Clipboard')}
+                            >
+                                <BsClipboard size={20} />
+                            </Button>
+                        </OverlayTrigger>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant='secondary'
+                        onClick={() => setShowCreatedClientResponse(false)}
+                    >
+                        {t('Close')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     )
 }
 export default AddClientDialog
