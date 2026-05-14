@@ -12,6 +12,7 @@ interface OAuthClient {
     description: string
     client_id: string
     client_secret: string
+    owner_email?: string
     authorities: Array<string>
     scope: Array<string>
     access_token_validity: number

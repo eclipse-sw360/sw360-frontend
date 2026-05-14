@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { encode } from 'he'
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useMemo, useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
@@ -143,7 +144,7 @@ export default function OAuthClientTable({ clients, updateClient, deleteClient }
             ),
             details: `
                 <div class="details-row">
-                    <p>Client Secret: ${client.client_secret}</p>
+                    <p>Client Secret: ${encode(client.client_secret)}</p>
                     <p>Access Token Validity: ${formatTime(client.access_token_validity)} (${client.access_token_validity} seconds)</p>
                     <p>Refresh Token Validity: ${formatTime(client.refresh_token_validity)} (${client.refresh_token_validity} seconds)</p>
                 </div>
