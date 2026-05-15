@@ -137,11 +137,11 @@ issuers used by the selected frontend authentication provider:
 SW360_SECURITY_JWT_TRUSTED_ISSUERS=http://localhost:8080/authorization,http://localhost:8083/realms/sw360
 ```
 
-The SW360 Authorization Server issuer is required for `sw360oauth` tokens. Add
-the Keycloak realm issuer when `NEXT_PUBLIC_SW360_AUTH_PROVIDER=keycloak`, or
-when integrations call the REST API with Keycloak-issued Bearer tokens. Issuer
-values must exactly match the JWT `iss` claim and must be reachable from the
-`sw360` container for discovery/JWKS lookup.
+For `sw360oauth`, keep a stable JWT signing keystore across backend restarts and
+across backend replicas. The compose files wire this through the `JWT_KEYSTORE`
+secret and persist it under `/etc/sw360/jwt-keystore.jks` in the `etc` volume.
+For production replacement steps, see the backend guide:
+[SW360 Backend Docker documentation](https://github.com/eclipse-sw360/sw360/blob/main/README_DOCKER.md#configuration).
 
 Sensitive backend values are stored as Docker secrets in
 [config/sw360/default_secrets](config/sw360/default_secrets).
