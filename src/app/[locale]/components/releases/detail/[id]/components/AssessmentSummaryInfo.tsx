@@ -121,7 +121,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
                 )}
                 {cliAttachmentNumber > 1 && (
                     <tr>
-                        <td colSpan={2}>{t('Multiple CLI are found in release!')}</td>
+                        <td colSpan={2}>{t('Multiple CLI are found in release')}</td>
                     </tr>
                 )}
             </tbody>

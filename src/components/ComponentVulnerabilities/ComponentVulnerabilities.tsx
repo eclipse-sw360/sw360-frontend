@@ -161,7 +161,7 @@ const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
             },
             {
                 id: 'matchedBy',
-                header: t('Matched By'),
+                header: t('Matched by'),
                 cell: ({ row }) => (
                     <div className='text-center'>{row.original.releaseVulnerabilityRelation?.matchedBy ?? ''}</div>
                 ),

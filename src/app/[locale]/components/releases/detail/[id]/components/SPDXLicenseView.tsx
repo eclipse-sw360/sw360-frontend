@@ -194,7 +194,7 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
                     {!CommonUtils.isNullEmptyOrUndefinedString(selectedLicenseId) && (
                         <>
                             <div>
-                                {t('License Name')}: <b>{selectedLicenseId}</b>
+                                {t('License name')}: <b>{selectedLicenseId}</b>
                             </div>
                             <div>
                                 {t('Source File List')}:

@@ -40,7 +40,7 @@ const clearingMessages: {
         variant: 'success',
     },
     ERROR_PROCESSING: {
-        message: 'Error when processing!',
+        message: 'Error while processing',
         variant: 'danger',
     },
     SET_OUTDATED: {

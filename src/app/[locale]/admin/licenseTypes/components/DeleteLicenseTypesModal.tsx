@@ -95,7 +95,7 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                MessageService.error(t('Error when processing'))
+                MessageService.error(t('Error while processing'))
             }
         } catch (error) {
             ApiUtils.reportError(error)

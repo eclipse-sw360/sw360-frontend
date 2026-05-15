@@ -58,7 +58,7 @@ const ComponentsUsing = ({ componentsUsing, documentName, showProcessing }: Prop
             },
             {
                 id: 'mainLicenses',
-                header: t('Main licenses'),
+                header: t('Main Licenses'),
                 cell: ({ row }) => {
                     return (
                         <>

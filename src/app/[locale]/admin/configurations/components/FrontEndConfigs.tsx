@@ -306,7 +306,7 @@ const FrontEndConfigs = (): JSX.Element => {
                                     <td>{t('ui_release_externalkeys')}</td>
                                 </tr>
                                 <tr id='ui-operating-systems'>
-                                    <td className='align-middle fw-bold'>{t('Operating Systems')}</td>
+                                    <td className='align-middle fw-bold'>{t('Operating System')}</td>
                                     <td>
                                         <PillsInput
                                             tags={arrayKeyStates[UIConfigKeys.UI_OPERATING_SYSTEMS]}
