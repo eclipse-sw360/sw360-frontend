@@ -263,7 +263,7 @@ export default function EditLinkedPackages({ releasePayload, setReleasePayload }
                                         className='btn btn-secondary'
                                         onClick={openLinkPackagesModal}
                                     >
-                                        {t('Add Packages')}
+                                        {t('Add Package')}
                                     </button>
                                 </div>
                             </div>

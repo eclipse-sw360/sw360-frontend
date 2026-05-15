@@ -187,7 +187,7 @@ function Project(): JSX.Element {
                                   <OverlayTrigger
                                       overlay={
                                           <Tooltip>
-                                              {allExpandableExpanded ? t('Collapse All') : t('Expand All')}
+                                              {allExpandableExpanded ? t('Collapse all') : t('Expand all')}
                                           </Tooltip>
                                       }
                                   >
@@ -215,7 +215,7 @@ function Project(): JSX.Element {
                                               cursor: 'pointer',
                                               padding: 0,
                                           }}
-                                          aria-label={allExpandableExpanded ? t('Collapse All') : t('Expand All')}
+                                          aria-label={allExpandableExpanded ? t('Collapse all') : t('Expand all')}
                                       >
                                           {allExpandableExpanded ? (
                                               <BsCaretDownFill size={16} />

@@ -652,7 +652,7 @@ export default function GeneralSection({
                         })}
                     </div>
                     <div className='border border-top-0 border-blue p-2'>
-                        <div className='fw-bold text-blue'>{t('Operating Systems')}</div>
+                        <div className='fw-bold text-blue'>{t('Operating System')}</div>
                         {operatingSystemMergeList.map((c) => {
                             if (c.presentInSource && c.presentInTarget) {
                                 return (

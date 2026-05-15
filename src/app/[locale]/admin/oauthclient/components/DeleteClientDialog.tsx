@@ -61,10 +61,10 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                MessageService.error(t('Error when processing'))
+                MessageService.error(t('Error while processing'))
             }
         } catch {
-            MessageService.error(t('Error when processing'))
+            MessageService.error(t('Error while processing'))
         }
     }
 

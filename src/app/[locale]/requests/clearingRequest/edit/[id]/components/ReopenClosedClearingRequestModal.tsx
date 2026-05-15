@@ -48,7 +48,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow }: Prop
     ])
 
     const handleError = useCallback(() => {
-        displayMessage('danger', t('Error when processing'))
+        displayMessage('danger', t('Error while processing'))
         setReloadPage(true)
     }, [
         t,
