@@ -53,7 +53,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
 
     const handleError = useCallback(
         async (response?: Response) => {
-            let errorMessage = t('Error when processing')
+            let errorMessage = t('Error while processing')
             if (response) {
                 try {
                     const data = (await response.json()) as {
@@ -61,7 +61,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
                     }
                     if (data.message) errorMessage = data.message
                 } catch {
-                    errorMessage = t('Error when processing')
+                    errorMessage = t('Error while processing')
                 }
             }
             displayMessage('danger', errorMessage)

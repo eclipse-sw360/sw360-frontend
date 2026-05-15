@@ -435,7 +435,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                             }}
                         >
                             <span className='fw-bold'>
-                                {t('Linked Releases And Projects')}
+                                {t('Linked Releases and Projects')}
                                 {' ('}
                                 <button
                                     type='button'
@@ -622,7 +622,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     },
                     {
                         id: 'uploadedBy',
-                        header: t('Uploaded By'),
+                        header: t('Uploaded by'),
                         cell: ({ row }) => {
                             if (row.original.node.type === 'attachment') {
                                 return <div className='text-center'>{row.original.node.entity.createdBy}</div>
