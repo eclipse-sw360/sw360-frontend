@@ -33,11 +33,13 @@ import {
     BsCheck2Square,
     BsClipboard,
     BsFillTrashFill,
+    BsPaperclip,
     BsPencil,
 } from 'react-icons/bs'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import {
+    Attachment,
     ConfigKeys,
     Embedded,
     ErrorDetails,
@@ -438,10 +440,96 @@ function Project(): JSX.Element {
                         clearingRequestDisabledGroups,
                         row.original.visibility,
                     )
+                    const attachments: Attachment[] = row.original._embedded?.['sw360:attachments'] ?? []
+
+                    const handleSingleAttachmentDownload = async () => {
+                        if (attachments.length !== 1) return
+                        if (CommonUtils.isNullOrUndefined(session.data)) return
+                        const att = attachments[0]
+                        await DownloadService.download(
+                            `projects/${id}/attachments/${att.attachmentContentId}`,
+                            session.data,
+                            att.filename,
+                        )
+                    }
+
                     return (
                         <>
                             {id && (
                                 <span className='d-flex align-items-center justify-content-center'>
+                                    <span
+                                        className='d-inline-flex align-items-center justify-content-center'
+                                        style={{
+                                            width: 28,
+                                            height: 28,
+                                        }}
+                                    >
+                                        {attachments.length === 1 && (
+                                            <OverlayTrigger
+                                                placement='left'
+                                                overlay={
+                                                    <Tooltip>
+                                                        <div className='text-start'>
+                                                            {attachments[0].filename}
+                                                            <br />
+                                                            {t('by')} {attachments[0].createdBy ?? ''}
+                                                        </div>
+                                                    </Tooltip>
+                                                }
+                                            >
+                                                <span
+                                                    className='d-inline-flex align-items-center justify-content-center'
+                                                    style={{
+                                                        width: 28,
+                                                        height: 28,
+                                                        cursor: 'pointer',
+                                                    }}
+                                                    onClick={() => void handleSingleAttachmentDownload()}
+                                                >
+                                                    <BsPaperclip
+                                                        className='btn-icon'
+                                                        size={20}
+                                                    />
+                                                </span>
+                                            </OverlayTrigger>
+                                        )}
+                                        {attachments.length > 1 && (
+                                            <OverlayTrigger
+                                                placement='left'
+                                                overlay={
+                                                    <Tooltip>
+                                                        <div className='text-start'>
+                                                            <strong>{`${attachments.length} ${t('Attachments')}`}</strong>
+                                                            {attachments.map((att) => (
+                                                                <div key={att.attachmentContentId}>
+                                                                    {att.filename} ({t('by')} {att.createdBy ?? ''})
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </Tooltip>
+                                                }
+                                            >
+                                                <Link
+                                                    href={`/projects/detail/${id}?tab=attachments`}
+                                                    className='d-inline-flex align-items-center justify-content-center position-relative'
+                                                    style={{
+                                                        width: 28,
+                                                        height: 28,
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    <BsPaperclip
+                                                        className='btn-icon'
+                                                        size={20}
+                                                    />
+                                                    <span className='position-absolute badge rounded-pill bg-primary attachment-badge'>
+                                                        {attachments.length}
+                                                    </span>
+                                                </Link>
+                                            </OverlayTrigger>
+                                        )}
+                                    </span>
+                                    <span className='border-start align-self-stretch mx-1 my-1' />
                                     <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                         <span
                                             className='d-inline-flex align-items-center justify-content-center'
@@ -678,6 +766,7 @@ function Project(): JSX.Element {
                         Object.entries({
                             ...searchParams,
                             ...pageableQueryParam,
+                            allDetails: 'true',
                         }).map(([key, value]) => [
                             key,
                             String(value),
@@ -1003,6 +1092,11 @@ function Project(): JSX.Element {
             fieldName: t('Additional Data'),
             value: '',
             paramName: 'additionalData',
+        },
+        {
+            fieldName: t('Attachment Author'),
+            value: '',
+            paramName: 'attachmentAuthor',
         },
     ]
 

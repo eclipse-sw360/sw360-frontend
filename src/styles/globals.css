@@ -1710,6 +1710,21 @@ input[checked] + .slider:before {
     margin-right: 5px;
 }
 
+.attachment-badge {
+    font-size: 0.5rem;
+    padding: 1px 3px;
+    line-height: 1;
+    min-width: 12px;
+    min-height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: -2px !important;
+    right: -6px !important;
+    left: auto !important;
+    transform: none !important;
+}
+
 .SCAN_AVAILABLE,
 .REPORT_AVAILABLE,
 .UNDER_CLEARING {
