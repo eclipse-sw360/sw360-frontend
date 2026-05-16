@@ -22,7 +22,6 @@ const csp = `
   connect-src 'self' https://www.gravatar.com${isDev ? ' http://localhost:*' : ''};
   object-src 'none';
   frame-ancestors 'self';
-  ${isDev ? '' : "require-trusted-types-for 'script'"};
 `
     .replace(/\s{2,}/g, ' ')
     .trim()
