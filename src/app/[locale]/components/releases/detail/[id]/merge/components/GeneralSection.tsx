@@ -1382,12 +1382,12 @@ export default function GeneralSection({
                                            sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName
                                                ? ` (${sourceReleaseDetail._embedded['sw360:vendors']?.[0].shortName})`
                                                : ''
-                                       }
+}
                                        ${
                                            sourceReleaseDetail._embedded['sw360:vendors']?.[0].url
                                                ? `: ${sourceReleaseDetail._embedded['sw360:vendors']?.[0].url}`
                                                : ''
-                                       }`
+}`
                                     : ''}
                             </div>
                         </div>
