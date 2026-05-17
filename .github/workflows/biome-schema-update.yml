@@ -1,0 +1,88 @@
+# Copyright (c) 2026 Gaurav Mishra <mishra.gaurav@siemens.com>. Part of the SW360 Frtonend Project.
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+# License-Filename: LICENSE
+
+name: Biome Auto-Migrate
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  migrate:
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: pnpm-setup
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          # See here for caching with `yarn`, `bun` or other package managers https://github.com/actions/cache/blob/main/examples.md or you can leverage caching with actions/setup-node https://github.com/actions/setup-node
+          path: |
+            ${{ github.workspace }}/.next/cache
+          # Generate a new cache whenever packages or source files change.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: 📦 Install dependencies
+        shell: bash
+        run: |
+          pnpm i
+
+      - name: Check if Biome was updated
+        id: check_biome
+        run: |
+          if git diff HEAD~1 package.json | grep -q '@biomejs/biome'; then
+            echo "biome_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "biome_updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Biome migrate
+        if: steps.check_biome.outputs.biome_updated == 'true'
+        run: pnpm biome migrate --write
+
+      - name: Commit migration changes
+        if: steps.check_biome.outputs.biome_updated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --exit-code; then
+            echo "No changes from biome migrate"
+          else
+            git add biome.json
+            git commit -m "chore: update biome schema to match CLI version"
+            git push
+          fi
+
