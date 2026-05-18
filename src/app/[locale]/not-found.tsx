@@ -1,0 +1,64 @@
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
+
+// This program and the accompanying materials are made
+// available under the terms of the Eclipse Public License 2.0
+// which is available at https://www.eclipse.org/legal/epl-2.0/
+
+// SPDX-License-Identifier: EPL-2.0
+// License-Filename: LICENSE
+
+'use client'
+
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { type JSX } from 'react'
+import sw360logo from '@/assets/images/sw360-logo.svg'
+
+function LocaleNotFound(): JSX.Element {
+    const t = useTranslations('default')
+    const router = useRouter()
+
+    const goBack = (): void => {
+        if (window.history.length > 1) {
+            router.back()
+            return
+        }
+
+        router.push('/')
+    }
+
+    return (
+        <div className='d-flex align-items-center justify-content-center w-100'>
+            <div className='text-center p-4 col col-md-6'>
+                <Image
+                    src={sw360logo}
+                    height={80}
+                    width={247}
+                    alt='SW360 Logo'
+                    className='my-4'
+                />
+                <h1 className='mb-0 fw-bold'>{t('Page Not Found')}</h1>
+                <p className='lead my-3 text-secondary'>{t('Page Not Found Description')}</p>
+                <div className='d-flex justify-content-center gap-3'>
+                    <button
+                        type='button'
+                        onClick={goBack}
+                        className='px-4 py-2 btn btn-outline-secondary'
+                    >
+                        {t('Go Back')}
+                    </button>
+                    <button
+                        type='button'
+                        className='btn btn-outline-secondary px-4 py-2'
+                        onClick={() => router.push('/')}
+                    >
+                        {t('Return Home')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default LocaleNotFound
