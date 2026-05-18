@@ -134,14 +134,18 @@ For the full stack, keep the backend trusted issuer list aligned with the token
 issuers used by the selected frontend authentication provider:
 
 ```env
-SW360_SECURITY_JWT_TRUSTED_ISSUERS=http://localhost:8080/authorization,http://localhost:8083/realms/sw360
+SW360_SECURITY_JWT_ISSUERS_0_ISSUER_URI=http://localhost:8080/authorization
+SW360_SECURITY_JWT_ISSUERS_1_ISSUER_URI=http://localhost:8083/realms/sw360
+# optional direct JWKS endpoint override:
+# SW360_SECURITY_JWT_ISSUERS_1_JWK_SET_URI=http://localhost:8083/realms/sw360/protocol/openid-connect/certs
 ```
 
-For `sw360oauth`, keep a stable JWT signing keystore across backend restarts and
-across backend replicas. The compose files wire this through the `JWT_KEYSTORE`
-secret and persist it under `/etc/sw360/jwt-keystore.jks` in the `etc` volume.
-For production replacement steps, see the backend guide:
-[SW360 Backend Docker documentation](https://github.com/eclipse-sw360/sw360/blob/main/README_DOCKER.md#configuration).
+The SW360 Authorization Server issuer is required for `sw360oauth` tokens. Add
+the Keycloak realm issuer when `NEXT_PUBLIC_SW360_AUTH_PROVIDER=keycloak`, or
+when integrations call the REST API with Keycloak-issued Bearer tokens. Issuer
+values must exactly match the JWT `iss` claim and must be reachable from the
+`sw360` container for discovery/JWKS lookup. The same trusted issuer list is
+used by both `/resource` and `/authorization` Bearer JWT validation paths.
 
 Sensitive backend values are stored as Docker secrets in
 [config/sw360/default_secrets](config/sw360/default_secrets).
