@@ -389,7 +389,7 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.licenseIds'
                                 className='form-label fw-medium'
                             >
-                                {t('Main licenses')}
+                                {t('Main Licenses')}
                             </label>
                             <input
                                 type='text'

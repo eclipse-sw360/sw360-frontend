@@ -52,7 +52,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
     }
 
     const handleError = useCallback(() => {
-        displayMessage('danger', t('Error when processing'))
+        displayMessage('danger', t('Error while processing'))
         setReloadPage(true)
     }, [])
 
@@ -74,7 +74,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
                 const errorResponse = await response.json()
                 displayMessage('danger', errorResponse.message)
             } else {
-                displayMessage('danger', t('Error when processing'))
+                displayMessage('danger', t('Error while processing'))
             }
         } catch {
             handleError()

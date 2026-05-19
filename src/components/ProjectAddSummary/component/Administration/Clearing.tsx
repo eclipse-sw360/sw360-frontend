@@ -174,12 +174,12 @@ export default function Clearing({ projectPayload, setProjectPayload }: Props): 
                         htmlFor='addProjects.generalRiskThirdPartySoftware'
                         className='form-label fw-bold'
                     >
-                        {t('General risk 3rd party software')}
+                        {t('General risks 3rd party software')}
                     </label>
                     <textarea
                         className='form-control'
                         id='addProjects.generalRiskThirdPartySoftware'
-                        aria-label='General risk 3rd party software'
+                        aria-label={t('General risks 3rd party software')}
                         style={{
                             height: '120px',
                         }}

@@ -187,18 +187,18 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 })
             }
             setTableData((prev) => {
-                return prev.map((t) => {
-                    if (t.id === att.id) {
+                return prev.map((data) => {
+                    if (data.id === att.id) {
                         return {
-                            ...t,
+                            ...data,
                             status: {
                                 variant: 'success',
-                                message: 'Success! Please reload page to see the changes!',
+                                message: t('Success Please reload the page to see the changes'),
                             },
                         }
                     }
                     return {
-                        ...t,
+                        ...data,
                     }
                 })
             })

@@ -95,7 +95,7 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX
         >
             <Modal.Header closeButton>
                 <Modal.Title>
-                    <b>{t('Change Vulnerability Rating And Action?')}</b>
+                    <b>{`${t('Change Vulnerability Rating And Action')}?`}</b>
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

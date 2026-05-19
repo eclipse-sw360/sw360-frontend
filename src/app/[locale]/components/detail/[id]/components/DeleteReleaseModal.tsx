@@ -64,7 +64,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     }
 
     const handleError = useCallback(() => {
-        displayMessage('danger', 'Error when processing!')
+        displayMessage('danger', t('Error while processing'))
         setReloadPage(true)
     }, [])
 
@@ -91,7 +91,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                 } else if (deleteStatus === StatusCodes.ACCEPTED) {
                     displayMessage('success', 'Created moderation request!')
                 } else {
-                    displayMessage('danger', 'Error when processing!')
+                    displayMessage('danger', t('Error while processing'))
                 }
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 handleError()

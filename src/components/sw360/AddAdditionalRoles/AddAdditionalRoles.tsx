@@ -160,7 +160,7 @@ function AddAdditionalRoles({
                                     key=''
                                     name='key'
                                     value={elem.key}
-                                    aria-label={t('Additional Role')}
+                                    aria-label={t('Additional Roles')}
                                     onChange={(e) => handleInputChange(e, j)}
                                 >
                                     {documentType === DocumentTypes.COMPONENT

@@ -566,7 +566,7 @@ function EditProject({
                 MessageService.info(t('You are allowed to perform write with MR'))
                 return 'ACCEPTED'
             default:
-                MessageService.error(t('Error when processing'))
+                MessageService.error(t('Error while processing'))
                 return 'DENIED'
         }
     }

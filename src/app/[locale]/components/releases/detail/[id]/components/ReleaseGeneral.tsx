@@ -68,14 +68,14 @@ const FileListView = ({
                         {!CommonUtils.isNullEmptyOrUndefinedString(licId) && (
                             <>
                                 <div>
-                                    {t('File Name')}: <b>{fileList?.attName ?? ''}</b>
+                                    {t('File name')}: <b>{fileList?.attName ?? ''}</b>
                                 </div>
                                 <div>
                                     {t('License Type')}:{' '}
                                     <b>{fileList?.data?.filter((l) => l.licName === licId)?.[0]?.licType ?? ''}</b>
                                 </div>
                                 <div>
-                                    {t('License Name')}: <b>{licId}</b>
+                                    {t('License name')}: <b>{licId}</b>
                                 </div>
                                 <ul>
                                     {CommonUtils.isNullEmptyOrUndefinedArray(
@@ -423,7 +423,7 @@ const ReleaseGeneral = ({ release, releaseId, fileList }: Props): ReactNode => {
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('Operating Systems')}:</td>
+                        <td>{t('Operating System')}:</td>
                         <td>
                             {!CommonUtils.isNullEmptyOrUndefinedArray(release.operatingSystems) &&
                                 renderArrayOfTexts(release.operatingSystems)}

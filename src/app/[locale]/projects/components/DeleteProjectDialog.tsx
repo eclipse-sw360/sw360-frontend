@@ -66,7 +66,7 @@ function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = fa
     }
 
     const handleError = useCallback(() => {
-        displayMessage('danger', t('Error when processing'))
+        displayMessage('danger', t('Error while processing'))
         setReloadPage(true)
     }, [
         t,
@@ -93,7 +93,7 @@ function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = fa
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                displayMessage('danger', t('Error when processing'))
+                displayMessage('danger', t('Error while processing'))
             }
         } catch {
             handleError()

@@ -68,7 +68,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
     }
 
     const handleError = useCallback(() => {
-        displayMessage('danger', <>{t('Error when processing')}</>)
+        displayMessage('danger', <>{t('Error while processing')}</>)
         setReloadPage(true)
     }, [
         t,
@@ -112,7 +112,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
                 await signOut()
             } else {
-                displayMessage('danger', <>{t('Error when processing')}</>)
+                displayMessage('danger', <>{t('Error while processing')}</>)
             }
         } catch {
             handleError()

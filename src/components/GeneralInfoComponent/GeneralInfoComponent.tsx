@@ -237,7 +237,7 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 htmlFor='tag'
                                 className='form-label fw-bold'
                             >
-                                {t('Homepage Url')}
+                                {t('Homepage URL')}
                             </label>
                             <input
                                 type='URL'

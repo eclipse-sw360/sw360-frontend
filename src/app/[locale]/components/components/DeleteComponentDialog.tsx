@@ -75,7 +75,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
             if (error && error instanceof ApiError && error.isAborted) {
                 return
             }
-            displayMessage('danger', t('Error when processing'))
+            displayMessage('danger', t('Error while processing'))
             setReloadPage(true)
         },
         [
@@ -116,7 +116,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 } else if (deleteStatus === StatusCodes.ACCEPTED) {
                     displayMessage('success', t('Created moderation request'))
                 } else {
-                    displayMessage('danger', t('Error when processing'))
+                    displayMessage('danger', t('Error while processing'))
                 }
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 await signOut()

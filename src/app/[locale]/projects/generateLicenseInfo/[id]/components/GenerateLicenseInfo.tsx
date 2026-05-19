@@ -669,7 +669,7 @@ function GenerateLicenseInfo({
             },
             {
                 id: 'uploadedBy',
-                header: t('Uploaded By'),
+                header: t('Uploaded by'),
                 cell: ({ row }) => {
                     if (row.original.node.type === 'attachment') {
                         return (

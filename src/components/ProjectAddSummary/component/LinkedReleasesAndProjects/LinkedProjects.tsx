@@ -270,7 +270,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                             className='btn btn-secondary'
                             onClick={() => setShowLinkedProjectsModal(true)}
                         >
-                            {t('Add Projects')}
+                            {t('Add Project')}
                         </button>
                     </div>
                 </div>
