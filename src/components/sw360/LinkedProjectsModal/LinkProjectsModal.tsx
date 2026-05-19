@@ -196,7 +196,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: 'name,asc',
+        sort: 'score,asc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -542,6 +542,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                         setPageableQueryParam((prev) => ({
                                             ...prev,
                                             page: 0,
+                                            sort: 'score,asc',
                                         }))
                                         handleSearch()
                                     }}
