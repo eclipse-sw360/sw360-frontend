@@ -1,4 +1,7 @@
 packages:
   # include packages in subfolders (change as required)
   - 'src/**'
-  
+
+ignoredBuiltDependencies:
+  - cypress
+  - sharp
