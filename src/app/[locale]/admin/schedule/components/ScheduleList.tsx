@@ -1,5 +1,5 @@
 // Copyright (C) Siemens Healthineers, 2025. Part of the SW360 Frontend Project.
-// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025,2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -11,19 +11,17 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { JSX, useCallback, useEffect, useState } from 'react'
-import { useConfigValue } from '@/contexts'
-import { ErrorDetails, ServiceDetailsResponse, UIConfigKeys } from '@/object-types'
+import { ErrorDetails, ServiceDetailsResponse } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import { ScheduleItem } from './ScheduleItem'
 
 export default function VendorsList(): JSX.Element {
     const t = useTranslations('default')
-    const { status } = useSession()
-    const svmConfigValue = useConfigValue(UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING)
+    const session = useSession()
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsResponse>({})
     const [refreshTrigger, setRefreshTrigger] = useState(0)
 
@@ -32,24 +30,23 @@ export default function VendorsList(): JSX.Element {
     }, [])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
+        if (session.status === 'unauthenticated') {
             signOut()
         }
     }, [
-        status,
+        session,
     ])
 
     useEffect(() => {
         const controller = new AbortController()
 
         const fetchServiceDetails = async () => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
             try {
                 const response = await ApiUtils.GET(
                     'schedule/serviceDetails',
-                    session.user.access_token,
+                    session.data.user.access_token,
                     controller.signal,
                 )
                 if (response.status === StatusCodes.OK) {
@@ -61,22 +58,19 @@ export default function VendorsList(): JSX.Element {
             }
         }
 
-        if (status === 'authenticated') {
-            void fetchServiceDetails()
-        }
+        void fetchServiceDetails()
 
         return () => controller.abort()
     }, [
-        status,
+        session,
         refreshTrigger,
     ])
 
     const handleCancelAllTasks = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
-            const response = await ApiUtils.POST('schedule/unscheduleAllServices', {}, session.user.access_token)
+            const response = await ApiUtils.POST('schedule/unscheduleAllServices', {}, session.data.user.access_token)
             if (response.status === StatusCodes.OK) {
                 setServiceDetails((prev) =>
                     Object.fromEntries(
@@ -109,21 +103,20 @@ export default function VendorsList(): JSX.Element {
         successMessage: string,
     ): Promise<void> => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
             let response
 
             if (action === 'unschedule') {
                 response = await ApiUtils.DELETE(
                     `schedule/unscheduleService?serviceName=${encodeURIComponent(serviceName)}`,
-                    session.user.access_token,
+                    session.data.user.access_token,
                 )
             } else {
                 response = await ApiUtils.POST(
                     `schedule/scheduleService?serviceName=${encodeURIComponent(serviceName)}`,
                     {},
-                    session.user.access_token,
+                    session.data.user.access_token,
                 )
             }
 
@@ -145,13 +138,12 @@ export default function VendorsList(): JSX.Element {
 
     const handleTriggerService = async (serviceName: string): Promise<void> => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
             const response = await ApiUtils.POST(
                 `schedule/triggerService?serviceName=${encodeURIComponent(serviceName)}`,
                 {},
-                session.user.access_token,
+                session.data.user.access_token,
             )
 
             if (response.status === StatusCodes.OK) {
@@ -170,8 +162,6 @@ export default function VendorsList(): JSX.Element {
         }
     }
 
-    const isSvmEnabled = svmConfigValue === null ? true : (svmConfigValue as boolean)
-
     return (
         <>
             <div className='container page-content'>
@@ -181,10 +171,7 @@ export default function VendorsList(): JSX.Element {
                             <button
                                 className='btn btn-danger col-auto'
                                 onClick={handleCancelAllTasks}
-                                disabled={
-                                    status !== 'authenticated' ||
-                                    !Object.values(serviceDetails).some((s) => s.isScheduled)
-                                }
+                                disabled={!Object.values(serviceDetails).some((s) => s.isScheduled)}
                             >
                                 {t('Cancel all Scheduled Tasks')}
                             </button>
@@ -201,7 +188,6 @@ export default function VendorsList(): JSX.Element {
                             serviceName='cvesearchService'
                             scheduleLabel={t('Schedule CVE Service')}
                             cancelLabel={t('Cancel CVE Service')}
-                            status={status}
                             handleScheduleService={handleScheduleService}
                             serviceDetail={serviceDetails['cvesearchService']}
                         />
@@ -212,62 +198,49 @@ export default function VendorsList(): JSX.Element {
                             serviceName='srcAttachmentUploadService'
                             scheduleLabel={t('Schedule SRC Upload Service')}
                             cancelLabel={t('Cancel Scheduled SRC Upload Service')}
-                            status={status}
                             handleScheduleService={handleScheduleService}
                             serviceDetail={serviceDetails['srcAttachmentUploadService']}
                         />
 
-                        {isSvmEnabled && (
-                            <>
-                                {/* SVM Vulnerabilities Sync Service */}
-                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Vulnerabilities Sync')}</h5>
-                                <ScheduleItem
-                                    serviceName='svmsyncService'
-                                    scheduleLabel={t('Schedule SVM Sync')}
-                                    cancelLabel={t('Cancel Scheduled SVM Sync')}
-                                    status={status}
-                                    handleScheduleService={handleScheduleService}
-                                    serviceDetail={serviceDetails['svmsyncService']}
-                                />
+                        {/* SVM Vulnerabilities Sync Service */}
+                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Vulnerabilities Sync')}</h5>
+                        <ScheduleItem
+                            serviceName='svmsyncService'
+                            scheduleLabel={t('Schedule SVM Sync')}
+                            cancelLabel={t('Cancel Scheduled SVM Sync')}
+                            handleScheduleService={handleScheduleService}
+                            serviceDetail={serviceDetails['svmsyncService']}
+                        />
 
-                                {/* SVM Vulnerabilities Reverse Match Service */}
-                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>
-                                    {t('SVM Vulnerabilities Reverse Match')}
-                                </h5>
-                                <ScheduleItem
-                                    serviceName='svmmatchService'
-                                    scheduleLabel={t('Schedule SVM Reverse Match')}
-                                    cancelLabel={t('Cancel Scheduled SVM Reverse Match')}
-                                    status={status}
-                                    handleScheduleService={handleScheduleService}
-                                    serviceDetail={serviceDetails['svmmatchService']}
-                                />
+                        {/* SVM Vulnerabilities Reverse Match Service */}
+                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Vulnerabilities Reverse Match')}</h5>
+                        <ScheduleItem
+                            serviceName='svmmatchService'
+                            scheduleLabel={t('Schedule SVM Reverse Match')}
+                            cancelLabel={t('Cancel Scheduled SVM Reverse Match')}
+                            handleScheduleService={handleScheduleService}
+                            serviceDetail={serviceDetails['svmmatchService']}
+                        />
 
-                                {/* SVM Monitoring List Update */}
-                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Monitoring List Update')}</h5>
-                                <ScheduleItem
-                                    serviceName='svmListUpdateService'
-                                    scheduleLabel={t('Schedule SVM Monitoring List Update')}
-                                    cancelLabel={t('Cancel Scheduled SVM Monitoring List Update')}
-                                    status={status}
-                                    handleScheduleService={handleScheduleService}
-                                    serviceDetail={serviceDetails['svmListUpdateService']}
-                                />
+                        {/* SVM Monitoring List Update */}
+                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Monitoring List Update')}</h5>
+                        <ScheduleItem
+                            serviceName='svmListUpdateService'
+                            scheduleLabel={t('Schedule SVM Monitoring List Update')}
+                            cancelLabel={t('Cancel Scheduled SVM Monitoring List Update')}
+                            handleScheduleService={handleScheduleService}
+                            serviceDetail={serviceDetails['svmListUpdateService']}
+                        />
 
-                                {/* SVM Release Tracking Feedback Service */}
-                                <h5 className='mt-3 mb-1 ms-1 header-underlined'>
-                                    {t('SVM Release Tracking Feedback')}
-                                </h5>
-                                <ScheduleItem
-                                    serviceName='svmTrackingFeedbackService'
-                                    scheduleLabel={t('Schedule SVM Release Tracking Feedback')}
-                                    cancelLabel={t('Cancel Scheduled Schedule SVM Release Tracking Feedback')}
-                                    status={status}
-                                    handleScheduleService={handleScheduleService}
-                                    serviceDetail={serviceDetails['svmTrackingFeedbackService']}
-                                />
-                            </>
-                        )}
+                        {/* SVM Release Tracking Feedback Service */}
+                        <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('SVM Release Tracking Feedback')}</h5>
+                        <ScheduleItem
+                            serviceName='svmTrackingFeedbackService'
+                            scheduleLabel={t('Schedule SVM Release Tracking Feedback')}
+                            cancelLabel={t('Cancel Scheduled Schedule SVM Release Tracking Feedback')}
+                            handleScheduleService={handleScheduleService}
+                            serviceDetail={serviceDetails['svmTrackingFeedbackService']}
+                        />
 
                         {/* Attachment Deletion From Local FS Service */}
                         <h5 className='mt-3 mb-1 ms-1 header-underlined'>{t('Attachment Deletion From Local FS')}</h5>
@@ -275,7 +248,6 @@ export default function VendorsList(): JSX.Element {
                             serviceName='deleteattachmentService'
                             scheduleLabel={t('Schedule Attachment Deletion From Local FS')}
                             cancelLabel={t('Cancel Scheduled Attachment Deletion From Localm FS')}
-                            status={status}
                             handleScheduleService={handleScheduleService}
                             serviceDetail={serviceDetails['deleteattachmentService']}
                         />
@@ -286,56 +258,45 @@ export default function VendorsList(): JSX.Element {
                             {t('Manual triggering of scheduled services')}
                         </h5>
                         <div className='my-3 ms-1 d-flex flex-wrap gap-2'>
-                            {isSvmEnabled && (
-                                <>
-                                    <button
-                                        className='btn btn-primary me-2 mb-2 px-5'
-                                        onClick={() => handleTriggerService('svmsyncService')}
-                                        disabled={status !== 'authenticated'}
-                                    >
-                                        {t('SVM Vulnerabilities Sync')}
-                                    </button>
-                                    <button
-                                        className='btn btn-primary me-2 mb-2 px-5'
-                                        onClick={() => handleTriggerService('svmmatchService')}
-                                        disabled={status !== 'authenticated'}
-                                    >
-                                        {t('SVM Vulnerabilities Reverse Match')}
-                                    </button>
-                                    <button
-                                        className='btn btn-primary me-2 mb-2 px-5'
-                                        onClick={() => handleTriggerService('svmListUpdateService')}
-                                        disabled={status !== 'authenticated'}
-                                    >
-                                        {t('SVM Monitoring List Update')}
-                                    </button>
-                                    <button
-                                        className='btn btn-primary me-2 mb-2 px-5'
-                                        onClick={() => handleTriggerService('svmTrackingFeedbackService')}
-                                        disabled={status !== 'authenticated'}
-                                    >
-                                        {t('SVM Release Tracking Feedback')}
-                                    </button>
-                                </>
-                            )}
+                            <button
+                                className='btn btn-primary me-2 mb-2 px-5'
+                                onClick={() => handleTriggerService('svmsyncService')}
+                            >
+                                {t('SVM Vulnerabilities Sync')}
+                            </button>
+                            <button
+                                className='btn btn-primary me-2 mb-2 px-5'
+                                onClick={() => handleTriggerService('svmmatchService')}
+                            >
+                                {t('SVM Vulnerabilities Reverse Match')}
+                            </button>
+                            <button
+                                className='btn btn-primary me-2 mb-2 px-5'
+                                onClick={() => handleTriggerService('svmListUpdateService')}
+                            >
+                                {t('SVM Monitoring List Update')}
+                            </button>
+                            <button
+                                className='btn btn-primary me-2 mb-2 px-5'
+                                onClick={() => handleTriggerService('svmTrackingFeedbackService')}
+                            >
+                                {t('SVM Release Tracking Feedback')}
+                            </button>
                             <button
                                 className='btn btn-primary me-2 mb-2 px-5'
                                 onClick={() => handleTriggerService('deleteattachmentService')}
-                                disabled={status !== 'authenticated'}
                             >
                                 {t('Attachment Deletion From Local FS')}
                             </button>
                             <button
                                 className='btn btn-primary me-2 mb-2 px-5'
                                 onClick={() => handleTriggerService('cvesearchService')}
-                                disabled={status !== 'authenticated'}
                             >
                                 {t('CVE Search')}
                             </button>
                             <button
                                 className='btn btn-primary me-2 mb-2 px-5'
                                 onClick={() => handleTriggerService('srcAttachmentUploadService')}
-                                disabled={status !== 'authenticated'}
                             >
                                 {t('SRC Upload')}
                             </button>

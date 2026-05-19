@@ -25,14 +25,12 @@ export const ScheduleItem = ({
     serviceName,
     scheduleLabel,
     cancelLabel,
-    status,
     handleScheduleService,
     serviceDetail,
 }: {
     serviceName: string
     scheduleLabel: string
     cancelLabel: string
-    status: string
     handleScheduleService: (serviceName: string, action: 'schedule' | 'unschedule', message: string) => void
     serviceDetail?: ServiceDetail
 }): JSX.Element => {
@@ -67,14 +65,14 @@ export const ScheduleItem = ({
                 <button
                     className='btn btn-primary me-2 px-5 my-2'
                     onClick={() => handleScheduleService(serviceName, 'schedule', `Task scheduled successfully!`)}
-                    disabled={status !== 'authenticated' || serviceDetail?.isScheduled === true}
+                    disabled={serviceDetail?.isScheduled === true}
                 >
                     {scheduleLabel}
                 </button>
                 <button
                     className='btn btn-secondary me-2 px-5 my-2'
                     onClick={() => handleScheduleService(serviceName, 'unschedule', `Task unscheduled successfully!`)}
-                    disabled={status !== 'authenticated' || serviceDetail?.isScheduled === false}
+                    disabled={serviceDetail?.isScheduled === false}
                 >
                     {cancelLabel}
                 </button>
