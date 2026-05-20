@@ -14,6 +14,7 @@
     "check": "biome check",
     "check::fix": "biome check --fix",
     "test": "cypress open",
+    "test:unit": "node --import tsx --test src/components/ChangeLog/changelogLinkUtils.test.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -63,6 +64,7 @@
     "systeminformation": "^5.31.6",
     "ts-node": "^10.9.2",
     "tsc-files": "^1.1.4",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   },
   "husky": {
