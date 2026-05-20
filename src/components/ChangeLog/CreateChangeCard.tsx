@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { JSX, useMemo, useState } from 'react'
 import { Changes } from '../../object-types/Changelogs'
+import { findKeyToLinkMappings, splitTextWithIdLinks } from './changelogLinkUtils'
 
 function CreateChangesCards({ changes }: { changes: Changes[] | undefined | null }): JSX.Element {
     return (
@@ -28,56 +29,30 @@ function CreateChangesCards({ changes }: { changes: Changes[] | undefined | null
     )
 }
 
-const findKeyToLinkMappings = (fieldValue: unknown, fieldName: string): Record<string, string> => {
-    if (!fieldValue || typeof fieldValue !== 'object') return {}
-    const obj = fieldValue as Record<string, Record<string, string>>
-    const keys = Object.keys(obj)
-    const res: Record<string, string> = {}
-
-    for (const key of keys) {
-        let href: string | null = null
-
-        if (fieldName.toLowerCase().includes('project')) {
-            href = `/projects/detail/${key}`
-        } else if (fieldName.toLowerCase().includes('component')) {
-            href = `/components/detail/${key}`
-        } else if (fieldName.toLowerCase().includes('release')) {
-            href = `/components/releases/detail/${key}`
-        } else if (fieldName.toLowerCase().includes('package')) {
-            href = `/packages/detail/${key}`
-        }
-
-        if (href !== null) res[key] = href
-    }
-    return res
-}
-
 const replaceKeysWithLinks = (diffString: string, mappings: Record<string, string>): JSX.Element => {
-    const delimiters = Object.keys(mappings)
+    const segments = splitTextWithIdLinks(diffString, mappings)
 
-    if (delimiters.length === 0) return <span>{diffString}</span>
-
-    const regex = new RegExp(`(${delimiters.join('|')})`)
-
-    const result = diffString.split(regex)
+    if (segments.length === 1 && segments[0].type === 'text') {
+        return <span>{diffString}</span>
+    }
 
     return (
         <>
-            {result.map((str: string, index: number) => {
-                if (mappings[str]) {
+            {segments.map((segment, index) => {
+                if (segment.type === 'link') {
                     return (
                         <Link
                             className='text-link'
-                            href={mappings[str]}
+                            href={segment.href}
                             target='_blank'
                             key={index}
                         >
-                            {str}
+                            {segment.value}
                         </Link>
                     )
-                } else {
-                    return <span key={index}>{str}</span>
                 }
+
+                return <span key={index}>{segment.value}</span>
             })}
         </>
     )
