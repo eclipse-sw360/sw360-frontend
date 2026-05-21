@@ -137,10 +137,16 @@ export default function DownloadLicenseInfoModal({
                 variant: 'DISCLOSURE',
                 selectedRelRelationship,
             })
+            const extensionMap: Record<string, string> = {
+                DocxGenerator: 'docx',
+                XhtmlGenerator: 'html',
+                TextGenerator: 'txt',
+            }
+            const ext = extensionMap[generatorClassName] ?? 'zip'
             const downloadStatus = await DownloadService.download(
                 downloadUrl,
                 session.data,
-                `LicenseInfo-${currentDate}.zip`,
+                `LicenseInfo-${currentDate}.${ext}`,
             )
             if (downloadStatus === StatusCodes.OK) {
                 setShowConfirmation(true)
