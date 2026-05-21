@@ -449,7 +449,7 @@ export default function BulkReleaseEdit(): JSX.Element {
         setPageableQueryParam({
             page: 0,
             page_entries: 10,
-            sort: '',
+            sort: Object.keys(search).length > 0 ? 'score,asc' : '',
         })
     }, [
         search,

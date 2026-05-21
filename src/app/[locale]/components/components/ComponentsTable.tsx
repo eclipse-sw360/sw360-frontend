@@ -186,7 +186,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: 'name,asc',
+        sort: params.toString() ? 'score,asc' : 'name,asc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -264,7 +264,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
         setPageableQueryParam({
             page: 0,
             page_entries: 10,
-            sort: '',
+            sort: params.toString() ? 'score,asc' : '',
         })
     }, [
         params.toString(),

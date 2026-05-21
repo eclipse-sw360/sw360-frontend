@@ -203,7 +203,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: 'name,asc',
+        sort: 'score,asc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -636,6 +636,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                             setPageableQueryParam((prev) => ({
                                                 ...prev,
                                                 page: 0,
+                                                sort: 'score,asc',
                                             }))
                                             handleSearch()
                                         }}
