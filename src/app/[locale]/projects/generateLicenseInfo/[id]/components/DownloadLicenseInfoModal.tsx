@@ -16,8 +16,10 @@ import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
-import { ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
+import { useConfigKeyValue } from '@/contexts'
+import { ConfigKeys, ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
+import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
 
 const relationFilterOptions: FilterOption[] = [
@@ -86,6 +88,7 @@ export default function DownloadLicenseInfoModal({
 }): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
+    const mailRequestForReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
     const [withSubProject, setWithSubProject] = useState(true)
     const [selectedRelRelationship, setSelectedRelRelationship] = useState<string[]>([])
@@ -127,7 +130,6 @@ export default function DownloadLicenseInfoModal({
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
-            const currentDate = new Date().toISOString().split('T')[0]
             const downloadUrl = CommonUtils.createUrlWithParams(`reports`, {
                 withlinkedreleases: 'false',
                 projectId,
@@ -137,20 +139,35 @@ export default function DownloadLicenseInfoModal({
                 variant: 'DISCLOSURE',
                 selectedRelRelationship,
             })
-            const extensionMap: Record<string, string> = {
-                DocxGenerator: 'docx',
-                XhtmlGenerator: 'html',
-                TextGenerator: 'txt',
-            }
-            const ext = extensionMap[generatorClassName] ?? 'zip'
-            const downloadStatus = await DownloadService.download(
-                downloadUrl,
-                session.data,
-                `LicenseInfo-${currentDate}.${ext}`,
-            )
-            if (downloadStatus === StatusCodes.OK) {
-                setShowConfirmation(true)
-                setShow(false)
+            const mailEnabled = mailRequestForReport === 'true'
+            if (!mailEnabled) {
+                const currentDate = new Date().toISOString().split('T')[0]
+                const extensionMap: Record<string, string> = {
+                    DocxGenerator: 'docx',
+                    XhtmlGenerator: 'html',
+                    TextGenerator: 'txt',
+                }
+                const ext = extensionMap[generatorClassName] ?? 'zip'
+                const downloadStatus = await DownloadService.download(
+                    downloadUrl,
+                    session.data,
+                    `LicenseInfo-${currentDate}.${ext}`,
+                )
+                if (downloadStatus === StatusCodes.OK) {
+                    setShow(false)
+                }
+            } else {
+                const mailResponse = await ApiUtils.GET(downloadUrl, session.data.user.access_token)
+                if (mailResponse.status === StatusCodes.OK) {
+                    MessageService.success(t('License info report generation has started'))
+                    setShow(false)
+                } else if (mailResponse.status === StatusCodes.FORBIDDEN) {
+                    MessageService.warn(t('Access Denied'))
+                } else if (mailResponse.status === StatusCodes.INTERNAL_SERVER_ERROR) {
+                    MessageService.error(t('Internal server error'))
+                } else if (mailResponse.status === StatusCodes.UNAUTHORIZED) {
+                    MessageService.error(t('Unauthorized request'))
+                }
             }
         } catch (error) {
             ApiUtils.reportError(error)

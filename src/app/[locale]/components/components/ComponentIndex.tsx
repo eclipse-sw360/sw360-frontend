@@ -80,7 +80,7 @@ const ComponentIndex = (): ReactNode => {
                 if (response.ok) {
                     const configs = await response.json()
 
-                    const mailEnabled = configs[ConfigKeys.MAIL_REQUEST_FOR_COMPONENT_REPORT] === 'true'
+                    const mailEnabled = configs[ConfigKeys.MAIL_REQUEST_FOR_REPORT] === 'true'
 
                     setExportViaMail(mailEnabled)
                 }
