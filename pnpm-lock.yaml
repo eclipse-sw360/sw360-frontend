@@ -37,7 +37,7 @@ importers:
         version: 1.2.0
       html-react-parser:
         specifier: ^6.1.1
-        version: 6.1.1(@types/react@19.2.14)(react@19.2.6)
+        version: 6.1.1(@types/react@19.2.15)(react@19.2.6)
       http-status-codes:
         specifier: ^2.3.0
         version: 2.3.0
@@ -64,10 +64,10 @@ importers:
         version: 19.2.6
       react-bootstrap:
         specifier: ^2.10.10
-        version: 2.10.10(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 2.10.10(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react-cookie:
         specifier: ^8.1.2
-        version: 8.1.2(@types/react@19.2.14)(react@19.2.6)
+        version: 8.1.2(@types/react@19.2.15)(react@19.2.6)
       react-datepicker:
         specifier: ^9.1.0
         version: 9.1.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -100,11 +100,11 @@ importers:
         specifier: ^25.9.1
         version: 25.9.1
       '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
+        specifier: 19.2.15
+        version: 19.2.15
       '@types/react-dom':
         specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
+        version: 19.2.3(@types/react@19.2.15)
       bootstrap:
         specifier: ^5.3.8
         version: 5.3.8(@popperjs/core@2.11.8)
@@ -885,8 +885,8 @@ packages:
     peerDependencies:
       '@types/react': '*'
 
-  '@types/react@19.2.14':
-    resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
+  '@types/react@19.2.15':
+    resolution: {integrity: sha512-eRwcGNHve+E8qtEQSSRl6urh+rFop4v8gm6O8rGv25CodbvFdLjA1vVQ1KkiFE0w0UPOnb8tDiFKL5lp0rtY5Q==}
 
   '@types/sinonjs__fake-timers@8.1.1':
     resolution: {integrity: sha512-0kSuKjAS0TrGLJ0M/+8MaFkGsQhZpB6pxOmvS3K8FYI72K//YmdfoW9X2qPsAKh1mkwxGD5zib9s1FIFed6E8g==}
@@ -3022,9 +3022,9 @@ snapshots:
 
   '@types/he@1.2.3': {}
 
-  '@types/hoist-non-react-statics@3.3.7(@types/react@19.2.14)':
+  '@types/hoist-non-react-statics@3.3.7(@types/react@19.2.15)':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.15
       hoist-non-react-statics: 3.3.2
 
   '@types/node@25.9.1':
@@ -3033,15 +3033,15 @@ snapshots:
 
   '@types/prop-types@15.7.15': {}
 
-  '@types/react-dom@19.2.3(@types/react@19.2.14)':
+  '@types/react-dom@19.2.3(@types/react@19.2.15)':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.15
 
-  '@types/react-transition-group@4.4.12(@types/react@19.2.14)':
+  '@types/react-transition-group@4.4.12(@types/react@19.2.15)':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.15
 
-  '@types/react@19.2.14':
+  '@types/react@19.2.15':
     dependencies:
       csstype: 3.2.3
 
@@ -3600,7 +3600,7 @@ snapshots:
       domhandler: 6.0.1
       htmlparser2: 12.0.0
 
-  html-react-parser@6.1.1(@types/react@19.2.14)(react@19.2.6):
+  html-react-parser@6.1.1(@types/react@19.2.15)(react@19.2.6):
     dependencies:
       domhandler: 6.0.1
       html-dom-parser: 7.1.0
@@ -3608,7 +3608,7 @@ snapshots:
       react-property: 2.0.2
       style-to-js: 1.1.21
     optionalDependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.15
 
   htmlparser2@12.0.0:
     dependencies:
@@ -4036,13 +4036,13 @@ snapshots:
       react-stately: 3.46.0(react@19.2.6)
       use-sync-external-store: 1.6.0(react@19.2.6)
 
-  react-bootstrap@2.10.10(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+  react-bootstrap@2.10.10(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
     dependencies:
       '@babel/runtime': 7.29.2
       '@restart/hooks': 0.4.16(react@19.2.6)
       '@restart/ui': 1.9.4(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@types/prop-types': 15.7.15
-      '@types/react-transition-group': 4.4.12(@types/react@19.2.14)
+      '@types/react-transition-group': 4.4.12(@types/react@19.2.15)
       classnames: 2.5.1
       dom-helpers: 5.2.1
       invariant: 2.2.4
@@ -4054,11 +4054,11 @@ snapshots:
       uncontrollable: 7.2.1(react@19.2.6)
       warning: 4.0.3
     optionalDependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.15
 
-  react-cookie@8.1.2(@types/react@19.2.14)(react@19.2.6):
+  react-cookie@8.1.2(@types/react@19.2.15)(react@19.2.6):
     dependencies:
-      '@types/hoist-non-react-statics': 3.3.7(@types/react@19.2.14)
+      '@types/hoist-non-react-statics': 3.3.7(@types/react@19.2.15)
       hoist-non-react-statics: 3.3.2
       react: 19.2.6
       universal-cookie: 8.1.2
@@ -4353,7 +4353,7 @@ snapshots:
   uncontrollable@7.2.1(react@19.2.6):
     dependencies:
       '@babel/runtime': 7.29.2
-      '@types/react': 19.2.14
+      '@types/react': 19.2.15
       invariant: 2.2.4
       react: 19.2.6
       react-lifecycles-compat: 3.0.4
