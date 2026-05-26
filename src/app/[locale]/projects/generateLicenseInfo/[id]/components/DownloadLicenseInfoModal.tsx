@@ -130,6 +130,20 @@ export default function DownloadLicenseInfoModal({
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
+
+            // Display warnings (e.g. stale sub-project/release references) without blocking download
+            try {
+                const responseBody = await response.json()
+                if (responseBody.warnings && responseBody.warnings.length > 0) {
+                    responseBody.warnings.forEach((warning: string) => {
+                        MessageService.warn(warning, {
+                            autoClose: false,
+                        })
+                    })
+                }
+            } catch {
+                // Response was plain text (no warnings) - continue normally
+            }
             const downloadUrl = CommonUtils.createUrlWithParams(`reports`, {
                 withlinkedreleases: 'false',
                 projectId,

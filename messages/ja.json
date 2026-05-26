@@ -14,6 +14,7 @@
     "API Token Length must be at least 20": "APIトークンの長さは20以上である必要があります",
     "APPROVED": "承認済",
     "ATTACHMENTS": "添付ファイル",
+    "AttachmentUsages saved successfully (with warnings)": "添付ファイルの使用状況が正常に保存されました（警告あり）",
     "AWAITING_RESPONSE": "応答待ち",
     "Accept Decline All MRs": "選択したすべてのモデレーションリクエストを承認/拒否してもよろしいですか?",
     "Accept Decline All Selected Moderation Requests": "選択したすべてのモデレーション リクエストの承認/拒否",
