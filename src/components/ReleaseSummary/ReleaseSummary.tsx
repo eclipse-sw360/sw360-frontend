@@ -17,7 +17,7 @@ import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
-import { ActionType, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
+import { ActionType, Release, ReleaseDetail, UIConfigKeys, UserGroupType, Vendor } from '@/object-types'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
@@ -93,6 +93,7 @@ const ReleaseSummary = ({
         releasePayload.sourceCodeDownloadurl ?? '',
     )
     const [sourceCodeDownloadUrlError, setSourceCodeDownloadUrlError] = useState<string | null>(null)
+    const { status, data: sessionData } = useSession()
 
     // Configs from backend
     const operatingSystemSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
@@ -217,6 +218,21 @@ const ReleaseSummary = ({
     const defaultValueClearingState = () => {
         return actionType === ActionType.EDIT ? releasePayload.clearingState : 'NEW'
     }
+
+    // Clearing state editability logic
+    const PRIVILEGED_GROUPS = [
+        UserGroupType.CLEARING_ADMIN,
+        UserGroupType.CLEARING_EXPERT,
+        UserGroupType.SW360_ADMIN,
+        UserGroupType.ADMIN,
+    ]
+    const userGroup = sessionData?.user?.userGroup as UserGroupType | undefined
+    const isPrivilegedUser = userGroup ? PRIVILEGED_GROUPS.includes(userGroup) : false
+    const currentClearingState = defaultValueClearingState()
+    const isClearingStateEditable =
+        isPrivilegedUser &&
+        actionType === ActionType.EDIT &&
+        (currentClearingState === 'NEW_CLEARING' || currentClearingState === 'REPORT_AVAILABLE')
 
     return (
         <>
@@ -541,15 +557,28 @@ const ReleaseSummary = ({
                                 >
                                     {t('Clearing State')}
                                 </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    id='modified_on'
-                                    aria-describedby='Modified on'
-                                    readOnly={true}
-                                    name='clearingState'
-                                    defaultValue={defaultValueClearingState()}
-                                />
+                                {isClearingStateEditable ? (
+                                    <select
+                                        className='form-select'
+                                        id='clearingState'
+                                        name='clearingState'
+                                        defaultValue={currentClearingState}
+                                        onChange={updateField}
+                                    >
+                                        <option value={currentClearingState}>{t(currentClearingState)}</option>
+                                        <option value='UNDER_CLEARING'>{t('UNDER_CLEARING')}</option>
+                                    </select>
+                                ) : (
+                                    <input
+                                        type='text'
+                                        className='form-control'
+                                        id='clearingState'
+                                        aria-describedby='Clearing State'
+                                        readOnly={true}
+                                        name='clearingState'
+                                        defaultValue={defaultValueClearingState()}
+                                    />
+                                )}
                             </div>
                             <div className='col-lg-4'>
                                 <label

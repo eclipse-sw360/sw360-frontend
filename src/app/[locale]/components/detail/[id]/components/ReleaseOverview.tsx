@@ -20,7 +20,7 @@ import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
@@ -56,9 +56,26 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         setDeleteModalOpen(true)
     }
 
-    const handleFossologyClearing = (releaseId: string) => {
-        setClearingReleaseId(releaseId)
-        setFossologyClearingModelOpen(true)
+    const [underClearingWarningOpen, setUnderClearingWarningOpen] = useState(false)
+    const [pendingFossologyReleaseId, setPendingFossologyReleaseId] = useState<string | undefined>(undefined)
+
+    const handleFossologyClearing = (releaseId: string, clearingState?: string) => {
+        if (clearingState === 'UNDER_CLEARING') {
+            setPendingFossologyReleaseId(releaseId)
+            setUnderClearingWarningOpen(true)
+        } else {
+            setClearingReleaseId(releaseId)
+            setFossologyClearingModelOpen(true)
+        }
+    }
+
+    const confirmFossologyClearing = () => {
+        setUnderClearingWarningOpen(false)
+        if (pendingFossologyReleaseId) {
+            setClearingReleaseId(pendingFossologyReleaseId)
+            setFossologyClearingModelOpen(true)
+            setPendingFossologyReleaseId(undefined)
+        }
     }
 
     const handleLinkToProject = (releaseId: string) => {
@@ -124,7 +141,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 header: t('Actions'),
                 enableSorting: false,
                 cell: ({ row }) => {
-                    const { id } = row.original
+                    const { id, clearingState } = row.original
                     return (
                         <span className='d-flex justify-content-evenly'>
                             <Image
@@ -135,7 +152,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                     marginRight: '5px',
                                 }}
                                 alt='Fossology'
-                                onClick={() => handleFossologyClearing(id)}
+                                onClick={() => handleFossologyClearing(id, clearingState)}
                             />
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link href={`/components/editRelease/${id}`}>
@@ -386,6 +403,37 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     releaseId={linkingReleaseId}
                 />
             )}
+            <Modal
+                show={underClearingWarningOpen}
+                onHide={() => setUnderClearingWarningOpen(false)}
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('Release Under Clearing')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>
+                        {t('The clearing state of this release is currently')} <b>{t('UNDER_CLEARING')}</b>
+                        {', '}
+                        {t('which means someone is already working on it')}.{' '}
+                        {t('Do you still want to trigger the FOSSology process')}?
+                    </p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant='secondary'
+                        onClick={() => setUnderClearingWarningOpen(false)}
+                    >
+                        {t('Cancel')}
+                    </Button>
+                    <Button
+                        variant='primary'
+                        onClick={confirmFossologyClearing}
+                    >
+                        {t('Proceed')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

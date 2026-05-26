@@ -70,6 +70,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
+    const { status, data: sessionData } = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
 
     useEffect(() => {
@@ -143,30 +144,30 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     'sw360:documentCreationInformation'
                 ]
                     ? {
-                          id: release._embedded['sw360:documentCreationInformation'].id,
-                          spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
-                          spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
-                          dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
-                          SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
-                          name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
-                          documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
-                          externalDocumentRefs:
-                              release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
-                          licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
-                          creator: creators, // 6.8
-                          created: createdDate, // 6.9
-                          creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
-                          documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
-                          // Information for ModerationRequests
-                          documentState: release._embedded['sw360:documentCreationInformation'].documentState,
-                          permissions: release._embedded['sw360:documentCreationInformation'].permissions,
-                          createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
-                          moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
-                      }
+                        id: release._embedded['sw360:documentCreationInformation'].id,
+                        spdxDocumentId: release._embedded['sw360:documentCreationInformation'].spdxDocumentId, // Id of the parent SPDX Document
+                        spdxVersion: release._embedded['sw360:documentCreationInformation'].spdxVersion, // 6.1
+                        dataLicense: release._embedded['sw360:documentCreationInformation'].dataLicense, // 6.2
+                        SPDXID: release._embedded['sw360:documentCreationInformation'].SPDXID, // 6.3
+                        name: release._embedded['sw360:documentCreationInformation'].name, // 6.4
+                        documentNamespace: release._embedded['sw360:documentCreationInformation'].documentNamespace, // 6.5
+                        externalDocumentRefs:
+                            release._embedded['sw360:documentCreationInformation'].externalDocumentRefs, // 6.6
+                        licenseListVersion: release._embedded['sw360:documentCreationInformation'].licenseListVersion, // 6.7
+                        creator: creators, // 6.8
+                        created: createdDate, // 6.9
+                        creatorComment: release._embedded['sw360:documentCreationInformation'].creatorComment, // 6.10
+                        documentComment: release._embedded['sw360:documentCreationInformation'].documentComment, // 6.11
+                        // Information for ModerationRequests
+                        documentState: release._embedded['sw360:documentCreationInformation'].documentState,
+                        permissions: release._embedded['sw360:documentCreationInformation'].permissions,
+                        createdBy: release._embedded['sw360:documentCreationInformation'].createdBy,
+                        moderators: release._embedded['sw360:documentCreationInformation'].moderators, // people who can modify the data
+                    }
                     : {
-                          creator: creators, // 6.8
-                          created: createdDate, // 6.9
-                      }
+                        creator: creators, // 6.8
+                        created: createdDate, // 6.9
+                    }
 
                 const SPDXPayload: SPDX = {
                     spdxDocument: release._embedded['sw360:spdxDocument'],
@@ -424,15 +425,29 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             const eccInfo = releasePayload.eccInformation
             const sanitizedEccInformation: ECCInformation | undefined = eccInfo
                 ? {
-                      ...eccInfo,
-                      eccStatus: eccInfo.eccStatus?.trim() !== '' ? eccInfo.eccStatus : undefined,
-                  }
+                    ...eccInfo,
+                    eccStatus: eccInfo.eccStatus?.trim() !== '' ? eccInfo.eccStatus : undefined,
+                }
                 : undefined
             const { linkedPackages, clearingState, ...cleanPayload } = releasePayload
+
+            const PRIVILEGED_GROUPS = [
+                UserGroupType.CLEARING_ADMIN,
+                UserGroupType.CLEARING_EXPERT,
+                UserGroupType.SW360_ADMIN,
+                UserGroupType.ADMIN,
+            ]
+            const userGroup = sessionData?.user?.userGroup as UserGroupType | undefined
+            const isPrivilegedUser = userGroup ? PRIVILEGED_GROUPS.includes(userGroup) : false
 
             const finalPayload: Release = {
                 ...cleanPayload,
                 eccInformation: sanitizedEccInformation,
+                ...(isPrivilegedUser && clearingState
+                    ? {
+                        clearingState,
+                    }
+                    : {}),
             }
             const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload)
 
