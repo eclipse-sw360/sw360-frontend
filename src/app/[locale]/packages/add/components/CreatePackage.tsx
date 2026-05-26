@@ -54,12 +54,11 @@ function CreatePackage(): JSX.Element {
             setCreatingPackage(true)
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            if (CommonUtils.isNullOrUndefined(session.user?.access_token)) return signOut()
 
             const normalizedPurl = packagePayload.purl?.trim()
             const packageManager = extractPackageManagerFromPurl(normalizedPurl)
             if (!normalizedPurl || !packageManager) {
-                MessageService.error(t('Enter a valid PURL'))
+                MessageService.error(t('Enter a valid pURL'))
                 return
             }
 
@@ -77,7 +76,7 @@ function CreatePackage(): JSX.Element {
             try {
                 res = (await response.json()) as Record<string, string>
             } catch (error) {
-                console.warn('Failed to parse package create error response as JSON.', error)
+                ApiUtils.reportError(error)
             }
             if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Package created successfully'))
