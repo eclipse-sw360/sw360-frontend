@@ -344,7 +344,7 @@ const ReleaseGeneral = ({ release, releaseId, fileList }: Props): ReactNode => {
                     </tr>
                     <tr>
                         <td>{t('Clearing State')}:</td>
-                        <td>{release.clearingState}</td>
+                        <td>{release.clearingState ? t(release.clearingState) : ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Release Mainline State')}:</td>

@@ -430,9 +430,24 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 : undefined
             const { linkedPackages, clearingState, ...cleanPayload } = releasePayload
 
+            const PRIVILEGED_GROUPS = [
+                UserGroupType.CLEARING_ADMIN,
+                UserGroupType.CLEARING_EXPERT,
+                UserGroupType.SW360_ADMIN,
+                UserGroupType.ADMIN,
+            ]
+            const userIdentity = await getAuthenticatedUserIdentity()
+            const userGroup = userIdentity.userGroup as UserGroupType | undefined
+            const isPrivilegedUser = userGroup ? PRIVILEGED_GROUPS.includes(userGroup) : false
+
             const finalPayload: Release = {
                 ...cleanPayload,
                 eccInformation: sanitizedEccInformation,
+                ...(isPrivilegedUser && clearingState
+                    ? {
+                          clearingState,
+                      }
+                    : {}),
             }
             const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload)
 
