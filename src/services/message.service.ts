@@ -50,7 +50,7 @@ function showMessage(type: string, text: string, lead: string, options?: Message
         type: type,
         lead: lead,
         text: text,
-        autoClose: options && (options.autoClose ?? false) ? options.autoClose : true,
+        autoClose: options?.autoClose !== undefined ? options.autoClose : true,
         keepAfterRouteChange: options?.keepAfterRouteChange ?? true,
     }
 

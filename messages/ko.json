@@ -14,6 +14,7 @@
     "API Token Length must be at least 20": "API 토큰 길이는 최소 20이어야 합니다",
     "APPROVED": "이름 *",
     "ATTACHMENTS": "첨부 파일",
+    "AttachmentUsages saved successfully (with warnings)": "첨부 파일 사용이 성공적으로 저장되었습니다 (경고 포함)",
     "AWAITING_RESPONSE": "응답을 기다리는 중",
     "Accept Decline All MRs": "선택한 모든 중재 요청을 수락/거절하시겠습니까?",
     "Accept Decline All Selected Moderation Requests": "선택한 모든 중재 요청 수락/거부",

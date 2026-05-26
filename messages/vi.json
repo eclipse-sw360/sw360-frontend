@@ -14,6 +14,7 @@
     "API Token Length must be at least 20": "Độ dài mã thông báo API phải ít nhất là 20",
     "APPROVED": "Tán thành",
     "ATTACHMENTS": "ĐÍNH KÈM",
+    "AttachmentUsages saved successfully (with warnings)": "Đã lưu thành công việc sử dụng tệp đính kèm (có cảnh báo)",
     "AWAITING_RESPONSE": "Đang chờ phản hồi",
     "Accept Decline All MRs": "Bạn có chắc chắn Chấp nhận/Từ chối tất cả các Yêu cầu Kiểm duyệt đã chọn không?",
     "Accept Decline All Selected Moderation Requests": "Chấp nhận/Từ chối tất cả các yêu cầu kiểm duyệt đã chọn",

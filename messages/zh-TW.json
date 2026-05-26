@@ -14,6 +14,7 @@
     "API Token Length must be at least 20": "API 令牌長度必須至少為 20",
     "APPROVED": "核定",
     "ATTACHMENTS": "附件",
+    "AttachmentUsages saved successfully (with warnings)": "附件使用情況已成功儲存（有警告）",
     "AWAITING_RESPONSE": "等待回覆",
     "Accept Decline All MRs": "您確定接受/拒絕所有選定的審核請求嗎？",
     "Accept Decline All Selected Moderation Requests": "接受/拒絕所有選定的審核請求",

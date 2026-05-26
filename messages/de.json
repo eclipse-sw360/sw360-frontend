@@ -14,6 +14,7 @@
     "API Token Length must be at least 20": "Die API-Token-Länge muss mindestens 20 betragen",
     "APPROVED": "genehmigt",
     "ATTACHMENTS": "ANHÄNGE",
+    "AttachmentUsages saved successfully (with warnings)": "Anhangsnutzungen erfolgreich gespeichert (mit Warnungen)",
     "AWAITING_RESPONSE": "Warten auf Antwort",
     "Accept Decline All MRs": "Sind Sie sicher, dass Sie alle ausgewählten Moderationsanfragen annehmen/ablehnen?",
     "Accept Decline All Selected Moderation Requests": "Alle ausgewählten Moderationsanfragen annehmen/ablehnen",
