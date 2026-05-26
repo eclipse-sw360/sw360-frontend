@@ -339,7 +339,7 @@ export default function CreateOrEditPackage({
                                 className='form-control'
                                 id='createOrEditPackage.purl'
                                 name='purl'
-                                placeholder={t('Enter a valid PURL')}
+                                placeholder={t('Enter a valid pURL')}
                                 value={packagePayload.purl ?? ''}
                                 onChange={handleChange}
                                 pattern='^[Pp][Kk][Gg]:[^\s]+$'
