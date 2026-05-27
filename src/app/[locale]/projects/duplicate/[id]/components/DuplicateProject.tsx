@@ -14,7 +14,7 @@ import { notFound, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
@@ -27,6 +27,7 @@ import {
     Project,
     ProjectPayload,
     ReleaseDetail,
+    User,
     UserGroupType,
     Vendor,
 } from '@/object-types'
@@ -171,6 +172,20 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         })
     }
 
+    const fetchUserData = useCallback(async (url: string) => {
+        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        const response = await ApiUtils.GET(url, session.data.user.access_token)
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as User
+            return data
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
+            MessageService.error(t('Unauthorized request'))
+            return
+        } else {
+            return undefined
+        }
+    }, [])
+
     const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
         try {
             const linkedReleasesObject: {
@@ -236,18 +251,30 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     })
                 }
 
-                if (project['_embedded']?.['projectOwner'] !== undefined) {
-                    setProjectOwner({
-                        [project['_embedded']['projectOwner'].email]:
-                            project['_embedded']['projectOwner'].fullName ?? '',
-                    })
+                if (project?.projectOwner !== undefined) {
+                    const userData = await fetchUserData(`users/${project?.projectOwner}`)
+                    if (!CommonUtils.isNullOrUndefined(userData)) {
+                        setProjectOwner({
+                            [project?.projectOwner]: userData?.fullName ?? project?.projectOwner,
+                        })
+                    } else {
+                        setProjectOwner({
+                            [project?.projectOwner]: project?.projectOwner,
+                        })
+                    }
                 }
 
-                if (project['_embedded']?.['projectManager'] !== undefined) {
-                    setProjectManager({
-                        [project['_embedded']['projectManager'].email]:
-                            project['_embedded']['projectManager'].fullName ?? '',
-                    })
+                if (project?.projectResponsible !== undefined) {
+                    const userData = await fetchUserData(`users/${project?.projectResponsible}`)
+                    if (!CommonUtils.isNullOrUndefined(userData)) {
+                        setProjectManager({
+                            [project?.projectResponsible]: userData?.fullName ?? project?.projectResponsible,
+                        })
+                    } else {
+                        setProjectManager({
+                            [project?.projectResponsible]: project?.projectResponsible,
+                        })
+                    }
                 }
 
                 if (project['_embedded']?.['sw360:moderators'] !== undefined) {
@@ -311,7 +338,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     contributors: (project._embedded?.['sw360:contributors'] ?? []).map((user) => user.email),
                     moderators: (project._embedded?.['sw360:moderators'] ?? []).map((user) => user.email),
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
-                    projectResponsible: project._embedded?.projectManager?.email ?? '',
+                    projectResponsible: project?.projectResponsible ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
                     linkedReleases: projectPayload.linkedReleases ?? {},
                     linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(

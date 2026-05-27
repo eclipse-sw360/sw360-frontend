@@ -90,42 +90,6 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
         ],
     )
 
-    const handleSelectReleases = useCallback(
-        (selectedReleases: ReleaseDetail[]) => {
-            const newReleaseLinks: ReleaseLink[] = selectedReleases.map((release: ReleaseDetail) => ({
-                id: release.id ?? '',
-                name: release.name,
-                version: release.version,
-                mainlineState: release.mainlineState,
-                clearingState: release.clearingState,
-                vendor: release.vendor ? release.vendor.fullName : '',
-                releaseRelationship: 'CONTAINED',
-            }))
-
-            const updatedReleaseLinks = [
-                ...releaseLinks,
-                ...newReleaseLinks,
-            ]
-            setReleaseLinks(updatedReleaseLinks)
-
-            const mapReleaseRelationship = new Map<string, string>()
-            updatedReleaseLinks.forEach((item) => {
-                mapReleaseRelationship.set(item.id, item.releaseRelationship)
-            })
-            const obj = Object.fromEntries(mapReleaseRelationship)
-            setReleasePayload({
-                ...releasePayload,
-                releaseIdToRelationship: obj,
-            })
-            handleReRender()
-        },
-        [
-            releaseLinks,
-            releasePayload,
-            setReleasePayload,
-        ],
-    )
-
     useEffect(() => {
         if (actionType === ActionType.EDIT && release !== undefined) {
             if (
