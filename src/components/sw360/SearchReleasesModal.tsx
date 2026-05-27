@@ -235,9 +235,9 @@ export default function SearchReleasesModal({
             const next =
                 typeof updater === 'function'
                     ? updater({
-                        pageIndex: pageableQueryParam.page,
-                        pageSize: pageableQueryParam.page_entries,
-                    })
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
                     : updater
 
             setPageableQueryParam((prev) => ({
@@ -266,9 +266,9 @@ export default function SearchReleasesModal({
                             ...pageableQueryParam,
                             ...(searchText && searchText !== ''
                                 ? {
-                                    name: searchText,
-                                    luceneSearch: !exactMatch,
-                                }
+                                      name: searchText,
+                                      luceneSearch: !exactMatch,
+                                  }
                                 : {}),
                             allDetails: true,
                         }).map(([key, value]) => [
@@ -568,7 +568,7 @@ export default function SearchReleasesModal({
                         )}
                     </Row>
                 </Col>
-            </Modal.Body >
+            </Modal.Body>
             <Modal.Footer>
                 <Button
                     variant='dark'
@@ -584,6 +584,6 @@ export default function SearchReleasesModal({
                     {t('Link Releases')}
                 </Button>
             </Modal.Footer>
-        </Modal >
+        </Modal>
     )
 }
