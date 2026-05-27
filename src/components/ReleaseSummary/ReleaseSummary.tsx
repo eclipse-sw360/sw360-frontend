@@ -90,6 +90,10 @@ const ReleaseSummary = ({
     const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
+    const [sourceCodeDownloadUrlInput, setSourceCodeDownloadUrlInput] = useState(
+        releasePayload.sourceCodeDownloadurl ?? '',
+    )
+    const [sourceCodeDownloadUrlError, setSourceCodeDownloadUrlError] = useState<string | null>(null)
     const { status } = useSession()
 
     // Configs from backend
@@ -103,6 +107,12 @@ const ReleaseSummary = ({
         }
     }, [
         status,
+    ])
+
+    useEffect(() => {
+        setSourceCodeDownloadUrlInput(releasePayload.sourceCodeDownloadurl ?? '')
+    }, [
+        releasePayload.sourceCodeDownloadurl,
     ])
 
     const setMainLicensesToPayload = (mainLicenses: { [k: string]: string }) => {
@@ -126,6 +136,42 @@ const ReleaseSummary = ({
             ...releasePayload,
             [e.target.name]: e.target.value,
         })
+    }
+
+    const isValidSourceCodeUrl = (value: string): boolean => {
+        const trimmedValue = value.trim()
+        if (trimmedValue === '') {
+            return true
+        }
+
+        try {
+            const parsedUrl = new URL(trimmedValue)
+            return parsedUrl.protocol.length > 0 && parsedUrl.hostname.length > 0
+        } catch {
+            return false
+        }
+    }
+
+    const handleSourceCodeDownloadUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setSourceCodeDownloadUrlInput(value)
+
+        if (value.trim() === '' || isValidSourceCodeUrl(value)) {
+            setSourceCodeDownloadUrlError(null)
+            setReleasePayload({
+                ...releasePayload,
+                sourceCodeDownloadurl: value,
+            })
+            return
+        }
+
+        setSourceCodeDownloadUrlError(t('Please enter a valid URL'))
+    }
+
+    const handleSourceCodeDownloadUrlBlur = () => {
+        setSourceCodeDownloadUrlError(
+            isValidSourceCodeUrl(sourceCodeDownloadUrlInput) ? null : t('Please enter a valid URL'),
+        )
     }
 
     const splitValueCategories = (valueCategories: string) => {
@@ -467,15 +513,17 @@ const ReleaseSummary = ({
                                     {t('Source Code Download URL')}
                                 </label>
                                 <input
-                                    type='URL'
+                                    type='url'
                                     className='form-control'
                                     placeholder={t('Enter URL')}
-                                    id='wiki_url'
-                                    aria-describedby='wiki_url'
                                     name='sourceCodeDownloadurl'
-                                    onChange={updateField}
-                                    value={releasePayload.sourceCodeDownloadurl ?? ''}
+                                    onBlur={handleSourceCodeDownloadUrlBlur}
+                                    onChange={handleSourceCodeDownloadUrlChange}
+                                    value={sourceCodeDownloadUrlInput}
                                 />
+                                {sourceCodeDownloadUrlError !== null && (
+                                    <div className='form-text text-danger'>{sourceCodeDownloadUrlError}</div>
+                                )}
                             </div>
                             <div className='col-lg-4'>
                                 <label
@@ -489,7 +537,6 @@ const ReleaseSummary = ({
                                     className='form-control'
                                     placeholder={t('Enter URL')}
                                     id='binaryDownloadurl'
-                                    aria-describedby='wiki_url'
                                     name='binaryDownloadurl'
                                     onChange={updateField}
                                     value={releasePayload.binaryDownloadurl ?? ''}
