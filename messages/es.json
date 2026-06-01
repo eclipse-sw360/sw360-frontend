@@ -1591,6 +1591,8 @@
     "Your selected Moderation requests are": "Sus solicitudes de moderación seleccionadas son:",
     "additional data": "Datos adicionales",
     "admin_private_access_description": "Permitir a los usuarios de administración acceder a recursos privados",
+    "nested_release_enabled_description": "Habilitar o deshabilitar la función de vinculación de versiones (versiones anidadas)",
+    "Nested Release Linking Feature": "Función de vinculación de versiones anidadas",
     "as of": "a",
     "attachment_delete_number_of_days_description": "Eliminar archivos adjuntos después de un número específico de días",
     "attachment_storage_location_description": "Configurar la ubicación de almacenamiento de archivos adjuntos",

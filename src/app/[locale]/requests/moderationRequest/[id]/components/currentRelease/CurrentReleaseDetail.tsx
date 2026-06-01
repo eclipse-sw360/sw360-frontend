@@ -21,10 +21,12 @@ import Summary from '@/app/[locale]/components/releases/detail/[id]/components/S
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
+import { useConfigKeyValue } from '@/contexts'
 import {
     Attachment,
     Changelogs,
     CommonTabIds,
+    ConfigKeys,
     DocumentTypes,
     Embedded,
     ErrorDetails,
@@ -49,6 +51,8 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const session = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const t = useTranslations('default')
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -195,12 +199,14 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                             >
                                 <div className='my-2'>{t('Summary')}</div>
                             </ListGroup.Item>
-                            <ListGroup.Item
-                                action
-                                eventKey={ReleaseTabIds.LINKED_RELEASES}
-                            >
-                                <div className='my-2'>{t('Linked Releases')}</div>
-                            </ListGroup.Item>
+                            {showLinkedReleases && (
+                                <ListGroup.Item
+                                    action
+                                    eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                >
+                                    <div className='my-2'>{t('Linked Releases')}</div>
+                                </ListGroup.Item>
+                            )}
                             <ListGroup.Item
                                 action
                                 eventKey={ReleaseTabIds.CLEARING_DETAILS}
@@ -237,9 +243,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                                     releaseId={releaseId}
                                 />
                             </Tab.Pane>
-                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
-                                <LinkedReleases releaseId={releaseId} />
-                            </Tab.Pane>
+                            {showLinkedReleases && (
+                                <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                    <LinkedReleases releaseId={releaseId} />
+                                </Tab.Pane>
+                            )}
                             <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
                                 <ClearingDetails
                                     release={release}

@@ -1591,6 +1591,8 @@
     "Your selected Moderation requests are": "선택한 중재 요청은 다음과 같습니다.",
     "additional data": "더 많은 데이터",
     "admin_private_access_description": "관리자가 개인 리소스에 액세스 할 수 있도록합니다",
+    "nested_release_enabled_description": "릴리스 간 연결(중첩 릴리스) 기능 활성화 또는 비활성화",
+    "Nested Release Linking Feature": "중첩 릴리스 연결 기능",
     "as of": "이름 *",
     "attachment_delete_number_of_days_description": "지정된 일 후 첨부 파일을 삭제합니다",
     "attachment_storage_location_description": "첨부 스토리지 위치를 구성하십시오",

@@ -12,7 +12,8 @@
 import { StatusCodes } from 'http-status-codes'
 import { signOut, useSession } from 'next-auth/react'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Attachment, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
+import { useConfigKeyValue } from '@/contexts'
+import { Attachment, ConfigKeys, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
 import AdditionalDataSection from './AdditionalDataSection'
@@ -44,6 +45,8 @@ export default function MergeReleaseDataCheck({
 }): ReactNode {
     const session = useSession()
     const [sourceReleaseDetail, setSourceReleaseDetail] = useState<ReleaseDetail | null>()
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
@@ -132,12 +135,14 @@ export default function MergeReleaseDataCheck({
                         finalReleasePayload={finalReleasePayload}
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
-                    <LinkedReleasesSection
-                        targetRelease={targetRelease}
-                        sourceReleaseDetail={sourceReleaseDetail}
-                        finalReleasePayload={finalReleasePayload}
-                        setFinalReleasePayload={setFinalReleasePayload}
-                    />
+                    {showLinkedReleases && (
+                        <LinkedReleasesSection
+                            targetRelease={targetRelease}
+                            sourceReleaseDetail={sourceReleaseDetail}
+                            finalReleasePayload={finalReleasePayload}
+                            setFinalReleasePayload={setFinalReleasePayload}
+                        />
+                    )}
                     <ClearingDetailsSection
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}

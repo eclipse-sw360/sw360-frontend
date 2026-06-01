@@ -25,11 +25,13 @@ import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
+import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
     ClearingInformation,
     COTSDetails,
     CommonTabIds,
+    ConfigKeys,
     Creator,
     DocumentCreationInformation,
     DocumentTypes,
@@ -59,6 +61,8 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
     const params = useSearchParams()
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
@@ -595,12 +599,14 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                             <div className='my-2'>{t('SPDX Document')}</div>
                                         </ListGroup.Item>
                                     )}
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.LINKED_RELEASES}
-                                    >
-                                        <div className='my-2'>{t('Linked Releases')}</div>
-                                    </ListGroup.Item>
+                                    {showLinkedReleases && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                        >
+                                            <div className='my-2'>{t('Linked Releases')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item
                                         action
                                         eventKey={ReleaseTabIds.LINKED_PACKAGES}
@@ -681,14 +687,16 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                                 />
                                             </Tab.Pane>
                                         )}
-                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
-                                            <LinkedReleases
-                                                actionType={ActionType.EDIT}
-                                                release={release}
-                                                releasePayload={releasePayload}
-                                                setReleasePayload={setReleasePayload}
-                                            />
-                                        </Tab.Pane>
+                                        {showLinkedReleases && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                                <LinkedReleases
+                                                    actionType={ActionType.EDIT}
+                                                    release={release}
+                                                    releasePayload={releasePayload}
+                                                    setReleasePayload={setReleasePayload}
+                                                />
+                                            </Tab.Pane>
+                                        )}
                                         <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
                                             <EditLinkedPackages
                                                 releasePayload={releasePayload}

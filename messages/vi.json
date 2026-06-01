@@ -1591,6 +1591,8 @@
     "Your selected Moderation requests are": "Yêu cầu Kiểm duyệt đã chọn của bạn là:",
     "additional data": "dữ liệu bổ sung",
     "admin_private_access_description": "Cho phép người dùng quản trị truy cập tài nguyên riêng tư",
+    "nested_release_enabled_description": "Bật hoặc tắt tính năng liên kết phiên bản (phiên bản lồng nhau)",
+    "Nested Release Linking Feature": "Tính năng liên kết phiên bản lồng nhau",
     "as of": "kể từ",
     "attachment_delete_number_of_days_description": "Xóa tệp đính kèm sau một số ngày được chỉ định",
     "attachment_storage_location_description": "Định cấu hình vị trí lưu trữ đính kèm",

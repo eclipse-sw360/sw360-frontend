@@ -1591,6 +1591,8 @@
     "Your selected Moderation requests are": "您选择的审核请求是：",
     "additional data": "附加数据",
     "admin_private_access_description": "允许管理员用户访问私人资源",
+    "nested_release_enabled_description": "启用或禁用版本到版本链接（嵌套版本）功能",
+    "Nested Release Linking Feature": "嵌套版本链接功能",
     "as of": "作为",
     "attachment_delete_number_of_days_description": "指定天数后删除附件",
     "attachment_storage_location_description": "配置附件存储位置",

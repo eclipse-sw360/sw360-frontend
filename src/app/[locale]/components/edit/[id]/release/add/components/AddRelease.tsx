@@ -20,11 +20,13 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
+import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
     COTSDetails,
     CommonTabIds,
     Component,
+    ConfigKeys,
     Release,
     ReleaseDetail,
     ReleaseTabIds,
@@ -59,6 +61,8 @@ const cotsDetails: COTSDetails = {
 function AddRelease({ componentId }: Props): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
 
     const [releasePayload, setReleasePayload] = useState<Release>({
         name: '',
@@ -297,12 +301,14 @@ function AddRelease({ componentId }: Props): ReactNode {
                                 >
                                     <div className='my-2'>{t('Summary')}</div>
                                 </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey={ReleaseTabIds.LINKED_RELEASES}
-                                >
-                                    <div className='my-2'>{t('Linked Releases')}</div>
-                                </ListGroup.Item>
+                                {showLinkedReleases && (
+                                    <ListGroup.Item
+                                        action
+                                        eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                    >
+                                        <div className='my-2'>{t('Linked Releases')}</div>
+                                    </ListGroup.Item>
+                                )}
                                 {withCotsDetails && (
                                     <ListGroup.Item
                                         action
@@ -332,14 +338,16 @@ function AddRelease({ componentId }: Props): ReactNode {
                                             releaseDetail={sourceRelease ?? undefined}
                                         />
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
-                                        <LinkedReleases
-                                            actionType={duplicateFromReleaseId ? ActionType.EDIT : ActionType.ADD}
-                                            release={sourceRelease ?? undefined}
-                                            releasePayload={releasePayload}
-                                            setReleasePayload={setReleasePayload}
-                                        />
-                                    </Tab.Pane>
+                                    {showLinkedReleases && (
+                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                            <LinkedReleases
+                                                actionType={duplicateFromReleaseId ? ActionType.EDIT : ActionType.ADD}
+                                                release={sourceRelease ?? undefined}
+                                                releasePayload={releasePayload}
+                                                setReleasePayload={setReleasePayload}
+                                            />
+                                        </Tab.Pane>
+                                    )}
                                     {withCotsDetails && (
                                         <Tab.Pane eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}>
                                             <AddCommercialDetails

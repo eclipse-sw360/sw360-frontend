@@ -252,6 +252,18 @@ const FeatureConfigurations = (): JSX.Element => {
                                     </td>
                                     <td className='align-middle'>{t('admin_private_access_description')}</td>
                                 </tr>
+                                <tr id='nested-release-enabled'>
+                                    <td className='align-middle fw-bold'>{t('Nested Release Linking Feature')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.IS_NESTED_RELEASE_ENABLED] === 'true'}
+                                            propKey={ConfigKeys.IS_NESTED_RELEASE_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('nested_release_enabled_description')}</td>
+                                </tr>
                                 <tr id='sbom-import-export-access-usergroup'>
                                     <td className='align-middle fw-bold'>
                                         {t('SBOM Import Export Access User Group')}
