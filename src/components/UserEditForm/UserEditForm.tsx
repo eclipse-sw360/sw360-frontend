@@ -95,9 +95,9 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         {t('Global Identifier')} <span className='required'>*</span>
                     </label>
                     <input
-                        type='globalIdentifier'
-                        name='globalIdentifier'
-                        value={userPayload.externalid}
+                        type='text'
+                        name='externalid'
+                        value={userPayload.externalid ?? ''}
                         onChange={handleChange}
                         className='form-control'
                         id='user.globalIdentifier'

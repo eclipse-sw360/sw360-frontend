@@ -29,6 +29,7 @@ export default function CreateUser(): JSX.Element {
         department: '',
         fullName: '',
         password: '',
+        externalid: '',
         secondaryDepartmentsAndRoles: {},
     })
     const router = useRouter()
