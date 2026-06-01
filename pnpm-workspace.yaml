@@ -2,6 +2,8 @@ packages:
   # include packages in subfolders (change as required)
   - 'src/**'
 
-ignoredBuiltDependencies:
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
   - cypress
   - sharp
