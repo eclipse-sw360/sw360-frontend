@@ -1613,6 +1613,8 @@
     "Your selected Moderation requests are": "Vos demandes de modération sélectionnées sont :",
     "additional data": "données supplémentaires",
     "admin_private_access_description": "Permettre aux utilisateurs de l'administrateur d'accéder aux ressources privées",
+    "nested_release_enabled_description": "Activer ou désactiver la fonctionnalité de liaison de versions (versions imbriquées)",
+    "Nested Release Linking Feature": "Fonctionnalité de liaison de versions imbriquées",
     "as of": "à partir de",
     "attachment_delete_number_of_days_description": "Supprimer les pièces jointes après un nombre spécifié de jours",
     "attachment_storage_location_description": "Configurer l'emplacement du stockage de la pièce jointe",

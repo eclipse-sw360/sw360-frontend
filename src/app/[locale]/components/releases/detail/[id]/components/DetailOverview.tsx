@@ -27,10 +27,12 @@ import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import { PageButtonHeader } from '@/components/sw360'
+import { useConfigKeyValue } from '@/contexts'
 import {
     Attachment,
     Changelogs,
     CommonTabIds,
+    ConfigKeys,
     DocumentTypes,
     Embedded,
     ErrorDetails,
@@ -68,6 +70,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const searchParams = useSearchParams()
     const router = useRouter()
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
@@ -440,12 +444,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                             <div className='my-2'>{t('SPDX Document')}</div>
                                         </ListGroup.Item>
                                     )}
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.LINKED_RELEASES}
-                                    >
-                                        <div className='my-2'>{t('Linked Releases')}</div>
-                                    </ListGroup.Item>
+                                    {showLinkedReleases && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                        >
+                                            <div className='my-2'>{t('Linked Releases')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item
                                         action
                                         eventKey={ReleaseTabIds.LINKED_PACKAGES}
@@ -611,9 +617,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 <SPDXDocumentTab releaseId={releaseId} />
                                             </Tab.Pane>
                                         )}
-                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
-                                            <LinkedReleases releaseId={releaseId} />
-                                        </Tab.Pane>
+                                        {showLinkedReleases && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                                <LinkedReleases releaseId={releaseId} />
+                                            </Tab.Pane>
+                                        )}
                                         <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
                                             <LinkedPackagesTab releaseId={releaseId} />
                                         </Tab.Pane>

@@ -1613,6 +1613,8 @@
     "Your selected Moderation requests are": "Ihre ausgewählten Moderationsanfragen sind:",
     "additional data": "zusätzliche Daten",
     "admin_private_access_description": "Ermöglichen Sie Administratorbenutzern, auf private Ressourcen zugreifen",
+    "nested_release_enabled_description": "Aktivieren oder deaktivieren Sie die Funktion zur Verknüpfung von Releases (verschachtelte Releases)",
+    "Nested Release Linking Feature": "Funktion zur Verknüpfung verschachtelter Releases",
     "as of": "als",
     "attachment_delete_number_of_days_description": "Löschen Sie Anhänge nach einer bestimmten Anzahl von Tagen",
     "attachment_storage_location_description": "Konfigurieren Sie den Speicherort des Anhangsspeichers",
