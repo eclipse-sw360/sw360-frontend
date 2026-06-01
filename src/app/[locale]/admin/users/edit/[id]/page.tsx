@@ -65,6 +65,7 @@ const AdminEditUserPage = (): JSX.Element => {
                     fullName: user.fullName,
                     userGroup: user.userGroup,
                     password: '',
+                    externalid: user.externalid,
                     secondaryDepartmentsAndRoles: user.secondaryDepartmentsAndRoles,
                 })
                 setIsUserDeactived(user.deactivated === true)
