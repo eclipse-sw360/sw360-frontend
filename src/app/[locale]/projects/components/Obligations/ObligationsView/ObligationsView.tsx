@@ -13,7 +13,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
-import { ActionType, ObligationEntry, ObligationType } from '@/object-types'
+import { ActionType, ObligationEntry, ObligationLevel } from '@/object-types'
 import AllObligations from './AllObligations'
 import LicenseObligation from './LicenseObligation'
 import ObligationTab from './ObligationTab'
@@ -72,7 +72,7 @@ export default function ObligationView({ projectId, actionType, payload, setPayl
                     actionType={actionType}
                     payload={payload}
                     setPayload={setPayload}
-                    obligationType={ObligationType.COMPONENT_OBLIGATION}
+                    obligationLevel={ObligationLevel.COMPONENT_OBLIGATION}
                 />
             </Tab>
             <Tab
@@ -84,7 +84,7 @@ export default function ObligationView({ projectId, actionType, payload, setPayl
                     actionType={actionType}
                     payload={payload}
                     setPayload={setPayload}
-                    obligationType={ObligationType.PROJECT_OBLIGATION}
+                    obligationLevel={ObligationLevel.PROJECT_OBLIGATION}
                 />
             </Tab>
             <Tab
@@ -96,7 +96,7 @@ export default function ObligationView({ projectId, actionType, payload, setPayl
                     actionType={actionType}
                     payload={payload}
                     setPayload={setPayload}
-                    obligationType={ObligationType.ORGANISATION_OBLIGATION}
+                    obligationLevel={ObligationLevel.ORGANISATION_OBLIGATION}
                 />
             </Tab>
         </Tabs>

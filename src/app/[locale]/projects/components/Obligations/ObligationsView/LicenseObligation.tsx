@@ -23,13 +23,13 @@ import {
     NestedRows,
     ObligationData,
     ObligationEntry,
+    ObligationLevel,
     ObligationResponse,
     PageableQueryParam,
     PaginationMeta,
     UpdateCommentModalMetadata,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
 import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
@@ -335,7 +335,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                     ...obligationValue,
                                     id: row.original.node[1].id,
                                     status: e.target.value,
-                                    obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                                    obligationLevel: ObligationLevel.LICENSE_OBLIGATION,
                                 }
                                 setPayload((payload: ObligationEntry) => ({
                                     ...payload,
@@ -663,7 +663,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                         obligationValue = {
                             ...obligationValue,
                             comment: comment,
-                            obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                            obligationLevel: ObligationLevel.LICENSE_OBLIGATION,
                         }
                         setPayload((payload: ObligationEntry) => ({
                             ...payload,

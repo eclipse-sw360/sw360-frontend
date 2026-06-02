@@ -44,7 +44,6 @@ import ClearingRequestStates from './enums/ClearingRequestStates'
 import ConfigKeys from './enums/ConfigKeys'
 import DocumentTypes from './enums/DocumentTypes'
 import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
-import ObligationType from './enums/ObligationType'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
@@ -78,7 +77,14 @@ import NavItem from './NavItem'
 import NavList from './NavList'
 import NodeData from './NodeData'
 import OAuthClient from './OAuthClient'
-import { Obligation, ObligationData, ObligationEntry, ObligationRelease, ObligationResponse } from './Obligation'
+import {
+    Obligation,
+    ObligationData,
+    ObligationEntry,
+    ObligationLevel,
+    ObligationRelease,
+    ObligationResponse,
+} from './Obligation'
 import Package from './Package'
 import { ColumnMeta, FilterOption, NestedRows, PageableQueryParam, PaginationMeta, TypedEntity } from './Pageable'
 import Preferences from './Preferences'
@@ -266,7 +272,7 @@ export {
     LicenseTabIds,
     MergeOrSplitActionType,
     NavList,
-    ObligationType,
+    ObligationLevel,
     Preferences,
     ProjectVulnerabilityTabType,
     parseRawUiConfig,

@@ -22,20 +22,19 @@ import {
     NestedRows,
     ObligationData,
     ObligationEntry,
+    ObligationLevel,
     ObligationResponse,
-    ObligationType,
     PageableQueryParam,
     PaginationMeta,
     UpdateCommentModalMetadata,
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
 
 interface Props {
     projectId: string
     actionType: ActionType
-    obligationType: ObligationType
+    obligationLevel: ObligationLevel
     payload?: ObligationEntry
     setPayload?: Dispatch<SetStateAction<ObligationEntry>>
 }
@@ -48,7 +47,7 @@ export default function ObligationTab({
     actionType,
     payload,
     setPayload,
-    obligationType,
+    obligationLevel,
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
@@ -89,9 +88,9 @@ export default function ObligationTab({
             {
                 id: 'title',
                 header:
-                    obligationType === ObligationType.ORGANISATION_OBLIGATION
+                    obligationLevel === ObligationLevel.ORGANISATION_OBLIGATION
                         ? t('Organisation Obligation')
-                        : obligationType === ObligationType.COMPONENT_OBLIGATION
+                        : obligationLevel === ObligationLevel.COMPONENT_OBLIGATION
                           ? t('Component Obligation')
                           : t('Project Obligation'),
                 cell: ({ row }) => (
@@ -168,9 +167,9 @@ export default function ObligationTab({
             {
                 id: 'title',
                 header:
-                    obligationType === ObligationType.ORGANISATION_OBLIGATION
+                    obligationLevel === ObligationLevel.ORGANISATION_OBLIGATION
                         ? t('Organisation Obligation')
-                        : obligationType === ObligationType.COMPONENT_OBLIGATION
+                        : obligationLevel === ObligationLevel.COMPONENT_OBLIGATION
                           ? t('Component Obligation')
                           : t('Project Obligation'),
                 cell: ({ row }) => (
@@ -197,7 +196,7 @@ export default function ObligationTab({
                                 obligationValue = {
                                     ...obligationValue,
                                     status: e.target.value,
-                                    obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                                    obligationLevel: obligationLevel,
                                 }
                                 setPayload((payload: ObligationEntry) => ({
                                     ...payload,
@@ -315,9 +314,9 @@ export default function ObligationTab({
                         Object.entries({
                             ...pageableQueryParam,
                             obligationLevel:
-                                obligationType === ObligationType.ORGANISATION_OBLIGATION
+                                obligationLevel === ObligationLevel.ORGANISATION_OBLIGATION
                                     ? 'organization'
-                                    : obligationType === ObligationType.COMPONENT_OBLIGATION
+                                    : obligationLevel === ObligationLevel.COMPONENT_OBLIGATION
                                       ? 'component'
                                       : 'project',
                         }).map(([key, value]) => [
@@ -493,7 +492,7 @@ export default function ObligationTab({
                         obligationValue = {
                             ...obligationValue,
                             comment: comment,
-                            obligationType: obligationType,
+                            obligationLevel: obligationLevel,
                         }
                         setPayload((payload: ObligationEntry) => ({
                             ...payload,

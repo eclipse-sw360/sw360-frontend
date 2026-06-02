@@ -123,3 +123,10 @@ export const ObligationLevelInfo = {
     PROJECT_OBLIGATION:
         'Project obligations are specific to the projects or products nature and are also requires steps or tasks to be made sure before conveying the software. An example could be tiny hardware with limited printed documentation. In this case open source license information would required special handling, for example print instructions how to obtain OSS license information on the packaging.',
 }
+
+export enum ObligationLevel {
+    LICENSE_OBLIGATION = 'LICENSE_OBLIGATION',
+    COMPONENT_OBLIGATION = 'COMPONENT_OBLIGATION',
+    ORGANISATION_OBLIGATION = 'ORGANISATION_OBLIGATION',
+    PROJECT_OBLIGATION = 'PROJECT_OBLIGATION',
+}
