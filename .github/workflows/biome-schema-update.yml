@@ -31,6 +31,11 @@ jobs:
 
       - name: Checkout source code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # Checkout the PR branch so commits can be pushed back to it.
+          ref: ${{ github.head_ref }}
+          # Needed to diff package.json between PR base/head commits.
+          fetch-depth: 0
 
       - name: pnpm-setup
         uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
@@ -61,11 +66,15 @@ jobs:
 
       - name: Check if Biome was updated
         id: check_biome
+        shell: bash
         run: |
-          if git diff HEAD~1 package.json | grep -q '@biomejs/biome'; then
-            echo "biome_updated=true" >> $GITHUB_OUTPUT
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          if git diff "$BASE_SHA" "$HEAD_SHA" -- package.json | grep -q '@biomejs/biome'; then
+            echo "biome_updated=true" >> "$GITHUB_OUTPUT"
           else
-            echo "biome_updated=false" >> $GITHUB_OUTPUT
+            echo "biome_updated=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run Biome migrate
@@ -83,6 +92,5 @@ jobs:
           else
             git add biome.json
             git commit -m "chore: update biome schema to match CLI version"
-            git push
+            git push origin HEAD:${{ github.head_ref }}
           fi
-
