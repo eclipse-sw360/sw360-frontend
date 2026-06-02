@@ -416,7 +416,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             if (index !== -1) {
                                 return (
                                     <div className='text-center'>
-                                        {Capitalize(memoizedLicenseClearing?.linkedReleases[index].relation ?? '')}
+                                        {Capitalize(memoizedLicenseClearing?.linkedReleases?.[index].relation ?? '')}
                                     </div>
                                 )
                             }
