@@ -23,7 +23,7 @@ ARG NEXTAUTH_URL=http://localhost:3000
 ARG AUTH_SECRET=mysecret
 
 RUN npm config set registry $NPM_CONFIG_REGISTRY \
- && npm install -g pnpm@latest-10
+ && npm install -g pnpm@latest-11
 
 WORKDIR /frontend
 
