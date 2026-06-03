@@ -72,7 +72,7 @@ const ReleaseAgrregate = ({ component }: { component: Component }): ReactNode =>
                     <td>{component.softwarePlatforms && component.softwarePlatforms.join(', ')}</td>
                 </tr>
                 <tr>
-                    <td>{t('Operating System')}:</td>
+                    <td>{t('Operating Systems')}:</td>
                     <td>{component.operatingSystems && component.operatingSystems.join(', ')}</td>
                 </tr>
                 <tr>

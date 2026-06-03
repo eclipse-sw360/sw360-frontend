@@ -787,7 +787,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                             className='mt-2'
                             onClick={() => addRootNode()}
                         >
-                            {t('Add Release')}
+                            {t('Add Releases')}
                         </Button>
                     </>
                 ) : (

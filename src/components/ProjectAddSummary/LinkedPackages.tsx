@@ -261,7 +261,7 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
                             className='btn btn-secondary'
                             onClick={() => setShowLinkedPackagesModal(true)}
                         >
-                            {t('Add Package')}
+                            {t('Add Packages')}
                         </button>
                     </div>
                 </div>
