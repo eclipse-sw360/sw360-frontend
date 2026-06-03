@@ -235,6 +235,20 @@ const tableIdToUrlParamMapper: Record<string, string> = {
     state: 'clearingState',
 }
 
+const comparator = (a: TypedProject | TypedRelease, b: TypedProject | TypedRelease): number => {
+    if (a.type === 'release' && b.type === 'project') {
+        return -1
+    } else if (a.type === 'project' && b.type === 'release') {
+        return 1
+    } else {
+        const aName = `${a.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.entity.version) && `(${a.entity.version})`}`
+        const bName = `${b.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.entity.version) && `(${b.entity.version})`}`
+        if (aName === bName) return 0
+        else if (aName < bName) return -1
+        else return 1
+    }
+}
+
 const buildTable = (
     licenseClearing: LicenseClearing,
     linkedProjects: Project[],
@@ -253,6 +267,7 @@ const buildTable = (
     )
     path.splice(0, path.length)
     extractLinkedReleases(projectName, projectVersion, licenseClearing, finalData, path)
+    finalData.sort(comparator)
     return finalData
 }
 

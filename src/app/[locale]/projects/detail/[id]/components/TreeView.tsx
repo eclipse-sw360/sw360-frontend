@@ -164,6 +164,27 @@ const stateFilterOptions: FilterOption[] = [
     },
 ]
 
+const comparator = (a: NestedRows<TypedProject | TypedRelease>, b: NestedRows<TypedProject | TypedRelease>): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
+    } else {
+        const aName = `${a.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.node.entity.version) && `(${a.node.entity.version})`}`
+        const bName = `${b.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.node.entity.version) && `(${b.node.entity.version})`}`
+        if (aName === bName) return 0
+        else if (aName < bName) return -1
+        else return 1
+    }
+}
+
+const sortAllLevels = (rows: NestedRows<TypedProject | TypedRelease>[]) => {
+    for (const r of rows) {
+        if (r.children && r.children.length !== 0) sortAllLevels(r.children)
+    }
+    rows.sort(comparator)
+}
+
 const buildTable = (
     setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease>[]>>,
     licenseClearing: LicenseClearing,
@@ -185,10 +206,14 @@ const buildTable = (
         releaseRows.push(nodeRelease)
     }
 
-    setRowData([
+    const rows = [
         ...linkedProjectRows,
         ...releaseRows,
-    ])
+    ]
+
+    sortAllLevels(rows)
+
+    setRowData(rows)
 }
 
 const extractLinkedProjectsAndTheirLinkedReleases = (
