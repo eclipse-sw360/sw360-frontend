@@ -82,7 +82,7 @@ const TableHeader = () => {
                                     <br />
                                     <b>{t('SPECIFIC')}</b>: {t('mainline_state_specific_tooltip')}
                                     <br />
-                                    <b>{t('Phaseout')}</b>: {t('mainline_state_phaseout_tooltip')}
+                                    <b>{t('PHASEOUT')}</b>: {t('mainline_state_phaseout_tooltip')}
                                     <br />
                                     <b>{t('DENIED')}</b>: {t('mainline_state_denied_tooltip')}
                                 </>

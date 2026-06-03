@@ -423,7 +423,7 @@ const ReleaseGeneral = ({ release, releaseId, fileList }: Props): ReactNode => {
                         </td>
                     </tr>
                     <tr>
-                        <td>{t('Operating System')}:</td>
+                        <td>{t('Operating Systems')}:</td>
                         <td>
                             {!CommonUtils.isNullEmptyOrUndefinedArray(release.operatingSystems) &&
                                 renderArrayOfTexts(release.operatingSystems)}

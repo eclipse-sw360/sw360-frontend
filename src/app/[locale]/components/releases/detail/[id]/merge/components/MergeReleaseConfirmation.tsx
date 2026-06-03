@@ -64,7 +64,7 @@ export default function MergeReleaseConfirmation({
                             <div className='mt-2 col'>{(finalReleasePayload.languages ?? []).join(', ')}</div>
                         </div>
                         <div className='border border-top-0 border-blue p-2'>
-                            <div className='fw-bold text-blue'>{t('Operating System')}</div>
+                            <div className='fw-bold text-blue'>{t('Operating Systems')}</div>
                             <div className='d-flex row'>
                                 <div className='mt-2 col'>{finalReleasePayload.operatingSystems?.join(', ')}</div>
                             </div>

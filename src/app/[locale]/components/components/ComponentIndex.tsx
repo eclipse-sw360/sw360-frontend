@@ -189,7 +189,7 @@ const ComponentIndex = (): ReactNode => {
             autocompleteSuggestions: vendorsSuggestions,
         },
         {
-            fieldName: t('Operating System'),
+            fieldName: t('Operating Systems'),
             value: '',
             paramName: 'operatingSystems',
             enableAutocomplete: true,

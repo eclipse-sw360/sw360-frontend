@@ -365,7 +365,7 @@ const ReleaseSummary = ({
                                     htmlFor='operating_systems'
                                     className='form-label fw-bold'
                                 >
-                                    {t('Operating System')}
+                                    {t('Operating Systems')}
                                 </label>
                                 <SuggestionBox
                                     initialValue={releasePayload.operatingSystems?.join(', ')}
@@ -580,7 +580,7 @@ const ReleaseSummary = ({
                                     <option value='OPEN'>{t('OPEN')}</option>
                                     <option value='MAINLINE'> {t('MAINLINE')}</option>
                                     <option value='SPECIFIC'>{t('SPECIFIC')}</option>
-                                    <option value='PHASEOUT'>{t('Phaseout')}</option>
+                                    <option value='PHASEOUT'>{t('PHASEOUT')}</option>
                                     <option value='DENIED'>{t('DENIED')}</option>
                                 </select>
                                 <div
