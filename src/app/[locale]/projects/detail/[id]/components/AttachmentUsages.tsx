@@ -211,6 +211,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
     const [showProcessingLinkedProjects, setShowProcessingLinkedProjects] = useState(false)
     const [showProcessingAttachmentUsages, setShowProcessingAttachmentUsages] = useState(false)
+    const [isTableBuilding, setIsTableBuilding] = useState(false)
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const memoizedLinkedProjects = useMemo(
@@ -269,9 +270,26 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 MessageService.error(t('Something went wrong'))
                 return notFound()
             }
-            MessageService.success(t('AttachmentUsages saved successfully'))
+
+            // Check for warnings in response (e.g. stale sub-project or release references)
+            try {
+                const responseBody = await response.json()
+                if (responseBody.warnings && responseBody.warnings.length > 0) {
+                    responseBody.warnings.forEach((warning: string) => {
+                        MessageService.warn(warning, {
+                            autoClose: false,
+                        })
+                    })
+                    MessageService.success(t('AttachmentUsages saved successfully (with warnings)'))
+                } else {
+                    MessageService.success(t('AttachmentUsages saved successfully'))
+                }
+            } catch {
+                // Response was plain text (no warnings)
+                MessageService.success(t('AttachmentUsages saved successfully'))
+            }
         } catch (e) {
-            console.error(e)
+            ApiUtils.reportError(e)
         } finally {
             setSaveUsagesLoading(false)
         }
@@ -950,7 +968,13 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     useEffect(() => {
         if (memoizedAttachmentUsages === undefined) return
 
-        buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects)
+        setIsTableBuilding(true)
+        // Use requestAnimationFrame to allow the browser to paint the loading indicator
+        // before starting the expensive table build
+        requestAnimationFrame(() => {
+            buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects)
+            setIsTableBuilding(false)
+        })
     }, [
         memoizedAttachmentUsages,
         memoizedLinkedProjects,
@@ -977,7 +1001,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 {table ? (
                     <SW360Table
                         table={table}
-                        showProcessing={showProcessingLinkedProjects || showProcessingAttachmentUsages}
+                        showProcessing={
+                            showProcessingLinkedProjects || showProcessingAttachmentUsages || isTableBuilding
+                        }
                     />
                 ) : (
                     <div className='col-12 mt-1 text-center'>

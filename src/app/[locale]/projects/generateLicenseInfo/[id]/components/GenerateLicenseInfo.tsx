@@ -799,14 +799,20 @@ function GenerateLicenseInfo({
                     )
                 }
                 const responses = await Promise.all(requests)
-                responses.map(async (r) => {
+                for (const r of responses) {
                     if (r.status !== StatusCodes.OK) {
-                        const err = (await r.json()) as ErrorDetails
-                        throw new ApiError(err.message, {
+                        let message = `Request failed with status ${r.status}`
+                        try {
+                            const err = (await r.json()) as ErrorDetails
+                            message = err.message
+                        } catch {
+                            // Response body is not valid JSON
+                        }
+                        throw new ApiError(message, {
                             status: r.status,
                         })
                     }
-                })
+                }
 
                 const proj = (await responses[0].json()) as Project
                 setProject(proj)

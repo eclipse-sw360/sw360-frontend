@@ -214,8 +214,8 @@ const extractLinkedReleases = (
     path: string[],
 ) => {
     path.push(`${projectName} (${projectVersion})`)
-    for (const l of licenseClearing['linkedReleases']) {
-        const release = licenseClearing['_embedded']['sw360:release'].filter(
+    for (const l of licenseClearing?.['linkedReleases'] ?? []) {
+        const release = licenseClearing?._embedded?.['sw360:release']?.filter(
             (r: Release) => r.id === l.release.split('/').at(-1),
         )?.[0]
         finalData.push({
@@ -244,7 +244,7 @@ const buildTable = (
     const finalData: (TypedProject | TypedRelease)[] = []
     const path: string[] = []
     extractLinkedProjectsAndTheirLinkedReleases(
-        licenseClearing['_embedded']['sw360:release'],
+        licenseClearing['_embedded']?.['sw360:release'] ?? [],
         linkedProjects,
         finalData,
         path,

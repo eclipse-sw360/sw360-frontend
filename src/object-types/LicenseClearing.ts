@@ -28,10 +28,10 @@ export default interface LicenseClearing {
     enableSvm: boolean
     considerReleasesFromExternalList: boolean
     enableVulnerabilitiesDisplay: boolean
-    linkedReleases: LinkedRelease[]
+    linkedReleases?: LinkedRelease[]
     linkedProjects?: LinkedProject[]
     _links: Links
-    _embedded: {
-        'sw360:release': Release[]
+    _embedded?: {
+        'sw360:release'?: Release[]
     }
 }

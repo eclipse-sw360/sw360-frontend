@@ -169,15 +169,12 @@ const buildTable = (
     licenseClearing: LicenseClearing,
     linkedProjects: Project[],
 ) => {
-    const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(
-        licenseClearing['_embedded']['sw360:release'],
-        linkedProjects,
-    )
+    const embeddedReleases = licenseClearing._embedded?.['sw360:release'] ?? []
+    const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(embeddedReleases, linkedProjects)
     const releaseRows: NestedRows<TypedProject | TypedRelease>[] = []
-    for (const l of licenseClearing['linkedReleases']) {
-        const release = licenseClearing['_embedded']['sw360:release'].filter(
-            (r: Release) => r.id === l.release.split('/').at(-1),
-        )?.[0]
+    for (const l of licenseClearing.linkedReleases ?? []) {
+        const release = embeddedReleases.filter((r: Release) => r.id === l.release.split('/').at(-1))?.[0]
+        if (release === undefined) continue
         const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
             node: {
                 type: 'release',
@@ -419,7 +416,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             if (index !== -1) {
                                 return (
                                     <div className='text-center'>
-                                        {Capitalize(memoizedLicenseClearing?.linkedReleases[index].relation ?? '')}
+                                        {Capitalize(memoizedLicenseClearing?.linkedReleases?.[index].relation ?? '')}
                                     </div>
                                 )
                             }
