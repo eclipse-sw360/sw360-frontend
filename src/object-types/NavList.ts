@@ -80,7 +80,7 @@ function NavList(): NavItem[] {
                     id: 'admin_vendors',
                 },
                 {
-                    href: '/bulkreleaseedit',
+                    href: '/admin/bulkreleaseedit',
                     name: t('Bulk Release Edit'),
                     id: 'admin_bulk_edit',
                 },
