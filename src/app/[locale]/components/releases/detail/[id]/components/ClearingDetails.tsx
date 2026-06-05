@@ -14,10 +14,9 @@
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { FossologyClearing } from 'next-sw360'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import { Attachment, ReleaseDetail } from '@/object-types'
 import AssessmentSummaryInfo from './AssessmentSummaryInfo'
@@ -36,15 +35,6 @@ const ClearingDetails = ({ release, releaseId, embeddedAttachments }: Props): Re
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [show, setShow] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <div className='col'>

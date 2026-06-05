@@ -11,12 +11,13 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { JSX, useCallback, useEffect, useState } from 'react'
 import { ErrorDetails, ServiceDetailsResponse } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ScheduleItem } from './ScheduleItem'
 
 export default function VendorsList(): JSX.Element {
@@ -30,18 +31,10 @@ export default function VendorsList(): JSX.Element {
     }, [])
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         const controller = new AbortController()
 
         const fetchServiceDetails = async () => {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             try {
                 const response = await ApiUtils.GET(
@@ -68,7 +61,7 @@ export default function VendorsList(): JSX.Element {
 
     const handleCancelAllTasks = async () => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.POST('schedule/unscheduleAllServices', {}, session.data.user.access_token)
             if (response.status === StatusCodes.OK) {
@@ -85,7 +78,7 @@ export default function VendorsList(): JSX.Element {
                 )
                 MessageService.success(t('Every task unscheduled successfully'))
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -103,7 +96,7 @@ export default function VendorsList(): JSX.Element {
         successMessage: string,
     ): Promise<void> => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             let response
 
@@ -124,7 +117,7 @@ export default function VendorsList(): JSX.Element {
                 MessageService.success(successMessage)
                 refreshServiceDetails()
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -138,7 +131,7 @@ export default function VendorsList(): JSX.Element {
 
     const handleTriggerService = async (serviceName: string): Promise<void> => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.POST(
                 `schedule/triggerService?serviceName=${encodeURIComponent(serviceName)}`,
@@ -150,7 +143,7 @@ export default function VendorsList(): JSX.Element {
                 MessageService.success(t('Task performed successfully'))
                 refreshServiceDetails()
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

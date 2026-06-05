@@ -11,11 +11,12 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import { Embedded, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import VulnerabilityTab from './VulnerabilityTab'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -36,16 +37,8 @@ const extractLinkedProjects = (projectPayload: Project[], projectData: ProjectDa
 }
 
 export default function ProjectVulnerabilities({ projectData }: { projectData: ProjectData }): JSX.Element {
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
     const [data, setData] = useState<ProjectData[]>([])
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         if (CommonUtils.isNullOrUndefined(session)) return
@@ -61,7 +54,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
                     signal,
                 )
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }

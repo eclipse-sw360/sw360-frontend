@@ -9,10 +9,10 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import DateField from '@/components/DateField'
 import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
@@ -33,17 +33,9 @@ export default function EditClearingDecision({
     setUpdateClearingRequestPayload,
 }: Props): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)

@@ -12,7 +12,7 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useRef, useState } from 'react'
@@ -20,6 +20,7 @@ import { Breadcrumb, Button, Card, Col, Collapse, Row, Spinner, Tab } from 'reac
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequestDetails, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
 import ClearingComments from './ClearingComments'
 import ClearingDecision from './ClearingDecision'
@@ -34,28 +35,19 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const [isReopenClosedCR, setIsReopenClosedCR] = useState<boolean>(false)
     const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState<boolean>(false)
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>()
-    const { status } = useSession()
     const param = useParams()
     const locale = (param.locale as string) || 'en'
     const requestsPath = `/${locale}/requests`
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const fetchData = async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ClearingRequestDetails
             return data
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             notFound()
         }
@@ -66,7 +58,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             toastShownRef.current = true
         }
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
-            (clearingRequestDetails: ClearingRequestDetails | undefined) => {
+            (clearingRequestDetails: ClearingRequestDetails | void) => {
                 if (!Object.hasOwn(clearingRequestDetails ?? {}, 'projectId')) {
                     setIsProjectDeleted(true)
                 }
@@ -77,7 +69,9 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
                 ) {
                     setIsReopenClosedCR(true)
                 }
-                setClearingRequestData(clearingRequestDetails)
+                if (!CommonUtils.isNullOrUndefined(clearingRequestDetails)) {
+                    setClearingRequestData(clearingRequestDetails)
+                }
             },
         )
     }, [

@@ -10,7 +10,6 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { JSX, useEffect, useState } from 'react'
 import { BsCaretDownFill, BsCaretRightFill } from 'react-icons/bs'
 import { ObligationRelease } from '@/object-types'
@@ -25,15 +24,6 @@ export function ShowObligationTextOnExpand({
     colLength: number
 }): JSX.Element {
     const [isExpanded, setIsExpanded] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         if (isExpanded) {
@@ -91,15 +81,7 @@ export function ExpandableList({
     commonReleases: ObligationRelease[]
 }): JSX.Element {
     const [isExpanded, setExpanded] = useState(false)
-    const { status } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
     return (
         <>
             {isExpanded ? (

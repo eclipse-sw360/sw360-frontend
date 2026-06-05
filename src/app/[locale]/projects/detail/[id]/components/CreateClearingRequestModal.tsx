@@ -10,15 +10,16 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
 import DateField from '@/components/DateField'
 import { ClearingRequestDetails, CreateClearingRequestPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -48,15 +49,6 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
         priority: 'LOW',
         requestingUserComment: '',
     })
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)
@@ -83,7 +75,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
     const createClearingRequest = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.POST(
                 `projects/${projectId}/clearingRequest`,
                 createClearingRequestPayload,
@@ -110,7 +102,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
                 displayMessage('danger', <>{t('Clearing request already present for project')}</>)
                 setIsDisabled(true)
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 displayMessage('danger', <>{t('Error while processing')}</>)
             }

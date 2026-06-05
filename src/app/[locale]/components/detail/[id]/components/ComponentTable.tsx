@@ -11,13 +11,14 @@
 
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
 
@@ -49,14 +50,6 @@ export default function ComponentTable({
             })
         }
     }
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<Component>[]>(
         () => [
@@ -138,7 +131,7 @@ export default function ComponentTable({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components`,
                     Object.fromEntries(

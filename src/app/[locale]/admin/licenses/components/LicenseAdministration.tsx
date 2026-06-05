@@ -10,15 +10,16 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, JSX, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react'
+import { Dispatch, JSX, ReactNode, SetStateAction, useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 import { FaRegQuestionCircle } from 'react-icons/fa'
 import { ErrorDetails } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
 type ModalType = 'OSADL' | 'SPDX' | undefined
@@ -52,19 +53,11 @@ function ConfirmationModal({ type, setType }: { type: ModalType; setType: Dispat
     const session = useSession()
     const [alert, setAlert] = useState<AlertData | null>(null)
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleImport = async () => {
         try {
             setState(ImportState.LOADING)
             if (!session.data) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const response = await ApiUtils.POST(url, {}, session.data.user.access_token)
             const res = (await response.json()) as ImportResult
@@ -165,14 +158,6 @@ export default function LicenseAdministration(): ReactNode {
     const [confirmationModalType, setConfirmationModalType] = useState<ModalType>(undefined)
     const session = useSession()
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files
 
@@ -191,7 +176,7 @@ export default function LicenseAdministration(): ReactNode {
             formData.append('licenseFile', file.current, file.current.name)
 
             if (!session.data) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const response = await ApiUtils.POST(
                 `licenses/upload?overwriteIfExternalIdMatches=${
@@ -215,7 +200,7 @@ export default function LicenseAdministration(): ReactNode {
 
     const downloadLicenseArchive = () => {
         try {
-            if (!session.data) return signOut()
+            if (!session.data) return dispatchSessionExpiredEvent()
             void DownloadService.download('licenses/downloadLicenses', session.data, `LicensesBackup.lics`)
         } catch (error) {
             ApiUtils.reportError(error)

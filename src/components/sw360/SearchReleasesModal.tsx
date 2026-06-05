@@ -14,7 +14,7 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import {
     ClientSidePageSizeSelector,
@@ -28,6 +28,7 @@ import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail, SearchResult } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface SearchReleasesModalProps {
     show: boolean
@@ -60,14 +61,6 @@ export default function SearchReleasesModal({
     const [byNameOnly, setByNameOnly] = useState(true)
     const [onlySubProjectReleases, setOnlySubProjectReleases] = useState(false)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleSelectRelease = (releaseDetail: ReleaseDetail) => {
         if (!multiSelect) {
@@ -255,7 +248,7 @@ export default function SearchReleasesModal({
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /releases endpoint
@@ -353,7 +346,7 @@ export default function SearchReleasesModal({
         setOnlySubProjectReleases(true)
         setShowProcessing(true)
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.GET(
                 `projects/${projectId}/subProjects/releases`,

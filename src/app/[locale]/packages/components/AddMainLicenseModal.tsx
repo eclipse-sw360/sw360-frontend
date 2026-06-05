@@ -11,13 +11,14 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, LicenseDetail, Package, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     showMainLicenseModal: boolean
@@ -36,14 +37,6 @@ export default function AddMainLicenseModal({
     const [newMainLicense, setNewMainLicense] = useState<Array<string>>()
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     useEffect(() => {
         if (packagePayload.licenseIds && packagePayload.licenseIds.length !== 0 && newMainLicense === undefined) {
@@ -160,7 +153,7 @@ export default function AddMainLicenseModal({
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const queryUrl = CommonUtils.createUrlWithParams(
                 `licenses`,

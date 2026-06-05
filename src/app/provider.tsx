@@ -12,11 +12,17 @@
 import { SessionProvider } from 'next-auth/react'
 
 import type { JSX } from 'react'
+import SessionStatusHandler from './SessionStatusHandler'
 
 type Props = {
     children?: React.ReactNode
 }
 
 export const Providers = ({ children }: Props): JSX.Element => {
-    return <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
+    return (
+        <SessionProvider refetchOnWindowFocus={false}>
+            <SessionStatusHandler />
+            {children}
+        </SessionProvider>
+    )
 }

@@ -19,7 +19,7 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -303,14 +303,6 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         | boolean
         | null
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
-
     const columns = useMemo<ColumnDef<NestedRows<TypedProject | TypedRelease>>[]>(
         () => [
             {
@@ -383,15 +375,10 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             <div className='text-center'>{Capitalize(row.original.node.entity.projectType ?? '')}</div>
                         )
                     } else {
-                        return (
-                            <div className='text-center'>
-                                {
-                                    typeFilterOptions.filter(
-                                        (op) => op.value === (row.original.node.entity as Release).componentType,
-                                    )[0].tag
-                                }
-                            </div>
-                        )
+                        const componentType = (row.original.node.entity as Release).componentType
+                        const typeOption = typeFilterOptions.find((op) => op.value === componentType)
+
+                        return <div className='text-center'>{typeOption?.tag ?? componentType ?? ''}</div>
                     }
                 },
                 meta: {

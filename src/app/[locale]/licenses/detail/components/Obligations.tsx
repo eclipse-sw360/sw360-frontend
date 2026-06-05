@@ -19,13 +19,14 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { ErrorDetails, LicenseDetail, NestedRows, Obligation } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     licenseId?: string
@@ -41,14 +42,6 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
     const [globalFilter, setGlobalFilter] = useState('')
     const [obligationData, setObligationData] = useState<Obligation[]>([])
     const [showProcessing, setShowProcessing] = useState(false)
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const memoizedData = useMemo(
         () =>
@@ -81,7 +74,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 setShowProcessing(true)
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {

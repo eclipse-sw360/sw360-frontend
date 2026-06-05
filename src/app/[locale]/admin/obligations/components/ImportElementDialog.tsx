@@ -11,9 +11,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Button, Form, Modal, Table } from 'react-bootstrap'
 import { ObligationElement } from '../../../../../object-types/Obligation'
 
@@ -26,15 +25,6 @@ interface Props {
 function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
     const t = useTranslations('default')
     const [selectedElementIndex, setSelectedElementIndex] = useState<number>(-1)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const obligationElements: ObligationElement[] = [
         {

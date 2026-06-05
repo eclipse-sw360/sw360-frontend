@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, type FormEvent, type ReactElement, SetStateAction, useEffect, useState } from 'react'
@@ -19,6 +19,7 @@ import { BsXCircle } from 'react-icons/bs'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddMainLicenseModal from './AddMainLicenseModal'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
@@ -66,14 +67,6 @@ export default function CreateOrEditPackage({
     })
     const [isPackageUsed, setIsPackageUsed] = useState(false)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -136,7 +129,11 @@ export default function CreateOrEditPackage({
             void (async () => {
                 try {
                     const sessionData = session.data
-                    if (CommonUtils.isNullOrUndefined(sessionData?.user?.access_token)) return signOut()
+                    if (
+                        CommonUtils.isNullOrUndefined(sessionData) ||
+                        CommonUtils.isNullOrUndefined(sessionData?.user?.access_token)
+                    )
+                        return dispatchSessionExpiredEvent()
 
                     const response = await ApiUtils.GET(`packages/${packageId}/usage`, sessionData.user.access_token)
                     if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {

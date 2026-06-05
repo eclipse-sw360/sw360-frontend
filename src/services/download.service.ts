@@ -10,8 +10,8 @@
 // License-Filename: LICENSE
 
 import { Session } from 'next-auth'
-import { signOut } from 'next-auth/react'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const parseFilenameFromContentDisposition = (response: Response): string | null => {
     const header = response.headers.get('Content-Disposition')
@@ -41,7 +41,8 @@ const download = async (
     },
 ): Promise<number | undefined> => {
     if (CommonUtils.isNullOrUndefined(session)) {
-        return signOut()
+        dispatchSessionExpiredEvent()
+        return undefined
     }
     try {
         const response = await ApiUtils.GET(url, session.user.access_token, undefined, headers)

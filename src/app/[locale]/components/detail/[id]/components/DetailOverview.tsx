@@ -14,7 +14,7 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
@@ -40,6 +40,7 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
 
@@ -66,14 +67,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const session = useSession()
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
         setActiveKey(fragment)
     }, [
@@ -86,7 +79,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const downloadBundle = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         await DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
             session.data,
@@ -108,7 +101,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`components/${componentId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -139,7 +132,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `components/${componentId}/vulnerabilities`,
                     session.data.user.access_token,
@@ -245,7 +238,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${componentId}`,
                     Object.fromEntries(

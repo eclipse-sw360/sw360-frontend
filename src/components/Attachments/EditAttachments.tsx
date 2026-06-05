@@ -11,7 +11,7 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Modal } from 'react-bootstrap'
@@ -151,14 +151,6 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
     const session = useSession()
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [attachmentsData, setAttachmentsData] = useState<Attachment[]>(() => [])
     const memoizedData = useMemo(

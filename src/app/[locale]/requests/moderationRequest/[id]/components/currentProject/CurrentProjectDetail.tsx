@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
@@ -33,14 +33,6 @@ export default function CurrentProjectDetail({
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         const controller = new AbortController()

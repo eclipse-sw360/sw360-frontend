@@ -14,7 +14,7 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -32,13 +32,14 @@ import {
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 function LicensePage(): ReactNode {
     const params = useSearchParams()
     const t = useTranslations('default')
     const [search, setSearch] = useState({})
     const [numberLicense, setNumberLicense] = useState(0)
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
     const deleteLicense = params.get('delete')
 
     useEffect(() => {
@@ -56,14 +57,6 @@ function LicensePage(): ReactNode {
             searchText: value,
         })
     }
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedString(deleteLicense)) {
@@ -177,7 +170,7 @@ function LicensePage(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `licenses`,

@@ -19,7 +19,7 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -30,6 +30,7 @@ import { Embedded, ErrorDetails, FilterOption, LinkedPackage } from '@/object-ty
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     releaseId: string
@@ -59,14 +60,6 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         variant: string
         message: JSX.Element
     } | null>(null)
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<LinkedPackage>[]>(
         () => [
@@ -268,7 +261,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails

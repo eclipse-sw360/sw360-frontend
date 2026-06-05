@@ -14,7 +14,7 @@
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -22,19 +22,12 @@ import { Spinner } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import SecondaryDepartments from './SecondaryDepartments'
 
 const SecondaryDepartmentsTable = (): JSX.Element => {
     const t = useTranslations('default')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<
         ColumnDef<
@@ -115,7 +108,7 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
                 const response = await ApiUtils.GET('departments/members', session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {

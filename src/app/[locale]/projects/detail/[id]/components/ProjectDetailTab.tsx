@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
@@ -29,6 +29,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import LinkProjects from '../../../components/LinkProjects'
@@ -68,14 +69,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     })
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB
         setActiveKey(fragment)
     }, [
@@ -94,7 +87,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/summaryAdministration`,
                     session.data.user.access_token,
@@ -128,7 +121,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         const signal = controller.signal
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/clearingDetailsCount`,
                     session.data.user.access_token,
@@ -153,7 +146,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     ])
 
     const handleEditProject = (projectId: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         if (session?.data.user.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
@@ -174,7 +167,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
             setVulnerabilitiesLoading(true)
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) {
-                    void signOut()
+                    dispatchSessionExpiredEvent()
                     return
                 }
 

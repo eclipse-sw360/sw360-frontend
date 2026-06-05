@@ -11,9 +11,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Release } from '@/object-types'
@@ -37,15 +36,6 @@ const ShowInfoOnHover = ({ text }: { text: string }) => {
 
 const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setReleasePayload({

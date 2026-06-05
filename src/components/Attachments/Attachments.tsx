@@ -14,7 +14,7 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -66,14 +66,6 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
             ApiUtils.reportError(error)
         }
     }
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<NestedRows<Attachment>>[]>(
         () => [

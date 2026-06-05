@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
@@ -21,6 +21,7 @@ import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
 import DependencyNetworkTreeView from './DependencyNetworkTreeView'
@@ -53,7 +54,6 @@ function LicenseClearing({
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
-    const { status } = useSession()
 
     // Configs from backend
     const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
@@ -64,24 +64,16 @@ function LicenseClearing({
     const disableCrButton = !crIsAllowed
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
         ;(async () => {
             try {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) {
                     MessageService.error(t('Session has expired'))
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 }
                 const response = await ApiUtils.GET('configurations?changeable=false', session.user.access_token)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    signOut()
+                    dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     setDependencyNetworkFeatureEnabled(false)
                     return
@@ -109,7 +101,7 @@ function LicenseClearing({
     const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
             const mailEnabled = mailRequestForProjectReport === 'true'
             const url = withLinkedRelease

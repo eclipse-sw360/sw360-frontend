@@ -12,13 +12,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     obligationId: string
@@ -28,26 +29,17 @@ interface Props {
 
 function DeleteObligationDialog({ obligationId, show, setShow }: Props): ReactNode {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const deleteObligation = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.DELETE(`obligations/${obligationId}`, session.user.access_token)
             if (response.status === StatusCodes.MULTI_STATUS) {
                 MessageService.success(t('Obligation deleted successfully'))
                 setShow(false)
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(t('Error while processing'))
             }

@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { JSX, useEffect, useMemo, useState } from 'react'
@@ -29,6 +29,7 @@ import {
     Project,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ExpandableList } from './ExpandableComponents'
 
 const Capitalize = (text: string) =>
@@ -49,14 +50,6 @@ interface ProjectObligationData extends ObligationData {
 export default function LicenseObligation({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<
         ColumnDef<
@@ -238,7 +231,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/licenseObligations`,
                     Object.fromEntries(

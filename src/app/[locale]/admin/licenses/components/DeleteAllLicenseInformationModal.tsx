@@ -10,12 +10,13 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { ApiUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Message {
     type: 'success' | 'danger'
@@ -32,26 +33,17 @@ export default function DeleteAllLicenseInformationModal({
     const t = useTranslations('default')
     const [deleting, setDeleting] = useState<boolean>(false)
     const [message, setMessage] = useState<undefined | Message>(undefined)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleDelete = async () => {
         try {
             setDeleting(true)
             const session = await getSession()
             if (!session) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const response = await ApiUtils.DELETE('licenses/deleteAll', session.user.access_token)
             if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status !== StatusCodes.OK) {
                 setMessage({
                     type: 'danger',

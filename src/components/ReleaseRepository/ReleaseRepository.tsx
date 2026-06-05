@@ -11,10 +11,9 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { type JSX, useEffect } from 'react'
+import React, { type JSX } from 'react'
 import { Release } from '@/object-types'
 
 interface Props {
@@ -24,15 +23,6 @@ interface Props {
 
 const ReleaseRepository = ({ releasePayload, setReleasePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         setReleasePayload({

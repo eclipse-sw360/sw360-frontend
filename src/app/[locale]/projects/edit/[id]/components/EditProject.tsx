@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -42,6 +42,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
 
@@ -76,14 +77,6 @@ function EditProject({
     const [hasClearingRequest, setHasClearingRequest] = useState(false)
 
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleDeleteProject = () => {
         setDeleteDialogOpen(true)
@@ -259,7 +252,7 @@ function EditProject({
     }
 
     const fetchUserData = useCallback(async (url: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.data.user.access_token)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as User
@@ -280,7 +273,7 @@ function EditProject({
         const loadServerObligations = async () => {
             try {
                 const s = await getSession()
-                if (CommonUtils.isNullOrUndefined(s)) return signOut()
+                if (CommonUtils.isNullOrUndefined(s)) return dispatchSessionExpiredEvent()
 
                 const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
                     page: '0',
@@ -323,7 +316,7 @@ function EditProject({
     useEffect(() => {
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token)
                 if (response.status !== StatusCodes.OK) {
                     return notFound()
@@ -541,7 +534,7 @@ function EditProject({
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'PROJECT',
             entityId: projectId,
@@ -574,7 +567,7 @@ function EditProject({
 
     const updateProject = async (payload?: ProjectPayload) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             const dataToUpdate = payload ?? projectPayload
             const requests = [
                 ApiUtils.PATCH(

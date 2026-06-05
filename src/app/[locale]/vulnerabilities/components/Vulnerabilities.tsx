@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tansta
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -28,6 +28,7 @@ import {
     Vulnerability,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
 
 type EmbeddedVulnerabilities = Embedded<Vulnerability, 'sw360:vulnerabilityApiDTOes'>
@@ -51,14 +52,6 @@ function Vulnerabilities(): ReactNode {
         totalPages: 0,
         number: 0,
     })
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
@@ -230,7 +223,7 @@ function Vulnerabilities(): ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(

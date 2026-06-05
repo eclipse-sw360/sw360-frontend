@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
@@ -22,6 +22,7 @@ import { BsFillTrashFill } from 'react-icons/bs'
 import { Embedded, User } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import SecondaryDepartments from '../components/SecondaryDepartments'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
@@ -35,15 +36,6 @@ const EditDepartmentPage = (): JSX.Element => {
     const [memberEmails, setMemberEmails] = useState<string[] | undefined>(undefined)
     const [emailSuggestions, setEmailSuggestions] = useState<string[]>([])
     const allEmails = useRef<string[]>([])
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleUpdateDepartmentMembers = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -58,7 +50,7 @@ const EditDepartmentPage = (): JSX.Element => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.PATCH(
             `departments/members?departmentName=${secondaryDepartmentName}`,
@@ -67,7 +59,7 @@ const EditDepartmentPage = (): JSX.Element => {
         )
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status !== StatusCodes.OK) {
             MessageService.error('Failed to update department members')
@@ -85,11 +77,11 @@ const EditDepartmentPage = (): JSX.Element => {
         }
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.GET(`departments/members`, session.user.access_token)
         if (response.status === StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Failed to fetch member of departments'))
@@ -106,11 +98,11 @@ const EditDepartmentPage = (): JSX.Element => {
     const fetchSuggestionUserEmails = useCallback(async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.GET(`users`, session.user.access_token)
         if (response.status === StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Failed to fetch member of departments'))

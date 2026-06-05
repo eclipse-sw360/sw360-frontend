@@ -11,7 +11,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -74,16 +73,6 @@ function ReleaseAddSummary({
     const [moderators, setModerators] = useState<{
         [k: string]: string
     }>({})
-
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         if (!releaseDetail) return

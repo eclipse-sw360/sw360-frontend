@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
@@ -20,6 +20,7 @@ import Modal from 'react-bootstrap/Modal'
 import { BsInfoCircle } from 'react-icons/bs'
 import { ErrorDetails, FileList, SrcFileList } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface LicenseInfo {
     license: string
@@ -46,7 +47,7 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
 
     useEffect(() => {
         if (session.status === 'unauthenticated') {
-            signOut()
+            dispatchSessionExpiredEvent()
         }
     }, [
         session.status,
@@ -59,7 +60,7 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `releases/${releaseId}/licenseFileList?attachmentId=${attachmentId}`,
                     session.data.user.access_token,

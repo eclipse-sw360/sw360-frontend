@@ -12,14 +12,15 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
 import { ErrorDetails, UIConfigKeys } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -33,19 +34,10 @@ const UserAccessToken = (): ReactNode => {
         ],
     })
     const [generatedToken, setGeneratedToken] = useState<string>('')
-    const { status } = useSession()
 
     // Config values from backend
     const apiTokenGenerator = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE)
     const writeAuthorityAllowed = apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const generateToken = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -61,7 +53,7 @@ const UserAccessToken = (): ReactNode => {
                     tokenData.authorities = tokenData.authorities.filter((v) => v.toLowerCase() !== 'write')
                 }
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
 
                 if (response.status === StatusCodes.CREATED) {

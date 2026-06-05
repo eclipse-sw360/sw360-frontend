@@ -10,14 +10,15 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { JSX, useEffect, useRef, useState } from 'react'
+import React, { JSX, useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Attachment, AttachmentTypes } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSummary from '../../../../object-types/cyclonedx/ImportSummary'
@@ -51,15 +52,6 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
     const inputRef = useRef<HTMLInputElement | null>(null)
     const isExistingProject =
         typeof importSBOMMetadata.projectId === 'string' && importSBOMMetadata.projectId.trim().length > 0
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         selectedFile.current = e.currentTarget.files?.[0] ?? null
@@ -119,7 +111,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
             const start = Date.now() // Capture start time
             setStartTime(start)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             if (!selectedFile.current) {
                 setImportError({
                     variant: 'danger',

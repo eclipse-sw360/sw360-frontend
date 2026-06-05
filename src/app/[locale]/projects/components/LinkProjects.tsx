@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
@@ -20,6 +20,7 @@ import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip 
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project, SearchResult } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
@@ -50,14 +51,6 @@ export default function LinkProjects({
     const topRef = useRef<HTMLDivElement | null>(null)
     const [linking, setLinking] = useState(false)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const scrollToTop = () => {
         topRef.current?.scrollTo({
@@ -308,7 +301,7 @@ export default function LinkProjects({
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint
@@ -408,7 +401,7 @@ export default function LinkProjects({
             const data = {
                 linkedProjects: Object.fromEntries(linkProjects),
             }
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.data.user.access_token)
             if (response.status !== StatusCodes.OK) {

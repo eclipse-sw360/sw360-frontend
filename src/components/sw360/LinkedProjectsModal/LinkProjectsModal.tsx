@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -29,6 +29,7 @@ import {
     SearchResult,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface AlertData {
     variant: string
@@ -56,14 +57,6 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const [exactMatch, setExactMatch] = useState(false)
     const [byNameOnly, setByNameOnly] = useState(true)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     useEffect(() => {
         setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
@@ -298,7 +291,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint

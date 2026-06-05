@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -36,6 +36,7 @@ import {
     ReleaseTabIds,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -54,14 +55,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
     const showLinkedReleases = isNestedReleaseEnabled !== 'false'
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? CommonTabIds.SUMMARY)
     }
@@ -75,7 +68,7 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                 const data = (await response.json()) as ReleaseDetail & EmbeddedChangelogs
                 return data
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                void signOut()
+                dispatchSessionExpiredEvent()
             }
         } catch (e) {
             console.error(e)
@@ -87,10 +80,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
         const signal = controller.signal
 
         fetchData(`releases/${releaseId}`, signal)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 setRelease(release)
                 if (
-                    !CommonUtils.isNullOrUndefined(release?._embedded) &&
+                    !CommonUtils.isNullOrUndefined(release) &&
+                    !CommonUtils.isNullOrUndefined(release._embedded) &&
                     !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
                 ) {
                     setEmbeddedAttachments(release._embedded['sw360:attachments'])
@@ -135,7 +129,7 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
                     Object.fromEntries(

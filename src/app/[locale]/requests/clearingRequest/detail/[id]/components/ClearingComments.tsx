@@ -13,13 +13,14 @@ import parse from 'html-react-parser'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { ClearingRequestComments, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedClearingRequestComments = Embedded<ClearingRequestComments, 'sw360:comments'>
 
@@ -35,15 +36,6 @@ export default function ClearingComments({
     const [commentPayload, setCommentPayload] = useState({
         text: '',
     })
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const formatDate = (timestamp: number | undefined): string | null => {
         if (timestamp === undefined) {
@@ -56,13 +48,13 @@ export default function ClearingComments({
 
     const fetchData = async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedClearingRequestComments
             return data
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             notFound()
         }
@@ -71,7 +63,7 @@ export default function ClearingComments({
     useEffect(() => {
         setLoading(true)
         void fetchData(`clearingrequest/${clearingRequestId}/comments`)
-            .then((clearingRequestCommentList: EmbeddedClearingRequestComments | undefined) => {
+            .then((clearingRequestCommentList) => {
                 if (clearingRequestCommentList === undefined) {
                     setLoading(false)
                     return
@@ -98,7 +90,7 @@ export default function ClearingComments({
 
     const handleAddComment = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.POST(
             `clearingrequest/${clearingRequestId}/comments`,
             commentPayload,
@@ -113,7 +105,7 @@ export default function ClearingComments({
                 text: '',
             })
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             MessageService.error(t('There are some problem to update your comments'))
         }

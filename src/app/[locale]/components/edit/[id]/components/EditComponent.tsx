@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -32,6 +32,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
@@ -74,15 +75,6 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         attachments: null,
         comment: '',
     })
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -112,7 +104,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/attachments`,
@@ -120,7 +112,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                 )
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -146,7 +138,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
 
     const updateComponent = async (payload?: ComponentPayload) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const dataToUpdate = payload ?? componentPayload
         const response = await ApiUtils.PATCH(`components/${componentId}`, dataToUpdate, session.user.access_token)
         if (response.status === StatusCodes.OK) {
@@ -163,7 +155,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
 
     const checkUpdateEligibility = async (componentId: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'COMPONENT',
             entityId: componentId,

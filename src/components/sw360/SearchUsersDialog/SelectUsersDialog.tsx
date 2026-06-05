@@ -14,7 +14,7 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -22,6 +22,7 @@ import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -49,14 +50,6 @@ const SelectUsersDialog = ({
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     useEffect(() => {
         setSelectingUsers(selectedUsers)
@@ -271,7 +264,7 @@ const SelectUsersDialog = ({
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const queryUrl = CommonUtils.createUrlWithParams(
                 `users`,

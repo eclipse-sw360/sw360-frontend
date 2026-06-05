@@ -13,12 +13,13 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Component, Embedded } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
@@ -30,13 +31,13 @@ function RecentComponentsWidget(): ReactNode {
     const [reload, setReload] = useState(false)
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedComponents
             return data
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             notFound()
         }
@@ -45,7 +46,7 @@ function RecentComponentsWidget(): ReactNode {
     useEffect(() => {
         setLoading(true)
         void fetchData('components/recentComponents')
-            .then((components: EmbeddedComponents | undefined) => {
+            .then((components) => {
                 if (components === undefined) {
                     return
                 }

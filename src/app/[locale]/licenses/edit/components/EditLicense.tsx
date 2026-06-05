@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -24,6 +24,7 @@ import LinkedObligationsDialog from '@/components/sw360/SearchObligations/Linked
 import { LicenseDetail, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
 import EditLicenseSummary from './EditLicenseSummary'
 
@@ -58,14 +59,6 @@ function EditLicense({ licenseId }: Props): ReactNode {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
     }
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
 
     useEffect(() => {
@@ -74,11 +67,11 @@ function EditLicense({ licenseId }: Props): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
                 const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -105,7 +98,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
 
         try {

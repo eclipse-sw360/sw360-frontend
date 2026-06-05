@@ -11,12 +11,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { ErrorDetails, MergeOrSplitActionType, Vendor } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import MergeVendor from './MergeData'
 import VendorTable from './VendorsTable'
 
@@ -53,21 +54,12 @@ export default function MergeOverview({
     const [finalVendorPayload, setFinalVendorPayload] = useState<null | Vendor>(null)
     const [err, setErr] = useState<null | string>(null)
     const [loading, setLoading] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleMergeVendor = async () => {
         try {
             setLoading(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.PATCH(
                 `vendors/mergeVendors?mergeTargetId=${targetVendor?._links?.self.href
                     .split('/')
@@ -96,11 +88,11 @@ export default function MergeOverview({
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`vendors/${id}`, session.user.access_token, signal)
 
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status === StatusCodes.OK) {
                     const vendor = (await response.json()) as Vendor
                     setTargetVendor(vendor)

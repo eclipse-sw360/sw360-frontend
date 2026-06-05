@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -33,6 +33,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
@@ -54,14 +55,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const session = useSession()
     const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
     }
@@ -73,7 +66,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -105,7 +98,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (CommonUtils.isNullOrUndefined(whitelist)) return
         const whitelistObj = Object.fromEntries(whitelist)
@@ -191,7 +184,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${licenseId}`,
                     Object.fromEntries(

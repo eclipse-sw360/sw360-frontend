@@ -11,13 +11,14 @@
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, TableSearch } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ReleaseDetail } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releaseLinks'>
 
@@ -53,14 +54,6 @@ export default function MergeReleaseTable({
             })
         }
     }
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ReleaseDetail>[]>(
         () => [
@@ -133,7 +126,7 @@ export default function MergeReleaseTable({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
                     Object.fromEntries(

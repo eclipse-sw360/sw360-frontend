@@ -9,8 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { signOut, useSession } from 'next-auth/react'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import ResourcesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { Component, DocumentTypes } from '@/object-types'
 import ComponentGeneral from './ComponentGeneral'
@@ -23,16 +22,6 @@ interface Props {
 }
 
 const Summary = ({ component, componentId }: Props): ReactNode => {
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     return (
         <div className='col'>
             <div>

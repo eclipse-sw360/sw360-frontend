@@ -11,7 +11,7 @@
 
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -30,6 +30,7 @@ import {
 } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     projectId: string
@@ -52,14 +53,6 @@ export default function ObligationTab({
     const t = useTranslations('default')
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -307,7 +300,7 @@ export default function ObligationTab({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/obligation`,
                     Object.fromEntries(

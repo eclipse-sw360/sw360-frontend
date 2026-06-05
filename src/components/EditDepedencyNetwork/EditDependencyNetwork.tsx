@@ -11,7 +11,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { type JSX, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Tooltip as BootstrapTooltip, Button, Form, Modal, OverlayTrigger, Spinner } from 'react-bootstrap'
@@ -19,6 +19,7 @@ import { BsArrowCounterclockwise, BsFillTrashFill, BsInfoCircle, BsPlusLg, BsQue
 import { Embedded, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import SearchReleasesModal from '../sw360/SearchReleasesModal'
 import LinkedReleasesTable from './LinkedReleasesTable'
 
@@ -290,7 +291,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.GET(
             `releases/${releaseNode.releaseId}/releases?transitive=true`,
@@ -337,7 +338,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.GET(`projects/network/${projectId}/linkedReleases`, session.user.access_token)
         if (response.status === StatusCodes.UNAUTHORIZED) {
@@ -550,7 +551,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.GET(`components/${release.componentId}/releases`, session.user.access_token)
         if (response.status === StatusCodes.UNAUTHORIZED) {
@@ -582,7 +583,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
 
         if (compareSpinner.current !== null) {
@@ -606,11 +607,12 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
         linkedReleases: Array<string>,
         linkedToReleases: Array<string>,
         checkingReleaseId: string,
-    ) => {
+    ): Promise<Array<string>> => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            dispatchSessionExpiredEvent()
+            return []
         }
         const cyclicCheckPayload: CheckCyclicLinkPayload = {
             linkedReleases: linkedReleases,

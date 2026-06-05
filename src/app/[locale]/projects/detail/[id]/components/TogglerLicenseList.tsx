@@ -11,13 +11,14 @@
 
 'use client'
 
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import type { useTranslations } from 'next-intl'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 import { BsCaretDownFill, BsCaretRightFill, BsExclamationTriangle, BsInfoCircle } from 'react-icons/bs'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ViewFileListIcon from './ViewFileListIcon'
 
 interface LicenseData {
@@ -55,15 +56,6 @@ const TogglerLicenseList = ({
     const [toggle, setToggle] = useState(false)
     const [isFileModalOpen, setIsFileModalOpen] = useState(false)
     const [selectedLicense, setSelectedLicense] = useState<string | undefined>(undefined)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return !CommonUtils.isNullEmptyOrUndefinedArray(licenses) ? (
         <div className='d-flex'>
@@ -193,7 +185,7 @@ const FileListModal = ({
 
     const fetchReleasesToFilesMapping = useCallback(async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(`releases/${releaseId}/licensesToSourceFiles`, session.user.access_token)
         const data = (await response.json()) as LicensesToSourcesMapping
         setLicensesToSourceFilesMapping(data)

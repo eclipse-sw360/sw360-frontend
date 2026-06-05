@@ -13,10 +13,10 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
@@ -24,6 +24,7 @@ import LinkedObligationsDialog from '@/components/sw360/SearchObligations/Linked
 import { LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddLicenseSummary from './AddLicenseSummary'
 
 function AddLicense(): ReactNode {
@@ -44,20 +45,11 @@ function AddLicense(): ReactNode {
         checked: true,
         licenseTypeDatabaseId: '',
     })
-    const { status } = useSession()
     const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
     }
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
 
@@ -92,7 +84,7 @@ function AddLicense(): ReactNode {
         }
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.POST('licenses', licensePayload, session.user.access_token)
         if (response.status == StatusCodes.CREATED) {
             MessageService.success(t('License added successfully'))

@@ -11,7 +11,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -87,21 +86,12 @@ function ReleaseEditSummary({
     const [moderators, setModerators] = useState<{
         [k: string]: string
     }>({})
-    const { status } = useSession()
 
     // Configs from backend
     const releaseExternalIdSuggestions =
         useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) !== null
             ? (useConfigValue(UIConfigKeys.UI_RELEASE_EXTERNALKEYS) as string[])
             : undefined
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)

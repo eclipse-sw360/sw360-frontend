@@ -9,12 +9,11 @@
 
 'use client'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { getSession, useSession } from 'next-auth/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ConfigurationContainers, ProcessedUiConfig, parseRawUiConfig, UiConfiguration } from '@/object-types'
-import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { useLocalStorage } from './index'
 
 interface CachedUiConfig {
@@ -26,7 +25,6 @@ export function useUiConfig() {
     const [processedConfig, setProcessedConfig] = useLocalStorage<CachedUiConfig | null>('uiConfig', null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const { status } = useSession()
-    const t = useTranslations('default')
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
     const hasFetchedRef = useRef(false)
 
@@ -60,8 +58,8 @@ export function useUiConfig() {
 
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                signOut()
+                dispatchSessionExpiredEvent()
+                setIsLoading(false)
                 return
             }
 
@@ -74,7 +72,7 @@ export function useUiConfig() {
                     timestamp: Date.now(),
                 })
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 setProcessedConfig(null)
             }

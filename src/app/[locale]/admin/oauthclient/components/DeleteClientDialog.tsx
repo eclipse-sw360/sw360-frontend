@@ -12,14 +12,15 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect } from 'react'
+import { type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import { SW360_API_URL } from '@/utils/env'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     clientId: string
@@ -29,15 +30,6 @@ interface Props {
 
 function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const sendOAuthClientRequest = async (clientId: string, token: string): Promise<Response> => {
         return await fetch(`${SW360_API_URL}/authorization/client-management/${clientId}`, {
@@ -53,13 +45,13 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
     const deleteProject = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await sendOAuthClientRequest(clientId, session.user.access_token)
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Client deleted successfully'))
                 setShow(false)
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(t('Error while processing'))
             }

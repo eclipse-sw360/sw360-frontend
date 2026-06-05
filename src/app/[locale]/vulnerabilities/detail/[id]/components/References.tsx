@@ -9,22 +9,12 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { Vulnerability } from '@/object-types'
 
 export default function References({ summaryData }: { summaryData: Vulnerability }): ReactNode {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <>

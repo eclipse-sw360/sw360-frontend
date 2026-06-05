@@ -11,13 +11,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { type JSX, useEffect } from 'react'
+import React, { type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     userId: string
@@ -36,21 +37,12 @@ const ToggleUserActiveModal = ({
 }: Props): JSX.Element => {
     const t = useTranslations('default')
     const router = useRouter()
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const toggleUserAccount = async () => {
         try {
             const session = await getSession()
             if (!session) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const response = await ApiUtils.PATCH(
                 `users/${userId}`,
@@ -64,7 +56,7 @@ const ToggleUserActiveModal = ({
                 router.push('/admin/users')
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(t('Something went wrong'))
             }

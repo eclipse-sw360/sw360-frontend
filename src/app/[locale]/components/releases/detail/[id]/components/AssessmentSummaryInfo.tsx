@@ -12,13 +12,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Button } from 'react-bootstrap'
 
 import { Attachment, AttachmentTypes } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     releaseId: string
@@ -33,15 +34,6 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo | undefined>(undefined)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const cliAttachmentNumber = embeddedAttachments.filter(
         (attachment) => attachment.attachmentType == AttachmentTypes.COMPONENT_LICENSE_INFO_XML,
@@ -49,7 +41,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
 
     const handleShowAssessmentInfo = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
         const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`, session.user.access_token)
         if (response.status === StatusCodes.OK) {
@@ -58,7 +50,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
         } else if (response.status === StatusCodes.NO_CONTENT) {
             setAssessmentSummaryInfo({})
         } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            await signOut()
+            dispatchSessionExpiredEvent()
         }
     }
 

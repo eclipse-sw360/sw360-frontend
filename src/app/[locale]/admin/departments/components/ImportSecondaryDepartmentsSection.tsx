@@ -12,13 +12,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ViewLogsModal from './ViewLogsModal'
 
 interface ImportDepartmentInformation {
@@ -53,26 +54,17 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
     const [showImportManuallyModal, setShowImportManuallyModal] = useState<boolean>(false)
     const [importManualResponse, setImportManualResponse] = useState<ImportManualResponse | undefined>(undefined)
     const [showLogsModal, setShowLogsModal] = useState<boolean>(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const fetchImportSchedulerStatus = useCallback(async () => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.GET('departments/importInformation', session.user.access_token)
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ImportDepartmentInformation
@@ -92,7 +84,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.POST(
             `departments/${importDepartmentInformation.isSchedulerStarted ? 'unscheduleImport' : 'scheduleImport'}`,
@@ -101,11 +93,11 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         )
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const data = (await response.json()) as {
             message: string
@@ -131,7 +123,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.POST(
             `departments/writePathFolder?pathFolder=${folderPath}`,
@@ -140,7 +132,7 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         )
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status !== StatusCodes.OK) {
             MessageService.error(t('Update folder path failed'))
@@ -161,18 +153,18 @@ const ImportSecondaryDepartmentsSection = (): JSX.Element => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         setImportedManuallyStatus(ImportStatus.IMPORTING)
         const response = await ApiUtils.POST(`departments/manuallyactive`, {}, session.user.access_token)
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             setImportedManuallyStatus(ImportStatus.FAILURE)
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ImportManualResponse

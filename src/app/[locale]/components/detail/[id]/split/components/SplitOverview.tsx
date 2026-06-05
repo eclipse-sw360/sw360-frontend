@@ -11,13 +11,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { redirect, useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Component, ErrorDetails, MergeOrSplitActionType, UserGroupType } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ComponentTable from '../../components/ComponentTable'
 import SplitComponentConfirmation from './ConfirmSplit'
 import SplitComponent from './SplitData'
@@ -59,21 +60,12 @@ function SplitOverview({
     const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
     const [err, setErr] = useState<null | string>(null)
     const [loading, setLoading] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleSplitComponent = async () => {
         try {
             setLoading(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
             const srcPayload = {
                 ...(sourceComponent ?? {}),
@@ -114,11 +106,11 @@ function SplitOverview({
         ;(async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`components/${id}`, session.user.access_token, signal)
 
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status === StatusCodes.OK) {
                     const component = (await response.json()) as Component
                     setSourceComponent(component)

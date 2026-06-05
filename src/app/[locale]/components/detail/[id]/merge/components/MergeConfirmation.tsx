@@ -9,9 +9,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { Attachment, Component } from '@/object-types'
 
 export default function MergeComponentConfirmation({
@@ -24,15 +23,6 @@ export default function MergeComponentConfirmation({
     sourceComponent: Component | null
 }): ReactNode {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <>

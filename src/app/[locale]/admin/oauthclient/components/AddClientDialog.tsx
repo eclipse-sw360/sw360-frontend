@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -22,6 +22,7 @@ import { OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { SW360_API_URL } from '@/utils/env'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -72,15 +73,6 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
     const [createdClientResponseJson, setCreatedClientResponseJson] = useState<string | null>(null)
     const [showCreatedClientResponse, setShowCreatedClientResponse] = useState(false)
     const [copied, setCopied] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
         setFormState((prev) => ({
@@ -219,7 +211,7 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         }
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
         const response = await sendOAuthClientRequest(requestBody, session.user.access_token)
         if (response.status === StatusCodes.OK || response.status === StatusCodes.CREATED) {

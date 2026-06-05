@@ -10,9 +10,8 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { ClearingRequestDetails } from '@/object-types'
 
 interface ClearingRequestDataMap {
@@ -25,15 +24,6 @@ interface Props {
 
 export default function ClearingDecision({ data }: Readonly<Props>): ReactNode | undefined {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const clearingRequestStatus: ClearingRequestDataMap = {
         NEW: t('New'),

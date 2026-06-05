@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -23,6 +23,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -82,14 +83,6 @@ function Packages(): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     const releaseCache = useMemo(() => new Map<string, ReleaseCache>(), [])
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleCreatePackage = () => {
         router.push('/packages/add')
@@ -264,7 +257,7 @@ function Packages(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(

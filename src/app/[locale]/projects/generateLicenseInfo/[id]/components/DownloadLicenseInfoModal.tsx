@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
@@ -21,6 +21,7 @@ import { ConfigKeys, ErrorDetails, FilterOption, SaveUsagesPayload } from '@/obj
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const relationFilterOptions: FilterOption[] = [
     {
@@ -96,14 +97,6 @@ export default function DownloadLicenseInfoModal({
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         if (Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false) {
             setWithSubProject(false)
         }
@@ -119,7 +112,7 @@ export default function DownloadLicenseInfoModal({
 
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             setLoading(true)
             const response = await ApiUtils.POST(
                 `projects/${projectId}/saveAttachmentUsages`,

@@ -11,7 +11,7 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import React, { type JSX, useEffect, useMemo, useState } from 'react'
@@ -19,6 +19,7 @@ import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { ErrorDetails } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -42,14 +43,6 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
     const t = useTranslations('default')
     const [selectingDepartment, setSelectingDepartment] = useState<string>(department || '')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<Department>[]>(
         () => [
@@ -114,7 +107,7 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET('users/groupList', session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails

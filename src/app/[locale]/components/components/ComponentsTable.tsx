@@ -15,7 +15,7 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -24,6 +24,7 @@ import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteComponentDialog from './DeleteComponentDialog'
 
 interface Props {
@@ -39,14 +40,6 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const session = useSession()
     const router = useRouter()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)
@@ -215,7 +208,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components`,

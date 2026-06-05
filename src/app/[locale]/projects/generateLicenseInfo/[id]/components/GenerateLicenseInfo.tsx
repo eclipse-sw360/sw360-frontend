@@ -13,7 +13,7 @@ import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReac
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -33,6 +33,7 @@ import {
     UserGroupType,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 
@@ -303,13 +304,6 @@ function GenerateLicenseInfo({
     const [projectRelationships, setProjectRelationships] = useState<string[]>([])
 
     const session = useSession()
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
@@ -768,7 +762,7 @@ function GenerateLicenseInfo({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params)
                 if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                     return

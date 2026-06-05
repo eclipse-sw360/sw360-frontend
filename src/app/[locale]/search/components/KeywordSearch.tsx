@@ -10,9 +10,9 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useReducer, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import icons from '@/assets/icons/icons.svg'
@@ -181,14 +181,6 @@ function KeywordSearch({
     const [searchOptions, dispatch] = useReducer(reducer, initialState)
     const [searchText, setSearchText] = useState('')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     function appendTypeMasksToParams(searchOptions: SEARCH_STATE, params = new URLSearchParams()) {
         const entries = Object.entries(searchOptions)

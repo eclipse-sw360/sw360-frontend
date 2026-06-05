@@ -12,7 +12,7 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
@@ -20,6 +20,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ChangeLog from './Changelog'
 import Summary from './Summary'
 
@@ -31,14 +32,6 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const param = useParams()
     const locale = (param.locale as string) || 'en'
     const packagesPath = `/${locale}/packages`
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         if (status !== 'authenticated') return
@@ -75,7 +68,10 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     ])
 
     const handleEditPackage = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) {
+            dispatchSessionExpiredEvent()
+            return
+        }
         if (session.user.email === summaryData?._embedded?.createdBy?.email) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/packages/edit/${packageId}`)

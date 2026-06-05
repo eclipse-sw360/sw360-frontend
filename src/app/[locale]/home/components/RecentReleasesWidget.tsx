@@ -13,12 +13,13 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
@@ -32,13 +33,13 @@ function RecentReleasesWidget(): ReactNode {
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedReleases
             return data
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             notFound()
         }
@@ -47,7 +48,7 @@ function RecentReleasesWidget(): ReactNode {
     useEffect(() => {
         setLoading(true)
         void fetchData('releases/recentReleases')
-            .then((releases: EmbeddedReleases | undefined) => {
+            .then((releases) => {
                 if (releases === undefined) {
                     return
                 }

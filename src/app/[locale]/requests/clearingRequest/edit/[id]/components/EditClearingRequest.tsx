@@ -12,7 +12,7 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -21,6 +21,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ClearingComments from './../../../detail/[id]/components/ClearingComments'
 import EditClearingDecision from './EditClearingDecision'
 import EditClearingRequestInfo from './EditClearingRequestInfo'
@@ -29,7 +30,6 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const router = useRouter()
-    const { status } = useSession()
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>()
     const [updateClearingRequestPayload, setUpdateClearingRequestPayload] = useState<UpdateClearingRequestPayload>({
         clearingType: '',
@@ -43,23 +43,15 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
     const locale = (param.locale as string) || 'en'
     const requestsPath = `/${locale}/requests`
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const fetchData = async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ClearingRequestDetails
             return data
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             notFound()
         }
@@ -67,8 +59,10 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
 
     useEffect(() => {
         void fetchData(`clearingrequest/${clearingRequestId}`).then(
-            (clearingRequestDetails: ClearingRequestDetails | undefined) => {
-                setClearingRequestData(clearingRequestDetails)
+            (clearingRequestDetails: ClearingRequestDetails | void) => {
+                if (!CommonUtils.isNullOrUndefined(clearingRequestDetails)) {
+                    setClearingRequestData(clearingRequestDetails)
+                }
             },
         )
     }, [
@@ -92,7 +86,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
 
     const handleUpdateClearingRequest = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         try {
             const response = await ApiUtils.PATCH(
                 `clearingrequest/${clearingRequestData?.id}`,
@@ -105,7 +99,7 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
                 )
                 router.push(`/requests/clearingRequest/detail/${clearingRequestData?.id}`)
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 const data = await response.json()
                 MessageService.error(data.message)

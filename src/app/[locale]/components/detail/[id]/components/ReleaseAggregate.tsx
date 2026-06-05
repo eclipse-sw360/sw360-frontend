@@ -10,24 +10,14 @@
 // License-Filename: LICENSE
 
 'use client'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Component, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
 const ReleaseAgrregate = ({ component }: { component: Component }): ReactNode => {
     const [toggle, setToggle] = useState(false)
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <table className='table summary-table'>

@@ -10,14 +10,15 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, RefObject, useEffect, useRef } from 'react'
+import { ReactNode, RefObject, useRef } from 'react'
 import { BsDownload, BsUpload } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 export default function ImportExportComponent(): ReactNode {
     const t = useTranslations('default')
@@ -25,15 +26,6 @@ export default function ImportExportComponent(): ReactNode {
     const componentsAttachmentFile = useRef<File | undefined>(undefined)
     const releaseLinksFile = useRef<File | undefined>(undefined)
     const licenseArchiveFile = useRef<File | undefined>(undefined)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, file: RefObject<File | undefined>) => {
         const files = e.currentTarget.files
@@ -70,7 +62,7 @@ export default function ImportExportComponent(): ReactNode {
 
             const session = await getSession()
             if (!session) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const response = await ApiUtils.POST(url, formData, session.user.access_token)
             if (response.status !== StatusCodes.OK) {

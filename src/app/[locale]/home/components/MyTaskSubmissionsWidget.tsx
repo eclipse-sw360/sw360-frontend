@@ -11,7 +11,7 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -20,6 +20,7 @@ import { BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 import type { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedTaskSubmissions = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -143,7 +144,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest/mySubmissions`,
@@ -230,7 +231,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
         if (!modReqToDelete?.id) return
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.DELETE(`moderationrequest/delete`, session.user.access_token, [
                 modReqToDelete.id,
@@ -244,7 +245,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 }
                 MessageService.error(data.message)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
