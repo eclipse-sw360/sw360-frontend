@@ -35,14 +35,26 @@ type Props = {
     children: ReactNode
 }
 
+const DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS = 5 * 60
+
+const getSessionRefetchIntervalSeconds = (): number => {
+    const parsed = Number(process.env.SW360_SESSION_REFETCH_INTERVAL_SECONDS)
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+        return DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS
+    }
+
+    return Math.floor(parsed)
+}
+
 async function RootLayout({ children }: Props): Promise<JSX.Element> {
     const locale = await getLocale()
     const messages = await getMessages()
+    const sessionRefetchIntervalSeconds = getSessionRefetchIntervalSeconds()
 
     return (
         <html lang={locale}>
             <body>
-                <Providers>
+                <Providers refetchIntervalSeconds={sessionRefetchIntervalSeconds}>
                     <NextIntlClientProvider messages={messages}>
                         <SW360BackendConfigProvider>
                             <UiConfigProvider>
