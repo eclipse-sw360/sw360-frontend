@@ -10,7 +10,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Alert, Dropdown } from 'react-bootstrap'
@@ -20,6 +20,7 @@ import { useConfigValue } from '@/contexts'
 import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ComponentsTable from './ComponentsTable'
 import ImportSBOMModal from './ImportSBOMModal'
 
@@ -28,7 +29,7 @@ const ComponentIndex = (): ReactNode => {
     const [numberOfComponent, setNumberOfComponent] = useState(0)
     const [importModalOpen, setImportModalOpen] = useState(false)
     const [vendorsSuggestions, setVendorsSuggestions] = useState<string[]>([])
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
     const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
     const platformsSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
     const osSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
@@ -37,18 +38,10 @@ const ComponentIndex = (): ReactNode => {
     const [exportViaMail, setExportViaMail] = useState<boolean>(false)
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
         const controller = new AbortController()
 
         const fetchVendors = async () => {
-            if (!session) return signOut()
+            if (!session) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.GET('vendors', session?.user?.access_token)
             if (!controller.signal.aborted && response.ok) {
                 const data = await response.json()
@@ -233,7 +226,7 @@ const ComponentIndex = (): ReactNode => {
     ]
 
     const handleExportComponent = async (withLinkedReleases: string) => {
-        if (!session) return signOut()
+        if (!session) return dispatchSessionExpiredEvent()
         const currentDate = new Date().toISOString().split('T')[0]
         const mailRequestParam = exportViaMail ? 'true' : 'false'
         const url = `reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=${mailRequestParam}&module=components`

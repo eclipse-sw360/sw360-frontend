@@ -11,13 +11,14 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import type { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedTaskAssignments = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -105,7 +106,7 @@ function MyTaskAssignmentsWidget(): ReactNode {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest/byState`,

@@ -10,11 +10,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { ErrorDetails } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 export interface LicenseClearingData {
     releaseCount: number
@@ -40,7 +41,7 @@ export default function LicenseClearing({ projectId, data }: LicenseClearingProp
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseClearingCount`,

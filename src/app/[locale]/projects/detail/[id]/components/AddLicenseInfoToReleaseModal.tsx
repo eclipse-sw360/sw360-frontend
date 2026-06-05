@@ -11,14 +11,15 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     projectId: string
@@ -47,21 +48,12 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
     const [addLicenseInfoToReleaseData, setAddLicenseInfoToReleaseData] = useState<AddLicenseInfoToReleaseData | null>(
         null,
     )
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleSubmit = async (projectId: string) => {
         setIsLoading(true)
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const createUrl = `projects/${projectId}/addLinkedReleasesLicenses`
             const response = await ApiUtils.POST(createUrl, {}, session.user.access_token)
             if (response.status == StatusCodes.OK) {

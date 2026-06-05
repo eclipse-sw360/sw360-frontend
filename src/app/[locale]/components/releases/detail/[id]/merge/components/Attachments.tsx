@@ -9,7 +9,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2, BsInfoCircle } from 'react-icons/bs'
@@ -30,20 +29,11 @@ export default function Attachments({
     finalReleasePayload: Release | null
     setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
-    const session = useSession()
     const t = useTranslations('default')
     const [otherAttachmentMergeList, setOtherAttachmentMergeList] = useState<ListFieldProcessComponent[]>([])
     const [matchingSourceAttachmentMergeList, setMatchingSourceAttachmentMergeList] = useState<
         ListFieldProcessComponent[]
     >([])
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     useEffect(() => {
         // Setup for 'SOURCE' attachments

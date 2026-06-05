@@ -9,7 +9,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
@@ -28,15 +27,6 @@ export default function UpdateCommentModal({
 }: UpdateCommentModalProps) {
     const t = useTranslations('default')
     const [commentText, setCommentText] = useState('')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         setCommentText(modalMetaData?.initialCommentValue ?? '')

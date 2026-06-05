@@ -14,7 +14,7 @@
 import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -33,14 +33,6 @@ const Capitalize = (text: string) =>
 const LinkedReleases = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [data, setData] = useState<NestedRows<ReleaseLink>[]>(() => [])
     const [showProcessing, setShowProcessing] = useState(false)

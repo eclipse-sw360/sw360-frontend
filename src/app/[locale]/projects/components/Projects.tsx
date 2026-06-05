@@ -22,7 +22,7 @@ import {
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -52,6 +52,7 @@ import {
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
@@ -109,14 +110,6 @@ function Project(): JSX.Element {
         },
     ])
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleDeleteProject = (projectId: string, clearingRequestId?: string, clearingState?: string) => {
         setDeleteProjectId(projectId)
         const hasOpenCR = clearingRequestId && (clearingState === 'OPEN' || clearingState === 'IN_PROGRESS')
@@ -147,7 +140,7 @@ function Project(): JSX.Element {
 
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.GET(
                 `projects/${projectId}/linkedProjects?transitive=false`,
@@ -718,7 +711,7 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET('projects/groups', session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -757,7 +750,7 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
@@ -823,7 +816,7 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
                 const projectIds = projectData
                     .map((project) => project['_links']['self']['href'].split('/').at(-1))
@@ -953,7 +946,7 @@ function Project(): JSX.Element {
 
     const exportProjectSpreadsheet = async ({ withLinkedRelease }: { withLinkedRelease: boolean }) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const mailEnabled = mailRequestForProjectReport === 'true'
             const searchParamsString = params.toString()

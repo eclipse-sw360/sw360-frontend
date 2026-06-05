@@ -13,13 +13,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { ActionType, Component } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const DEFAULT_COMPONENT_INFO: Component = {
     id: '',
@@ -54,15 +55,6 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         attachments: 0,
     })
     const [comment, setComment] = useState('')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const displayMessage = (variant: string, message: ReactNode) => {
         setVariant(variant)
@@ -86,7 +78,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
     const deleteComponent = async () => {
         if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`components/${componentId}`, {
             comment: comment,
         })
@@ -119,7 +111,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                     displayMessage('danger', t('Error while processing'))
                 }
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 handleError()
             }

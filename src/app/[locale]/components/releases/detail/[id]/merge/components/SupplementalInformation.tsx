@@ -9,9 +9,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
 import { Release, ReleaseDetail } from '@/object-types'
 
@@ -27,15 +26,6 @@ export default function SupplementalInformation({
     setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
     const t = useTranslations('default')
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     return (
         <>

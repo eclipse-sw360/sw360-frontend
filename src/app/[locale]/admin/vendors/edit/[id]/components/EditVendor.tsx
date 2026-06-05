@@ -12,13 +12,14 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, Release, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import VendorDetailForm from '../../../components/VendorDetailForm'
 
 type EmbeddedReleases = Embedded<Release, 'sw360:releases'>
@@ -28,15 +29,6 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
     const router = useRouter()
     const [vendorData, setVendorData] = useState<Vendor | null>(null)
     const [releases, setReleases] = useState<Release[] | null>(null)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -45,7 +37,7 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
         ;(async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`vendors/${id}`, session.user.access_token, signal)
 
                 if (response.status === StatusCodes.OK) {
@@ -95,7 +87,7 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
     const handleSubmit = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             if (vendorData === null) return
             delete vendorData['_links']
             const response = await ApiUtils.PATCH(`vendors/${id}`, vendorData, session.user.access_token)
@@ -103,7 +95,7 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
                 MessageService.success(t('Vendor is updated'))
                 router.push('/admin/vendors')
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -118,7 +110,7 @@ export default function EditVendor({ id }: { id: string }): ReactNode {
     const handleDelete = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.DELETE(`vendors/${id}`, session.user.access_token)
             if (response.status == StatusCodes.OK) {
                 MessageService.success(t('Vendor deleted successfully'))

@@ -14,7 +14,7 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -45,6 +45,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
@@ -68,16 +69,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
-    const { status } = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         const fragment = params.get('tab') ?? CommonTabIds.SUMMARY
@@ -115,10 +107,10 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -404,7 +396,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
 
         if (isSPDXFeatureEnabled === true) {
@@ -473,7 +465,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
 
     const checkUpdateEligibility = async (releaseId: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'RELEASE',
             entityId: releaseId,

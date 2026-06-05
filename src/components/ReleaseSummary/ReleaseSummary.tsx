@@ -11,7 +11,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
@@ -94,20 +93,11 @@ const ReleaseSummary = ({
         releasePayload.sourceCodeDownloadurl ?? '',
     )
     const [sourceCodeDownloadUrlError, setSourceCodeDownloadUrlError] = useState<string | null>(null)
-    const { status } = useSession()
 
     // Configs from backend
     const operatingSystemSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
     const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
     const platformSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         setSourceCodeDownloadUrlInput(releasePayload.sourceCodeDownloadurl ?? '')

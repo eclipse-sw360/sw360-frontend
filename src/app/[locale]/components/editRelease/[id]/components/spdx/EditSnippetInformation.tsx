@@ -10,7 +10,6 @@
 // License-Filename: LICENSE
 
 'use client'
-import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { InputKeyValue, SnippetInformation, SnippetRange, SPDX, SPDXDocument } from '@/object-types'
@@ -42,15 +41,6 @@ const EditSnippetInformation = ({
         key: '',
         value: '',
     })
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const setDataSnippetRanges = (inputs: SnippetRange[]) => {
         const snippets: SnippetInformation[] = snippetInformations.map((snippet, index) => {

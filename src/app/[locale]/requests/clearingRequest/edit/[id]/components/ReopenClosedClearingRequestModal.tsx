@@ -10,15 +10,16 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useCallback, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import DateField from '@/components/DateField'
 import { CreateClearingRequestPayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -28,7 +29,6 @@ interface Props {
 
 export default function ReopenClosedClearingRequestModal({ show, setShow, clearingRequestId }: Props): ReactNode {
     const t = useTranslations('default')
-    const { status } = useSession()
     const [message, setMessage] = useState('')
     const [variant, setVariant] = useState('success')
     const [isCritical, setIsCritical] = useState(false)
@@ -42,14 +42,6 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
         requestingUserComment: '',
         clearingState: 'NEW',
     })
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleError = useCallback(
         async (response?: Response) => {
@@ -81,7 +73,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
     const reopenClearingRequest = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.PATCH(
                 `clearingrequest/${clearingRequestId}`,
                 createClearingRequestPayload,
@@ -95,7 +87,7 @@ export default function ReopenClosedClearingRequestModal({ show, setShow, cleari
                 setIsDisabled(true)
                 setReloadPage(true)
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 handleError(response)
             }

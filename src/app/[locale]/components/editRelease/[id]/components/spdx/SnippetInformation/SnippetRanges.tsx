@@ -9,8 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { signOut, useSession } from 'next-auth/react'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { SnippetRange } from '@/object-types'
 
@@ -28,16 +27,6 @@ interface SnippetRangeInput {
 }
 
 function SnippetRanges({ inputList, setInputList, setDataSnippetRanges }: Props): ReactNode {
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: SnippetRange[] = [

@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -33,6 +33,7 @@ import {
     PaginationMeta,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -53,14 +54,6 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
         setActiveKey(key ?? CommonTabIds.SUMMARY)
     }
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const fetchData = async (url: string) => {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return
@@ -69,7 +62,7 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
             const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
             return data
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            await signOut()
+            dispatchSessionExpiredEvent()
         } else {
             notFound()
         }
@@ -77,7 +70,7 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
 
     useEffect(() => {
         fetchData(`components/${componentId}`)
-            .then((component: Component | undefined) => {
+            .then((component) => {
                 setComponent(component)
             })
             .catch((err) => console.error(err))
@@ -118,7 +111,7 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${componentId}`,
                     Object.fromEntries(

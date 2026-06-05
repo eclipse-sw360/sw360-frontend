@@ -13,7 +13,7 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -21,6 +21,7 @@ import { Alert, Button, Spinner } from 'react-bootstrap'
 import { BsExclamationTriangle } from 'react-icons/bs'
 import { Attachment, AttachmentTypes, Embedded, ErrorDetails } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import SPDXLicenseView from './SPDXLicenseView'
 
 interface Props {
@@ -53,14 +54,6 @@ interface SpdxLicensesPayload {
 const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [tableData, setTableData] = useState<CellData[]>(() => [])
     const memoizedData = useMemo(
@@ -168,7 +161,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
     const handleAddSpdxLicenses = async (att: CellData) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             setShowProcessing(true)
             const payload: SpdxLicensesPayload = {
                 mainLicenseIds: att.licenseInfo?.licenseIds ?? [],
@@ -211,7 +204,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
     const handleShowLicenseInfo = async (attachmentId: string) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             setShowProcessing(true)
             const response = await ApiUtils.GET(
                 `releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`,
@@ -261,7 +254,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `releases/${releaseId}/attachments`,
                     session.data.user.access_token,

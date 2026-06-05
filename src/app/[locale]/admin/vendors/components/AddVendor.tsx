@@ -11,12 +11,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import { Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import VendorDetailForm from './VendorDetailForm'
 
 export default function AddVendor(): JSX.Element {
@@ -29,14 +30,6 @@ export default function AddVendor(): JSX.Element {
         url: '',
     })
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const handleCancel = () => {
         router.push('/admin/vendors')
     }
@@ -44,7 +37,7 @@ export default function AddVendor(): JSX.Element {
     const handleSubmit = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             if (vendorData === null) return
             delete vendorData['_links']
             const response = await ApiUtils.POST('vendors', vendorData, session.user.access_token)
@@ -52,7 +45,7 @@ export default function AddVendor(): JSX.Element {
                 MessageService.success(t('Vendor is created'))
                 router.push('/admin/vendors')
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('A vendor with same name already exists'))
             } else {

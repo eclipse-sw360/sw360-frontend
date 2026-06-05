@@ -13,7 +13,7 @@ import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReac
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -35,6 +35,7 @@ import {
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -65,13 +66,6 @@ function GenerateSourceCodeBundle({
     const [hideWithUsage, setHideWithUsage] = useState(false)
 
     const session = useSession()
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
@@ -119,7 +113,7 @@ function GenerateSourceCodeBundle({
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Something went wrong'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const response = await ApiUtils.POST(
                 `projects/${projectId}/saveAttachmentUsages`,
@@ -155,7 +149,7 @@ function GenerateSourceCodeBundle({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params)
                 if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                     return

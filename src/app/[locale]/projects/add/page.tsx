@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
@@ -24,6 +24,7 @@ import Summary from '@/components/ProjectAddSummary/Summary'
 import { ConfigKeys, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 function AddProjects(): JSX.Element {
     const router = useRouter()
@@ -92,15 +93,6 @@ function AddProjects(): JSX.Element {
     })
 
     const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         ;(async () => {
@@ -108,11 +100,11 @@ function AddProjects(): JSX.Element {
                 const session = await getSession()
                 if (CommonUtils.isNullOrUndefined(session)) {
                     MessageService.error(t('Session has expired'))
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 }
                 const response = await ApiUtils.GET('configurations', session.user.access_token)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    signOut()
+                    dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     setDependencyNetworkFeatureEnabled(false)
                     return
@@ -153,7 +145,7 @@ function AddProjects(): JSX.Element {
 
     const createProject = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const createUrl = isDependencyNetworkFeatureEnabled === true ? `projects/network` : 'projects'
         try {
             const response = await ApiUtils.POST(createUrl, projectPayload, session.user.access_token)

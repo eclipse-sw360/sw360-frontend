@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -19,6 +19,7 @@ import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ClearingRequestComponent from './ClearingRequest'
 import ClosedModerationRequest from './ClosedModerationRequest'
 import OpenModerationRequest from './OpenModerationRequest'
@@ -28,19 +29,10 @@ type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests
 
 function Requests(): ReactNode | undefined {
     const t = useTranslations('default')
-    const { status } = useSession()
     const [openModerationRequestCount, setOpenModerationRequestCount] = useState(0)
     const [closedModerationRequestCount, setClosedModerationRequestCount] = useState(0)
     const [openClearingRequestCount, setOpenClearingRequestCount] = useState(0)
     const [closedClearingRequestCount, setClosedClearingRequestCount] = useState(0)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const advancedSearch = [
         {
@@ -151,7 +143,7 @@ function Requests(): ReactNode | undefined {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const moderationRequestsPromsies = ApiUtils.GET('moderationrequest', session.user.access_token, signal)
                 const clearingRequestsPromises = ApiUtils.GET('clearingrequests', session.user.access_token, signal)
 

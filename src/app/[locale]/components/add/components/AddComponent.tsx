@@ -13,10 +13,10 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue, SearchUsersModal } from 'next-sw360'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
@@ -33,11 +33,12 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 function AddComponent(): ReactNode {
     const t = useTranslations('default')
     const router = useRouter()
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
     const [vendor, setVendor] = useState<Vendor>({
@@ -76,14 +77,6 @@ function AddComponent(): ReactNode {
         blog: '',
     })
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     // Configs from backend
     const componentExternalIdSuggestions =
         useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) !== null
@@ -111,7 +104,7 @@ function AddComponent(): ReactNode {
     }
 
     const submit = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.POST('components', componentPayload, session.user.access_token)
 
         if (response.status === StatusCodes.CREATED) {

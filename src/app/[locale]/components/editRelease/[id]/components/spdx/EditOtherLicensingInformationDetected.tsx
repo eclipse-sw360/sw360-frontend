@@ -10,7 +10,6 @@
 // License-Filename: LICENSE
 
 'use client'
-import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { OtherLicensingInformationDetected, SPDX, SPDXDocument } from '@/object-types'
@@ -51,15 +50,6 @@ const EditOtherLicensingInformationDetected = ({
 }: Props): ReactNode => {
     const [increIndex, setIncreIndex] = useState(0)
     const [isAdd, setIsAdd] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const displayIndex = (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (

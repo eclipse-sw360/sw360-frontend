@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -24,6 +24,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import BulkUserUpload from './BulkUserUpload'
 import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
 
@@ -41,14 +42,6 @@ export default function UserAdminstration(): JSX.Element {
     const params = useSearchParams()
     const session = useSession()
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleAddUsers = () => {
         router.push('/admin/users/add')
     }
@@ -60,7 +53,7 @@ export default function UserAdminstration(): JSX.Element {
     const downloadUsers = () => {
         getSession()
             .then((session) => {
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 void DownloadService.download('importExport/downloadUsers', session, 'users.csv', {
                     Accept: 'text/plain',
                 })
@@ -72,7 +65,7 @@ export default function UserAdminstration(): JSX.Element {
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === StatusCodes.OK) {
             const data = await response.json()
@@ -87,7 +80,7 @@ export default function UserAdminstration(): JSX.Element {
 
     useEffect(() => {
         void fetchData('users/departments')
-            .then((departments: Array<string> | undefined) => {
+            .then((departments) => {
                 if (departments === undefined) {
                     return
                 }
@@ -281,7 +274,7 @@ export default function UserAdminstration(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `users`,

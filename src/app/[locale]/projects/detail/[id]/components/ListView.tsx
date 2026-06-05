@@ -18,7 +18,7 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -282,14 +282,6 @@ export default function ListView({
 }): JSX.Element {
     const t = useTranslations('default')
     const { status, data: session } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])

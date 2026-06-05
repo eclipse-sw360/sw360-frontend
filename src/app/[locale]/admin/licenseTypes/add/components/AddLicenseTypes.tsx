@@ -11,11 +11,12 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useRef } from 'react'
+import { type JSX, useRef } from 'react'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 export default function AddLicenseTypes(): JSX.Element {
     const router = useRouter()
@@ -23,18 +24,10 @@ export default function AddLicenseTypes(): JSX.Element {
     const t = useTranslations('default')
     const searchValueRef = useRef<HTMLInputElement>(null)
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const handleAddLicenseType = async ({ addLicenseTypeTitle }: { addLicenseTypeTitle: string }) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const url = CommonUtils.createUrlWithParams('licenses/addLicenseType', {
                 licenseType: addLicenseTypeTitle,
             })

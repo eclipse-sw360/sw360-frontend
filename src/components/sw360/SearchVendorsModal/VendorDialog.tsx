@@ -12,13 +12,14 @@
 
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddVendorDialog from './AddVendor'
 
 interface Props {
@@ -130,7 +131,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const searchVendor = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             const queryUrl = CommonUtils.createUrlWithParams(
                 `vendors`,
                 Object.fromEntries(

@@ -9,9 +9,8 @@
 
 'use client'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect } from 'react'
+import { type JSX } from 'react'
 import { AiOutlineTags, AiOutlineUnorderedList } from 'react-icons/ai'
 import { BsBag, BsFileEarmarkText, BsFilter, BsSearch } from 'react-icons/bs'
 import { FiEdit2 } from 'react-icons/fi'
@@ -24,15 +23,6 @@ import icons from '@/assets/icons/icons.svg'
 
 const AdminMainPage = (): JSX.Element => {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <>

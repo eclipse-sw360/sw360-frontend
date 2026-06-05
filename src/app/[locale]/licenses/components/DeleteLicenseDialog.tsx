@@ -13,13 +13,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { LicensePayload } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     licensePayload: LicensePayload
@@ -35,15 +36,6 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
     const [showMessage, setShowMessage] = useState(false)
     const [reloadPage, setReloadPage] = useState(false)
     const [loading, setLoading] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const displayMessage = (variant: string, message: string) => {
         setVariant(variant)
@@ -59,7 +51,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
     const deleteLicense = async () => {
         setLoading(true)
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.DELETE(`licenses/${licensePayload.shortName}`, session.user.access_token)
         try {
             if (response.status == StatusCodes.OK) {
@@ -69,7 +61,7 @@ const DeleteLicenseDialog = ({ licensePayload, show, setShow }: Props): ReactNod
             } else if (response.status == StatusCodes.ACCEPTED) {
                 displayMessage('success', t('Created moderation request'))
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else if (response.status == StatusCodes.BAD_REQUEST) {
                 const errorResponse = await response.json()
                 displayMessage('danger', errorResponse.message)

@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -21,6 +21,7 @@ import { BsInfoCircle, BsQuestionCircle } from 'react-icons/bs'
 import { ModerationRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface propType {
     [key: string]: string
@@ -52,14 +53,6 @@ export default function BulkDeclineModerationRequestModal({
     })
 
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const computeProgress = (responseCode: number) => {
         switch (responseCode) {
@@ -214,7 +207,7 @@ export default function BulkDeclineModerationRequestModal({
     }
 
     const rejectModerationRequest = async (singleMrId: string, updatedRejectPayload: ModerationRequestPayload) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         try {
             setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
@@ -274,7 +267,7 @@ export default function BulkDeclineModerationRequestModal({
                     })
                     MessageService.error(t('There are internal server error'))
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                 }
@@ -289,7 +282,7 @@ export default function BulkDeclineModerationRequestModal({
     }
 
     const acceptModerationRequest = async (singleMrId: string, updatedAcceptPayload: ModerationRequestPayload) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         try {
             setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
@@ -349,7 +342,7 @@ export default function BulkDeclineModerationRequestModal({
                     })
                     MessageService.error(t('There are internal server error'))
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                 }

@@ -13,7 +13,7 @@
 
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table, TableSearch } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -21,6 +21,7 @@ import { Button, Modal, Spinner } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LicensePayload, NestedRows, Obligation } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -54,13 +55,6 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
             })
         }
     }
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
     const [obligations, setObligations] = useState<Obligation[]>([])
     const [checkAll, setCheckAll] = useState(false)
     const handleCloseDialog = () => {
@@ -184,7 +178,7 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `obligations`,
                     Object.fromEntries(

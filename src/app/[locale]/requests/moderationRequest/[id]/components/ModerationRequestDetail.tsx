@@ -12,7 +12,7 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
@@ -20,6 +20,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ErrorDetails, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
 import CurrentReleaseDetail from './currentRelease/CurrentReleaseDetail'
@@ -30,7 +31,6 @@ import ProposedChanges from './ProposedChanges'
 function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId: string }): ReactNode | undefined {
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
-    const { status } = useSession()
     const router = useRouter()
     const param = useParams()
     const locale = (param.locale as string) || 'en'
@@ -69,18 +69,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     })
     const [isAssignedModerator, setIsAssignedModerator] = useState<boolean>(false)
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const fetchData = async (url: string) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.GET(url, session.user.access_token)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
@@ -97,8 +89,10 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     useEffect(() => {
         void fetchData(`moderationrequest/${moderationRequestId}`).then(
-            (moderationRequestDetails: ModerationRequestDetails | undefined) => {
-                setModerationRequestData(moderationRequestDetails)
+            (moderationRequestDetails: ModerationRequestDetails | void) => {
+                if (!CommonUtils.isNullOrUndefined(moderationRequestDetails)) {
+                    setModerationRequestData(moderationRequestDetails)
+                }
             },
         )
 
@@ -116,7 +110,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const assignModerationRequest = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const updatedAssignPayload = {
                 ...moderationRequestPayload,
                 action: 'ASSIGN',
@@ -132,7 +126,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 setIsAssignedModerator(true)
                 MessageService.success(t('You have assigned yourself to this moderation request'))
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 return notFound()
             }
@@ -144,7 +138,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const handleAcceptModerationRequest = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const hasComment = handleCommentValidation()
             if (hasComment) {
                 const updatedAcceptPayload = {
@@ -162,7 +156,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     MessageService.success(t('You have accepted the moderation request'))
                     router.push('/requests')
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                     router.push(`/requests/moderationRequest/${moderationRequestId}`)
@@ -178,7 +172,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const handleRejectModerationRequest = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const hasComment = handleCommentValidation()
             if (hasComment) {
                 const updatedRejectPayload = {
@@ -196,7 +190,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     MessageService.success(t('You have rejected the moderation request'))
                     router.push('/requests')
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                     router.push(`/requests/moderationRequest/${moderationRequestId}`)
@@ -214,7 +208,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             const hasComment = handleCommentValidation()
             if (hasComment) {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const updatedPostponePayload = {
                     ...moderationRequestPayload,
                     action: 'POSTPONE',
@@ -230,7 +224,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     MessageService.success(t('You have postponed the moderation request'))
                     router.push('/requests')
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                     router.push(`/requests/moderationRequest/${moderationRequestId}`)
@@ -246,7 +240,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const handleUnassignModerationRequest = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const updatedUnassignPayload = {
                 ...moderationRequestPayload,
                 action: 'UNASSIGN',
@@ -266,7 +260,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 MessageService.warn(t('You are the last moderator for this request you are not allowed to unsubscribe'))
                 router.push('/requests')
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(t('There are some errors while updating moderation request'))
                 router.push(`/requests/moderationRequest/${moderationRequestId}`)

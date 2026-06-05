@@ -12,7 +12,7 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -20,6 +20,7 @@ import { Button, Spinner } from 'react-bootstrap'
 import { AccessToken, Embedded, ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedAccessTokens = Embedded<AccessToken, 'sw360:restApiTokens'>
 
@@ -32,18 +33,10 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
     const session = useSession()
     const [revoked, setRevoked] = useState(false)
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const revokeToken = async (tokenName: string) => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.DELETE(
                 CommonUtils.createUrlWithParams('users/tokens', {
                     name: tokenName,
@@ -55,7 +48,7 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
                 MessageService.success(t('Revoke token sucessfully'))
                 setRevoked(!revoked)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(t('Error while processing'))
             }
@@ -147,7 +140,7 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET('users/tokens', session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails

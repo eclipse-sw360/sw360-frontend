@@ -10,10 +10,11 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
 import { ClearingRequestDetails } from '@/object-types'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 export default function ClearingRequestInfo({
     data,
@@ -24,7 +25,7 @@ export default function ClearingRequestInfo({
     const { status } = useSession()
 
     if (status === 'unauthenticated') {
-        signOut()
+        dispatchSessionExpiredEvent()
     } else {
         return (
             <table className='table summary-table'>

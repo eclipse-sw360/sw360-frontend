@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -28,6 +28,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import MergeReleaseConfirmation from './MergeReleaseConfirmation'
 import MergeReleaseDataCheck from './MergeReleaseDataCheck'
 import MergeReleaseTable from './MergeReleaseTable'
@@ -68,7 +69,7 @@ function MergeReleaseOverview({
     const [finalReleasePayload, setFinalReleasePayload] = useState<null | Release>(null)
     const [error, setError] = useState<null | string>(null)
     const [loading, setLoading] = useState(false)
-    const { status, data: session } = useSession()
+    const { data: session } = useSession()
     const [sourceAttachments, setSourceAttachments] = useState<Array<Attachment>>([])
     const [targetAttachments, setTargetAttachments] = useState<Array<Attachment>>([])
     const [releaseUsages, setReleaseUsages] = useState<null | ReleaseUsages>(null)
@@ -82,7 +83,7 @@ function MergeReleaseOverview({
                 const data = (await response.json()) as EmbeddedAttachments
                 return data
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 return undefined
             }
@@ -99,24 +100,16 @@ function MergeReleaseOverview({
     ])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
         ;(async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
 
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status === StatusCodes.OK) {
                     const singleRelease = (await response.json()) as ReleaseDetail
                     const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
@@ -151,14 +144,14 @@ function MergeReleaseOverview({
         ;(async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `releases/${releaseId}/usageInformationForMerge`,
                     session.user.access_token,
                     signal,
                 )
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status === StatusCodes.OK) {
                     const releaseUsage = (await response.json()) as ReleaseUsages
                     setReleaseUsages(releaseUsage)
@@ -194,7 +187,7 @@ function MergeReleaseOverview({
         try {
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
-                signOut()
+                dispatchSessionExpiredEvent()
                 return false
             }
             if (!sourceRelease?.id) {
@@ -247,7 +240,7 @@ function MergeReleaseOverview({
         try {
             setLoading(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const payload = {
                 ...(finalReleasePayload ?? {}),
             }

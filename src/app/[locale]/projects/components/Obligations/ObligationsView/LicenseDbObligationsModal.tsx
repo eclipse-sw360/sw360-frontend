@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
@@ -28,6 +28,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ExpandableList } from './ExpandableComponents'
 
 const Capitalize = (text: string) =>
@@ -51,26 +52,18 @@ export default function LicenseDbObligationsModal({
     const session = useSession()
     const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const addObligationsToLicense = async () => {
         try {
             setLoading(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.POST(
                 `projects/${projectId}/licenseObligation`,
                 obligationIds,
                 session.user.access_token,
             )
             if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CREATED) {
                 MessageService.success(t('Added obligations successfully'))
                 setRefresh((prev) => !prev)
@@ -285,7 +278,7 @@ export default function LicenseDbObligationsModal({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/licenseDbObligations`,
                     Object.fromEntries(

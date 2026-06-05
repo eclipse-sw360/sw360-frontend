@@ -11,7 +11,7 @@
 
 import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -19,6 +19,7 @@ import { BsCaretRightFill } from 'react-icons/bs'
 import { PaddedCell, SW360Table } from '@/components/sw360'
 import { NestedRows, TypedEntity } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface ViewRelease {
     id: string
@@ -62,14 +63,6 @@ export default function ReleaseView({
     const t = useTranslations('default')
     const session = useSession()
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
     const [rowData, setRowData] = useState<
         NestedRows<TypedRelease | TypedLicense | TypedLicenseType | TypedObligation>[]
     >([])
@@ -94,7 +87,7 @@ export default function ReleaseView({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/licenseObligations?view=true`,
                     session.data.user.access_token,

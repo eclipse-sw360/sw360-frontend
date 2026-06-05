@@ -14,7 +14,7 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
@@ -30,6 +30,7 @@ import {
     SearchResult,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     releaseId?: string
@@ -54,14 +55,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const [selectedProject, setSelectedProject] = useState<Project>()
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<Project>[]>(
         () => [
@@ -305,7 +298,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint
@@ -423,7 +416,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
 
     const handleLinkToProject = async () => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.PATCH(
                 `projects/${selectedProject?._links.self.href.split('/').at(-1)}/releases`,
@@ -450,7 +443,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const getLinkedProjects = async (signal: AbortSignal) => {
         setShowLinkedProjectsProcessing(true)
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.data.user.access_token, signal)
             if (response.status !== StatusCodes.OK) {
@@ -490,7 +483,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
         const signal = controller.signal
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
                 const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {

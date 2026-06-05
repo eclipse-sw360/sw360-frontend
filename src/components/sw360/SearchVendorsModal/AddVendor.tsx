@@ -10,13 +10,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface AlertData {
     variant: string
@@ -59,7 +60,7 @@ const AddVendorDialog = ({
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
                 setState(AddVendorState.ADD_NEW_VENDOR)
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const payload: Vendor = {
                 fullName: vendor.fullName,
@@ -80,7 +81,7 @@ const AddVendorDialog = ({
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
                 setState(AddVendorState.ADD_NEW_VENDOR)
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CONFLICT) {
                 setAlert({
                     variant: 'danger',

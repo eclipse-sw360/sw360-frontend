@@ -10,7 +10,7 @@
 // License-Filename: LICENSE
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
@@ -19,6 +19,7 @@ import SecondaryDepartmentsAndRoles from '@/components/UserEditForm/SecondaryDep
 import { User, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -34,15 +35,6 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
     })
     const [showSuccess, setShowSuccess] = useState<boolean>(false)
     const [isUpdateSuccess, setIsUpdateSuccess] = useState<boolean>(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         if (show === false) return
@@ -50,7 +42,7 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
             const session = await getSession()
             if (CommonUtils.isNullOrUndefined(session)) {
                 MessageService.error(t('Session has expired'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             const response = await ApiUtils.GET(`users/byid/${editingUserId}`, session.user.access_token)
             if (response.status === StatusCodes.UNAUTHORIZED) {
@@ -96,7 +88,7 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
 
             if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
 
             MessageService.error(t('Something went wrong'))

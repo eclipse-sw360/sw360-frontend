@@ -11,7 +11,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useRef, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
@@ -20,6 +20,7 @@ import { Attachment, Embedded } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
 import CommonUtils from '@/utils/common.utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -62,11 +63,11 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
         }
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const uploadAttachmentResponse = await ApiUtils.POST('attachments', formData, session.user.access_token)
         if (uploadAttachmentResponse.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
 
         if (uploadAttachmentResponse.status !== StatusCodes.OK) {

@@ -11,14 +11,15 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type ReactElement, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type ReactElement, SetStateAction, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -47,15 +48,6 @@ export default function DeletePackageModal({
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [deleting, setDeleting] = useState<boolean | null>(null)
     const router = useRouter()
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleGoBack = () => {
         router.push('/packages')
@@ -99,7 +91,7 @@ export default function DeletePackageModal({
                     }
                 }
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 if (isEditPage) {
                     MessageService.error(t('Package cannot be deleted'))

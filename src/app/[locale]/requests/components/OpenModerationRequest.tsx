@@ -13,13 +13,14 @@ import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 
@@ -45,14 +46,6 @@ function OpenModerationRequest(): ReactNode {
 
     const session = useSession()
     const params = useSearchParams()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const formatDate = (timestamp: number | undefined): string | null => {
         if (timestamp === undefined) {
@@ -176,7 +169,7 @@ function OpenModerationRequest(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest`,

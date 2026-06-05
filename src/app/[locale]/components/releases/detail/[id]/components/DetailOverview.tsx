@@ -14,7 +14,7 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Col, Dropdown, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -49,6 +49,7 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -114,14 +115,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     ])
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
         setActiveKey(fragment)
     }, [
@@ -144,7 +137,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                     EmbeddedChangelogs
                 return data
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 return undefined
             }
@@ -161,7 +154,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const extractUserEmail = () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         setUserEmail(session.data.user.email)
     }
 
@@ -171,7 +164,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         void extractUserEmail()
 
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 if (CommonUtils.isNullOrUndefined(release)) {
                     notFound()
                 }
@@ -191,7 +184,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             })
             .then((release: ReleaseDetail) => {
                 fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
-                    .then((embeddedReleaseLinks: EmbeddedReleaseLinks | undefined) => {
+                    .then((embeddedReleaseLinks) => {
                         if (embeddedReleaseLinks) {
                             setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
                         }
@@ -201,7 +194,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             .catch((err) => console.error(err))
 
         fetchData(`releases/${releaseId}/vulnerabilities`)
-            .then((vulnerabilities: EmbeddedVulnerabilities | undefined) => {
+            .then((vulnerabilities) => {
                 if (
                     vulnerabilities &&
                     !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
@@ -226,7 +219,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `releases/${releaseId}/licenseFileList`,
                     session.data.user.access_token,
@@ -286,7 +279,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
                     Object.fromEntries(
@@ -333,7 +326,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     ])
 
     const downloadBundle = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         await DownloadService.download(
             `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
             session.data,
@@ -346,7 +339,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         await ApiUtils.POST(`releases/${releaseId}/subscriptions`, {}, session.data.user.access_token)
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 if (release === undefined) return
                 setRelease(release)
                 setSubscribers(getSubcribersEmail(release))

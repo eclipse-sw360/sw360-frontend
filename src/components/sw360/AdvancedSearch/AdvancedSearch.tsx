@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import React, { type JSX, useEffect, useState } from 'react'
@@ -43,6 +43,7 @@ interface SearchParams {
 
 function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Element {
     const router = useRouter()
+    const pathname = usePathname()
     const t = useTranslations('default')
     const params = Object.fromEntries(useSearchParams())
     const [searchParams, setSearchParam] = useState<SearchParams>({
@@ -50,8 +51,10 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
         luceneSearch: params.luceneSearch || 'true',
     })
     const [createdOnSearchOption, setCreatedOnSearchOption] = useState('')
-    const [isUsersPage, setIsUsersPage] = useState(false)
-    const [isPackagesPage, setIsPackagesPage] = useState(false)
+    const [isMounted, setIsMounted] = useState(false)
+
+    const isUsersPage = pathname.includes('users')
+    const isPackagesPage = pathname.includes('packages')
 
     const handleSearchParam = (event: React.ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
         setSearchParam((prev: SearchParams) => ({
@@ -65,14 +68,12 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
     }
 
     useEffect(() => {
-        const currentUrl = new URL(window.location.href)
-        setIsUsersPage(currentUrl.pathname.includes('users'))
+        setIsMounted(true)
     }, [])
 
-    useEffect(() => {
-        const currentUrl = new URL(window.location.href)
-        setIsPackagesPage(currentUrl.pathname.includes('packages'))
-    }, [])
+    if (!isMounted) {
+        return <></>
+    }
 
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)

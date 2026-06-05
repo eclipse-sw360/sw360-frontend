@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
@@ -20,6 +20,7 @@ import { BsInfoCircle } from 'react-icons/bs'
 import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -40,14 +41,6 @@ export default function CompareObligation({
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<Project>[]>(
         () => [
@@ -271,7 +264,7 @@ export default function CompareObligation({
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const queryUrl = CommonUtils.createUrlWithParams(
                 `projects`,

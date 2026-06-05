@@ -10,9 +10,8 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { DisplayMap } from '@/components/DisplayMap/DisplayMap'
 import { useConfigValue } from '@/contexts'
 import { UIConfigKeys, Vulnerability } from '@/object-types'
@@ -21,16 +20,7 @@ import UsingReleasesTable from './UsingReleasesTable'
 export default function Summary({ summaryData }: { summaryData: Vulnerability }): ReactNode {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
-    const { status } = useSession()
     const svmNotificationUrl = useConfigValue(UIConfigKeys.UI_SVM_NOTIFICATION_URL) as string | null
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <>

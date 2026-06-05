@@ -12,6 +12,7 @@ import { StatusCodes } from 'http-status-codes'
 import { RequestContent } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { SW360_API_URL } from '@/utils/env'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const base = SW360_API_URL + '/resource/api'
 
@@ -211,6 +212,10 @@ async function send({
                 })
                 await sleep(getRetryDelay(attempt))
                 continue
+            }
+
+            if (response.status === StatusCodes.UNAUTHORIZED && typeof window !== 'undefined') {
+                dispatchSessionExpiredEvent()
             }
 
             return response

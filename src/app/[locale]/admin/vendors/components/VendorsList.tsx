@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -22,6 +22,7 @@ import { BsFillTrashFill, BsGit, BsPencil, BsQuestionCircle } from 'react-icons/
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
@@ -29,7 +30,7 @@ const DeleteVendor = async (vendorId: string) => {
     try {
         const session = await getSession()
         if (!session) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         }
         const response = await ApiUtils.DELETE(`vendors/${vendorId}`, session.user.access_token)
         if (response.status !== StatusCodes.NO_CONTENT) {
@@ -106,14 +107,6 @@ export default function VendorsList(): JSX.Element {
     const [delVendor, setDelVendor] = useState<Vendor | null>(null)
     const session = useSession()
     const [search, setSearch] = useState({})
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleAddVendor = () => {
         router.push('/admin/vendors/add')
@@ -241,7 +234,7 @@ export default function VendorsList(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vendors`,
                     Object.fromEntries(
@@ -340,7 +333,7 @@ export default function VendorsList(): JSX.Element {
     const handleExportSpreadsheet = async () => {
         try {
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const url = 'vendors/exportVendorDetails'
             const currentDate = new Date().toISOString().split('T')[0]
             void DownloadService.download(url, session, `vendors-${currentDate}.xlsx`)

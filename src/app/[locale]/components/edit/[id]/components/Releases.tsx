@@ -15,13 +15,14 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, LinkedRelease, ReleaseLink } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     componentId: string
@@ -33,14 +34,6 @@ const Releases = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ReleaseLink>[]>(
         () => [
@@ -99,7 +92,7 @@ const Releases = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `components/${componentId}/releases`,
                     session.data.user.access_token,

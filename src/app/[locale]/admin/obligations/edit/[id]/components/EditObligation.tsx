@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -21,6 +21,7 @@ import { Obligation } from '@/object-types'
 import MessageService from '@/services/message.service'
 import CommonUtils from '@/utils/common.utils'
 import { ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ObligationForm from '../../../components/AddOrEditObligation'
 
 interface props {
@@ -38,22 +39,13 @@ function EditObligation({ obligationId }: props): ReactNode {
         obligationLevel: '',
         obligationType: '',
     } as Obligation)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         void (async () => {
             try {
                 setIsLoading(true)
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const response = await ApiUtils.GET(`obligations/${obligationId}`, session.user.access_token)
                 if (response.status === StatusCodes.OK) {
@@ -85,7 +77,7 @@ function EditObligation({ obligationId }: props): ReactNode {
 
     const submitObligation = async () => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
         if (
             !isFieldValid(obligation.title) ||

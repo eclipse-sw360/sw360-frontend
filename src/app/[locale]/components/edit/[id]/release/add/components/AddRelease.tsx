@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -35,6 +35,7 @@ import {
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ReleaseAddSummary from './ReleaseAddSummary'
 
 interface Props {
@@ -128,23 +129,15 @@ function AddRelease({ componentId }: Props): ReactNode {
     }
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         if (!duplicateFromReleaseId) return
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `releases/${duplicateFromReleaseId}`,
                     session.data.user.access_token,
                 )
-                if (response.status === StatusCodes.UNAUTHORIZED) return signOut()
+                if (response.status === StatusCodes.UNAUTHORIZED) return dispatchSessionExpiredEvent()
                 else if (response.status !== StatusCodes.OK) return notFound()
 
                 const release: ReleaseDetail = (await response.json()) as ReleaseDetail
@@ -230,10 +223,10 @@ function AddRelease({ componentId }: Props): ReactNode {
         if (!componentId) return
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`components/${componentId}`, session.data.user.access_token)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -254,7 +247,7 @@ function AddRelease({ componentId }: Props): ReactNode {
     ])
 
     const submit = async () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.POST('releases', releasePayload, session.data.user.access_token)
         if (response.status === StatusCodes.CREATED) {
             const release = (await response.json()) as ReleaseDetail

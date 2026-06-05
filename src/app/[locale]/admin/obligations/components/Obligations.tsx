@@ -14,7 +14,7 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -22,6 +22,7 @@ import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { Embedded, ErrorDetails, Obligation, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ObligationLevelInfo, ObligationLevels } from '../../../../../object-types/Obligation'
 import DeleteObligationDialog from './DeleteObligationDialog'
 
@@ -35,14 +36,6 @@ function Obligations(): ReactNode {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [deletedObligationId, setDeletedObligationId] = useState('')
     const router = useRouter()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const openDeleteDialog = (obligationId: string | undefined) => {
         if (obligationId !== undefined) {
@@ -216,7 +209,7 @@ function Obligations(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `obligations`,
                     Object.fromEntries(

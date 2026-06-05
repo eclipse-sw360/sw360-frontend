@@ -11,14 +11,15 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import UserEditForm from '@/components/UserEditForm/UserEditForm'
 import UserOperationType from '@/components/UserEditForm/UserOperationType'
 import { UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 export default function CreateUser(): JSX.Element {
     const t = useTranslations('default')
@@ -33,15 +34,6 @@ export default function CreateUser(): JSX.Element {
         secondaryDepartmentsAndRoles: {},
     })
     const router = useRouter()
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setUser((prev) => ({
@@ -55,7 +47,7 @@ export default function CreateUser(): JSX.Element {
         try {
             const session = await getSession()
             if (!session) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             user.fullName = `${user.givenName} ${user.lastName}`
             const response = await ApiUtils.POST('users', user, session.user.access_token)
@@ -63,7 +55,7 @@ export default function CreateUser(): JSX.Element {
                 MessageService.success(t('User is created'))
                 router.push('/admin/users')
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('User with the same email already exists'))
             } else {

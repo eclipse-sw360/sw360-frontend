@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
@@ -20,6 +20,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
 import { extractPackageManagerFromPurl } from '../../../components/purlUtils'
 
@@ -28,21 +29,12 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
     const router = useRouter()
     const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
     const [updatingPackage, setUpdatingPackage] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token)
                 if (response.status === StatusCodes.OK) {
                     setPackagePayload((await response.json()) as Package)
@@ -59,7 +51,7 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
         try {
             setUpdatingPackage(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
             const normalizedPurl = packagePayload?.purl?.trim()
             const packageManager = extractPackageManagerFromPurl(normalizedPurl)
@@ -81,7 +73,7 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
                 MessageService.success(t('Package updated successfully'))
                 router.push(`/packages/detail/${packageId}`)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 let res: Record<string, string> = {}
                 try {

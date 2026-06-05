@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
@@ -20,6 +20,7 @@ import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDet
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { Changelogs, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -34,14 +35,6 @@ function ChangeLog({
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [changeLogId, setChangeLogId] = useState('')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -75,7 +68,7 @@ function ChangeLog({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${projectId}`,
                     Object.fromEntries(

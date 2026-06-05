@@ -10,10 +10,11 @@
 // License-Filename: LICENSE
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { DocumentTypes, ErrorDetails, Resources } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ComponentsUsing from './ComponentsUsing'
 import ProjectsUsing from './ProjectsUsing'
 
@@ -27,14 +28,6 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
     const [resourcesUsing, setResourceUsing] = useState<Resources | undefined>(undefined)
     const session = useSession()
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
@@ -45,7 +38,7 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
         void (async () => {
             try {
                 setShowProcessing(true)
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `${documentType}/usedBy/${documentId}`,
                     session.data.user.access_token,

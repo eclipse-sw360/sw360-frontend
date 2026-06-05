@@ -12,7 +12,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { getSession, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
@@ -21,6 +21,7 @@ import UserOperationType from '@/components/UserEditForm/UserOperationType'
 import { User, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ToggleUserActiveModal from './components/ToggleUserActiveModal'
 
 const AdminEditUserPage = (): JSX.Element => {
@@ -47,12 +48,12 @@ const AdminEditUserPage = (): JSX.Element => {
         void (async () => {
             try {
                 const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
                 const queryUrl = `users/byid/${params.id}`
                 const response = await ApiUtils.GET(queryUrl, session.user.access_token)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -80,7 +81,7 @@ const AdminEditUserPage = (): JSX.Element => {
         try {
             const session = await getSession()
             if (!session) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
             userPayload.fullName = `${userPayload.givenName} ${userPayload.lastName}`
             if (CommonUtils.isNullEmptyOrUndefinedString(userPayload.password)) {
@@ -92,7 +93,7 @@ const AdminEditUserPage = (): JSX.Element => {
                 router.push(`/admin/users/details/${params.id}`)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('User with the same email already exists'))
             } else {

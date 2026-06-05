@@ -11,9 +11,9 @@
 
 import { withAuth } from 'next-auth/middleware'
 import createMiddleware from 'next-intl/middleware'
+import { locales } from '@/constants'
 import { UserGroupType } from '@/object-types'
 import { routing } from './i18n/routing'
-import { locales } from './object-types/Constants'
 import { CommonUtils } from './utils'
 
 const LOGIN_PAGE_PATH = '/'
@@ -98,12 +98,20 @@ const authMiddleware = withAuth(
                 const protectionConfig = getProtectionConfig(pathWithoutLocale)
 
                 // if protection config is not found or authRequired flag is undefined or false, it is a public page
-                if (CommonUtils.isNullOrUndefined(protectionConfig?.authRequired) || !protectionConfig.authRequired) {
+                if (
+                    CommonUtils.isNullOrUndefined(protectionConfig) ||
+                    CommonUtils.isNullOrUndefined(protectionConfig?.authRequired) ||
+                    !protectionConfig.authRequired
+                ) {
                     return true
                 }
 
                 // if authentication is required but token is not found, deny access
                 if (CommonUtils.isNullOrUndefined(token)) {
+                    return false
+                }
+
+                if (token.error === 'RefreshAccessTokenError' || CommonUtils.isNullOrUndefined(token.access_token)) {
                     return false
                 }
 

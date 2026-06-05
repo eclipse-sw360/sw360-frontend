@@ -19,7 +19,7 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -29,6 +29,7 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW3
 import { ErrorDetails, FilterOption, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 import { ApiError, ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     projectId: string
@@ -72,14 +73,6 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [packagesData, setPackagesData] = useState<Package[]>(() => [])
     const memoizedPackagesData = useMemo(
@@ -325,7 +318,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `projects/${projectId}/packages`,
                     session.data.user.access_token,
@@ -366,7 +359,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails

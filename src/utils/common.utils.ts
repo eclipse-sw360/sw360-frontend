@@ -13,11 +13,11 @@
 import { InputKeyValue, User } from '@/object-types'
 
 /**
- * Checks if the given object is null or undefined.
+ * Checks if the given object is void, null or undefined.
  * @param obj - The object to check.
- * @returns True if the object is null or undefined, false otherwise.
+ * @returns True if the object is void, null or undefined, false otherwise.
  */
-const isNullOrUndefined = (obj: unknown): obj is null | undefined => {
+const isNullOrUndefined = <T>(obj: T | null | undefined | void): obj is null | undefined | void => {
     if (obj === null || obj === undefined) {
         return true
     }

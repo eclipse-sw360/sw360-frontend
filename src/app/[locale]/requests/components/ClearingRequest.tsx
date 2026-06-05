@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -29,6 +29,7 @@ import {
     UserGroupType,
 } from '@/object-types'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
@@ -48,14 +49,6 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
         totalPages: 0,
         number: 0,
     })
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ClearingRequest>[]>(
         () => [
@@ -359,7 +352,7 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const statusFilter =
                     requestType === 'OPEN'

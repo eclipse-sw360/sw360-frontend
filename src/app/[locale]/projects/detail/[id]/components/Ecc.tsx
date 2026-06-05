@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -21,6 +21,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ECCInterface, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedProjectReleaseEcc = Embedded<ECCInterface, 'sw360:releases'>
 
@@ -36,14 +37,6 @@ const Capitalize = (text: string) =>
 function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Element {
     const t = useTranslations('default')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
@@ -152,7 +145,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
+                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/releases/ecc`,
                     Object.fromEntries(
@@ -233,7 +226,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
 
     const exportSpreadsheet = () => {
         try {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const currentDate = new Date().toISOString().split('T')[0]
             const eccSpreadSheetName = `releases-${projectName}-${projectVersion}-${currentDate}.xlsx`
             const url = `reports?projectId=${projectId}&module=projectReleaseSpreadSheetWithEcc&mimetype=xlsx`

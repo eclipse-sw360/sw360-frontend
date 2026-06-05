@@ -11,15 +11,16 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import { ListGroup, Tab } from 'react-bootstrap'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
 import { extractPackageManagerFromPurl } from '../../components/purlUtils'
 
@@ -31,15 +32,6 @@ function CreatePackage(): JSX.Element {
         createdOn: `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`,
     })
     const [creatingPackage, setCreatingPackage] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -53,7 +45,7 @@ function CreatePackage(): JSX.Element {
         try {
             setCreatingPackage(true)
             const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
+            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
             const normalizedPurl = packagePayload.purl?.trim()
             const packageManager = extractPackageManagerFromPurl(normalizedPurl)
@@ -86,7 +78,7 @@ function CreatePackage(): JSX.Element {
                     handleGoBack()
                 }
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }

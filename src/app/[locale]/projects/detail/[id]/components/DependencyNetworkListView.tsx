@@ -20,7 +20,7 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table, TableSearch } from 'next-sw360'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -171,14 +171,6 @@ const upperCaseWithUnderscore = (text: string | undefined) => {
 const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
     const t = useTranslations('default')
     const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()

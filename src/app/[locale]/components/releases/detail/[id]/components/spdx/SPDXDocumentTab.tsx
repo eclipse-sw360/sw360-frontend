@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import {
@@ -29,6 +29,7 @@ import {
     SPDXDocument,
 } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 import AnnotationInformation from './AnnotationInformation'
 import DocumentCreationInformationDetail from './DocumentCreationInformation'
@@ -83,25 +84,16 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
     const [annotationsPackages, setAnnotationsPackages] = useState<Annotations[]>([])
 
     const [isModeFull, setIsModeFull] = useState(true)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const fetchData = useCallback(async (url: string) => {
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url, session.user.access_token)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail
             return data
         } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             return undefined
         }
@@ -109,7 +101,7 @@ const SPDXDocumentTab = ({ releaseId }: Props): ReactNode => {
 
     useEffect(() => {
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 if (!release) return
                 //SPDX Document
                 if (

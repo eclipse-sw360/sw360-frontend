@@ -13,13 +13,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import React, { ReactNode, useEffect, useRef, useState } from 'react'
+import React, { ReactNode, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
 
 import { Component } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -48,15 +49,6 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
     const selectedFile = useRef<File | undefined>(undefined)
     const inputRef = useRef<HTMLInputElement>(undefined)
     const router = useRouter()
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.currentTarget.files) return
@@ -74,7 +66,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
         if (!selectedFile.current) return
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
         setNotAllowedMessageDisplayed(false)
         const formData = new FormData()
@@ -98,7 +90,7 @@ const ImportSBOMModal = ({ show, setShow }: Props): ReactNode => {
         if (!selectedFile.current) return
 
         const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
+        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
 
         const formData = new FormData()
         formData.append('file', selectedFile.current, selectedFile.current.name)
