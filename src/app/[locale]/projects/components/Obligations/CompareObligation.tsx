@@ -19,7 +19,8 @@ import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 
 import { BsInfoCircle } from 'react-icons/bs'
 import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
@@ -284,7 +285,7 @@ export default function CompareObligation({
                     ]),
                 ),
             )
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            const response = await ApiUtils.GET(queryUrl, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

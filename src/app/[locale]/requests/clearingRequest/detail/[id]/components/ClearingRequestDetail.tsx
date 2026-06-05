@@ -12,14 +12,15 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequestDetails, UserGroupType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ReopenClosedClearingRequestModal from '../../../edit/[id]/components/ReopenClosedClearingRequestModal'
 import ClearingComments from './ClearingComments'
@@ -40,9 +41,7 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const requestsPath = `/${locale}/requests`
 
     const fetchData = async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as ClearingRequestDetails
             return data

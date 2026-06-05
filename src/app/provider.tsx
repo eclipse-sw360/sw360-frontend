@@ -20,7 +20,10 @@ type Props = {
 
 export const Providers = ({ children }: Props): JSX.Element => {
     return (
-        <SessionProvider refetchOnWindowFocus={false}>
+        <SessionProvider
+            refetchOnWindowFocus={false}
+            refetchInterval={5 * 60} // Refresh session every 5 minutes to prevent sign out
+        >
             <SessionStatusHandler />
             {children}
         </SessionProvider>

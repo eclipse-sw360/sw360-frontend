@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -41,7 +41,8 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -253,7 +254,7 @@ function EditProject({
 
     const fetchUserData = useCallback(async (url: string) => {
         if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.data.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as User
             return data
@@ -272,15 +273,12 @@ function EditProject({
 
         const loadServerObligations = async () => {
             try {
-                const s = await getSession()
-                if (CommonUtils.isNullOrUndefined(s)) return dispatchSessionExpiredEvent()
-
                 const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
                     page: '0',
                     page_entries: '9999',
                 })
 
-                const resp = await ApiUtils.GET(url, s.user.access_token, signal)
+                const resp = await ApiUtils.GET(url, signal)
                 const body = (await resp.json().catch(() => ({}))) as {
                     obligations?: Record<
                         string,
@@ -317,7 +315,7 @@ function EditProject({
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token)
+                const response = await ApiUtils.GET(`projects/${projectId}`)
                 if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -539,7 +537,7 @@ function EditProject({
             entityType: 'PROJECT',
             entityId: projectId,
         })
-        const response = await ApiUtils.POST(url, {}, session.data.user.access_token)
+        const response = await ApiUtils.POST(url, {})
         switch (response.status) {
             case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))
@@ -575,7 +573,6 @@ function EditProject({
                         ? `projects/network/${projectId}`
                         : `projects/${projectId}`,
                     dataToUpdate,
-                    session.data.user.access_token,
                 ),
             ]
             if (Object.keys(obligations).length !== 0) {
@@ -585,52 +582,36 @@ function EditProject({
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateLicenseObligation`,
-                                {
-                                    [key]: obligations[key],
-                                },
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, {
+                                [key]: obligations[key],
+                            }),
                         )
                     } else if (obligations[key]?.obligationType === ObligationType.COMPONENT_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateObligation?obligationLevel=component`,
-                                {
-                                    [key]: obligations[key],
-                                },
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=component`, {
+                                [key]: obligations[key],
+                            }),
                         )
                     } else if (obligations[key]?.obligationType === ObligationType.PROJECT_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateObligation?obligationLevel=project`,
-                                {
-                                    [key]: obligations[key],
-                                },
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=project`, {
+                                [key]: obligations[key],
+                            }),
                         )
                     } else if (obligations[key]?.obligationType === ObligationType.ORGANISATION_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateObligation?obligationLevel=organization`,
-                                {
-                                    [key]: obligations[key],
-                                },
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=organization`, {
+                                [key]: obligations[key],
+                            }),
                         )
                     }
                 }

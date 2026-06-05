@@ -17,7 +17,8 @@ import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
@@ -127,7 +128,7 @@ export default function VendorTable({
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

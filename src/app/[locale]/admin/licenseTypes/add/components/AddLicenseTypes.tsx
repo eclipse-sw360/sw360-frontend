@@ -11,12 +11,12 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useRef } from 'react'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 export default function AddLicenseTypes(): JSX.Element {
     const router = useRouter()
@@ -26,12 +26,10 @@ export default function AddLicenseTypes(): JSX.Element {
 
     const handleAddLicenseType = async ({ addLicenseTypeTitle }: { addLicenseTypeTitle: string }) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const url = CommonUtils.createUrlWithParams('licenses/addLicenseType', {
                 licenseType: addLicenseTypeTitle,
             })
-            const response = await ApiUtils.POST(url, {}, session.user.access_token)
+            const response = await ApiUtils.POST(url, {})
             if (response.status == StatusCodes.OK) {
                 MessageService.success(t('License Type is created successfully'))
                 router.push('/admin/licenseTypes')

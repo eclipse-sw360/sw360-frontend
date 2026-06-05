@@ -10,14 +10,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import type { JSX } from 'react'
 import { ProjectPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -39,10 +37,8 @@ export default function LicenseInfoHeader({ projectPayload, setProjectPayload }:
 
     const getDefaultLicenseInfoHeader = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const url = 'projects/licenseInfoHeader'
-            const response = await ApiUtils.GET(url, session.user.access_token)
+            const response = await ApiUtils.GET(url)
             if (response.status == StatusCodes.OK) {
                 const data = (await response.json()) as LicenseInfoHeader
                 setProjectPayload({

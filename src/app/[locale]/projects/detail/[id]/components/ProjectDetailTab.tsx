@@ -28,7 +28,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
@@ -88,11 +89,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/summaryAdministration`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -122,11 +119,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/clearingDetailsCount`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/clearingDetailsCount`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -171,11 +164,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                     return
                 }
 
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/tabCounts`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/tabCounts`, signal)
                 const body = (await response.json().catch(() => ({}))) as ProjectDetailTabCounts | ErrorDetails
 
                 if (response.status !== StatusCodes.OK) {

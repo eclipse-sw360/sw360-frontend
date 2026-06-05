@@ -29,8 +29,9 @@ import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 import { Attachment, ErrorDetails, FilterOption, NestedRows, TypedEntity } from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 
 interface Props {
     projectId: string
@@ -564,7 +565,6 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             try {
                 const response = await ApiUtils.GET(
                     `projects/network/${projectId}/linkedResources?transitive=true`,
-                    session.data.user.access_token,
                     signal,
                 )
 

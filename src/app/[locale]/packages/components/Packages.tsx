@@ -22,7 +22,8 @@ import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
@@ -274,7 +275,7 @@ function Packages(): ReactNode {
                     ),
                 )
 
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -312,11 +313,7 @@ function Packages(): ReactNode {
                             }
                         }
                         try {
-                            const releaseResp = await ApiUtils.GET(
-                                `releases/${pkg.releaseId}`,
-                                session.user.access_token,
-                                signal,
-                            )
+                            const releaseResp = await ApiUtils.GET(`releases/${pkg.releaseId}`, signal)
                             if (releaseResp.status === StatusCodes.OK) {
                                 const release = await releaseResp.json()
                                 releaseCache.set(pkg.releaseId, release)

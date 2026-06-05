@@ -9,13 +9,13 @@
 // License-Filename: LICENSE
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { UserGroupType, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface SecondaryDepartmentAndRole {
     department: string
@@ -82,13 +82,7 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
 
     const fetchAvailableDepartments = async () => {
         // Fetch available departments from the backend
-        const session = await getSession()
-        if (session === null) {
-            MessageService.error(t('Session has expired'))
-            return
-        }
-
-        const response = await ApiUtils.GET('users/departments', session.user.access_token)
+        const response = await ApiUtils.GET('users/departments')
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return

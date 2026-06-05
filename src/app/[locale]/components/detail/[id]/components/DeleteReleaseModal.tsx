@@ -13,12 +13,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { ActionType, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -62,12 +63,10 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
 
     const deleteComponent = async () => {
         if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) return
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`releases/${releaseId}`, {
             comment: comment,
         })
-        const response = await ApiUtils.DELETE(url, session.user.access_token)
+        const response = await ApiUtils.DELETE(url)
         try {
             if (response.status === StatusCodes.MULTI_STATUS) {
                 const body = (await response.json()) as Array<DeleteResponse>
@@ -98,9 +97,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
             if (CommonUtils.isNullEmptyOrUndefinedString(releaseId)) return
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const releaseResponse = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
+            const releaseResponse = await ApiUtils.GET(`releases/${releaseId}`, signal)
             if (releaseResponse.status === StatusCodes.OK) {
                 const release = (await releaseResponse.json()) as ReleaseDetail
                 setRelease(release)

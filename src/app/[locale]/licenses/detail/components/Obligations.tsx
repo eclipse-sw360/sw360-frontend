@@ -25,7 +25,8 @@ import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { ErrorDetails, LicenseDetail, NestedRows, Obligation } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -76,7 +77,7 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 setShowProcessing(true)
-                const response = await ApiUtils.GET(`licenses/${licenseId}`, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(`licenses/${licenseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

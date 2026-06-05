@@ -13,7 +13,7 @@ import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReac
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useSearchParams } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -34,7 +34,8 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -110,16 +111,7 @@ function GenerateSourceCodeBundle({
             if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                 return
             }
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Something went wrong'))
-                return dispatchSessionExpiredEvent()
-            }
-            const response = await ApiUtils.POST(
-                `projects/${projectId}/saveAttachmentUsages`,
-                saveUsagesPayload,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status !== StatusCodes.CREATED) {
                 MessageService.error(t('Something went wrong'))
                 return notFound()
@@ -127,7 +119,6 @@ function GenerateSourceCodeBundle({
             const currentDate = new Date().toISOString().split('T')[0]
             DownloadService.download(
                 `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`,
-                session,
                 `SourceCodeBundle-${currentDate}.zip`,
             )
         } catch (e) {
@@ -155,26 +146,20 @@ function GenerateSourceCodeBundle({
                     return
                 }
                 const requests = [
-                    ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal),
+                    ApiUtils.GET(`projects/${projectId}`, signal),
                 ]
                 if (searchParams.withSubProjects === 'true') {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=true&filter=withSourceAttachment`,
-                            session.data.user.access_token,
                             signal,
                         ),
-                        ApiUtils.GET(
-                            `projects/${projectId}/linkedProjects?transitive=true`,
-                            session.data.user.access_token,
-                            signal,
-                        ),
+                        ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal),
                     )
                 } else {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=false&filter=withSourceAttachment`,
-                            session.data.user.access_token,
                             signal,
                         ),
                     )

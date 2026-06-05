@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -29,7 +29,8 @@ import {
     UIConfigKeys,
     Vendor,
 } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -67,10 +68,7 @@ export default function ComponentEditSummary({
             : undefined
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as Component
             return data

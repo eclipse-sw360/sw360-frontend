@@ -27,7 +27,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import { ErrorDetails, FilterOption } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ClearingStateBadge from './ClearingStateBadge'
 
 interface ListViewData {
@@ -451,11 +452,7 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
 
         void (async () => {
             try {
-                const listViewResponse = await ApiUtils.GET(
-                    `projects/network/${projectId}/listView`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const listViewResponse = await ApiUtils.GET(`projects/network/${projectId}/listView`, signal)
 
                 if (listViewResponse.status !== StatusCodes.OK) {
                     const err = (await listViewResponse.json()) as ErrorDetails

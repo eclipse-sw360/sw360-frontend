@@ -34,7 +34,8 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ReleaseAddSummary from './ReleaseAddSummary'
 
@@ -133,10 +134,7 @@ function AddRelease({ componentId }: Props): ReactNode {
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(
-                    `releases/${duplicateFromReleaseId}`,
-                    session.data.user.access_token,
-                )
+                const response = await ApiUtils.GET(`releases/${duplicateFromReleaseId}`)
                 if (response.status === StatusCodes.UNAUTHORIZED) return dispatchSessionExpiredEvent()
                 else if (response.status !== StatusCodes.OK) return notFound()
 
@@ -224,7 +222,7 @@ function AddRelease({ componentId }: Props): ReactNode {
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`components/${componentId}`, session.data.user.access_token)
+                const response = await ApiUtils.GET(`components/${componentId}`)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
@@ -248,7 +246,7 @@ function AddRelease({ componentId }: Props): ReactNode {
 
     const submit = async () => {
         if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.POST('releases', releasePayload, session.data.user.access_token)
+        const response = await ApiUtils.POST('releases', releasePayload)
         if (response.status === StatusCodes.CREATED) {
             const release = (await response.json()) as ReleaseDetail
             MessageService.success(t('Release is created'))

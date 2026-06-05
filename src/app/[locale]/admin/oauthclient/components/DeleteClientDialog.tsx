@@ -12,13 +12,13 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
-import { CommonUtils } from '@/utils'
+import { getAuthenticatedAccessToken } from '@/utils/api/authenticatedApi.util'
 import { SW360_API_URL } from '@/utils/env'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
@@ -44,9 +44,7 @@ function DeleteClientDialog({ clientId, show, setShow }: Props): JSX.Element {
 
     const deleteProject = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const response = await sendOAuthClientRequest(clientId, session.user.access_token)
+            const response = await sendOAuthClientRequest(clientId, await getAuthenticatedAccessToken())
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Client deleted successfully'))
                 setShow(false)

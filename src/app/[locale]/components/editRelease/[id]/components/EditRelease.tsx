@@ -14,7 +14,6 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
-import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -44,7 +43,9 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
@@ -106,9 +107,8 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     useEffect(() => {
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
+                const userIdentity = await getAuthenticatedUserIdentity()
+                const response = await ApiUtils.GET(`releases/${releaseId}`)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
@@ -133,7 +133,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                         creators = [
                             {
                                 type: 'Person',
-                                value: `${session.user.name} (${session.user.email})`,
+                                value: `${userIdentity.name} (${userIdentity.email})`,
                                 index: 0,
                             },
                         ]
@@ -393,12 +393,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     }
 
     const updateRelease = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return dispatchSessionExpiredEvent()
-        }
-
         if (isSPDXFeatureEnabled === true) {
             setInputValid(true)
             if (validateLicenseIdentifier(SPDXPayload) && validateExtractedText(SPDXPayload)) {
@@ -412,11 +406,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             ) {
                 return
             } else {
-                const responseUpdateSPDX = await ApiUtils.PATCH(
-                    `releases/${releaseId}/spdx`,
-                    SPDXPayload,
-                    session.user.access_token,
-                )
+                const responseUpdateSPDX = await ApiUtils.PATCH(`releases/${releaseId}/spdx`, SPDXPayload)
                 if (responseUpdateSPDX.status === StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Session has expired'))
                     return
@@ -444,7 +434,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 ...cleanPayload,
                 eccInformation: sanitizedEccInformation,
             }
-            const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload, session.user.access_token)
+            const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload)
 
             if (response.status === StatusCodes.OK) {
                 const release = (await response.json()) as ReleaseDetail
@@ -464,13 +454,11 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     }
 
     const checkUpdateEligibility = async (releaseId: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'RELEASE',
             entityId: releaseId,
         })
-        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        const response = await ApiUtils.POST(url, {})
         switch (response.status) {
             case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))

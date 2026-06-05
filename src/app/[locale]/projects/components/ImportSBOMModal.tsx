@@ -10,15 +10,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import React, { JSX, useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
 
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Attachment, AttachmentTypes } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSummary from '../../../../object-types/cyclonedx/ImportSummary'
@@ -92,9 +91,9 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
         setImportState(ImportSBOMState.CONFIRM_IMPORT)
     }
 
-    const fetchImportStatus = async (projectId: string, attachmentId: string, accessToken: string) => {
+    const fetchImportStatus = async (projectId: string, attachmentId: string) => {
         try {
-            const response = await ApiUtils.GET(`projects/${projectId}/attachments/${attachmentId}`, accessToken)
+            const response = await ApiUtils.GET(`projects/${projectId}/attachments/${attachmentId}`)
 
             const importStatusResponse = await response.json()
             setImportSummary(importStatusResponse)
@@ -110,8 +109,6 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
             setImportState(ImportSBOMState.IMPORTING)
             const start = Date.now() // Capture start time
             setStartTime(start)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             if (!selectedFile.current) {
                 setImportError({
                     variant: 'danger',
@@ -128,7 +125,6 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                       }`
                     : `projects/import/SBOM?type=${importSBOMMetadata.importType}`,
                 formData,
-                session.user.access_token,
             )
             const responseText = await response.text()
             const responseJson = await JSON.parse(responseText)
@@ -169,7 +165,7 @@ const ImportSBOMModal = ({ importSBOMMetadata, setImportSBOMMetadata }: Props): 
                     const attachmentId = attachmentUrl.pathname.split('/').pop()
 
                     if (attachmentId != null) {
-                        await fetchImportStatus(projectId, attachmentId, session.user.access_token)
+                        await fetchImportStatus(projectId, attachmentId)
                     }
                 }
                 const endTime = Date.now()

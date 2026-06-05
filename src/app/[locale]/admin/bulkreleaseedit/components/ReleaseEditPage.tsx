@@ -11,14 +11,15 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter, VendorDialog } from 'next-sw360'
 import React, { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsXCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Release, Vendor } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface AlertData {
@@ -58,10 +59,7 @@ function UpdateReleaseModal({
     const handleEditRelease = async (release: Release | null) => {
         if (release === null) return
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
-            const response = await ApiUtils.PATCH(`releases/${release.id}`, release, session.user.access_token)
+            const response = await ApiUtils.PATCH(`releases/${release.id}`, release)
 
             if (response.status == StatusCodes.OK) {
                 setAlert({
@@ -394,7 +392,7 @@ export default function BulkReleaseEdit(): JSX.Element {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status === StatusCodes.NO_CONTENT) {
                     setReleaseData([])
                     return

@@ -17,8 +17,9 @@ import { SW360Table } from 'next-sw360'
 import React, { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { ErrorDetails } from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -108,7 +109,7 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET('users/groupList', session.data.user.access_token, signal)
+                const response = await ApiUtils.GET('users/groupList', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

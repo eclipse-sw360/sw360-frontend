@@ -13,7 +13,8 @@ import { StatusCodes } from 'http-status-codes'
 import { useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { DocumentTypes, ErrorDetails, Resources } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ComponentsUsing from './ComponentsUsing'
 import ProjectsUsing from './ProjectsUsing'
@@ -39,11 +40,7 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
             try {
                 setShowProcessing(true)
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(
-                    `${documentType}/usedBy/${documentId}`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`${documentType}/usedBy/${documentId}`, signal)
                 if (response.status === StatusCodes.NO_CONTENT) {
                     return
                 }

@@ -18,7 +18,8 @@ import { Dispatch, type FormEvent, type ReactElement, SetStateAction, useEffect,
 import { BsXCircle } from 'react-icons/bs'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddMainLicenseModal from './AddMainLicenseModal'
 import DeletePackageModal from './DeletePackageModal'
@@ -135,7 +136,7 @@ export default function CreateOrEditPackage({
                     )
                         return dispatchSessionExpiredEvent()
 
-                    const response = await ApiUtils.GET(`packages/${packageId}/usage`, sessionData.user.access_token)
+                    const response = await ApiUtils.GET(`packages/${packageId}/usage`)
                     if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                         const err = (await response.json()) as ErrorDetails
                         throw new ApiError(err.message, {

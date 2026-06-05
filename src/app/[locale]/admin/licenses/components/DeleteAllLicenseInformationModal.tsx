@@ -10,12 +10,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Message {
@@ -37,11 +37,7 @@ export default function DeleteAllLicenseInformationModal({
     const handleDelete = async () => {
         try {
             setDeleting(true)
-            const session = await getSession()
-            if (!session) {
-                return dispatchSessionExpiredEvent()
-            }
-            const response = await ApiUtils.DELETE('licenses/deleteAll', session.user.access_token)
+            const response = await ApiUtils.DELETE('licenses/deleteAll')
             if (response.status === StatusCodes.UNAUTHORIZED) {
                 return dispatchSessionExpiredEvent()
             } else if (response.status !== StatusCodes.OK) {

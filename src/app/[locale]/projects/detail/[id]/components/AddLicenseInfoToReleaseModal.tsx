@@ -11,15 +11,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import { Alert, Button, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     projectId: string
@@ -52,10 +50,8 @@ function AddLicenseInfoToReleaseModal({ projectId, show, setShow }: Props): JSX.
     const handleSubmit = async (projectId: string) => {
         setIsLoading(true)
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const createUrl = `projects/${projectId}/addLinkedReleasesLicenses`
-            const response = await ApiUtils.POST(createUrl, {}, session.user.access_token)
+            const response = await ApiUtils.POST(createUrl, {})
             if (response.status == StatusCodes.OK) {
                 const data = (await response.json()) as AddLicenseInfoToReleaseData
                 setAddLicenseInfoToReleaseData(data)

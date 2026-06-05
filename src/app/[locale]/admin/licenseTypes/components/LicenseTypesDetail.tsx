@@ -19,8 +19,9 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LicenseType } from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteLicenseTypesModal from './DeleteLicenseTypesModal'
 
@@ -108,7 +109,7 @@ export default function LicenseTypesDetail(): ReactNode {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

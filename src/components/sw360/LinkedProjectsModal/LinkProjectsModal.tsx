@@ -28,7 +28,8 @@ import {
     ProjectPayload,
     SearchResult,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface AlertData {
@@ -313,7 +314,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -342,11 +343,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                     .filter(([k]) => k !== 'sort')
                     .forEach(([key, value]) => params.append(key, String(value)))
 
-                const response = await ApiUtils.GET(
-                    `search?${params.toString()}`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`search?${params.toString()}`, signal)
                 if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -371,7 +368,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                 if (!accessToken) return
 
                 const projectPromises = projectIds.map((id) =>
-                    ApiUtils.GET(`projects/${id}`, accessToken, signal)
+                    ApiUtils.GET(`projects/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
                         .catch(() => null),
                 )

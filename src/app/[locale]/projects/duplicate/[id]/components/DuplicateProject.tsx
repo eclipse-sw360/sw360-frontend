@@ -32,7 +32,8 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -167,7 +168,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
 
     const fetchUserData = useCallback(async (url: string) => {
         if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.data.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as User
             return data
@@ -188,7 +189,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
             for (const l of linkedReleases) {
                 const releaseId = l['release']?.split('/').pop()
                 if (releaseId === undefined) continue
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token)
+                const response = await ApiUtils.GET(`releases/${releaseId}`)
                 const releaseData = (await response.json()) as ReleaseDetail
                 linkedReleasesObject[releaseId] = {
                     name: releaseData.name,
@@ -212,7 +213,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token)
+                const response = await ApiUtils.GET(`projects/${projectId}`)
                 if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -392,7 +393,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 ? `projects/network/duplicate/${projectId}`
                 : `projects/duplicate/${projectId}`
         try {
-            const response = await ApiUtils.POST(createProjectUrl, projectPayload, session.data.user.access_token)
+            const response = await ApiUtils.POST(createProjectUrl, projectPayload)
 
             if (response.status == StatusCodes.CREATED) {
                 const data = (await response.json()) as Project

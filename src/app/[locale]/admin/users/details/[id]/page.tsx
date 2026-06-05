@@ -13,12 +13,12 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useParams } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { PageButtonHeader, PageSpinner } from '@/components/sw360'
 import { User } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const UserDetailPage = (): JSX.Element => {
@@ -30,10 +30,7 @@ const UserDetailPage = (): JSX.Element => {
 
     useEffect(() => {
         ;(async () => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
-            const response = await ApiUtils.GET(`users/byid/${params.id}`, session.user.access_token)
+            const response = await ApiUtils.GET(`users/byid/${params.id}`)
             if (response.status === StatusCodes.UNAUTHORIZED) {
                 return dispatchSessionExpiredEvent()
             } else if (response.status !== StatusCodes.OK) {

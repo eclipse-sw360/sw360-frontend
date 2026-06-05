@@ -18,7 +18,8 @@ import { Modal } from 'react-bootstrap'
 import { BsExclamationTriangle, BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 import { SW360Table, UpdateCommentModal } from '@/components/sw360'
 import { Attachment, AttachmentTypes, Embedded, ErrorDetails, UpdateCommentModalMetadata } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
 
 interface Props<T> {
@@ -200,11 +201,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return
-                const response = await ApiUtils.GET(
-                    `${documentType}/${documentId}/attachments`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`${documentType}/${documentId}/attachments`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

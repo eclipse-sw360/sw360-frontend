@@ -9,9 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Session } from 'next-auth'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 const parseFilenameFromContentDisposition = (response: Response): string | null => {
     const header = response.headers.get('Content-Disposition')
@@ -34,18 +32,13 @@ const parseFilenameFromContentDisposition = (response: Response): string | null 
 
 const download = async (
     url: string,
-    session: Session | null,
     fileName: string,
     headers?: {
         [key: string]: string
     },
 ): Promise<number | undefined> => {
-    if (CommonUtils.isNullOrUndefined(session)) {
-        dispatchSessionExpiredEvent()
-        return undefined
-    }
     try {
-        const response = await ApiUtils.GET(url, session.user.access_token, undefined, headers)
+        const response = await ApiUtils.GET(url, undefined, headers)
         if (!response.ok) {
             return response.status
         }

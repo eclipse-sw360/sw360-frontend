@@ -11,12 +11,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { ErrorDetails, MergeOrSplitActionType, Vendor } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import MergeVendor from './MergeData'
 import VendorTable from './VendorsTable'
@@ -58,14 +59,11 @@ export default function MergeOverview({
     const handleMergeVendor = async () => {
         try {
             setLoading(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.PATCH(
                 `vendors/mergeVendors?mergeTargetId=${targetVendor?._links?.self.href
                     .split('/')
                     .at(-1)}&mergeSourceId=${sourceVendor?._links?.self.href.split('/').at(-1)}`,
                 finalVendorPayload ?? {},
-                session.user.access_token,
             )
             if (response.status === StatusCodes.OK) {
                 setLoading(false)
@@ -87,9 +85,7 @@ export default function MergeOverview({
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`vendors/${id}`, session.user.access_token, signal)
+                const response = await ApiUtils.GET(`vendors/${id}`, signal)
 
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()

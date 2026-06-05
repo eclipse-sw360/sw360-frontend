@@ -10,13 +10,13 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -38,9 +38,7 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
     const [licenseTypeUsageCount, setLicenseTypeUsageCount] = useState<number | null>(null)
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = await response.json()
             return data
@@ -77,9 +75,7 @@ export default function DeleteLicenseTypesModal({ licenseTypeId, licenseTypeName
 
     const handleDeleteLicenseType = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const response = await ApiUtils.DELETE(`licenseTypes/${licenseTypeId}`, session.user.access_token)
+            const response = await ApiUtils.DELETE(`licenseTypes/${licenseTypeId}`)
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Delete License Type successful'))
                 setShow(false)

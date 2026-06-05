@@ -12,15 +12,15 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
 import { ErrorDetails, UIConfigKeys } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -52,9 +52,7 @@ const UserAccessToken = (): ReactNode => {
                 if (!writeAuthorityAllowed && 'WRITE' in tokenData.authorities) {
                     tokenData.authorities = tokenData.authorities.filter((v) => v.toLowerCase() !== 'write')
                 }
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.POST('users/tokens', tokenData, session.user.access_token)
+                const response = await ApiUtils.POST('users/tokens', tokenData)
 
                 if (response.status === StatusCodes.CREATED) {
                     const data: string = (await response.json()) as string

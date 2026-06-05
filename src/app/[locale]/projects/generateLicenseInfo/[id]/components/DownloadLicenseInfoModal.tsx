@@ -20,7 +20,8 @@ import { useConfigKeyValue } from '@/contexts'
 import { ConfigKeys, ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const relationFilterOptions: FilterOption[] = [
@@ -114,11 +115,7 @@ export default function DownloadLicenseInfoModal({
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             setLoading(true)
-            const response = await ApiUtils.POST(
-                `projects/${projectId}/saveAttachmentUsages`,
-                saveUsagesPayload,
-                session.data.user.access_token,
-            )
+            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status !== StatusCodes.CREATED) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
@@ -156,16 +153,12 @@ export default function DownloadLicenseInfoModal({
                     TextGenerator: 'txt',
                 }
                 const ext = extensionMap[generatorClassName] ?? 'zip'
-                const downloadStatus = await DownloadService.download(
-                    downloadUrl,
-                    session.data,
-                    `LicenseInfo-${currentDate}.${ext}`,
-                )
+                const downloadStatus = await DownloadService.download(downloadUrl, `LicenseInfo-${currentDate}.${ext}`)
                 if (downloadStatus === StatusCodes.OK) {
                     setShow(false)
                 }
             } else {
-                const mailResponse = await ApiUtils.GET(downloadUrl, session.data.user.access_token)
+                const mailResponse = await ApiUtils.GET(downloadUrl)
                 if (mailResponse.status === StatusCodes.OK) {
                     MessageService.success(t('License info report generation has started'))
                     setShow(false)

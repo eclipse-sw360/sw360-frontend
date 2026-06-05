@@ -25,7 +25,8 @@ import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
 import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Attachment {
     attachmentType: string
@@ -318,7 +319,7 @@ export default function ListView({
 
             if (status === 'authenticated' && session) {
                 try {
-                    const response = await ApiUtils.GET(`releases/${release.id}/attachments`, session.user.access_token)
+                    const response = await ApiUtils.GET(`releases/${release.id}/attachments`)
 
                     if (response.status === StatusCodes.OK) {
                         const data = await response.json()
@@ -680,7 +681,7 @@ export default function ListView({
                     .join('&')
 
                 const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? '&' + filterParams : ''}`
-                const response = await ApiUtils.GET(url, session.user.access_token, signal)
+                const response = await ApiUtils.GET(url, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -715,11 +716,7 @@ export default function ListView({
         }, timeLimit)
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

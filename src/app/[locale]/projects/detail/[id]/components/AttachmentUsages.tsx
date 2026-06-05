@@ -21,7 +21,7 @@ import {
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
@@ -40,8 +40,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -249,16 +249,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const handleSaveUsages = async () => {
         try {
             setSaveUsagesLoading(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Something went wrong'))
-                return dispatchSessionExpiredEvent()
-            }
-            const response = await ApiUtils.POST(
-                `projects/${projectId}/saveAttachmentUsages`,
-                saveUsagesPayload,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status !== StatusCodes.CREATED) {
                 MessageService.error(t('Something went wrong'))
                 return notFound()
@@ -300,11 +291,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -341,11 +328,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/attachmentUsage?transitive=true`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/attachmentUsage?transitive=true`, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails

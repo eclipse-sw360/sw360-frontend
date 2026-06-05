@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -23,7 +23,8 @@ import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
 import { LicenseDetail, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
 import EditLicenseSummary from './EditLicenseSummary'
@@ -69,7 +70,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
@@ -94,15 +95,8 @@ function EditLicense({ licenseId }: Props): ReactNode {
             MessageService.error(t('Fullname not null or empty'))
             return
         }
-
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return dispatchSessionExpiredEvent()
-        }
-
         try {
-            const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
+            const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload)
 
             if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as LicensePayload

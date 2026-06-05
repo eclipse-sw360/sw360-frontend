@@ -14,8 +14,9 @@ import { useSession } from 'next-auth/react'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { useConfigKeyValue } from '@/contexts'
 import { Attachment, ConfigKeys, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AdditionalDataSection from './AdditionalDataSection'
 import Attachments from './Attachments'
@@ -60,7 +61,7 @@ export default function MergeReleaseDataCheck({
                 const queryUrl = CommonUtils.createUrlWithParams(`releases/${sourceRelease?.id}`, {
                     allDetails: 'true',
                 })
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

@@ -19,7 +19,8 @@ import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project, SearchResult } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
@@ -323,7 +324,7 @@ export default function LinkProjects({
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -352,11 +353,7 @@ export default function LinkProjects({
                     .filter(([k]) => k !== 'sort')
                     .forEach(([key, value]) => params.append(key, String(value)))
 
-                const response = await ApiUtils.GET(
-                    `search?${params.toString()}`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`search?${params.toString()}`, signal)
                 if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -381,7 +378,7 @@ export default function LinkProjects({
                 if (!accessToken) return
 
                 const projectPromises = projectIds.map((id) =>
-                    ApiUtils.GET(`projects/${id}`, accessToken, signal)
+                    ApiUtils.GET(`projects/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
                         .catch(() => null),
                 )
@@ -403,7 +400,7 @@ export default function LinkProjects({
             }
             if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
-            const response = await ApiUtils.PATCH(`projects/${projectId}`, data, session.data.user.access_token)
+            const response = await ApiUtils.PATCH(`projects/${projectId}`, data)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

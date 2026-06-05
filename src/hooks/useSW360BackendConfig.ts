@@ -9,10 +9,10 @@
 
 'use client'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Configuration, ConfigurationContainers } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { useLocalStorage } from './index'
 
@@ -55,15 +55,7 @@ export function useSW360BackendConfig() {
 
             setIsLoading(true)
             hasFetchedRef.current = true
-
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                dispatchSessionExpiredEvent()
-                setIsLoading(false)
-                return
-            }
-
-            const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
+            const response = await ApiUtils.GET(apiEndpoint)
             if (response.status == StatusCodes.OK) {
                 const configData = (await response.json()) as Configuration
                 setProcessedConfig({

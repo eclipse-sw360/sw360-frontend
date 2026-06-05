@@ -12,13 +12,13 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -32,9 +32,7 @@ function DeleteObligationDialog({ obligationId, show, setShow }: Props): ReactNo
 
     const deleteObligation = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const response = await ApiUtils.DELETE(`obligations/${obligationId}`, session.user.access_token)
+            const response = await ApiUtils.DELETE(`obligations/${obligationId}`)
             if (response.status === StatusCodes.MULTI_STATUS) {
                 MessageService.success(t('Obligation deleted successfully'))
                 setShow(false)

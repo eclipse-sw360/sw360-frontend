@@ -9,14 +9,12 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Alert, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import DownloadService from '@/services/download.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     show: boolean
@@ -63,15 +61,10 @@ export default function ExportProjectSbomModal({
             const start = Date.now()
             setLoading(true)
             setDisableExportSbom(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                return dispatchSessionExpiredEvent()
-            }
             const currentDate = new Date().toISOString().split('T')[0]
             const downloadStatusCode = await DownloadService.download(
                 `reports?module=sbom&projectId=${projectId}&withSubProject=${includeSubProjectReleases}
                  &bomType=${sbomFormat}`,
-                session,
                 `Project-${currentDate}_SBOM.${sbomFormat.toLowerCase()}`,
             )
             if (downloadStatusCode !== undefined && downloadStatusCode === 200) {

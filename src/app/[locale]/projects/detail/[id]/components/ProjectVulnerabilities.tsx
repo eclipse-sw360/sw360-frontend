@@ -15,7 +15,8 @@ import { useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import { Embedded, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import VulnerabilityTab from './VulnerabilityTab'
 
@@ -48,11 +49,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectData.id}/linkedProjects?transitive=true`,
-                    session.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectData.id}/linkedProjects?transitive=true`, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {

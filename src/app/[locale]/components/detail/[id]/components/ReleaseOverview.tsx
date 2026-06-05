@@ -26,7 +26,8 @@ import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink, UserGroupType } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
@@ -231,7 +232,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

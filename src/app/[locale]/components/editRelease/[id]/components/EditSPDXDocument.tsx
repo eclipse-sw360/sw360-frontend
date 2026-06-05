@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import {
@@ -27,8 +27,8 @@ import {
     SnippetInformation,
     SPDX,
 } from '@/object-types'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 import EditAnnotationInformation from './spdx/EditAnnotationInformation'
@@ -93,9 +93,7 @@ const EditSPDXDocument = ({
     const [toggleOther, setToggleOther] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail
             return data

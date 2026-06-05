@@ -11,14 +11,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { FossologyConfig } from '@/object-types'
 import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 enum FossologyStatus {
@@ -41,9 +40,7 @@ export default function FossologyOverview(): ReactNode {
     const [fossologyStatus, setFossologyStatus] = useState<FossologyStatus>(FossologyStatus.UNKNOWN)
 
     const fetchData = useCallback(async (url: string, serverConfig: boolean) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             if (serverConfig) {
                 const data = await response.json()
@@ -100,9 +97,7 @@ export default function FossologyOverview(): ReactNode {
     }
 
     const updateFossologyConfig = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.POST('fossology/saveConfig', fossologyConfigData, session.user.access_token)
+        const response = await ApiUtils.POST('fossology/saveConfig', fossologyConfigData)
         if (response.status === StatusCodes.OK) {
             MessageService.success(t('Fossology configuration updated successfully'))
         } else if (response.status === StatusCodes.UNAUTHORIZED) {

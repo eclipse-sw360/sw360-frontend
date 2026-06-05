@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
@@ -21,7 +21,7 @@ import { Button } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { Embedded, User } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import SecondaryDepartments from '../components/SecondaryDepartments'
 
@@ -47,15 +47,9 @@ const EditDepartmentPage = (): JSX.Element => {
             MessageService.error(`${t('Some emails are not existed')}: ${checkNotExistingUserEmails().join(', ')}`)
             return
         }
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return dispatchSessionExpiredEvent()
-        }
         const response = await ApiUtils.PATCH(
             `departments/members?departmentName=${secondaryDepartmentName}`,
             memberEmails,
-            session.user.access_token,
         )
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
@@ -75,11 +69,7 @@ const EditDepartmentPage = (): JSX.Element => {
             setMemberEmails([])
             return
         }
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            return dispatchSessionExpiredEvent()
-        }
-        const response = await ApiUtils.GET(`departments/members`, session.user.access_token)
+        const response = await ApiUtils.GET(`departments/members`)
         if (response.status === StatusCodes.UNAUTHORIZED) {
             return dispatchSessionExpiredEvent()
         }
@@ -96,11 +86,7 @@ const EditDepartmentPage = (): JSX.Element => {
     ])
 
     const fetchSuggestionUserEmails = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            return dispatchSessionExpiredEvent()
-        }
-        const response = await ApiUtils.GET(`users`, session.user.access_token)
+        const response = await ApiUtils.GET(`users`)
         if (response.status === StatusCodes.UNAUTHORIZED) {
             return dispatchSessionExpiredEvent()
         }

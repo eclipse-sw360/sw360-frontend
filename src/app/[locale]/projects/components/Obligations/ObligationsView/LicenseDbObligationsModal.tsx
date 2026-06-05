@@ -12,7 +12,7 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
@@ -27,7 +27,8 @@ import {
     PaginationMeta,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ExpandableList } from './ExpandableComponents'
 
@@ -55,13 +56,7 @@ export default function LicenseDbObligationsModal({
     const addObligationsToLicense = async () => {
         try {
             setLoading(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const response = await ApiUtils.POST(
-                `projects/${projectId}/licenseObligation`,
-                obligationIds,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.POST(`projects/${projectId}/licenseObligation`, obligationIds)
             if (response.status === StatusCodes.UNAUTHORIZED) {
                 dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CREATED) {
@@ -290,7 +285,7 @@ export default function LicenseDbObligationsModal({
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

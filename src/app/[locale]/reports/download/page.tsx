@@ -14,7 +14,7 @@ import { signIn, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Spinner } from 'react-bootstrap'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 function ReportDownloadPage(): JSX.Element {
     const t = useTranslations('default')
@@ -59,7 +59,7 @@ function ReportDownloadPage(): JSX.Element {
                 url += `&projectId=${encodeURIComponent(projectId)}`
             }
 
-            const response = await ApiUtils.GET(url, session.user.access_token)
+            const response = await ApiUtils.GET(url)
 
             if (!response.ok) {
                 setError(

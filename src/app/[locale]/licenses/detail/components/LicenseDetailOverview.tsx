@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -32,7 +32,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import Detail from './Detail'
 import Obligations from './Obligations'
@@ -65,9 +66,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
+                const response = await ApiUtils.GET(`licenses/${licenseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -95,18 +94,9 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     }
 
     const handleUpdateWhitelist = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return dispatchSessionExpiredEvent()
-        }
         if (CommonUtils.isNullOrUndefined(whitelist)) return
         const whitelistObj = Object.fromEntries(whitelist)
-        const response = await ApiUtils.PATCH(
-            `licenses/${licenseId}/whitelist`,
-            whitelistObj,
-            session.user.access_token,
-        )
+        const response = await ApiUtils.PATCH(`licenses/${licenseId}/whitelist`, whitelistObj)
         if (response.status == StatusCodes.OK) {
             MessageService.success(t('License updated successfully'))
             window.location.reload()
@@ -195,7 +185,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                     ),
                 )
 
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

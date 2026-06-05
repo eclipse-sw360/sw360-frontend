@@ -32,7 +32,8 @@ import {
     TypedEntity,
     UserGroupType,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
@@ -768,26 +769,20 @@ function GenerateLicenseInfo({
                     return
                 }
                 const requests = [
-                    ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal),
+                    ApiUtils.GET(`projects/${projectId}`, signal),
                 ]
                 if (searchParams.withSubProjects === 'true') {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=true&filter=withCliAttachment`,
-                            session.data.user.access_token,
                             signal,
                         ),
-                        ApiUtils.GET(
-                            `projects/${projectId}/linkedProjects?transitive=true`,
-                            session.data.user.access_token,
-                            signal,
-                        ),
+                        ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal),
                     )
                 } else {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=false&filter=withCliAttachment`,
-                            session.data.user.access_token,
                             signal,
                         ),
                     )
@@ -825,11 +820,7 @@ function GenerateLicenseInfo({
                     const relId = r._links?.self.href.split('/').at(-1) ?? ''
                     for (const att of r.attachments ?? []) {
                         licenseRequests.push(
-                            ApiUtils.GET(
-                                `releases/${relId}/licenseData/${att.attachmentContentId}`,
-                                session.data.user.access_token,
-                                signal,
-                            ),
+                            ApiUtils.GET(`releases/${relId}/licenseData/${att.attachmentContentId}`, signal),
                         )
                     }
                 }

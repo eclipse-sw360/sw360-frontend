@@ -18,7 +18,8 @@ import { Spinner } from 'react-bootstrap'
 import { BsCaretRightFill } from 'react-icons/bs'
 import { PaddedCell, SW360Table } from '@/components/sw360'
 import { NestedRows, TypedEntity } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface ViewRelease {
@@ -88,11 +89,7 @@ export default function ReleaseView({
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/licenseObligations?view=true`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/licenseObligations?view=true`, signal)
                 const obligations: ObligationsReleaseView = await response.json()
                 const tableData: NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType>[] = []
                 for (const x of obligations.processedLicenses) {

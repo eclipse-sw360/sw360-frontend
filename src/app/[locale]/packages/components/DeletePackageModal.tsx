@@ -11,14 +11,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { Dispatch, type ReactElement, SetStateAction, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface DeletePackageModalMetData {
@@ -56,12 +56,7 @@ export default function DeletePackageModal({
     const deletePackage = async () => {
         try {
             setDeleting(true)
-            const session = await getSession()
-            if (!session) {
-                return router.push('/')
-            }
-
-            const response = await ApiUtils.DELETE(`packages/${modalMetaData.packageId}`, session.user.access_token)
+            const response = await ApiUtils.DELETE(`packages/${modalMetaData.packageId}`)
 
             if (response.status == StatusCodes.OK) {
                 if (isEditPage) {

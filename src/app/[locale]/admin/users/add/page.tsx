@@ -11,14 +11,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import UserEditForm from '@/components/UserEditForm/UserEditForm'
 import UserOperationType from '@/components/UserEditForm/UserOperationType'
 import { UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 export default function CreateUser(): JSX.Element {
@@ -45,12 +45,8 @@ export default function CreateUser(): JSX.Element {
     const handleCreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         try {
-            const session = await getSession()
-            if (!session) {
-                return dispatchSessionExpiredEvent()
-            }
             user.fullName = `${user.givenName} ${user.lastName}`
-            const response = await ApiUtils.POST('users', user, session.user.access_token)
+            const response = await ApiUtils.POST('users', user)
             if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('User is created'))
                 router.push('/admin/users')

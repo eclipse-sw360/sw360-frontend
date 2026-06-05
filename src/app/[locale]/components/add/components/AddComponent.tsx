@@ -32,7 +32,8 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 function AddComponent(): ReactNode {
@@ -105,7 +106,7 @@ function AddComponent(): ReactNode {
 
     const submit = async () => {
         if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.POST('components', componentPayload, session.user.access_token)
+        const response = await ApiUtils.POST('components', componentPayload)
 
         if (response.status === StatusCodes.CREATED) {
             const data = (await response.json()) as Component

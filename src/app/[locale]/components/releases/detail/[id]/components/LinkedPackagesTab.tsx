@@ -28,8 +28,9 @@ import { packageManagers } from '@/app/[locale]/packages/components/PackageManag
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, FilterOption, LinkedPackage } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -206,7 +207,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         try {
             setDeleting(true)
 
-            const response = await ApiUtils.DELETE(`packages/${selectedPkg.id}`, session.data.user.access_token)
+            const response = await ApiUtils.DELETE(`packages/${selectedPkg.id}`)
             if (response.status === StatusCodes.OK || response.status === StatusCodes.NO_CONTENT) {
                 MessageService.success(t('Package deleted successfully'))
                 setPackagesData((prev) => prev.filter((pkg) => pkg.id !== selectedPkg.id))
@@ -262,7 +263,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(`releases/${releaseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
