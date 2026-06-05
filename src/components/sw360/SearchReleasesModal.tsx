@@ -27,7 +27,8 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail, SearchResult } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface SearchReleasesModalProps {
@@ -270,7 +271,7 @@ export default function SearchReleasesModal({
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -299,11 +300,7 @@ export default function SearchReleasesModal({
                     .filter(([k]) => k !== 'sort')
                     .forEach(([key, value]) => params.append(key, String(value)))
 
-                const response = await ApiUtils.GET(
-                    `search?${params.toString()}`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`search?${params.toString()}`, signal)
                 if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -328,7 +325,7 @@ export default function SearchReleasesModal({
                 if (!accessToken) return
 
                 const releasePromises = releaseIds.map((id) =>
-                    ApiUtils.GET(`releases/${id}`, accessToken, signal)
+                    ApiUtils.GET(`releases/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
                         .catch(() => null),
                 )
@@ -348,10 +345,7 @@ export default function SearchReleasesModal({
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
-            const response = await ApiUtils.GET(
-                `projects/${projectId}/subProjects/releases`,
-                session.data.user.access_token,
-            )
+            const response = await ApiUtils.GET(`projects/${projectId}/subProjects/releases`)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

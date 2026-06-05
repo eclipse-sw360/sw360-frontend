@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { Button } from 'react-bootstrap'
@@ -21,8 +21,7 @@ import { BiXCircle } from 'react-icons/bi'
 import { BsCheck2Circle } from 'react-icons/bs'
 import { LicenseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     license: LicenseDetail
@@ -41,12 +40,7 @@ const Detail = ({ license, setLicense }: Props): ReactNode => {
     }
 
     const updateExternalLicenseLink = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return dispatchSessionExpiredEvent()
-        }
-        const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license, session.user.access_token)
+        const response = await ApiUtils.PATCH(`licenses/${license.shortName}`, license)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as LicenseDetail
             MessageService.success(t('Update external link success'))

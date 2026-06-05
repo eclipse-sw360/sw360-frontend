@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useState } from 'react'
@@ -23,8 +23,8 @@ import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
 import { LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import AddLicenseSummary from './AddLicenseSummary'
 
 function AddLicense(): ReactNode {
@@ -82,10 +82,7 @@ function AddLicense(): ReactNode {
             MessageService.error(t('Shortname is invalid'))
             return
         }
-
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.POST('licenses', licensePayload, session.user.access_token)
+        const response = await ApiUtils.POST('licenses', licensePayload)
         if (response.status == StatusCodes.CREATED) {
             MessageService.success(t('License added successfully'))
             router.push('/licenses')

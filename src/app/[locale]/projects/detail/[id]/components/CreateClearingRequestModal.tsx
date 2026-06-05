@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useCallback, useState } from 'react'
@@ -18,7 +18,7 @@ import { Alert, Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
 import DateField from '@/components/DateField'
 import { ClearingRequestDetails, CreateClearingRequestPayload } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -74,13 +74,7 @@ export default function CreateClearingRequestModal({ show, setShow, projectId, p
 
     const createClearingRequest = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const response = await ApiUtils.POST(
-                `projects/${projectId}/clearingRequest`,
-                createClearingRequestPayload,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.POST(`projects/${projectId}/clearingRequest`, createClearingRequestPayload)
             const responseData = (await response.json()) as ClearingRequestDetails
             if (response.status == StatusCodes.CREATED) {
                 displayMessage(

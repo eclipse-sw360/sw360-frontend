@@ -10,7 +10,7 @@
 // License-Filename: LICENSE
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
@@ -18,7 +18,7 @@ import { BsPeopleFill } from 'react-icons/bs'
 import SecondaryDepartmentsAndRoles from '@/components/UserEditForm/SecondaryDepartmentsAndRoles'
 import { User, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -39,12 +39,7 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
     useEffect(() => {
         if (show === false) return
         void (async () => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                return dispatchSessionExpiredEvent()
-            }
-            const response = await ApiUtils.GET(`users/byid/${editingUserId}`, session.user.access_token)
+            const response = await ApiUtils.GET(`users/byid/${editingUserId}`)
             if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
                 return
@@ -68,17 +63,7 @@ function EditSecondaryDepartmentAndRolesModal({ show, setShow, editingUserId }: 
     const handleUpdateUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         try {
-            const session = await getSession()
-            if (!session) {
-                MessageService.success(t('Session has expired'))
-                return
-            }
-
-            const response = await ApiUtils.PATCH(
-                `users/${editingUserId}`,
-                updateUserPayload,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.PATCH(`users/${editingUserId}`, updateUserPayload)
 
             if (response.status === StatusCodes.OK) {
                 setShowSuccess(true)

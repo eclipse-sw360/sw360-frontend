@@ -31,7 +31,8 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 function LicensePage(): ReactNode {
@@ -67,7 +68,7 @@ function LicensePage(): ReactNode {
     ])
 
     const handleExportLicense = () => {
-        void DownloadService.download(`reports?module=licenses`, session, `Licenses.xlsx`)
+        void DownloadService.download(`reports?module=licenses`, `Licenses.xlsx`)
     }
 
     const columns = useMemo<ColumnDef<LicenseDetail>[]>(
@@ -184,7 +185,7 @@ function LicensePage(): ReactNode {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

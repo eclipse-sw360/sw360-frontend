@@ -11,13 +11,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import React, { type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -40,17 +40,9 @@ const ToggleUserActiveModal = ({
 
     const toggleUserAccount = async () => {
         try {
-            const session = await getSession()
-            if (!session) {
-                return dispatchSessionExpiredEvent()
-            }
-            const response = await ApiUtils.PATCH(
-                `users/${userId}`,
-                {
-                    deactivated: !isUserDeactived,
-                },
-                session.user.access_token,
-            )
+            const response = await ApiUtils.PATCH(`users/${userId}`, {
+                deactivated: !isUserDeactived,
+            })
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 router.push('/admin/users')

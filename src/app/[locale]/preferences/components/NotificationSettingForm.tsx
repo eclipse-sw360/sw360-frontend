@@ -12,13 +12,13 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { User } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import UserInformation from './UserInformation'
 import UserPreferences from './UserPreferences'
@@ -41,9 +41,7 @@ const NotificationSettingForm = (): ReactNode => {
 
     const updateNotificationSetting = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const response = await ApiUtils.PATCH('users/profile', notificationSetting, session.user.access_token)
+            const response = await ApiUtils.PATCH('users/profile', notificationSetting)
 
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
@@ -58,9 +56,7 @@ const NotificationSettingForm = (): ReactNode => {
     }
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
 
         if (response.status === StatusCodes.OK) {
             const data: User = (await response.json()) as User

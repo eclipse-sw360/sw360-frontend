@@ -17,7 +17,8 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import icons from '@/assets/icons/icons.svg'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, SearchResult } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface SEARCH_STATE {
     project: boolean
@@ -213,7 +214,7 @@ function KeywordSearch({
 
             const queryUrl = `search?${params.toString()}`
 
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token)
+            const response = await ApiUtils.GET(queryUrl)
             if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

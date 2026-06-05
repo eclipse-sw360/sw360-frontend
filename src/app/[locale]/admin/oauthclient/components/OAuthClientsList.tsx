@@ -12,13 +12,13 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import { OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
+import { getAuthenticatedAccessToken } from '@/utils/api/authenticatedApi.util'
 import { SW360_API_URL } from '@/utils/env'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddClientDialog from './AddClientDialog'
@@ -79,14 +79,7 @@ function OAuthClientsList(): ReactNode {
     const fetchClientsData = async () => {
         setLoading(true)
         try {
-            const session = await getSession()
-
-            if (CommonUtils.isNullOrUndefined(session)) {
-                setLoading(false)
-                return dispatchSessionExpiredEvent()
-            }
-
-            const response = await sendOAuthClientRequest(session.user.access_token)
+            const response = await sendOAuthClientRequest(await getAuthenticatedAccessToken())
 
             if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as OAuthClient[]

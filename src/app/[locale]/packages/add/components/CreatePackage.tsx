@@ -11,16 +11,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import { ListGroup, Tab } from 'react-bootstrap'
-
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
 import { extractPackageManagerFromPurl } from '../../components/purlUtils'
 
@@ -44,8 +42,7 @@ function CreatePackage(): JSX.Element {
     const handleCreatePackage = async () => {
         try {
             setCreatingPackage(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
+            const userIdentity = await getAuthenticatedUserIdentity()
 
             const normalizedPurl = packagePayload.purl?.trim()
             const packageManager = extractPackageManagerFromPurl(normalizedPurl)
@@ -54,16 +51,12 @@ function CreatePackage(): JSX.Element {
                 return
             }
 
-            const response = await ApiUtils.POST(
-                'packages',
-                {
-                    ...packagePayload,
-                    purl: normalizedPurl,
-                    createdBy: session.user.email ?? '',
-                    packageManager,
-                },
-                session.user.access_token,
-            )
+            const response = await ApiUtils.POST('packages', {
+                ...packagePayload,
+                purl: normalizedPurl,
+                createdBy: userIdentity.email,
+                packageManager,
+            })
             let res: Record<string, string> = {}
             try {
                 res = (await response.json()) as Record<string, string>
@@ -77,8 +70,6 @@ function CreatePackage(): JSX.Element {
                 } else {
                     handleGoBack()
                 }
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }

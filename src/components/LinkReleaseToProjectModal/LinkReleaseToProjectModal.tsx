@@ -29,7 +29,8 @@ import {
     ReleaseDetail,
     SearchResult,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -320,7 +321,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -349,11 +350,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                     .filter(([k]) => k !== 'sort')
                     .forEach(([key, value]) => params.append(key, String(value)))
 
-                const response = await ApiUtils.GET(
-                    `search?${params.toString()}`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`search?${params.toString()}`, signal)
                 if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -378,7 +375,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                 if (!accessToken) return
 
                 const projectPromises = projectIds.map((id) =>
-                    ApiUtils.GET(`projects/${id}`, accessToken, signal)
+                    ApiUtils.GET(`projects/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
                         .catch(() => null),
                 )
@@ -423,7 +420,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                 [
                     releaseId,
                 ],
-                session.data.user.access_token,
             )
             if (response.status !== StatusCodes.CREATED) {
                 const err = (await response.json()) as ErrorDetails
@@ -445,7 +441,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
-            const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, session.data.user.access_token, signal)
+            const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -485,7 +481,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(`releases/${releaseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

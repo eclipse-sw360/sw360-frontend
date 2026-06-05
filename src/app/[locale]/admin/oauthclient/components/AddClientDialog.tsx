@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -20,9 +20,8 @@ import { Button, Col, Form, Modal, OverlayTrigger, Row, Tooltip } from 'react-bo
 import { BsClipboard } from 'react-icons/bs'
 import { OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
+import { getAuthenticatedAccessToken } from '@/utils/api/authenticatedApi.util'
 import { SW360_API_URL } from '@/utils/env'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -209,11 +208,7 @@ const AddClientDialog = ({ show, setShow, client }: Props): ReactNode => {
         if (!validateForm()) {
             return
         }
-
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
-        const response = await sendOAuthClientRequest(requestBody, session.user.access_token)
+        const response = await sendOAuthClientRequest(requestBody, await getAuthenticatedAccessToken())
         if (response.status === StatusCodes.OK || response.status === StatusCodes.CREATED) {
             const responseBody: unknown = await response.json()
             MessageService.success(

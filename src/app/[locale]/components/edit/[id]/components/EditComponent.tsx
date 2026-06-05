@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -31,7 +31,8 @@ import {
     ErrorDetails,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
@@ -81,14 +82,11 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         const signal = controller.signal
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
-
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}`,
                     Object.fromEntries(params),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -103,14 +101,11 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         })()
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/attachments`,
                     Object.fromEntries(params),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
@@ -137,10 +132,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     ])
 
     const updateComponent = async (payload?: ComponentPayload) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const dataToUpdate = payload ?? componentPayload
-        const response = await ApiUtils.PATCH(`components/${componentId}`, dataToUpdate, session.user.access_token)
+        const response = await ApiUtils.PATCH(`components/${componentId}`, dataToUpdate)
         if (response.status === StatusCodes.OK) {
             MessageService.success(`Component ${dataToUpdate.name}  updated successfully!`)
             router.push('/components/detail/' + componentId)
@@ -154,13 +147,11 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     }
 
     const checkUpdateEligibility = async (componentId: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'COMPONENT',
             entityId: componentId,
         })
-        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        const response = await ApiUtils.POST(url, {})
         switch (response.status) {
             case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))

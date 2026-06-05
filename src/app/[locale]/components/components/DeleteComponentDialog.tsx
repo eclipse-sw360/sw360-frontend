@@ -13,13 +13,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { ActionType, Component } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const DEFAULT_COMPONENT_INFO: Component = {
@@ -77,12 +78,10 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
 
     const deleteComponent = async () => {
         if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`components/${componentId}`, {
             comment: comment,
         })
-        const response = await ApiUtils.DELETE(url, session.user.access_token)
+        const response = await ApiUtils.DELETE(url)
         try {
             if (response.status === StatusCodes.MULTI_STATUS) {
                 const body = (await response.json()) as Array<DeleteResponse>
@@ -124,13 +123,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         async (signal: AbortSignal) => {
             try {
                 if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
-                const componentsResponse = await ApiUtils.GET(
-                    `components/${componentId}`,
-                    session.user.access_token,
-                    signal,
-                )
+                const componentsResponse = await ApiUtils.GET(`components/${componentId}`, signal)
                 if (componentsResponse.status === StatusCodes.OK) {
                     const component = (await componentsResponse.json()) as Component
                     setComponent(component)

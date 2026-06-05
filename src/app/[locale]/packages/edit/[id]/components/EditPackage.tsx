@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
@@ -19,7 +19,7 @@ import { ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
 import { extractPackageManagerFromPurl } from '../../../components/purlUtils'
@@ -33,9 +33,7 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
     useEffect(() => {
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token)
+                const response = await ApiUtils.GET(`packages/${packageId}`)
                 if (response.status === StatusCodes.OK) {
                     setPackagePayload((await response.json()) as Package)
                 } else {
@@ -50,9 +48,6 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
     const handleEditPackage = async () => {
         try {
             setUpdatingPackage(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
             const normalizedPurl = packagePayload?.purl?.trim()
             const packageManager = extractPackageManagerFromPurl(normalizedPurl)
             if (!normalizedPurl || !packageManager) {
@@ -60,15 +55,11 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
                 return
             }
 
-            const response = await ApiUtils.PATCH(
-                `packages/${packageId}`,
-                {
-                    ...packagePayload,
-                    purl: normalizedPurl,
-                    packageManager,
-                },
-                session.user.access_token,
-            )
+            const response = await ApiUtils.PATCH(`packages/${packageId}`, {
+                ...packagePayload,
+                purl: normalizedPurl,
+                packageManager,
+            })
             if (response.status == StatusCodes.OK) {
                 MessageService.success(t('Package updated successfully'))
                 router.push(`/packages/detail/${packageId}`)

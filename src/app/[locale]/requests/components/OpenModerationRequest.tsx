@@ -19,7 +19,8 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'n
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
@@ -182,7 +183,7 @@ function OpenModerationRequest(): ReactNode {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

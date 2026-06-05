@@ -12,14 +12,15 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Spinner } from 'react-bootstrap'
 import { AccessToken, Embedded, ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedAccessTokens = Embedded<AccessToken, 'sw360:restApiTokens'>
@@ -35,13 +36,10 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
 
     const revokeToken = async (tokenName: string) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.DELETE(
                 CommonUtils.createUrlWithParams('users/tokens', {
                     name: tokenName,
                 }),
-                session.user.access_token,
             )
 
             if (response.status === StatusCodes.NO_CONTENT) {
@@ -141,7 +139,7 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET('users/tokens', session.data.user.access_token, signal)
+                const response = await ApiUtils.GET('users/tokens', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

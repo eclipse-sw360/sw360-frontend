@@ -12,14 +12,15 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ErrorDetails, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CurrentComponentDetail from './currentComponent/CurrentComponentDetail'
 import CurrentProjectDetail from './currentProject/CurrentProjectDetail'
@@ -71,9 +72,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     const fetchData = async (url: string) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const response = await ApiUtils.GET(url, session.user.access_token)
+            const response = await ApiUtils.GET(url)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -109,18 +108,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     const assignModerationRequest = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const updatedAssignPayload = {
                 ...moderationRequestPayload,
                 action: 'ASSIGN',
             }
             setModerationRequestPayload(updatedAssignPayload)
-            const response = await ApiUtils.PATCH(
-                `moderationrequest/${moderationRequestId}`,
-                updatedAssignPayload,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`, updatedAssignPayload)
             if (response.status == StatusCodes.ACCEPTED) {
                 await response.json()
                 setIsAssignedModerator(true)
@@ -137,8 +130,6 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     const handleAcceptModerationRequest = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const hasComment = handleCommentValidation()
             if (hasComment) {
                 const updatedAcceptPayload = {
@@ -146,11 +137,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     action: 'ACCEPT',
                 }
                 setModerationRequestPayload(updatedAcceptPayload)
-                const response = await ApiUtils.PATCH(
-                    `moderationrequest/${moderationRequestId}`,
-                    updatedAcceptPayload,
-                    session.user.access_token,
-                )
+                const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`, updatedAcceptPayload)
                 if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have accepted the moderation request'))
@@ -171,8 +158,6 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     const handleRejectModerationRequest = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const hasComment = handleCommentValidation()
             if (hasComment) {
                 const updatedRejectPayload = {
@@ -180,11 +165,7 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                     action: 'REJECT',
                 }
                 setModerationRequestPayload(updatedRejectPayload)
-                const response = await ApiUtils.PATCH(
-                    `moderationrequest/${moderationRequestId}`,
-                    updatedRejectPayload,
-                    session.user.access_token,
-                )
+                const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`, updatedRejectPayload)
                 if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     MessageService.success(t('You have rejected the moderation request'))
@@ -207,8 +188,6 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
         try {
             const hasComment = handleCommentValidation()
             if (hasComment) {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
                 const updatedPostponePayload = {
                     ...moderationRequestPayload,
                     action: 'POSTPONE',
@@ -217,7 +196,6 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
                 const response = await ApiUtils.PATCH(
                     `moderationrequest/${moderationRequestId}`,
                     updatedPostponePayload,
-                    session.user.access_token,
                 )
                 if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
@@ -239,18 +217,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
 
     const handleUnassignModerationRequest = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const updatedUnassignPayload = {
                 ...moderationRequestPayload,
                 action: 'UNASSIGN',
             }
             setModerationRequestPayload(updatedUnassignPayload)
-            const response = await ApiUtils.PATCH(
-                `moderationrequest/${moderationRequestId}`,
-                updatedUnassignPayload,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.PATCH(`moderationrequest/${moderationRequestId}`, updatedUnassignPayload)
             if (response.status == StatusCodes.ACCEPTED) {
                 await response.json()
                 MessageService.success(t('You have unassigned yourself from the moderation request'))

@@ -20,7 +20,8 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { PaddedCell, SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, NestedRows, ReleaseLink } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type EmbeddedReleaseLinks = Embedded<ReleaseLink, 'sw360:releaseLinks'>
 interface Props {
@@ -67,11 +68,7 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `releases/${releaseId}/releases?transitive=true`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`releases/${releaseId}/releases?transitive=true`, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails

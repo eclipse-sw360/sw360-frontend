@@ -12,12 +12,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Component, Embedded, ReleaseDetail } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import HomeTableHeader from './HomeTableHeader'
 
@@ -32,9 +33,7 @@ function MySubscriptionsWidget(): ReactNode {
     const [reload, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedComponents & EmbeddedReleases
             return data

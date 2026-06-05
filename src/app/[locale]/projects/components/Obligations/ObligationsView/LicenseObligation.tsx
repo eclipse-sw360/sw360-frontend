@@ -29,7 +29,8 @@ import {
     PaginationMeta,
     UpdateCommentModalMetadata,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
@@ -451,7 +452,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -503,11 +504,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 setShowProcessing(true)
-                const response = await ApiUtils.GET(
-                    `projects/${selectedProjectId}/licenseObligations`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${selectedProjectId}/licenseObligations`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

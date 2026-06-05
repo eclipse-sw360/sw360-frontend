@@ -11,14 +11,10 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
-
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface SelectedVulnerability {
     releaseId: string
@@ -51,12 +47,7 @@ const ChangeStateDialog = ({ show, setShow, state, selectedVulner }: Props): JSX
     }
 
     const updateState = useCallback(async (url: string, data: ChangeStatePayload) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return dispatchSessionExpiredEvent()
-        }
-        await ApiUtils.PATCH(url, data, session.user.access_token)
+        await ApiUtils.PATCH(url, data)
     }, [])
 
     const handleSubmit = async () => {

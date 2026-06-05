@@ -20,7 +20,8 @@ import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle, BsQuestionCircle } from 'react-icons/bs'
 import { ModerationRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface propType {
@@ -212,11 +213,7 @@ export default function BulkDeclineModerationRequestModal({
             setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment) {
-                const response = await ApiUtils.PATCH(
-                    `moderationrequest/${singleMrId}`,
-                    updatedRejectPayload,
-                    session.data.user.access_token,
-                )
+                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`, updatedRejectPayload)
                 if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     const progressStatus = computeProgress(response.status)
@@ -287,11 +284,7 @@ export default function BulkDeclineModerationRequestModal({
             setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment) {
-                const response = await ApiUtils.PATCH(
-                    `moderationrequest/${singleMrId}`,
-                    updatedAcceptPayload,
-                    session.data.user.access_token,
-                )
+                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`, updatedAcceptPayload)
                 if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     const progressStatus = computeProgress(response.status)

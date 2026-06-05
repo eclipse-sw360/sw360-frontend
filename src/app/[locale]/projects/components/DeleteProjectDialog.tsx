@@ -11,13 +11,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { Project } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Data {
@@ -66,12 +67,10 @@ function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = fa
 
     const deleteProject = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             const url = CommonUtils.createUrlWithParams(`projects/${projectId}`, {
                 comment: comment,
             })
-            const response = await ApiUtils.DELETE(url, session.user.access_token)
+            const response = await ApiUtils.DELETE(url)
             if (response.status === StatusCodes.OK) {
                 displayMessage('success', t('Delete project successful'))
                 router.push('/projects')
@@ -94,9 +93,7 @@ function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = fa
 
     useEffect(() => {
         const fetchData = async (projectId: string) => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-            const projectsResponse = await ApiUtils.GET(`projects/${projectId}`, session.user.access_token)
+            const projectsResponse = await ApiUtils.GET(`projects/${projectId}`)
             if (projectsResponse.status == StatusCodes.OK) {
                 const projectData = (await projectsResponse.json()) as Project
                 setProject(projectData)

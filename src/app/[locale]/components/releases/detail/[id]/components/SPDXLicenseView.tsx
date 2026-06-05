@@ -19,7 +19,8 @@ import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { BsInfoCircle } from 'react-icons/bs'
 import { ErrorDetails, FileList, SrcFileList } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface LicenseInfo {
@@ -63,7 +64,6 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(
                     `releases/${releaseId}/licenseFileList?attachmentId=${attachmentId}`,
-                    session.data.user.access_token,
                     signal,
                 )
                 if (response.status !== StatusCodes.OK) {

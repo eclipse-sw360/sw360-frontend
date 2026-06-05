@@ -22,7 +22,7 @@ import {
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -51,7 +51,8 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
@@ -139,13 +140,7 @@ function Project(): JSX.Element {
         })
 
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
-            const response = await ApiUtils.GET(
-                `projects/${projectId}/linkedProjects?transitive=false`,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=false`)
 
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
@@ -441,7 +436,6 @@ function Project(): JSX.Element {
                         const att = attachments[0]
                         await DownloadService.download(
                             `projects/${id}/attachments/${att.attachmentContentId}`,
-                            session.data,
                             att.filename,
                         )
                     }
@@ -712,7 +706,7 @@ function Project(): JSX.Element {
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET('projects/groups', session.data.user.access_token, signal)
+                const response = await ApiUtils.GET('projects/groups', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -766,7 +760,7 @@ function Project(): JSX.Element {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -824,11 +818,7 @@ function Project(): JSX.Element {
 
                 if (projectIds.length === 0) return
 
-                const response = await ApiUtils.POST(
-                    'projects/licenseClearingCount',
-                    projectIds,
-                    session.data.user.access_token,
-                )
+                const response = await ApiUtils.POST('projects/licenseClearingCount', projectIds)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -959,7 +949,7 @@ function Project(): JSX.Element {
                 // If mail is not enabled, download the file immediately
                 const currentDate = new Date().toISOString().split('T')[0]
                 const fileName = `Projects-${currentDate}.xlsx`
-                const statusCode = await DownloadService.download(url, session.data, fileName)
+                const statusCode = await DownloadService.download(url, fileName)
                 if (statusCode === StatusCodes.OK) {
                     MessageService.success(t('Spreadsheet download is successful'))
                 } else if (statusCode === StatusCodes.FORBIDDEN) {
@@ -971,7 +961,7 @@ function Project(): JSX.Element {
                 }
             } else {
                 // If mail is enabled, just send the request and show message
-                const response = await ApiUtils.GET(url, session.data.user.access_token)
+                const response = await ApiUtils.GET(url)
                 if (response.status === StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
                 } else if (response.status === StatusCodes.FORBIDDEN) {

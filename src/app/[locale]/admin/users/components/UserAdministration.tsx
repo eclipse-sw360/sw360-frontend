@@ -13,7 +13,7 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -22,8 +22,9 @@ import { BsFiles, BsPencil } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, User } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import BulkUserUpload from './BulkUserUpload'
 import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
@@ -51,22 +52,15 @@ export default function UserAdminstration(): JSX.Element {
     }, [])
 
     const downloadUsers = () => {
-        getSession()
-            .then((session) => {
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-                void DownloadService.download('importExport/downloadUsers', session, 'users.csv', {
-                    Accept: 'text/plain',
-                })
-            })
-            .catch((error: unknown) => {
-                ApiUtils.reportError(error)
-            })
+        void DownloadService.download('importExport/downloadUsers', 'users.csv', {
+            Accept: 'text/plain',
+        }).catch((error: unknown) => {
+            ApiUtils.reportError(error)
+        })
     }
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = await response.json()
             return data
@@ -265,7 +259,7 @@ export default function UserAdminstration(): JSX.Element {
     useEffect(() => {
         if (session.status === 'loading') return
         const controller = new AbortController()
-        const signal = controller.signal
+        const _signal = controller.signal
 
         const timeLimit = userData.length !== 0 ? 700 : 0
         const timeout = setTimeout(() => {
@@ -288,7 +282,7 @@ export default function UserAdminstration(): JSX.Element {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

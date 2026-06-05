@@ -20,7 +20,8 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Spinner } from 'react-bootstrap'
 import { BsExclamationTriangle } from 'react-icons/bs'
 import { Attachment, AttachmentTypes, Embedded, ErrorDetails } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import SPDXLicenseView from './SPDXLicenseView'
 
@@ -168,11 +169,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 otherLicenseIds: att.licenseInfo?.otherLicenseIds ?? [],
             }
 
-            const response = await ApiUtils.POST(
-                `releases/${releaseId}/spdxLicenses`,
-                payload,
-                session.data.user.access_token,
-            )
+            const response = await ApiUtils.POST(`releases/${releaseId}/spdxLicenses`, payload)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -206,10 +203,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         try {
             if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             setShowProcessing(true)
-            const response = await ApiUtils.GET(
-                `releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`,
-                session.data.user.access_token,
-            )
+            const response = await ApiUtils.GET(`releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -255,11 +249,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
         void (async () => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-                const response = await ApiUtils.GET(
-                    `releases/${releaseId}/attachments`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`releases/${releaseId}/attachments`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

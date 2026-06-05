@@ -22,8 +22,8 @@ import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
 import Attachments from '@/components/Attachments/Attachments'
 import { AdministrationDataType, ErrorDetails, SummaryDataType } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 export default function CurrentProjectDetail({
     projectId,
 }: Readonly<{
@@ -41,11 +41,7 @@ export default function CurrentProjectDetail({
         void (async () => {
             if (CommonUtils.isNullOrUndefined(session)) return
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/summaryAdministration`,
-                    session.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

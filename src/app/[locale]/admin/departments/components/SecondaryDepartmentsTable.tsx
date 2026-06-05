@@ -21,7 +21,8 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import SecondaryDepartments from './SecondaryDepartments'
 
@@ -110,7 +111,7 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
             try {
                 if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
-                const response = await ApiUtils.GET('departments/members', session.data.user.access_token, signal)
+                const response = await ApiUtils.GET('departments/members', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

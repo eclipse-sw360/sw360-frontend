@@ -11,14 +11,12 @@
 
 'use client'
 
-import { getSession } from 'next-auth/react'
 import type { useTranslations } from 'next-intl'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 import { BsCaretDownFill, BsCaretRightFill, BsExclamationTriangle, BsInfoCircle } from 'react-icons/bs'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ViewFileListIcon from './ViewFileListIcon'
 
 interface LicenseData {
@@ -184,9 +182,7 @@ const FileListModal = ({
     }
 
     const fetchReleasesToFilesMapping = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-        const response = await ApiUtils.GET(`releases/${releaseId}/licensesToSourceFiles`, session.user.access_token)
+        const response = await ApiUtils.GET(`releases/${releaseId}/licensesToSourceFiles`)
         const data = (await response.json()) as LicensesToSourcesMapping
         setLicensesToSourceFilesMapping(data)
         if (data.status === 'success' && data.licensesData !== undefined) {

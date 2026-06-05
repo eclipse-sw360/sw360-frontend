@@ -19,7 +19,7 @@ import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
 import { useConfigValue } from '@/contexts'
 import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ComponentsTable from './ComponentsTable'
 import ImportSBOMModal from './ImportSBOMModal'
@@ -42,7 +42,7 @@ const ComponentIndex = (): ReactNode => {
 
         const fetchVendors = async () => {
             if (!session) return dispatchSessionExpiredEvent()
-            const response = await ApiUtils.GET('vendors', session?.user?.access_token)
+            const response = await ApiUtils.GET('vendors')
             if (!controller.signal.aborted && response.ok) {
                 const data = await response.json()
                 const names = data._embedded?.['sw360:vendors']?.map((v: { fullName: string }) => v.fullName) || []
@@ -68,7 +68,7 @@ const ComponentIndex = (): ReactNode => {
             try {
                 if (!session) return
 
-                const response = await ApiUtils.GET('configurations', session?.user?.access_token)
+                const response = await ApiUtils.GET('configurations')
 
                 if (response.ok) {
                     const configs = await response.json()
@@ -243,11 +243,11 @@ const ComponentIndex = (): ReactNode => {
 
         try {
             if (exportViaMail) {
-                const response = await ApiUtils.GET(url, session.user.access_token)
+                const response = await ApiUtils.GET(url)
 
                 response.status === 200 ? handleSuccess() : handleError()
             } else {
-                const statusCode = await DownloadService.download(url, session, `components-${currentDate}.xlsx`)
+                const statusCode = await DownloadService.download(url, `components-${currentDate}.xlsx`)
 
                 statusCode === 200 ? handleSuccess() : handleError()
             }

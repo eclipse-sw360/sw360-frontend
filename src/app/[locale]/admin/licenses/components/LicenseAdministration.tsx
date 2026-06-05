@@ -18,7 +18,8 @@ import { FaRegQuestionCircle } from 'react-icons/fa'
 import { ErrorDetails } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils } from '@/utils'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
@@ -59,7 +60,7 @@ function ConfirmationModal({ type, setType }: { type: ModalType; setType: Dispat
             if (!session.data) {
                 return dispatchSessionExpiredEvent()
             }
-            const response = await ApiUtils.POST(url, {}, session.data.user.access_token)
+            const response = await ApiUtils.POST(url, {})
             const res = (await response.json()) as ImportResult
             if (response.status !== StatusCodes.OK) {
                 setState(ImportState.IMPORT)
@@ -183,7 +184,6 @@ export default function LicenseAdministration(): ReactNode {
                     overwriteIfExternalIdMatches
                 }&overwriteIfIdMatchesEvenWithoutExternalIdMatch=${overwriteIfIdMatchesEvenWithoutExternalIdMatch}`,
                 formData,
-                session.data.user.access_token,
             )
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Licenses uploaded successfully'))
@@ -201,7 +201,7 @@ export default function LicenseAdministration(): ReactNode {
     const downloadLicenseArchive = () => {
         try {
             if (!session.data) return dispatchSessionExpiredEvent()
-            void DownloadService.download('licenses/downloadLicenses', session.data, `LicensesBackup.lics`)
+            void DownloadService.download('licenses/downloadLicenses', `LicensesBackup.lics`)
         } catch (error) {
             ApiUtils.reportError(error)
         }

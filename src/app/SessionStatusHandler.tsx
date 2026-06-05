@@ -47,6 +47,15 @@ export default function SessionStatusHandler() {
     ])
 
     useEffect(() => {
+        // Once we are on a non-protected route (typically login), allow future handling cycles.
+        if (!isProtectedRoute(pathname)) {
+            isHandlingSessionRef.current = false
+        }
+    }, [
+        pathname,
+    ])
+
+    useEffect(() => {
         if (
             status === 'authenticated' &&
             session?.user.error === 'RefreshAccessTokenError' &&

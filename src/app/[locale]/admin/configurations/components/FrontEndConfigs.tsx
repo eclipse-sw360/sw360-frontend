@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
@@ -24,7 +24,7 @@ import {
     UiConfiguration,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const FrontEndConfigs = (): JSX.Element => {
@@ -35,12 +35,7 @@ const FrontEndConfigs = (): JSX.Element => {
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
 
     const fetchUiConfig = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            dispatchSessionExpiredEvent()
-            return
-        }
-        const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
+        const response = await ApiUtils.GET(apiEndpoint)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as UiConfiguration
             setCurrentUiConfig(data)
@@ -64,12 +59,7 @@ const FrontEndConfigs = (): JSX.Element => {
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
         if (currentUiConfig === undefined) return
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            dispatchSessionExpiredEvent()
-            return
-        }
-        const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig, session.user.access_token)
+        const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig)
         if (response.status == StatusCodes.OK) {
             MessageService.success(t('Updated frontend configurations successfully'))
             refreshConfig()

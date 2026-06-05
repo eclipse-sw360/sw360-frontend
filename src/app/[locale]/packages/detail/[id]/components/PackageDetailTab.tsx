@@ -19,7 +19,8 @@ import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ChangeLog from './Changelog'
 import Summary from './Summary'
@@ -41,7 +42,7 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token, signal)
+                const response = await ApiUtils.GET(`packages/${packageId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

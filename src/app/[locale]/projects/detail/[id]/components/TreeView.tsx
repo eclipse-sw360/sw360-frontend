@@ -39,7 +39,8 @@ import {
     UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
@@ -805,7 +806,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 const url = `projects/${projectId}/licenseClearing?transitive=true&${columnFilters
                     .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
                     .join('&')}`
-                const response = await ApiUtils.GET(url, session.user.access_token, signal)
+                const response = await ApiUtils.GET(url, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -840,11 +841,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails

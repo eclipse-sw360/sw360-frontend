@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
@@ -20,7 +20,8 @@ import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
@@ -66,12 +67,7 @@ function LicenseClearing({
     useEffect(() => {
         ;(async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) {
-                    MessageService.error(t('Session has expired'))
-                    return dispatchSessionExpiredEvent()
-                }
-                const response = await ApiUtils.GET('configurations?changeable=false', session.user.access_token)
+                const response = await ApiUtils.GET('configurations?changeable=false')
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
@@ -100,9 +96,6 @@ function LicenseClearing({
 
     const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
             const mailEnabled = mailRequestForProjectReport === 'true'
             const url = withLinkedRelease
                 ? `reports?module=PROJECTS&withlinkedreleases=true&projectId=${projectId}`
@@ -112,7 +105,7 @@ function LicenseClearing({
                 // If mail is not enabled, download the file immediately
                 const currentDate = new Date().toISOString().split('T')[0]
                 const fileName = `Projects-${currentDate}.xlsx`
-                const statusCode = await DownloadService.download(url, session, fileName)
+                const statusCode = await DownloadService.download(url, fileName)
                 if (statusCode === StatusCodes.OK) {
                     MessageService.success(t('Spreadsheet download is successful'))
                 } else if (statusCode === StatusCodes.FORBIDDEN) {
@@ -124,7 +117,7 @@ function LicenseClearing({
                 }
             } else {
                 // If mail is enabled, just send the request and show message
-                const response = await ApiUtils.GET(url, session.user.access_token)
+                const response = await ApiUtils.GET(url)
                 if (response.status === StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
                 } else if (response.status === StatusCodes.FORBIDDEN) {

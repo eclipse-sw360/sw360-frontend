@@ -11,12 +11,12 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import { Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import VendorDetailForm from './VendorDetailForm'
 
@@ -36,11 +36,9 @@ export default function AddVendor(): JSX.Element {
 
     const handleSubmit = async () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
             if (vendorData === null) return
             delete vendorData['_links']
-            const response = await ApiUtils.POST('vendors', vendorData, session.user.access_token)
+            const response = await ApiUtils.POST('vendors', vendorData)
             if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Vendor is created'))
                 router.push('/admin/vendors')
