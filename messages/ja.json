@@ -687,6 +687,7 @@
     "Fullname not null or empty": "フルネームが null または空ではありません!",
     "Fullname shortname should not be null or empty": "フルネーム、ショートネームはnullまたは空であってはなりません",
     "Further properties": "さらなるプロパティ",
+    "CREATE PROJECT CLEARING REPORT": "プロジェクト清算レポートの作成",
     "GENERATE LICENSE INFORMATION": "ライセンス情報を生成します",
     "GENERATE SOURCE CODE BUNDLE": "ソースコードバンドルの生成",
     "GNU arch": "GNU アーチ",

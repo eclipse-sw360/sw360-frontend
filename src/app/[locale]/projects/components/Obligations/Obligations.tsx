@@ -43,7 +43,7 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
     const generateLicenseInfo = (withSubProjects: boolean) => {
         const isCalledFromProjectLicenseTab = false
         sessionStorage.setItem('isCalledFromProjectLicenseTab', JSON.stringify(isCalledFromProjectLicenseTab))
-        router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects}`)
+        router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects}&variant=REPORT`)
     }
 
     return (

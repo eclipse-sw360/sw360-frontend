@@ -687,6 +687,7 @@
     "Fullname not null or empty": "전체 이름은 null이거나 비어 있지 않습니다!",
     "Fullname shortname should not be null or empty": "전체 이름, 단축 이름은 null이거나 비어 있을 수 없습니다.",
     "Further properties": "추가 속성",
+    "CREATE PROJECT CLEARING REPORT": "프로젝트 청산 보고서 생성",
     "GENERATE LICENSE INFORMATION": "라이센스 정보를 생성합니다",
     "GENERATE SOURCE CODE BUNDLE": "소스 코드 번들 생성",
     "GNU arch": "GNU 아카이브",

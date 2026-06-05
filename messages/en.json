@@ -687,6 +687,7 @@
     "Fullname not null or empty": "Fullname not null or empty",
     "Fullname shortname should not be null or empty": "Fullname, shortname should not be null or Empty",
     "Further properties": "Further properties",
+    "CREATE PROJECT CLEARING REPORT": "CREATE PROJECT CLEARING REPORT",
     "GENERATE LICENSE INFORMATION": "GENERATE LICENSE INFORMATION",
     "GENERATE SOURCE CODE BUNDLE": "GENERATE SOURCE CODE BUNDLE",
     "GNU arch": "GNU arch",

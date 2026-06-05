@@ -144,13 +144,14 @@ export default function DownloadLicenseInfoModal({
             } catch {
                 // Response was plain text (no warnings) - continue normally
             }
+            const variant = params.get('variant') ?? 'DISCLOSURE'
             const downloadUrl = CommonUtils.createUrlWithParams(`reports`, {
                 withlinkedreleases: 'false',
                 projectId,
                 module: 'licenseInfo',
                 withSubProject: withSubProject ? 'true' : 'false',
                 generatorClassName,
-                variant: 'DISCLOSURE',
+                variant,
                 selectedRelRelationship,
             })
             const mailEnabled = mailRequestForReport === 'true'

@@ -687,6 +687,7 @@
     "Fullname not null or empty": "Tên đầy đủ không rỗng hoặc trống!",
     "Fullname shortname should not be null or empty": "Tên đầy đủ, tên viết tắt không được rỗng hoặc trống",
     "Further properties": "Tài sản hơn nữa",
+    "CREATE PROJECT CLEARING REPORT": "TẠO BÁO CÁO THANH TOÁN DỰ ÁN",
     "GENERATE LICENSE INFORMATION": "Tạo thông tin giấy phép",
     "GENERATE SOURCE CODE BUNDLE": "TẠO BỘ MÃ NGUỒN",
     "GNU arch": "Vòm GNU",
