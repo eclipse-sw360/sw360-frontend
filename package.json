@@ -1,6 +1,6 @@
 {
   "name": "sw360-frontend",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "private": true,
   "scripts": {
     "preinstall": "pnpx only-allow pnpm",
