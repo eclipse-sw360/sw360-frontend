@@ -967,7 +967,11 @@ function GenerateLicenseInfo({
             <div className='container page-content'>
                 <div className='row'>
                     <div className='row d-flex justify-content-between'>
-                        <div className='col-auto buttonheader-title'>{t('GENERATE LICENSE INFORMATION')}</div>
+                        <div className='col-auto buttonheader-title'>
+                            {isCalledFromProjectLicenseTab
+                                ? t('GENERATE LICENSE INFORMATION')
+                                : t('CREATE PROJECT CLEARING REPORT')}
+                        </div>
                         <div className='col-auto text-truncate buttonheader-title'>
                             {project && `${project.name} ${project.version !== undefined && `(${project.version})`}`}
                         </div>

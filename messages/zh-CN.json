@@ -687,6 +687,7 @@
     "Fullname not null or empty": "全名不为空！",
     "Fullname shortname should not be null or empty": "全名、简称不得为空或为空",
     "Further properties": "进一步的属性",
+    "CREATE PROJECT CLEARING REPORT": "创建项目清算报告",
     "GENERATE LICENSE INFORMATION": "生成许可证信息",
     "GENERATE SOURCE CODE BUNDLE": "生成源代码包",
     "GNU arch": "GNU 拱门",

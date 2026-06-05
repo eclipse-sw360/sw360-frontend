@@ -687,6 +687,7 @@
     "Fullname not null or empty": "Nom complet ni nul ni vide !",
     "Fullname shortname should not be null or empty": "Nom complet, nom court ne doit pas être nul ou vide",
     "Further properties": "Autres propriétés",
+    "CREATE PROJECT CLEARING REPORT": "CRÉER UN RAPPORT DE COMPENSATION DE PROJET",
     "GENERATE LICENSE INFORMATION": "Générer des informations de licence",
     "GENERATE SOURCE CODE BUNDLE": "GÉNÉRER UN GROUPE DE CODE SOURCE",
     "GNU arch": "Arche GNU",
