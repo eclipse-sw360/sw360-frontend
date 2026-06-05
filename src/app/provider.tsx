@@ -16,13 +16,20 @@ import SessionStatusHandler from './SessionStatusHandler'
 
 type Props = {
     children?: React.ReactNode
+    refetchIntervalSeconds?: number
 }
 
-export const Providers = ({ children }: Props): JSX.Element => {
+const DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS = 5 * 60
+export const Providers = ({ children, refetchIntervalSeconds }: Props): JSX.Element => {
+    const resolvedRefetchIntervalSeconds =
+        refetchIntervalSeconds && refetchIntervalSeconds > 0
+            ? refetchIntervalSeconds
+            : DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS
+
     return (
         <SessionProvider
             refetchOnWindowFocus={false}
-            refetchInterval={5 * 60} // Refresh session every 5 minutes to prevent sign out
+            refetchInterval={resolvedRefetchIntervalSeconds}
         >
             <SessionStatusHandler />
             {children}
