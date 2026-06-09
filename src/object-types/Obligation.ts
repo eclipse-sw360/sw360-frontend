@@ -76,7 +76,8 @@ export interface ObligationElement {
     languageElement: string
     action: string
     object: string
-    selected: boolean
+    type: string
+    id: string
 }
 
 export interface ObligationTreeProps {
