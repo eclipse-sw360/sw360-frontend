@@ -1055,7 +1055,7 @@ function Project(): JSX.Element {
                 },
                 {
                     key: 'PHASE_OUT',
-                    text: t('PhaseOut'),
+                    text: t('Phaseout'),
                 },
                 {
                     key: 'UNKNOWN',
