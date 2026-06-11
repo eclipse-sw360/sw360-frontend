@@ -163,7 +163,11 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         })
     }
 
-    const fetchUserData = useCallback(async (url: string) => {
+    const fetchUserData = useCallback(async (email: string | undefined | null) => {
+        if (!email) {
+            return undefined
+        }
+        const url = `users/${email}`
         const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             return (await response.json()) as User
@@ -238,7 +242,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 }
 
                 if (project?.projectOwner !== undefined) {
-                    const userData = await fetchUserData(`users/${project?.projectOwner}`)
+                    const userData = await fetchUserData(project?.projectOwner)
                     if (!CommonUtils.isNullOrUndefined(userData)) {
                         setProjectOwner({
                             [project?.projectOwner]: userData?.fullName ?? project?.projectOwner,
@@ -251,7 +255,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 }
 
                 if (project?.projectResponsible !== undefined) {
-                    const userData = await fetchUserData(`users/${project?.projectResponsible}`)
+                    const userData = await fetchUserData(project?.projectResponsible)
                     if (!CommonUtils.isNullOrUndefined(userData)) {
                         setProjectManager({
                             [project?.projectResponsible]: userData?.fullName ?? project?.projectResponsible,
