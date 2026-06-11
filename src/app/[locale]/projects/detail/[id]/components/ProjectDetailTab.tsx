@@ -60,6 +60,20 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const router = useRouter()
     const searchParams = useSearchParams()
     const DEFAULT_ACTIVE_TAB = 'summary'
+    const TABS = [
+        'summary',
+        'administration',
+        'licenseClearing',
+        'linkedPackages',
+        'obligations',
+        'ecc',
+        'vulnerabilityTrackingStatus',
+        'eventKey',
+        'attachmentUsages',
+        'vulnerabilities',
+        'changeLog',
+    ]
+
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
     const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
@@ -81,8 +95,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }, [])
 
     useEffect(() => {
-        const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB
-        setActiveKey(fragment)
+        let tab = searchParams.get('tab')
+        if (tab === null || TABS.indexOf(tab) === -1) {
+            tab = DEFAULT_ACTIVE_TAB
+        }
+        setActiveKey(tab)
     }, [
         searchParams,
     ])

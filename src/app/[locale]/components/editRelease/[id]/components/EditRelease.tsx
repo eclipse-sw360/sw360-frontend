@@ -513,7 +513,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             name: t('Delete Release'),
         },
         Cancel: {
-            link: '/components/releases/detail/' + releaseId,
+            link: `/components/releases/detail/${releaseId}?tab=${activeKey ?? CommonTabIds.SUMMARY}`,
             type: 'secondary',
             name: t('Cancel'),
         },

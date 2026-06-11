@@ -643,7 +643,7 @@ function EditProject({
     }
 
     const handleCancelClick = () => {
-        router.push('/projects')
+        router.push(`/projects/detail/${projectId}?tab=${activeKey ?? DEFAULT_ACTIVE_TAB}`)
     }
 
     return (
