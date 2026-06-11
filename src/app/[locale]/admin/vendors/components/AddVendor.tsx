@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import { Vendor } from '@/object-types'
@@ -22,7 +21,6 @@ import VendorDetailForm from './VendorDetailForm'
 
 export default function AddVendor(): JSX.Element {
     const t = useTranslations('default')
-    const { status } = useSession()
     const router = useRouter()
     const [vendorData, setVendorData] = useState<Vendor | null>({
         fullName: '',

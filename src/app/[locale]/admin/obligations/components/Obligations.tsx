@@ -14,7 +14,6 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -23,7 +22,6 @@ import { BsCheck2Square, BsClipboard, BsFillTrashFill, BsPencil } from 'react-ic
 import { Embedded, ErrorDetails, Obligation, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ObligationLevelInfo, ObligationLevels } from '../../../../../object-types/Obligation'
 import DeleteObligationDialog from './DeleteObligationDialog'
 
@@ -33,7 +31,6 @@ function Obligations(): ReactNode {
     const t = useTranslations('default')
     const [search, setSearch] = useState({})
     const [obligationCount, setObligationCount] = useState(0)
-    const session = useSession()
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [deletedObligationId, setDeletedObligationId] = useState('')
     const router = useRouter()
@@ -199,7 +196,6 @@ function Obligations(): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -210,7 +206,6 @@ function Obligations(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `obligations`,
                     Object.fromEntries(
@@ -250,7 +245,6 @@ function Obligations(): ReactNode {
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
         search,
     ])
 

@@ -12,7 +12,6 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -31,7 +30,6 @@ interface Props {
 
 const TokensTable = ({ generatedToken }: Props): ReactNode => {
     const t = useTranslations('default')
-    const session = useSession()
     const [revoked, setRevoked] = useState(false)
 
     const revokeToken = async (tokenName: string) => {
@@ -127,7 +125,6 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -138,7 +135,6 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET('users/tokens', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -163,7 +159,6 @@ const TokensTable = ({ generatedToken }: Props): ReactNode => {
 
         return () => controller.abort()
     }, [
-        session,
         revoked,
         generatedToken,
     ])

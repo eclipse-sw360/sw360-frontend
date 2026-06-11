@@ -112,6 +112,10 @@ function findInvalidDirective(content) {
     return undefined
 }
 
+function hasServerSessionUsage(content) {
+    return /\bgetServerSession\b/.test(content)
+}
+
 function usesClientOnlyPatterns(content) {
     return clientMarkers.some((pattern) => pattern.test(content))
 }
@@ -174,6 +178,10 @@ function main() {
             continue
         }
 
+        if (hasValidUseClientDirective(content) && hasServerSessionUsage(content)) {
+            issues.push(`${relativePath}: do not use getServerSession in 'use client' files`)
+        }
+
         if (
             isClientComponentFile(relativePath) &&
             usesClientOnlyPatterns(content) &&
@@ -182,10 +190,7 @@ function main() {
             issues.push(`${relativePath}: add 'use client' as the first statement for client-only component code`)
         }
 
-        if (
-            isAppDirectoryFileMakingApiCalls(relativePath, content) &&
-            !hasValidUseClientDirective(content)
-        ) {
+        if (isAppDirectoryFileMakingApiCalls(relativePath, content) && !hasValidUseClientDirective(content)) {
             issues.push(`${relativePath}: files under src/app making API calls must declare 'use client'`)
         }
     }

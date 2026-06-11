@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Modal, Spinner } from 'react-bootstrap'
@@ -50,7 +49,6 @@ export default function LicenseDbObligationsModal({
 }): ReactNode {
     const t = useTranslations('default')
     const [obligationIds, setObligationIds] = useState<string[]>([])
-    const session = useSession()
     const [loading, setLoading] = useState(false)
 
     const addObligationsToLicense = async () => {
@@ -262,7 +260,6 @@ export default function LicenseDbObligationsModal({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -273,7 +270,6 @@ export default function LicenseDbObligationsModal({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/licenseDbObligations`,
                     Object.fromEntries(
@@ -326,7 +322,6 @@ export default function LicenseDbObligationsModal({
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({

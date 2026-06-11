@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -19,7 +18,6 @@ import { Form, Spinner } from 'react-bootstrap'
 import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
 
@@ -31,7 +29,6 @@ export default function ComponentTable({
     setComponent: Dispatch<SetStateAction<null | Component>>
 }>): ReactNode {
     const t = useTranslations('default')
-    const session = useSession()
     const [search, setSearch] = useState<{
         name: string
         luceneSearch?: boolean
@@ -121,7 +118,6 @@ export default function ComponentTable({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -132,7 +128,6 @@ export default function ComponentTable({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components`,
                     Object.fromEntries(
@@ -172,7 +167,6 @@ export default function ComponentTable({
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
         search,
     ])
 

@@ -19,7 +19,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -31,7 +30,6 @@ import MessageService from '@/services/message.service'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     releaseId: string
@@ -46,7 +44,6 @@ const packageManagerFilterOptions: FilterOption[] = packageManagers.map((pm: str
 
 export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
@@ -202,7 +199,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
 
     const [packagesData, setPackagesData] = useState<LinkedPackage[]>(() => [])
     const deleteLinkedPackage = async () => {
-        if (!selectedPkg || !session.data) return
+        if (!selectedPkg) return
 
         try {
             setDeleting(true)
@@ -251,7 +248,6 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -262,7 +258,6 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`releases/${releaseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -286,9 +281,7 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     const table = useReactTable({
         data: memoizedData,

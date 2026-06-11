@@ -12,14 +12,12 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, LicenseDetail, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { PageSizeSelector, SW360Table, TableFooter } from '../Table/Components'
 
 interface Props {
@@ -39,7 +37,6 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
         [k: string]: string
     }>(releaseLicenses)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
-    const session = useSession()
 
     const handleCheckbox = (item: LicenseDetail) => {
         const copiedLicenses = {
@@ -106,8 +103,6 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const queryUrl = CommonUtils.createUrlWithParams(
                 `licenses`,
                 Object.fromEntries(
@@ -148,14 +143,13 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
     }
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const handleClickSelectLicenses = () => {

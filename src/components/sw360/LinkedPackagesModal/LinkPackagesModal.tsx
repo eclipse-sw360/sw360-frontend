@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -21,7 +20,6 @@ import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LinkedPackageData, Package, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface HasLinkedPackages {
     linkedPackages?: Record<string, LinkedPackageData>
@@ -46,7 +44,6 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
     const [linkPackages, setLinkPackages] = useState<Map<string, LinkedPackageData>>(new Map())
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
-    const session = useSession()
 
     useEffect(() => {
         setLinkPackages(new Map(Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})))
@@ -157,14 +154,13 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -206,8 +202,6 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const queryUrl = CommonUtils.createUrlWithParams(
                 `packages`,
                 Object.fromEntries(

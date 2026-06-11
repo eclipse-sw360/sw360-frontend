@@ -14,7 +14,6 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Col, Dropdown, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -50,6 +49,7 @@ import {
 import DownloadService from '@/services/download.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
@@ -80,15 +80,26 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
-    const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
     const [changeLogId, setChangeLogId] = useState('')
     const [changelogTab, setChangelogTab] = useState('list-change')
-    const session = useSession()
     const [vulInfo, setVulInfo] = useState([
         0,
         0,
     ])
     const [fileList, setFileList] = useState<SrcFileList | undefined>()
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedArray(vulnerData)) {
@@ -127,26 +138,20 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         router.push(`?tab=${key}`)
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session.data)) return
-            const response = await ApiUtils.GET(url)
-            if (response.status === StatusCodes.OK) {
-                const data = (await response.json()) as ReleaseDetail &
-                    EmbeddedReleaseLinks &
-                    EmbeddedVulnerabilities &
-                    EmbeddedChangelogs
-                return data
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return dispatchSessionExpiredEvent()
-            } else {
-                return undefined
-            }
-        },
-        [
-            session,
-        ],
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const response = await ApiUtils.GET(url)
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as ReleaseDetail &
+                EmbeddedReleaseLinks &
+                EmbeddedVulnerabilities &
+                EmbeddedChangelogs
+            return data
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
+            return dispatchSessionExpiredEvent()
+        } else {
+            return undefined
+        }
+    }, [])
 
     const getSubcribersEmail = (release: ReleaseDetail) => {
         return release._embedded['sw360:subscribers']
@@ -154,16 +159,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             : []
     }
 
-    const extractUserEmail = () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-        setUserEmail(session.data.user.email)
-    }
-
     useEffect(() => {
-        if (session.status === 'loading') return
-
-        void extractUserEmail()
-
         fetchData(`releases/${releaseId}`)
             .then((release) => {
                 if (CommonUtils.isNullOrUndefined(release)) {
@@ -210,17 +206,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [
         fetchData,
         releaseId,
-        session,
     ])
 
     useEffect(() => {
-        if (session.status === 'loading' || CommonUtils.isNullOrUndefined(release)) return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`releases/${releaseId}/licenseFileList`, signal)
                 if (response.status !== StatusCodes.OK) {
                     if (response.status === StatusCodes.CONFLICT) return
@@ -239,7 +232,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         return () => controller.abort()
     }, [
-        session,
         releaseId,
         release,
     ])
@@ -265,7 +257,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -276,7 +267,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
                     Object.fromEntries(
@@ -319,11 +309,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [
         pageableQueryParam,
         releaseId,
-        session,
     ])
 
     const downloadBundle = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         await DownloadService.download(
             `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
             'AttachmentBundle.zip',
@@ -331,8 +319,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const handleSubcriptions = async () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return
-
         await ApiUtils.POST(`releases/${releaseId}/subscriptions`, {})
         fetchData(`releases/${releaseId}`)
             .then((release) => {
@@ -344,8 +330,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const isUserSubscribed = () => {
-        if (userEmail === undefined) return false
-        return subscribers.includes(userEmail)
+        const email = userIdentity?.email
+        return email !== undefined && subscribers.includes(email)
     }
 
     const headerButtons = {
@@ -353,7 +339,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             link: `/components/editRelease/${releaseId}`,
             type: 'primary',
             name: t('Edit release'),
-            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         'Link To Project': {
             link: '',
@@ -362,15 +348,15 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 setLinkProjectModalShow(true)
             },
             name: t('Link To Project'),
-            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         Merge: {
             link: `/components/releases/detail/${releaseId}/merge`,
             type: 'secondary',
             name: t('Merge'),
             hidden:
-                session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
-                session?.data?.user?.userGroup === UserGroupType.USER,
+                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                userIdentity?.userGroup === UserGroupType.USER,
         },
         Subscribe: {
             link: '',

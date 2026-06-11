@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useRef } from 'react'
 import MessageService from '@/services/message.service'
@@ -20,7 +19,6 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 export default function AddLicenseTypes(): JSX.Element {
     const router = useRouter()
-    const { status } = useSession()
     const t = useTranslations('default')
     const searchValueRef = useRef<HTMLInputElement>(null)
 
@@ -69,7 +67,6 @@ export default function AddLicenseTypes(): JSX.Element {
                             type='submit'
                             id='add_license_type.submit'
                             className='btn btn-primary col-auto me-2'
-                            disabled={status !== 'authenticated'}
                         >
                             {t('Create License Type')}
                         </button>

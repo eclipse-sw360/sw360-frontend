@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
@@ -20,7 +19,6 @@ import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { Changelogs, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -29,7 +27,6 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [changeLogId, setChangeLogId] = useState('')
     const router = useRouter()
-    const session = useSession()
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -52,7 +49,6 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -63,7 +59,6 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${obligationId}`,
                     Object.fromEntries(
@@ -106,7 +101,6 @@ function ChangeLog({ obligationId }: { obligationId: string }): JSX.Element {
     }, [
         pageableQueryParam,
         obligationId,
-        session,
     ])
 
     return (

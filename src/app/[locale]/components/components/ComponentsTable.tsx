@@ -15,7 +15,6 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -25,7 +24,7 @@ import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, 
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import DeleteComponentDialog from './DeleteComponentDialog'
 
 interface Props {
@@ -39,8 +38,20 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const params = useSearchParams()
     const [deletingComponent, setDeletingComponent] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const session = useSession()
     const router = useRouter()
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const handleClickDelete = (componentId: string) => {
         setDeletingComponent(componentId)
@@ -198,7 +209,6 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -209,7 +219,6 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components`,
@@ -251,7 +260,6 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     }, [
         pageableQueryParam,
         params.toString(),
-        session,
     ])
 
     useEffect(() => {
@@ -272,7 +280,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
         // table state config
         state: {
             columnVisibility: {
-                actions: !(session?.data?.user?.userGroup === UserGroupType.SECURITY_USER),
+                actions: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
             },
             pagination: {
                 pageIndex: pageableQueryParam.page,

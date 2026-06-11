@@ -13,7 +13,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -108,7 +107,6 @@ function AddRelease({ componentId }: Props): ReactNode {
         [k: string]: string
     }>({})
 
-    const session = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const params = useSearchParams()
     const duplicateFromReleaseId = params.get('duplicate')
@@ -133,7 +131,6 @@ function AddRelease({ componentId }: Props): ReactNode {
         if (!duplicateFromReleaseId) return
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`releases/${duplicateFromReleaseId}`)
                 if (response.status === StatusCodes.UNAUTHORIZED) return dispatchSessionExpiredEvent()
                 else if (response.status !== StatusCodes.OK) return notFound()
@@ -221,7 +218,6 @@ function AddRelease({ componentId }: Props): ReactNode {
         if (!componentId) return
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`components/${componentId}`)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()
@@ -245,7 +241,6 @@ function AddRelease({ componentId }: Props): ReactNode {
     ])
 
     const submit = async () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.POST('releases', releasePayload)
         if (response.status === StatusCodes.CREATED) {
             const release = (await response.json()) as ReleaseDetail

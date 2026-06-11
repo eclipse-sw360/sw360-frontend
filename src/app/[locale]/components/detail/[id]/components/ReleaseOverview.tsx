@@ -16,7 +16,6 @@ import { StatusCodes } from 'http-status-codes'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -28,7 +27,7 @@ import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyCle
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink, UserGroupType } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
 type EmbeddedLinkedReleases = Embedded<ReleaseLink, 'sw360:releaseLinks'>
@@ -49,7 +48,19 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
     const [linkingReleaseId, setLinkingReleaseId] = useState<string | undefined>(undefined)
     const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
-    const session = useSession()
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const handleClickDelete = (releaseId: string) => {
         setDeletingRelease(releaseId)
@@ -211,7 +222,6 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -222,7 +232,6 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
                     Object.fromEntries(
@@ -265,7 +274,6 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
 
         return () => controller.abort()
     }, [
-        session,
         componentId,
         pageableQueryParam,
     ])
@@ -279,7 +287,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         state: {
             columnVisibility: {
                 actions:
-                    !(session?.data?.user?.userGroup === UserGroupType.SECURITY_USER) ||
+                    !(userIdentity?.userGroup === UserGroupType.SECURITY_USER) ||
                     calledFromModerationRequestDetail === undefined ||
                     calledFromModerationRequestDetail === false,
             },

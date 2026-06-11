@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
@@ -30,7 +29,7 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import LinkProjects from '../../../components/LinkProjects'
@@ -48,7 +47,6 @@ import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
@@ -68,6 +66,19 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         show: false,
         importType: 'CycloneDx',
     })
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     useEffect(() => {
         const fragment = searchParams.get('tab') ?? DEFAULT_ACTIVE_TAB
@@ -82,13 +93,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -109,16 +118,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
-        session,
     ])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`projects/${projectId}/clearingDetailsCount`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -135,12 +141,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
-        session,
     ])
 
     const handleEditProject = (projectId: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-        if (session?.data.user.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
+        if (userIdentity?.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
         } else {
@@ -150,8 +154,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }
 
     useEffect(() => {
-        if (session.status === 'loading') return
-
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -159,11 +161,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
             setObligationsLoading(true)
             setVulnerabilitiesLoading(true)
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) {
-                    dispatchSessionExpiredEvent()
-                    return
-                }
-
                 const response = await ApiUtils.GET(`projects/${projectId}/tabCounts`, signal)
                 const body = (await response.json().catch(() => ({}))) as ProjectDetailTabCounts | ErrorDetails
 
@@ -190,8 +187,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
-        session.status,
-        session.data?.user?.access_token,
     ])
 
     const isVulnerabilitiesDisplayEnabled = summaryData?.enableVulnerabilitiesDisplay ?? false
@@ -263,10 +258,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='licenseClearing'
-                                    hidden={
-                                        session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                    }
+                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
                                 </ListGroup.Item>
@@ -279,10 +271,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='obligations'
-                                    hidden={
-                                        session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                    }
+                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={
@@ -301,10 +290,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='ecc'
-                                    hidden={
-                                        session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                    }
+                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('ECC')}</div>
                                 </ListGroup.Item>
@@ -317,20 +303,14 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='attachments'
-                                    hidden={
-                                        session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                    }
+                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
                                     eventKey='attachmentUsages'
-                                    hidden={
-                                        session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                    }
+                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachment Usages')}</div>
                                 </ListGroup.Item>
@@ -349,10 +329,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='changeLog'
-                                    hidden={
-                                        session.status === 'authenticated' &&
-                                        session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                    }
+                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>
                                 </ListGroup.Item>
@@ -366,10 +343,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             variant='primary'
                                             className='me-2 col-auto'
                                             onClick={() => handleEditProject(projectId)}
-                                            disabled={
-                                                session.status === 'authenticated' &&
-                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                            }
+                                            disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                         >
                                             {t('Edit Projects')}
                                         </Button>
@@ -377,10 +351,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             variant='secondary'
                                             className='col-auto'
                                             onClick={() => setShow(true)}
-                                            disabled={
-                                                session.status === 'authenticated' &&
-                                                session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                            }
+                                            disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                         >
                                             {t('Link to Projects')}
                                         </Button>
@@ -389,10 +360,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 variant='dark'
                                                 id='exportSBOM'
                                                 className='px-2'
-                                                hidden={
-                                                    session.status === 'authenticated' &&
-                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                                }
+                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                             >
                                                 {t('Import SBOM')}
                                             </Dropdown.Toggle>
@@ -456,10 +424,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 variant='dark'
                                                 id='exportSBOM'
                                                 className='px-2'
-                                                hidden={
-                                                    session.status === 'authenticated' &&
-                                                    session?.data.user?.userGroup === UserGroupType.SECURITY_USER
-                                                }
+                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                             >
                                                 {t('Export SBOM')}
                                             </Dropdown.Toggle>

@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
@@ -22,7 +22,6 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
 import DependencyNetworkTreeView from './DependencyNetworkTreeView'
@@ -54,35 +53,16 @@ function LicenseClearing({
     const router = useRouter()
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
-    const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
 
     // Configs from backend
     const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
+    const isDependencyNetworkFeatureEnabled =
+        useConfigKeyValue(ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP) === 'true'
     const clearingRequestDisabledGroups = useConfigValue(
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
     const crIsAllowed = CommonUtils.isCrAllowed(businessUnit, clearingState, clearingRequestDisabledGroups, visibility)
     const disableCrButton = !crIsAllowed
-
-    useEffect(() => {
-        ;(async () => {
-            try {
-                const response = await ApiUtils.GET('configurations?changeable=false')
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    dispatchSessionExpiredEvent()
-                } else if (response.status !== StatusCodes.OK) {
-                    setDependencyNetworkFeatureEnabled(false)
-                    return
-                }
-                const config = await response.json()
-                setDependencyNetworkFeatureEnabled(
-                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] === 'true',
-                )
-            } catch {
-                setDependencyNetworkFeatureEnabled(false)
-            }
-        })()
-    }, [])
 
     const generateSourceCodeBundle = (withSubProjects: boolean) => {
         router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`)

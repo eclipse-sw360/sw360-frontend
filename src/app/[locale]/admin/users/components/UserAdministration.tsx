@@ -13,7 +13,6 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -25,7 +24,6 @@ import MessageService from '@/services/message.service'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import BulkUserUpload from './BulkUserUpload'
 import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
 
@@ -41,7 +39,6 @@ export default function UserAdminstration(): JSX.Element {
         useState<boolean>(false)
     const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
     const params = useSearchParams()
-    const session = useSession()
 
     const handleAddUsers = () => {
         router.push('/admin/users/add')
@@ -257,7 +254,6 @@ export default function UserAdminstration(): JSX.Element {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const _signal = controller.signal
 
@@ -268,7 +264,6 @@ export default function UserAdminstration(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `users`,
@@ -310,7 +305,6 @@ export default function UserAdminstration(): JSX.Element {
     }, [
         pageableQueryParam,
         params.toString(),
-        session,
         refreshTrigger,
     ])
 

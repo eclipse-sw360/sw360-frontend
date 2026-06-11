@@ -10,7 +10,6 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Spinner } from 'react-bootstrap'
@@ -19,7 +18,6 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 function ReportDownloadPage(): JSX.Element {
     const t = useTranslations('default')
     const searchParams = useSearchParams()
-    const { data: session, status } = useSession()
     const [error, setError] = useState<string | null>(null)
     const [downloading, setDownloading] = useState(false)
     const [downloaded, setDownloaded] = useState(false)
@@ -29,24 +27,9 @@ function ReportDownloadPage(): JSX.Element {
     const extendedByReleases = searchParams.get('extendedByReleases') ?? 'false'
     const projectId = searchParams.get('projectId') ?? ''
 
-    // Redirect to login if not authenticated
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            // callbackUrl preserves the full URL so after login it comes back here
-            void signIn('keycloak', {
-                callbackUrl: window.location.href,
-            })
-        }
-    }, [
-        status,
-    ])
-
     const triggerDownload = useCallback(async () => {
         if (!module || !token) {
             setError(t('Missing required parameters (module, token)'))
-            return
-        }
-        if (!session) {
             return
         }
 
@@ -96,30 +79,17 @@ function ReportDownloadPage(): JSX.Element {
         token,
         extendedByReleases,
         projectId,
-        session,
     ])
 
     useEffect(() => {
-        if (status === 'authenticated' && !downloaded && !downloading) {
+        if (!downloaded && !downloading) {
             void triggerDownload()
         }
     }, [
-        status,
         downloaded,
         downloading,
         triggerDownload,
     ])
-
-    if (status === 'loading' || status === 'unauthenticated') {
-        return (
-            <div className='container mt-5 text-center'>
-                <Spinner animation='border' />
-                <p className='mt-2'>
-                    {status === 'loading' ? t('Checking authentication') : t('Redirecting to login')}
-                </p>
-            </div>
-        )
-    }
 
     return (
         <div className='container mt-5'>

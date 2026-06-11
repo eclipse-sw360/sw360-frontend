@@ -20,7 +20,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table, TableSearch } from 'next-sw360'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -171,7 +170,6 @@ const upperCaseWithUnderscore = (text: string | undefined) => {
 
 const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
     const t = useTranslations('default')
-    const session = useSession()
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
@@ -442,7 +440,6 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
     })
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -473,7 +470,6 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
         return () => controller.abort()
     }, [
         projectId,
-        session.status,
     ])
 
     const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {

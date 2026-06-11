@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -31,7 +30,6 @@ import {
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     projectId: string
@@ -53,7 +51,6 @@ export default function ObligationTab({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
-    const session = useSession()
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -290,7 +287,6 @@ export default function ObligationTab({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -301,7 +297,6 @@ export default function ObligationTab({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/obligation`,
                     Object.fromEntries(
@@ -358,7 +353,6 @@ export default function ObligationTab({
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const detailTable = useReactTable({

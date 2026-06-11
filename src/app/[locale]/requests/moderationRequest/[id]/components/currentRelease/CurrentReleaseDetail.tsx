@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -50,7 +49,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [changeLogId, setChangeLogId] = useState('')
-    const session = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const t = useTranslations('default')
     const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
@@ -117,7 +115,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -128,7 +125,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
                     Object.fromEntries(
@@ -171,7 +167,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     }, [
         pageableQueryParam,
         releaseId,
-        session,
     ])
 
     return release ? (

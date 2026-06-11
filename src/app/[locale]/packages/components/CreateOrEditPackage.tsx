@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, type FormEvent, type ReactElement, SetStateAction, useEffect, useState } from 'react'
@@ -20,7 +19,6 @@ import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddMainLicenseModal from './AddMainLicenseModal'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
@@ -67,7 +65,6 @@ export default function CreateOrEditPackage({
         packageVersion: '',
     })
     const [isPackageUsed, setIsPackageUsed] = useState(false)
-    const session = useSession()
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -126,16 +123,9 @@ export default function CreateOrEditPackage({
     }
 
     useEffect(() => {
-        if (isEditPage && !CommonUtils.isNullOrUndefined(packageId) && session.status !== 'loading') {
+        if (isEditPage && !CommonUtils.isNullOrUndefined(packageId)) {
             void (async () => {
                 try {
-                    const sessionData = session.data
-                    if (
-                        CommonUtils.isNullOrUndefined(sessionData) ||
-                        CommonUtils.isNullOrUndefined(sessionData?.user?.access_token)
-                    )
-                        return dispatchSessionExpiredEvent()
-
                     const response = await ApiUtils.GET(`packages/${packageId}/usage`)
                     if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                         const err = (await response.json()) as ErrorDetails

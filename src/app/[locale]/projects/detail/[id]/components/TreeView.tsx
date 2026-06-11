@@ -19,7 +19,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -41,6 +40,7 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
@@ -264,7 +264,6 @@ const tableIdToUrlParamMapper: Record<string, string> = {
 
 export default function TreeView({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
 
     const [expandLevel, setExpandLevel] = useState(-1)
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
@@ -303,6 +302,20 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const showAddLicenseButton = useConfigValue(UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON) as
         | boolean
         | null
+
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const columns = useMemo<ColumnDef<NestedRows<TypedProject | TypedRelease>>[]>(
         () => [
@@ -793,7 +806,6 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     ])
 
     useEffect(() => {
-        if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -826,14 +838,11 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
         return () => controller.abort()
     }, [
-        status,
         projectId,
-        session,
         columnFilters,
     ])
 
     useEffect(() => {
-        if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -861,9 +870,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
         return () => controller.abort()
     }, [
-        status,
         projectId,
-        session,
     ])
 
     return (
@@ -882,9 +889,9 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             onClick={() => setShow(true)}
                             hidden={
                                 !(
-                                    session?.user.userGroup === UserGroupType.ADMIN ||
-                                    session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
-                                    session?.user.userGroup === UserGroupType.SW360_ADMIN
+                                    userIdentity?.userGroup === UserGroupType.ADMIN ||
+                                    userIdentity?.userGroup === UserGroupType.CLEARING_ADMIN ||
+                                    userIdentity?.userGroup === UserGroupType.SW360_ADMIN
                                 )
                             }
                         >

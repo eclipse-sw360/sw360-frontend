@@ -21,7 +21,6 @@ import {
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
@@ -235,7 +234,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [releaseFilter, setReleaseFilter] = useState<string>('')
     const [searchTerm, setSearchTerm] = useState<string>('')
-    const session = useSession()
     const filteredData = useMemo(
         () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm, saveUsagesPayload) : data),
         [
@@ -280,7 +278,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     }
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -313,11 +310,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         return () => controller.abort()
     }, [
         projectId,
-        session,
     ])
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -395,7 +390,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         return () => controller.abort()
     }, [
         projectId,
-        session,
     ])
 
     const columns = useMemo<ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>>[]>(

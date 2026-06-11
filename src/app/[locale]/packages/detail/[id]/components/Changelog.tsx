@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Nav, Tab } from 'react-bootstrap'
@@ -19,7 +18,6 @@ import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { Changelogs, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedChangeLogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -27,7 +25,6 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [changeLogId, setChangeLogId] = useState('')
-    const session = useSession()
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -50,7 +47,6 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -61,10 +57,6 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) {
-                    dispatchSessionExpiredEvent()
-                    return
-                }
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${packageId}`,
                     Object.fromEntries(
@@ -107,7 +99,6 @@ function ChangeLog({ packageId }: { packageId: string }): ReactNode {
     }, [
         pageableQueryParam,
         packageId,
-        session,
     ])
 
     return (

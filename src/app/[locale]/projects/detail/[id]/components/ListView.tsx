@@ -18,7 +18,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -282,7 +281,6 @@ export default function ListView({
     projectVersion: string
 }): JSX.Element {
     const t = useTranslations('default')
-    const { status, data: session } = useSession()
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])
@@ -311,34 +309,26 @@ export default function ListView({
 
     const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
 
-    const handleShowLicenseFiles = useCallback(
-        async (release: Release) => {
-            setSelectedRelease(release)
-            setShowModal(true)
-            setLicenseFiles([])
+    const handleShowLicenseFiles = useCallback(async (release: Release) => {
+        setSelectedRelease(release)
+        setShowModal(true)
+        setLicenseFiles([])
 
-            if (status === 'authenticated' && session) {
-                try {
-                    const response = await ApiUtils.GET(`releases/${release.id}/attachments`)
+        try {
+            const response = await ApiUtils.GET(`releases/${release.id}/attachments`)
 
-                    if (response.status === StatusCodes.OK) {
-                        const data = await response.json()
-                        const files =
-                            data._embedded?.['sw360:attachments']
-                                ?.filter((att: Attachment) => att.attachmentType === 'LICENSE')
-                                ?.map((att: Attachment) => att.filename) || []
-                        setLicenseFiles(files)
-                    }
-                } catch (error) {
-                    ApiUtils.reportError(error)
-                }
+            if (response.status === StatusCodes.OK) {
+                const data = await response.json()
+                const files =
+                    data._embedded?.['sw360:attachments']
+                        ?.filter((att: Attachment) => att.attachmentType === 'LICENSE')
+                        ?.map((att: Attachment) => att.filename) || []
+                setLicenseFiles(files)
             }
-        },
-        [
-            status,
-            session,
-        ],
-    )
+        } catch (error) {
+            ApiUtils.reportError(error)
+        }
+    }, [])
 
     const columns = useMemo<ColumnDef<TypedProject | TypedRelease>[]>(
         () => [
@@ -665,7 +655,6 @@ export default function ListView({
     })
 
     useEffect(() => {
-        if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
         const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
@@ -700,14 +689,11 @@ export default function ListView({
         })()
         return () => controller.abort()
     }, [
-        status,
         projectId,
-        session,
         columnFilters,
     ])
 
     useEffect(() => {
-        if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
         const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
@@ -734,9 +720,7 @@ export default function ListView({
         })()
         return () => controller.abort()
     }, [
-        status,
         projectId,
-        session,
     ])
 
     useEffect(() => {

@@ -12,31 +12,40 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, CommonUtils } from '@/utils'
+import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ChangeLog from './Changelog'
 import Summary from './Summary'
 
 function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
     const router = useRouter()
     const param = useParams()
     const locale = (param.locale as string) || 'en'
     const packagesPath = `/${locale}/packages`
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
 
     useEffect(() => {
-        if (status !== 'authenticated') return
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
+    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -64,16 +73,10 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
         return () => controller.abort()
     }, [
         packageId,
-        session,
-        status,
     ])
 
     const handleEditPackage = () => {
-        if (CommonUtils.isNullOrUndefined(session)) {
-            dispatchSessionExpiredEvent()
-            return
-        }
-        if (session.user.email === summaryData?._embedded?.createdBy?.email) {
+        if (userIdentity?.email === summaryData?._embedded?.createdBy?.email) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/packages/edit/${packageId}`)
         } else {

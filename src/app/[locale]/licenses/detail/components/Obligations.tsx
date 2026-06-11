@@ -19,7 +19,6 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
@@ -27,7 +26,6 @@ import { Form, Spinner } from 'react-bootstrap'
 import { ErrorDetails, LicenseDetail, NestedRows, Obligation } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     licenseId?: string
@@ -38,7 +36,6 @@ interface Props {
 
 const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props): ReactNode => {
     const t = useTranslations('default')
-    const session = useSession()
 
     const [globalFilter, setGlobalFilter] = useState('')
     const [obligationData, setObligationData] = useState<Obligation[]>([])
@@ -75,7 +72,6 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 setShowProcessing(true)
                 const response = await ApiUtils.GET(`licenses/${licenseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
@@ -103,7 +99,6 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         return () => controller.abort()
     }, [
         licenseId,
-        session.data,
         isEditWhitelist,
         setWhitelist,
     ])

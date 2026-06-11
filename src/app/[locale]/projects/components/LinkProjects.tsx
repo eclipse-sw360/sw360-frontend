@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useRef, useState } from 'react'
@@ -21,7 +20,6 @@ import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project, SearchResult } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
@@ -51,7 +49,6 @@ export default function LinkProjects({
     const [byNameOnly, setByNameOnly] = useState(true)
     const topRef = useRef<HTMLDivElement | null>(null)
     const [linking, setLinking] = useState(false)
-    const session = useSession()
 
     const scrollToTop = () => {
         topRef.current?.scrollTo({
@@ -276,14 +273,13 @@ export default function LinkProjects({
     })
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const handleCheckboxes = (projectId: string) => {
@@ -302,7 +298,6 @@ export default function LinkProjects({
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint
@@ -374,9 +369,6 @@ export default function LinkProjects({
                 }
 
                 // Fetch full details for each project
-                const accessToken = session.data?.user.access_token
-                if (!accessToken) return
-
                 const projectPromises = projectIds.map((id) =>
                     ApiUtils.GET(`projects/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
@@ -398,7 +390,6 @@ export default function LinkProjects({
             const data = {
                 linkedProjects: Object.fromEntries(linkProjects),
             }
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data)
             if (response.status !== StatusCodes.OK) {

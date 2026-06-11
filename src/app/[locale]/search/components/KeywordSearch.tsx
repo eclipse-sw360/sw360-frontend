@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useReducer, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -181,7 +180,6 @@ function KeywordSearch({
 
     const [searchOptions, dispatch] = useReducer(reducer, initialState)
     const [searchText, setSearchText] = useState('')
-    const session = useSession()
 
     function appendTypeMasksToParams(searchOptions: SEARCH_STATE, params = new URLSearchParams()) {
         const entries = Object.entries(searchOptions)
@@ -200,8 +198,6 @@ function KeywordSearch({
         }, 300)
 
         try {
-            if (session.status !== 'authenticated') return
-
             const params = appendTypeMasksToParams(
                 searchOptions,
                 new URLSearchParams({

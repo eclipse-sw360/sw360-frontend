@@ -21,7 +21,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table, TableSearch } from 'next-sw360'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -198,7 +197,6 @@ type TypedRelease = TypedEntity<ReleaseClearingState, 'release'>
 const DependencyNetworkTreeView = ({ projectId }: Props) => {
     const t = useTranslations('default')
 
-    const session = useSession()
     const [expandLevel, setExpandLevel] = useState(-1)
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -553,7 +551,6 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     })
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -587,7 +584,6 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         return () => controller.abort()
     }, [
         projectId,
-        session.status,
     ])
 
     const fetchReleasesRecursive = (

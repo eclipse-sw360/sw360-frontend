@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -43,7 +42,6 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
 
@@ -76,8 +74,6 @@ function EditProject({
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [hasClearingRequest, setHasClearingRequest] = useState(false)
-
-    const session = useSession()
 
     const handleDeleteProject = () => {
         setDeleteDialogOpen(true)
@@ -267,7 +263,6 @@ function EditProject({
     }, [])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -308,13 +303,11 @@ function EditProject({
         return () => controller.abort()
     }, [
         projectId,
-        session.status,
     ])
 
     useEffect(() => {
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`projects/${projectId}`)
                 if (response.status !== StatusCodes.OK) {
                     return notFound()
@@ -528,11 +521,9 @@ function EditProject({
     }, [
         projectId,
         setProjectPayload,
-        session,
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'PROJECT',
             entityId: projectId,
@@ -565,7 +556,6 @@ function EditProject({
 
     const updateProject = async (payload?: ProjectPayload) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             const dataToUpdate = payload ?? projectPayload
             const requests = [
                 ApiUtils.PATCH(
