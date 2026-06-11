@@ -20,213 +20,255 @@ export function ObligationTree({
     onAddChild,
     onAddSibling,
     onDeleteNode,
-    onUpdateNodeElement,
+    onImportNode,
 }: ObligationTreeProps): ReactNode {
     const t = useTranslations('default')
     const [showImportElement, setShowImportElement] = useState(false)
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
 
     const handleImportElement = (element: ObligationElement, nodeId: string) => {
-        onUpdateNodeElement(nodeId, element)
+        const langElement = element.langElement ?? ''
+        const action = element.action ?? ''
+        const object = element.object ?? ''
+        onImportNode(nodeId, [
+            'Obligation',
+            langElement,
+            action,
+            object,
+        ])
         setShowImportElement(false)
     }
 
-    const renderTree = (nodes: TreeNode[], parentId?: string, level = 1) => {
-        return nodes.map((node) => (
-            <div
-                key={node.id}
-                style={{
-                    marginLeft: `${level * 20}px`,
-                }}
-                className='tree-row'
-            >
-                {node.languageElement != null ? (
-                    <div className='row mb-2 align-items-center position-relative'>
-                        <div className='col-md-3'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                value={node.languageElement}
-                                onChange={(e) => {
-                                    e.preventDefault()
-                                    onUpdateNode(node.id, 'languageElement', e.target.value)
-                                }}
-                            />
+    const renderTree = (root: TreeNode) => {
+        return root.children.map((node) => {
+            return (
+                <div
+                    key={node.id}
+                    className='tree-row ms-5'
+                >
+                    {node.val.length === 4 ? (
+                        <div className='row mb-2 align-items-center position-relative'>
+                            <div className='col-md-3'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    value={node.val[1]}
+                                    onChange={(e) => {
+                                        e.preventDefault()
+                                        const action = node.val[2] ?? ''
+                                        const object = node.val[3] ?? ''
+                                        onUpdateNode(node.id ?? '', [
+                                            'Obligation',
+                                            e.target.value,
+                                            action,
+                                            object,
+                                        ])
+                                    }}
+                                />
+                            </div>
+                            <div className='col-md-3'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    value={node.val[2]}
+                                    onChange={(e) => {
+                                        e.preventDefault()
+                                        const languageElement = node.val[1] ?? ''
+                                        const object = node.val[3] ?? ''
+                                        onUpdateNode(node.id ?? '', [
+                                            'Obligation',
+                                            languageElement,
+                                            e.target.value,
+                                            object,
+                                        ])
+                                    }}
+                                />
+                            </div>
+                            <div className='col-md-3'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    value={node.val[3]}
+                                    onChange={(e) => {
+                                        e.preventDefault()
+                                        const languageElement = node.val[1] ?? ''
+                                        const action = node.val[2] ?? ''
+                                        onUpdateNode(node.id ?? '', [
+                                            'Obligation',
+                                            languageElement,
+                                            action,
+                                            e.target.value,
+                                        ])
+                                    }}
+                                />
+                            </div>
+                            <div className='col-md-3 d-flex align-items-center action-buttons opacity-0'>
+                                <span>»</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        onAddChild(1, node.id ?? '')
+                                    }}
+                                >
+                                    +Child
+                                </a>
+                                <span>|</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        onAddSibling(1, node.id ?? '')
+                                    }}
+                                >
+                                    +Sibling
+                                </a>
+                                <span>|</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        onDeleteNode(node.id ?? '')
+                                    }}
+                                >
+                                    Delete
+                                </a>
+                                <span>|</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        setSelectedNodeId(node.id ?? '')
+                                        setShowImportElement(true)
+                                    }}
+                                >
+                                    Import
+                                </a>
+                            </div>
                         </div>
-                        <div className='col-md-3'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                value={node.action}
-                                onChange={(e) => {
-                                    e.preventDefault()
-                                    onUpdateNode(node.id, 'action', e.target.value)
-                                }}
-                            />
+                    ) : (
+                        <div className='row mb-2 align-items-center position-relative'>
+                            <div className='col-md-3'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder={t('Type')}
+                                    value={node.val[0]}
+                                    onChange={(e) => {
+                                        e.preventDefault()
+                                        const text = node.val[1] ?? ''
+                                        onUpdateNode(node.id ?? '', [
+                                            e.target.value,
+                                            text,
+                                        ])
+                                    }}
+                                />
+                            </div>
+                            <div className='col-md-3'>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    placeholder={t('Text')}
+                                    value={node.val[1]}
+                                    onChange={(e) => {
+                                        e.preventDefault()
+                                        const type = node.val[0] ?? ''
+                                        onUpdateNode(node.id ?? '', [
+                                            type,
+                                            e.target.value,
+                                        ])
+                                    }}
+                                />
+                            </div>
+                            <div className='col-md-3 d-flex align-items-center action-buttons opacity-0'>
+                                <span>»</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        onAddChild(1, node.id ?? '')
+                                    }}
+                                >
+                                    +Child
+                                </a>
+                                <span>|</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        onAddSibling(1, node.id ?? '')
+                                    }}
+                                >
+                                    +Sibling
+                                </a>
+                                <span>|</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        onDeleteNode(node.id ?? '')
+                                    }}
+                                >
+                                    Delete
+                                </a>
+                                <span>|</span>
+                                <a
+                                    href='#'
+                                    className='mx-2'
+                                    style={{
+                                        color: 'blue',
+                                        textDecoration: 'none',
+                                    }}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        setSelectedNodeId(node.id ?? '')
+                                        setShowImportElement(true)
+                                    }}
+                                >
+                                    Import
+                                </a>
+                            </div>
                         </div>
-                        <div className='col-md-3'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                value={node.object}
-                                onChange={(e) => {
-                                    e.preventDefault()
-                                    onUpdateNode(node.id, 'object', e.target.value)
-                                }}
-                            />
-                        </div>
-                        <div className='col-md-3 d-flex align-items-center action-buttons opacity-0'>
-                            <span>»</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    onAddChild(node.id)
-                                }}
-                            >
-                                +Child
-                            </a>
-                            <span>|</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    onAddSibling(node.id, node.parentId)
-                                }}
-                            >
-                                +Sibling
-                            </a>
-                            <span>|</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    onDeleteNode(node.id, node.parentId)
-                                }}
-                            >
-                                Delete
-                            </a>
-                            <span>|</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    setSelectedNodeId(node.id)
-                                    setShowImportElement(true)
-                                }}
-                            >
-                                Import
-                            </a>
-                        </div>
-                    </div>
-                ) : (
-                    <div className='row mb-2 align-items-center position-relative'>
-                        <div className='col-md-3'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder={t('Type')}
-                                value={node.type}
-                                onChange={(e) => onUpdateNode(node.id, 'type', e.target.value)}
-                            />
-                        </div>
-                        <div className='col-md-3'>
-                            <input
-                                type='text'
-                                className='form-control'
-                                placeholder={t('Text')}
-                                value={node.text}
-                                onChange={(e) => onUpdateNode(node.id, 'text', e.target.value)}
-                            />
-                        </div>
-                        <div className='col-md-3 d-flex align-items-center action-buttons opacity-0'>
-                            <span>»</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    onAddChild(node.id)
-                                }}
-                            >
-                                +Child
-                            </a>
-                            <span>|</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    onAddSibling(node.id, node.parentId)
-                                }}
-                            >
-                                +Sibling
-                            </a>
-                            <span>|</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    onDeleteNode(node.id, node.parentId)
-                                }}
-                            >
-                                Delete
-                            </a>
-                            <span>|</span>
-                            <a
-                                href='#'
-                                className='mx-2'
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none',
-                                }}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    setSelectedNodeId(node.id)
-                                    setShowImportElement(true)
-                                }}
-                            >
-                                Import
-                            </a>
-                        </div>
-                    </div>
-                )}
-                {node.children.length > 0 && renderTree(node.children, node.id, level + 1)}
-            </div>
-        ))
+                    )}
+                    {renderTree(node)}
+                </div>
+            )
+        })
     }
 
     return (
@@ -241,14 +283,7 @@ export function ObligationTree({
                 }}
             />
             <div className='col-12'>
-                <label
-                    className='form-label'
-                    style={{
-                        fontWeight: 'bold',
-                    }}
-                >
-                    {t('Text')}
-                </label>
+                <label className='form-label fw-bold'>{t('Text')}</label>
                 <div className='row mb-2 align-items-center'>
                     <div className='col-md-4'>
                         <input
@@ -266,18 +301,18 @@ export function ObligationTree({
                             href='#'
                             onClick={(e) => {
                                 e.preventDefault()
-                                onAddChild()
+                                onAddChild(1, tree.id ?? '')
                             }}
                             style={{
                                 color: 'blue',
                                 textDecoration: 'none',
                             }}
                         >
-                            +Child
+                            +{t('Child')}
                         </a>
                     </div>
                 </div>
-                {tree.length > 0 && renderTree(tree)}
+                {renderTree(tree)}
             </div>
         </>
     )
