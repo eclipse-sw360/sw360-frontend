@@ -13,13 +13,14 @@
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails } from '@/object-types'
+import { getAuthenticatedAccessToken } from '@/utils/api/authenticatedApi.util'
 import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ObligationElement } from '../../../../../object-types/Obligation'
 
 type EmbeddedObligationElements = Embedded<ObligationElement, 'sw360:obligationElements'>
@@ -33,15 +34,6 @@ interface Props {
 function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
     const t = useTranslations('default')
     const [selectedElement, setSelectedElement] = useState<ObligationElement | undefined>()
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ObligationElement>[]>(
         () => [
@@ -119,7 +111,6 @@ function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -130,9 +121,10 @@ function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET('obligations/elements', session.data.user.access_token, signal)
-                if (response.status !== StatusCodes.OK) {
+                const response = await ApiUtils.GET('obligations/elements', await getAuthenticatedAccessToken(), signal)
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    dispatchSessionExpiredEvent()
+                } else if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: response.status,
@@ -154,9 +146,7 @@ function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     const table = useReactTable({
         data: memoizedData,

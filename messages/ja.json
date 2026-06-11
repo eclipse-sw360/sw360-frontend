@@ -220,6 +220,7 @@
     "Checked Status": "確認済みのステータス",
     "Checked Team": "チェックされたチーム",
     "Checking authentication": "認証を確認中...",
+    "Child": "子供",
     "Choose a component into which current one should be split": "電流を分割するコンポーネントを選択します",
     "Choose a component that should be merged into the current one": "現在のコンポーネントにマージする必要があるコンポーネントを選択してください",
     "Choose a release that should be merged into the current one": "現在のリリースにマージするリリースを選択してください",
