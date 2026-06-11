@@ -248,15 +248,14 @@ function EditProject({
         })
     }
 
-    const fetchUserData = useCallback(async (url: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
+    const fetchUserData = useCallback(async (email: string | undefined | null) => {
+        if (!email) {
+            return undefined
+        }
+        const url = `users/${email}`
         const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as User
-            return data
-        } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.error(t('Unauthorized request'))
-            return
+            return (await response.json()) as User
         } else {
             return undefined
         }
@@ -345,7 +344,7 @@ function EditProject({
                 }
 
                 if (project?.projectOwner !== undefined) {
-                    const userData = await fetchUserData(`users/${project?.projectOwner}`)
+                    const userData = await fetchUserData(project?.projectOwner)
                     if (!CommonUtils.isNullOrUndefined(userData)) {
                         setProjectOwner({
                             [project?.projectOwner]: userData?.fullName ?? project?.projectOwner,
@@ -358,7 +357,7 @@ function EditProject({
                 }
 
                 if (project?.projectResponsible !== undefined) {
-                    const userData = await fetchUserData(`users/${project?.projectResponsible}`)
+                    const userData = await fetchUserData(project?.projectResponsible)
                     if (!CommonUtils.isNullOrUndefined(userData)) {
                         setProjectManager({
                             [project?.projectResponsible]: userData?.fullName ?? project?.projectResponsible,
@@ -390,7 +389,7 @@ function EditProject({
                     const securityResponsiblesMap = new Map<string, string>()
                     await Promise.all(
                         project.securityResponsibles.map(async (securityResponsible) => {
-                            const userData = await fetchUserData(`users/${securityResponsible}`)
+                            const userData = await fetchUserData(securityResponsible)
                             if (!CommonUtils.isNullOrUndefined(userData)) {
                                 securityResponsiblesMap.set(
                                     securityResponsible,
