@@ -61,19 +61,36 @@ export interface ObligationResponse {
     page?: PaginationMeta
 }
 
+type TYPE = string
+type TEXT = string
+
+type LANGUAGE_ELEMENT = string
+type ACTION = string
+type OBJECT = string
+
+export type TreeNodeVal =
+    | [
+          'ROOT',
+      ]
+    | [
+          TYPE,
+          TEXT,
+      ]
+    | [
+          'Obligation',
+          LANGUAGE_ELEMENT,
+          ACTION,
+          OBJECT,
+      ]
+
 export interface TreeNode {
-    id: string
-    type: string
-    text: string
+    id?: string
+    val: TreeNodeVal
     children: TreeNode[]
-    parentId?: string
-    languageElement?: string
-    action?: string
-    object?: string
 }
 
 export interface ObligationElement {
-    languageElement: string
+    langElement: string
     action: string
     object: string
     type: string
@@ -81,17 +98,13 @@ export interface ObligationElement {
 }
 
 export interface ObligationTreeProps {
-    tree: TreeNode[]
+    tree: TreeNode
     title: string
-    onAddChild: (parentId?: string) => void
-    onAddSibling: (nodeId: string, parentId?: string) => void
+    onAddChild: (type: number, parentId: string) => void
+    onAddSibling: (type: number, nodeId: string) => void
     onDeleteNode: (nodeId: string, parentId?: string) => void
-    onUpdateNode: (
-        nodeId: string,
-        field: 'type' | 'text' | 'languageElement' | 'action' | 'object',
-        value: string,
-    ) => void
-    onUpdateNodeElement: (nodeId: string, element: ObligationElement) => void
+    onUpdateNode: (nodeId: string, newValue: TreeNodeVal) => void
+    onImportNode: (nodeId: string, newValue: TreeNodeVal) => void
 }
 
 export interface ObligationFormProps {
