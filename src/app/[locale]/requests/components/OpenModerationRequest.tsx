@@ -13,7 +13,6 @@ import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -21,7 +20,6 @@ import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 
@@ -45,7 +43,6 @@ function OpenModerationRequest(): ReactNode {
         REJECTED: t('REJECTED'),
     }
 
-    const session = useSession()
     const params = useSearchParams()
 
     const formatDate = (timestamp: number | undefined): string | null => {
@@ -159,7 +156,6 @@ function OpenModerationRequest(): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -170,7 +166,6 @@ function OpenModerationRequest(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest`,
@@ -211,7 +206,6 @@ function OpenModerationRequest(): ReactNode {
         return () => controller.abort()
     }, [
         params.toString(),
-        session,
     ])
 
     const table = useReactTable({

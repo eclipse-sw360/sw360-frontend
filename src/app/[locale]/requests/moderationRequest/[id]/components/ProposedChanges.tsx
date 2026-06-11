@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -19,8 +18,6 @@ import { Spinner } from 'react-bootstrap'
 import { Attachment, ErrorDetails, ModerationRequestDetails, RequestDocumentTypes } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import CommonUtils from '@/utils/common.utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import TableHeader from './TableHeader'
 
 type RowValue =
@@ -49,7 +46,6 @@ export default function ProposedChanges({
     const t = useTranslations('default')
     const dafaultTitle = t('BASIC FIELD CHANGES')
     const attachmentTitle = t('ATTACHMENTS')
-    const session = useSession()
 
     const columns = useMemo<ColumnDef<RowInterface>[]>(
         () => [
@@ -382,13 +378,12 @@ export default function ProposedChanges({
     )
 
     useEffect(() => {
-        if (session.status === 'loading' || moderationRequestData === undefined) return
+        if (moderationRequestData === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 setShowProcessing(true)
                 let queryUrl = ''
                 if (moderationRequestData?.documentType == RequestDocumentTypes.COMPONENT) {
@@ -435,7 +430,6 @@ export default function ProposedChanges({
 
         return () => controller.abort()
     }, [
-        session,
         moderationRequestData,
     ])
 

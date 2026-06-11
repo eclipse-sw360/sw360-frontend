@@ -12,14 +12,12 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import { type JSX, useMemo, useState } from 'react'
 import { ErrorDetails, SearchDuplicatesResponse } from '@/object-types'
-import { ApiError, CommonUtils } from '@/utils'
+import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 export default function DatabaseSanitation(): JSX.Element {
     const t = useTranslations('default')
@@ -30,12 +28,10 @@ export default function DatabaseSanitation(): JSX.Element {
             duplicates,
         ],
     )
-    const session = useSession()
 
     const searchDuplicate = async () => {
         try {
             setDuplicates(null)
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             const response = await ApiUtils.GET('databaseSanitation/searchDuplicate')
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails

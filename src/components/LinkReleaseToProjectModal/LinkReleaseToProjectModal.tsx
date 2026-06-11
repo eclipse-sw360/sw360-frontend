@@ -14,7 +14,6 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
@@ -31,7 +30,6 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     releaseId?: string
@@ -55,7 +53,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const [byNameOnly, setByNameOnly] = useState(true)
     const [selectedProject, setSelectedProject] = useState<Project>()
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
-    const session = useSession()
 
     const columns = useMemo<ColumnDef<Project>[]>(
         () => [
@@ -215,14 +212,13 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -299,7 +295,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint
@@ -371,9 +366,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                 }
 
                 // Fetch full details for each project
-                const accessToken = session.data?.user.access_token
-                if (!accessToken) return
-
                 const projectPromises = projectIds.map((id) =>
                     ApiUtils.GET(`projects/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
@@ -413,8 +405,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
 
     const handleLinkToProject = async () => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const response = await ApiUtils.PATCH(
                 `projects/${selectedProject?._links.self.href.split('/').at(-1)}/releases`,
                 [
@@ -439,8 +429,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const getLinkedProjects = async (signal: AbortSignal) => {
         setShowLinkedProjectsProcessing(true)
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const response = await ApiUtils.GET(`releases/usedBy/${releaseId}`, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
@@ -463,7 +451,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     }
 
     useEffect(() => {
-        if (session.status === 'loading' || !withLinkedProject || !show) return
+        if (!withLinkedProject || !show) return
         const controller = new AbortController()
         const signal = controller.signal
         void getLinkedProjects(signal)
@@ -474,13 +462,10 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     ])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
                 const response = await ApiUtils.GET(`releases/${releaseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -502,7 +487,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
 
     return (
         <>
-            {session.status === 'authenticated' && (
+            {
                 <Modal
                     show={show}
                     onHide={handleCloseDialog}
@@ -703,7 +688,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                         )}
                     </Modal.Footer>
                 </Modal>
-            )}
+            }
         </>
     )
 }

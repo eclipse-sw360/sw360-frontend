@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -19,7 +18,6 @@ import { Form, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
@@ -31,7 +29,6 @@ export default function VendorTable({
     setVendor: Dispatch<SetStateAction<null | Vendor>>
 }>): ReactNode {
     const t = useTranslations('default')
-    const session = useSession()
 
     const columns = useMemo<ColumnDef<Vendor>[]>(
         () => [
@@ -107,7 +104,6 @@ export default function VendorTable({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -118,7 +114,6 @@ export default function VendorTable({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vendors`,
                     Object.fromEntries(
@@ -154,7 +149,6 @@ export default function VendorTable({
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({

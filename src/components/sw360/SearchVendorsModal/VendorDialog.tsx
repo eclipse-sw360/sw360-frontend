@@ -12,7 +12,6 @@
 
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -20,7 +19,6 @@ import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddVendorDialog from './AddVendor'
 
 interface Props {
@@ -53,7 +51,6 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
         setSearchText(undefined)
         setVendorData([])
     }
-    const session = useSession()
     const [selectedVendor, setSelectedVendor] = useState<Vendor>(vendor)
 
     const columns = useMemo<ColumnDef<Vendor>[]>(
@@ -132,7 +129,6 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const searchVendor = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             const queryUrl = CommonUtils.createUrlWithParams(
                 `vendors`,
                 Object.fromEntries(
@@ -172,14 +168,13 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     }
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         void searchVendor(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({

@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -19,7 +18,6 @@ import { Button, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, LicenseDetail, Package, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     showMainLicenseModal: boolean
@@ -37,7 +35,6 @@ export default function AddMainLicenseModal({
     const t = useTranslations('default')
     const [newMainLicense, setNewMainLicense] = useState<Array<string>>()
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
-    const session = useSession()
 
     useEffect(() => {
         if (packagePayload.licenseIds && packagePayload.licenseIds.length !== 0 && newMainLicense === undefined) {
@@ -105,14 +102,12 @@ export default function AddMainLicenseModal({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -154,8 +149,6 @@ export default function AddMainLicenseModal({
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const queryUrl = CommonUtils.createUrlWithParams(
                 `licenses`,
                 Object.fromEntries(

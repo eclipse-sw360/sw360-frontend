@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -31,7 +30,6 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
@@ -52,7 +50,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     const [showLicenseDbObligationsModal, setShowLicenseDbObligationsModal] = useState(false)
     const [showCompareObligationsModal, setShowCompareObligationsModal] = useState(false)
     const [refresh, setRefresh] = useState(false)
-    const session = useSession()
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -429,7 +426,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -440,7 +436,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/licenseObligations`,
                     Object.fromEntries(
@@ -491,18 +486,15 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
         refresh,
     ])
 
     useEffect(() => {
-        if (session.status === 'loading' || !selectedProjectId) return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 setShowProcessing(true)
                 const response = await ApiUtils.GET(`projects/${selectedProjectId}/licenseObligations`, signal)
                 if (response.status !== StatusCodes.OK) {
@@ -523,7 +515,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
 
         return () => controller.abort()
     }, [
-        session,
         selectedProjectId,
     ])
 

@@ -13,7 +13,6 @@
 
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table, TableSearch } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -22,7 +21,6 @@ import { BsCheck2Square } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LicensePayload, NestedRows, Obligation } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -38,7 +36,6 @@ type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
 
 const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const session = useSession()
     const [search, setSearch] = useState<{
         search: string
     }>({
@@ -168,7 +165,6 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -179,7 +175,6 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `obligations`,
                     Object.fromEntries(
@@ -226,7 +221,6 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
 
         return () => controller.abort()
     }, [
-        session,
         search,
     ])
 

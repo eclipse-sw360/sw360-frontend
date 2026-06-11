@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -30,7 +29,6 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface AlertData {
     variant: string
@@ -57,7 +55,6 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
     const [byNameOnly, setByNameOnly] = useState(true)
-    const session = useSession()
 
     useEffect(() => {
         setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
@@ -208,14 +205,13 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -292,7 +288,6 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint
@@ -364,9 +359,6 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                 }
 
                 // Fetch full details for each project
-                const accessToken = session.data?.user.access_token
-                if (!accessToken) return
-
                 const projectPromises = projectIds.map((id) =>
                     ApiUtils.GET(`projects/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))

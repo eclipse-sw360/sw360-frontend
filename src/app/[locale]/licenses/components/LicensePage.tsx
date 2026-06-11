@@ -14,7 +14,6 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -33,14 +32,12 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 function LicensePage(): ReactNode {
     const params = useSearchParams()
     const t = useTranslations('default')
     const [search, setSearch] = useState({})
     const [numberLicense, setNumberLicense] = useState(0)
-    const { data: session } = useSession()
     const deleteLicense = params.get('delete')
 
     useEffect(() => {
@@ -171,8 +168,6 @@ function LicensePage(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
-
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `licenses`,
                     Object.fromEntries(

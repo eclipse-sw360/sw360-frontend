@@ -13,7 +13,6 @@ import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReac
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -34,7 +33,6 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 
@@ -303,8 +301,6 @@ function GenerateLicenseInfo({
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
     const [projectRelationships, setProjectRelationships] = useState<string[]>([])
-
-    const session = useSession()
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
@@ -752,7 +748,6 @@ function GenerateLicenseInfo({
     }, [])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -763,7 +758,6 @@ function GenerateLicenseInfo({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params)
                 if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                     return

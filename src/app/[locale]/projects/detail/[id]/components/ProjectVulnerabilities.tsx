@@ -11,11 +11,9 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import { Embedded, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
-import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import VulnerabilityTab from './VulnerabilityTab'
@@ -38,12 +36,9 @@ const extractLinkedProjects = (projectPayload: Project[], projectData: ProjectDa
 }
 
 export default function ProjectVulnerabilities({ projectData }: { projectData: ProjectData }): JSX.Element {
-    const { data: session } = useSession()
     const [data, setData] = useState<ProjectData[]>([])
 
     useEffect(() => {
-        if (CommonUtils.isNullOrUndefined(session)) return
-
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -69,9 +64,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
         })()
 
         return () => controller.abort(signal)
-    }, [
-        session,
-    ])
+    }, [])
 
     return (
         <>

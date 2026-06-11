@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import React, { type JSX, useEffect, useMemo, useState } from 'react'
@@ -19,8 +18,6 @@ import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { ErrorDetails } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import CommonUtils from '@/utils/common.utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -43,7 +40,6 @@ interface Department {
 export default function DepartmentModal({ show, setShow, department, setDepartment }: Props): JSX.Element {
     const t = useTranslations('default')
     const [selectingDepartment, setSelectingDepartment] = useState<string>(department || '')
-    const session = useSession()
 
     const columns = useMemo<ColumnDef<Department>[]>(
         () => [
@@ -97,7 +93,6 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -108,7 +103,6 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET('users/groupList', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -140,9 +134,7 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     const table = useReactTable({
         data: memoizedData,

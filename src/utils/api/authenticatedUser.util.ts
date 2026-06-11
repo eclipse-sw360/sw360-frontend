@@ -13,24 +13,17 @@ import { getSession } from 'next-auth/react'
 import { ApiError } from '@/utils'
 import CommonUtils from '@/utils/common.utils'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { SW360User } from '../../../nextauth'
 
-export interface AuthenticatedUserIdentity {
-    email: string
-    name: string
-}
-
-export const getAuthenticatedUserIdentity = async (): Promise<AuthenticatedUserIdentity> => {
+export const getAuthenticatedUserIdentity = async (): Promise<SW360User> => {
     const session = await getSession()
 
-    if (CommonUtils.isNullOrUndefined(session)) {
+    if (CommonUtils.isNullOrUndefined(session) || !session.user) {
         dispatchSessionExpiredEvent()
         throw new ApiError('Session has expired', {
             code: 'UNAUTHORIZED',
         })
     }
 
-    return {
-        email: session.user?.email ?? '',
-        name: session.user?.name ?? '',
-    }
+    return session.user
 }

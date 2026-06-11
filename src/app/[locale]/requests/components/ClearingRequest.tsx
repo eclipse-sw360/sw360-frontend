@@ -13,7 +13,6 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -30,14 +29,26 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
 function ClearingRequestComponent({ requestType }: { requestType: RequestType }): ReactNode | undefined {
     const t = useTranslations('default')
-    const session = useSession()
     const params = useSearchParams()
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -303,9 +314,8 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
                                     className='btn-transparent'
                                     hidden={
                                         !Object.hasOwn(row.original, 'projectId') ||
-                                        !session.data ||
-                                        (session.data.user.userGroup === UserGroupType.USER &&
-                                            session.data.user.email !== row.original._embedded?.requestingUser?.email)
+                                        (userIdentity?.userGroup === UserGroupType.USER &&
+                                            userIdentity?.email !== row.original._embedded?.requestingUser?.email)
                                     }
                                 >
                                     <Link
@@ -329,7 +339,6 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
         ],
         [
             t,
-            session,
         ],
     )
     const [clearingRequestData, setClearingRequestDataData] = useState<ClearingRequest[]>(() => [])
@@ -342,7 +351,6 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -353,7 +361,6 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const statusFilter =
                     requestType === 'OPEN'
@@ -399,7 +406,6 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
     }, [
         pageableQueryParam,
         params.toString(),
-        session,
         requestType,
     ])
 

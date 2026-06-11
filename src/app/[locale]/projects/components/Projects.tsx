@@ -22,7 +22,6 @@ import {
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -53,7 +52,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
@@ -77,7 +76,6 @@ interface GroupEntry {
 
 function Project(): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
     const params = useSearchParams()
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
@@ -110,6 +108,20 @@ function Project(): JSX.Element {
             text: t('None'),
         },
     ])
+
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const handleDeleteProject = (projectId: string, clearingRequestId?: string, clearingState?: string) => {
         setDeleteProjectId(projectId)
@@ -432,7 +444,6 @@ function Project(): JSX.Element {
 
                     const handleSingleAttachmentDownload = async () => {
                         if (attachments.length !== 1) return
-                        if (CommonUtils.isNullOrUndefined(session.data)) return
                         const att = attachments[0]
                         await DownloadService.download(
                             `projects/${id}/attachments/${att.attachmentContentId}`,
@@ -699,13 +710,11 @@ function Project(): JSX.Element {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET('projects/groups', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -728,12 +737,9 @@ function Project(): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -744,8 +750,6 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects`,
@@ -787,7 +791,6 @@ function Project(): JSX.Element {
     }, [
         pageableQueryParam,
         params.toString(),
-        session,
     ])
 
     useEffect(() => {
@@ -802,7 +805,6 @@ function Project(): JSX.Element {
 
     // Fetch license clearing counts in batch after project data is loaded
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         if (projectData.length === 0) {
             setLicenseClearingData({})
             return
@@ -810,8 +812,6 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
                 const projectIds = projectData
                     .map((project) => project['_links']['self']['href'].split('/').at(-1))
                     .filter((id): id is string => id !== undefined)
@@ -835,7 +835,6 @@ function Project(): JSX.Element {
         })()
     }, [
         projectData,
-        session,
     ])
 
     const table = useReactTable<ProjectWithSubRows>({
@@ -867,8 +866,8 @@ function Project(): JSX.Element {
                 expanded: expandedState,
             }),
             columnVisibility: {
-                actions: !(session.data?.user?.userGroup === UserGroupType.SECURITY_USER),
-                licenseClearing: !(session.data?.user?.userGroup === UserGroupType.SECURITY_USER),
+                actions: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
+                licenseClearing: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
             },
             pagination: {
                 pageIndex: pageableQueryParam.page,
@@ -936,8 +935,6 @@ function Project(): JSX.Element {
 
     const exportProjectSpreadsheet = async ({ withLinkedRelease }: { withLinkedRelease: boolean }) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const mailEnabled = mailRequestForProjectReport === 'true'
             const searchParamsString = params.toString()
             const baseUrl = withLinkedRelease
@@ -1117,20 +1114,14 @@ function Project(): JSX.Element {
                                         <button
                                             className='btn btn-primary'
                                             onClick={handleAddProject}
-                                            disabled={
-                                                session.status === 'authenticated' &&
-                                                session.data?.user?.userGroup === UserGroupType.SECURITY_USER
-                                            }
+                                            disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                         >
                                             {t('Add Project')}
                                         </button>
                                         <Dropdown>
                                             <Dropdown.Toggle
                                                 variant='secondary'
-                                                hidden={
-                                                    session.status === 'authenticated' &&
-                                                    session.data?.user?.userGroup === UserGroupType.SECURITY_USER
-                                                }
+                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                             >
                                                 {t('Import SBOM')}
                                             </Dropdown.Toggle>

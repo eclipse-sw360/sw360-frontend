@@ -13,7 +13,6 @@ import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -21,7 +20,6 @@ import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 
 type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -37,7 +35,6 @@ function ClosedModerationRequest(): ReactNode {
         PENDING: t('Pending'),
         REJECTED: t('REJECTED'),
     }
-    const session = useSession()
     const params = useSearchParams()
 
     const formatDate = (timestamp: number | undefined): string | null => {
@@ -135,7 +132,6 @@ function ClosedModerationRequest(): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -146,7 +142,6 @@ function ClosedModerationRequest(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest`,
@@ -187,7 +182,6 @@ function ClosedModerationRequest(): ReactNode {
         return () => controller.abort()
     }, [
         params.toString(),
-        session,
     ])
 
     const table = useReactTable({

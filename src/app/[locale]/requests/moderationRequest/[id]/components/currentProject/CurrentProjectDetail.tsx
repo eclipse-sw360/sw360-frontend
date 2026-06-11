@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
@@ -22,7 +21,7 @@ import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
 import Attachments from '@/components/Attachments/Attachments'
 import { AdministrationDataType, ErrorDetails, SummaryDataType } from '@/object-types'
-import { ApiError, CommonUtils } from '@/utils'
+import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 export default function CurrentProjectDetail({
     projectId,
@@ -30,7 +29,6 @@ export default function CurrentProjectDetail({
     projectId: string
 }>): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
 
@@ -39,7 +37,6 @@ export default function CurrentProjectDetail({
         const signal = controller.signal
 
         void (async () => {
-            if (CommonUtils.isNullOrUndefined(session)) return
             try {
                 const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
                 if (response.status !== StatusCodes.OK) {
@@ -64,8 +61,6 @@ export default function CurrentProjectDetail({
         return () => controller.abort()
     }, [
         projectId,
-        session,
-        status,
     ])
 
     return (

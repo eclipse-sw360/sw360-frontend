@@ -9,9 +9,10 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Modal } from 'react-bootstrap'
@@ -150,7 +151,6 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
     }>({})
     const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
-    const session = useSession()
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
 
     const [attachmentsData, setAttachmentsData] = useState<Attachment[]>(() => [])
@@ -189,7 +189,6 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
     )
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -200,7 +199,6 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return
                 const response = await ApiUtils.GET(`${documentType}/${documentId}/attachments`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -234,9 +232,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     useEffect(() => {
         setDocumentPayload({

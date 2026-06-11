@@ -10,14 +10,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { useConfigKeyValue } from '@/contexts'
 import { Attachment, ConfigKeys, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AdditionalDataSection from './AdditionalDataSection'
 import Attachments from './Attachments'
 import ClearingDetailsSection from './ClearingDetailsSection'
@@ -45,19 +43,16 @@ export default function MergeReleaseDataCheck({
     finalReleasePayload: Release | null
     setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
-    const session = useSession()
     const [sourceReleaseDetail, setSourceReleaseDetail] = useState<ReleaseDetail | null>()
     const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
     const showLinkedReleases = isNestedReleaseEnabled !== 'false'
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(`releases/${sourceRelease?.id}`, {
                     allDetails: 'true',
                 })
@@ -79,7 +74,6 @@ export default function MergeReleaseDataCheck({
 
         return () => controller.abort()
     }, [
-        session,
         sourceRelease?.id,
     ])
 

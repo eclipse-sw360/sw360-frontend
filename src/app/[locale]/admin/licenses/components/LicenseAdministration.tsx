@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, JSX, ReactNode, SetStateAction, useRef, useState } from 'react'
 import { Alert, Modal } from 'react-bootstrap'
@@ -20,7 +19,6 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteAllLicenseInformationModal from './DeleteAllLicenseInformationModal'
 
 type ModalType = 'OSADL' | 'SPDX' | undefined
@@ -51,15 +49,11 @@ function ConfirmationModal({ type, setType }: { type: ModalType; setType: Dispat
         DONE,
     }
     const [state, setState] = useState<ImportState>(ImportState.IMPORT)
-    const session = useSession()
     const [alert, setAlert] = useState<AlertData | null>(null)
 
     const handleImport = async () => {
         try {
             setState(ImportState.LOADING)
-            if (!session.data) {
-                return dispatchSessionExpiredEvent()
-            }
             const response = await ApiUtils.POST(url, {})
             const res = (await response.json()) as ImportResult
             if (response.status !== StatusCodes.OK) {
@@ -157,7 +151,6 @@ export default function LicenseAdministration(): ReactNode {
     const [overwriteIfIdMatchesEvenWithoutExternalIdMatch, setOverwriteIfIdMatchesEvenWithoutExternalIdMatch] =
         useState(false)
     const [confirmationModalType, setConfirmationModalType] = useState<ModalType>(undefined)
-    const session = useSession()
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files
@@ -176,9 +169,6 @@ export default function LicenseAdministration(): ReactNode {
             const formData = new FormData()
             formData.append('licenseFile', file.current, file.current.name)
 
-            if (!session.data) {
-                return dispatchSessionExpiredEvent()
-            }
             const response = await ApiUtils.POST(
                 `licenses/upload?overwriteIfExternalIdMatches=${
                     overwriteIfExternalIdMatches
@@ -200,7 +190,6 @@ export default function LicenseAdministration(): ReactNode {
 
     const downloadLicenseArchive = () => {
         try {
-            if (!session.data) return dispatchSessionExpiredEvent()
             void DownloadService.download('licenses/downloadLicenses', `LicensesBackup.lics`)
         } catch (error) {
             ApiUtils.reportError(error)

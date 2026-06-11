@@ -11,19 +11,16 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { JSX, useCallback, useEffect, useState } from 'react'
 import { ErrorDetails, ServiceDetailsResponse } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, CommonUtils } from '@/utils'
+import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ScheduleItem } from './ScheduleItem'
 
 export default function VendorsList(): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsResponse>({})
     const [refreshTrigger, setRefreshTrigger] = useState(0)
 
@@ -35,8 +32,6 @@ export default function VendorsList(): JSX.Element {
         const controller = new AbortController()
 
         const fetchServiceDetails = async () => {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             try {
                 const response = await ApiUtils.GET('schedule/serviceDetails')
                 if (response.status === StatusCodes.OK) {
@@ -52,14 +47,11 @@ export default function VendorsList(): JSX.Element {
 
         return () => controller.abort()
     }, [
-        session,
         refreshTrigger,
     ])
 
     const handleCancelAllTasks = async () => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const response = await ApiUtils.POST('schedule/unscheduleAllServices', {})
             if (response.status === StatusCodes.OK) {
                 setServiceDetails((prev) =>
@@ -74,8 +66,6 @@ export default function VendorsList(): JSX.Element {
                     ),
                 )
                 MessageService.success(t('Every task unscheduled successfully'))
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -93,8 +83,6 @@ export default function VendorsList(): JSX.Element {
         successMessage: string,
     ): Promise<void> => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             let response
 
             if (action === 'unschedule') {
@@ -111,8 +99,6 @@ export default function VendorsList(): JSX.Element {
             if (response.status === StatusCodes.OK) {
                 MessageService.success(successMessage)
                 refreshServiceDetails()
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -126,8 +112,6 @@ export default function VendorsList(): JSX.Element {
 
     const handleTriggerService = async (serviceName: string): Promise<void> => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
-
             const response = await ApiUtils.POST(
                 `schedule/triggerService?serviceName=${encodeURIComponent(serviceName)}`,
                 {},
@@ -136,8 +120,6 @@ export default function VendorsList(): JSX.Element {
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Task performed successfully'))
                 refreshServiceDetails()
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

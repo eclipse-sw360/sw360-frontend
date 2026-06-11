@@ -13,7 +13,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -53,7 +52,6 @@ function EditLicense({ licenseId }: Props): ReactNode {
         checked: false,
         licenseTypeDatabaseId: '',
     })
-    const session = useSession()
     const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
 
     const handleSelect = (key: string | null) => {
@@ -68,7 +66,6 @@ function EditLicense({ licenseId }: Props): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
                 const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {

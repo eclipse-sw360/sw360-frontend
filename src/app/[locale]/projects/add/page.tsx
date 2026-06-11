@@ -14,17 +14,17 @@ import { useRouter } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
+import { useConfigKeyValue } from '@/contexts'
 import { ConfigKeys, InputKeyValue, Project, ProjectPayload, UserGroupType, Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 function AddProjects(): JSX.Element {
     const router = useRouter()
@@ -92,27 +92,8 @@ function AddProjects(): JSX.Element {
         packageIds: {},
     })
 
-    const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
-
-    useEffect(() => {
-        ;(async () => {
-            try {
-                const response = await ApiUtils.GET('configurations')
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    dispatchSessionExpiredEvent()
-                } else if (response.status !== StatusCodes.OK) {
-                    setDependencyNetworkFeatureEnabled(false)
-                    return
-                }
-                const config = await response.json()
-                setDependencyNetworkFeatureEnabled(
-                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true',
-                )
-            } catch {
-                setDependencyNetworkFeatureEnabled(false)
-            }
-        })()
-    }, [])
+    const isDependencyNetworkFeatureEnabled =
+        useConfigKeyValue(ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP) === 'true'
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)

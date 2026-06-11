@@ -14,7 +14,6 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
@@ -41,7 +40,7 @@ import {
 import DownloadService from '@/services/download.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
 
@@ -61,11 +60,22 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
-    const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
     const [changeLogId, setChangeLogId] = useState('')
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [refreshSubscriptions, setRefreshSubscriptions] = useState(false)
-    const session = useSession()
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     useEffect(() => {
         const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
@@ -80,28 +90,18 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const downloadBundle = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return dispatchSessionExpiredEvent()
         await DownloadService.download(
             `${DocumentTypes.COMPONENT}/${componentId}/attachments/download`,
             'AttachmentBundle.zip',
         )
     }
 
-    const extractUserEmailFromSession = () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return
-        setUserEmail(session.data.user.email)
-    }
-
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
-        void extractUserEmailFromSession()
-
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`components/${componentId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -122,17 +122,14 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         return () => controller.abort()
     }, [
         componentId,
-        session,
     ])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`components/${componentId}/vulnerabilities`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -151,7 +148,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         return () => controller.abort()
     }, [
         componentId,
-        session,
     ])
 
     const getSubcribersEmail = (component: Component) => {
@@ -161,12 +157,11 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }
 
     const isUserSubscribed = () => {
-        if (userEmail === undefined) return false
-        return subscribers.includes(userEmail)
+        if (userIdentity?.email === undefined) return false
+        return subscribers.includes(userIdentity?.email)
     }
 
     const handleSubcriptions = async () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return
         try {
             await ApiUtils.POST(`components/${componentId}/subscriptions`, {})
             setRefreshSubscriptions(!refreshSubscriptions)
@@ -180,19 +175,19 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             link: `/components/edit/${componentId}`,
             type: 'primary',
             name: t('Edit component'),
-            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         Merge: {
             link: `/components/detail/${componentId}/merge`,
             type: 'secondary',
             name: t('Merge'),
-            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         Split: {
             link: `/components/detail/${componentId}/split`,
             type: 'secondary',
             name: t('Split'),
-            hidden: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            hidden: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         Subscribe: {
             link: '',
@@ -223,7 +218,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -234,7 +228,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${componentId}`,
                     Object.fromEntries(
@@ -277,7 +270,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }, [
         pageableQueryParam,
         componentId,
-        session,
     ])
 
     const param = useParams()

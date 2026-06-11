@@ -10,11 +10,9 @@
 
 'use client'
 
-import { getServerSession } from 'next-auth/next'
-import { ReactNode } from 'react'
-import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
-import { ConfigKeys, Configuration } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { type ReactNode, use } from 'react'
+import { useConfigKeyValue } from '@/contexts'
+import { ConfigKeys } from '@/object-types'
 import EditRelease from './components/EditRelease'
 
 interface Context {
@@ -23,20 +21,13 @@ interface Context {
     }>
 }
 
-const ReleaseEditPage = async (props: Context): Promise<ReactNode> => {
-    const params = await props.params
-    const releaseId = params.id
-    const session = await getServerSession(authOptions)
-    if (CommonUtils.isNullOrUndefined(session)) {
-        return null
-    }
-    const response = await ApiUtils.GET('configurations', session.user.access_token)
-    const config = (await response.json()) as Configuration
-    const isSPDXFeatureEnabled = config[ConfigKeys.SPDX_DOCUMENT_ENABLED] == 'true'
+const ReleaseEditPage = ({ params }: Context): ReactNode => {
+    const resolvedParams = use(params)
+    const isSPDXFeatureEnabled = useConfigKeyValue(ConfigKeys.SPDX_DOCUMENT_ENABLED) === 'true'
 
     return (
         <EditRelease
-            releaseId={releaseId}
+            releaseId={resolvedParams.id}
             isSPDXFeatureEnabled={isSPDXFeatureEnabled}
         />
     )

@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
@@ -22,7 +21,6 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const relationFilterOptions: FilterOption[] = [
     {
@@ -94,7 +92,6 @@ export default function DownloadLicenseInfoModal({
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
     const [withSubProject, setWithSubProject] = useState(true)
     const [selectedRelRelationship, setSelectedRelRelationship] = useState<string[]>([])
-    const session = useSession()
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
@@ -113,7 +110,6 @@ export default function DownloadLicenseInfoModal({
 
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             setLoading(true)
             const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status !== StatusCodes.CREATED) {

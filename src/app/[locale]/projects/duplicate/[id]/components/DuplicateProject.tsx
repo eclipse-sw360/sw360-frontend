@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
@@ -34,7 +33,6 @@ import {
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     projectId: string
@@ -60,7 +58,6 @@ interface LinkedReleaseData {
 function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Props): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
-    const session = useSession()
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -167,11 +164,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     }
 
     const fetchUserData = useCallback(async (url: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as User
-            return data
+            return (await response.json()) as User
         } else if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Unauthorized request'))
             return
@@ -185,7 +180,6 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
             const linkedReleasesObject: {
                 [key: string]: LinkedReleaseData
             } = {}
-            if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
             for (const l of linkedReleases) {
                 const releaseId = l['release']?.split('/').pop()
                 if (releaseId === undefined) continue
@@ -209,10 +203,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     }
 
     useEffect(() => {
-        if (session.status === 'loading') return
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const response = await ApiUtils.GET(`projects/${projectId}`)
                 if (response.status !== StatusCodes.OK) {
                     return notFound()
@@ -383,11 +375,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     }, [
         projectId,
         setProjectPayload,
-        session,
     ])
 
     const createProject = async () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
         const createProjectUrl =
             isDependencyNetworkFeatureEnabled === true
                 ? `projects/network/duplicate/${projectId}`

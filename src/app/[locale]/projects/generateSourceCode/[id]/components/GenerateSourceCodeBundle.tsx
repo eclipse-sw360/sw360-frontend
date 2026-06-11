@@ -13,7 +13,6 @@ import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReac
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -36,7 +35,6 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -65,8 +63,6 @@ function GenerateSourceCodeBundle({
     })
     const [loading, setLoading] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
-
-    const session = useSession()
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
@@ -129,7 +125,6 @@ function GenerateSourceCodeBundle({
     }
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -140,7 +135,6 @@ function GenerateSourceCodeBundle({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return dispatchSessionExpiredEvent()
                 const searchParams = Object.fromEntries(params)
                 if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                     return
