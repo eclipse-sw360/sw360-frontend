@@ -7,6 +7,7 @@
     "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "check:client-directives": "node scripts/check-client-directives.mjs",
     "lint": "biome lint",
     "format": "biome format",
     "lint::fix": "biome lint --fix",

@@ -56,6 +56,11 @@ jobs:
         run: |
           pnpm i
 
+      - name: Check client directives
+        shell: bash
+        run: |
+          pnpm check:client-directives
+
       - name: Run linting
         shell: bash
         run: |

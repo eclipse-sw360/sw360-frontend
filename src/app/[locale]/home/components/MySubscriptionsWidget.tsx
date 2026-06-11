@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use-client'
+'use client'
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
