@@ -79,6 +79,23 @@ function isClientComponentFile(relativePath) {
     )
 }
 
+function isAppDirectoryFileMakingApiCalls(relativePath, content) {
+    // Check if this is a .tsx file under src/app (any file in the page tree)
+    const isAppFile = relativePath.endsWith('.tsx') && relativePath.startsWith(path.join('src', 'app') + path.sep)
+
+    if (!isAppFile) return false
+
+    // Any file under src/app that makes API calls must be a client component
+    // because they're part of the page tree and could execute server-side
+    const apiCallPatterns = [
+        /from\s+['"][^'"]*authenticatedApi\.util['"]/,
+        /from\s+['"][^'"]*api\.util['"]/,
+        /\bApiUtils\./,
+    ]
+
+    return apiCallPatterns.some((pattern) => pattern.test(content))
+}
+
 function hasValidUseClientDirective(content) {
     const firstStatement = getMeaningfulFirstStatement(content)
     return firstStatement === "'use client'" || firstStatement === '"use client"'
@@ -163,6 +180,13 @@ function main() {
             !hasValidUseClientDirective(content)
         ) {
             issues.push(`${relativePath}: add 'use client' as the first statement for client-only component code`)
+        }
+
+        if (
+            isAppDirectoryFileMakingApiCalls(relativePath, content) &&
+            !hasValidUseClientDirective(content)
+        ) {
+            issues.push(`${relativePath}: files under src/app making API calls must declare 'use client'`)
         }
     }
 

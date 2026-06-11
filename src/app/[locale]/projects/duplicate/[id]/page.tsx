@@ -7,6 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { getServerSession } from 'next-auth/next'
 import type { JSX } from 'react'
 import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
