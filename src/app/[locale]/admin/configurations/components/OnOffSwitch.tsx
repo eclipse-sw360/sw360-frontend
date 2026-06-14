@@ -9,17 +9,25 @@
 // License-Filename: LICENSE
 
 import { Dispatch, type JSX, SetStateAction } from 'react'
-import { Configuration, UiConfiguration } from '@/object-types'
+import { Configuration, LicenseDBConfiguration, UiConfiguration } from '@/object-types'
 
 interface SwitchProps {
     size: number
     checked: boolean
     setCurrentConfig?: Dispatch<SetStateAction<Configuration | undefined>>
     setCurrentUiConfig?: Dispatch<SetStateAction<UiConfiguration | undefined>>
+    setCurrentLicenseDBConfig?: Dispatch<SetStateAction<LicenseDBConfiguration | undefined>>
     propKey: string
 }
 
-const OnOffSwitch = ({ size, checked, setCurrentConfig, setCurrentUiConfig, propKey }: SwitchProps): JSX.Element => {
+const OnOffSwitch = ({
+    size,
+    checked,
+    setCurrentConfig,
+    setCurrentUiConfig,
+    setCurrentLicenseDBConfig,
+    propKey,
+}: SwitchProps): JSX.Element => {
     return (
         <div>
             <span className='align-middle fw-bold p-2'>OFF</span>
@@ -48,6 +56,14 @@ const OnOffSwitch = ({ size, checked, setCurrentConfig, setCurrentUiConfig, prop
                                     ...prev,
                                     [propKey]: event.target.checked.toString(),
                                 } as UiConfiguration
+                            })
+                        }
+                        if (setCurrentLicenseDBConfig) {
+                            setCurrentLicenseDBConfig((prev) => {
+                                return {
+                                    ...prev,
+                                    [propKey]: event.target.checked.toString(),
+                                } as LicenseDBConfiguration
                             })
                         }
                     }}
