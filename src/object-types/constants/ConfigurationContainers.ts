@@ -10,6 +10,7 @@
 const ConfigurationContainers = {
     SW360_CONFIGURATION: 'SW360_CONFIGURATION',
     UI_CONFIGURATION: 'UI_CONFIGURATION',
+    LICENSEDB_REST: 'LICENSEDB_REST',
 }
 
 export default ConfigurationContainers
