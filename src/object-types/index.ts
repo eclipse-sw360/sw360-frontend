@@ -43,6 +43,7 @@ import ActionType from './enums/ActionType'
 import ClearingRequestStates from './enums/ClearingRequestStates'
 import ConfigKeys from './enums/ConfigKeys'
 import DocumentTypes from './enums/DocumentTypes'
+import LicenseDBConfigKeys from './enums/LicenseDBConfigKeys'
 import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
 import ObligationType from './enums/ObligationType'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
@@ -59,6 +60,7 @@ import FossologyProcessInfo from './FossologyProcessInfo'
 import FossologyProcessStatus from './FossologyProcessStatus'
 import InputKeyValue from './InputKeyValue'
 import LicenseClearing from './LicenseClearing'
+import LicenseDBConfiguration from './LicenseDBConfiguration'
 import LicenseDetail from './LicenseDetail'
 import LicensePayload from './LicensePayload'
 import LicenseType from './LicenseType'
@@ -172,6 +174,7 @@ export type {
     ImportSummary,
     InputKeyValue,
     LicenseClearing,
+    LicenseDBConfiguration,
     LicenseDetail,
     LicensePayload,
     LicenseType,
@@ -263,6 +266,7 @@ export {
     ConfigKeys,
     ConfigurationContainers,
     DocumentTypes,
+    LicenseDBConfigKeys,
     LicenseTabIds,
     MergeOrSplitActionType,
     NavList,
