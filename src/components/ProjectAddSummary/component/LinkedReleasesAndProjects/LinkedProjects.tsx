@@ -227,6 +227,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                 setProjectPayload={setProjectPayload}
                 show={showLinkedProjectsModal}
                 setShow={setShowLinkedProjectsModal}
+                mode='SET'
             />
             <div className='row mb-4'>
                 <div className='row header-1'>

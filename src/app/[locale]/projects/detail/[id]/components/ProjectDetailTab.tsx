@@ -13,16 +13,20 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
-import { type JSX, useEffect, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
+import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import {
     ActionType,
     AdministrationDataType,
     ClearingDetailsCount,
     ErrorDetails,
+    LinkedProjectData,
+    Project,
     ProjectDetailTabCounts,
+    ProjectPayload,
     SummaryDataType,
     UserGroupType,
 } from '@/object-types'
@@ -32,7 +36,6 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
-import LinkProjects from '../../../components/LinkProjects'
 import Obligations from '../../../components/Obligations/Obligations'
 import Administration from './Administration'
 import AttachmentUsages from './AttachmentUsages'
@@ -83,6 +86,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+    const [projectPayload, setProjectPayload] = useState<ProjectPayload>()
 
     useEffect(() => {
         void (async () => {
@@ -127,6 +131,31 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
+
+                const project = (await (await ApiUtils.GET(`projects/${projectId}`, signal)).json()) as Project
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+                const ob = {} as {
+                    [k: string]: LinkedProjectData
+                }
+                project._embedded?.['sw360:projects']?.map((p) => {
+                    ob[p?.id ?? ''] = {
+                        enableSvm: p.enableSvm ?? false,
+                        name: p.name ?? '',
+                        projectRelationship:
+                            project.linkedProjects?.filter((pr) => pr.project.split('/').at(-1) === p.id)?.[0]
+                                ?.relation ?? 'CONTAINED',
+                        version: p.version ?? '',
+                    }
+                })
+                setProjectPayload({
+                    id: projectId,
+                    linkedProjects: ob,
+                })
             } catch (error) {
                 ApiUtils.reportError(error)
             }
@@ -233,11 +262,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 projectName={summaryData?.name}
                 projectVersion={summaryData?.version}
             />
-            <LinkProjects
-                show={show}
-                setShow={setShow}
-                projectId={projectId}
-            />
+            {projectPayload && (
+                <LinkProjectsModal
+                    show={show}
+                    setShow={setShow}
+                    projectPayload={projectPayload}
+                    setProjectPayload={setProjectPayload as Dispatch<SetStateAction<ProjectPayload>>}
+                    mode='UPDATE'
+                />
+            )}
             {summaryData?.name ? (
                 <Breadcrumb
                     name={`${summaryData.name}${
