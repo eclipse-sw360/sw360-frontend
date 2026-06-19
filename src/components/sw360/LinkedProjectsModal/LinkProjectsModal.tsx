@@ -40,6 +40,7 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
     setShow: (show: boolean) => void
+    mode: 'SET' | 'UPDATE'
 }
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
@@ -48,18 +49,26 @@ type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function LinkProjectsModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
+export default function LinkProjectsModal({
+    projectPayload,
+    setProjectPayload,
+    show,
+    setShow,
+    mode,
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
     const [byNameOnly, setByNameOnly] = useState(true)
+    const [linking, setLinking] = useState(false)
 
     useEffect(() => {
         setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
     }, [
         projectPayload,
+        show,
     ])
 
     const columns = useMemo<ColumnDef<Project>[]>(
@@ -396,6 +405,61 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
         setLinkProjects(m)
     }
 
+    const handleLinkProjects = async (projectId: string) => {
+        setLinking(true)
+        try {
+            const data = {
+                linkedProjects: Object.fromEntries(linkProjects),
+            }
+
+            const response = await ApiUtils.PATCH(`projects/${projectId}`, data)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+            const res = (await response.json()) as Project
+            setAlert({
+                variant: 'success',
+                message: (
+                    <>
+                        <p>
+                            {`${t('The projects have been successfully linked to project')} `}
+                            <span className='fw-bold'>{res.name}</span>.{' '}
+                        </p>
+                        <p>
+                            {t('Click')}{' '}
+                            <Link
+                                href={`/projects/edit/${projectId}?tab=linkedProjectsAndReleases`}
+                                className='text-link'
+                            >
+                                {t('here')}
+                            </Link>{' '}
+                            {t('to edit the project relation')}.
+                        </p>
+                    </>
+                ),
+            })
+        } catch (error) {
+            if (error instanceof ApiError && error.isAborted) {
+                return
+            }
+            const message =
+                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
+            setAlert({
+                variant: 'danger',
+                message: (
+                    <>
+                        <p>{message}</p>
+                    </>
+                ),
+            })
+        } finally {
+            setLinking(false)
+        }
+    }
+
     const closeModal = () => {
         setShow(false)
         setProjectData([])
@@ -414,6 +478,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
             sort: '',
         })
         setSearchText(undefined)
+        setLinkProjects(new Map())
     }
 
     return (
@@ -574,10 +639,10 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                 <Button
                     variant='primary'
                     onClick={() => {
-                        projectPayloadSetter()
-                        closeModal()
+                        mode === 'SET' ? projectPayloadSetter() : handleLinkProjects(projectPayload.id ?? '')
+                        mode === 'SET' && closeModal()
                     }}
-                    disabled={linkProjects.size === 0}
+                    disabled={linkProjects.size === 0 || linking}
                 >
                     {t('Link Projects')}
                 </Button>
