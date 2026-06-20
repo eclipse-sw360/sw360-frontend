@@ -91,6 +91,6 @@ jobs:
             echo "No changes from biome migrate"
           else
             git add biome.json
-            git commit -m "chore: update biome schema to match CLI version"
+            git commit -m "chore: Update biome schema to match CLI version"
             git push origin HEAD:${{ github.head_ref }}
           fi
