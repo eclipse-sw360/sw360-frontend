@@ -71,6 +71,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         'eventKey',
         'attachmentUsages',
         'vulnerabilities',
+        'attachments',
         'changeLog',
     ]
 

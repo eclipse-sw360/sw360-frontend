@@ -103,7 +103,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                                                 }}
                                             >
                                                 <Link
-                                                    href={`/licenses/${licenseId}`}
+                                                    href={`/licenses/detail?id=${licenseId}`}
                                                     className='text-link'
                                                 >
                                                     {licenseId}
@@ -357,7 +357,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             for (const pid of projectHierarchyIds) {
                 const p: ProjectInfo[] = []
                 getLinkedProject(pid, p, memoizedLinkedProjects ?? [])
-                if (p) projectHierarchy.push(p[0])
+                if (p[0]) projectHierarchy.push(p[0])
             }
             tableData.push({
                 node: [

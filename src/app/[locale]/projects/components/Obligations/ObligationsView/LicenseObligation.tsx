@@ -105,7 +105,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                                 }}
                                             >
                                                 <Link
-                                                    href={`/licenses/${licenseId}`}
+                                                    href={`/licenses/detail?id=${licenseId}`}
                                                     className='text-link'
                                                 >
                                                     {licenseId}
@@ -268,7 +268,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                                 }}
                                             >
                                                 <Link
-                                                    href={`/licenses/${licenseId}`}
+                                                    href={`/licenses/detail?id=${licenseId}`}
                                                     className='text-link'
                                                 >
                                                     {licenseId}
@@ -490,6 +490,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     ])
 
     useEffect(() => {
+        if (CommonUtils.isNullOrUndefined(selectedProjectId)) return
         const controller = new AbortController()
         const signal = controller.signal
 
