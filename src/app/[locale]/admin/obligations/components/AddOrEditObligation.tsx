@@ -29,15 +29,14 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps): Rea
             : '',
     )
 
-    const { tree, treeText, addChild, addSibling, deleteNode, updateNode, updateNodeElement } = useObligationTree(
-        obligation.text,
-    )
+    const treeops = useObligationTree(obligation.text)
 
     useEffect(() => {
         setObligation((prev) => ({
             ...prev,
             title: title,
-            text: treeText,
+            node: treeops.makeNodeString(),
+            text: treeops.treeText,
             obligationType:
                 Object.keys(ObligationTypes).find(
                     (key) => ObligationTypes[key as keyof typeof ObligationTypes] === obligationType,
@@ -49,10 +48,9 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps): Rea
         }))
     }, [
         title,
-        treeText,
+        treeops.tree,
         obligationType,
         obligationLevel,
-        setObligation,
     ])
 
     return (
@@ -68,13 +66,13 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps): Rea
                 />
 
                 <ObligationTree
-                    tree={tree}
+                    tree={treeops.tree}
                     title={title}
-                    onUpdateNode={updateNode}
-                    onAddChild={addChild}
-                    onAddSibling={addSibling}
-                    onDeleteNode={deleteNode}
-                    onUpdateNodeElement={updateNodeElement}
+                    onUpdateNode={treeops.updateNode}
+                    onAddChild={treeops.addChild}
+                    onAddSibling={treeops.addSibling}
+                    onDeleteNode={treeops.deleteNode}
+                    onImportNode={treeops.importNode}
                 />
 
                 <div className='row'>
@@ -83,7 +81,7 @@ function ObligationForm({ obligation, setObligation }: ObligationFormProps): Rea
                         <pre className='border p-3 obligation-preview'>
                             {title}
                             <br />
-                            {treeText}
+                            {treeops.treeText}
                         </pre>
                     </div>
                 </div>

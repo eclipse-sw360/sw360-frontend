@@ -11,10 +11,18 @@
 
 'use client'
 
+import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useState } from 'react'
-import { Button, Form, Modal, Table } from 'react-bootstrap'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { Button, Modal, Spinner } from 'react-bootstrap'
+import { Embedded, ErrorDetails } from '@/object-types'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { ApiError, CommonUtils } from '@/utils/index'
 import { ObligationElement } from '../../../../../object-types/Obligation'
+
+type EmbeddedObligationElements = Embedded<ObligationElement, 'sw360:obligationElements'>
 
 interface Props {
     show: boolean
@@ -24,38 +32,138 @@ interface Props {
 
 function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
     const t = useTranslations('default')
-    const [selectedElementIndex, setSelectedElementIndex] = useState<number>(-1)
+    const [selectedElement, setSelectedElement] = useState<ObligationElement | undefined>()
 
-    const obligationElements: ObligationElement[] = [
-        {
-            languageElement: 'YOU MUST NOT',
-            action: 'Modify',
-            object: 'License text',
-            selected: false,
+    const columns = useMemo<ColumnDef<ObligationElement>[]>(
+        () => [
+            {
+                id: 'selecObliationElement',
+                cell: ({ row }) => {
+                    return (
+                        <div className='form-check'>
+                            <input
+                                className='form-check-input'
+                                type='radio'
+                                checked={
+                                    !CommonUtils.isNullOrUndefined(selectedElement) &&
+                                    row.original.id === selectedElement.id
+                                }
+                                onChange={() => setSelectedElement(row.original)}
+                            />
+                        </div>
+                    )
+                },
+                meta: {
+                    width: '5%',
+                },
+            },
+            {
+                id: 'type',
+                accessorKey: 'type',
+                header: t('Type'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '15%',
+                },
+            },
+            {
+                id: 'langElement',
+                accessorKey: 'langElement',
+                header: t('Language Element'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'action',
+                accessorKey: 'action',
+                header: t('Action'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '25%',
+                },
+            },
+            {
+                id: 'object',
+                accessorKey: 'object',
+                header: t('Object'),
+                cell: (info) => info.getValue(),
+                meta: {
+                    width: '30%',
+                },
+            },
+        ],
+        [
+            t,
+            selectedElement,
+        ],
+    )
+
+    const [elementData, setElementData] = useState<ObligationElement[]>(() => [])
+    const memoizedData = useMemo(
+        () => elementData,
+        [
+            elementData,
+        ],
+    )
+    const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        const timeLimit = memoizedData.length !== 0 ? 700 : 0
+        const timeout = setTimeout(() => {
+            setShowProcessing(true)
+        }, timeLimit)
+
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET('obligations/elements', signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
+                }
+
+                const data = (await response.json()) as EmbeddedObligationElements
+                setElementData(
+                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:obligationElements'])
+                        ? []
+                        : data['_embedded']['sw360:obligationElements'],
+                )
+            } catch (error) {
+                ApiUtils.reportError(error)
+            } finally {
+                clearTimeout(timeout)
+                setShowProcessing(false)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [])
+
+    const table = useReactTable({
+        data: memoizedData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+
+        getPaginationRowModel: getPaginationRowModel(),
+
+        meta: {
+            rowHeightConstant: true,
         },
-        {
-            languageElement: 'YOU MUST',
-            action: 'Provide',
-            object: 'License text',
-            selected: false,
-        },
-    ]
+    })
 
     const handleClose = () => {
-        setSelectedElementIndex(-1)
+        setSelectedElement(undefined)
         setShow(false)
     }
 
     const handleImport = () => {
-        if (selectedElementIndex >= 0) {
-            const selectedElement = obligationElements[selectedElementIndex]
-            onImport({
-                languageElement: selectedElement.languageElement,
-                action: selectedElement.action,
-                object: selectedElement.object,
-                selected: true,
-            })
-        }
+        if (!CommonUtils.isNullOrUndefined(selectedElement)) onImport(selectedElement)
         handleClose()
     }
 
@@ -71,83 +179,36 @@ function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
                 <Modal.Title>{t('Import Obligation Element')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Table
-                    bordered
-                    hover
-                >
-                    <thead>
-                        <tr
-                            style={{
-                                backgroundColor: '#6c757d',
-                                color: 'white',
-                            }}
-                        >
-                            <th
-                                style={{
-                                    width: '10%',
-                                }}
-                            >
-                                Select
-                            </th>
-                            <th
-                                style={{
-                                    width: '30%',
-                                }}
-                            >
-                                Language Element
-                            </th>
-                            <th
-                                style={{
-                                    width: '30%',
-                                }}
-                            >
-                                Action
-                            </th>
-                            <th
-                                style={{
-                                    width: '30%',
-                                }}
-                            >
-                                Object
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {obligationElements.map((element, index) => (
-                            <tr key={index}>
-                                <td
-                                    style={{
-                                        textAlign: 'center',
-                                    }}
-                                >
-                                    <Form.Check
-                                        type='radio'
-                                        name='obligationElement'
-                                        checked={index === selectedElementIndex}
-                                        onChange={() => setSelectedElementIndex(index)}
-                                    />
-                                </td>
-                                <td>{element.languageElement}</td>
-                                <td>{element.action}</td>
-                                <td>{element.object}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                <div className='mb-3'>
+                    {table ? (
+                        <>
+                            <ClientSidePageSizeSelector table={table} />
+                            <SW360Table
+                                table={table}
+                                showProcessing={showProcessing}
+                            />
+                            <ClientSideTableFooter table={table} />
+                        </>
+                    ) : (
+                        <div className='col-12 mt-1 text-center'>
+                            <Spinner className='spinner' />
+                        </div>
+                    )}
+                </div>
             </Modal.Body>
             <Modal.Footer>
                 <Button
                     variant='secondary'
                     onClick={handleClose}
                 >
-                    Close
+                    {t('Close')}
                 </Button>
                 <Button
                     variant='warning'
                     onClick={handleImport}
-                    disabled={selectedElementIndex === -1}
+                    disabled={CommonUtils.isNullOrUndefined(selectedElement)}
                 >
-                    Import Obligation Element
+                    {t('Import Obligation Element')}
                 </Button>
             </Modal.Footer>
         </Modal>

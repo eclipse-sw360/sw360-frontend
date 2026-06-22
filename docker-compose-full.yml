@@ -138,7 +138,7 @@ services:
 
   # Nginx reverse proxy
   web:
-    image: docker.io/library/nginx:1.31.1-trixie
+    image: docker.io/library/nginx:1.31.2-trixie
     container_name: sw360_web
     restart: unless-stopped
     env_file: ./config/nginx/.env.web
