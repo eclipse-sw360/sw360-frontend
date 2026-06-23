@@ -16,6 +16,7 @@ import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 import FeatureConfigurations from '@/app/[locale]/admin/configurations/components/FeatureConfigurations'
 import FrontEndConfigs from '@/app/[locale]/admin/configurations/components/FrontEndConfigs'
+import LicenseDBConfigurations from '@/app/[locale]/admin/configurations/components/LicenseDBConfigurations'
 
 export default function ConfigurationsTabs(): JSX.Element {
     const t = useTranslations('default')
@@ -55,6 +56,12 @@ export default function ConfigurationsTabs(): JSX.Element {
                                 >
                                     <div className='my-2'>{t('Frontend Configurations')}</div>
                                 </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey='licensedb'
+                                >
+                                    <div className='my-2'>{t('LicenseDB Configurations')}</div>
+                                </ListGroup.Item>
                             </ListGroup>
                         </Col>
                         <Col className='ps-2 me-3'>
@@ -65,6 +72,9 @@ export default function ConfigurationsTabs(): JSX.Element {
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='frontend'>
                                         <FrontEndConfigs />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey='licensedb'>
+                                        <LicenseDBConfigurations />
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Row>
