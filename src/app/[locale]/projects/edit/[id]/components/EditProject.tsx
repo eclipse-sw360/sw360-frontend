@@ -404,12 +404,10 @@ function EditProject({
                 }
 
                 if (project['_embedded']?.['sw360:vendors']?.[0] !== undefined) {
-                    const vendorData = project['_embedded']['sw360:vendors'][0]
+                    const selectedVendor = project['_embedded']['sw360:vendors'][0]
                     setVendor({
-                        id: vendorData.id ?? '',
-                        fullName: vendorData.fullName ?? '',
-                        shortName: vendorData.shortName ?? '',
-                        url: vendorData.url ?? '',
+                        ...selectedVendor,
+                        id: project.vendorId ?? selectedVendor.id ?? '',
                     })
                 }
 
