@@ -50,6 +50,7 @@ import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import RequestType from './enums/RequestType'
 import { ArrayTypeUIConfigKeys, UIConfigKeys } from './enums/UIConfigKeys'
+import UserGroupPriority from './enums/UserGroupPriority'
 import UserGroupType from './enums/UserGroupType'
 import VulnerabilitiesVerificationState from './enums/VulnerabilitiesVerificationState'
 import ErrorDetails from './error'
@@ -275,6 +276,7 @@ export {
     RequestDocumentTypes,
     RequestType,
     UIConfigKeys,
+    UserGroupPriority,
     UserGroupType,
     VulnerabilitiesVerificationState,
 }

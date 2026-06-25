@@ -18,16 +18,19 @@ import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-boots
 import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
+import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
     AdministrationDataType,
     ClearingDetailsCount,
+    ConfigKeys,
     ErrorDetails,
     LinkedProjectData,
     Project,
     ProjectDetailTabCounts,
     ProjectPayload,
     SummaryDataType,
+    UserGroupPriority,
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -84,6 +87,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         show: false,
         importType: 'CycloneDx',
     })
+    const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
+    const normalizedSbomImportExportAccessUserRole: UserGroupType =
+        sbomImportExportAccessUserRole && sbomImportExportAccessUserRole in UserGroupType
+            ? (sbomImportExportAccessUserRole as UserGroupType)
+            : UserGroupType.VIEWER
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
@@ -406,90 +414,94 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         >
                                             {t('Link to Projects')}
                                         </Button>
-                                        <Dropdown className='col-auto'>
-                                            <Dropdown.Toggle
-                                                variant='dark'
-                                                id='exportSBOM'
-                                                className='px-2'
-                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
-                                            >
-                                                {t('Import SBOM')}
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setImportSBOMMetadata({
-                                                            importType: 'CycloneDx',
-                                                            show: true,
-                                                            projectId: projectId,
-                                                            doNotReplace: false,
-                                                        })
-                                                    }}
-                                                >
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-flex',
-                                                            alignItems: 'center',
-                                                            gap: '6px',
-                                                        }}
-                                                    >
-                                                        {t('replace existing releases and packages')}
-                                                        <ShowInfoOnHover
-                                                            text={t(
-                                                                'This will remove all current releases and packages and replace them with data from the SBOM',
-                                                            )}
-                                                        />
-                                                    </span>
-                                                </Dropdown.Item>
-                                                <Dropdown.Item
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setImportSBOMMetadata({
-                                                            importType: 'CycloneDx',
-                                                            show: true,
-                                                            projectId: projectId,
-                                                            doNotReplace: true,
-                                                        })
-                                                    }}
-                                                >
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-flex',
-                                                            alignItems: 'center',
-                                                            gap: '6px',
-                                                        }}
-                                                    >
-                                                        {t('Add new releases and packages')}
-                                                        <ShowInfoOnHover
-                                                            text={t(
-                                                                'Adds new data from the SBOM without modifying existing releases and packages',
-                                                            )}
-                                                        />
-                                                    </span>
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                        <Dropdown className='col-auto'>
-                                            <Dropdown.Toggle
-                                                variant='dark'
-                                                id='exportSBOM'
-                                                className='px-2'
-                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
-                                            >
-                                                {t('Export SBOM')}
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setShowExportProjectSbomModal(true)
-                                                    }}
-                                                >
-                                                    {t('CycloneDX')}
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
+                                        {userIdentity?.userGroup &&
+                                            UserGroupPriority[userIdentity.userGroup] <=
+                                                UserGroupPriority[normalizedSbomImportExportAccessUserRole] && (
+                                                <>
+                                                    <Dropdown className='col-auto'>
+                                                        <Dropdown.Toggle
+                                                            variant='dark'
+                                                            id='exportSBOM'
+                                                            className='px-2'
+                                                        >
+                                                            {t('Import SBOM')}
+                                                        </Dropdown.Toggle>
+                                                        <Dropdown.Menu>
+                                                            <Dropdown.Item
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setImportSBOMMetadata({
+                                                                        importType: 'CycloneDx',
+                                                                        show: true,
+                                                                        projectId: projectId,
+                                                                        doNotReplace: false,
+                                                                    })
+                                                                }}
+                                                            >
+                                                                <span
+                                                                    style={{
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '6px',
+                                                                    }}
+                                                                >
+                                                                    {t('replace existing releases and packages')}
+                                                                    <ShowInfoOnHover
+                                                                        text={t(
+                                                                            'This will remove all current releases and packages and replace them with data from the SBOM',
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            </Dropdown.Item>
+                                                            <Dropdown.Item
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setImportSBOMMetadata({
+                                                                        importType: 'CycloneDx',
+                                                                        show: true,
+                                                                        projectId: projectId,
+                                                                        doNotReplace: true,
+                                                                    })
+                                                                }}
+                                                            >
+                                                                <span
+                                                                    style={{
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '6px',
+                                                                    }}
+                                                                >
+                                                                    {t('Add new releases and packages')}
+                                                                    <ShowInfoOnHover
+                                                                        text={t(
+                                                                            'Adds new data from the SBOM without modifying existing releases and packages',
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            </Dropdown.Item>
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
+                                                    <Dropdown className='col-auto'>
+                                                        <Dropdown.Toggle
+                                                            variant='dark'
+                                                            id='exportSBOM'
+                                                            className='px-2'
+                                                        >
+                                                            {t('Export SBOM')}
+                                                        </Dropdown.Toggle>
+                                                        <Dropdown.Menu>
+                                                            <Dropdown.Item
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setShowExportProjectSbomModal(true)
+                                                                }}
+                                                            >
+                                                                {t('CycloneDX')}
+                                                            </Dropdown.Item>
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
+                                                </>
+                                            )}
                                     </Row>
                                 </Col>
                                 <Col
