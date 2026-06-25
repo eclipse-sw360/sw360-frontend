@@ -42,7 +42,7 @@ services:
     restart: unless-stopped
     container_name: couchdb_nouveau
     volumes:
-      - ./config/couchdb/nouveau.yaml:/opt/nouveau/etc/nouveau.yaml
+      - nouveau_data:/opt/nouveau/data/nouveau
     ports:
       - "5987:5987"
       - "5988:5988"
@@ -95,6 +95,7 @@ services:
 volumes:
   couchdb: {}
   etc: {}
+  nouveau_data: {}
 
 networks:
   sw360net:
