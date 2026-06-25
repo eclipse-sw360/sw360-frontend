@@ -88,7 +88,7 @@ export default function GeneralInformation({
         setVendor(vendorResponse)
         setProjectPayload({
             ...projectPayload,
-            vendorId: vendorResponse._links?.self.href.split('/').at(-1),
+            vendorId: vendorResponse._links?.self.href.split('/').at(-1) ?? vendorResponse.id ?? '',
         })
     }
 

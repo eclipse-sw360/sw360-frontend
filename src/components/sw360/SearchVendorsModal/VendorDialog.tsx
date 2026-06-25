@@ -34,6 +34,28 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const t = useTranslations('default')
     const [showAddVendor, setShowAddVendor] = useState(false)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
+
+    const getVendorIdentifier = (vendorData?: Vendor): string => {
+        if (!vendorData) return ''
+        return vendorData._links?.self.href.split('/').at(-1) ?? vendorData.id ?? ''
+    }
+
+    const isVendorMatched = (currentVendor?: Vendor, comparedVendor?: Vendor): boolean => {
+        const currentIdentifier = getVendorIdentifier(currentVendor)
+        const comparedIdentifier = getVendorIdentifier(comparedVendor)
+
+        if (currentIdentifier !== '' && comparedIdentifier !== '') {
+            return currentIdentifier === comparedIdentifier
+        }
+
+        return (
+            (currentVendor?.fullName ?? '') !== '' &&
+            (currentVendor?.fullName ?? '') === (comparedVendor?.fullName ?? '') &&
+            (currentVendor?.shortName ?? '') === (comparedVendor?.shortName ?? '') &&
+            (currentVendor?.url ?? '') === (comparedVendor?.url ?? '')
+        )
+    }
+
     const handleCloseDialog = () => {
         setShow(!show)
         setSelectedVendor(vendor)
@@ -53,6 +75,12 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     }
     const [selectedVendor, setSelectedVendor] = useState<Vendor>(vendor)
 
+    useEffect(() => {
+        setSelectedVendor(vendor)
+    }, [
+        vendor,
+    ])
+
     const columns = useMemo<ColumnDef<Vendor>[]>(
         () => [
             {
@@ -60,11 +88,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 cell: ({ row }) => (
                     <Form.Check
                         type='radio'
-                        checked={
-                            selectedVendor !== null &&
-                            row.original._links?.self.href.split('/').at(-1) ===
-                                selectedVendor._links?.self.href.split('/').at(-1)
-                        }
+                        checked={isVendorMatched(row.original, selectedVendor)}
                         onChange={() => setSelectedVendor(row.original)}
                     ></Form.Check>
                 ),
