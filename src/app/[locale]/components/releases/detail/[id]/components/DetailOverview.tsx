@@ -216,7 +216,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             try {
                 const response = await ApiUtils.GET(`releases/${releaseId}/licenseFileList`, signal)
                 if (response.status !== StatusCodes.OK) {
-                    if (response.status === StatusCodes.CONFLICT) return
+                    if (response.status === StatusCodes.CONFLICT || response.status === StatusCodes.NOT_FOUND) return
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: response.status,
@@ -233,7 +233,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         return () => controller.abort()
     }, [
         releaseId,
-        release,
     ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
