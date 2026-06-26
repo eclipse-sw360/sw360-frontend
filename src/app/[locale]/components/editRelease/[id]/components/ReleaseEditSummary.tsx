@@ -213,10 +213,6 @@ function ReleaseEditSummary({
                         setReleasePayload={setReleasePayload}
                         vendor={vendor}
                         setVendor={setVendor}
-                        mainLicenses={mainLicenses}
-                        setMainLicenses={setMainLicenses}
-                        otherLicenses={otherLicenses}
-                        setOtherLicenses={setOtherLicenses}
                         contributors={contributors}
                         setContributors={setContributors}
                         moderators={moderators}
