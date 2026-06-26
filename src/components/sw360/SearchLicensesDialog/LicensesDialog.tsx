@@ -23,31 +23,37 @@ import { PageSizeSelector, SW360Table, TableFooter } from '../Table/Components'
 interface Props {
     show: boolean
     setShow: React.Dispatch<React.SetStateAction<boolean>>
-    selectLicenses: (licenses: { [k: string]: string }) => void
-    releaseLicenses: {
-        [k: string]: string
-    }
+    selectLicenses: (licenses: string[]) => void
+    releaseLicenses: string[]
 }
 
 type EmbeddedLicenses = Embedded<LicenseDetail, 'sw360:licenses'>
 
 const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const [selectedLicenses, setSelectedLicenses] = useState<{
-        [k: string]: string
-    }>(releaseLicenses)
+    const [selectedLicenses, setSelectedLicenses] = useState<string[]>(releaseLicenses)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
 
+    useEffect(() => {
+        setSelectedLicenses(releaseLicenses)
+    }, [
+        releaseLicenses,
+        show,
+    ])
+
     const handleCheckbox = (item: LicenseDetail) => {
-        const copiedLicenses = {
+        const copiedLicenses = [
             ...selectedLicenses,
-        }
-        const licenseId = item._links?.self.href.split('/').at(-1)
+        ]
+        const licenseId = item.shortName
         if (licenseId === undefined) return
-        if (Object.keys(copiedLicenses).includes(licenseId)) {
-            delete copiedLicenses[licenseId]
+        if (copiedLicenses.includes(licenseId)) {
+            const index = copiedLicenses.indexOf(licenseId)
+            if (index > -1) {
+                copiedLicenses.splice(index, 1)
+            }
         } else {
-            copiedLicenses[licenseId] = item.fullName ?? ''
+            copiedLicenses.push(licenseId)
         }
         setSelectedLicenses(copiedLicenses)
     }
@@ -60,9 +66,7 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                     <Form.Check
                         name='licenseId'
                         type='checkbox'
-                        checked={Object.keys(selectedLicenses).includes(
-                            row.original._links?.self.href.split('/').at(-1) ?? '',
-                        )}
+                        checked={selectedLicenses.includes(row.original.shortName ?? '')}
                         onChange={() => {
                             handleCheckbox(row.original)
                         }}
@@ -196,8 +200,9 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
 
     const handleCloseDialog = () => {
         setShow(!show)
-        setSelectedLicenses({})
+        setSelectedLicenses([])
         setLicenseData([])
+        setSearchText('')
     }
 
     return (
@@ -228,7 +233,7 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                         <div className='col-lg-4'>
                             <button
                                 type='button'
-                                className={`fw-bold btn btn-light button-plain me-2`}
+                                className='fw-bold btn btn-light button-plain me-2'
                                 onClick={() => {
                                     if (!searchText) setSearchText('')
                                     setPageableQueryParam((prev) => ({
@@ -242,11 +247,11 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                             </button>
                             <button
                                 type='button'
-                                className={`fw-bold btn btn-light button-plain me-2`}
+                                className='fw-bold btn btn-light button-plain me-2'
                                 onClick={() => {
                                     setSearchText('')
                                     setLicenseData([])
-                                    setSelectedLicenses({})
+                                    setSelectedLicenses([])
                                 }}
                             >
                                 {t('Reset')}

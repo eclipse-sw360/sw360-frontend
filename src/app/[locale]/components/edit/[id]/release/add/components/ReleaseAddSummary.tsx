@@ -25,36 +25,10 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: {
-        [k: string]: string
-    }
-    setMainLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
-    otherLicenses: {
-        [k: string]: string
-    }
-    setOtherLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
     releaseDetail?: ReleaseDetail
 }
 
-function ReleaseAddSummary({
-    releasePayload,
-    setReleasePayload,
-    vendor,
-    setVendor,
-    mainLicenses,
-    setMainLicenses,
-    otherLicenses,
-    setOtherLicenses,
-    releaseDetail,
-}: Props): ReactNode {
+function ReleaseAddSummary({ releasePayload, setReleasePayload, vendor, setVendor, releaseDetail }: Props): ReactNode {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
@@ -142,10 +116,6 @@ function ReleaseAddSummary({
                         setReleasePayload={setReleasePayload}
                         vendor={vendor}
                         setVendor={setVendor}
-                        mainLicenses={mainLicenses}
-                        setMainLicenses={setMainLicenses}
-                        otherLicenses={otherLicenses}
-                        setOtherLicenses={setOtherLicenses}
                         moderators={moderators}
                         setModerators={setModerators}
                         contributors={contributors}
