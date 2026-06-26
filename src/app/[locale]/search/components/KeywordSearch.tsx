@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useReducer, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import icons from '@/assets/icons/icons.svg'
@@ -158,11 +158,13 @@ function KeywordSearch({
     setShowProcessing,
     setPaginationMeta,
     pageableQueryParam,
+    setPageableQueryParam,
 }: {
     setData: Dispatch<SetStateAction<SearchResult[]>>
     setShowProcessing: Dispatch<SetStateAction<boolean>>
     setPaginationMeta: Dispatch<SetStateAction<PaginationMeta | undefined>>
     pageableQueryParam: PageableQueryParam
+    setPageableQueryParam: Dispatch<SetStateAction<PageableQueryParam>>
 }): ReactNode {
     const t = useTranslations('default')
 
@@ -230,6 +232,14 @@ function KeywordSearch({
             setShowProcessing(false)
         }
     }
+
+    useEffect(() => {
+        if (searchText.trim() !== '') {
+            handleSearch()
+        }
+    }, [
+        pageableQueryParam,
+    ])
 
     return (
         <>
@@ -417,7 +427,7 @@ function KeywordSearch({
                                 >
                                     <use href={`${icons.src}#oblig`}></use>
                                 </svg>{' '}
-                                {'Obligations'}
+                                {t('Obligations')}
                             </label>
                         </div>
                         <div className='form-check mt-1'>
@@ -443,7 +453,7 @@ function KeywordSearch({
                                 >
                                     <use href={`${icons.src}#user`}></use>
                                 </svg>{' '}
-                                {'Users'}
+                                {t('Users')}
                             </label>
                         </div>
                         <div className='form-check mt-1'>
@@ -469,7 +479,7 @@ function KeywordSearch({
                                 >
                                     <use href={`${icons.src}#vendor`}></use>
                                 </svg>{' '}
-                                {'Vendors'}
+                                {t('Vendors')}
                             </label>
                         </div>
                         <div className='form-check mt-1'>
@@ -488,7 +498,7 @@ function KeywordSearch({
                                 className='form-check-label fw-medium'
                                 htmlFor='keyboard-check-entire-document'
                             >
-                                {'Entire Document'}
+                                {t('Entire Document')}
                             </label>
                         </div>
                         <div className='row mt-2'>
@@ -506,7 +516,7 @@ function KeywordSearch({
                                         })
                                     }
                                 >
-                                    {'Toggle'}
+                                    {t('Toggle')}
                                 </button>
                                 <button
                                     type='button'
@@ -517,7 +527,7 @@ function KeywordSearch({
                                         })
                                     }
                                 >
-                                    {'Deselect All'}
+                                    {t('Deselect All')}
                                 </button>
                             </div>
                         </div>
@@ -525,7 +535,12 @@ function KeywordSearch({
                             <button
                                 type='button'
                                 className='btn btn-sm btn-primary'
-                                onClick={() => void handleSearch()}
+                                onClick={() =>
+                                    setPageableQueryParam({
+                                        ...pageableQueryParam,
+                                        page: 0,
+                                    })
+                                }
                             >
                                 {t('Search')}
                             </button>
