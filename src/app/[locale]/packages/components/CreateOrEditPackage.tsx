@@ -97,11 +97,21 @@ export default function CreateOrEditPackage({
     const handleSelectRelease = (selectedReleases: ReleaseDetail[]) => {
         if (selectedReleases.length > 0) {
             const release = selectedReleases[0]
+            const selectedRelease = {
+                ...release,
+                id: release.id ?? '',
+            } as ReleaseDetail & {
+                id: string
+            }
             setPackagePayload((prev) => ({
                 ...prev,
-                releaseId: release.id ?? '',
+                releaseId: selectedRelease.id,
+                _embedded: {
+                    ...prev._embedded,
+                    'sw360:release': selectedRelease,
+                },
             }))
-            setReleaseNameVersion(`${release.name} (${release.version})`)
+            setReleaseNameVersion(`${selectedRelease.name} (${selectedRelease.version})`)
         }
     }
 
@@ -158,6 +168,13 @@ export default function CreateOrEditPackage({
                 setShow={setShowLinkedReleasesModal}
                 onSelect={handleSelectRelease}
                 multiSelect={false}
+                preSelectedReleases={
+                    packagePayload._embedded?.['sw360:release']
+                        ? [
+                              packagePayload._embedded['sw360:release'] as unknown as ReleaseDetail,
+                          ]
+                        : []
+                }
             />
             <AddMainLicenseModal
                 showMainLicenseModal={showMainLicenseModal}
@@ -428,6 +445,9 @@ export default function CreateOrEditPackage({
                                         setPackagePayload((prev) => ({
                                             ...prev,
                                             releaseId: '',
+                                            _embedded: prev._embedded
+                                                ? (({ 'sw360:release': _removed, ...rest }) => rest)(prev._embedded)
+                                                : prev._embedded,
                                         }))
                                     }}
                                 >
