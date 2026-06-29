@@ -34,6 +34,7 @@ interface SearchReleasesModalProps {
     setShow: (show: boolean) => void
     onSelect: (releases: ReleaseDetail[]) => void
     multiSelect?: boolean
+    preSelectedReleases?: ReleaseDetail[]
     projectId?: string
     showExactMatch?: boolean
     showSubProjectReleases?: boolean
@@ -50,6 +51,7 @@ export default function SearchReleasesModal({
     setShow,
     onSelect,
     multiSelect = true,
+    preSelectedReleases = [],
     projectId,
     showSubProjectReleases = false,
 }: SearchReleasesModalProps): JSX.Element {
@@ -115,14 +117,19 @@ export default function SearchReleasesModal({
             {
                 id: 'componentName',
                 header: t('Component Name'),
-                cell: ({ row }) => (
-                    <Link
-                        className='text-link'
-                        href={`/components/detail/${row.original['_links']['sw360:component']['href'].split('/').pop() ?? ''}`}
-                    >
-                        {row.original.name}
-                    </Link>
-                ),
+                cell: ({ row }) => {
+                    const componentId = row.original['_links']?.['sw360:component']?.['href']?.split('/').pop()
+                    return componentId ? (
+                        <Link
+                            className='text-link'
+                            href={`/components/detail/${componentId}`}
+                        >
+                            {row.original.name}
+                        </Link>
+                    ) : (
+                        <>{row.original.name}</>
+                    )
+                },
                 meta: {
                     width: '20%',
                 },
@@ -188,6 +195,29 @@ export default function SearchReleasesModal({
         ],
     )
     const [showProcessing, setShowProcessing] = useState(false)
+
+    useEffect(() => {
+        if (!show || !preSelectedReleases || preSelectedReleases.length === 0) {
+            return
+        }
+
+        setSelectedReleases(preSelectedReleases)
+        setReleaseData(preSelectedReleases)
+        setPaginationMeta({
+            size: preSelectedReleases.length,
+            totalElements: preSelectedReleases.length,
+            totalPages: 1,
+            number: 0,
+        })
+        setPageableQueryParam((prev) => ({
+            ...prev,
+            page: 0,
+            page_entries: Math.max(prev.page_entries, preSelectedReleases.length),
+        }))
+    }, [
+        show,
+        preSelectedReleases,
+    ])
 
     useEffect(() => {
         if (searchText === undefined) return
