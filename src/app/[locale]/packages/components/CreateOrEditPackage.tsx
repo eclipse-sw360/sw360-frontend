@@ -158,6 +158,13 @@ export default function CreateOrEditPackage({
                 setShow={setShowLinkedReleasesModal}
                 onSelect={handleSelectRelease}
                 multiSelect={false}
+                preSelectedReleases={
+                    packagePayload._embedded?.['sw360:release']
+                        ? [
+                              packagePayload._embedded['sw360:release'] as unknown as ReleaseDetail,
+                          ]
+                        : []
+                }
             />
             <AddMainLicenseModal
                 showMainLicenseModal={showMainLicenseModal}
