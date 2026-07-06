@@ -64,7 +64,15 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
     }
 
     const changeCreatedOnSearchOption = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setCreatedOnSearchOption(event.target.value)
+        const selectedOption = event.target.value
+        setCreatedOnSearchOption(selectedOption)
+
+        setSearchParam((prev: SearchParams) => ({
+            ...prev,
+            createdOn: selectedOption === 'BETWEEN' ? '' : (prev.createdOn ?? ''),
+            createdOnStart: selectedOption === 'BETWEEN' ? (prev.createdOnStart ?? '') : '',
+            createdOnEnd: selectedOption === 'BETWEEN' ? (prev.createdOnEnd ?? '') : '',
+        }))
     }
 
     useEffect(() => {
@@ -78,11 +86,87 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
     const submitSearch = () => {
         const currentUrl = new URL(window.location.href)
         const searchUrl = new URL(currentUrl.origin + currentUrl.pathname)
-        Object.entries(searchParams).forEach(([key, value]: Array<string>) => {
-            if (!CommonUtils.isNullEmptyOrUndefinedString(value)) {
-                searchUrl.searchParams.append(key, value)
+
+        const normalizeCreatedOnOption = (
+            option: string,
+        ): 'EQUAL' | 'LESS_THAN_OR_EQUAL_TO' | 'GREATER_THAN_OR_EQUAL_TO' | 'BETWEEN' | '' => {
+            switch (option) {
+                case 'EQUAL':
+                case 'equalTo':
+                    return 'EQUAL'
+                case 'LESS_THAN_OR_EQUAL_TO':
+                case 'lessThanEqualTo':
+                    return 'LESS_THAN_OR_EQUAL_TO'
+                case 'GREATER_THAN_OR_EQUAL_TO':
+                case 'greaterThanEqualTo':
+                    return 'GREATER_THAN_OR_EQUAL_TO'
+                case 'BETWEEN':
+                    return 'BETWEEN'
+                default:
+                    return ''
             }
+        }
+
+        const normalizedCreatedOnOption = normalizeCreatedOnOption(createdOnSearchOption)
+        const maxDate = '9999-01-01'
+        const singleDate = searchParams.createdOn
+        const startDate = searchParams.createdOnStart
+        const endDate = searchParams.createdOnEnd
+
+        let createdOnQueryValue = ''
+        if (normalizedCreatedOnOption === 'EQUAL' && !CommonUtils.isNullEmptyOrUndefinedString(singleDate)) {
+            createdOnQueryValue = singleDate
+        }
+        if (
+            normalizedCreatedOnOption === 'LESS_THAN_OR_EQUAL_TO' &&
+            !CommonUtils.isNullEmptyOrUndefinedString(singleDate)
+        ) {
+            createdOnQueryValue = `[1970-01-01 TO ${singleDate}]`
+        }
+        if (
+            normalizedCreatedOnOption === 'GREATER_THAN_OR_EQUAL_TO' &&
+            !CommonUtils.isNullEmptyOrUndefinedString(singleDate)
+        ) {
+            createdOnQueryValue = `[${singleDate} TO ${maxDate}]`
+        }
+        if (
+            normalizedCreatedOnOption === 'BETWEEN' &&
+            !CommonUtils.isNullEmptyOrUndefinedString(startDate) &&
+            !CommonUtils.isNullEmptyOrUndefinedString(endDate)
+        ) {
+            createdOnQueryValue = `[${startDate} TO ${endDate}]`
+        }
+
+        const effectiveParams = Object.entries(searchParams).filter(([key, value]: Array<string>) => {
+            if (CommonUtils.isNullEmptyOrUndefinedString(value)) {
+                return false
+            }
+
+            // createdOn payload is assembled separately from selected mode and date fields.
+            if (key === 'createdOn' || key === 'createdOnStart' || key === 'createdOnEnd') {
+                return false
+            }
+
+            return true
         })
+
+        if (!CommonUtils.isNullEmptyOrUndefinedString(createdOnQueryValue)) {
+            effectiveParams.push([
+                'createdOn',
+                createdOnQueryValue,
+            ])
+        }
+
+        const hasSearchFilter = effectiveParams.some(([key]) => key !== 'luceneSearch')
+
+        effectiveParams.forEach(([key, value]: Array<string>) => {
+            // luceneSearch is only meaningful when at least one actual filter is present.
+            if (key === 'luceneSearch' && !hasSearchFilter) {
+                return
+            }
+            searchUrl.searchParams.append(key, value)
+        })
+
         router.push(searchUrl.toString())
     }
 
@@ -116,7 +200,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                     size='sm'
                                     name={field.paramName}
                                     onChange={changeCreatedOnSearchOption}
-                                    value={searchParams.type}
+                                    value={createdOnSearchOption}
                                 >
                                     <option value='' />
                                     {field.value.map((option) => (
@@ -135,8 +219,8 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
                                     <Form.Control
                                         type='date'
                                         size='sm'
-                                        name='createdOnDate'
-                                        value={searchParams.createdOnDate}
+                                        name='createdOn'
+                                        value={searchParams.createdOn}
                                         onChange={handleSearchParam}
                                         max={new Date().toISOString().split('T')[0]}
                                     />
