@@ -14,13 +14,13 @@ FROM node:${VARIANT} AS build
 
 ARG NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
 
-# define run-time args
+# define build-time args
 ARG NEXT_PUBLIC_SW360_API_URL
 ARG NEXT_PUBLIC_SW360_AUTH_PROVIDER=sw360basic
 
-# define build-time args
+# define run-time args
 ARG NEXTAUTH_URL=http://localhost:3000
-ARG AUTH_SECRET=mysecret
+ARG NEXTAUTH_SECRET=mysecret
 
 RUN npm config set registry $NPM_CONFIG_REGISTRY \
  && npm install -g pnpm@latest-11
@@ -30,7 +30,12 @@ WORKDIR /frontend
 # Prepare the build environment
 COPY . .
 
-RUN pnpm install
+# No TTY for pnpm
+ENV CI=true
+
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    --mount=type=cache,id=cypress,target=/root/.cache/Cypress \
+    pnpm install --frozen-lockfile
 RUN pnpm build --experimental-analyze --turbo --profile
 
 # Runtime
@@ -44,6 +49,7 @@ COPY --from=build /frontend/next.config.ts .
 COPY --from=build /frontend/public ./public
 COPY --from=build /frontend/.next/standalone ./
 COPY --from=build /frontend/.next/static ./.next/static
+COPY --from=build --chmod=755 /frontend/config/front-end/entrypoint.sh ./entrypoint.sh
 
 # Runtime ENV to configure
 ENV SW360_REST_CLIENT_ID=""
@@ -57,5 +63,8 @@ ENV SW360_SESSION_REFETCH_INTERVAL_SECONDS="300"
 ENV NEXT_PUBLIC_SW360_API_URL=""
 ENV NEXT_PUBLIC_SW360_AUTH_PROVIDER=""
 
+ENTRYPOINT [ "/frontend/entrypoint.sh" ]
+
 CMD ["node", "server.js"]
+
 EXPOSE 3000
