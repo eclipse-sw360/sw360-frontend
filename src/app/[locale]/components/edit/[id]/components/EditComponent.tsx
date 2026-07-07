@@ -17,7 +17,7 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
-import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import {
@@ -76,6 +76,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         attachments: null,
         comment: '',
     })
+    const [loadingComponent, setLoadingComponent] = useState<boolean>(true)
+    const [loadingAttachments, setLoadingAttachments] = useState<boolean>(true)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -97,6 +99,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                 setComponent(component)
             } catch (error) {
                 ApiUtils.reportError(error)
+            } finally {
+                setLoadingComponent(false)
             }
         })()
         void (async () => {
@@ -122,6 +126,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                 setAttachmentData(dataAttachments._embedded?.['sw360:attachments'] ?? [])
             } catch (error) {
                 ApiUtils.reportError(error)
+            } finally {
+                setLoadingAttachments(false)
             }
         })()
 
@@ -212,85 +218,87 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         },
     }
 
-    return (
-        component && (
-            <>
-                <CreateMRCommentDialog<ComponentPayload>
-                    show={showCommentModal}
-                    setShow={setShowCommentModal}
-                    updateEntity={updateComponent}
-                    setEntityPayload={setComponentPayload}
-                />
-                <DeleteComponentDialog
-                    componentId={componentId}
-                    show={deleteDialogOpen}
-                    setShow={setDeleteDialogOpen}
-                    actionType={ActionType.EDIT}
-                />
-                <div className='container page-content'>
-                    <Tab.Container defaultActiveKey={CommonTabIds.SUMMARY}>
-                        <Row>
-                            <Col
-                                sm={2}
-                                className='me-3'
-                            >
-                                <ListGroup>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={CommonTabIds.SUMMARY}
-                                    >
-                                        <div className='my-2'>{t('Summary')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={CommonTabIds.RELEASES}
-                                    >
-                                        <div className='my-2'>{t('Release')}</div>
-                                    </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={CommonTabIds.ATTACHMENTS}
-                                    >
-                                        <div className='my-2'>{t('Attachments')}</div>
-                                    </ListGroup.Item>
-                                </ListGroup>
-                            </Col>
-                            <Col>
-                                <Row className='mb-3'>
-                                    <PageButtonHeader
-                                        title={component.name}
-                                        buttons={headerButtons}
-                                    ></PageButtonHeader>
-                                </Row>
-                                <Row className='mt-3'>
-                                    <Tab.Content>
-                                        <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
-                                            <ComponentEditSummary
-                                                attachmentData={attachmentData}
-                                                componentId={componentId}
-                                                componentPayload={componentPayload}
-                                                setComponentPayload={setComponentPayload}
-                                            />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey={CommonTabIds.RELEASES}>
-                                            <Releases componentId={componentId} />
-                                        </Tab.Pane>
-                                        <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
-                                            <EditAttachments
-                                                documentId={componentId}
-                                                documentType={DocumentTypes.COMPONENT}
-                                                documentPayload={componentPayload}
-                                                setDocumentPayload={setComponentPayload}
-                                            />
-                                        </Tab.Pane>
-                                    </Tab.Content>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Tab.Container>
-                </div>
-            </>
-        )
+    return loadingComponent || loadingAttachments || !component ? (
+        <div className='col-12 mt-1 text-center'>
+            <Spinner className='spinner' />
+        </div>
+    ) : (
+        <>
+            <CreateMRCommentDialog<ComponentPayload>
+                show={showCommentModal}
+                setShow={setShowCommentModal}
+                updateEntity={updateComponent}
+                setEntityPayload={setComponentPayload}
+            />
+            <DeleteComponentDialog
+                componentId={componentId}
+                show={deleteDialogOpen}
+                setShow={setDeleteDialogOpen}
+                actionType={ActionType.EDIT}
+            />
+            <div className='container page-content'>
+                <Tab.Container defaultActiveKey={CommonTabIds.SUMMARY}>
+                    <Row>
+                        <Col
+                            sm={2}
+                            className='me-3'
+                        >
+                            <ListGroup>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.SUMMARY}
+                                >
+                                    <div className='my-2'>{t('Summary')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.RELEASES}
+                                >
+                                    <div className='my-2'>{t('Release')}</div>
+                                </ListGroup.Item>
+                                <ListGroup.Item
+                                    action
+                                    eventKey={CommonTabIds.ATTACHMENTS}
+                                >
+                                    <div className='my-2'>{t('Attachments')}</div>
+                                </ListGroup.Item>
+                            </ListGroup>
+                        </Col>
+                        <Col>
+                            <Row className='mb-3'>
+                                <PageButtonHeader
+                                    title={component.name}
+                                    buttons={headerButtons}
+                                ></PageButtonHeader>
+                            </Row>
+                            <Row className='mt-3'>
+                                <Tab.Content>
+                                    <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
+                                        <ComponentEditSummary
+                                            attachmentData={attachmentData}
+                                            componentId={componentId}
+                                            componentPayload={componentPayload}
+                                            setComponentPayload={setComponentPayload}
+                                        />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey={CommonTabIds.RELEASES}>
+                                        <Releases componentId={componentId} />
+                                    </Tab.Pane>
+                                    <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
+                                        <EditAttachments
+                                            documentId={componentId}
+                                            documentType={DocumentTypes.COMPONENT}
+                                            documentPayload={componentPayload}
+                                            setDocumentPayload={setComponentPayload}
+                                        />
+                                    </Tab.Pane>
+                                </Tab.Content>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Tab.Container>
+            </div>
+        </>
     )
 }
 
