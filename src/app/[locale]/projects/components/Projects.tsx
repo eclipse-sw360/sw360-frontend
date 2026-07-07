@@ -112,6 +112,19 @@ function Project(): JSX.Element {
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: params.toString() ? 'score,asc' : 'name,asc',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [projectData, setProjectData] = useState<ProjectWithSubRows[]>(() => [])
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
         void (async () => {
@@ -135,8 +148,15 @@ function Project(): JSX.Element {
     }
 
     const handleEditProject = (projectId: string) => {
-        router.push(`/projects/edit/${projectId}`)
-        MessageService.success(t('You are editing the original document'))
+        const project = projectData.find((proj) => proj['_links']?.['self']?.['href']?.split('/').at(-1) === projectId)
+        const createdByEmail = project?.['_embedded']?.['createdBy']
+        if (userIdentity?.email === createdByEmail || userIdentity?.userGroup === UserGroupType.ADMIN) {
+            MessageService.info(t('You are editing the original document'))
+            router.push(`/projects/edit/${projectId}`)
+        } else {
+            MessageService.info(t('You will create a moderation request if you update'))
+            router.push(`/projects/edit/${projectId}`)
+        }
     }
 
     const fetchLinkedProjects = useCallback(async (projectId: string) => {
@@ -661,18 +681,7 @@ function Project(): JSX.Element {
             showLinkedProjects,
         ],
     )
-    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
-        page: 0,
-        page_entries: 10,
-        sort: params.toString() ? 'score,asc' : 'name,asc',
-    })
-    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
-        size: 0,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-    })
-    const [projectData, setProjectData] = useState<ProjectWithSubRows[]>(() => [])
+
     const memoizedData = useMemo(() => {
         if (!showLinkedProjects) return projectData
 
@@ -707,7 +716,6 @@ function Project(): JSX.Element {
         showLinkedProjects,
         linkedProjectsData,
     ])
-    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
         const controller = new AbortController()

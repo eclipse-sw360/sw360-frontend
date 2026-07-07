@@ -199,11 +199,14 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     ])
 
     const handleEditProject = (projectId: string) => {
-        if (userIdentity?.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
-            MessageService.success(t('You are editing the original document'))
+        if (
+            userIdentity?.email === summaryData?.['_embedded']?.['createdBy']?.['email'] ||
+            userIdentity?.userGroup === UserGroupType.ADMIN
+        ) {
+            MessageService.info(t('You are editing the original document'))
             router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
         } else {
-            MessageService.success(t('You will create a moderation request if you update'))
+            MessageService.info(t('You will create a moderation request if you update'))
             router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
         }
     }
