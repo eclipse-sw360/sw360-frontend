@@ -16,7 +16,7 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
@@ -53,6 +53,7 @@ function EditLicense({ licenseId }: Props): ReactNode {
         licenseTypeDatabaseId: '',
     })
     const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
+    const [loading, setLoading] = useState<boolean>(true)
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
@@ -77,6 +78,8 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 setLicensePayload(license)
             } catch (error) {
                 ApiUtils.reportError(error)
+            } finally {
+                setLoading(false)
             }
         })()
         return () => controller.abort()
@@ -160,7 +163,11 @@ function EditLicense({ licenseId }: Props): ReactNode {
         },
     }
 
-    return (
+    return loading || !licensePayload ? (
+        <div className='col-12 mt-1 text-center'>
+            <Spinner className='spinner' />
+        </div>
+    ) : (
         <div className='container page-content'>
             <DeleteLicenseDialog
                 licensePayload={licensePayload}
