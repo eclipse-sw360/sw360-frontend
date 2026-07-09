@@ -74,11 +74,9 @@ function AddComponent(): ReactNode {
         blog: '',
     })
 
-    // Configs from backend
-    const componentExternalIdSuggestions =
-        useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) !== null
-            ? (useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) as string[])
-            : undefined
+    // Configs from backend - call hooks unconditionally
+    const configExternalIds = useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS)
+    const componentExternalIdSuggestions = configExternalIds !== null ? (configExternalIds as string[]) : undefined
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)
