@@ -11,12 +11,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ErrorDetails, Package, UserGroupType } from '@/object-types'
+import { useConfigKeyValue, useSW360BackendConfigContext } from '@/contexts'
+import { ConfigKeys, ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -31,9 +32,15 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const param = useParams()
     const locale = (param.locale as string) || 'en'
     const packagesPath = `/${locale}/packages`
+    const { isLoading } = useSW360BackendConfigContext()
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED)
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+
+    if (!isLoading && isPackageFeatureEnabled !== 'true') {
+        notFound()
+    }
 
     useEffect(() => {
         void (async () => {

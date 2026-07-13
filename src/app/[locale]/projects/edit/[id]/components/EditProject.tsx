@@ -23,8 +23,10 @@ import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
+import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
+    ConfigKeys,
     DocumentTypes,
     ErrorDetails,
     InputKeyValue,
@@ -54,6 +56,7 @@ function EditProject({
 }): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -66,7 +69,11 @@ function EditProject({
         'linkedProjectsAndReleases',
         'attachments',
         'obligations',
-        'linkedPackages',
+        ...(isPackageFeatureEnabled
+            ? [
+                  'linkedPackages',
+              ]
+            : []),
     ]
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
@@ -718,12 +725,14 @@ function EditProject({
                                                 >
                                                     <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                                 </ListGroup.Item>
-                                                <ListGroup.Item
-                                                    action
-                                                    eventKey='linkedPackages'
-                                                >
-                                                    <div className='my-2'>{t('Linked Packages')}</div>
-                                                </ListGroup.Item>
+                                                {isPackageFeatureEnabled && (
+                                                    <ListGroup.Item
+                                                        action
+                                                        eventKey='linkedPackages'
+                                                    >
+                                                        <div className='my-2'>{t('Linked Packages')}</div>
+                                                    </ListGroup.Item>
+                                                )}
                                                 <ListGroup.Item
                                                     action
                                                     eventKey='attachments'
@@ -832,13 +841,15 @@ function EditProject({
                                                             />
                                                         )}
                                                     </Tab.Pane>
-                                                    <Tab.Pane eventKey='linkedPackages'>
-                                                        <LinkedPackages
-                                                            projectId={projectId}
-                                                            payload={projectPayload}
-                                                            setPayload={setProjectPayload}
-                                                        />
-                                                    </Tab.Pane>
+                                                    {isPackageFeatureEnabled && (
+                                                        <Tab.Pane eventKey='linkedPackages'>
+                                                            <LinkedPackages
+                                                                projectId={projectId}
+                                                                payload={projectPayload}
+                                                                setPayload={setProjectPayload}
+                                                            />
+                                                        </Tab.Pane>
+                                                    )}
                                                     <Tab.Pane eventKey='attachments'>
                                                         <EditAttachments
                                                             documentId={projectId}

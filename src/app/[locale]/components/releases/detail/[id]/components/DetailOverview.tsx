@@ -73,6 +73,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const searchParams = useSearchParams()
     const router = useRouter()
     const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
@@ -426,12 +427,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                             <div className='my-2'>{t('Linked Releases')}</div>
                                         </ListGroup.Item>
                                     )}
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.LINKED_PACKAGES}
-                                    >
-                                        <div className='my-2'>{t('Linked Packages')}</div>
-                                    </ListGroup.Item>
+                                    {isPackageFeatureEnabled && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.LINKED_PACKAGES}
+                                        >
+                                            <div className='my-2'>{t('Linked Packages')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item
                                         action
                                         eventKey={ReleaseTabIds.CLEARING_DETAILS}
@@ -596,9 +599,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 <LinkedReleases releaseId={releaseId} />
                                             </Tab.Pane>
                                         )}
-                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
-                                            <LinkedPackagesTab releaseId={releaseId} />
-                                        </Tab.Pane>
+                                        {isPackageFeatureEnabled && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
+                                                <LinkedPackagesTab releaseId={releaseId} />
+                                            </Tab.Pane>
+                                        )}
                                         <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
                                             <ClearingDetails
                                                 release={release}

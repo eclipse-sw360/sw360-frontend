@@ -53,6 +53,7 @@ import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
@@ -70,7 +71,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         'summary',
         'administration',
         'licenseClearing',
-        'linkedPackages',
         'obligations',
         'ecc',
         'vulnerabilityTrackingStatus',
@@ -79,6 +79,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         'vulnerabilities',
         'attachments',
         'changeLog',
+        ...(isPackageFeatureEnabled
+            ? [
+                  'linkedPackages',
+              ]
+            : []),
     ]
 
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
@@ -324,12 +329,14 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
                                 </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='linkedPackages'
-                                >
-                                    <div className='my-2'>{t('Linked Packages')}</div>
-                                </ListGroup.Item>
+                                {isPackageFeatureEnabled && (
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='linkedPackages'
+                                    >
+                                        <div className='my-2'>{t('Linked Packages')}</div>
+                                    </ListGroup.Item>
+                                )}
                                 <ListGroup.Item
                                     action
                                     eventKey='obligations'
@@ -560,9 +567,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             />
                                         )}
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey='linkedPackages'>
-                                        <LinkedPackagesTab projectId={projectId} />
-                                    </Tab.Pane>
+                                    {isPackageFeatureEnabled && (
+                                        <Tab.Pane eventKey='linkedPackages'>
+                                            <LinkedPackagesTab projectId={projectId} />
+                                        </Tab.Pane>
+                                    )}
                                     <Tab.Pane eventKey='obligations'>
                                         <Obligations
                                             projectId={projectId}
