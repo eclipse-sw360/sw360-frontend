@@ -59,6 +59,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
     const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
     const [obligationsLoading, setObligationsLoading] = useState<boolean>(false)
+    const [eccClassifiedCount, setEccClassifiedCount] = useState<number>(0)
+    const [eccOpenCount, setEccOpenCount] = useState<number>(0)
+    const [eccLoading, setEccLoading] = useState<boolean>(false)
     const [vulnerabilitiesTotal, setVulnerabilitiesTotal] = useState<number>(0)
     const [vulnerabilitiesRatedCount, setVulnerabilitiesRatedCount] = useState<number>(0)
     const [vulnerabilitiesLoading, setVulnerabilitiesLoading] = useState<boolean>(false)
@@ -255,6 +258,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         const fetchCounts = async () => {
             setObligationsLoading(true)
+            setEccLoading(true)
             setVulnerabilitiesLoading(true)
             try {
                 const response = await ApiUtils.GET(`projects/${projectId}/tabCounts`, signal)
@@ -269,12 +273,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 const data = body as ProjectDetailTabCounts
                 setObligationsTotal(data.obligationCount)
                 setObligationsNonOpenCount(data.obligationNonOpenCount)
+                setEccClassifiedCount(Math.max(0, data.eccClassifiedCount))
+                setEccOpenCount(Math.max(0, data.eccOpenCount))
                 setVulnerabilitiesTotal(Math.max(0, data.vulnerabilityCount))
                 setVulnerabilitiesRatedCount(Math.max(0, data.vulnerabilityRatedCount))
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
                 setObligationsLoading(false)
+                setEccLoading(false)
                 setVulnerabilitiesLoading(false)
             }
         }
@@ -298,6 +305,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
         ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
         : '?/?'
+
+    const eccBadgeClassName =
+        eccOpenCount > 0
+            ? 'obligations-badge--danger'
+            : eccClassifiedCount > 0
+              ? 'obligations-badge--success'
+              : 'obligations-badge'
+
+    const eccCountValue = `${eccOpenCount} / ${eccClassifiedCount}`
 
     return (
         <>
@@ -394,7 +410,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     eventKey='ecc'
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
-                                    <div className='my-2'>{t('ECC')}</div>
+                                    <SidebarCountBadge
+                                        badgeClassName={eccBadgeClassName}
+                                        countId='eccCount'
+                                        isLoading={eccLoading}
+                                        label={t('ECC')}
+                                        value={eccCountValue}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
