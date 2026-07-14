@@ -72,7 +72,7 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
                 } catch (error) {
                     ApiUtils.reportError(error)
                 }
-                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
+                MessageService.error(res.message ?? response.statusText)
             }
         } catch (e) {
             ApiUtils.reportError(e)
