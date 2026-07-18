@@ -1,4 +1,21 @@
 packages:
   # include packages in subfolders (change as required)
   - 'src/**'
-  
+
+# pnpm v11 requires explicit approval for every package that has install scripts.
+# 1. @swc/core for transpilation
+# 2. sharp for image optimisation
+# 3. @parcel/watcher (next-intl dev file-watching)
+# 4. cypress (test runner binary)
+allowBuilds:
+  '@swc/core': true
+  sharp: true
+  '@parcel/watcher': true
+  cypress: true
+
+# Kept for compatibility with pnpm v9/v10 workspaces.
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - cypress
+  - sharp

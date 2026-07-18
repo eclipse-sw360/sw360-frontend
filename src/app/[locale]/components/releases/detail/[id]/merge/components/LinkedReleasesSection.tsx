@@ -9,7 +9,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
@@ -28,17 +27,8 @@ export default function LinkedReleasesSection({
 }): ReactNode {
     const t = useTranslations('default')
     const [linkedReleaseMergeList, setLinkedReleaseMergeList] = useState<ListFieldProcessComponent[]>([])
-    const session = useSession()
     const sourceLinkedReleases = sourceReleaseDetail?._embedded['sw360:releaseLinks'] || []
     const targetLinkedReleases = targetRelease?._embedded['sw360:releaseLinks'] || []
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     useEffect(() => {
         setLinkedReleaseMergeList([

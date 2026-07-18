@@ -52,7 +52,7 @@ function Preferences(): {
                 },
                 {
                     id: 'projectROLES',
-                    name: t('Additional Role'),
+                    name: t('Additional Roles'),
                 },
             ],
         },
@@ -79,7 +79,7 @@ function Preferences(): {
                 },
                 {
                     id: 'componentROLES',
-                    name: t('Additional Role'),
+                    name: t('Additional Roles'),
                 },
             ],
         },
@@ -106,7 +106,7 @@ function Preferences(): {
                 },
                 {
                     id: 'releaseROLES',
-                    name: t('Additional Role'),
+                    name: t('Additional Roles'),
                 },
             ],
         },

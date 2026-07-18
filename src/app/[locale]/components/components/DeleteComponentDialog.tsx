@@ -13,13 +13,15 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import { ActionType, Component } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const DEFAULT_COMPONENT_INFO: Component = {
     id: '',
@@ -54,15 +56,6 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         attachments: 0,
     })
     const [comment, setComment] = useState('')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const displayMessage = (variant: string, message: ReactNode) => {
         setVariant(variant)
@@ -75,7 +68,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
             if (error && error instanceof ApiError && error.isAborted) {
                 return
             }
-            displayMessage('danger', t('Error when processing'))
+            displayMessage('danger', t('Error while processing'))
             setReloadPage(true)
         },
         [
@@ -85,12 +78,10 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
 
     const deleteComponent = async () => {
         if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const url = CommonUtils.createUrlWithParams(`components/${componentId}`, {
             comment: comment,
         })
-        const response = await ApiUtils.DELETE(url, session.user.access_token)
+        const response = await ApiUtils.DELETE(url)
         try {
             if (response.status === StatusCodes.MULTI_STATUS) {
                 const body = (await response.json()) as Array<DeleteResponse>
@@ -116,10 +107,10 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                 } else if (deleteStatus === StatusCodes.ACCEPTED) {
                     displayMessage('success', t('Created moderation request'))
                 } else {
-                    displayMessage('danger', t('Error when processing'))
+                    displayMessage('danger', t('Error while processing'))
                 }
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 handleError()
             }
@@ -132,13 +123,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         async (signal: AbortSignal) => {
             try {
                 if (CommonUtils.isNullEmptyOrUndefinedString(componentId)) return
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return
-                const componentsResponse = await ApiUtils.GET(
-                    `components/${componentId}`,
-                    session.user.access_token,
-                    signal,
-                )
+                const componentsResponse = await ApiUtils.GET(`components/${componentId}`, signal)
                 if (componentsResponse.status === StatusCodes.OK) {
                     const component = (await componentsResponse.json()) as Component
                     setComponent(component)

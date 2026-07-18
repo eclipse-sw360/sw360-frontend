@@ -13,8 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
@@ -25,11 +24,13 @@ import EditAttachments from '@/components/Attachments/EditAttachments'
 import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDetails'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
+import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
     ClearingInformation,
     COTSDetails,
     CommonTabIds,
+    ConfigKeys,
     Creator,
     DocumentCreationInformation,
     DocumentTypes,
@@ -42,7 +43,10 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteReleaseModal from '../../../detail/[id]/components/DeleteReleaseModal'
 import EditClearingDetails from './EditClearingDetails'
 import EditECCDetails from './EditECCDetails'
@@ -59,21 +63,14 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const router = useRouter()
     const t = useTranslations('default')
     const params = useSearchParams()
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [componentId, setComponentId] = useState('')
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
-    const { status } = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         const fragment = params.get('tab') ?? CommonTabIds.SUMMARY
@@ -110,11 +107,10 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     useEffect(() => {
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token)
+                const userIdentity = await getAuthenticatedUserIdentity()
+                const response = await ApiUtils.GET(`releases/${releaseId}`)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -137,7 +133,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                         creators = [
                             {
                                 type: 'Person',
-                                value: `${session.user.name} (${session.user.email})`,
+                                value: `${userIdentity.name} (${userIdentity.email})`,
                                 index: 0,
                             },
                         ]
@@ -397,12 +393,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     }
 
     const updateRelease = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-
         if (isSPDXFeatureEnabled === true) {
             setInputValid(true)
             if (validateLicenseIdentifier(SPDXPayload) && validateExtractedText(SPDXPayload)) {
@@ -416,11 +406,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             ) {
                 return
             } else {
-                const responseUpdateSPDX = await ApiUtils.PATCH(
-                    `releases/${releaseId}/spdx`,
-                    SPDXPayload,
-                    session.user.access_token,
-                )
+                const responseUpdateSPDX = await ApiUtils.PATCH(`releases/${releaseId}/spdx`, SPDXPayload)
                 if (responseUpdateSPDX.status === StatusCodes.UNAUTHORIZED) {
                     MessageService.error(t('Session has expired'))
                     return
@@ -444,11 +430,26 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 : undefined
             const { linkedPackages, clearingState, ...cleanPayload } = releasePayload
 
+            const PRIVILEGED_GROUPS = [
+                UserGroupType.CLEARING_ADMIN,
+                UserGroupType.CLEARING_EXPERT,
+                UserGroupType.SW360_ADMIN,
+                UserGroupType.ADMIN,
+            ]
+            const userIdentity = await getAuthenticatedUserIdentity()
+            const userGroup = userIdentity.userGroup as UserGroupType | undefined
+            const isPrivilegedUser = userGroup ? PRIVILEGED_GROUPS.includes(userGroup) : false
+
             const finalPayload: Release = {
                 ...cleanPayload,
                 eccInformation: sanitizedEccInformation,
+                ...(isPrivilegedUser && clearingState
+                    ? {
+                          clearingState,
+                      }
+                    : {}),
             }
-            const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload, session.user.access_token)
+            const response = await ApiUtils.PATCH(`releases/${releaseId}`, finalPayload)
 
             if (response.status === StatusCodes.OK) {
                 const release = (await response.json()) as ReleaseDetail
@@ -468,13 +469,11 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     }
 
     const checkUpdateEligibility = async (releaseId: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'RELEASE',
             entityId: releaseId,
         })
-        const response = await ApiUtils.POST(url, {}, session.user.access_token)
+        const response = await ApiUtils.POST(url, {})
         switch (response.status) {
             case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))
@@ -495,7 +494,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                 MessageService.info(t('You are allowed to perform write with MR'))
                 return 'ACCEPTED'
             default:
-                MessageService.error(t('Error when processing'))
+                MessageService.error(t('Error while processing'))
                 return 'DENIED'
         }
     }
@@ -529,7 +528,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             name: t('Delete Release'),
         },
         Cancel: {
-            link: '/components/releases/detail/' + releaseId,
+            link: `/components/releases/detail/${releaseId}?tab=${activeKey ?? CommonTabIds.SUMMARY}`,
             type: 'secondary',
             name: t('Cancel'),
         },
@@ -594,12 +593,14 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                             <div className='my-2'>{t('SPDX Document')}</div>
                                         </ListGroup.Item>
                                     )}
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.LINKED_RELEASES}
-                                    >
-                                        <div className='my-2'>{t('Linked Releases')}</div>
-                                    </ListGroup.Item>
+                                    {showLinkedReleases && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                        >
+                                            <div className='my-2'>{t('Linked Releases')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item
                                         action
                                         eventKey={ReleaseTabIds.LINKED_PACKAGES}
@@ -680,14 +681,16 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                                 />
                                             </Tab.Pane>
                                         )}
-                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
-                                            <LinkedReleases
-                                                actionType={ActionType.EDIT}
-                                                release={release}
-                                                releasePayload={releasePayload}
-                                                setReleasePayload={setReleasePayload}
-                                            />
-                                        </Tab.Pane>
+                                        {showLinkedReleases && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                                <LinkedReleases
+                                                    actionType={ActionType.EDIT}
+                                                    release={release}
+                                                    releasePayload={releasePayload}
+                                                    setReleasePayload={setReleasePayload}
+                                                />
+                                            </Tab.Pane>
+                                        )}
                                         <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
                                             <EditLinkedPackages
                                                 releasePayload={releasePayload}

@@ -91,7 +91,7 @@ function base64urlEncode(buffer: Buffer) {
     return buffer.toString('base64').replace('+', '-').replace('/', '_').replace(/=+$/, '')
 }
 
-function codeChallengeGenerator(verifier: crypto.BinaryLike) {
+function codeChallengeGenerator(verifier: string | NodeJS.ArrayBufferView) {
     const hash = crypto.createHash('sha256').update(verifier).digest()
     const challenge = base64urlEncode(hash)
     return challenge

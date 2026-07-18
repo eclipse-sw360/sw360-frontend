@@ -9,11 +9,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { DocumentTypes, ErrorDetails, Resources } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ComponentsUsing from './ComponentsUsing'
 import ProjectsUsing from './ProjectsUsing'
 
@@ -25,32 +27,17 @@ interface Props {
 
 const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.Element => {
     const [resourcesUsing, setResourceUsing] = useState<Resources | undefined>(undefined)
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
                 setShowProcessing(true)
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(
-                    `${documentType}/usedBy/${documentId}`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`${documentType}/usedBy/${documentId}`, signal)
                 if (response.status === StatusCodes.NO_CONTENT) {
                     return
                 }
@@ -74,7 +61,6 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
     }, [
         documentId,
         documentType,
-        session,
     ])
 
     return (

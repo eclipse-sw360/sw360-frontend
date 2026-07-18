@@ -207,6 +207,7 @@ export function PageSizeSelector({
     const setPageSize = (sz: number) =>
         setPageableQueryParam({
             ...pageableQueryParam,
+            page: 0,
             page_entries: sz,
         })
     return (

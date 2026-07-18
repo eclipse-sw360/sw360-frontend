@@ -9,9 +9,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 
@@ -23,15 +22,6 @@ export default function LicenseInfoDownloadConfirmationModal({
     setShow: Dispatch<SetStateAction<boolean>>
 }): ReactNode {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <>

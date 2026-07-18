@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -28,7 +27,8 @@ import {
     ProjectPayload,
     SearchResult,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface AlertData {
     variant: string
@@ -40,6 +40,7 @@ interface Props {
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     show: boolean
     setShow: (show: boolean) => void
+    mode: 'SET' | 'UPDATE'
 }
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
@@ -48,27 +49,26 @@ type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-export default function LinkProjectsModal({ projectPayload, setProjectPayload, show, setShow }: Props): JSX.Element {
+export default function LinkProjectsModal({
+    projectPayload,
+    setProjectPayload,
+    show,
+    setShow,
+    mode,
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
     const [byNameOnly, setByNameOnly] = useState(true)
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
+    const [linking, setLinking] = useState(false)
 
     useEffect(() => {
         setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
     }, [
         projectPayload,
+        show,
     ])
 
     const columns = useMemo<ColumnDef<Project>[]>(
@@ -196,7 +196,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: 'name,asc',
+        sort: 'score,asc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -214,14 +214,13 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -298,7 +297,6 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
     const handleSearch = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
 
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
                 // Search by name only using /projects endpoint
@@ -320,7 +318,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -349,11 +347,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                     .filter(([k]) => k !== 'sort')
                     .forEach(([key, value]) => params.append(key, String(value)))
 
-                const response = await ApiUtils.GET(
-                    `search?${params.toString()}`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`search?${params.toString()}`, signal)
                 if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -374,11 +368,8 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                 }
 
                 // Fetch full details for each project
-                const accessToken = session.data?.user.access_token
-                if (!accessToken) return
-
                 const projectPromises = projectIds.map((id) =>
-                    ApiUtils.GET(`projects/${id}`, accessToken, signal)
+                    ApiUtils.GET(`projects/${id}`, signal)
                         .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
                         .catch(() => null),
                 )
@@ -414,6 +405,61 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
         setLinkProjects(m)
     }
 
+    const handleLinkProjects = async (projectId: string) => {
+        setLinking(true)
+        try {
+            const data = {
+                linkedProjects: Object.fromEntries(linkProjects),
+            }
+
+            const response = await ApiUtils.PATCH(`projects/${projectId}`, data)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+            const res = (await response.json()) as Project
+            setAlert({
+                variant: 'success',
+                message: (
+                    <>
+                        <p>
+                            {`${t('The projects have been successfully linked to project')} `}
+                            <span className='fw-bold'>{res.name}</span>.{' '}
+                        </p>
+                        <p>
+                            {t('Click')}{' '}
+                            <Link
+                                href={`/projects/edit/${projectId}?tab=linkedProjectsAndReleases`}
+                                className='text-link'
+                            >
+                                {t('here')}
+                            </Link>{' '}
+                            {t('to edit the project relation')}.
+                        </p>
+                    </>
+                ),
+            })
+        } catch (error) {
+            if (error instanceof ApiError && error.isAborted) {
+                return
+            }
+            const message =
+                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
+            setAlert({
+                variant: 'danger',
+                message: (
+                    <>
+                        <p>{message}</p>
+                    </>
+                ),
+            })
+        } finally {
+            setLinking(false)
+        }
+    }
+
     const closeModal = () => {
         setShow(false)
         setProjectData([])
@@ -432,6 +478,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
             sort: '',
         })
         setSearchText(undefined)
+        setLinkProjects(new Map())
     }
 
     return (
@@ -542,6 +589,7 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                                         setPageableQueryParam((prev) => ({
                                             ...prev,
                                             page: 0,
+                                            sort: 'score,asc',
                                         }))
                                         handleSearch()
                                     }}
@@ -591,10 +639,10 @@ export default function LinkProjectsModal({ projectPayload, setProjectPayload, s
                 <Button
                     variant='primary'
                     onClick={() => {
-                        projectPayloadSetter()
-                        closeModal()
+                        mode === 'SET' ? projectPayloadSetter() : handleLinkProjects(projectPayload.id ?? '')
+                        mode === 'SET' && closeModal()
                     }}
-                    disabled={linkProjects.size === 0}
+                    disabled={linkProjects.size === 0 || linking}
                 >
                     {t('Link Projects')}
                 </Button>

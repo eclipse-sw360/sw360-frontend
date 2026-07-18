@@ -16,17 +16,18 @@ import { StatusCodes } from 'http-status-codes'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink, UserGroupType } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import DeleteReleaseModal from './DeleteReleaseModal'
 
 type EmbeddedLinkedReleases = Embedded<ReleaseLink, 'sw360:releaseLinks'>
@@ -47,24 +48,45 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [fossologyClearingModelOpen, setFossologyClearingModelOpen] = useState(false)
     const [linkingReleaseId, setLinkingReleaseId] = useState<string | undefined>(undefined)
     const [linkToProjectModalOpen, setLinkToProjectModalOpen] = useState(false)
-    const session = useSession()
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const handleClickDelete = (releaseId: string) => {
         setDeletingRelease(releaseId)
         setDeleteModalOpen(true)
     }
 
-    const handleFossologyClearing = (releaseId: string) => {
-        setClearingReleaseId(releaseId)
-        setFossologyClearingModelOpen(true)
+    const [underClearingWarningOpen, setUnderClearingWarningOpen] = useState(false)
+    const [pendingFossologyReleaseId, setPendingFossologyReleaseId] = useState<string | undefined>(undefined)
+
+    const handleFossologyClearing = (releaseId: string, clearingState?: string) => {
+        if (clearingState === 'UNDER_CLEARING') {
+            setPendingFossologyReleaseId(releaseId)
+            setUnderClearingWarningOpen(true)
+        } else {
+            setClearingReleaseId(releaseId)
+            setFossologyClearingModelOpen(true)
+        }
+    }
+
+    const confirmFossologyClearing = () => {
+        setUnderClearingWarningOpen(false)
+        if (pendingFossologyReleaseId) {
+            setClearingReleaseId(pendingFossologyReleaseId)
+            setFossologyClearingModelOpen(true)
+            setPendingFossologyReleaseId(undefined)
+        }
     }
 
     const handleLinkToProject = (releaseId: string) => {
@@ -130,7 +152,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 header: t('Actions'),
                 enableSorting: false,
                 cell: ({ row }) => {
-                    const { id } = row.original
+                    const { id, clearingState } = row.original
                     return (
                         <span className='d-flex justify-content-evenly'>
                             <Image
@@ -141,7 +163,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                     marginRight: '5px',
                                 }}
                                 alt='Fossology'
-                                onClick={() => handleFossologyClearing(id)}
+                                onClick={() => handleFossologyClearing(id, clearingState)}
                             />
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link href={`/components/editRelease/${id}`}>
@@ -152,10 +174,12 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                 </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Duplicate')}</Tooltip>}>
-                                <BsClipboard
-                                    className='btn-icon'
-                                    size={20}
-                                />
+                                <Link href={`/components/edit/${componentId}/release/add?duplicate=${id}`}>
+                                    <BsClipboard
+                                        className='btn-icon'
+                                        size={20}
+                                    />
+                                </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Link Project')}</Tooltip>}>
                                 <BsLink45Deg
@@ -215,7 +239,6 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -226,7 +249,6 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
                     Object.fromEntries(
@@ -236,7 +258,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -269,7 +291,6 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
 
         return () => controller.abort()
     }, [
-        session,
         componentId,
         pageableQueryParam,
     ])
@@ -283,7 +304,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         state: {
             columnVisibility: {
                 actions:
-                    !(session?.data?.user?.userGroup === UserGroupType.SECURITY_USER) ||
+                    !(userIdentity?.userGroup === UserGroupType.SECURITY_USER) ||
                     calledFromModerationRequestDetail === undefined ||
                     calledFromModerationRequestDetail === false,
             },
@@ -390,6 +411,37 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     releaseId={linkingReleaseId}
                 />
             )}
+            <Modal
+                show={underClearingWarningOpen}
+                onHide={() => setUnderClearingWarningOpen(false)}
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>{t('Release Under Clearing')}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>
+                        {t('The clearing state of this release is currently')} <b>{t('UNDER_CLEARING')}</b>
+                        {', '}
+                        {t('which means someone is already working on it')}.{' '}
+                        {t('Do you still want to trigger the FOSSology process')}?
+                    </p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant='secondary'
+                        onClick={() => setUnderClearingWarningOpen(false)}
+                    >
+                        {t('Cancel')}
+                    </Button>
+                    <Button
+                        variant='primary'
+                        onClick={confirmFossologyClearing}
+                    >
+                        {t('Proceed')}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

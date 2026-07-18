@@ -11,8 +11,7 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
-import { type JSX, useEffect } from 'react'
+import { type JSX } from 'react'
 import { Release } from '@/object-types'
 import COTSOSSInformation from './COTSOSSInformation'
 import CommercialDetailsAdministration from './CommercialDetailsAdministration'
@@ -36,16 +35,6 @@ function AddCommercialDetails({
     cotsResponsible,
     setCotsResponsible,
 }: Props): JSX.Element {
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     return (
         <>
             <div

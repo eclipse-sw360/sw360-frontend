@@ -19,7 +19,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
@@ -27,8 +26,8 @@ import { BsPencil } from 'react-icons/bs'
 import { packageManagers } from '@/app/[locale]/packages/components/PackageManagers'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from '@/components/sw360'
 import { ErrorDetails, FilterOption, Package, Project, ReleaseClearingStateMapping } from '@/object-types'
-import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     projectId: string
@@ -68,18 +67,9 @@ const clearingStateFilterOptions: FilterOption[] = [
 
 export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [packagesData, setPackagesData] = useState<Package[]>(() => [])
     const memoizedPackagesData = useMemo(
@@ -314,7 +304,6 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
     )
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -325,12 +314,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/packages`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/packages`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -350,12 +334,10 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
 
         return () => controller.abort()
     }, [
-        session,
         projectId,
     ])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -366,8 +348,7 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(`projects/${projectId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -387,7 +368,6 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
 
         return () => controller.abort()
     }, [
-        session,
         projectId,
     ])
 

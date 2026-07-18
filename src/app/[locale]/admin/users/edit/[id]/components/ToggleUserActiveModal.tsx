@@ -11,13 +11,14 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
-import React, { type JSX, useEffect } from 'react'
+import React, { type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     userId: string
@@ -36,35 +37,18 @@ const ToggleUserActiveModal = ({
 }: Props): JSX.Element => {
     const t = useTranslations('default')
     const router = useRouter()
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const toggleUserAccount = async () => {
         try {
-            const session = await getSession()
-            if (!session) {
-                return signOut()
-            }
-            const response = await ApiUtils.PATCH(
-                `users/${userId}`,
-                {
-                    deactivated: !isUserDeactived,
-                },
-                session.user.access_token,
-            )
+            const response = await ApiUtils.PATCH(`users/${userId}`, {
+                deactivated: !isUserDeactived,
+            })
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 router.push('/admin/users')
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 MessageService.error(t('Something went wrong'))
             }

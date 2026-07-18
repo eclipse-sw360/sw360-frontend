@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -32,7 +31,9 @@ import {
     PageableQueryParam,
     PaginationMeta,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 type EmbeddedVulnerabilities = Embedded<LinkedVulnerability, 'sw360:vulnerabilityDTOes'>
@@ -46,7 +47,6 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const [component, setComponent] = useState<Component>()
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [changeLogId, setChangeLogId] = useState('')
-    const session = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
 
     const handleSelect = (key: string | null) => {
@@ -54,36 +54,23 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     }
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
-    const fetchData = async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == StatusCodes.OK) {
-            const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
-            return data
-        } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            await signOut()
-        } else {
-            notFound()
-        }
-    }
-
-    useEffect(() => {
-        fetchData(`components/${componentId}`)
-            .then((component: Component | undefined) => {
-                setComponent(component)
-            })
-            .catch((err) => console.error(err))
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET(`components/${componentId}`)
+                if (response.status == StatusCodes.OK) {
+                    const data = (await response.json()) as Component & EmbeddedVulnerabilities & EmbeddedChangelogs
+                    setComponent(data)
+                } else if (response.status == StatusCodes.UNAUTHORIZED) {
+                    dispatchSessionExpiredEvent()
+                } else {
+                    notFound()
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        })()
     }, [
         componentId,
-        fetchData,
     ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -107,7 +94,6 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -118,7 +104,6 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${componentId}`,
                     Object.fromEntries(
@@ -129,7 +114,7 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
                     ),
                 )
 
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -161,7 +146,6 @@ const CurrentComponentDetail = ({ componentId }: Props): ReactNode => {
     }, [
         pageableQueryParam,
         componentId,
-        session,
     ])
 
     return component ? (

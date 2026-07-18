@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
@@ -22,38 +21,24 @@ import Summary from '@/app/[locale]/projects/detail/[id]/components/Summary'
 import VulnerabilityTrackingStatusComponent from '@/app/[locale]/projects/detail/[id]/components/VulnerabilityTrackingStatus'
 import Attachments from '@/components/Attachments/Attachments'
 import { AdministrationDataType, ErrorDetails, SummaryDataType } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 export default function CurrentProjectDetail({
     projectId,
 }: Readonly<{
     projectId: string
 }>): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [administrationData, setAdministrationData] = useState<AdministrationDataType | undefined>(undefined)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
-            if (CommonUtils.isNullOrUndefined(session)) return
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/summaryAdministration`,
-                    session.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -76,8 +61,6 @@ export default function CurrentProjectDetail({
         return () => controller.abort()
     }, [
         projectId,
-        session,
-        status,
     ])
 
     return (

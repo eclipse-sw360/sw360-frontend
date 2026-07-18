@@ -194,7 +194,7 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
                             <option value='INTERNAL_USE'>{t('Internal use')}</option>
                             <option value='OPTIONAL'>{t('Optional')}</option>
                             <option value='TO_BE_REPLACED'>{t('To be replaced')}</option>
-                            <option value='CODE_SNIPPET'>{t('Code snippet')}</option>
+                            <option value='CODE_SNIPPET'>{t('Code Snippet')}</option>
                         </select>
                     </div>
                 ),

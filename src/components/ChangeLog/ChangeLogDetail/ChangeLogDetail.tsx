@@ -25,6 +25,9 @@ const ChangeLogDetail = ({ changeLogData }: Props): JSX.Element => {
     const [toggle, setToggle] = useState(false)
 
     const handleReferenceDoc = () => {
+        if (CommonUtils.isNullOrUndefined(changeLogData)) {
+            return
+        }
         if (
             CommonUtils.isNullOrUndefined(changeLogData?.referenceDoc) &&
             CommonUtils.isNullOrUndefined(changeLogData?.info)

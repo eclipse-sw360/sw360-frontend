@@ -11,11 +11,11 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { type JSX, useEffect, useState } from 'react'
 import { Tab, Tabs } from 'react-bootstrap'
 import { Embedded, Project, ProjectData, ProjectVulnerabilityTabType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import VulnerabilityTab from './VulnerabilityTab'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -36,32 +36,17 @@ const extractLinkedProjects = (projectPayload: Project[], projectData: ProjectDa
 }
 
 export default function ProjectVulnerabilities({ projectData }: { projectData: ProjectData }): JSX.Element {
-    const { data: session, status } = useSession()
     const [data, setData] = useState<ProjectData[]>([])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
-        if (CommonUtils.isNullOrUndefined(session)) return
-
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectData.id}/linkedProjects?transitive=true`,
-                    session.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectData.id}/linkedProjects?transitive=true`, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -79,9 +64,7 @@ export default function ProjectVulnerabilities({ projectData }: { projectData: P
         })()
 
         return () => controller.abort(signal)
-    }, [
-        session,
-    ])
+    }, [])
 
     return (
         <>

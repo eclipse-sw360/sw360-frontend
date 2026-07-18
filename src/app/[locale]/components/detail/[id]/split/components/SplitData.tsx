@@ -9,7 +9,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsArrowCounterclockwise, BsArrowRight } from 'react-icons/bs'
@@ -29,15 +28,7 @@ export default function SplitComponent({
     const t = useTranslations('default')
     const [releaseIdsSplitList, setReleaseIdsSplitList] = useState<ListFieldProcessComponent[]>([])
     const [attachmentsSplitList, setAttachmentsSplitList] = useState<ListFieldProcessComponent[]>([])
-    const { status } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
     useEffect(() => {
         if (!sourceComponent || !targetComponent) return
         sourceComponent.releaseIds = (sourceComponent._embedded?.['sw360:releases'] ?? []).map((rel) => rel.id ?? '')

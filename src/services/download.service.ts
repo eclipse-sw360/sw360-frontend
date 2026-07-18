@@ -9,31 +9,45 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Session } from 'next-auth'
-import { signOut } from 'next-auth/react'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+
+const parseFilenameFromContentDisposition = (response: Response): string | null => {
+    const header = response.headers.get('Content-Disposition')
+    if (!header) return null
+
+    // Prefer RFC 5987 filename* (UTF-8 encoded)
+    const filenameStar = header.match(/filename\*=UTF-8''(.+?)(?:;|$)/i)
+    if (filenameStar) {
+        return decodeURIComponent(filenameStar[1].trim())
+    }
+
+    // Fallback to plain filename="..."
+    const filenameQuoted = header.match(/filename="(.+?)"/) || header.match(/filename=([^;\s]+)/)
+    if (filenameQuoted) {
+        return filenameQuoted[1].trim()
+    }
+
+    return null
+}
 
 const download = async (
     url: string,
-    session: Session | null,
     fileName: string,
     headers?: {
         [key: string]: string
     },
 ): Promise<number | undefined> => {
-    if (CommonUtils.isNullOrUndefined(session)) {
-        return signOut()
-    }
     try {
-        const response = await ApiUtils.GET(url, session.user.access_token, undefined, headers)
+        const response = await ApiUtils.GET(url, undefined, headers)
         if (!response.ok) {
             return response.status
         }
+        const resolvedFileName = parseFilenameFromContentDisposition(response) ?? fileName
         const blob = await response.blob()
         const objectURL = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = objectURL
-        link.setAttribute('download', fileName)
+        link.setAttribute('download', resolvedFileName)
         link.click()
         setTimeout(() => window.URL.revokeObjectURL(objectURL), 0)
         return response.status

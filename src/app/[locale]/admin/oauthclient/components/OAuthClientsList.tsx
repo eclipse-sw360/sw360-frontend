@@ -12,14 +12,15 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import { OAuthClient } from '@/object-types'
 import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
+import { getAuthenticatedAccessToken } from '@/utils/api/authenticatedApi.util'
 import { SW360_API_URL } from '@/utils/env'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AddClientDialog from './AddClientDialog'
 import DeleteClientDialog from './DeleteClientDialog'
 import OAuthClientTable from './OAuthClientTable'
@@ -27,21 +28,12 @@ import OAuthClientTable from './OAuthClientTable'
 function OAuthClientsList(): ReactNode {
     const t = useTranslations('default')
     const [numberClient, setNumberClient] = useState(0)
-    const { status } = useSession()
     const [openAddClientDialog, setOpenAddClientDialog] = useState(false)
     const [openDeleteClientDialog, setOpenDeleteClientDialog] = useState(false)
     const [selectedClient, setSelectedClient] = useState<OAuthClient | null>(null)
     const [refreshTrigger, setRefreshTrigger] = useState(0)
     const [clients, setClients] = useState<OAuthClient[]>([])
     const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const addClient = () => {
         setSelectedClient(null)
@@ -87,27 +79,20 @@ function OAuthClientsList(): ReactNode {
     const fetchClientsData = async () => {
         setLoading(true)
         try {
-            const session = await getSession()
-
-            if (CommonUtils.isNullOrUndefined(session)) {
-                setLoading(false)
-                return signOut()
-            }
-
-            const response = await sendOAuthClientRequest(session.user.access_token)
+            const response = await sendOAuthClientRequest(await getAuthenticatedAccessToken())
 
             if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as OAuthClient[]
                 setClients(data)
                 setNumberClient(data.length)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
-                MessageService.error(t('Error when processing'))
+                MessageService.error(t('Error while processing'))
             }
         } catch (err) {
             console.error('Error fetching clients:', err)
-            MessageService.error(t('Error when processing'))
+            MessageService.error(t('Error while processing'))
         } finally {
             setLoading(false)
         }

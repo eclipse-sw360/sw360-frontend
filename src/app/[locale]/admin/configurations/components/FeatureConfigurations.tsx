@@ -12,13 +12,15 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
+import { useSW360BackendConfigContext } from '@/contexts'
 import { ConfigKeys, Configuration, ConfigurationContainers } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import AttachmentStorageConfigurations from './AttachmentStorageConfigurations'
 import MailConfigurations from './MailConfigurations'
 import OnOffSwitch from './OnOffSwitch'
@@ -29,30 +31,16 @@ import SelectUserGroup from './SelectUserGroup'
 const FeatureConfigurations = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentConfig, setCurrentConfig] = useState<Configuration | undefined>(undefined)
-    const { status } = useSession()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
+    const { refreshConfig } = useSW360BackendConfigContext()
 
     const fetchSw360Config = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            signOut()
-            return
-        }
-        const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
+        const response = await ApiUtils.GET(apiEndpoint)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as Configuration
             setCurrentConfig(data)
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            await signOut()
+            dispatchSessionExpiredEvent()
         } else {
             setCurrentConfig({} as Configuration)
         }
@@ -76,18 +64,12 @@ const FeatureConfigurations = (): JSX.Element => {
             MessageService.error(t('API Token Length must be at least 20'))
             return
         }
-
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            signOut()
-            return
-        }
-        const response = await ApiUtils.PATCH(apiEndpoint, currentConfig, session.user.access_token)
+        const response = await ApiUtils.PATCH(apiEndpoint, currentConfig)
         if (response.status == StatusCodes.OK) {
+            refreshConfig()
             MessageService.success(t('Update backend configurations successfully'))
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            await signOut()
+            dispatchSessionExpiredEvent()
         } else {
             const responseData = await response.json()
             MessageService.error(responseData.message)
@@ -251,6 +233,18 @@ const FeatureConfigurations = (): JSX.Element => {
                                         />
                                     </td>
                                     <td className='align-middle'>{t('admin_private_access_description')}</td>
+                                </tr>
+                                <tr id='nested-release-enabled'>
+                                    <td className='align-middle fw-bold'>{t('Nested Release Linking Feature')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.IS_NESTED_RELEASE_ENABLED] === 'true'}
+                                            propKey={ConfigKeys.IS_NESTED_RELEASE_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('nested_release_enabled_description')}</td>
                                 </tr>
                                 <tr id='sbom-import-export-access-usergroup'>
                                     <td className='align-middle fw-bold'>

@@ -9,12 +9,11 @@
 
 'use client'
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
-import { useTranslations } from 'next-intl'
+import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Configuration, ConfigurationContainers } from '@/object-types'
-import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { useLocalStorage } from './index'
 
 interface CachedSW360Config {
@@ -26,7 +25,6 @@ export function useSW360BackendConfig() {
     const [processedConfig, setProcessedConfig] = useLocalStorage<CachedSW360Config | null>('sw360BackendConfig', null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const { status } = useSession()
-    const t = useTranslations('default')
     const apiEndpoint = `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`
     const hasFetchedRef = useRef(false)
 
@@ -57,15 +55,7 @@ export function useSW360BackendConfig() {
 
             setIsLoading(true)
             hasFetchedRef.current = true
-
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                signOut()
-                return
-            }
-
-            const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
+            const response = await ApiUtils.GET(apiEndpoint)
             if (response.status == StatusCodes.OK) {
                 const configData = (await response.json()) as Configuration
                 setProcessedConfig({
@@ -73,7 +63,7 @@ export function useSW360BackendConfig() {
                     timestamp: Date.now(),
                 })
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 setProcessedConfig(null)
             }

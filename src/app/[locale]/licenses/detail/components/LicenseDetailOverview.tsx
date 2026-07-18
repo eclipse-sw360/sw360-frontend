@@ -13,7 +13,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -32,7 +31,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import Detail from './Detail'
 import Obligations from './Obligations'
 import Text from './Text'
@@ -51,16 +51,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const params = useSearchParams()
     const [changeLogId, setChangeLogId] = useState('')
     const [changelogTab, setChangelogTab] = useState('list-change')
-    const session = useSession()
     const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
@@ -72,9 +63,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`licenses/${licenseId}`, session.user.access_token, signal)
+                const response = await ApiUtils.GET(`licenses/${licenseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -102,18 +91,9 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     }
 
     const handleUpdateWhitelist = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
         if (CommonUtils.isNullOrUndefined(whitelist)) return
         const whitelistObj = Object.fromEntries(whitelist)
-        const response = await ApiUtils.PATCH(
-            `licenses/${licenseId}/whitelist`,
-            whitelistObj,
-            session.user.access_token,
-        )
+        const response = await ApiUtils.PATCH(`licenses/${licenseId}/whitelist`, whitelistObj)
         if (response.status == StatusCodes.OK) {
             MessageService.success(t('License updated successfully'))
             window.location.reload()
@@ -180,7 +160,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -191,7 +170,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${licenseId}`,
                     Object.fromEntries(
@@ -202,7 +180,7 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
                     ),
                 )
 
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -234,7 +212,6 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     }, [
         pageableQueryParam,
         licenseId,
-        session,
     ])
 
     return (

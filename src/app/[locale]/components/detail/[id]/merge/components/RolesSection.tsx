@@ -9,7 +9,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
@@ -28,15 +27,6 @@ export default function RolesSection({
 }): ReactNode {
     const t = useTranslations('default')
     const [moderatorsMergeList, setModeratorsMergeList] = useState<ListFieldProcessComponent[]>([])
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         setModeratorsMergeList([

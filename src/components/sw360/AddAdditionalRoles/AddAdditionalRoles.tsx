@@ -9,7 +9,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -36,7 +35,6 @@ function AddAdditionalRoles({
     const [inputListData, setInputListData] = useState<InputKeyValue[]>([])
     const [isDeleteItem, setIsDeleteItem] = useState<boolean>(false)
     const [currentIndex, setCurrentIndex] = useState<number>(-1)
-    const { status } = useSession()
 
     // Configs from backend
     const projectAdditionalRoles =
@@ -69,14 +67,6 @@ function AddAdditionalRoles({
                   'Contributor',
                   'Expert',
               ]
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         setInputListData(
@@ -160,7 +150,7 @@ function AddAdditionalRoles({
                                     key=''
                                     name='key'
                                     value={elem.key}
-                                    aria-label={t('Additional Role')}
+                                    aria-label={t('Additional Roles')}
                                     onChange={(e) => handleInputChange(e, j)}
                                 >
                                     {documentType === DocumentTypes.COMPONENT

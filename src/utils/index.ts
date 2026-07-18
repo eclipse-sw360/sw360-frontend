@@ -7,7 +7,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import ApiUtils, { ApiError } from './api/api.util'
+import UnauthenticatedApiUtils, { ApiError } from './api/api.util'
+import AuthenticatedApiUtils from './api/authenticatedApi.util'
 import CommonUtils from './common.utils'
 
-export { ApiError, ApiUtils, CommonUtils }
+// API client usage guide:
+// - Use AuthenticatedApiUtils for protected backend endpoints.
+//   It resolves the current session token and dispatches session-expired flow on 401.
+// - Use UnauthenticatedApiUtils for public/anonymous endpoints (for example, version/footer calls).
+// Backward compatibility: ApiUtils stays mapped to the unauthenticated/transport client.
+const ApiUtils = UnauthenticatedApiUtils
+
+export { ApiError, ApiUtils, AuthenticatedApiUtils, CommonUtils, UnauthenticatedApiUtils }

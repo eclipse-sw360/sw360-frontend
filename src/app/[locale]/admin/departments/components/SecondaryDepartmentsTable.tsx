@@ -14,27 +14,18 @@
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import SecondaryDepartments from './SecondaryDepartments'
 
 const SecondaryDepartmentsTable = (): JSX.Element => {
     const t = useTranslations('default')
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<
         ColumnDef<
@@ -104,7 +95,6 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
     const [showProcessing, setShowProcessing] = useState(true)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -115,9 +105,7 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
-                const response = await ApiUtils.GET('departments/members', session.data.user.access_token, signal)
+                const response = await ApiUtils.GET('departments/members', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -136,9 +124,7 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     const table = useReactTable({
         data: Object.entries(memoizedData),

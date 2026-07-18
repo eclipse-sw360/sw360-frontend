@@ -19,13 +19,13 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { ErrorDetails, LicenseDetail, NestedRows, Obligation } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     licenseId?: string
@@ -36,19 +36,10 @@ interface Props {
 
 const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Props): ReactNode => {
     const t = useTranslations('default')
-    const session = useSession()
 
     const [globalFilter, setGlobalFilter] = useState('')
     const [obligationData, setObligationData] = useState<Obligation[]>([])
     const [showProcessing, setShowProcessing] = useState(false)
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const memoizedData = useMemo(
         () =>
@@ -81,9 +72,8 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 setShowProcessing(true)
-                const response = await ApiUtils.GET(`licenses/${licenseId}`, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(`licenses/${licenseId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -109,7 +99,6 @@ const Obligations = ({ licenseId, isEditWhitelist, whitelist, setWhitelist }: Pr
         return () => controller.abort()
     }, [
         licenseId,
-        session.data,
         isEditWhitelist,
         setWhitelist,
     ])

@@ -13,12 +13,15 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut } from 'next-auth/react'
+import { notFound } from 'next/navigation'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { Embedded, ErrorDetails, ReleaseDetail } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { Embedded, ReleaseDetail } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
@@ -31,14 +34,12 @@ function RecentReleasesWidget(): ReactNode {
     const [reload, setReload] = useState(false)
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status === StatusCodes.OK) {
+        const response = await ApiUtils.GET(url)
+        if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedReleases
             return data
-        } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            return signOut()
+        } else if (response.status == StatusCodes.UNAUTHORIZED) {
+            return dispatchSessionExpiredEvent()
         } else {
             const err = (await response.json()) as ErrorDetails
             throw new ApiError(err.message, {
@@ -50,7 +51,7 @@ function RecentReleasesWidget(): ReactNode {
     useEffect(() => {
         setLoading(true)
         void fetchData('releases/recentReleases')
-            .then((releases: EmbeddedReleases | undefined) => {
+            .then((releases) => {
                 if (releases === undefined) {
                     return
                 }

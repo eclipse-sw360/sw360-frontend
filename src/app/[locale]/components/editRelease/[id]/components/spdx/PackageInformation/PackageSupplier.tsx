@@ -9,8 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { signOut, useSession } from 'next-auth/react'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { InputKeyValue } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 
@@ -29,16 +28,6 @@ function PackageSupplier({
     isPackageSupplier,
     setIsPackageSupplier,
 }: Props): ReactNode {
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const { name, value } = e.target
         const list: InputKeyValue = dataPackageSupplier

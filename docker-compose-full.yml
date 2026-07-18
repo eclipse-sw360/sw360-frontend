@@ -42,8 +42,6 @@ services:
     image: docker.io/library/couchdb:3.5-nouveau
     restart: unless-stopped
     container_name: couchdb_nouveau
-    volumes:
-      - ./config/couchdb/nouveau.yaml:/opt/nouveau/etc/nouveau.yaml
     ports:
       - "5987:5987"
       - "5988:5988"
@@ -94,7 +92,7 @@ services:
       - sw360
 
   keycloak:
-    image: "ghcr.io/eclipse-sw360/sw360/keycloak:26.5.5"
+    image: "ghcr.io/eclipse-sw360/sw360/keycloak:26.6.4"
     container_name: keycloak
     restart: unless-stopped
     env_file: ./config/keycloak/.env.keycloak
@@ -138,7 +136,7 @@ services:
 
   # Nginx reverse proxy
   web:
-    image: docker.io/library/nginx:1.31.0-trixie
+    image: docker.io/library/nginx:1.31.2-trixie
     container_name: sw360_web
     restart: unless-stopped
     env_file: ./config/nginx/.env.web

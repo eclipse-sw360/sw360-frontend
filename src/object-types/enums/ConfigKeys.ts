@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2024. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2024. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -18,8 +19,7 @@ enum ConfigKeys {
     ATTACHMENT_DELETE_NO_OF_DAYS = 'attachment.delete.no.of.days',
     ATTACHMENT_STORE_FILE_SYSTEM_LOCATION = 'attachment.store.file.system.location',
     AUTO_SET_ECC_STATUS = 'auto.set.ecc.status',
-    MAIL_REQUEST_FOR_PROJECT_REPORT = 'send.project.spreadsheet.export.to.mail.enabled',
-    MAIL_REQUEST_FOR_COMPONENT_REPORT = 'send.component.spreadsheet.export.to.mail.enabled',
+    MAIL_REQUEST_FOR_REPORT = 'send.export.to.mail.enabled',
     IS_BULK_RELEASE_DELETING_ENABLED = 'bulk.release.deleting.enabled',
     DISABLE_CLEARING_FOSSOLOGY_REPORT_DOWNLOAD = 'disable.clearing.fossology.report.download',
     IS_FORCE_UPDATE_ENABLED = 'rest.force.update.enabled',
@@ -31,6 +31,7 @@ enum ConfigKeys {
     IS_PACKAGE_PORTLET_ENABLED = 'package.portlet.enabled',
     RELEASE_SOURCECODE_URL_SKIP_DOMAINS = 'release.sourcecodeurl.skip.domains',
     REST_API_TOKEN_LENGTH = 'rest.apitoken.length',
+    IS_NESTED_RELEASE_ENABLED = 'nested.release.enabled',
 }
 
 export default ConfigKeys

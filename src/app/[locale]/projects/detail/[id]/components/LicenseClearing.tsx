@@ -9,24 +9,39 @@
 
 'use client'
 
+import { type ColumnFiltersState } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
-import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
+import {
+    ConfigKeys,
+    ErrorDetails,
+    LicenseClearing as LicenseClearingData,
+    Project,
+    UIConfigKeys,
+    UserGroupType,
+} from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
 import DependencyNetworkTreeView from './DependencyNetworkTreeView'
 import ListView from './ListView'
 import TreeView from './TreeView'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
+
+const tableIdToUrlParamMapper: Record<string, string> = {
+    type: 'componentType',
+    relation: 'releaseRelation',
+    state: 'clearingState',
+}
 
 function LicenseClearing({
     projectId,
@@ -52,11 +67,17 @@ function LicenseClearing({
     const router = useRouter()
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
-    const [isDependencyNetworkFeatureEnabled, setDependencyNetworkFeatureEnabled] = useState(false)
-    const { status } = useSession()
+    const [licenseClearingData, setLicenseClearingData] = useState<LicenseClearingData | undefined>(undefined)
+    const [linkedProjectsData, setLinkedProjectsData] = useState<Project[]>([])
+    const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState<boolean>(true)
+    const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState<boolean>(true)
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const isLoadingClearingData = isLoadingLicenseClearing || isLoadingLinkedProjects
 
     // Configs from backend
-    const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT)
+    const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
+    const isDependencyNetworkFeatureEnabled =
+        useConfigKeyValue(ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP) === 'true'
     const clearingRequestDisabledGroups = useConfigValue(
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
@@ -64,37 +85,78 @@ function LicenseClearing({
     const disableCrButton = !crIsAllowed
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        setIsLoadingLinkedProjects(true)
+
+        void (async () => {
+            try {
+                const linkedProjectsResponse = await ApiUtils.GET(
+                    `projects/${projectId}/linkedProjects?transitive=true`,
+                    signal,
+                )
+                if (linkedProjectsResponse.status !== StatusCodes.OK) {
+                    const err = (await linkedProjectsResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: linkedProjectsResponse.status,
+                    })
+                }
+
+                const linkedProjects = (await linkedProjectsResponse.json()) as {
+                    _embedded?: {
+                        'sw360:projects'?: Project[]
+                    }
+                }
+
+                setLinkedProjectsData(linkedProjects._embedded?.['sw360:projects'] ?? [])
+            } catch (error) {
+                ApiUtils.reportError(error)
+            } finally {
+                setIsLoadingLinkedProjects(false)
+            }
+        })()
+
+        return () => controller.abort()
     }, [
-        status,
+        projectId,
     ])
 
     useEffect(() => {
-        ;(async () => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        setIsLoadingLicenseClearing(true)
+
+        void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) {
-                    MessageService.error(t('Session has expired'))
-                    return signOut()
+                const filterParams = columnFilters
+                    .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
+                    .filter((param) => param !== '')
+                    .join('&')
+
+                const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? `&${filterParams}` : ''}`
+                const response = await ApiUtils.GET(url, signal)
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
+                    })
                 }
-                const response = await ApiUtils.GET('configurations?changeable=false', session.user.access_token)
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    signOut()
-                } else if (response.status !== StatusCodes.OK) {
-                    setDependencyNetworkFeatureEnabled(false)
-                    return
-                }
-                const config = await response.json()
-                setDependencyNetworkFeatureEnabled(
-                    config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] === 'true',
-                )
-            } catch {
-                setDependencyNetworkFeatureEnabled(false)
+
+                setLicenseClearingData((await response.json()) as LicenseClearingData)
+            } catch (error) {
+                ApiUtils.reportError(error)
+            } finally {
+                setIsLoadingLicenseClearing(false)
             }
         })()
-    }, [])
+
+        return () => controller.abort()
+    }, [
+        projectId,
+        columnFilters,
+    ])
 
     const generateSourceCodeBundle = (withSubProjects: boolean) => {
         router.push(`/projects/generateSourceCode/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`)
@@ -108,9 +170,6 @@ function LicenseClearing({
 
     const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
             const mailEnabled = mailRequestForProjectReport === 'true'
             const url = withLinkedRelease
                 ? `reports?module=PROJECTS&withlinkedreleases=true&projectId=${projectId}`
@@ -120,7 +179,7 @@ function LicenseClearing({
                 // If mail is not enabled, download the file immediately
                 const currentDate = new Date().toISOString().split('T')[0]
                 const fileName = `Projects-${currentDate}.xlsx`
-                const statusCode = await DownloadService.download(url, session, fileName)
+                const statusCode = await DownloadService.download(url, fileName)
                 if (statusCode === StatusCodes.OK) {
                     MessageService.success(t('Spreadsheet download is successful'))
                 } else if (statusCode === StatusCodes.FORBIDDEN) {
@@ -132,7 +191,7 @@ function LicenseClearing({
                 }
             } else {
                 // If mail is enabled, just send the request and show message
-                const response = await ApiUtils.GET(url, session.user.access_token)
+                const response = await ApiUtils.GET(url)
                 if (response.status === StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
                 } else if (response.status === StatusCodes.FORBIDDEN) {
@@ -255,7 +314,14 @@ function LicenseClearing({
                         {isDependencyNetworkFeatureEnabled ? (
                             <DependencyNetworkTreeView projectId={projectId} />
                         ) : (
-                            <TreeView projectId={projectId} />
+                            <TreeView
+                                projectId={projectId}
+                                licenseClearingData={licenseClearingData}
+                                linkedProjectsData={linkedProjectsData}
+                                isLoadingClearingData={isLoadingClearingData}
+                                columnFilters={columnFilters}
+                                setColumnFilters={setColumnFilters}
+                            />
                         )}
                     </Tab.Pane>
                     <Tab.Pane eventKey='list-view'>
@@ -266,6 +332,11 @@ function LicenseClearing({
                                 projectId={projectId}
                                 projectName={projectName}
                                 projectVersion={projectVersion}
+                                licenseClearingData={licenseClearingData}
+                                linkedProjectsData={linkedProjectsData}
+                                isLoadingClearingData={isLoadingClearingData}
+                                columnFilters={columnFilters}
+                                setColumnFilters={setColumnFilters}
                             />
                         )}
                     </Tab.Pane>

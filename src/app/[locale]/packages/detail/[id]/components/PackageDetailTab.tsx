@@ -11,43 +11,47 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ChangeLog from './Changelog'
 import Summary from './Summary'
 
 function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
     const router = useRouter()
-    // localePrefix is 'never' — do not embed locale in public URLs
-    const packagesPath = '/packages'
+    const param = useParams()
+    const locale = (param.locale as string) || 'en'
+    const packagesPath = `/${locale}/packages`
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     useEffect(() => {
-        if (status !== 'authenticated') return
-
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token, signal)
+                const response = await ApiUtils.GET(`packages/${packageId}`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -69,13 +73,10 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
         return () => controller.abort()
     }, [
         packageId,
-        session,
-        status,
     ])
 
     const handleEditPackage = () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        if (session.user.email === summaryData?._embedded?.createdBy?.email) {
+        if (userIdentity?.email === summaryData?._embedded?.createdBy?.email) {
             MessageService.success(t('You are editing the original document'))
             router.push(`/packages/edit/${packageId}`)
         } else {

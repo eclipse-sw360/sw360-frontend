@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -29,7 +29,9 @@ import {
     UIConfigKeys,
     Vendor,
 } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     componentId: string
@@ -58,7 +60,6 @@ export default function ComponentEditSummary({
     const [moderators, setModerators] = useState<{
         [k: string]: string
     }>({})
-    const { status } = useSession()
 
     // Configs from backend
     const componentExternalIdSuggestions =
@@ -66,31 +67,20 @@ export default function ComponentEditSummary({
             ? (useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) as string[])
             : undefined
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as Component
             return data
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             return notFound()
         }
     }, [])
 
     useEffect(() => {
-        void fetchData(`components/${componentId}`).then((component: Component | undefined) => {
+        void fetchData(`components/${componentId}`).then((component) => {
             if (!component) return
 
             if (component.externalIds) {

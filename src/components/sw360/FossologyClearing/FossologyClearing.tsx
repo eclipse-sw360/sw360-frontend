@@ -12,13 +12,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Button, Modal } from 'react-bootstrap'
 import { Attachment, FossologyProcessInfo, FossologyProcessStatus, ReleaseDetail } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     show: boolean
@@ -40,7 +41,7 @@ const clearingMessages: {
         variant: 'success',
     },
     ERROR_PROCESSING: {
-        message: 'Error when processing!',
+        message: 'Error while processing',
         variant: 'danger',
     },
     SET_OUTDATED: {
@@ -78,15 +79,6 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         percent: 0,
         stepName: '',
     })
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const resetTimeCountDown = () => {
         setTimeInterval(5)
@@ -106,12 +98,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
     }, [])
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.UNAUTHORIZED) {
             MessageService.error(t('Session has expired'))
             return undefined
@@ -126,7 +113,7 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
     const fetchRelease = useCallback(() => {
         const url = `releases/${releaseId}`
         fetchData(url)
-            .then((data: ReleaseDetail | undefined) => {
+            .then((data) => {
                 if (data === undefined) return
                 setRelease(data)
                 numberOfSourceAttachment.current = countSourceAttachment(data._embedded['sw360:attachments'])
@@ -221,13 +208,8 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
 
     const reloadReport = async () => {
         hideMessage()
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
         const url = `releases/${releaseId}/reloadFossologyReport`
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             clearAllInterval()
             setProgressStatus({

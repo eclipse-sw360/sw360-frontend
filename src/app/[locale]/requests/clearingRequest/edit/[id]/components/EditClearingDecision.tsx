@@ -9,13 +9,12 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import DateField from '@/components/DateField'
 import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
-import { CommonUtils } from '@/utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 
 interface Props {
     clearingRequestData: ClearingRequestDetails | undefined
@@ -33,17 +32,21 @@ export default function EditClearingDecision({
     setUpdateClearingRequestPayload,
 }: Props): ReactNode {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
     const [clearingTeamData, setClearingTeamData] = useState<ClearingRequestDataMap>({})
     const [dialogOpenClearingTeam, setDialogOpenClearingTeam] = useState(false)
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const updateClearingTeamData = (user: ClearingRequestDataMap) => {
         const userEmails = Object.keys(user)
@@ -109,9 +112,7 @@ export default function EditClearingDecision({
                             name='priority'
                             value={updateClearingRequestPayload.priority}
                             onChange={updateInputField}
-                            disabled={
-                                CommonUtils.isNullOrUndefined(session) || session.user.userGroup === UserGroupType.USER
-                            }
+                            disabled={userIdentity?.userGroup === UserGroupType.USER}
                             required
                         >
                             <option value='LOW'>{t('Low')}</option>

@@ -214,6 +214,7 @@ export default function Search(): ReactNode {
                             setShowProcessing={setShowProcessing}
                             setPaginationMeta={setPaginationMeta}
                             pageableQueryParam={pageableQueryParam}
+                            setPageableQueryParam={setPageableQueryParam}
                         />
                     </div>
                     <div className='col'>

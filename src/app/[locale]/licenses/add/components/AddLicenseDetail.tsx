@@ -13,11 +13,12 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Embedded, LicensePayload, LicenseType } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     licensePayload: LicensePayload
@@ -47,15 +48,6 @@ const AddLicenseDetail = ({
     const validateShortName = (value: string) => {
         return value.match(/^[A-Za-z0-9\-.+]*$/) ? false : true
     }
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.target.name === 'shortName') {
@@ -85,11 +77,9 @@ const AddLicenseDetail = ({
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`licenseTypes`, session.user.access_token, signal)
+                const response = await ApiUtils.GET(`licenseTypes`, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }

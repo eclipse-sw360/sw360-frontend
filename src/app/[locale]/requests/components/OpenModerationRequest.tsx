@@ -13,13 +13,13 @@ import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
 import ExpandingModeratorCell from './ExpandingModeratorCell'
 
@@ -43,16 +43,7 @@ function OpenModerationRequest(): ReactNode {
         REJECTED: t('REJECTED'),
     }
 
-    const session = useSession()
     const params = useSearchParams()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const formatDate = (timestamp: number | undefined): string | null => {
         if (timestamp === undefined) {
@@ -165,7 +156,6 @@ function OpenModerationRequest(): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -176,7 +166,6 @@ function OpenModerationRequest(): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest`,
@@ -189,7 +178,7 @@ function OpenModerationRequest(): ReactNode {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -217,7 +206,6 @@ function OpenModerationRequest(): ReactNode {
         return () => controller.abort()
     }, [
         params.toString(),
-        session,
     ])
 
     const table = useReactTable({

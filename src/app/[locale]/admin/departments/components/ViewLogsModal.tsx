@@ -12,11 +12,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     show: boolean
@@ -28,22 +29,9 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
     const [logFilesDate, setLogFilesDate] = useState<string[]>([])
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
     const [logFileContents, setLogFileContents] = useState<string[]>([])
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const fetchLogFiles = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            return signOut()
-        }
-        const response = await ApiUtils.GET('departments/logFiles', session.user.access_token)
+        const response = await ApiUtils.GET('departments/logFiles')
         if (response.status !== StatusCodes.OK) {
             return
         }
@@ -62,14 +50,7 @@ const ViewLogsModal = ({ show, setShow }: Props): JSX.Element => {
         if (CommonUtils.isNullEmptyOrUndefinedString(selectedDate)) {
             return
         }
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            return signOut()
-        }
-        const response = await ApiUtils.GET(
-            `departments/logFileContent?date=${selectedDate}`,
-            session.user.access_token,
-        )
+        const response = await ApiUtils.GET(`departments/logFileContent?date=${selectedDate}`)
         if (response.status !== StatusCodes.OK) {
             setLogFileContents([])
             return

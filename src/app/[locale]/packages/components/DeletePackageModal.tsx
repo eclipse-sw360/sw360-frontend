@@ -11,13 +11,15 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type ReactElement, SetStateAction, useState } from 'react'
 import { Alert, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
+
 import MessageService from '@/services/message.service'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -28,7 +30,7 @@ interface DeletePackageModalMetData {
 
 interface AlertData {
     variant: string
-    message: JSX.Element
+    message: ReactElement
 }
 
 export default function DeletePackageModal({
@@ -41,20 +43,11 @@ export default function DeletePackageModal({
     setModalMetaData: Dispatch<SetStateAction<DeletePackageModalMetData>>
     isEditPage: boolean
     onDeleteSuccess?: (packageId: string) => void
-}): ReactNode {
+}): ReactElement {
     const t = useTranslations('default')
     const [alert, setAlert] = useState<AlertData | null>(null)
     const [deleting, setDeleting] = useState<boolean | null>(null)
     const router = useRouter()
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleGoBack = () => {
         router.push('/packages')
@@ -63,12 +56,7 @@ export default function DeletePackageModal({
     const deletePackage = async () => {
         try {
             setDeleting(true)
-            const session = await getSession()
-            if (!session) {
-                return router.push('/')
-            }
-
-            const response = await ApiUtils.DELETE(`packages/${modalMetaData.packageId}`, session.user.access_token)
+            const response = await ApiUtils.DELETE(`packages/${modalMetaData.packageId}`)
 
             if (response.status == StatusCodes.OK) {
                 if (isEditPage) {
@@ -87,9 +75,7 @@ export default function DeletePackageModal({
                             <p>
                                 {t('Package')}{' '}
                                 <strong>
-                                    {`${modalMetaData.packageName}${
-                                        modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''
-                                    }`}
+                                    {`${modalMetaData.packageName}${modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''}`}
                                 </strong>{' '}
                                 {t('deleted successfully')}!
                             </p>
@@ -100,7 +86,7 @@ export default function DeletePackageModal({
                     }
                 }
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
                 if (isEditPage) {
                     MessageService.error(t('Package cannot be deleted'))
@@ -173,9 +159,7 @@ export default function DeletePackageModal({
                     <p>
                         {`${t('Do you really want to delete the package')} `}
                         <span className='fw-medium'>
-                            {`${modalMetaData.packageName}${
-                                modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''
-                            }`}
+                            {`${modalMetaData.packageName}${modalMetaData.packageVersion ? `(${modalMetaData.packageVersion})` : ''}`}
                         </span>
                         ?
                     </p>

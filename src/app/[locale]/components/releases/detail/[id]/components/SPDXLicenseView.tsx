@@ -12,14 +12,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { BsInfoCircle } from 'react-icons/bs'
 import { ErrorDetails, FileList, SrcFileList } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface LicenseInfo {
     license: string
@@ -41,28 +41,16 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
     const t = useTranslations('default')
     const [selectedLicenseId, setSelectedLicenseId] = useState<string>()
     const [modalShow, setModalShow] = useState(false)
-    const session = useSession()
     const [fileList, setFileList] = useState<FileList[] | undefined>()
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session.status,
-    ])
-
-    useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const response = await ApiUtils.GET(
                     `releases/${releaseId}/licenseFileList?attachmentId=${attachmentId}`,
-                    session.data.user.access_token,
                     signal,
                 )
                 if (response.status !== StatusCodes.OK) {
@@ -81,7 +69,6 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
 
         return () => controller.abort()
     }, [
-        session,
         releaseId,
         attachmentId,
     ])
@@ -194,7 +181,7 @@ const SPDXLicenseView = ({ isISR, attachmentName, attachmentId, releaseId, licen
                     {!CommonUtils.isNullEmptyOrUndefinedString(selectedLicenseId) && (
                         <>
                             <div>
-                                {t('License Name')}: <b>{selectedLicenseId}</b>
+                                {t('License name')}: <b>{selectedLicenseId}</b>
                             </div>
                             <div>
                                 {t('Source File List')}:

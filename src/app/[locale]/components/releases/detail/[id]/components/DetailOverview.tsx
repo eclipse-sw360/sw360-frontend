@@ -13,8 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Col, Dropdown, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -27,10 +26,12 @@ import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import { PageButtonHeader } from '@/components/sw360'
+import { useConfigKeyValue } from '@/contexts'
 import {
     Attachment,
     Changelogs,
     CommonTabIds,
+    ConfigKeys,
     DocumentTypes,
     Embedded,
     ErrorDetails,
@@ -46,7 +47,10 @@ import {
     VulnerabilitiesVerificationState,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -68,21 +72,34 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const searchParams = useSearchParams()
     const router = useRouter()
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [linkProjectModalShow, setLinkProjectModalShow] = useState<boolean>(false)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
-    const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
     const [changeLogId, setChangeLogId] = useState('')
     const [changelogTab, setChangelogTab] = useState('list-change')
-    const session = useSession()
     const [vulInfo, setVulInfo] = useState([
         0,
         0,
     ])
     const [fileList, setFileList] = useState<SrcFileList | undefined>()
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     useEffect(() => {
         if (!CommonUtils.isNullEmptyOrUndefinedArray(vulnerData)) {
@@ -110,14 +127,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     ])
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
         setActiveKey(fragment)
     }, [
@@ -129,26 +138,20 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         router.push(`?tab=${key}`)
     }
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session.data)) return
-            const response = await ApiUtils.GET(url, session.data.user.access_token)
-            if (response.status === StatusCodes.OK) {
-                const data = (await response.json()) as ReleaseDetail &
-                    EmbeddedReleaseLinks &
-                    EmbeddedVulnerabilities &
-                    EmbeddedChangelogs
-                return data
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        [
-            session,
-        ],
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const response = await ApiUtils.GET(url)
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as ReleaseDetail &
+                EmbeddedReleaseLinks &
+                EmbeddedVulnerabilities &
+                EmbeddedChangelogs
+            return data
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
+            return dispatchSessionExpiredEvent()
+        } else {
+            return undefined
+        }
+    }, [])
 
     const getSubcribersEmail = (release: ReleaseDetail) => {
         return release._embedded['sw360:subscribers']
@@ -156,18 +159,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             : []
     }
 
-    const extractUserEmail = () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-        setUserEmail(session.data.user.email)
-    }
-
     useEffect(() => {
-        if (session.status === 'loading') return
-
-        void extractUserEmail()
-
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 if (CommonUtils.isNullOrUndefined(release)) {
                     notFound()
                 }
@@ -187,7 +181,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             })
             .then((release: ReleaseDetail) => {
                 fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
-                    .then((embeddedReleaseLinks: EmbeddedReleaseLinks | undefined) => {
+                    .then((embeddedReleaseLinks) => {
                         if (embeddedReleaseLinks) {
                             setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
                         }
@@ -197,7 +191,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             .catch((err) => console.error(err))
 
         fetchData(`releases/${releaseId}/vulnerabilities`)
-            .then((vulnerabilities: EmbeddedVulnerabilities | undefined) => {
+            .then((vulnerabilities) => {
                 if (
                     vulnerabilities &&
                     !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
@@ -212,24 +206,17 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [
         fetchData,
         releaseId,
-        session,
     ])
 
     useEffect(() => {
-        if (session.status === 'loading' || CommonUtils.isNullOrUndefined(release)) return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(
-                    `releases/${releaseId}/licenseFileList`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`releases/${releaseId}/licenseFileList`, signal)
                 if (response.status !== StatusCodes.OK) {
-                    if (response.status === StatusCodes.CONFLICT) return
+                    if (response.status === StatusCodes.CONFLICT || response.status === StatusCodes.NOT_FOUND) return
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: response.status,
@@ -245,9 +232,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         return () => controller.abort()
     }, [
-        session,
         releaseId,
-        release,
     ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -271,7 +256,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -282,7 +266,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
                     Object.fromEntries(
@@ -293,7 +276,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                     ),
                 )
 
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -325,24 +308,19 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [
         pageableQueryParam,
         releaseId,
-        session,
     ])
 
     const downloadBundle = async () => {
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
         await DownloadService.download(
             `${DocumentTypes.RELEASE}/${releaseId}/attachments/download`,
-            session.data,
             'AttachmentBundle.zip',
         )
     }
 
     const handleSubcriptions = async () => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return
-
-        await ApiUtils.POST(`releases/${releaseId}/subscriptions`, {}, session.data.user.access_token)
+        await ApiUtils.POST(`releases/${releaseId}/subscriptions`, {})
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 if (release === undefined) return
                 setRelease(release)
                 setSubscribers(getSubcribersEmail(release))
@@ -351,8 +329,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     const isUserSubscribed = () => {
-        if (userEmail === undefined) return false
-        return subscribers.includes(userEmail)
+        const email = userIdentity?.email
+        return email !== undefined && subscribers.includes(email)
     }
 
     const headerButtons = {
@@ -360,7 +338,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             link: `/components/editRelease/${releaseId}`,
             type: 'primary',
             name: t('Edit release'),
-            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         'Link To Project': {
             link: '',
@@ -369,15 +347,15 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 setLinkProjectModalShow(true)
             },
             name: t('Link To Project'),
-            disable: session?.data?.user?.userGroup === UserGroupType.SECURITY_USER,
+            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         Merge: {
             link: `/components/releases/detail/${releaseId}/merge`,
             type: 'secondary',
             name: t('Merge'),
             hidden:
-                session?.data?.user?.userGroup === UserGroupType.SECURITY_USER ||
-                session?.data?.user?.userGroup === UserGroupType.USER,
+                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                userIdentity?.userGroup === UserGroupType.USER,
         },
         Subscribe: {
             link: '',
@@ -439,12 +417,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                             <div className='my-2'>{t('SPDX Document')}</div>
                                         </ListGroup.Item>
                                     )}
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.LINKED_RELEASES}
-                                    >
-                                        <div className='my-2'>{t('Linked Releases')}</div>
-                                    </ListGroup.Item>
+                                    {showLinkedReleases && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                        >
+                                            <div className='my-2'>{t('Linked Releases')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item
                                         action
                                         eventKey={ReleaseTabIds.LINKED_PACKAGES}
@@ -610,9 +590,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 <SPDXDocumentTab releaseId={releaseId} />
                                             </Tab.Pane>
                                         )}
-                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
-                                            <LinkedReleases releaseId={releaseId} />
-                                        </Tab.Pane>
+                                        {showLinkedReleases && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                                <LinkedReleases releaseId={releaseId} />
+                                            </Tab.Pane>
+                                        )}
                                         <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
                                             <LinkedPackagesTab releaseId={releaseId} />
                                         </Tab.Pane>

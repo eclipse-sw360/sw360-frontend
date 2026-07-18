@@ -7,27 +7,35 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { useSession } from 'next-auth/react'
+'use client'
+
 import { useTranslations } from 'next-intl'
-import { Spinner } from 'react-bootstrap'
+import { type ComponentType, type FC, useEffect, useState } from 'react'
 import { UserGroupType } from '@/object-types'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 
 export function AccessControl<P extends object>(
-    WrappedComponent: React.ComponentType<P>,
+    WrappedComponent: ComponentType<P>,
     notAllowedGroups: UserGroupType[] = [],
-): React.FC<P> {
-    const ProtectedComponent: React.FC<P> = (props) => {
-        const { data: session, status } = useSession()
+): FC<P> {
+    const ProtectedComponent: FC<P> = (props) => {
         const t = useTranslations('default')
+        const [userIdentity, setUserIdentity] = useState<Awaited<
+            ReturnType<typeof getAuthenticatedUserIdentity>
+        > | null>(null)
 
-        if (status === 'loading') {
-            return (
-                <div className='col-12 d-flex justify-content-center align-items-center'>
-                    <Spinner className='spinner' />
-                </div>
-            )
-        }
-        if (status === 'authenticated' && notAllowedGroups.includes(session?.user?.userGroup)) {
+        useEffect(() => {
+            void (async () => {
+                try {
+                    setUserIdentity(await getAuthenticatedUserIdentity())
+                } catch {
+                    setUserIdentity(null)
+                }
+            })()
+        }, [])
+
+        const userGroup = userIdentity?.userGroup
+        if (userGroup !== undefined && notAllowedGroups.includes(userGroup)) {
             return (
                 <div className='container page-content'>
                     <div

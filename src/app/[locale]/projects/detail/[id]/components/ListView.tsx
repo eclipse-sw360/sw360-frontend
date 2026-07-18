@@ -18,14 +18,14 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
-import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Attachment {
     attachmentType: string
@@ -34,8 +34,6 @@ interface Attachment {
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
-type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
 interface ListViewProject extends Project {
     path?: string
@@ -214,8 +212,8 @@ const extractLinkedReleases = (
     path: string[],
 ) => {
     path.push(`${projectName} (${projectVersion})`)
-    for (const l of licenseClearing['linkedReleases']) {
-        const release = licenseClearing['_embedded']['sw360:release'].filter(
+    for (const l of licenseClearing?.['linkedReleases'] ?? []) {
+        const release = licenseClearing?._embedded?.['sw360:release']?.filter(
             (r: Release) => r.id === l.release.split('/').at(-1),
         )?.[0]
         finalData.push({
@@ -229,10 +227,18 @@ const extractLinkedReleases = (
     }
 }
 
-const tableIdToUrlParamMapper: Record<string, string> = {
-    type: 'componentType',
-    relation: 'releaseRelation',
-    state: 'clearingState',
+const comparator = (a: TypedProject | TypedRelease, b: TypedProject | TypedRelease): number => {
+    if (a.type === 'release' && b.type === 'project') {
+        return -1
+    } else if (a.type === 'project' && b.type === 'release') {
+        return 1
+    } else {
+        const aName = `${a.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.entity.version) && `(${a.entity.version})`}`
+        const bName = `${b.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.entity.version) && `(${b.entity.version})`}`
+        if (aName === bName) return 0
+        else if (aName < bName) return -1
+        else return 1
+    }
 }
 
 const buildTable = (
@@ -244,7 +250,7 @@ const buildTable = (
     const finalData: (TypedProject | TypedRelease)[] = []
     const path: string[] = []
     extractLinkedProjectsAndTheirLinkedReleases(
-        licenseClearing['_embedded']['sw360:release'],
+        licenseClearing['_embedded']?.['sw360:release'] ?? [],
         linkedProjects,
         finalData,
         path,
@@ -253,6 +259,7 @@ const buildTable = (
     )
     path.splice(0, path.length)
     extractLinkedReleases(projectName, projectVersion, licenseClearing, finalData, path)
+    finalData.sort(comparator)
     return finalData
 }
 
@@ -260,23 +267,23 @@ export default function ListView({
     projectId,
     projectName,
     projectVersion,
+    licenseClearingData,
+    linkedProjectsData,
+    isLoadingClearingData,
+    columnFilters,
+    setColumnFilters,
 }: {
     projectId: string
     projectName: string
     projectVersion: string
+    licenseClearingData?: LicenseClearing
+    linkedProjectsData: Project[]
+    isLoadingClearingData: boolean
+    columnFilters: ColumnFiltersState
+    setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>
 }): JSX.Element {
     const t = useTranslations('default')
-    const { status, data: session } = useSession()
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
-
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
@@ -303,34 +310,34 @@ export default function ListView({
 
     const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
 
-    const handleShowLicenseFiles = useCallback(
-        async (release: Release) => {
-            setSelectedRelease(release)
-            setShowModal(true)
-            setLicenseFiles([])
+    useEffect(() => {
+        setLicenseClearing(licenseClearingData)
+        setLinkedProjects(linkedProjectsData)
+    }, [
+        licenseClearingData,
+        linkedProjectsData,
+    ])
 
-            if (status === 'authenticated' && session) {
-                try {
-                    const response = await ApiUtils.GET(`releases/${release.id}/attachments`, session.user.access_token)
+    const handleShowLicenseFiles = useCallback(async (release: Release) => {
+        setSelectedRelease(release)
+        setShowModal(true)
+        setLicenseFiles([])
 
-                    if (response.status === StatusCodes.OK) {
-                        const data = await response.json()
-                        const files =
-                            data._embedded?.['sw360:attachments']
-                                ?.filter((att: Attachment) => att.attachmentType === 'LICENSE')
-                                ?.map((att: Attachment) => att.filename) || []
-                        setLicenseFiles(files)
-                    }
-                } catch (error) {
-                    ApiUtils.reportError(error)
-                }
+        try {
+            const response = await ApiUtils.GET(`releases/${release.id}/attachments`)
+
+            if (response.status === StatusCodes.OK) {
+                const data = await response.json()
+                const files =
+                    data._embedded?.['sw360:attachments']
+                        ?.filter((att: Attachment) => att.attachmentType === 'LICENSE')
+                        ?.map((att: Attachment) => att.filename) || []
+                setLicenseFiles(files)
             }
-        },
-        [
-            status,
-            session,
-        ],
-    )
+        } catch (error) {
+            ApiUtils.reportError(error)
+        }
+    }, [])
 
     const columns = useMemo<ColumnDef<TypedProject | TypedRelease>[]>(
         () => [
@@ -657,82 +664,9 @@ export default function ListView({
     })
 
     useEffect(() => {
-        if (status !== 'authenticated') return
-        const controller = new AbortController()
-        const signal = controller.signal
-        const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
-
-        void (async () => {
-            try {
-                const filterParams = columnFilters
-                    .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
-                    .filter((param) => param !== '')
-                    .join('&')
-
-                const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? '&' + filterParams : ''}`
-                const response = await ApiUtils.GET(url, session.user.access_token, signal)
-
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-                const licenseClearingData = (await response.json()) as LicenseClearing
-                setLicenseClearing(licenseClearingData)
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
-            }
-        })()
-        return () => controller.abort()
+        setShowProcessing(isLoadingClearingData)
     }, [
-        status,
-        projectId,
-        session,
-        columnFilters,
-    ])
-
-    useEffect(() => {
-        if (status !== 'authenticated') return
-        const controller = new AbortController()
-        const signal = controller.signal
-        const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
-        void (async () => {
-            try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.user.access_token,
-                    signal,
-                )
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-                const linkedProjectsData = (await response.json()) as LinkedProjects
-                setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
-            }
-        })()
-        return () => controller.abort()
-    }, [
-        status,
-        projectId,
-        session,
+        isLoadingClearingData,
     ])
 
     useEffect(() => {

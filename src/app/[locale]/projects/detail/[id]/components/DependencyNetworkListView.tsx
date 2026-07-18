@@ -20,14 +20,14 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table, TableSearch } from 'next-sw360'
 import React, { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import { ErrorDetails, FilterOption } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ClearingStateBadge from './ClearingStateBadge'
 
 interface ListViewData {
@@ -170,15 +170,6 @@ const upperCaseWithUnderscore = (text: string | undefined) => {
 
 const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
     const t = useTranslations('default')
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
@@ -449,7 +440,6 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
     })
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -459,11 +449,7 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
 
         void (async () => {
             try {
-                const listViewResponse = await ApiUtils.GET(
-                    `projects/network/${projectId}/listView`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const listViewResponse = await ApiUtils.GET(`projects/network/${projectId}/listView`, signal)
 
                 if (listViewResponse.status !== StatusCodes.OK) {
                     const err = (await listViewResponse.json()) as ErrorDetails
@@ -484,7 +470,6 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
         return () => controller.abort()
     }, [
         projectId,
-        session.status,
     ])
 
     const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {

@@ -13,7 +13,6 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -22,7 +21,8 @@ import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -49,7 +49,6 @@ interface DeletePackageModalMetData {
 }
 
 function Packages(): ReactNode {
-    const { data: session, status } = useSession()
     const t = useTranslations('default')
     const params = useSearchParams()
     const router = useRouter()
@@ -82,14 +81,6 @@ function Packages(): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     const releaseCache = useMemo(() => new Map<string, ReleaseCache>(), [])
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleCreatePackage = () => {
         router.push('/packages/add')
@@ -257,15 +248,12 @@ function Packages(): ReactNode {
     )
 
     useEffect(() => {
-        if (status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
         const timeout = setTimeout(() => setShowProcessing(true), packageData.length !== 0 ? 700 : 0)
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `packages`,
@@ -281,7 +269,7 @@ function Packages(): ReactNode {
                     ),
                 )
 
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -319,11 +307,7 @@ function Packages(): ReactNode {
                             }
                         }
                         try {
-                            const releaseResp = await ApiUtils.GET(
-                                `releases/${pkg.releaseId}`,
-                                session.user.access_token,
-                                signal,
-                            )
+                            const releaseResp = await ApiUtils.GET(`releases/${pkg.releaseId}`, signal)
                             if (releaseResp.status === StatusCodes.OK) {
                                 const release = await releaseResp.json()
                                 releaseCache.set(pkg.releaseId, release)
@@ -354,14 +338,13 @@ function Packages(): ReactNode {
     }, [
         pageableQueryParam,
         params.toString(),
-        status,
     ])
 
     useEffect(() => {
         setPageableQueryParam({
             page: 0,
             page_entries: 10,
-            sort: '',
+            sort: params.toString() ? 'score,asc' : '',
         })
     }, [
         params.toString(),

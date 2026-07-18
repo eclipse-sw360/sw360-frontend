@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import {
@@ -27,8 +27,9 @@ import {
     SnippetInformation,
     SPDX,
 } from '@/object-types'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 import EditAnnotationInformation from './spdx/EditAnnotationInformation'
 import EditDocumentCreationInformation from './spdx/EditDocumentCreationInformation'
@@ -90,25 +91,14 @@ const EditSPDXDocument = ({
 
     const [isModeFull, setIsModeFull] = useState(true)
     const [toggleOther, setToggleOther] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const fetchData = useCallback(async (url: string) => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-        const response = await ApiUtils.GET(url, session.user.access_token)
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail
             return data
         } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            return signOut()
+            return dispatchSessionExpiredEvent()
         } else {
             return undefined
         }
@@ -117,7 +107,7 @@ const EditSPDXDocument = ({
     const [isTypeCateGoryEmpty, setIsTypeCateGoryEmpty] = useState(true)
     useEffect(() => {
         fetchData(`releases/${releaseId}`)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 if (!release) return
                 //SPDX Document
                 if (

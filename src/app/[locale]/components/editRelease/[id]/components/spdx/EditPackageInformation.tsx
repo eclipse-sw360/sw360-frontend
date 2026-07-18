@@ -10,7 +10,6 @@
 // License-Filename: LICENSE
 
 'use client'
-import { signOut, useSession } from 'next-auth/react'
 import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import {
@@ -66,15 +65,6 @@ const EditPackageInformation = ({
         value: '',
     })
     const [isPackageSupplier, setIsPackageSupplier] = useState(true)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handlePackageSupplier = (data: string) => {
         if (data === 'NOASSERTION') {

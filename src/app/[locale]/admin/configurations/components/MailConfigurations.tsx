@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2025. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -37,33 +38,17 @@ const MailConfigurations = ({ currentConfig, setCurrentConfig }: Props): JSX.Ele
                     </tr>
                 </thead>
                 <tbody>
-                    <tr id='send-project-spreadsheet-export-to-mail-enabled'>
-                        <td className='align-middle fw-bold'>
-                            {t('Enable Sending Project Spreadsheet Export Via Mail')}
-                        </td>
+                    <tr id='send-export-to-mail-enabled'>
+                        <td className='align-middle fw-bold'>{t('Enable Sending Export Via Mail')}</td>
                         <td>
                             <OnOffSwitch
                                 size={25}
                                 setCurrentConfig={setCurrentConfig}
-                                checked={currentConfig[ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT] === 'true'}
-                                propKey={ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT}
+                                checked={currentConfig[ConfigKeys.MAIL_REQUEST_FOR_REPORT] === 'true'}
+                                propKey={ConfigKeys.MAIL_REQUEST_FOR_REPORT}
                             />
                         </td>
-                        <td>{t('send_project_spreadsheet_export_to_mail_enabled_description')}</td>
-                    </tr>
-                    <tr id='send-component-spreadsheet-export-to-mail-enabled'>
-                        <td className='align-middle fw-bold'>
-                            {t('Enable Sending Component Spreadsheet Export Via Mail')}
-                        </td>
-                        <td>
-                            <OnOffSwitch
-                                size={25}
-                                setCurrentConfig={setCurrentConfig}
-                                checked={currentConfig[ConfigKeys.MAIL_REQUEST_FOR_COMPONENT_REPORT] === 'true'}
-                                propKey={ConfigKeys.MAIL_REQUEST_FOR_COMPONENT_REPORT}
-                            />
-                        </td>
-                        <td>{t('send_component_spreadsheet_export_to_mail_enabled_description')}</td>
+                        <td>{t('send_export_to_mail_enabled_description')}</td>
                     </tr>
                 </tbody>
             </table>

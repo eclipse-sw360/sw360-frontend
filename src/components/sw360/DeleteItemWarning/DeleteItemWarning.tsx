@@ -14,7 +14,7 @@ import React, { type JSX } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { AddtionalDataType, RolesType } from '@/object-types'
-import { ApiUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Input {
     key: string

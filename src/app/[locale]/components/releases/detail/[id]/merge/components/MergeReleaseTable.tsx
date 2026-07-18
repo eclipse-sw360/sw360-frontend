@@ -11,13 +11,13 @@
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, TableSearch } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ReleaseDetail } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releaseLinks'>
 
@@ -33,7 +33,6 @@ export default function MergeReleaseTable({
     releaseId: string | null
 }>): ReactNode {
     const t = useTranslations('default')
-    const session = useSession()
     const [search, setSearch] = useState<{
         name: string
         luceneSearch?: boolean
@@ -53,14 +52,6 @@ export default function MergeReleaseTable({
             })
         }
     }
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ReleaseDetail>[]>(
         () => [
@@ -122,7 +113,6 @@ export default function MergeReleaseTable({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -133,7 +123,6 @@ export default function MergeReleaseTable({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
                     Object.fromEntries(
@@ -146,7 +135,7 @@ export default function MergeReleaseTable({
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -173,7 +162,6 @@ export default function MergeReleaseTable({
 
         return () => controller.abort()
     }, [
-        session,
         search,
     ])
 

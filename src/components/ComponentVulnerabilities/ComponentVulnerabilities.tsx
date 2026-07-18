@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, ShowInfoOnHover, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -37,15 +36,6 @@ const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
     const [state, setState] = useState('NOT_CHECKED')
     const [selectedVulner, setSelectedVulner] = useState<Array<SelectedVulnerability>>([])
     const [checkAll, setCheckAll] = useState<boolean>(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const memoizedData = useMemo(
         () => vulnerData,
@@ -161,7 +151,7 @@ const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
             },
             {
                 id: 'matchedBy',
-                header: t('Matched By'),
+                header: t('Matched by'),
                 cell: ({ row }) => (
                     <div className='text-center'>{row.original.releaseVulnerabilityRelation?.matchedBy ?? ''}</div>
                 ),

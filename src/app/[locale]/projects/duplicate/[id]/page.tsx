@@ -7,11 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getServerSession } from 'next-auth/next'
-import type { JSX } from 'react'
-import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
-import { ConfigKeys, Configuration } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+'use client'
+
+import { type JSX, use } from 'react'
+import { useConfigKeyValue } from '@/contexts'
+import { ConfigKeys } from '@/object-types'
 import DuplicateProject from './components/DuplicateProject'
 
 interface Context {
@@ -20,21 +20,14 @@ interface Context {
     }>
 }
 
-const ProjectDuplicatePage = async (props: Context): Promise<JSX.Element> => {
-    const params = await props.params
-    const projectId = params.id
-
-    const session = await getServerSession(authOptions)
-    if (CommonUtils.isNullOrUndefined(session)) {
-        return <></>
-    }
-    const response = await ApiUtils.GET('configurations', session.user.access_token)
-    const config = (await response.json()) as Configuration
-    const isDependencyNetworkFeatureEnabled = config[ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP] == 'true'
+const ProjectDuplicatePage = ({ params }: Context): JSX.Element => {
+    const resolvedParams = use(params)
+    const isDependencyNetworkFeatureEnabled =
+        useConfigKeyValue(ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP) === 'true'
 
     return (
         <DuplicateProject
-            projectId={projectId}
+            projectId={resolvedParams.id}
             isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}
         />
     )

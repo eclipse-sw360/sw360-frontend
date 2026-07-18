@@ -13,14 +13,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Obligation } from '@/object-types'
 import MessageService from '@/services/message.service'
-import CommonUtils from '@/utils/common.utils'
-import { ApiUtils } from '@/utils/index'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ObligationForm from '../../components/AddOrEditObligation'
 
 function AddObligation(): ReactNode {
@@ -32,22 +31,10 @@ function AddObligation(): ReactNode {
         obligationLevel: '',
         obligationType: '',
     } as Obligation)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const isFieldValid = (field: string | null | undefined): boolean =>
         field !== null && field !== undefined && field.trim() !== ''
     const submitObligation = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
         if (
             !isFieldValid(obligation.title) ||
             !isFieldValid(obligation.text) ||
@@ -57,7 +44,7 @@ function AddObligation(): ReactNode {
             MessageService.error(`${t('Please fill in all fields before submitting')}.`)
             return
         }
-        const response = await ApiUtils.POST('obligations', obligation, session.user.access_token)
+        const response = await ApiUtils.POST('obligations', obligation)
         if (response.status == StatusCodes.CREATED) {
             MessageService.success(t('Obligation added successfully'))
             router.push('/admin/obligations')

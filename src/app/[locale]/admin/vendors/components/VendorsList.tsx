@@ -13,7 +13,6 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -21,17 +20,14 @@ import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill, BsGit, BsPencil, BsQuestionCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type EmbeddedVendors = Embedded<Vendor, 'sw360:vendors'>
 
 const DeleteVendor = async (vendorId: string) => {
     try {
-        const session = await getSession()
-        if (!session) {
-            return signOut()
-        }
-        const response = await ApiUtils.DELETE(`vendors/${vendorId}`, session.user.access_token)
+        const response = await ApiUtils.DELETE(`vendors/${vendorId}`)
         if (response.status !== StatusCodes.NO_CONTENT) {
             const err = (await response.json()) as ErrorDetails
             throw new ApiError(err.message, {
@@ -104,16 +100,7 @@ export default function VendorsList(): JSX.Element {
 
     const [numVendors, setNumVendors] = useState<null | number>(null)
     const [delVendor, setDelVendor] = useState<Vendor | null>(null)
-    const session = useSession()
     const [search, setSearch] = useState({})
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleAddVendor = () => {
         router.push('/admin/vendors/add')
@@ -230,7 +217,6 @@ export default function VendorsList(): JSX.Element {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -241,7 +227,6 @@ export default function VendorsList(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vendors`,
                     Object.fromEntries(
@@ -254,7 +239,7 @@ export default function VendorsList(): JSX.Element {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -281,7 +266,6 @@ export default function VendorsList(): JSX.Element {
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -325,7 +309,7 @@ export default function VendorsList(): JSX.Element {
         setPageableQueryParam({
             page: 0,
             page_entries: 10,
-            sort: '',
+            sort: Object.keys(search).length > 0 ? 'score,asc' : '',
         })
     }, [
         search,
@@ -337,13 +321,11 @@ export default function VendorsList(): JSX.Element {
         })
     }
 
-    const handleExportSpreadsheet = async () => {
+    const handleExportSpreadsheet = () => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const url = 'vendors/exportVendorDetails'
             const currentDate = new Date().toISOString().split('T')[0]
-            void DownloadService.download(url, session, `vendors-${currentDate}.xlsx`)
+            void DownloadService.download(url, `vendors-${currentDate}.xlsx`)
         } catch (error: unknown) {
             ApiUtils.reportError(error)
         }
