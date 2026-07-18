@@ -1,4 +1,5 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
@@ -8,17 +9,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use-client'
+'use client'
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
+import { type JSX, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { Component, Embedded } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import { Component, Embedded, ErrorDetails } from '@/object-types'
+import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedComponents = Embedded<Component, 'sw360:components'>
@@ -32,13 +32,16 @@ function RecentComponentsWidget(): ReactNode {
         const session = await getSession()
         if (CommonUtils.isNullOrUndefined(session)) return signOut()
         const response = await ApiUtils.GET(url, session.user.access_token)
-        if (response.status == StatusCodes.OK) {
+        if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedComponents
             return data
-        } else if (response.status == StatusCodes.UNAUTHORIZED) {
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
             return signOut()
         } else {
-            notFound()
+            const err = (await response.json()) as ErrorDetails
+            throw new ApiError(err.message, {
+                status: response.status,
+            })
         }
     }, [])
 
@@ -58,7 +61,7 @@ function RecentComponentsWidget(): ReactNode {
                         components['_embedded']['sw360:components'].map((item: Component) => [
                             <li key={item.name}>
                                 <Link
-                                    href={'components/detail/' + item.id}
+                                    href={`/components/detail/${item.id}`}
                                     style={{
                                         color: 'orange',
                                         textDecoration: 'none',

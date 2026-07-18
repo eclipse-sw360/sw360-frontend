@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -13,17 +14,17 @@
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
-import { ReactNode, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { Alert, Button, Form, InputGroup, Modal } from 'react-bootstrap'
 import { BsEye, BsEyeSlash } from 'react-icons/bs'
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { AUTH_PROVIDER } from '@/utils/env'
+import { homePath } from '@/utils/localePath.utils'
 
 function AuthScreen(): ReactNode {
     const router = useRouter()
-    const locale = useLocale()
     const t = useTranslations('default')
     const [dialogShow, setDialogShow] = useState<boolean>(false)
     const [messageShow, setMessageShow] = useState<boolean>(false)
@@ -56,7 +57,8 @@ function AuthScreen(): ReactNode {
             }
 
             if (result.status === StatusCodes.OK) {
-                router.push(`/${locale}/home`)
+                // localePrefix is 'never' — navigate to /home, not /{locale}/home
+                router.push(homePath())
             } else {
                 setMessageShow(true)
             }

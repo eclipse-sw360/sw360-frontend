@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useParams, useRouter } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
@@ -35,9 +35,8 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
     const [showReopenClearingRequestModal, setShowReopenClearingRequestModal] = useState<boolean>(false)
     const [clearingRequestData, setClearingRequestData] = useState<ClearingRequestDetails | undefined>()
     const { status } = useSession()
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const requestsPath = `/${locale}/requests`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const requestsPath = '/requests'
 
     useEffect(() => {
         if (status === 'unauthenticated') {

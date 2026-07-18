@@ -8,13 +8,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-'use-client'
+'use client'
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { getSession, signOut } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Component, Embedded, ReleaseDetail } from '@/object-types'
 import { ApiUtils, CommonUtils } from '@/utils/index'
@@ -102,7 +102,7 @@ function MySubscriptionsWidget(): ReactNode {
                                 {componentData.map((item: Component) => (
                                     <li key={item.id}>
                                         <Link
-                                            href={'components/detail/' + item.id}
+                                            href={`/components/detail/${item.id}`}
                                             style={{
                                                 color: 'orange',
                                                 textDecoration: 'none',
@@ -127,7 +127,7 @@ function MySubscriptionsWidget(): ReactNode {
                                 {releaseData.map((item: ReleaseDetail) => (
                                     <li key={item.id}>
                                         <Link
-                                            href={'components/releases/detail/' + item.id}
+                                            href={`/components/releases/detail/${item.id}`}
                                             style={{
                                                 color: 'orange',
                                                 textDecoration: 'none',

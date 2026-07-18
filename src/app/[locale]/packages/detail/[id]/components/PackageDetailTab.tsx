@@ -11,7 +11,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
@@ -28,9 +28,8 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const { data: session, status } = useSession()
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
     const router = useRouter()
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const packagesPath = `/${locale}/packages`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const packagesPath = '/packages'
 
     useEffect(() => {
         if (status === 'unauthenticated') {

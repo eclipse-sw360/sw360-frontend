@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
@@ -535,9 +535,8 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         },
     }
 
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const componentsPath = `/${locale}/components`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const componentsPath = '/components'
 
     return (
         release && (

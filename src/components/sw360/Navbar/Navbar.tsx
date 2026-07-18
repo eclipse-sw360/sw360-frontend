@@ -1,4 +1,5 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
@@ -11,17 +12,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useParams, useRouter, useSelectedLayoutSegment } from 'next/navigation'
+import { useRouter, useSelectedLayoutSegment } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { LocaleSwitcher, Logo, ProfileDropdown } from 'next-sw360'
 import { type JSX, useState } from 'react'
 import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
 import { NavList } from '@/object-types'
+import { homePath, toPublicPath } from '@/utils/localePath.utils'
 
 function Navbar(): JSX.Element {
     const router = useRouter()
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
 
     const { data: session, status } = useSession()
     const [show, setShow] = useState(false)
@@ -30,10 +30,6 @@ function Navbar(): JSX.Element {
 
     const navlist = NavList()
 
-    const getLocalizedPath = (path: string) => {
-        if (path === '#' || path === '/') return path
-        return `/${locale}${path}`
-    }
     // NavItems receives an array of links with possible entries:
     // href: the link (mandatory)
     // name: the name of the link (mandatory)
@@ -55,7 +51,8 @@ function Navbar(): JSX.Element {
                     }
                 }
 
-                const localizedHref = getLocalizedPath(item.href)
+                // localePrefix is 'never' — do not embed locale in public URLs
+                const href = toPublicPath(item.href)
                 if ('childs' in item) {
                     return (
                         <NavDropdown
@@ -71,13 +68,13 @@ function Navbar(): JSX.Element {
                                 // hack to route to /admin when clicked on dropdown title
                                 if ((e.target as HTMLElement).attributes[0].name === 'id') {
                                     e.preventDefault()
-                                    router.push(localizedHref)
+                                    router.push(href)
                                 }
                             }}
                         >
                             {item.childs?.map((child) => (
                                 <NavDropdown.Item
-                                    href={getLocalizedPath(child.href)}
+                                    href={toPublicPath(child.href)}
                                     key={child.id}
                                 >
                                     {child.name}
@@ -90,7 +87,7 @@ function Navbar(): JSX.Element {
                         <Nav.Link
                             key={item.name}
                             className={`${pathname == item.href ? 'active' : ''}`}
-                            href={localizedHref}
+                            href={href}
                         >
                             {item.name}
                         </Nav.Link>
@@ -109,7 +106,7 @@ function Navbar(): JSX.Element {
                 <Container fluid>
                     <BSNavbar.Brand
                         as={Link}
-                        href={status === 'authenticated' ? `/${locale ?? 'en'}/home` : `/${locale ?? 'en'}`}
+                        href={status === 'authenticated' ? homePath() : '/'}
                     >
                         <Logo
                             src={process.env.NEXT_PUBLIC_CUSTOM_LOGO ?? undefined}

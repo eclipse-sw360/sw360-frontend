@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -291,9 +291,8 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         session,
     ])
 
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const componentsPath = `/${locale}/components`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const componentsPath = '/components'
 
     // Early return for loading state
     if (!component) {
