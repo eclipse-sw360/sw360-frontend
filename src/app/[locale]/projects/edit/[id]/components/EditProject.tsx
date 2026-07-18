@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -23,6 +22,7 @@ import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
+import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import {
     ActionType,
     DocumentTypes,
@@ -32,6 +32,7 @@ import {
     LinkedProjectData,
     LinkedReleaseData,
     ObligationEntry,
+    ObligationType,
     Project,
     ProjectPayload,
     User,
@@ -39,8 +40,8 @@ import {
     Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
 
@@ -73,16 +74,6 @@ function EditProject({
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [hasClearingRequest, setHasClearingRequest] = useState(false)
-
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleDeleteProject = () => {
         setDeleteDialogOpen(true)
@@ -257,36 +248,31 @@ function EditProject({
         })
     }
 
-    const fetchUserData = useCallback(async (url: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-        const response = await ApiUtils.GET(url, session.data.user.access_token)
+    const fetchUserData = useCallback(async (email: string | undefined | null) => {
+        if (!email) {
+            return undefined
+        }
+        const url = `users/${email}`
+        const response = await ApiUtils.GET(url)
         if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as User
-            return data
-        } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.error(t('Unauthorized request'))
-            return
+            return (await response.json()) as User
         } else {
             return undefined
         }
     }, [])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         const loadServerObligations = async () => {
             try {
-                const s = await getSession()
-                if (CommonUtils.isNullOrUndefined(s)) return signOut()
-
                 const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
                     page: '0',
                     page_entries: '9999',
                 })
 
-                const resp = await ApiUtils.GET(url, s.user.access_token, signal)
+                const resp = await ApiUtils.GET(url, signal)
                 const body = (await resp.json().catch(() => ({}))) as {
                     obligations?: Record<
                         string,
@@ -316,14 +302,12 @@ function EditProject({
         return () => controller.abort()
     }, [
         projectId,
-        session.status,
     ])
 
     useEffect(() => {
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token)
+                const response = await ApiUtils.GET(`projects/${projectId}`)
                 if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -360,7 +344,7 @@ function EditProject({
                 }
 
                 if (project?.projectOwner !== undefined) {
-                    const userData = await fetchUserData(`users/${project?.projectOwner}`)
+                    const userData = await fetchUserData(project?.projectOwner)
                     if (!CommonUtils.isNullOrUndefined(userData)) {
                         setProjectOwner({
                             [project?.projectOwner]: userData?.fullName ?? project?.projectOwner,
@@ -373,7 +357,7 @@ function EditProject({
                 }
 
                 if (project?.projectResponsible !== undefined) {
-                    const userData = await fetchUserData(`users/${project?.projectResponsible}`)
+                    const userData = await fetchUserData(project?.projectResponsible)
                     if (!CommonUtils.isNullOrUndefined(userData)) {
                         setProjectManager({
                             [project?.projectResponsible]: userData?.fullName ?? project?.projectResponsible,
@@ -405,7 +389,7 @@ function EditProject({
                     const securityResponsiblesMap = new Map<string, string>()
                     await Promise.all(
                         project.securityResponsibles.map(async (securityResponsible) => {
-                            const userData = await fetchUserData(`users/${securityResponsible}`)
+                            const userData = await fetchUserData(securityResponsible)
                             if (!CommonUtils.isNullOrUndefined(userData)) {
                                 securityResponsiblesMap.set(
                                     securityResponsible,
@@ -420,12 +404,10 @@ function EditProject({
                 }
 
                 if (project['_embedded']?.['sw360:vendors']?.[0] !== undefined) {
-                    const vendorData = project['_embedded']['sw360:vendors'][0]
+                    const selectedVendor = project['_embedded']['sw360:vendors'][0]
                     setVendor({
-                        id: vendorData.id ?? '',
-                        fullName: vendorData.fullName ?? '',
-                        shortName: vendorData.shortName ?? '',
-                        url: vendorData.url ?? '',
+                        ...selectedVendor,
+                        id: project.vendorId ?? selectedVendor.id ?? '',
                     })
                 }
 
@@ -536,16 +518,14 @@ function EditProject({
     }, [
         projectId,
         setProjectPayload,
-        session,
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
         const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
             entityType: 'PROJECT',
             entityId: projectId,
         })
-        const response = await ApiUtils.POST(url, {}, session.data.user.access_token)
+        const response = await ApiUtils.POST(url, {})
         switch (response.status) {
             case StatusCodes.UNAUTHORIZED:
                 MessageService.warn(t('Unauthorized request'))
@@ -566,14 +546,13 @@ function EditProject({
                 MessageService.info(t('You are allowed to perform write with MR'))
                 return 'ACCEPTED'
             default:
-                MessageService.error(t('Error when processing'))
+                MessageService.error(t('Error while processing'))
                 return 'DENIED'
         }
     }
 
     const updateProject = async (payload?: ProjectPayload) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             const dataToUpdate = payload ?? projectPayload
             const requests = [
                 ApiUtils.PATCH(
@@ -581,54 +560,45 @@ function EditProject({
                         ? `projects/network/${projectId}`
                         : `projects/${projectId}`,
                     dataToUpdate,
-                    session.data.user.access_token,
                 ),
             ]
             if (Object.keys(obligations).length !== 0) {
                 for (const key in obligations) {
-                    if (obligations[key]?.obligationType === ObligationLevels.LICENSE_OBLIGATION) {
+                    if (obligations[key]?.obligationType === ObligationType.LICENSE_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateLicenseObligation`,
-                                obligations,
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, {
+                                [key]: obligations[key],
+                            }),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationLevels.COMPONENT_OBLIGATION) {
+                    } else if (obligations[key]?.obligationType === ObligationType.COMPONENT_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateObligation?obligationLevel=component`,
-                                obligations,
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=component`, {
+                                [key]: obligations[key],
+                            }),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationLevels.PROJECT_OBLIGATION) {
+                    } else if (obligations[key]?.obligationType === ObligationType.PROJECT_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateObligation?obligationLevel=project`,
-                                obligations,
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=project`, {
+                                [key]: obligations[key],
+                            }),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationLevels.ORGANISATION_OBLIGATION) {
+                    } else if (obligations[key]?.obligationType === ObligationType.ORGANISATION_OBLIGATION) {
                         if (Object.hasOwn(obligations[key], 'obligationType')) {
                             delete obligations[key].obligationType
                         }
                         requests.push(
-                            ApiUtils.PATCH(
-                                `projects/${projectId}/updateObligation?obligationLevel=organization`,
-                                obligations,
-                                session.data.user.access_token,
-                            ),
+                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=organization`, {
+                                [key]: obligations[key],
+                            }),
                         )
                     }
                 }
@@ -670,7 +640,7 @@ function EditProject({
     }
 
     const handleCancelClick = () => {
-        router.push('/projects')
+        router.push(`/projects/detail/${projectId}?tab=${activeKey ?? DEFAULT_ACTIVE_TAB}`)
     }
 
     return (
@@ -764,16 +734,13 @@ function EditProject({
                                                     action
                                                     eventKey='obligations'
                                                 >
-                                                    <div className='d-flex align-items-center my-2'>
-                                                        <span className='me-2'>{t('Obligations')}</span>
-                                                        <span
-                                                            id='obligationsCount'
-                                                            className='badge obligations-badge--danger'
-                                                            aria-live='polite'
-                                                        >
-                                                            {`${obligationsNonOpenCount} / ${obligationsTotal}`}
-                                                        </span>
-                                                    </div>
+                                                    <SidebarCountBadge
+                                                        badgeClassName='obligations-badge--danger'
+                                                        countId='obligationsCount'
+                                                        isLoading={false}
+                                                        label={t('Obligations')}
+                                                        value={`${obligationsNonOpenCount} / ${obligationsTotal}`}
+                                                    />
                                                 </ListGroup.Item>
                                             </ListGroup>
                                         </Col>

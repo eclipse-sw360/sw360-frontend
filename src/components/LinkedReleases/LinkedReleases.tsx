@@ -11,7 +11,6 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -31,15 +30,6 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
     const t = useTranslations('default')
     const [releaseLinks, setReleaseLinks] = useState<ReleaseLink[]>([])
     const [linkedReleasesDiaglog, setLinkedReleasesDiaglog] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const setReleaseIdToRelationshipsToReleasePayLoad = useCallback(
         (releaseIdToRelationships: Map<string, string>) => {

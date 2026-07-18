@@ -11,9 +11,8 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { JSX, useEffect, useState } from 'react'
+import { JSX, useState } from 'react'
 import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
@@ -26,15 +25,6 @@ interface Props {
 
 const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const Clipboard = ({ text }: { text: string }) => {
         const [copied, setCopied] = useState(false)

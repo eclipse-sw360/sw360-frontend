@@ -13,7 +13,6 @@ import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReac
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -32,7 +31,8 @@ import {
     TypedEntity,
     UserGroupType,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 
@@ -301,15 +301,6 @@ function GenerateLicenseInfo({
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
     const [projectRelationships, setProjectRelationships] = useState<string[]>([])
-
-    const session = useSession()
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
@@ -669,7 +660,7 @@ function GenerateLicenseInfo({
             },
             {
                 id: 'uploadedBy',
-                header: t('Uploaded By'),
+                header: t('Uploaded by'),
                 cell: ({ row }) => {
                     if (row.original.node.type === 'attachment') {
                         return (
@@ -757,7 +748,6 @@ function GenerateLicenseInfo({
     }, [])
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -768,45 +758,44 @@ function GenerateLicenseInfo({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const searchParams = Object.fromEntries(params)
                 if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                     return
                 }
                 const requests = [
-                    ApiUtils.GET(`projects/${projectId}`, session.data.user.access_token, signal),
+                    ApiUtils.GET(`projects/${projectId}`, signal),
                 ]
                 if (searchParams.withSubProjects === 'true') {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=true&filter=withCliAttachment`,
-                            session.data.user.access_token,
                             signal,
                         ),
-                        ApiUtils.GET(
-                            `projects/${projectId}/linkedProjects?transitive=true`,
-                            session.data.user.access_token,
-                            signal,
-                        ),
+                        ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal),
                     )
                 } else {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=false&filter=withCliAttachment`,
-                            session.data.user.access_token,
                             signal,
                         ),
                     )
                 }
                 const responses = await Promise.all(requests)
-                responses.map(async (r) => {
+                for (const r of responses) {
                     if (r.status !== StatusCodes.OK) {
-                        const err = (await r.json()) as ErrorDetails
-                        throw new ApiError(err.message, {
+                        let message = `Request failed with status ${r.status}`
+                        try {
+                            const err = (await r.json()) as ErrorDetails
+                            message = err.message
+                        } catch {
+                            // Response body is not valid JSON
+                        }
+                        throw new ApiError(message, {
                             status: r.status,
                         })
                     }
-                })
+                }
 
                 const proj = (await responses[0].json()) as Project
                 setProject(proj)
@@ -825,11 +814,7 @@ function GenerateLicenseInfo({
                     const relId = r._links?.self.href.split('/').at(-1) ?? ''
                     for (const att of r.attachments ?? []) {
                         licenseRequests.push(
-                            ApiUtils.GET(
-                                `releases/${relId}/licenseData/${att.attachmentContentId}`,
-                                session.data.user.access_token,
-                                signal,
-                            ),
+                            ApiUtils.GET(`releases/${relId}/licenseData/${att.attachmentContentId}`, signal),
                         )
                     }
                 }
@@ -961,7 +946,11 @@ function GenerateLicenseInfo({
             <div className='container page-content'>
                 <div className='row'>
                     <div className='row d-flex justify-content-between'>
-                        <div className='col-auto buttonheader-title'>{t('GENERATE LICENSE INFORMATION')}</div>
+                        <div className='col-auto buttonheader-title'>
+                            {isCalledFromProjectLicenseTab
+                                ? t('GENERATE LICENSE INFORMATION')
+                                : t('CREATE PROJECT CLEARING REPORT')}
+                        </div>
                         <div className='col-auto text-truncate buttonheader-title'>
                             {project && `${project.name} ${project.version !== undefined && `(${project.version})`}`}
                         </div>

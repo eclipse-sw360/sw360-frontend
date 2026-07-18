@@ -10,7 +10,6 @@
 // License-Filename: LICENSE
 
 'use client'
-import { signOut, useSession } from 'next-auth/react'
 import { ReactNode, useEffect, useState } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { Annotations, InputKeyValue, PackageInformation, SPDX, SPDXDocument } from '@/object-types'
@@ -47,15 +46,6 @@ const EditAnnotationInformation = ({
     const handleInputKeyToAnnotator = (data: InputKeyValue) => {
         return data.key + ':' + data.value
     }
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const setAnnotatorToAnnotation = (input: InputKeyValue) => {
         if (isSourceSPDXDocument) {

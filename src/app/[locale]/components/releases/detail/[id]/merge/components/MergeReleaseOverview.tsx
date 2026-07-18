@@ -11,7 +11,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -27,7 +26,9 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import MergeReleaseConfirmation from './MergeReleaseConfirmation'
 import MergeReleaseDataCheck from './MergeReleaseDataCheck'
 import MergeReleaseTable from './MergeReleaseTable'
@@ -68,29 +69,22 @@ function MergeReleaseOverview({
     const [finalReleasePayload, setFinalReleasePayload] = useState<null | Release>(null)
     const [error, setError] = useState<null | string>(null)
     const [loading, setLoading] = useState(false)
-    const { status, data: session } = useSession()
     const [sourceAttachments, setSourceAttachments] = useState<Array<Attachment>>([])
     const [targetAttachments, setTargetAttachments] = useState<Array<Attachment>>([])
     const [releaseUsages, setReleaseUsages] = useState<null | ReleaseUsages>(null)
     const [heavyUsage, setHeavyUsage] = useState(false)
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            if (CommonUtils.isNullOrUndefined(session)) return
-            const response = await ApiUtils.GET(url, session.user.access_token)
-            if (response.status === StatusCodes.OK) {
-                const data = (await response.json()) as EmbeddedAttachments
-                return data
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
-            } else {
-                return undefined
-            }
-        },
-        [
-            session,
-        ],
-    )
+    const fetchData = useCallback(async (url: string) => {
+        const response = await ApiUtils.GET(url)
+        if (response.status === StatusCodes.OK) {
+            const data = (await response.json()) as EmbeddedAttachments
+            return data
+        } else if (response.status === StatusCodes.UNAUTHORIZED) {
+            return dispatchSessionExpiredEvent()
+        } else {
+            return undefined
+        }
+    }, [])
 
     const activeEntries = useMemo(() => {
         return Object.entries(releaseUsages || {}).filter(([_, value]) => value > 0)
@@ -99,24 +93,14 @@ function MergeReleaseOverview({
     ])
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
-    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
         ;(async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`releases/${releaseId}`, session.user.access_token, signal)
+                const response = await ApiUtils.GET(`releases/${releaseId}`, signal)
 
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status === StatusCodes.OK) {
                     const singleRelease = (await response.json()) as ReleaseDetail
                     const compId = singleRelease?._links['sw360:component']?.href.split('/').pop() ?? ''
@@ -150,15 +134,9 @@ function MergeReleaseOverview({
         const signal = controller.signal
         ;(async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(
-                    `releases/${releaseId}/usageInformationForMerge`,
-                    session.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`releases/${releaseId}/usageInformationForMerge`, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status === StatusCodes.OK) {
                     const releaseUsage = (await response.json()) as ReleaseUsages
                     setReleaseUsages(releaseUsage)
@@ -192,11 +170,6 @@ function MergeReleaseOverview({
 
     const checkMergeReleaseEligibility = async (): Promise<boolean> => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                signOut()
-                return false
-            }
             if (!sourceRelease?.id) {
                 MessageService.error(t('No source release found'))
                 return false
@@ -246,8 +219,6 @@ function MergeReleaseOverview({
     const handleMergeRelease = async () => {
         try {
             setLoading(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const payload = {
                 ...(finalReleasePayload ?? {}),
             }
@@ -259,7 +230,6 @@ function MergeReleaseOverview({
             const response = await ApiUtils.PATCH(
                 `releases/mergereleases?mergeTargetId=${targetRelease?.id}&mergeSourceId=${sourceRelease?.id}`,
                 payload,
-                session.user.access_token,
             )
             if (response.status !== 200) {
                 const err = (await response.json()) as ErrorDetails

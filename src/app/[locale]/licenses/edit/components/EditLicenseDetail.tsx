@@ -13,11 +13,11 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Embedded, ErrorDetails, LicensePayload, LicenseType } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     inputValid: boolean
@@ -39,15 +39,6 @@ const EditLicenseDetail = ({
     const t = useTranslations('default')
     const params = useSearchParams()
     const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.target.name === 'fullName') {
@@ -72,8 +63,7 @@ const EditLicenseDetail = ({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(`licenseTypes`, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(`licenseTypes`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {

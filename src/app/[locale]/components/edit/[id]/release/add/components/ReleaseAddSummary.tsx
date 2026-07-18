@@ -11,14 +11,13 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import ReleaseRepository from '@/components/ReleaseRepository/ReleaseRepository'
 import ReleaseSummary from '@/components/ReleaseSummary/ReleaseSummary'
 import { useConfigValue } from '@/contexts'
-import { DocumentTypes, InputKeyValue, Release, UIConfigKeys, Vendor } from '@/object-types'
+import { DocumentTypes, InputKeyValue, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 
 interface Props {
@@ -26,34 +25,10 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: {
-        [k: string]: string
-    }
-    setMainLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
-    otherLicenses: {
-        [k: string]: string
-    }
-    setOtherLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
+    releaseDetail?: ReleaseDetail
 }
 
-function ReleaseAddSummary({
-    releasePayload,
-    setReleasePayload,
-    vendor,
-    setVendor,
-    mainLicenses,
-    setMainLicenses,
-    otherLicenses,
-    setOtherLicenses,
-}: Props): ReactNode {
+function ReleaseAddSummary({ releasePayload, setReleasePayload, vendor, setVendor, releaseDetail }: Props): ReactNode {
     const t = useTranslations('default')
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
     const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
@@ -73,14 +48,27 @@ function ReleaseAddSummary({
         [k: string]: string
     }>({})
 
-    const { status } = useSession()
-
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
+        if (!releaseDetail) return
+        if (releaseDetail.roles) {
+            setRoles(CommonUtils.convertObjectToMapRoles(releaseDetail.roles))
+        }
+        if (releaseDetail.externalIds) {
+            setExternalIds(CommonUtils.convertObjectToMap(releaseDetail.externalIds))
+        }
+        if (releaseDetail.additionalData) {
+            setAddtionalData(CommonUtils.convertObjectToMap(releaseDetail.additionalData))
+        }
+        if (releaseDetail._embedded?.['sw360:contributors']) {
+            setContributors(
+                CommonUtils.extractEmailsAndFullNamesFromUsers(releaseDetail._embedded['sw360:contributors']),
+            )
+        }
+        if (releaseDetail._embedded?.['sw360:moderators']) {
+            setModerators(CommonUtils.extractEmailsAndFullNamesFromUsers(releaseDetail._embedded['sw360:moderators']))
         }
     }, [
-        status,
+        releaseDetail,
     ])
 
     const setDataRoles = (roles: InputKeyValue[]) => {
@@ -128,10 +116,6 @@ function ReleaseAddSummary({
                         setReleasePayload={setReleasePayload}
                         vendor={vendor}
                         setVendor={setVendor}
-                        mainLicenses={mainLicenses}
-                        setMainLicenses={setMainLicenses}
-                        otherLicenses={otherLicenses}
-                        setOtherLicenses={setOtherLicenses}
                         moderators={moderators}
                         setModerators={setModerators}
                         contributors={contributors}

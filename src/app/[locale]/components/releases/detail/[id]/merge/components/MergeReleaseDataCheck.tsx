@@ -10,11 +10,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Attachment, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
+import { useConfigKeyValue } from '@/contexts'
+import { Attachment, ConfigKeys, ErrorDetails, Release, ReleaseDetail } from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 import AdditionalDataSection from './AdditionalDataSection'
 import Attachments from './Attachments'
 import ClearingDetailsSection from './ClearingDetailsSection'
@@ -42,29 +43,20 @@ export default function MergeReleaseDataCheck({
     finalReleasePayload: Release | null
     setFinalReleasePayload: Dispatch<SetStateAction<null | Release>>
 }): ReactNode {
-    const session = useSession()
     const [sourceReleaseDetail, setSourceReleaseDetail] = useState<ReleaseDetail | null>()
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`releases/${sourceRelease?.id}`, {
                     allDetails: 'true',
                 })
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -82,7 +74,6 @@ export default function MergeReleaseDataCheck({
 
         return () => controller.abort()
     }, [
-        session,
         sourceRelease?.id,
     ])
 
@@ -132,12 +123,14 @@ export default function MergeReleaseDataCheck({
                         finalReleasePayload={finalReleasePayload}
                         setFinalReleasePayload={setFinalReleasePayload}
                     />
-                    <LinkedReleasesSection
-                        targetRelease={targetRelease}
-                        sourceReleaseDetail={sourceReleaseDetail}
-                        finalReleasePayload={finalReleasePayload}
-                        setFinalReleasePayload={setFinalReleasePayload}
-                    />
+                    {showLinkedReleases && (
+                        <LinkedReleasesSection
+                            targetRelease={targetRelease}
+                            sourceReleaseDetail={sourceReleaseDetail}
+                            finalReleasePayload={finalReleasePayload}
+                            setFinalReleasePayload={setFinalReleasePayload}
+                        />
+                    )}
                     <ClearingDetailsSection
                         targetRelease={targetRelease}
                         sourceReleaseDetail={sourceReleaseDetail}

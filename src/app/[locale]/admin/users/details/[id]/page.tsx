@@ -13,12 +13,13 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { PageButtonHeader, PageSpinner } from '@/components/sw360'
 import { User } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const UserDetailPage = (): JSX.Element => {
     const params = useParams<{
@@ -26,24 +27,12 @@ const UserDetailPage = (): JSX.Element => {
     }>()
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         ;(async () => {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
-            const response = await ApiUtils.GET(`users/byid/${params.id}`, session.user.access_token)
+            const response = await ApiUtils.GET(`users/byid/${params.id}`)
             if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status !== StatusCodes.OK) {
                 return notFound()
             }

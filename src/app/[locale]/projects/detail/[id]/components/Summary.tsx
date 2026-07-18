@@ -11,9 +11,8 @@
 
 import { decode } from 'he'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
@@ -30,15 +29,6 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
     const [toggleGeneralInformation, setToggleGeneralInformation] = useState(false)
     const [toggleRoles, setToggleRoles] = useState(false)
     const [toggleVendor, setToggleVendor] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const Clipboard = ({ text }: { text: string }) => {
         const [copied, setCopied] = useState(false)

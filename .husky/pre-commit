@@ -1,1 +1,2 @@
+pnpm check:client-directives
 pnpx lint-staged

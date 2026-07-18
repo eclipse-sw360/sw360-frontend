@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -24,12 +23,13 @@ import {
     ObligationData,
     ObligationEntry,
     ObligationResponse,
+    ObligationType,
     PageableQueryParam,
     PaginationMeta,
     UpdateCommentModalMetadata,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
@@ -50,15 +50,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     const [showLicenseDbObligationsModal, setShowLicenseDbObligationsModal] = useState(false)
     const [showCompareObligationsModal, setShowCompareObligationsModal] = useState(false)
     const [refresh, setRefresh] = useState(false)
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -114,7 +105,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                                 }}
                                             >
                                                 <Link
-                                                    href={`/licenses/${licenseId}`}
+                                                    href={`/licenses/detail?id=${licenseId}`}
                                                     className='text-link'
                                                 >
                                                     {licenseId}
@@ -277,7 +268,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                                 }}
                                             >
                                                 <Link
-                                                    href={`/licenses/${licenseId}`}
+                                                    href={`/licenses/detail?id=${licenseId}`}
                                                     className='text-link'
                                                 >
                                                     {licenseId}
@@ -333,9 +324,8 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                 let obligationValue = payload?.[row.original.node[0]] ?? {}
                                 obligationValue = {
                                     ...obligationValue,
-                                    id: row.original.node[1].id,
                                     status: e.target.value,
-                                    obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                                    obligationType: ObligationType.LICENSE_OBLIGATION,
                                 }
                                 setPayload((payload: ObligationEntry) => ({
                                     ...payload,
@@ -436,7 +426,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -447,7 +436,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/licenseObligations`,
                     Object.fromEntries(
@@ -459,7 +447,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -498,24 +486,18 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
         refresh,
     ])
 
     useEffect(() => {
-        if (session.status === 'loading' || !selectedProjectId) return
+        if (CommonUtils.isNullOrUndefined(selectedProjectId)) return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 setShowProcessing(true)
-                const response = await ApiUtils.GET(
-                    `projects/${selectedProjectId}/licenseObligations`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${selectedProjectId}/licenseObligations`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -534,7 +516,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
 
         return () => controller.abort()
     }, [
-        session,
         selectedProjectId,
     ])
 
@@ -663,7 +644,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                         obligationValue = {
                             ...obligationValue,
                             comment: comment,
-                            obligationType: ObligationLevels.LICENSE_OBLIGATION,
+                            obligationType: ObligationType.LICENSE_OBLIGATION,
                         }
                         setPayload((payload: ObligationEntry) => ({
                             ...payload,

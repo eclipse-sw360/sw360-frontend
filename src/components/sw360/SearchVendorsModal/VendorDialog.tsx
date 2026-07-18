@@ -12,13 +12,13 @@
 
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Vendor } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import AddVendorDialog from './AddVendor'
 
 interface Props {
@@ -34,6 +34,28 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const t = useTranslations('default')
     const [showAddVendor, setShowAddVendor] = useState(false)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
+
+    const getVendorIdentifier = (vendorData?: Vendor): string => {
+        if (!vendorData) return ''
+        return vendorData._links?.self.href.split('/').at(-1) ?? vendorData.id ?? ''
+    }
+
+    const isVendorMatched = (currentVendor?: Vendor, comparedVendor?: Vendor): boolean => {
+        const currentIdentifier = getVendorIdentifier(currentVendor)
+        const comparedIdentifier = getVendorIdentifier(comparedVendor)
+
+        if (currentIdentifier !== '' && comparedIdentifier !== '') {
+            return currentIdentifier === comparedIdentifier
+        }
+
+        return (
+            (currentVendor?.fullName ?? '') !== '' &&
+            (currentVendor?.fullName ?? '') === (comparedVendor?.fullName ?? '') &&
+            (currentVendor?.shortName ?? '') === (comparedVendor?.shortName ?? '') &&
+            (currentVendor?.url ?? '') === (comparedVendor?.url ?? '')
+        )
+    }
+
     const handleCloseDialog = () => {
         setShow(!show)
         setSelectedVendor(vendor)
@@ -51,8 +73,13 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
         setSearchText(undefined)
         setVendorData([])
     }
-    const session = useSession()
     const [selectedVendor, setSelectedVendor] = useState<Vendor>(vendor)
+
+    useEffect(() => {
+        setSelectedVendor(vendor)
+    }, [
+        vendor,
+    ])
 
     const columns = useMemo<ColumnDef<Vendor>[]>(
         () => [
@@ -61,11 +88,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 cell: ({ row }) => (
                     <Form.Check
                         type='radio'
-                        checked={
-                            selectedVendor !== null &&
-                            row.original._links?.self.href.split('/').at(-1) ===
-                                selectedVendor._links?.self.href.split('/').at(-1)
-                        }
+                        checked={isVendorMatched(row.original, selectedVendor)}
                         onChange={() => setSelectedVendor(row.original)}
                     ></Form.Check>
                 ),
@@ -130,7 +153,6 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const searchVendor = async (signal?: AbortSignal) => {
         try {
             setShowProcessing(true)
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             const queryUrl = CommonUtils.createUrlWithParams(
                 `vendors`,
                 Object.fromEntries(
@@ -147,7 +169,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                     ]),
                 ),
             )
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            const response = await ApiUtils.GET(queryUrl, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -170,14 +192,13 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     }
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         void searchVendor(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({

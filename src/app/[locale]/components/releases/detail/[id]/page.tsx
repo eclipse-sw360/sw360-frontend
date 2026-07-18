@@ -8,12 +8,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { getServerSession } from 'next-auth'
-import { signOut } from 'next-auth/react'
-import { ReactNode } from 'react'
-import authOptions from '@/app/api/auth/[...nextauth]/authOptions'
-import { ConfigKeys, Configuration } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+'use client'
+
+import { type ReactNode, use } from 'react'
+import { useConfigKeyValue } from '@/contexts'
+import { ConfigKeys } from '@/object-types'
 import DetailOverview from './components/DetailOverview'
 
 interface Context {
@@ -22,20 +21,13 @@ interface Context {
     }>
 }
 
-const Detail = async (props: Context): Promise<ReactNode> => {
-    const params = await props.params
-    const releaseId = params.id
-    const session = await getServerSession(authOptions)
-    if (CommonUtils.isNullOrUndefined(session)) {
-        return signOut()
-    }
-    const response = await ApiUtils.GET('configurations', session.user.access_token)
-    const configs = (await response.json()) as Configuration
-    const isSPDXFeatureEnabled = configs[ConfigKeys.SPDX_DOCUMENT_ENABLED] == 'true'
+const Detail = ({ params }: Context): ReactNode => {
+    const resolvedParams = use(params)
+    const isSPDXFeatureEnabled = useConfigKeyValue(ConfigKeys.SPDX_DOCUMENT_ENABLED) === 'true'
 
     return (
         <DetailOverview
-            releaseId={releaseId}
+            releaseId={resolvedParams.id}
             isSPDXFeatureEnabled={isSPDXFeatureEnabled}
         />
     )

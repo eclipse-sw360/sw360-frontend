@@ -11,37 +11,29 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
+
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
+import { extractPackageManagerFromPurl } from '../../../components/purlUtils'
 
-function EditPackage({ packageId }: { packageId: string }): ReactNode {
+function EditPackage({ packageId }: { packageId: string }): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
     const [updatingPackage, setUpdatingPackage] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`packages/${packageId}`, session.user.access_token)
+                const response = await ApiUtils.GET(`packages/${packageId}`)
                 if (response.status === StatusCodes.OK) {
                     setPackagePayload((await response.json()) as Package)
                 } else {
@@ -56,25 +48,34 @@ function EditPackage({ packageId }: { packageId: string }): ReactNode {
     const handleEditPackage = async () => {
         try {
             setUpdatingPackage(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.PATCH(
-                `packages/${packageId}`,
-                {
-                    ...packagePayload,
-                    packageManager: packagePayload?.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase(),
-                },
-                session.user.access_token,
-            )
+            const normalizedPurl = packagePayload?.purl?.trim()
+            const packageManager = extractPackageManagerFromPurl(normalizedPurl)
+            if (!normalizedPurl || !packageManager) {
+                MessageService.error(t('Enter a valid pURL'))
+                return
+            }
+
+            const response = await ApiUtils.PATCH(`packages/${packageId}`, {
+                ...packagePayload,
+                purl: normalizedPurl,
+                packageManager,
+            })
             if (response.status == StatusCodes.OK) {
                 MessageService.success(t('Package updated successfully'))
                 router.push(`/packages/detail/${packageId}`)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
+                dispatchSessionExpiredEvent()
             } else {
-                const res = (await response.json()) as Record<string, string>
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                let res: Record<string, string> = {}
+                try {
+                    res = (await response.json()) as Record<string, string>
+                } catch (error) {
+                    ApiUtils.reportError(error)
+                }
+                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }
+        } catch (e) {
+            ApiUtils.reportError(e)
         } finally {
             setUpdatingPackage(false)
         }

@@ -13,17 +13,18 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
 import { LicenseDetail, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteLicenseDialog from '../../components/DeleteLicenseDialog'
 import EditLicenseSummary from './EditLicenseSummary'
 
@@ -51,20 +52,12 @@ function EditLicense({ licenseId }: Props): ReactNode {
         checked: false,
         licenseTypeDatabaseId: '',
     })
-    const session = useSession()
     const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
+    const [loading, setLoading] = useState<boolean>(true)
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
     }
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
 
@@ -74,11 +67,10 @@ function EditLicense({ licenseId }: Props): ReactNode {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(`licenses/${licenseId}`, Object.fromEntries(params))
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -86,6 +78,8 @@ function EditLicense({ licenseId }: Props): ReactNode {
                 setLicensePayload(license)
             } catch (error) {
                 ApiUtils.reportError(error)
+            } finally {
+                setLoading(false)
             }
         })()
         return () => controller.abort()
@@ -101,15 +95,8 @@ function EditLicense({ licenseId }: Props): ReactNode {
             MessageService.error(t('Fullname not null or empty'))
             return
         }
-
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            return signOut()
-        }
-
         try {
-            const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload, session.user.access_token)
+            const response = await ApiUtils.PATCH(`licenses/${licenseId}`, licensePayload)
 
             if (response.status === StatusCodes.OK) {
                 const data = (await response.json()) as LicensePayload
@@ -176,7 +163,11 @@ function EditLicense({ licenseId }: Props): ReactNode {
         },
     }
 
-    return (
+    return loading || !licensePayload ? (
+        <div className='col-12 mt-1 text-center'>
+            <Spinner className='spinner' />
+        </div>
+    ) : (
         <div className='container page-content'>
             <DeleteLicenseDialog
                 licensePayload={licensePayload}

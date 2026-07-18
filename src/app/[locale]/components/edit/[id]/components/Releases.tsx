@@ -15,13 +15,13 @@ import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { SW360Table } from '@/components/sw360'
 import { Embedded, ErrorDetails, LinkedRelease, ReleaseLink } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Props {
     componentId: string
@@ -32,15 +32,6 @@ type EmbeddedLinkedReleases = Embedded<LinkedRelease, 'sw360:releaseLinks'>
 const Releases = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const router = useRouter()
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ReleaseLink>[]>(
         () => [
@@ -88,7 +79,6 @@ const Releases = ({ componentId }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -99,12 +89,7 @@ const Releases = ({ componentId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(
-                    `components/${componentId}/releases`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`components/${componentId}/releases`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -130,7 +115,6 @@ const Releases = ({ componentId }: Props): ReactNode => {
 
         return () => controller.abort()
     }, [
-        session,
         componentId,
     ])
 

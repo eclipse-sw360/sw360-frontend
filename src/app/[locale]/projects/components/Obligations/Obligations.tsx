@@ -10,9 +10,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useState } from 'react'
 import { Dropdown, Nav, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ActionType, ObligationEntry, UserGroupType } from '@/object-types'
@@ -30,20 +29,11 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
     const router = useRouter()
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
         const isCalledFromProjectLicenseTab = false
         sessionStorage.setItem('isCalledFromProjectLicenseTab', JSON.stringify(isCalledFromProjectLicenseTab))
-        router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects}`)
+        router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects}&variant=REPORT`)
     }
 
     return (

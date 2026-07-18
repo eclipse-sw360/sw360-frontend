@@ -11,7 +11,7 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { getSession, signOut } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -19,7 +19,9 @@ import { Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 import type { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import HomeTableHeader from './HomeTableHeader'
 
 type EmbeddedTaskSubmissions = Embedded<ModerationRequest, 'sw360:moderationRequests'>
@@ -142,9 +144,6 @@ function MyTaskSubmissionsWidget(): ReactNode {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `moderationrequest/mySubmissions`,
                     Object.fromEntries(
@@ -154,7 +153,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -229,10 +228,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
     const handleDeleteModerationRequest = async () => {
         if (!modReqToDelete?.id) return
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
-            const response = await ApiUtils.DELETE(`moderationrequest/delete`, session.user.access_token, [
+            const response = await ApiUtils.DELETE(`moderationrequest/delete`, [
                 modReqToDelete.id,
             ])
             if (response.status === StatusCodes.OK) {
@@ -244,7 +240,7 @@ function MyTaskSubmissionsWidget(): ReactNode {
                 }
                 MessageService.error(data.message)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

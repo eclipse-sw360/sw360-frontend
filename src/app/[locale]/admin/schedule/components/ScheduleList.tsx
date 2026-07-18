@@ -11,17 +11,16 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { JSX, useCallback, useEffect, useState } from 'react'
 import { ErrorDetails, ServiceDetailsResponse } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { ScheduleItem } from './ScheduleItem'
 
 export default function VendorsList(): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
     const [serviceDetails, setServiceDetails] = useState<ServiceDetailsResponse>({})
     const [refreshTrigger, setRefreshTrigger] = useState(0)
 
@@ -30,25 +29,11 @@ export default function VendorsList(): JSX.Element {
     }, [])
 
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
-
-    useEffect(() => {
         const controller = new AbortController()
 
         const fetchServiceDetails = async () => {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
             try {
-                const response = await ApiUtils.GET(
-                    'schedule/serviceDetails',
-                    session.data.user.access_token,
-                    controller.signal,
-                )
+                const response = await ApiUtils.GET('schedule/serviceDetails')
                 if (response.status === StatusCodes.OK) {
                     const data = (await response.json()) as ServiceDetailsResponse
                     setServiceDetails(data)
@@ -62,15 +47,12 @@ export default function VendorsList(): JSX.Element {
 
         return () => controller.abort()
     }, [
-        session,
         refreshTrigger,
     ])
 
     const handleCancelAllTasks = async () => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
-            const response = await ApiUtils.POST('schedule/unscheduleAllServices', {}, session.data.user.access_token)
+            const response = await ApiUtils.POST('schedule/unscheduleAllServices', {})
             if (response.status === StatusCodes.OK) {
                 setServiceDetails((prev) =>
                     Object.fromEntries(
@@ -84,8 +66,6 @@ export default function VendorsList(): JSX.Element {
                     ),
                 )
                 MessageService.success(t('Every task unscheduled successfully'))
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -103,28 +83,22 @@ export default function VendorsList(): JSX.Element {
         successMessage: string,
     ): Promise<void> => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
             let response
 
             if (action === 'unschedule') {
                 response = await ApiUtils.DELETE(
                     `schedule/unscheduleService?serviceName=${encodeURIComponent(serviceName)}`,
-                    session.data.user.access_token,
                 )
             } else {
                 response = await ApiUtils.POST(
                     `schedule/scheduleService?serviceName=${encodeURIComponent(serviceName)}`,
                     {},
-                    session.data.user.access_token,
                 )
             }
 
             if (response.status === StatusCodes.OK) {
                 MessageService.success(successMessage)
                 refreshServiceDetails()
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -138,19 +112,14 @@ export default function VendorsList(): JSX.Element {
 
     const handleTriggerService = async (serviceName: string): Promise<void> => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
             const response = await ApiUtils.POST(
                 `schedule/triggerService?serviceName=${encodeURIComponent(serviceName)}`,
                 {},
-                session.data.user.access_token,
             )
 
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Task performed successfully'))
                 refreshServiceDetails()
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                return signOut()
             } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

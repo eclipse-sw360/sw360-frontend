@@ -11,9 +11,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, SetStateAction, useEffect } from 'react'
+import { Dispatch, type JSX, SetStateAction } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { LicensePayload, Obligation } from '@/object-types'
@@ -32,15 +31,6 @@ const DeleteObligationDialog = ({
     setLicensePayload,
 }: Props): JSX.Element => {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleSubmit = () => {
         const id = obligation?._links?.self.href.split('/').at(-1) ?? ''

@@ -22,7 +22,6 @@ import {
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, Breadcrumb, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
@@ -51,7 +50,9 @@ import {
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
@@ -75,7 +76,6 @@ interface GroupEntry {
 
 function Project(): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
     const params = useSearchParams()
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
@@ -89,7 +89,7 @@ function Project(): JSX.Element {
     const [linkedProjectsData, setLinkedProjectsData] = useState<Record<string, TypeProject[]>>({})
 
     // Configs from backend
-    const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_PROJECT_REPORT)
+    const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
     const clearingRequestDisabledGroups = useConfigValue(
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
@@ -109,13 +109,32 @@ function Project(): JSX.Element {
         },
     ])
 
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: params.toString() ? 'score,asc' : 'name,asc',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [projectData, setProjectData] = useState<ProjectWithSubRows[]>(() => [])
+    const [showProcessing, setShowProcessing] = useState(false)
+
     useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const handleDeleteProject = (projectId: string, clearingRequestId?: string, clearingState?: string) => {
         setDeleteProjectId(projectId)
@@ -129,8 +148,15 @@ function Project(): JSX.Element {
     }
 
     const handleEditProject = (projectId: string) => {
-        router.push(`/projects/edit/${projectId}`)
-        MessageService.success(t('You are editing the original document'))
+        const project = projectData.find((proj) => proj['_links']?.['self']?.['href']?.split('/').at(-1) === projectId)
+        const createdByEmail = project?.['_embedded']?.['createdBy']
+        if (userIdentity?.email === createdByEmail || userIdentity?.userGroup === UserGroupType.ADMIN) {
+            MessageService.info(t('You are editing the original document'))
+            router.push(`/projects/edit/${projectId}`)
+        } else {
+            MessageService.info(t('You will create a moderation request if you update'))
+            router.push(`/projects/edit/${projectId}`)
+        }
     }
 
     const fetchLinkedProjects = useCallback(async (projectId: string) => {
@@ -146,13 +172,7 @@ function Project(): JSX.Element {
         })
 
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
-            const response = await ApiUtils.GET(
-                `projects/${projectId}/linkedProjects?transitive=false`,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=false`)
 
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
@@ -187,7 +207,7 @@ function Project(): JSX.Element {
                                   <OverlayTrigger
                                       overlay={
                                           <Tooltip>
-                                              {allExpandableExpanded ? t('Collapse All') : t('Expand All')}
+                                              {allExpandableExpanded ? t('Collapse all') : t('Expand all')}
                                           </Tooltip>
                                       }
                                   >
@@ -215,7 +235,7 @@ function Project(): JSX.Element {
                                               cursor: 'pointer',
                                               padding: 0,
                                           }}
-                                          aria-label={allExpandableExpanded ? t('Collapse All') : t('Expand All')}
+                                          aria-label={allExpandableExpanded ? t('Collapse all') : t('Expand all')}
                                       >
                                           {allExpandableExpanded ? (
                                               <BsCaretDownFill size={16} />
@@ -444,11 +464,9 @@ function Project(): JSX.Element {
 
                     const handleSingleAttachmentDownload = async () => {
                         if (attachments.length !== 1) return
-                        if (CommonUtils.isNullOrUndefined(session.data)) return
                         const att = attachments[0]
                         await DownloadService.download(
                             `projects/${id}/attachments/${att.attachmentContentId}`,
-                            session.data,
                             att.filename,
                         )
                     }
@@ -663,18 +681,7 @@ function Project(): JSX.Element {
             showLinkedProjects,
         ],
     )
-    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
-        page: 0,
-        page_entries: 10,
-        sort: 'name,asc',
-    })
-    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
-        size: 0,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-    })
-    const [projectData, setProjectData] = useState<ProjectWithSubRows[]>(() => [])
+
     const memoizedData = useMemo(() => {
         if (!showLinkedProjects) return projectData
 
@@ -709,17 +716,14 @@ function Project(): JSX.Element {
         showLinkedProjects,
         linkedProjectsData,
     ])
-    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET('projects/groups', session.data.user.access_token, signal)
+                const response = await ApiUtils.GET('projects/groups', signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -741,12 +745,9 @@ function Project(): JSX.Element {
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -757,8 +758,6 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects`,
@@ -773,7 +772,7 @@ function Project(): JSX.Element {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -800,14 +799,13 @@ function Project(): JSX.Element {
     }, [
         pageableQueryParam,
         params.toString(),
-        session,
     ])
 
     useEffect(() => {
         setPageableQueryParam({
             page: 0,
             page_entries: 10,
-            sort: '',
+            sort: params.toString() ? 'score,asc' : '',
         })
     }, [
         params.toString(),
@@ -815,7 +813,6 @@ function Project(): JSX.Element {
 
     // Fetch license clearing counts in batch after project data is loaded
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         if (projectData.length === 0) {
             setLicenseClearingData({})
             return
@@ -823,19 +820,13 @@ function Project(): JSX.Element {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
                 const projectIds = projectData
                     .map((project) => project['_links']['self']['href'].split('/').at(-1))
                     .filter((id): id is string => id !== undefined)
 
                 if (projectIds.length === 0) return
 
-                const response = await ApiUtils.POST(
-                    'projects/licenseClearingCount',
-                    projectIds,
-                    session.data.user.access_token,
-                )
+                const response = await ApiUtils.POST('projects/licenseClearingCount', projectIds)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -852,7 +843,6 @@ function Project(): JSX.Element {
         })()
     }, [
         projectData,
-        session,
     ])
 
     const table = useReactTable<ProjectWithSubRows>({
@@ -884,8 +874,8 @@ function Project(): JSX.Element {
                 expanded: expandedState,
             }),
             columnVisibility: {
-                actions: !(session.data?.user?.userGroup === UserGroupType.SECURITY_USER),
-                licenseClearing: !(session.data?.user?.userGroup === UserGroupType.SECURITY_USER),
+                actions: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
+                licenseClearing: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
             },
             pagination: {
                 pageIndex: pageableQueryParam.page,
@@ -953,8 +943,6 @@ function Project(): JSX.Element {
 
     const exportProjectSpreadsheet = async ({ withLinkedRelease }: { withLinkedRelease: boolean }) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
             const mailEnabled = mailRequestForProjectReport === 'true'
             const searchParamsString = params.toString()
             const baseUrl = withLinkedRelease
@@ -966,7 +954,7 @@ function Project(): JSX.Element {
                 // If mail is not enabled, download the file immediately
                 const currentDate = new Date().toISOString().split('T')[0]
                 const fileName = `Projects-${currentDate}.xlsx`
-                const statusCode = await DownloadService.download(url, session.data, fileName)
+                const statusCode = await DownloadService.download(url, fileName)
                 if (statusCode === StatusCodes.OK) {
                     MessageService.success(t('Spreadsheet download is successful'))
                 } else if (statusCode === StatusCodes.FORBIDDEN) {
@@ -978,7 +966,7 @@ function Project(): JSX.Element {
                 }
             } else {
                 // If mail is enabled, just send the request and show message
-                const response = await ApiUtils.GET(url, session.data.user.access_token)
+                const response = await ApiUtils.GET(url)
                 if (response.status === StatusCodes.OK) {
                     MessageService.success(t('Excel report generation has started'))
                 } else if (response.status === StatusCodes.FORBIDDEN) {
@@ -1055,7 +1043,7 @@ function Project(): JSX.Element {
                 },
                 {
                     key: 'PHASE_OUT',
-                    text: t('PhaseOut'),
+                    text: t('Phaseout'),
                 },
                 {
                     key: 'UNKNOWN',
@@ -1134,20 +1122,14 @@ function Project(): JSX.Element {
                                         <button
                                             className='btn btn-primary'
                                             onClick={handleAddProject}
-                                            disabled={
-                                                session.status === 'authenticated' &&
-                                                session.data?.user?.userGroup === UserGroupType.SECURITY_USER
-                                            }
+                                            disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                         >
                                             {t('Add Project')}
                                         </button>
                                         <Dropdown>
                                             <Dropdown.Toggle
                                                 variant='secondary'
-                                                hidden={
-                                                    session.status === 'authenticated' &&
-                                                    session.data?.user?.userGroup === UserGroupType.SECURITY_USER
-                                                }
+                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                             >
                                                 {t('Import SBOM')}
                                             </Dropdown.Toggle>

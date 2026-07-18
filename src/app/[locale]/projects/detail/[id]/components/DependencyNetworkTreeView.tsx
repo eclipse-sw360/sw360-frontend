@@ -21,7 +21,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table, TableSearch } from 'next-sw360'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -29,8 +28,9 @@ import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 import { Attachment, ErrorDetails, FilterOption, NestedRows, TypedEntity } from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
 
 interface Props {
     projectId: string
@@ -197,7 +197,6 @@ type TypedRelease = TypedEntity<ReleaseClearingState, 'release'>
 const DependencyNetworkTreeView = ({ projectId }: Props) => {
     const t = useTranslations('default')
 
-    const session = useSession()
     const [expandLevel, setExpandLevel] = useState(-1)
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -552,7 +551,6 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
     })
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -564,7 +562,6 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
             try {
                 const response = await ApiUtils.GET(
                     `projects/network/${projectId}/linkedResources?transitive=true`,
-                    session.data.user.access_token,
                     signal,
                 )
 
@@ -587,7 +584,6 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         return () => controller.abort()
     }, [
         projectId,
-        session.status,
     ])
 
     const fetchReleasesRecursive = (

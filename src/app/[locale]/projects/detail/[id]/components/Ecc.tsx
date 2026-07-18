@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -20,7 +19,8 @@ import { Button, Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ECCInterface, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type EmbeddedProjectReleaseEcc = Embedded<ECCInterface, 'sw360:releases'>
 
@@ -35,15 +35,6 @@ const Capitalize = (text: string) =>
 
 function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
@@ -141,7 +132,6 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -152,7 +142,6 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/releases/ecc`,
                     Object.fromEntries(
@@ -165,7 +154,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -191,7 +180,6 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -233,11 +221,10 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
 
     const exportSpreadsheet = () => {
         try {
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
             const currentDate = new Date().toISOString().split('T')[0]
             const eccSpreadSheetName = `releases-${projectName}-${projectVersion}-${currentDate}.xlsx`
             const url = `reports?projectId=${projectId}&module=projectReleaseSpreadSheetWithEcc&mimetype=xlsx`
-            void DownloadService.download(url, session.data, eccSpreadSheetName)
+            void DownloadService.download(url, eccSpreadSheetName)
         } catch (e) {
             console.error(e)
         }

@@ -11,14 +11,14 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
-import { ActionType, Release, ReleaseDetail, UIConfigKeys, Vendor } from '@/object-types'
+import { ActionType, Release, ReleaseDetail, UIConfigKeys, UserGroupType, Vendor } from '@/object-types'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
@@ -27,22 +27,6 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: {
-        [k: string]: string
-    }
-    setMainLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
-    otherLicenses: {
-        [k: string]: string
-    }
-    setOtherLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
     contributors: {
         [k: string]: string
     }
@@ -68,10 +52,6 @@ const ReleaseSummary = ({
     setReleasePayload,
     vendor,
     setVendor,
-    mainLicenses,
-    setMainLicenses,
-    otherLicenses,
-    setOtherLicenses,
     contributors,
     setContributors,
     moderators,
@@ -90,7 +70,13 @@ const ReleaseSummary = ({
     const handleClickSearchContributors = useCallback(() => setDialogOpenContributors(true), [])
     const [dialogOpenModerators, setDialogOpenModerators] = useState(false)
     const handleClickSearchModerators = useCallback(() => setDialogOpenModerators(true), [])
-    const { status } = useSession()
+    const [sourceCodeDownloadUrlInput, setSourceCodeDownloadUrlInput] = useState(
+        releasePayload.sourceCodeDownloadurl ?? '',
+    )
+    const [sourceCodeDownloadUrlError, setSourceCodeDownloadUrlError] = useState<string | null>(null)
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
 
     // Configs from backend
     const operatingSystemSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
@@ -98,26 +84,32 @@ const ReleaseSummary = ({
     const platformSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
+        setSourceCodeDownloadUrlInput(releasePayload.sourceCodeDownloadurl ?? '')
     }, [
-        status,
+        releasePayload.sourceCodeDownloadurl,
     ])
 
-    const setMainLicensesToPayload = (mainLicenses: { [k: string]: string }) => {
-        setMainLicenses(mainLicenses)
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
+
+    const setMainLicensesToPayload = (mainLicenses: string[]) => {
         setReleasePayload({
             ...releasePayload,
-            mainLicenseIds: Object.keys(mainLicenses),
+            mainLicenseIds: mainLicenses,
         })
     }
 
-    const setOtherLicensesToPayload = (otherLicenses: { [k: string]: string }) => {
-        setOtherLicenses(otherLicenses)
+    const setOtherLicensesToPayload = (otherLicenses: string[]) => {
         setReleasePayload({
             ...releasePayload,
-            otherLicenseIds: Object.keys(otherLicenses),
+            otherLicenseIds: otherLicenses,
         })
     }
 
@@ -126,6 +118,42 @@ const ReleaseSummary = ({
             ...releasePayload,
             [e.target.name]: e.target.value,
         })
+    }
+
+    const isValidSourceCodeUrl = (value: string): boolean => {
+        const trimmedValue = value.trim()
+        if (trimmedValue === '') {
+            return true
+        }
+
+        try {
+            const parsedUrl = new URL(trimmedValue)
+            return parsedUrl.protocol.length > 0 && parsedUrl.hostname.length > 0
+        } catch {
+            return false
+        }
+    }
+
+    const handleSourceCodeDownloadUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setSourceCodeDownloadUrlInput(value)
+
+        if (value.trim() === '' || isValidSourceCodeUrl(value)) {
+            setSourceCodeDownloadUrlError(null)
+            setReleasePayload({
+                ...releasePayload,
+                sourceCodeDownloadurl: value,
+            })
+            return
+        }
+
+        setSourceCodeDownloadUrlError(t('Please enter a valid URL'))
+    }
+
+    const handleSourceCodeDownloadUrlBlur = () => {
+        setSourceCodeDownloadUrlError(
+            isValidSourceCodeUrl(sourceCodeDownloadUrlInput) ? null : t('Please enter a valid URL'),
+        )
     }
 
     const splitValueCategories = (valueCategories: string) => {
@@ -181,6 +209,21 @@ const ReleaseSummary = ({
     const defaultValueClearingState = () => {
         return actionType === ActionType.EDIT ? releasePayload.clearingState : 'NEW'
     }
+
+    // Clearing state editability logic
+    const PRIVILEGED_GROUPS = [
+        UserGroupType.CLEARING_ADMIN,
+        UserGroupType.CLEARING_EXPERT,
+        UserGroupType.SW360_ADMIN,
+        UserGroupType.ADMIN,
+    ]
+    const userGroup = userIdentity?.userGroup as UserGroupType | undefined
+    const isPrivilegedUser = userGroup ? PRIVILEGED_GROUPS.includes(userGroup) : false
+    const currentClearingState = defaultValueClearingState()
+    const isClearingStateEditable =
+        isPrivilegedUser &&
+        actionType === ActionType.EDIT &&
+        (currentClearingState === 'NEW_CLEARING' || currentClearingState === 'REPORT_AVAILABLE')
 
     return (
         <>
@@ -420,14 +463,14 @@ const ReleaseSummary = ({
                                     aria-describedby='MainLicense'
                                     readOnly={true}
                                     name='mainLicenseIds'
-                                    value={Object.values(mainLicenses).join(', ')}
+                                    value={(releasePayload.mainLicenseIds ?? []).join(', ')}
                                     onClick={handleClickSearchMainLicenses}
                                 />
                                 <LicensesDialog
                                     show={dialogOpenMainLicenses}
                                     setShow={setDialogOpenMainLicenses}
                                     selectLicenses={setMainLicensesToPayload}
-                                    releaseLicenses={mainLicenses}
+                                    releaseLicenses={releasePayload.mainLicenseIds ?? []}
                                 />
                             </div>
                         </div>
@@ -450,13 +493,13 @@ const ReleaseSummary = ({
                                     readOnly={true}
                                     name='otherLicenseIds'
                                     onClick={handleClickSearchOtherLicenses}
-                                    value={Object.values(otherLicenses).join(', ')}
+                                    value={(releasePayload.otherLicenseIds ?? []).join(', ')}
                                 />
                                 <LicensesDialog
                                     show={dialogOpenOtherLicenses}
                                     setShow={setDialogOpenOtherLicenses}
                                     selectLicenses={setOtherLicensesToPayload}
-                                    releaseLicenses={otherLicenses}
+                                    releaseLicenses={releasePayload.otherLicenseIds ?? []}
                                 />
                             </div>
                             <div className='col-lg-4'>
@@ -467,15 +510,17 @@ const ReleaseSummary = ({
                                     {t('Source Code Download URL')}
                                 </label>
                                 <input
-                                    type='URL'
+                                    type='url'
                                     className='form-control'
                                     placeholder={t('Enter URL')}
-                                    id='wiki_url'
-                                    aria-describedby='wiki_url'
                                     name='sourceCodeDownloadurl'
-                                    onChange={updateField}
-                                    value={releasePayload.sourceCodeDownloadurl ?? ''}
+                                    onBlur={handleSourceCodeDownloadUrlBlur}
+                                    onChange={handleSourceCodeDownloadUrlChange}
+                                    value={sourceCodeDownloadUrlInput}
                                 />
+                                {sourceCodeDownloadUrlError !== null && (
+                                    <div className='form-text text-danger'>{sourceCodeDownloadUrlError}</div>
+                                )}
                             </div>
                             <div className='col-lg-4'>
                                 <label
@@ -489,7 +534,6 @@ const ReleaseSummary = ({
                                     className='form-control'
                                     placeholder={t('Enter URL')}
                                     id='binaryDownloadurl'
-                                    aria-describedby='wiki_url'
                                     name='binaryDownloadurl'
                                     onChange={updateField}
                                     value={releasePayload.binaryDownloadurl ?? ''}
@@ -504,15 +548,32 @@ const ReleaseSummary = ({
                                 >
                                     {t('Clearing State')}
                                 </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    id='modified_on'
-                                    aria-describedby='Modified on'
-                                    readOnly={true}
-                                    name='clearingState'
-                                    defaultValue={defaultValueClearingState()}
-                                />
+                                {isClearingStateEditable ? (
+                                    <select
+                                        className='form-select'
+                                        id='clearingState'
+                                        name='clearingState'
+                                        defaultValue={currentClearingState}
+                                        onChange={updateField}
+                                    >
+                                        <option value={currentClearingState}>{t(currentClearingState)}</option>
+                                        <option value='UNDER_CLEARING'>{t('UNDER_CLEARING')}</option>
+                                    </select>
+                                ) : (
+                                    <input
+                                        type='text'
+                                        className='form-control'
+                                        id='clearingState'
+                                        aria-describedby='Clearing State'
+                                        readOnly={true}
+                                        name='clearingState'
+                                        value={
+                                            releasePayload.clearingState
+                                                ? `${t(releasePayload.clearingState)}`
+                                                : t('NEW')
+                                        }
+                                    />
+                                )}
                             </div>
                             <div className='col-lg-4'>
                                 <label

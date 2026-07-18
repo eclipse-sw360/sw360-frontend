@@ -14,7 +14,6 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
@@ -24,7 +23,8 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import CDXImportStatus from '@/components/CDXImportStatus/CDXImportStatus'
 import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
 import ReleaseCheckStates from '../../object-types/enums/ReleaseCheckStates'
 
@@ -33,25 +33,14 @@ type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 function Attachments({ documentId, documentType }: { documentId: string; documentType: string }): JSX.Element {
     const t = useTranslations('default')
     const [importStatusData, setImportStatusData] = useState<ImportSummary | null>(null)
-    const session = useSession()
 
     const handleAttachmentDownload = async (attachmentId: string, attachmentName: string) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return
-        await DownloadService.download(
-            `${documentType}/${documentId}/attachments/${attachmentId}`,
-            session.data,
-            attachmentName,
-        )
+        await DownloadService.download(`${documentType}/${documentId}/attachments/${attachmentId}`, attachmentName)
     }
 
     const handleImportStatusView = async (attachmentId: string) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return
-
-            const res = await ApiUtils.GET(
-                `${documentType}/${documentId}/attachments/${attachmentId}`,
-                session.data.user.access_token,
-            )
+            const res = await ApiUtils.GET(`${documentType}/${documentId}/attachments/${attachmentId}`)
 
             if (res.status === StatusCodes.OK) {
                 const data = (await res.json()) as ImportSummary
@@ -66,14 +55,6 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
             ApiUtils.reportError(error)
         }
     }
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<ColumnDef<NestedRows<Attachment>>[]>(
         () => [
@@ -271,7 +252,6 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -282,12 +262,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return
-                const response = await ApiUtils.GET(
-                    `${documentType}/${documentId}/attachments`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`${documentType}/${documentId}/attachments`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -320,9 +295,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
         })()
 
         return () => controller.abort()
-    }, [
-        session,
-    ])
+    }, [])
 
     const table = useReactTable({
         data: memoizedData,

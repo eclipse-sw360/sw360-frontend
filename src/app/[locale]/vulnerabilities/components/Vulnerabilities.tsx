@@ -13,7 +13,6 @@ import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tansta
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -27,7 +26,9 @@ import {
     UserGroupType,
     Vulnerability,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import DeleteVulnerabilityModal from './DeleteVulnerabilityModal'
 
 type EmbeddedVulnerabilities = Embedded<Vulnerability, 'sw360:vulnerabilityApiDTOes'>
@@ -38,7 +39,6 @@ function Vulnerabilities(): ReactNode {
     const [numVulnerabilities, setNumVulnerabilities] = useState<null | number>(0)
     const [vulnerabilityToBeDeleted, setVulnerabilityToBeDeleted] = useState<null | string>(null)
     const router = useRouter()
-    const { data: session, status } = useSession()
     const [reloadKey, setReloadKey] = useState(1)
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -52,13 +52,19 @@ function Vulnerabilities(): ReactNode {
         number: 0,
     })
 
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const onDeleteClick = (id: string) => {
         setVulnerabilityToBeDeleted(id)
@@ -218,7 +224,6 @@ function Vulnerabilities(): ReactNode {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -229,9 +234,6 @@ function Vulnerabilities(): ReactNode {
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
                 const searchParams = Object.fromEntries(params.entries())
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `vulnerabilities`,
@@ -245,7 +247,7 @@ function Vulnerabilities(): ReactNode {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -273,7 +275,6 @@ function Vulnerabilities(): ReactNode {
     }, [
         pageableQueryParam,
         params.toString(),
-        session,
     ])
 
     useEffect(() => {
@@ -294,7 +295,7 @@ function Vulnerabilities(): ReactNode {
         // table state config
         state: {
             columnVisibility: {
-                actions: !(session?.user?.userGroup === UserGroupType.SECURITY_USER),
+                actions: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
             },
             pagination: {
                 pageIndex: pageableQueryParam.page,
@@ -384,10 +385,7 @@ function Vulnerabilities(): ReactNode {
                                     <button
                                         className='btn btn-primary col-auto'
                                         onClick={handleAddVulnerability}
-                                        disabled={
-                                            status === 'authenticated' &&
-                                            session?.user?.userGroup === UserGroupType.SECURITY_USER
-                                        }
+                                        disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                     >
                                         {t('Add Vulnerability')}
                                     </button>

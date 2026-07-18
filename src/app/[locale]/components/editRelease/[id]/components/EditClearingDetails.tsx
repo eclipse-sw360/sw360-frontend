@@ -9,8 +9,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { signOut, useSession } from 'next-auth/react'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { Release } from '@/object-types'
 import ClearingDetails from './ClearingDetails'
 import RequestInformation from './RequestInformation'
@@ -22,15 +21,6 @@ interface Props {
 }
 
 const EditClearingDetails = ({ releasePayload, setReleasePayload }: Props): ReactNode => {
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
     return (
         <>
             <div

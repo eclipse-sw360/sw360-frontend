@@ -77,6 +77,10 @@ Frontend runtime configuration is stored in
 | `NEXTAUTH_URL_INTERNAL` | Internal URL for server-side auth callbacks (Docker network) | `http://sw360-frontend:3000` |
 | `NEXT_PUBLIC_SW360_API_URL` | Backend REST API URL (client-side, set at build time) | `http://localhost:8080` |
 | `NEXT_PUBLIC_SW360_AUTH_PROVIDER` | Authentication provider to use (see below) | `sw360basic` |
+| `SW360_SESSION_REFETCH_INTERVAL_SECONDS` | Session refresh interval in seconds for background token refresh | `300` |
+
+`SW360_SESSION_REFETCH_INTERVAL_SECONDS` is read from the container/server
+environment at startup.
 
 ### Authentication Providers
 

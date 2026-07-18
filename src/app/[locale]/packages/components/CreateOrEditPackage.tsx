@@ -11,17 +11,18 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type FormEvent, type ReactElement, SetStateAction, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
+import LicensesDialog from '@/components/sw360/SearchLicensesDialog/LicensesDialog'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
-import AddMainLicenseModal from './AddMainLicenseModal'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
+import { extractPackageManagerFromPurl } from './purlUtils'
 
 interface DeletePackageModalMetData {
     show: boolean
@@ -51,7 +52,7 @@ export default function CreateOrEditPackage({
     isPending,
     isEditPage,
     packageId,
-}: Props): ReactNode {
+}: Props): ReactElement {
     const router = useRouter()
     const t = useTranslations('default')
     const [releaseNameVersion, setReleaseNameVersion] = useState<string>('')
@@ -64,15 +65,6 @@ export default function CreateOrEditPackage({
         packageVersion: '',
     })
     const [isPackageUsed, setIsPackageUsed] = useState(false)
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -105,15 +97,35 @@ export default function CreateOrEditPackage({
     const handleSelectRelease = (selectedReleases: ReleaseDetail[]) => {
         if (selectedReleases.length > 0) {
             const release = selectedReleases[0]
+            const selectedRelease = {
+                ...release,
+                id: release.id ?? '',
+            } as ReleaseDetail & {
+                id: string
+            }
             setPackagePayload((prev) => ({
                 ...prev,
-                releaseId: release.id ?? '',
+                releaseId: selectedRelease.id,
+                _embedded: {
+                    ...prev._embedded,
+                    'sw360:release': selectedRelease,
+                },
             }))
-            setReleaseNameVersion(`${release.name} (${release.version})`)
+            setReleaseNameVersion(`${selectedRelease.name} (${selectedRelease.version})`)
         }
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
+        if (e.target.name === 'purl') {
+            const purl = e.target.value
+            setPackagePayload((prev) => ({
+                ...prev,
+                purl,
+                packageManager: extractPackageManagerFromPurl(purl) ?? '',
+            }))
+            return
+        }
+
         setPackagePayload((prev) => ({
             ...prev,
             [e.target.name]: e.target.value,
@@ -121,11 +133,10 @@ export default function CreateOrEditPackage({
     }
 
     useEffect(() => {
-        if (isEditPage && !CommonUtils.isNullOrUndefined(packageId) && session.status !== 'loading') {
+        if (isEditPage && !CommonUtils.isNullOrUndefined(packageId)) {
             void (async () => {
                 try {
-                    if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                    const response = await ApiUtils.GET(`packages/${packageId}/usage`, session.data.user.access_token)
+                    const response = await ApiUtils.GET(`packages/${packageId}/usage`)
                     if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                         const err = (await response.json()) as ErrorDetails
                         throw new ApiError(err.message, {
@@ -145,6 +156,13 @@ export default function CreateOrEditPackage({
         packageId,
     ])
 
+    const setMainLicensesToPayload = (mainLicenses: string[]) => {
+        setPackagePayload({
+            ...packagePayload,
+            licenseIds: mainLicenses,
+        })
+    }
+
     return (
         <>
             <DeletePackageModal
@@ -157,18 +175,25 @@ export default function CreateOrEditPackage({
                 setShow={setShowLinkedReleasesModal}
                 onSelect={handleSelectRelease}
                 multiSelect={false}
+                preSelectedReleases={
+                    packagePayload._embedded?.['sw360:release']
+                        ? [
+                              packagePayload._embedded['sw360:release'] as unknown as ReleaseDetail,
+                          ]
+                        : []
+                }
             />
-            <AddMainLicenseModal
-                showMainLicenseModal={showMainLicenseModal}
-                setShowMainLicenseModal={setShowMainLicenseModal}
-                setPackagePayload={setPackagePayload}
-                packagePayload={packagePayload}
+            <LicensesDialog
+                show={showMainLicenseModal}
+                setShow={setShowMainLicenseModal}
+                selectLicenses={setMainLicensesToPayload}
+                releaseLicenses={packagePayload.licenseIds ?? []}
             />
             <form
                 id='add_or_edit_package_form_submit'
                 method='post'
                 className='mb-3'
-                onSubmit={(e) => {
+                onSubmit={(e: FormEvent<HTMLFormElement>) => {
                     e.preventDefault()
                     handleSubmit()
                 }}
@@ -311,7 +336,7 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.purl'
                                 className='form-label fw-medium'
                             >
-                                {`PURL (${t('Package URL')})`}{' '}
+                                {`PURL (${t('Package URL')})`} <ShowInfoOnHover text={t('PURL format hint')} />
                                 <span
                                     style={{
                                         color: 'red',
@@ -321,13 +346,15 @@ export default function CreateOrEditPackage({
                                 </span>
                             </label>
                             <input
-                                type='url'
+                                type='text'
                                 className='form-control'
                                 id='createOrEditPackage.purl'
                                 name='purl'
-                                placeholder={t('Enter PURL')}
+                                placeholder={t('Enter a valid pURL')}
                                 value={packagePayload.purl ?? ''}
                                 onChange={handleChange}
+                                pattern='^[Pp][Kk][Gg]:[^\s]+$'
+                                title={t('PURL format hint')}
                                 required
                             />
                         </div>
@@ -389,7 +416,7 @@ export default function CreateOrEditPackage({
                                 htmlFor='createOrEditPackage.licenseIds'
                                 className='form-label fw-medium'
                             >
-                                {t('Main licenses')}
+                                {t('Main Licenses')}
                             </label>
                             <input
                                 type='text'
@@ -425,6 +452,9 @@ export default function CreateOrEditPackage({
                                         setPackagePayload((prev) => ({
                                             ...prev,
                                             releaseId: '',
+                                            _embedded: prev._embedded
+                                                ? (({ 'sw360:release': _removed, ...rest }) => rest)(prev._embedded)
+                                                : prev._embedded,
                                         }))
                                     }}
                                 >

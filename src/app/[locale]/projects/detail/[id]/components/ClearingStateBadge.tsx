@@ -11,9 +11,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import type { useTranslations } from 'next-intl'
-import { type JSX, useEffect } from 'react'
+import { type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { ReleaseClearingStateMapping } from '@/object-types'
 
@@ -34,16 +33,6 @@ const capitalize = (text: string): string => {
 }
 
 function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props): JSX.Element {
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     return (
         <div className='text-center'>
             {isRelease ? (

@@ -11,10 +11,9 @@
 
 'use client'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SetStateAction } from 'preact/compat'
-import { Dispatch, ReactNode, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsExclamationTriangle, BsInfoCircle } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
@@ -68,14 +67,14 @@ const FileListView = ({
                         {!CommonUtils.isNullEmptyOrUndefinedString(licId) && (
                             <>
                                 <div>
-                                    {t('File Name')}: <b>{fileList?.attName ?? ''}</b>
+                                    {t('File name')}: <b>{fileList?.attName ?? ''}</b>
                                 </div>
                                 <div>
                                     {t('License Type')}:{' '}
                                     <b>{fileList?.data?.filter((l) => l.licName === licId)?.[0]?.licType ?? ''}</b>
                                 </div>
                                 <div>
-                                    {t('License Name')}: <b>{licId}</b>
+                                    {t('License name')}: <b>{licId}</b>
                                 </div>
                                 <ul>
                                     {CommonUtils.isNullEmptyOrUndefinedArray(
@@ -136,16 +135,7 @@ const FileListView = ({
 const ReleaseGeneral = ({ release, releaseId, fileList }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
-    const { status } = useSession()
     const [selectedLicenseId, setSelectedLicenseId] = useState<string>()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const Clipboard = ({ text }: { text: string }) => {
         const [copied, setCopied] = useState(false)
@@ -354,7 +344,7 @@ const ReleaseGeneral = ({ release, releaseId, fileList }: Props): ReactNode => {
                     </tr>
                     <tr>
                         <td>{t('Clearing State')}:</td>
-                        <td>{release.clearingState}</td>
+                        <td>{release.clearingState ? t(release.clearingState) : ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Release Mainline State')}:</td>

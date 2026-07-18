@@ -23,7 +23,7 @@ ARG NEXTAUTH_URL=http://localhost:3000
 ARG AUTH_SECRET=mysecret
 
 RUN npm config set registry $NPM_CONFIG_REGISTRY \
- && npm install -g pnpm@latest-10
+ && npm install -g pnpm@latest-11
 
 WORKDIR /frontend
 
@@ -51,6 +51,7 @@ ENV SW360_REST_CLIENT_SECRET=""
 ENV SW360_KEYCLOAK_CLIENT_ID=""
 ENV SW360_KEYCLOAK_CLIENT_SECRET=""
 ENV AUTH_ISSUER=""
+ENV SW360_SESSION_REFETCH_INTERVAL_SECONDS="300"
 
 # ENVs used at build time, not runtime
 ENV NEXT_PUBLIC_SW360_API_URL=""

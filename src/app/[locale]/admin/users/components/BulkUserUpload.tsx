@@ -10,14 +10,16 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { type JSX, useRef, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { BsUpload } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils } from '@/utils'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     onUploadSuccess?: () => void
@@ -54,17 +56,11 @@ export default function BulkUserUpload({ onUploadSuccess }: Props): JSX.Element 
 
             const formData = new FormData()
             formData.append('usersCsv', usersCsvFile.current, usersCsvFile.current.name)
-
-            const session = await getSession()
-            if (!session) {
-                return signOut()
-            }
-
-            const response = await ApiUtils.POST('importExport/usersCsv', formData, session.user.access_token)
+            const response = await ApiUtils.POST('importExport/usersCsv', formData)
 
             if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             }
 
             if (response.status !== StatusCodes.OK) {

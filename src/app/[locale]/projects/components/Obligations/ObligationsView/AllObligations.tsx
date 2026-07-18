@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { JSX, useEffect, useMemo, useState } from 'react'
@@ -28,7 +27,8 @@ import {
     PaginationMeta,
     Project,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils/index'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { ExpandableList } from './ExpandableComponents'
 
 const Capitalize = (text: string) =>
@@ -48,15 +48,6 @@ interface ProjectObligationData extends ObligationData {
 
 export default function LicenseObligation({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const columns = useMemo<
         ColumnDef<
@@ -112,7 +103,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                                                 }}
                                             >
                                                 <Link
-                                                    href={`/licenses/${licenseId}`}
+                                                    href={`/licenses/detail?id=${licenseId}`}
                                                     className='text-link'
                                                 >
                                                     {licenseId}
@@ -227,7 +218,6 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
     const [isLoadingObligations, setIsLoadingObligations] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -238,7 +228,6 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/licenseObligations`,
                     Object.fromEntries(
@@ -251,7 +240,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -273,7 +262,6 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const [linkedProjects, setLinkedProjects] = useState<Project[] | undefined>(() => undefined)
@@ -286,7 +274,6 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
     const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState(false)
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -298,11 +285,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -323,9 +306,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
 
         return () => controller.abort()
     }, [
-        session,
         projectId,
-        session,
     ])
 
     const getLinkedProject = (pid: string, p: ProjectInfo[], projects: Project[]) => {
@@ -376,7 +357,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             for (const pid of projectHierarchyIds) {
                 const p: ProjectInfo[] = []
                 getLinkedProject(pid, p, memoizedLinkedProjects ?? [])
-                if (p) projectHierarchy.push(p[0])
+                if (p[0]) projectHierarchy.push(p[0])
             }
             tableData.push({
                 node: [

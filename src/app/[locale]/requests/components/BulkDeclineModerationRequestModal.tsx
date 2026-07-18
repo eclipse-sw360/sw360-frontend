@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -20,7 +19,8 @@ import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle, BsQuestionCircle } from 'react-icons/bs'
 import { ModerationRequestPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface propType {
     [key: string]: string
@@ -50,16 +50,6 @@ export default function BulkDeclineModerationRequestModal({
         action: '',
         comment: '',
     })
-
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const computeProgress = (responseCode: number) => {
         switch (responseCode) {
@@ -214,16 +204,11 @@ export default function BulkDeclineModerationRequestModal({
     }
 
     const rejectModerationRequest = async (singleMrId: string, updatedRejectPayload: ModerationRequestPayload) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
         try {
             setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment) {
-                const response = await ApiUtils.PATCH(
-                    `moderationrequest/${singleMrId}`,
-                    updatedRejectPayload,
-                    session.data.user.access_token,
-                )
+                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`, updatedRejectPayload)
                 if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     const progressStatus = computeProgress(response.status)
@@ -274,7 +259,7 @@ export default function BulkDeclineModerationRequestModal({
                     })
                     MessageService.error(t('There are internal server error'))
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                 }
@@ -289,16 +274,11 @@ export default function BulkDeclineModerationRequestModal({
     }
 
     const acceptModerationRequest = async (singleMrId: string, updatedAcceptPayload: ModerationRequestPayload) => {
-        if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
         try {
             setShowProcessing(true)
             const hasComment = handleCommentValidation(moderationRequestPayload.comment)
             if (hasComment) {
-                const response = await ApiUtils.PATCH(
-                    `moderationrequest/${singleMrId}`,
-                    updatedAcceptPayload,
-                    session.data.user.access_token,
-                )
+                const response = await ApiUtils.PATCH(`moderationrequest/${singleMrId}`, updatedAcceptPayload)
                 if (response.status == StatusCodes.ACCEPTED) {
                     await response.json()
                     const progressStatus = computeProgress(response.status)
@@ -349,7 +329,7 @@ export default function BulkDeclineModerationRequestModal({
                     })
                     MessageService.error(t('There are internal server error'))
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     MessageService.error(t('There are some errors while updating moderation request'))
                 }

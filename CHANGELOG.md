@@ -6,6 +6,223 @@ the first project location:
 
 https://github.com/eclipse-sw360/sw360/releases
 
+## v1.0.0-rc.2
+
+This is the second release candidate for SW360-Frontend in the line of next major
+release version 1.0.0 of SW360-Frontend project. The candidate includes numerous
+features, corrections, and improvements over the previous release candidate
+[v1.0.0-rc.1](https://github.com/eclipse-sw360/sw360-frontend/releases/tag/v1.0.0-rc.1)
+
+This release candidate serves as a preview of the upcoming major version 1.0.0
+for testing and should not be used in production environments.
+
+Major highlights since last release:
+* Fixed Generate License Info / Clearing Report download error (when sub-projects / releases are not reachable)
+* Combined mail config for project and component spreadsheet into one config
+* Feature to reopen closed clearing request
+* Support multi-issuers for authorization
+* Search by lucene ranking based on score
+* Removed inner HTMLs
+* Feature to manually trigger the schedulers
+* New page to download reports using download link
+* Redirection url for changelog components
+* Refactored remaining tables to tanstack
+* Added drag & drop feature to attachment modal
+* Lot of code refactor and unifications
+
+### Credits
+
+The following GitHub users have contributed to the source code since the last release (in alphabetical order):
+
+```
+> aaryan359 <aaryanmeena96@gmail.com>
+> Alex <alextanzhao22@gmail.com>
+> Amrit Kumar Verma <amrit.verma@siemens.com>
+> Anushree Bondia <anushreebondia@gmail.com>
+> Bibhuti Bhusan Dash <bibhuti230185@gmail.com>
+> Dearsh Oberoi <oberoidearsh@gmail.com>
+> dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+> Farooq Fateh Aftab <farooq-fateh.aftab@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Keerthi B L <keerthi.bl@siemens.com>
+> Nikesh Kumar <kumar.nikesh@siemens.com>
+> punaykukreja <kukrejapunay04@gmail.com>
+> rudra-superrr <prabhuchopra@gmail.com>
+> suhas-SHS <suhas.n@siemens-healthineers.com>
+> Sujal Kalauni <sujal1kalauni@gmail.com>
+> Taanvi Khevaria <taanvikhevaria@gmail.com>
+```
+
+Please note that also many other persons usually contribute to the project with
+reviews, testing, documentations, conversations or presentations.
+
+### Features
+
+* `8f70bf09` feat(docker): Expose CouchDB connection props
+* `e0438382` feat(project): Save attachment usages return 400
+* `23b05cc0` feat(CR): Implement reopen closed clearing request functionality (#1465)
+* `04320655` feat(UI): Unify link releases modal components
+* `b53d9dc6` feat(search): Search by lucene ranking
+* `af1dd3ec` feat(projects): Implement project detail tab counts and update data fetching logic
+* `6d945af1` feat(Vulnerability): Introduce SidebarCountBadge component and update vulnerability status labels
+* `5e261eb2` feat(Scheduler): Added api to  manually  trigger the  schedulers and refactor the apis
+* `c7ae8c03` feat(authorization): Support multi-issuers
+* `c86d39f6` feat(projects): Add attachment indicator icon in project listing actions column
+* `d5f34ce3` feat(ci): Auto upgrade biome schema on upgrade
+* `8fb807c5` feat(oauth): Upgrade to new API format
+* `e62536fb` feat(UI): Add expand/collapse functionality for projects with sub-projects
+* `204a0cee` feat(advancesearch): Allow Info button for labels
+* `32112097` feat(changelog): Added redirection url to changelog components
+* `97aca3a4` feat(projects): add By Name Only filter for linked releases and projects search
+* `763d856b` feat(Component): Added pagination and sorting for release overview in components
+* `2bde7d79` feat(components): add 'All' option to Release Overview page size selector
+
+### Corrections
+
+* `09715c82` fix(translation): Fixed language translations
+* `3c6d638e` fix(translations): Refactored translations
+* `b00e21a3` fix(api): Add headers param centrally to all HTTP methods
+* `734ce861` fix: Show server error message in JSON format for reopen CR
+* `9b17d3cc` fix: Update catch block
+* `f2b017d1` fix:  Make clearingState optional
+* `c7f96cff` fix: Reuse the createClearingRequestPayload and show error message properly
+* `4b134cab` fix(obligations): Fix obligation comment update
+* `0ab0dc5f` fix(ci): Run biome-schema-update.yml on branch
+* `ee2583ff` fix(build): Fix build errors
+* `b7c9ad00` fix(licenseClearing): Handle no releases
+* `df69c3ae` fix(deps): Replace ignoredBuiltDependencies
+* `d9bab27c` fix(project): Fixed project responsible and owner on duplicating project
+* `01da3846` fix(duplicate): use projectResponsible as payload key for project manager field
+* `c5b75231` fix(duplicate): add missing projectManager field in projectPayloadData
+* `51cf7faf` fix(duplicate): add missing projectManager field in projectPayloadData Signed-off-by: Sujal Kalauni <sujal1kalauni@gmail.com>
+* `e1e2105c` fix(url): Add validation for source code url
+* `6c0d7e3f` fix(Configuration): Combine multiple mail configuration to single
+* `938ac26c` fix(UI): Resolve duplicate release and merge release
+* `827938fa` fix(report): Authenticating the report download link
+* `651bad8b` fix(package): Added translations and code refactoring Signed-off-by: Amrit Kumar Verma <amrit.verma@siemens.com>
+* `c0889b25` fix: Add packageurl-js dependency and improve PURL validation in package creation and editing
+* `b8ebed5d` fix(Package): Add PURL validation and extraction for package manager
+* `84d197a5` fix(vulnerability): Optimize pagination and improve vulnerability count handling
+* `7a2db764` fix(ProjectDetails): Add vulnerability counts and loading state to project details view
+* `204ca1af` fix(projects): Handle Unicode in report download filename and correct file extension
+* `0aafe085` fix(ci): Migrate pnpm config
+* `101baaee` fix(schedule): Remove incorrect SVM enable check
+* `53f9788c` fix(obligations): Fix obligation comment update
+* `572cdb59` fix(releases): Fix loading of releases in edit projects tab
+* `2e86cac6` fix(package): Package deletion infinite loading issue
+* `c9720b7e` fix(frontend): Remove Trusted Types CSP directive
+* `e913e956` fix(ci): Restrict contents write permission to job
+* `c2a0367b` fix(schema): Update biome schema to 2.4.15
+* `9e00a8d1` Revert "fix(csp): Remove require-trusted-types-for"
+* `8365e9bb` fix(changelog): Remove inner html
+* `880db526` fix(obligations): Add read-only all obligations tab in project details
+* `7724f950` fix(lic): Populate licenses in post spdx licenses endpoint correctly
+* `14637f0b` fix(lic): Add check for existence of src files array
+* `c75b2339` fix(csp): Remove require-trusted-types-for
+* `8009cb84` fix(search): Add restricted search and search by name to all relevant modals
+* `66a7ee97` fix(admin): Stabilize hook order in schedule list
+* `18b0ac1a` fix(changelog): Add sorting by change timestamp
+* `3d9e417e` fix(externalIds): Handle package-url as JSON array
+* `9f2c131f` fix(ui): Date validation component
+* `2537a5b0` fix(hooks): Guard useLocalStorage against invalid JSON
+* `1840efc4` fix(ui): Filter license obligations by project release main licenses when no CLI attachment exists
+* `3075ca41` fix(headers): Add dev mode headers
+* `5d0ed3e5` fix(licenseinfo): Add license info in release summary tab
+* `3ff5af8f` fix(filter): Fix filter in projects attachment usage
+* `60d40de6` fix(scp): Tighten CSP against object-src
+* `0afaa85a` fix(docker): Tighten CSP against XSS
+* `9d161b00` fix(components): handle empty response in edit component page
+* `8fcd58f1` fix(dragndrop): Add drag and drop to select attachments modal
+* `ef70daad` fix(ExportSpreadsheet): Fixed export spreadsheet in project with search results
+* `70e58d7a` fix(projectgroups): Fetch project groups from endpoint
+
+### Infrastructure
+
+* `3ad3daa9` chore(deps-dev): bump cypress from 15.15.0 to 15.16.0
+* `8aa55720` chore(deps): bump actions/checkout from 6.0.2 to 6.0.3
+* `7c4b4432` chore(deps): bump github/codeql-action from 4.36.0 to 4.36.2
+* `873812da` chore(deps): bump html-react-parser from 6.1.2 to 6.1.3
+* `23dbeed2` chore(deps-dev): bump lint-staged from 17.0.5 to 17.0.7
+* `76fc15d2` chore(docker): Sync thrift properties
+* `966938bc` chore(deps): Upgrade pnpm from v10 to v11
+* `8e8e877f` chore(deps-dev): bump systeminformation from 5.31.6 to 5.31.7
+* `5689a45a` chore(deps): bump next-intl from 4.12.0 to 4.13.0
+* `a0fca1d8` chore(deps): bump library/nginx from 1.31.0-trixie to 1.31.1-trixie
+* `dc4c65b4` chore(deps-dev): bump @biomejs/biome from 2.4.15 to 2.4.16
+* `75f8c215` chore(deps): bump date-fns from 4.3.0 to 4.4.0
+* `b6cad5fe` chore(deps-dev): bump @commitlint/cli from 21.0.1 to 21.0.2
+* `583244df` chore(deps): bump docker/metadata-action from 6.0.0 to 6.1.0
+* `cdd36e53` chore(deps): bump html-react-parser from 6.1.1 to 6.1.2
+* `641e7c84` chore(deps-dev): bump @types/react from 19.2.14 to 19.2.15
+* `7a116009` chore(deps-dev): bump @types/node from 25.8.0 to 25.9.1
+* `f6393137` chore(deps): bump step-security/harden-runner from 2.19.3 to 2.19.4
+* `4cb82bab` chore(deps): bump date-fns from 4.1.0 to 4.3.0
+* `1a0c9fc5` chore(deps): bump docker/build-push-action from 7.1.0 to 7.2.0
+* `50aab42e` chore(deps): bump docker/setup-buildx-action from 4.0.0 to 4.1.0
+* `bcd51883` chore(deps): bump docker/login-action from 4.1.0 to 4.2.0
+* `ddeba043` chore(deps): bump github/codeql-action from 4.35.5 to 4.36.0
+* `749b73be` chore(docker): Add jwk-set-uri option
+* `8604b113` chore(docker): Add JWT_KEYSTORE secret for backend
+* `1dec9ade` chore(ci): Upgrade pnpm version to 10
+* `bb8bd903` chore(deps): bump github/codeql-action from 4.35.4 to 4.35.5
+* `75c3c627` chore(deps-dev): bump @biomejs/biome from 2.4.12 to 2.4.15
+* `4007d4bb` chore(deps-dev): bump @types/node from 25.6.0 to 25.8.0
+* `7a1b5a92` chore(deps): bump next-intl from 4.11.1 to 4.12.0
+* `09a50cdb` chore(deps): bump html-react-parser from 6.1.0 to 6.1.1
+* `4c8ccf98` chore(deps): bump preact from 10.29.1 to 10.29.2
+* `1413ec04` chore(deps-dev): bump lint-staged from 17.0.4 to 17.0.5
+* `f7951933` chore(deps): bump react-dom from 19.2.5 to 19.2.6
+* `93422ac3` chore(deps): bump react from 19.2.5 to 19.2.6
+* `f95dc91c` chore(deps-dev): bump lint-staged from 17.0.3 to 17.0.4
+* `e6871805` chore(deps-dev): bump cypress from 15.14.2 to 15.15.0
+* `116a2f5e` chore(deps-dev): bump @commitlint/cli from 20.5.3 to 21.0.1
+* `8a320953` chore(deps): bump pnpm/action-setup from 6.0.6 to 6.0.8
+* `d6e491f8` chore(deps): bump html-react-parser from 6.0.1 to 6.1.0
+* `a231d357` chore(deps): bump step-security/harden-runner from 2.19.1 to 2.19.3
+* `5394cb9b` chore(deps): bump library/nginx from 1.29.8-trixie to 1.31.0-trixie
+* `e8fb441d` chore(deps): bump library/postgres from 18.3-alpine to 18.4-alpine
+* `f843443c` chore(docker): Sync docker with actual config
+* `422536c3` chore(deps): bump pnpm/action-setup from 6.0.4 to 6.0.6
+* `b1a16f4f` chore(deps): bump step-security/harden-runner from 2.19.0 to 2.19.1
+* `36e36a55` chore(deps): bump actions/dependency-review-action from 4.9.0 to 5.0.0
+* `98d76e9e` chore(deps): bump github/codeql-action from 4.35.3 to 4.35.4
+* `70f21b6a` chore(deps-dev): bump systeminformation from 5.31.5 to 5.31.6
+* `e3dd1856` chore(deps): bump sigstore/cosign-installer from 4.1.1 to 4.1.2
+* `24d71224` chore(deps): bump next from 16.2.4 to 16.2.6
+* `1162cfac` chore(deps-dev): bump lint-staged from 16.4.0 to 17.0.3
+* `e5b33c02` chore(deps): bump next-intl from 4.11.0 to 4.11.1
+* `bb1e19b3` chore(deps): bump fast-uri from 3.1.0 to 3.1.2
+* `f18f4460` chore(deps): bump react-cookie from 8.1.0 to 8.1.2
+* `f599c1e4` chore(deps): bump next-intl from 4.9.1 to 4.11.0
+* `60afb45e` chore(deps-dev): bump systeminformation from 5.31.1 to 5.31.5
+* `c5273115` chore(deps-dev): bump cypress from 15.13.1 to 15.14.2
+* `7a152034` chore(deps): bump pnpm/action-setup from 6.0.3 to 6.0.4
+* `c7a3fcbf` chore(deps-dev): bump @commitlint/cli from 20.5.0 to 20.5.3
+* `eb4c488f` chore(deps): bump github/codeql-action from 4.35.2 to 4.35.3
+* `9e744301` refactor(releases): Refactor linked releases table to TanStack
+* `e984d4fb` chore(deps-dev): bump prettier from 3.8.1 to 3.8.3
+* `30b26e30` chore(deps-dev): bump typescript from 5.9.3 to 6.0.3
+* `9bb17db6` chore(deps): bump react-dom from 19.2.1 to 19.2.5
+* `57e9a74c` chore(deps): bump next from 16.2.3 to 16.2.4
+* `955c1e91` chore(deps-dev): bump lint-staged from 16.3.1 to 16.4.0
+* `4085b495` chore(deps): bump step-security/harden-runner from 2.18.0 to 2.19.0
+* `58b33d93` chore(deps): bump actions/setup-node from 6.3.0 to 6.4.0
+* `c443ae11` chore(deps): bump webiny/action-conventional-commits from 1.3.1 to 1.4.2
+* `a499dd98` chore(deps): bump actions/cache from 5.0.4 to 5.0.5
+* `7c5146cf` chore(biome): Update biome version in config file
+* `4db18d7c` chore(deps): bump pnpm/action-setup from 5.0.0 to 6.0.1
+* `c468e9a4` chore(deps): bump html-react-parser from 5.2.17 to 6.0.1
+* `d7dc3feb` chore(deps): bump preact from 10.28.4 to 10.29.1
+* `a9a85463` chore(deps-dev): bump @biomejs/biome from 2.4.10 to 2.4.12
+* `788e9a2c` chore(deps): bump next-auth from 4.24.13 to 4.24.14
+* `143e18f3` chore(deps): bump dotenv from 17.3.1 to 17.4.2
+* `57160fbf` chore(deps): bump step-security/harden-runner from 2.17.0 to 2.18.0
+* `f1f032ff` chore(deps): bump softprops/action-gh-release from 2.6.1 to 3.0.0
+* `92e4917c` chore(deps): bump github/codeql-action from 4.35.1 to 4.35.2
+* `cf1af3d1` chore(biome): Update biome version in config file
+
+**Full Changelog**: https://github.com/eclipse-sw360/sw360-frontend/compare/v1.0.0-rc.1...v1.0.0-rc.2
+
 ## v1.0.0-rc.1
 
 This is a first release candidate for SW360-Frontend in the line of next major

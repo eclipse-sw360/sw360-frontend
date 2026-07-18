@@ -21,7 +21,6 @@ import {
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
@@ -40,7 +39,8 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -211,6 +211,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
     const [showProcessingLinkedProjects, setShowProcessingLinkedProjects] = useState(false)
     const [showProcessingAttachmentUsages, setShowProcessingAttachmentUsages] = useState(false)
+    const [isTableBuilding, setIsTableBuilding] = useState(false)
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const memoizedLinkedProjects = useMemo(
@@ -233,7 +234,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [releaseFilter, setReleaseFilter] = useState<string>('')
     const [searchTerm, setSearchTerm] = useState<string>('')
-    const session = useSession()
     const filteredData = useMemo(
         () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm, saveUsagesPayload) : data),
         [
@@ -244,41 +244,40 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         ],
     )
 
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
-
     const handleSaveUsages = async () => {
         try {
             setSaveUsagesLoading(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Something went wrong'))
-                return signOut()
-            }
-            const response = await ApiUtils.POST(
-                `projects/${projectId}/saveAttachmentUsages`,
-                saveUsagesPayload,
-                session.user.access_token,
-            )
+            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status !== StatusCodes.CREATED) {
                 MessageService.error(t('Something went wrong'))
                 return notFound()
             }
-            MessageService.success(t('AttachmentUsages saved successfully'))
+
+            // Check for warnings in response (e.g. stale sub-project or release references)
+            try {
+                const responseBody = await response.json()
+                if (responseBody.warnings && responseBody.warnings.length > 0) {
+                    responseBody.warnings.forEach((warning: string) => {
+                        MessageService.warn(warning, {
+                            autoClose: false,
+                        })
+                    })
+                    MessageService.success(t('AttachmentUsages saved successfully (with warnings)'))
+                } else {
+                    MessageService.success(t('AttachmentUsages saved successfully'))
+                }
+            } catch {
+                // Response was plain text (no warnings)
+                MessageService.success(t('AttachmentUsages saved successfully'))
+            }
         } catch (e) {
-            console.error(e)
+            ApiUtils.reportError(e)
         } finally {
             setSaveUsagesLoading(false)
         }
     }
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -289,11 +288,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -315,11 +310,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         return () => controller.abort()
     }, [
         projectId,
-        session,
     ])
 
     useEffect(() => {
-        if (session.status !== 'authenticated') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -330,11 +323,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/attachmentUsage?transitive=true`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`projects/${projectId}/attachmentUsage?transitive=true`, signal)
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -401,7 +390,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         return () => controller.abort()
     }, [
         projectId,
-        session,
     ])
 
     const columns = useMemo<ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>>[]>(
@@ -417,7 +405,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                             }}
                         >
                             <span className='fw-bold'>
-                                {t('Linked Releases And Projects')}
+                                {t('Linked Releases and Projects')}
                                 {' ('}
                                 <button
                                     type='button'
@@ -604,7 +592,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                     },
                     {
                         id: 'uploadedBy',
-                        header: t('Uploaded By'),
+                        header: t('Uploaded by'),
                         cell: ({ row }) => {
                             if (row.original.node.type === 'attachment') {
                                 return <div className='text-center'>{row.original.node.entity.createdBy}</div>
@@ -950,7 +938,13 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     useEffect(() => {
         if (memoizedAttachmentUsages === undefined) return
 
-        buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects)
+        setIsTableBuilding(true)
+        // Use requestAnimationFrame to allow the browser to paint the loading indicator
+        // before starting the expensive table build
+        requestAnimationFrame(() => {
+            buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects)
+            setIsTableBuilding(false)
+        })
     }, [
         memoizedAttachmentUsages,
         memoizedLinkedProjects,
@@ -977,7 +971,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 {table ? (
                     <SW360Table
                         table={table}
-                        showProcessing={showProcessingLinkedProjects || showProcessingAttachmentUsages}
+                        showProcessing={
+                            showProcessingLinkedProjects || showProcessingAttachmentUsages || isTableBuilding
+                        }
                     />
                 ) : (
                     <div className='col-12 mt-1 text-center'>

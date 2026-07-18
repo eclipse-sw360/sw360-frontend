@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
@@ -24,37 +24,23 @@ import {
     UiConfiguration,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const FrontEndConfigs = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
     const [arrayKeyStates, setArrayKeyStates] = useState<ProcessedUiConfig>({} as ProcessedUiConfig)
-    const { status } = useSession()
     const { refreshConfig } = useUiConfigContext()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
 
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
-
     const fetchUiConfig = useCallback(async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            signOut()
-            return
-        }
-        const response = await ApiUtils.GET(apiEndpoint, session.user.access_token)
+        const response = await ApiUtils.GET(apiEndpoint)
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as UiConfiguration
             setCurrentUiConfig(data)
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            await signOut()
+            dispatchSessionExpiredEvent()
         } else {
             setCurrentUiConfig({} as UiConfiguration)
         }
@@ -73,18 +59,12 @@ const FrontEndConfigs = (): JSX.Element => {
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
         if (currentUiConfig === undefined) return
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) {
-            MessageService.error(t('Session has expired'))
-            signOut()
-            return
-        }
-        const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig, session.user.access_token)
+        const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig)
         if (response.status == StatusCodes.OK) {
             MessageService.success(t('Updated frontend configurations successfully'))
             refreshConfig()
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            await signOut()
+            dispatchSessionExpiredEvent()
         } else {
             const responseData = await response.json()
             MessageService.error(responseData.message)

@@ -10,24 +10,14 @@
 // License-Filename: LICENSE
 
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import { COTSDetails } from '@/object-types'
 
 const CommercialDetailsAdministration = ({ costDetails }: { costDetails: COTSDetails | undefined }): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     return (
         <table className='table summary-table'>

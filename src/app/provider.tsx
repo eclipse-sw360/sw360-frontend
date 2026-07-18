@@ -12,11 +12,27 @@
 import { SessionProvider } from 'next-auth/react'
 
 import type { JSX } from 'react'
+import SessionStatusHandler from './SessionStatusHandler'
 
 type Props = {
     children?: React.ReactNode
+    refetchIntervalSeconds?: number
 }
 
-export const Providers = ({ children }: Props): JSX.Element => {
-    return <SessionProvider refetchOnWindowFocus={false}>{children}</SessionProvider>
+const DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS = 5 * 60
+export const Providers = ({ children, refetchIntervalSeconds }: Props): JSX.Element => {
+    const resolvedRefetchIntervalSeconds =
+        refetchIntervalSeconds && refetchIntervalSeconds > 0
+            ? refetchIntervalSeconds
+            : DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS
+
+    return (
+        <SessionProvider
+            refetchOnWindowFocus={false}
+            refetchInterval={resolvedRefetchIntervalSeconds}
+        >
+            <SessionStatusHandler />
+            {children}
+        </SessionProvider>
+    )
 }

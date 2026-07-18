@@ -12,14 +12,14 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import { Embedded, ErrorDetails, LinkedPackageData, Package, PageableQueryParam, PaginationMeta } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface HasLinkedPackages {
     linkedPackages?: Record<string, LinkedPackageData>
@@ -44,15 +44,6 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
     const [linkPackages, setLinkPackages] = useState<Map<string, LinkedPackageData>>(new Map())
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [exactMatch, setExactMatch] = useState(false)
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     useEffect(() => {
         setLinkPackages(new Map(Object.entries(payload.linkedPackages ?? payload.packageIds ?? {})))
@@ -163,14 +154,13 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading' || searchText === undefined) return
+        if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
         handleSearch(signal)
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const table = useReactTable({
@@ -212,8 +202,6 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
 
     const handleSearch = async (signal?: AbortSignal) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-
             const queryUrl = CommonUtils.createUrlWithParams(
                 `packages`,
                 Object.fromEntries(
@@ -232,7 +220,7 @@ export default function LinkPackagesModal<T extends HasLinkedPackages>({
                     ]),
                 ),
             )
-            const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+            const response = await ApiUtils.GET(queryUrl, signal)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

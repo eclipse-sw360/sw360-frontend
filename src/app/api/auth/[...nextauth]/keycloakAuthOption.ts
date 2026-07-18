@@ -77,6 +77,13 @@ const keycloakAuthOption: NextAuthOptions = {
             return await refreshAccessToken(token)
         },
         session({ session, token }) {
+            session.user.error = token.error
+
+            if (token.error !== undefined || token.access_token === undefined) {
+                session.user.access_token = ''
+                return session
+            }
+
             // Send properties to the client, like an access_token from a provider.
             session.user.access_token = token.access_token
             const decodedToken = jwtDecode(token.access_token)

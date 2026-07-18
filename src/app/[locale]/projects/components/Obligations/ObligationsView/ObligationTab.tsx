@@ -11,7 +11,6 @@
 
 import { ColumnDef, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -28,9 +27,9 @@ import {
     PaginationMeta,
     UpdateCommentModalMetadata,
 } from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
-import { ApiError, ApiUtils } from '@/utils/index'
-import { ObligationLevels } from '../../../../../../object-types/Obligation'
 
 interface Props {
     projectId: string
@@ -52,15 +51,6 @@ export default function ObligationTab({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -197,7 +187,7 @@ export default function ObligationTab({
                                 obligationValue = {
                                     ...obligationValue,
                                     status: e.target.value,
-                                    obligationType: ObligationLevels.ORGANISATION_OBLIGATION,
+                                    obligationType,
                                 }
                                 setPayload((payload: ObligationEntry) => ({
                                     ...payload,
@@ -297,7 +287,6 @@ export default function ObligationTab({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -308,7 +297,6 @@ export default function ObligationTab({
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `projects/${projectId}/obligation`,
                     Object.fromEntries(
@@ -326,7 +314,7 @@ export default function ObligationTab({
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -365,7 +353,6 @@ export default function ObligationTab({
         return () => controller.abort()
     }, [
         pageableQueryParam,
-        session,
     ])
 
     const detailTable = useReactTable({

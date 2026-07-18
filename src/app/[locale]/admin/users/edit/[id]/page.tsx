@@ -12,7 +12,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { notFound, useParams, useRouter } from 'next/navigation'
-import { getSession, signOut } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
 import { type JSX, useEffect, useState } from 'react'
@@ -20,7 +20,9 @@ import UserEditForm from '@/components/UserEditForm/UserEditForm'
 import UserOperationType from '@/components/UserEditForm/UserOperationType'
 import { User, UserPayload } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ToggleUserActiveModal from './components/ToggleUserActiveModal'
 
 const AdminEditUserPage = (): JSX.Element => {
@@ -46,13 +48,10 @@ const AdminEditUserPage = (): JSX.Element => {
     useEffect(() => {
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
                 const queryUrl = `users/byid/${params.id}`
-                const response = await ApiUtils.GET(queryUrl, session.user.access_token)
+                const response = await ApiUtils.GET(queryUrl)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status !== StatusCodes.OK) {
                     return notFound()
                 }
@@ -65,6 +64,7 @@ const AdminEditUserPage = (): JSX.Element => {
                     fullName: user.fullName,
                     userGroup: user.userGroup,
                     password: '',
+                    externalid: user.externalid,
                     secondaryDepartmentsAndRoles: user.secondaryDepartmentsAndRoles,
                 })
                 setIsUserDeactived(user.deactivated === true)
@@ -77,21 +77,17 @@ const AdminEditUserPage = (): JSX.Element => {
     const handleUpdateUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         try {
-            const session = await getSession()
-            if (!session) {
-                return signOut()
-            }
             userPayload.fullName = `${userPayload.givenName} ${userPayload.lastName}`
             if (CommonUtils.isNullEmptyOrUndefinedString(userPayload.password)) {
                 delete userPayload.password
             }
-            const response = await ApiUtils.PATCH(`users/${params.id}`, userPayload, session.user.access_token)
+            const response = await ApiUtils.PATCH(`users/${params.id}`, userPayload)
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
                 router.push(`/admin/users/details/${params.id}`)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CONFLICT) {
                 MessageService.error(t('User with the same email already exists'))
             } else {

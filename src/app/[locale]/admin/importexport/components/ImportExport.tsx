@@ -10,14 +10,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, RefObject, useEffect, useRef } from 'react'
+import { ReactNode, RefObject, useRef } from 'react'
 import { BsDownload, BsUpload } from 'react-icons/bs'
 import { ErrorDetails } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
-import { ApiError, ApiUtils } from '@/utils'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 export default function ImportExportComponent(): ReactNode {
     const t = useTranslations('default')
@@ -25,15 +25,6 @@ export default function ImportExportComponent(): ReactNode {
     const componentsAttachmentFile = useRef<File | undefined>(undefined)
     const releaseLinksFile = useRef<File | undefined>(undefined)
     const licenseArchiveFile = useRef<File | undefined>(undefined)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, file: RefObject<File | undefined>) => {
         const files = e.currentTarget.files
@@ -50,13 +41,7 @@ export default function ImportExportComponent(): ReactNode {
             [key: string]: string
         },
     ) => {
-        getSession()
-            .then((session) => {
-                DownloadService.download(url, session, filename, headers)
-            })
-            .catch((error: unknown) => {
-                ApiUtils.reportError(error)
-            })
+        void DownloadService.download(url, filename, headers)
     }
 
     const handleUpload = async (url: string, formDataField: string, file: RefObject<File | undefined>) => {
@@ -68,11 +53,7 @@ export default function ImportExportComponent(): ReactNode {
             const formData = new FormData()
             formData.append(formDataField, file.current, file.current.name)
 
-            const session = await getSession()
-            if (!session) {
-                return signOut()
-            }
-            const response = await ApiUtils.POST(url, formData, session.user.access_token)
+            const response = await ApiUtils.POST(url, formData)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {

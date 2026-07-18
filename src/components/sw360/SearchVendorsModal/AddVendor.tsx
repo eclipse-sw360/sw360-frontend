@@ -10,13 +10,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import React, { type JSX, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { Vendor } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface AlertData {
     variant: string
@@ -55,18 +56,12 @@ const AddVendorDialog = ({
     const handleSubmit = async () => {
         try {
             setState(AddVendorState.ADD_NEW_VENDOR_REQUEST_PENDING)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) {
-                MessageService.error(t('Session has expired'))
-                setState(AddVendorState.ADD_NEW_VENDOR)
-                return signOut()
-            }
             const payload: Vendor = {
                 fullName: vendor.fullName,
                 shortName: vendor.shortName,
                 url: vendor.url,
             }
-            const response = await ApiUtils.POST('vendors', payload, session.user.access_token)
+            const response = await ApiUtils.POST('vendors', payload)
             if (response.status == StatusCodes.CREATED) {
                 setAlert({
                     variant: 'success',
@@ -80,7 +75,7 @@ const AddVendorDialog = ({
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.error(t('Session has expired'))
                 setState(AddVendorState.ADD_NEW_VENDOR)
-                return signOut()
+                return dispatchSessionExpiredEvent()
             } else if (response.status === StatusCodes.CONFLICT) {
                 setAlert({
                     variant: 'danger',

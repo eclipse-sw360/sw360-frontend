@@ -15,7 +15,15 @@ const ShowInfoOnHover = ({ text }: { text: string | ReactNode }): JSX.Element =>
     return (
         <>
             <OverlayTrigger
-                overlay={<Tooltip>{text}</Tooltip>}
+                overlay={
+                    <Tooltip
+                        style={{
+                            whiteSpace: 'pre-line',
+                        }}
+                    >
+                        {text}
+                    </Tooltip>
+                }
                 placement='bottom'
             >
                 <span className='d-inline-block'>

@@ -10,7 +10,6 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -21,10 +20,12 @@ import Summary from '@/app/[locale]/components/releases/detail/[id]/components/S
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
+import { useConfigKeyValue } from '@/contexts'
 import {
     Attachment,
     Changelogs,
     CommonTabIds,
+    ConfigKeys,
     DocumentTypes,
     Embedded,
     ErrorDetails,
@@ -33,7 +34,9 @@ import {
     ReleaseDetail,
     ReleaseTabIds,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 type EmbeddedChangelogs = Embedded<Changelogs, 'sw360:changeLogs'>
 
@@ -46,17 +49,10 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [changeLogId, setChangeLogId] = useState('')
-    const session = useSession()
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const t = useTranslations('default')
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
+    const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const showLinkedReleases = isNestedReleaseEnabled !== 'false'
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? CommonTabIds.SUMMARY)
@@ -64,14 +60,12 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
 
     const fetchData = async (url: string, signal: AbortSignal) => {
         try {
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return
-            const response = await ApiUtils.GET(url, session.user.access_token, signal)
+            const response = await ApiUtils.GET(url, signal)
             if (response.status == StatusCodes.OK) {
                 const data = (await response.json()) as ReleaseDetail & EmbeddedChangelogs
                 return data
             } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                void signOut()
+                dispatchSessionExpiredEvent()
             }
         } catch (e) {
             console.error(e)
@@ -83,10 +77,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
         const signal = controller.signal
 
         fetchData(`releases/${releaseId}`, signal)
-            .then((release: ReleaseDetail | undefined) => {
+            .then((release) => {
                 setRelease(release)
                 if (
-                    !CommonUtils.isNullOrUndefined(release?._embedded) &&
+                    !CommonUtils.isNullOrUndefined(release) &&
+                    !CommonUtils.isNullOrUndefined(release._embedded) &&
                     !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
                 ) {
                     setEmbeddedAttachments(release._embedded['sw360:attachments'])
@@ -120,7 +115,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -131,7 +125,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `changelog/document/${releaseId}`,
                     Object.fromEntries(
@@ -142,7 +135,7 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                     ),
                 )
 
-                const response = await ApiUtils.GET(queryUrl, session.data.user.access_token, signal)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -174,7 +167,6 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
     }, [
         pageableQueryParam,
         releaseId,
-        session,
     ])
 
     return release ? (
@@ -195,12 +187,14 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                             >
                                 <div className='my-2'>{t('Summary')}</div>
                             </ListGroup.Item>
-                            <ListGroup.Item
-                                action
-                                eventKey={ReleaseTabIds.LINKED_RELEASES}
-                            >
-                                <div className='my-2'>{t('Linked Releases')}</div>
-                            </ListGroup.Item>
+                            {showLinkedReleases && (
+                                <ListGroup.Item
+                                    action
+                                    eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                >
+                                    <div className='my-2'>{t('Linked Releases')}</div>
+                                </ListGroup.Item>
+                            )}
                             <ListGroup.Item
                                 action
                                 eventKey={ReleaseTabIds.CLEARING_DETAILS}
@@ -237,9 +231,11 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                                     releaseId={releaseId}
                                 />
                             </Tab.Pane>
-                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
-                                <LinkedReleases releaseId={releaseId} />
-                            </Tab.Pane>
+                            {showLinkedReleases && (
+                                <Tab.Pane eventKey={ReleaseTabIds.LINKED_RELEASES}>
+                                    <LinkedReleases releaseId={releaseId} />
+                                </Tab.Pane>
+                            )}
                             <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
                                 <ClearingDetails
                                     release={release}

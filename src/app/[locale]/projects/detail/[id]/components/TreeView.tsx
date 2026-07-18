@@ -17,9 +17,7 @@ import {
     getExpandedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -28,8 +26,6 @@ import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 import { useConfigValue } from '@/contexts'
 import {
-    Embedded,
-    ErrorDetails,
     FilterOption,
     LicenseClearing,
     NestedRows,
@@ -39,13 +35,12 @@ import {
     UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { CommonUtils } from '@/utils'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
-type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
 type TypedProject = TypedEntity<Project, 'project'>
 
@@ -164,20 +159,38 @@ const stateFilterOptions: FilterOption[] = [
     },
 ]
 
+const comparator = (a: NestedRows<TypedProject | TypedRelease>, b: NestedRows<TypedProject | TypedRelease>): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
+    } else {
+        const aName = `${a.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.node.entity.version) && `(${a.node.entity.version})`}`
+        const bName = `${b.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.node.entity.version) && `(${b.node.entity.version})`}`
+        if (aName === bName) return 0
+        else if (aName < bName) return -1
+        else return 1
+    }
+}
+
+const sortAllLevels = (rows: NestedRows<TypedProject | TypedRelease>[]) => {
+    for (const r of rows) {
+        if (r.children && r.children.length !== 0) sortAllLevels(r.children)
+    }
+    rows.sort(comparator)
+}
+
 const buildTable = (
     setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease>[]>>,
     licenseClearing: LicenseClearing,
     linkedProjects: Project[],
 ) => {
-    const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(
-        licenseClearing['_embedded']['sw360:release'],
-        linkedProjects,
-    )
+    const embeddedReleases = licenseClearing._embedded?.['sw360:release'] ?? []
+    const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(embeddedReleases, linkedProjects)
     const releaseRows: NestedRows<TypedProject | TypedRelease>[] = []
-    for (const l of licenseClearing['linkedReleases']) {
-        const release = licenseClearing['_embedded']['sw360:release'].filter(
-            (r: Release) => r.id === l.release.split('/').at(-1),
-        )?.[0]
+    for (const l of licenseClearing.linkedReleases ?? []) {
+        const release = embeddedReleases.filter((r: Release) => r.id === l.release.split('/').at(-1))?.[0]
+        if (release === undefined) continue
         const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
             node: {
                 type: 'release',
@@ -188,10 +201,14 @@ const buildTable = (
         releaseRows.push(nodeRelease)
     }
 
-    setRowData([
+    const rows = [
         ...linkedProjectRows,
         ...releaseRows,
-    ])
+    ]
+
+    sortAllLevels(rows)
+
+    setRowData(rows)
 }
 
 const extractLinkedProjectsAndTheirLinkedReleases = (
@@ -233,28 +250,29 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
     return rows
 }
 
-const tableIdToUrlParamMapper: Record<string, string> = {
-    type: 'componentType',
-    relation: 'releaseRelation',
-    state: 'clearingState',
-}
-
-export default function TreeView({ projectId }: { projectId: string }): JSX.Element {
+export default function TreeView({
+    projectId,
+    licenseClearingData,
+    linkedProjectsData,
+    isLoadingClearingData,
+    columnFilters,
+    setColumnFilters,
+}: {
+    projectId: string
+    licenseClearingData?: LicenseClearing
+    linkedProjectsData: Project[]
+    isLoadingClearingData: boolean
+    columnFilters: ColumnFiltersState
+    setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>
+}): JSX.Element {
     const t = useTranslations('default')
-    const { data: session, status } = useSession()
 
     const [expandLevel, setExpandLevel] = useState(-1)
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
     const [show, setShow] = useState<boolean>(false)
-    // Track loading state for each API call separately
-    const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState(true)
-    const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState(true)
     const [isDataReady, setIsDataReady] = useState(false)
 
-    // Show processing until both API calls complete AND data is ready to render
-    const showProcessing = isLoadingLicenseClearing || isLoadingLinkedProjects || !isDataReady
+    const showProcessing = isLoadingClearingData || !isDataReady
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
@@ -276,18 +294,32 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     const [rowData, setRowData] = useState<NestedRows<TypedProject | TypedRelease>[]>([])
     const [searchTerm, setSearchTerm] = useState('')
 
+    useEffect(() => {
+        setLicenseClearing(licenseClearingData)
+        setLinkedProjects(linkedProjectsData)
+    }, [
+        licenseClearingData,
+        linkedProjectsData,
+    ])
+
     // Configs from backend
     const showAddLicenseButton = useConfigValue(UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON) as
         | boolean
         | null
 
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        status,
-    ])
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     const columns = useMemo<ColumnDef<NestedRows<TypedProject | TypedRelease>>[]>(
         () => [
@@ -361,15 +393,10 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             <div className='text-center'>{Capitalize(row.original.node.entity.projectType ?? '')}</div>
                         )
                     } else {
-                        return (
-                            <div className='text-center'>
-                                {
-                                    typeFilterOptions.filter(
-                                        (op) => op.value === (row.original.node.entity as Release).componentType,
-                                    )[0].tag
-                                }
-                            </div>
-                        )
+                        const componentType = (row.original.node.entity as Release).componentType
+                        const typeOption = typeFilterOptions.find((op) => op.value === componentType)
+
+                        return <div className='text-center'>{typeOption?.tag ?? componentType ?? ''}</div>
                     }
                 },
                 meta: {
@@ -419,7 +446,7 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             if (index !== -1) {
                                 return (
                                     <div className='text-center'>
-                                        {Capitalize(memoizedLicenseClearing?.linkedReleases[index].relation ?? '')}
+                                        {Capitalize(memoizedLicenseClearing?.linkedReleases?.[index].relation ?? '')}
                                     </div>
                                 )
                             }
@@ -654,13 +681,17 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     })
 
     useEffect(() => {
-        if (memoizedLicenseClearing === undefined) return
+        if (memoizedLicenseClearing === undefined) {
+            setIsDataReady(!isLoadingClearingData)
+            return
+        }
         buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
         // Mark data as ready only after setting row data
         setIsDataReady(true)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,
+        isLoadingClearingData,
     ])
 
     useEffect(() => {
@@ -782,84 +813,6 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         expandLevel,
     ])
 
-    useEffect(() => {
-        if (status !== 'authenticated') return
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        // Reset data ready state when starting new fetch
-        setIsLoadingLicenseClearing(true)
-        setIsDataReady(false)
-
-        void (async () => {
-            try {
-                const url = `projects/${projectId}/licenseClearing?transitive=true&${columnFilters
-                    .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
-                    .join('&')}`
-                const response = await ApiUtils.GET(url, session.user.access_token, signal)
-
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const licenseClearingData = (await response.json()) as LicenseClearing
-                setLicenseClearing(licenseClearingData)
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                setIsLoadingLicenseClearing(false)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [
-        status,
-        projectId,
-        session,
-        columnFilters,
-    ])
-
-    useEffect(() => {
-        if (status !== 'authenticated') return
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        setIsLoadingLinkedProjects(true)
-
-        void (async () => {
-            try {
-                const response = await ApiUtils.GET(
-                    `projects/${projectId}/linkedProjects?transitive=true`,
-                    session.user.access_token,
-                    signal,
-                )
-
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const linkedProjectsData = (await response.json()) as LinkedProjects
-                setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                setIsLoadingLinkedProjects(false)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [
-        status,
-        projectId,
-        session,
-    ])
-
     return (
         <>
             {showAddLicenseButton === null || showAddLicenseButton ? (
@@ -876,9 +829,9 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                             onClick={() => setShow(true)}
                             hidden={
                                 !(
-                                    session?.user.userGroup === UserGroupType.ADMIN ||
-                                    session?.user.userGroup === UserGroupType.CLEARING_ADMIN ||
-                                    session?.user.userGroup === UserGroupType.SW360_ADMIN
+                                    userIdentity?.userGroup === UserGroupType.ADMIN ||
+                                    userIdentity?.userGroup === UserGroupType.CLEARING_ADMIN ||
+                                    userIdentity?.userGroup === UserGroupType.SW360_ADMIN
                                 )
                             }
                         >

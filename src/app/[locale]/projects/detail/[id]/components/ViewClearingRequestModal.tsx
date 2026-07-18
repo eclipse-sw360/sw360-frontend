@@ -12,13 +12,14 @@
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 import { BsCheck2Square } from 'react-icons/bs'
 import { ClearingRequestDetails } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils/index'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     show: boolean
@@ -44,15 +45,6 @@ export default function ViewClearingRequestModal({
         setMessage(message)
         setShowMessage(true)
     }
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -62,17 +54,15 @@ export default function ViewClearingRequestModal({
 
         void (async () => {
             try {
-                const session = await getSession()
-                if (CommonUtils.isNullOrUndefined(session)) return signOut()
-                const response = await ApiUtils.GET(`clearingrequest/${clearingRequestId}`, session.user.access_token)
+                const response = await ApiUtils.GET(`clearingrequest/${clearingRequestId}`)
                 if (response.status == StatusCodes.OK) {
                     const data = (await response.json()) as ClearingRequestDetails
                     setClearingRequestData(data)
                 } else if (response.status == StatusCodes.FORBIDDEN) {
                     displayMessage('warning', t('Failed to fetch clearing request from database'))
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else if (response.status == StatusCodes.UNAUTHORIZED) {
-                    return signOut()
+                    return dispatchSessionExpiredEvent()
                 } else {
                     notFound()
                 }

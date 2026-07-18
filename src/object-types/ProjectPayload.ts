@@ -11,7 +11,7 @@ import { Attachment, LinkedPackageData, LinkedProjectData, LinkedReleaseData, Re
 
 interface ProjectPayload {
     id?: string
-    name: string
+    name?: string
     version?: string
     visibility?: string
     createdBy?: string

@@ -25,17 +25,25 @@ jobs:
       contents: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
 
       - name: Checkout source code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Checkout the PR branch so commits can be pushed back to it.
+          ref: ${{ github.head_ref }}
+          # Needed to diff package.json between PR base/head commits.
+          fetch-depth: 0
 
       - name: pnpm-setup
-        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
-          version: 10
+          # Pinned to 11.11.0: A bare "11" resolves to 11.12.0, whose self-installer
+          # crashes action-setup with "Cannot use 'in' operator to search for
+          # 'integrity' in undefined". Need to Bump once pnpm/action-setup#276 is fixed upstream.
+          version: 11.11.0
 
       - name: Setup Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -43,7 +51,7 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
 
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           # See here for caching with `yarn`, `bun` or other package managers https://github.com/actions/cache/blob/main/examples.md or you can leverage caching with actions/setup-node https://github.com/actions/setup-node
           path: |
@@ -61,11 +69,15 @@ jobs:
 
       - name: Check if Biome was updated
         id: check_biome
+        shell: bash
         run: |
-          if git diff HEAD~1 package.json | grep -q '@biomejs/biome'; then
-            echo "biome_updated=true" >> $GITHUB_OUTPUT
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          if git diff "$BASE_SHA" "$HEAD_SHA" -- package.json | grep -q '@biomejs/biome'; then
+            echo "biome_updated=true" >> "$GITHUB_OUTPUT"
           else
-            echo "biome_updated=false" >> $GITHUB_OUTPUT
+            echo "biome_updated=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run Biome migrate
@@ -82,7 +94,6 @@ jobs:
             echo "No changes from biome migrate"
           else
             git add biome.json
-            git commit -m "chore: update biome schema to match CLI version"
-            git push
+            git commit -m "chore: Update biome schema to match CLI version"
+            git push origin HEAD:${{ github.head_ref }}
           fi
-

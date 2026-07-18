@@ -9,9 +9,8 @@
 
 'use client'
 
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { VendorAdvisory, Vulnerability } from '@/object-types'
 
@@ -23,15 +22,6 @@ function AddVendorAdvisory({
     setPayload: Dispatch<SetStateAction<Vulnerability>>
 }): ReactNode {
     const t = useTranslations('default')
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const addAdvisory = () => {
         setPayload((prev: Vulnerability) => {

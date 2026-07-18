@@ -11,14 +11,16 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
-import { ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
+import { useConfigKeyValue } from '@/contexts'
+import { ConfigKeys, ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
 import DownloadService from '@/services/download.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import MessageService from '@/services/message.service'
+import { CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 const relationFilterOptions: FilterOption[] = [
     {
@@ -86,19 +88,11 @@ export default function DownloadLicenseInfoModal({
 }): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
+    const mailRequestForReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
     const [withSubProject, setWithSubProject] = useState(true)
     const [selectedRelRelationship, setSelectedRelRelationship] = useState<string[]>([])
-    const session = useSession()
     const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        session,
-    ])
 
     useEffect(() => {
         if (Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false) {
@@ -116,35 +110,61 @@ export default function DownloadLicenseInfoModal({
 
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             setLoading(true)
-            const response = await ApiUtils.POST(
-                `projects/${projectId}/saveAttachmentUsages`,
-                saveUsagesPayload,
-                session.data.user.access_token,
-            )
+            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status !== StatusCodes.CREATED) {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
             }
-            const currentDate = new Date().toISOString().split('T')[0]
+
+            // Display warnings (e.g. stale sub-project/release references) without blocking download
+            try {
+                const responseBody = await response.json()
+                if (responseBody.warnings && responseBody.warnings.length > 0) {
+                    responseBody.warnings.forEach((warning: string) => {
+                        MessageService.warn(warning, {
+                            autoClose: false,
+                        })
+                    })
+                }
+            } catch {
+                // Response was plain text (no warnings) - continue normally
+            }
+            const variant = params.get('variant') ?? 'DISCLOSURE'
             const downloadUrl = CommonUtils.createUrlWithParams(`reports`, {
                 withlinkedreleases: 'false',
                 projectId,
                 module: 'licenseInfo',
                 withSubProject: withSubProject ? 'true' : 'false',
                 generatorClassName,
-                variant: 'DISCLOSURE',
+                variant,
                 selectedRelRelationship,
             })
-            const downloadStatus = await DownloadService.download(
-                downloadUrl,
-                session.data,
-                `LicenseInfo-${currentDate}.zip`,
-            )
-            if (downloadStatus === StatusCodes.OK) {
-                setShowConfirmation(true)
-                setShow(false)
+            const mailEnabled = mailRequestForReport === 'true'
+            if (!mailEnabled) {
+                const currentDate = new Date().toISOString().split('T')[0]
+                const extensionMap: Record<string, string> = {
+                    DocxGenerator: 'docx',
+                    XhtmlGenerator: 'html',
+                    TextGenerator: 'txt',
+                }
+                const ext = extensionMap[generatorClassName] ?? 'zip'
+                const downloadStatus = await DownloadService.download(downloadUrl, `LicenseInfo-${currentDate}.${ext}`)
+                if (downloadStatus === StatusCodes.OK) {
+                    setShow(false)
+                }
+            } else {
+                const mailResponse = await ApiUtils.GET(downloadUrl)
+                if (mailResponse.status === StatusCodes.OK) {
+                    MessageService.success(t('License info report generation has started'))
+                    setShow(false)
+                } else if (mailResponse.status === StatusCodes.FORBIDDEN) {
+                    MessageService.warn(t('Access Denied'))
+                } else if (mailResponse.status === StatusCodes.INTERNAL_SERVER_ERROR) {
+                    MessageService.error(t('Internal server error'))
+                } else if (mailResponse.status === StatusCodes.UNAUTHORIZED) {
+                    MessageService.error(t('Unauthorized request'))
+                }
             }
         } catch (error) {
             ApiUtils.reportError(error)

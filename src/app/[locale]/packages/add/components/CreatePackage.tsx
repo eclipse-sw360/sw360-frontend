@@ -11,17 +11,18 @@
 
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
-import { getSession, signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { type JSX, useState } from 'react'
 import { ListGroup, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import CreateOrEditPackage from '../../components/CreateOrEditPackage'
+import { extractPackageManagerFromPurl } from '../../components/purlUtils'
 
-function CreatePackage(): ReactNode {
+function CreatePackage(): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
     const d = new Date()
@@ -29,15 +30,6 @@ function CreatePackage(): ReactNode {
         createdOn: `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`,
     })
     const [creatingPackage, setCreatingPackage] = useState(false)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const handleGoBack = () => {
         if (window.history.length > 1) {
@@ -50,18 +42,27 @@ function CreatePackage(): ReactNode {
     const handleCreatePackage = async () => {
         try {
             setCreatingPackage(true)
-            const session = await getSession()
-            if (CommonUtils.isNullOrUndefined(session)) return signOut()
-            const response = await ApiUtils.POST(
-                'packages',
-                {
-                    ...packagePayload,
-                    createdBy: session.user.email,
-                    packageManager: packagePayload.purl?.substring(4, packagePayload.purl.indexOf('/')).toUpperCase(),
-                },
-                session.user.access_token,
-            )
-            const res = (await response.json()) as Record<string, string>
+            const userIdentity = await getAuthenticatedUserIdentity()
+
+            const normalizedPurl = packagePayload.purl?.trim()
+            const packageManager = extractPackageManagerFromPurl(normalizedPurl)
+            if (!normalizedPurl || !packageManager) {
+                MessageService.error(t('Enter a valid pURL'))
+                return
+            }
+
+            const response = await ApiUtils.POST('packages', {
+                ...packagePayload,
+                purl: normalizedPurl,
+                createdBy: userIdentity.email,
+                packageManager,
+            })
+            let res: Record<string, string> = {}
+            try {
+                res = (await response.json()) as Record<string, string>
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
             if (response.status == StatusCodes.CREATED) {
                 MessageService.success(t('Package created successfully'))
                 if (res.id) {
@@ -69,13 +70,11 @@ function CreatePackage(): ReactNode {
                 } else {
                     handleGoBack()
                 }
-            } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                await signOut()
             } else {
-                MessageService.error(`${t('Something went wrong')}: ${res.message}`)
+                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
             }
         } catch (e) {
-            console.error(e)
+            ApiUtils.reportError(e)
         } finally {
             setCreatingPackage(false)
         }

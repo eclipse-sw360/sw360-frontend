@@ -10,7 +10,6 @@
 'use client'
 
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
 import { ClearingRequestDetails } from '@/object-types'
@@ -21,54 +20,49 @@ export default function ClearingRequestInfo({
     data: ClearingRequestDetails | undefined
 }>): ReactNode | undefined {
     const t = useTranslations('default')
-    const { status } = useSession()
 
-    if (status === 'unauthenticated') {
-        signOut()
-    } else {
-        return (
-            <table className='table summary-table'>
-                <thead>
-                    <tr>
-                        <th colSpan={2}>{t('Clearing Request')}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{t('Requesting User')}:</td>
-                        <td>
-                            {data?.requestingUser !== undefined &&
-                            data?._embedded?.requestingUser?.fullName !== undefined ? (
-                                <Link href={`mailto:${data._embedded.requestingUser.email}`}>
-                                    {data._embedded.requestingUser.fullName}
-                                </Link>
-                            ) : (
-                                ''
-                            )}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{t('Created On')}:</td>
-                        <td>{data?._embedded?.createdOn ?? ''}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Preferred Clearing Date')}:</td>
-                        <td>{data?.requestedClearingDate ?? ''}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Business Area Line')}:</td>
-                        <td>{data?.projectBU ?? ''}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Clearing Type')}:</td>
-                        <td>{data?.clearingType ?? ''}</td>
-                    </tr>
-                    <tr>
-                        <td>{t('Requester Comment')}:</td>
-                        <td>{data?.requestingUserComment ?? ''}</td>
-                    </tr>
-                </tbody>
-            </table>
-        )
-    }
+    return (
+        <table className='table summary-table'>
+            <thead>
+                <tr>
+                    <th colSpan={2}>{t('Clearing Request')}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{t('Requesting User')}:</td>
+                    <td>
+                        {data?.requestingUser !== undefined &&
+                        data?._embedded?.requestingUser?.fullName !== undefined ? (
+                            <Link href={`mailto:${data._embedded.requestingUser.email}`}>
+                                {data._embedded.requestingUser.fullName}
+                            </Link>
+                        ) : (
+                            ''
+                        )}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{t('Created On')}:</td>
+                    <td>{data?._embedded?.createdOn ?? ''}</td>
+                </tr>
+                <tr>
+                    <td>{t('Preferred Clearing Date')}:</td>
+                    <td>{data?.requestedClearingDate ?? ''}</td>
+                </tr>
+                <tr>
+                    <td>{t('Business Area Line')}:</td>
+                    <td>{data?.projectBU ?? ''}</td>
+                </tr>
+                <tr>
+                    <td>{t('Clearing Type')}:</td>
+                    <td>{data?.clearingType ?? ''}</td>
+                </tr>
+                <tr>
+                    <td>{t('Requester Comment')}:</td>
+                    <td>{data?.requestingUserComment ?? ''}</td>
+                </tr>
+            </tbody>
+        </table>
+    )
 }

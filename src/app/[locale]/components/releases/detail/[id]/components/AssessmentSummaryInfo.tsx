@@ -12,13 +12,14 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { getSession, signOut, useSession } from 'next-auth/react'
+
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Button } from 'react-bootstrap'
 
 import { Attachment, AttachmentTypes } from '@/object-types'
-import { ApiUtils, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     releaseId: string
@@ -33,32 +34,20 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
     const [assessmentSummaryInfo, setAssessmentSummaryInfo] = useState<AssessmentSummaryInfo | undefined>(undefined)
-    const { status } = useSession()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-            signOut()
-        }
-    }, [
-        status,
-    ])
 
     const cliAttachmentNumber = embeddedAttachments.filter(
         (attachment) => attachment.attachmentType == AttachmentTypes.COMPONENT_LICENSE_INFO_XML,
     ).length
 
     const handleShowAssessmentInfo = async () => {
-        const session = await getSession()
-        if (CommonUtils.isNullOrUndefined(session)) return signOut()
-
-        const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`, session.user.access_token)
+        const response = await ApiUtils.GET(`releases/${releaseId}/assessmentSummaryInfo`)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as AssessmentSummaryInfo
             setAssessmentSummaryInfo(data)
         } else if (response.status === StatusCodes.NO_CONTENT) {
             setAssessmentSummaryInfo({})
         } else if (response.status === StatusCodes.UNAUTHORIZED) {
-            await signOut()
+            dispatchSessionExpiredEvent()
         }
     }
 
@@ -121,7 +110,7 @@ const AssessmentSummaryInfo = ({ embeddedAttachments, releaseId }: Props): React
                 )}
                 {cliAttachmentNumber > 1 && (
                     <tr>
-                        <td colSpan={2}>{t('Multiple CLI are found in release!')}</td>
+                        <td colSpan={2}>{t('Multiple CLI are found in release')}</td>
                     </tr>
                 )}
             </tbody>

@@ -13,14 +13,14 @@
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
-import { signOut, useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Spinner } from 'react-bootstrap'
 import { BsExclamationTriangle } from 'react-icons/bs'
 import { Attachment, AttachmentTypes, Embedded, ErrorDetails } from '@/object-types'
-import { ApiError, ApiUtils, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import SPDXLicenseView from './SPDXLicenseView'
 
 interface Props {
@@ -52,15 +52,6 @@ interface SpdxLicensesPayload {
 
 const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
-    const session = useSession()
-
-    useEffect(() => {
-        if (session.status === 'unauthenticated') {
-            void signOut()
-        }
-    }, [
-        session,
-    ])
 
     const [tableData, setTableData] = useState<CellData[]>(() => [])
     const memoizedData = useMemo(
@@ -168,18 +159,13 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
     const handleAddSpdxLicenses = async (att: CellData) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             setShowProcessing(true)
             const payload: SpdxLicensesPayload = {
                 mainLicenseIds: att.licenseInfo?.licenseIds ?? [],
                 otherLicenseIds: att.licenseInfo?.otherLicenseIds ?? [],
             }
 
-            const response = await ApiUtils.POST(
-                `releases/${releaseId}/spdxLicenses`,
-                payload,
-                session.data.user.access_token,
-            )
+            const response = await ApiUtils.POST(`releases/${releaseId}/spdxLicenses`, payload)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -187,18 +173,18 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
                 })
             }
             setTableData((prev) => {
-                return prev.map((t) => {
-                    if (t.id === att.id) {
+                return prev.map((data) => {
+                    if (data.id === att.id) {
                         return {
-                            ...t,
+                            ...data,
                             status: {
                                 variant: 'success',
-                                message: 'Success! Please reload page to see the changes!',
+                                message: t('Success Please reload the page to see the changes'),
                             },
                         }
                     }
                     return {
-                        ...t,
+                        ...data,
                     }
                 })
             })
@@ -211,12 +197,8 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
     const handleShowLicenseInfo = async (attachmentId: string) => {
         try {
-            if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
             setShowProcessing(true)
-            const response = await ApiUtils.GET(
-                `releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`,
-                session.data.user.access_token,
-            )
+            const response = await ApiUtils.GET(`releases/${releaseId}/spdxLicensesInfo?attachmentId=${attachmentId}`)
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -250,7 +232,6 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
     }
 
     useEffect(() => {
-        if (session.status === 'loading') return
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -261,12 +242,7 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
         void (async () => {
             try {
-                if (CommonUtils.isNullOrUndefined(session.data)) return signOut()
-                const response = await ApiUtils.GET(
-                    `releases/${releaseId}/attachments`,
-                    session.data.user.access_token,
-                    signal,
-                )
+                const response = await ApiUtils.GET(`releases/${releaseId}/attachments`, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -315,7 +291,6 @@ const SPDXAttachments = ({ releaseId }: Props): ReactNode => {
 
         return () => controller.abort()
     }, [
-        session,
         releaseId,
     ])
 
