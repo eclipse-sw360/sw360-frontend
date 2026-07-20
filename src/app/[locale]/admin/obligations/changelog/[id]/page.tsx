@@ -18,7 +18,7 @@ interface Context {
 }
 
 export const metadata: Metadata = {
-    title: 'Admin',
+    title: 'Admin - Obligations',
 }
 
 const ObligationsChangelog = async (props: Context): Promise<JSX.Element> => {

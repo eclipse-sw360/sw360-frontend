@@ -12,7 +12,7 @@ import type { JSX } from 'react'
 import UserAdministration from './components/UserAdministration'
 
 export const metadata: Metadata = {
-    title: 'Admin',
+    title: 'Admin - Users',
 }
 
 function UsersAdministrationPage(): JSX.Element {
