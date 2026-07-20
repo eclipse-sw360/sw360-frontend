@@ -13,7 +13,7 @@ import { ReactNode } from 'react'
 import OAuthClientsList from './components/OAuthClientsList'
 
 export const metadata: Metadata = {
-    title: 'Admin',
+    title: 'Admin - OAuth Client',
 }
 
 function OAuthClientPage(): ReactNode {
