@@ -150,7 +150,8 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     )
     const [showProcessing, setShowProcessing] = useState(false)
 
-    const searchVendor = async (signal?: AbortSignal) => {
+    const searchVendor = async (signal?: AbortSignal, overrideSearchText?: string) => {
+        const effectiveSearchText = overrideSearchText ?? searchText
         try {
             setShowProcessing(true)
             const queryUrl = CommonUtils.createUrlWithParams(
@@ -158,9 +159,9 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 Object.fromEntries(
                     Object.entries({
                         ...pageableQueryParam,
-                        ...(searchText !== undefined && searchText !== ''
+                        ...(effectiveSearchText !== undefined && effectiveSearchText !== ''
                             ? {
-                                  searchText: searchText,
+                                  searchText: effectiveSearchText,
                               }
                             : {}),
                     }).map(([key, value]) => [
@@ -199,6 +200,18 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
         return () => controller.abort()
     }, [
         pageableQueryParam,
+    ])
+
+    useEffect(() => {
+        if (!show) return
+        const vendorName = vendor.fullName ?? ''
+        if (vendorName === '') return
+        setSelectedVendor(vendor)
+        setVendorData([
+            vendor,
+        ])
+    }, [
+        show,
     ])
 
     const table = useReactTable({
@@ -279,6 +292,8 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const handleClickSelectVendor = () => {
         setVendor(selectedVendor)
         setShow(!show)
+        setSearchText(undefined)
+        setVendorData([])
     }
 
     return (
