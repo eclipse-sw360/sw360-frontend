@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1.4
 
 # Copyright (c) Helio Chissini de Castro, 2025. Part of the SW360 Frontend Project.
+# SPDX-FileContributor: Gaurav Mishra
+# SPDX-FileCopyrightText: (C) 2026 Siemens AG
 
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -23,13 +25,15 @@ services:
       - couchdb
     ports:
       - "8080:8080"
-      - "11311:11311"
     networks:
       - sw360net
     stdin_open: true
     tty: true
     volumes:
       - etc:/etc/sw360
+      # If using SVM, material expected under /etc/sw360 by backend runtime
+      # - ./config/svm_sw360_certificate.pfx:/etc/sw360/svm_sw360_certificate.pfx:ro
+      # - ./config/svm_sw360_keystore.jks:/etc/sw360/svm_sw360_keystore.jks:ro
     healthcheck:
       test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/resource/api/health | grep -iq 'status\":\"up' || exit 1" ]
       interval: 30s
@@ -38,27 +42,22 @@ services:
       start_period: 60s
 
   couchdb-nouveau:
-    # CouchDB 3.5 with Nouveau (Lucene 10)
-    # nouveau_index_upgrader enabled in sw360_setup.ini to handle missing lucene_version
-    # See: https://github.com/apache/couchdb/issues/6054
-    image: couchdb:3.5-nouveau
+    image: docker.io/library/couchdb:3.5-nouveau
     restart: unless-stopped
     container_name: couchdb_nouveau
-    volumes:
-      - nouveau_data:/opt/nouveau/data/nouveau
-      - ./config/couchdb/nouveau.yaml:/opt/nouveau/etc/nouveau.yaml
+    environment:
+      # Fix needed because upstream uses `./data/nouveau` which resolves to `/data/nouveau`
+      JAVA_TOOL_OPTIONS: "-Ddw.rootDir=/opt/nouveau/data/nouveau"
     ports:
       - "5987:5987"
       - "5988:5988"
     networks:
       - sw360net
+    volumes:
+      - couchdb-nouveau:/var/lib/nouveau
 
   couchdb:
-    # Main CouchDB database - uses base image (not nouveau image which is Java-only)
-    # Nouveau search is handled by separate couchdb-nouveau container
-    # Note: SW360 backend needs to specify lucene_version:10 in design docs
-    # See: https://github.com/eclipse-sw360/sw360/issues/4314
-    image: couchdb:3.5
+    image: docker.io/library/couchdb:3.5
     restart: unless-stopped
     container_name: couchdb
     env_file:
@@ -83,11 +82,15 @@ services:
   sw360-frontend:
     build:
       context: .
+      dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SW360_API_URL: ${NEXT_PUBLIC_SW360_API_URL:-http://localhost:8080}
-        NEXT_PUBLIC_SW360_AUTH_PROVIDER: sw360basic
-        NEXTAUTH_URL: http://localhost
-        AUTH_SECRET: mysecret
+        BUILDKIT_INLINE_CACHE: 1
+        NEXT_PUBLIC_SW360_API_URL: ${NEXT_PUBLIC_SW360_API_URL:-https://localhost}
+        NEXT_PUBLIC_SW360_AUTH_PROVIDER: ${NEXT_PUBLIC_SW360_AUTH_PROVIDER:-sw360basic}
+        NEXTAUTH_URL: https://localhost
+    secrets:
+      - NEXTAUTH_SECRET
+      - SW360_FRONTEND_KC_SECRET
     image: "ghcr.io/eclipse-sw360/sw360-frontend:${SW360_FRONTEND_VERSION:-main}"
     container_name: sw360-frontend
     restart: unless-stopped
@@ -100,10 +103,89 @@ services:
     depends_on:
       - sw360
 
+  keycloak:
+    image: "ghcr.io/eclipse-sw360/sw360/keycloak:26.7.0"
+    container_name: keycloak
+    restart: unless-stopped
+    env_file:
+      - ./config/sw360/.env.backend     # for COUCHDB properties
+      - ./config/keycloak/.env.keycloak # will override any COUCHDB properties if needed
+    volumes:
+      - ./config/keycloak/orgmapping.properties:/etc/sw360/orgmapping.properties:ro
+    secrets:
+      - COUCHDB_SECRETS
+# Uncomment following for development
+#    command:
+#      - start-dev
+#      - --debug
+    depends_on:
+      - postgres
+    ports:
+      - "8083:8083"
+    networks:
+      - sw360net
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -ec ': > /dev/tcp/127.0.0.1/9000'" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # PG for KeyCloak
+  postgres:
+    image: docker.io/library/postgres:18.4-alpine
+    container_name: postgres
+    restart: unless-stopped
+    env_file: ./config/postgres/.env.postgres
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_DB=keycloak
+      - POSTGRES_PASSWORD_FILE=/run/secrets/POSTGRES_PASSWORD
+    networks:
+      - sw360net
+    volumes:
+      - postgres_storage:/var/lib/postgresql
+    secrets:
+      - POSTGRES_PASSWORD
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready --dbname $$POSTGRES_DB --username $$POSTGRES_USER" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  # Nginx reverse proxy
+  web:
+    image: docker.io/library/nginx:1.31.2-trixie
+    container_name: sw360_web
+    restart: unless-stopped
+    env_file: ./config/nginx/.env.web
+    volumes:
+      - ./config/nginx/rev_proxy.template:/etc/nginx/templates/default.conf.template:ro
+      - ./config/nginx/proxy_params:/etc/nginx/proxy_params:ro
+    command: >
+      /bin/sh -c "
+        export DEBIAN_FRONTEND=noninteractive &&
+        apt-get update &&
+        apt-get install -y ssl-cert &&
+        exec /docker-entrypoint.sh nginx -g 'daemon off;'
+      "
+    ports:
+      # If ports changed, update nginx/proxy_params
+      - "443:443"
+    networks:
+      - sw360net
+    depends_on:
+      - sw360-frontend
+      - sw360
+      - keycloak
+
 volumes:
   couchdb: {}
+  couchdb-nouveau: {}
   etc: {}
-  nouveau_data: {}
+  postgres_storage: {}
 
 networks:
   sw360net:
@@ -117,3 +199,9 @@ secrets:
     file: ./config/couchdb/default_secrets
   JWT_KEYSTORE:
     file: ./config/sw360/jwt-keystore.jks
+  POSTGRES_PASSWORD:
+    file: ./config/postgres/postgresql_password
+  NEXTAUTH_SECRET:
+    file: ./config/front-end/nextauth_secret
+  SW360_FRONTEND_KC_SECRET:
+    file: ./config/front-end/sw360_frontend_kc_secret
