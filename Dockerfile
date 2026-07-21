@@ -52,6 +52,7 @@ COPY --from=build /frontend/.next/static ./.next/static
 COPY --from=build --chmod=755 /frontend/config/front-end/entrypoint.sh ./entrypoint.sh
 
 # Runtime ENV to configure
+ENV SW360_API_URL="http://localhost:8080"
 ENV SW360_REST_CLIENT_ID=""
 ENV SW360_REST_CLIENT_SECRET=""
 ENV SW360_KEYCLOAK_CLIENT_ID=""
