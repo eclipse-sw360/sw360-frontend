@@ -282,10 +282,19 @@ Frontend runtime configuration lives in
 | `NEXT_PUBLIC_SW360_API_URL` | Backend REST API URL (**build-time**, client-side) | `http://localhost:8080` |
 | `NEXT_PUBLIC_SW360_AUTH_PROVIDER` | Authentication provider (**build-time**, see below) | `sw360basic` |
 | `SW360_SESSION_REFETCH_INTERVAL_SECONDS` | Background token refresh interval (seconds) | `300` |
+| `SW360_API_URL` | Backend REST API URL (**run-time**, server-side) | `http://sw360:8080` |
 
 The session secret (`NEXTAUTH_SECRET`) and the Keycloak client secret are **not**
 set here — they are delivered as Docker secrets (see
 [Secrets and Credential Generation](#secrets-and-credential-generation)).
+
+> [!NOTE]
+> The frontend communicates with the backend at two locations. One is at the
+> client-side, i.e., the browser. This communication uses the address from
+> `NEXT_PUBLIC_SW360_API_URL`, which must be set at the build time of the image.
+> The other is at the server-side (primarily for auth), which can be set at
+> runtime via `SW360_API_URL`. Depending on your setup, the values may differ
+> for the variables.
 
 ### Authentication Providers
 
