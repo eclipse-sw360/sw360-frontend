@@ -646,10 +646,15 @@ body {
     font-size: medium;
     font-weight: bold;
     flex-grow: 1;
+    margin: 0;
+    height: 24px;
+    display: flex;
+    align-items: center;
 }
 
 .tableHeader {
     display: flex;
+    align-items: center;
     margin-left: 5px;
     padding-right: 10px;
     padding-top: 20px;
@@ -1499,12 +1504,12 @@ input[checked] + .slider:before {
 }
 
 .sw360-table td {
-    padding: 12px !important;
+    padding: 8px 12px !important;
     vertical-align: middle;
 }
 
 .sw360-table th {
-    padding: 12px !important;
+    padding: 8px 12px !important;
     vertical-align: middle;
 }
 
@@ -1522,7 +1527,7 @@ input[checked] + .slider:before {
 
     overflow: hidden;
 
-    height: calc(2 * 1lh); /* exactly 2 lines, always */
+    max-height: calc(2 * 1lh); /* clamp to at most 2 lines, but shrink to content */
 }
 
 .table-text-link {
@@ -1606,6 +1611,11 @@ input[checked] + .slider:before {
 }
 
 .suggestions-list li:hover {
+    color: var(--tab-hover-foreground);
+    background-color: var(--sw360-primary-hover-color);
+}
+
+.suggestions-list li.suggestion-focused {
     color: var(--tab-hover-foreground);
     background-color: var(--sw360-primary-hover-color);
 }
