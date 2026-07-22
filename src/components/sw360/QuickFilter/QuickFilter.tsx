@@ -11,7 +11,7 @@
 
 import React, { type JSX, useRef } from 'react'
 import { Form } from 'react-bootstrap'
-import { QuickFilterProps } from './QuickFilter.types'
+import type { QuickFilterProps } from './QuickFilter.types'
 
 function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilterProps): JSX.Element {
     const debounceRef = useRef<NodeJS.Timeout | null>(null)
@@ -36,7 +36,7 @@ function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilter
             >
                 <div className='card-header'>{title}</div>
                 <div className='card-body'>
-                    <Form>
+                    <Form onSubmit={(e) => e.preventDefault()}>
                         <Form.Group
                             key={id}
                             className='mb-3'
