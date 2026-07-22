@@ -175,7 +175,9 @@ OpenTofu/Terraform script and follow its guide:
 This creates the `sw360` realm and the frontend (UI) client. The
 [config/keycloak/.env.keycloak](config/keycloak/.env.keycloak) file sets the
 Keycloak admin bootstrap credentials and points Keycloak at the bundled
-`postgres` service — change the admin password before running.
+`postgres` service — change the admin password before running. Using the
+bootstrap credentials, you can access Keycloak from its base URL at
+<https://localhost/kc>.
 
 > [!NOTE]
 > If OpenTofu fails during provider login with a certificate mismatch on local
@@ -250,8 +252,15 @@ runtime**:
 Because they are baked in, setting them only in an env file has **no effect** on
 an already-built image. To use different values you must:
 
-1. Edit the `build.args` for the `sw360-frontend` service in the compose file.
-2. Rebuild the image:
+1. Export the new values in your terminal where you are going to build the
+  image.
+
+   ```sh
+   export NEXT_PUBLIC_SW360_API_URL=http://locahost:8080
+   export NEXT_PUBLIC_SW360_AUTH_PROVIDER=keycoak
+   ```
+
+2. From same shell, rebuild the image:
 
    ```sh
    docker compose -f docker-compose.yml build sw360-frontend
@@ -264,7 +273,7 @@ an already-built image. To use different values you must:
    ```
 
 The prebuilt image published on ghcr.io defaults to
-`NEXT_PUBLIC_SW360_API_URL=http://localhost:8080` and
+`NEXT_PUBLIC_SW360_API_URL=https://localhost` and
 `NEXT_PUBLIC_SW360_AUTH_PROVIDER=sw360basic`. Any deployment with a different API
 URL or auth provider must build its own image.
 
