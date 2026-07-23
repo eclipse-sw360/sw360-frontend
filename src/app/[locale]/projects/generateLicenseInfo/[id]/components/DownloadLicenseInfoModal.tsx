@@ -108,76 +108,86 @@ export default function DownloadLicenseInfoModal({
         projectRelationships,
     ])
 
+    const downloadHandler = async (response: Response) => {
+        try {
+            const responseBody = await response.json()
+            if (responseBody.warnings && responseBody.warnings.length > 0) {
+                responseBody.warnings.forEach((warning: string) => {
+                    MessageService.warn(warning, {
+                        autoClose: false,
+                    })
+                })
+            }
+        } catch {
+            // Response was plain text (no warnings) - continue normally
+        }
+        const variant = params.get('variant') ?? 'DISCLOSURE'
+        const downloadUrl = CommonUtils.createUrlWithParams(`reports`, {
+            withlinkedreleases: 'false',
+            projectId,
+            module: 'licenseInfo',
+            withSubProject: withSubProject ? 'true' : 'false',
+            generatorClassName,
+            variant,
+            selectedRelRelationship,
+        })
+        const mailEnabled = mailRequestForReport === 'true'
+        if (!mailEnabled) {
+            const currentDate = new Date().toISOString().split('T')[0]
+            const extensionMap: Record<string, string> = {
+                DocxGenerator: 'docx',
+                XhtmlGenerator: 'html',
+                TextGenerator: 'txt',
+            }
+            const ext = extensionMap[generatorClassName] ?? 'zip'
+            const downloadStatus = await DownloadService.download(downloadUrl, `LicenseInfo-${currentDate}.${ext}`)
+            if (downloadStatus === StatusCodes.OK) {
+                setShow(false)
+            } else {
+                MessageService.error(`${t('Download failed with status')} (${downloadStatus})`)
+            }
+        } else {
+            const mailResponse = await ApiUtils.GET(downloadUrl)
+            if (mailResponse.status === StatusCodes.OK) {
+                MessageService.success(t('License info report generation has started'))
+                setShow(false)
+            } else {
+                let errorMessage = t('Internal server error')
+                try {
+                    const errorBody = (await mailResponse.json()) as ErrorDetails
+                    if (!CommonUtils.isNullOrUndefined(errorBody?.message)) {
+                        errorMessage = errorBody.message
+                    }
+                } catch {
+                    // Fallback to status-based message when no JSON body is available.
+                    if (mailResponse.status === StatusCodes.FORBIDDEN) {
+                        errorMessage = t('Access Denied')
+                    } else if (mailResponse.status === StatusCodes.UNAUTHORIZED) {
+                        errorMessage = t('Unauthorized request')
+                    } else if (mailResponse.status >= 500) {
+                        errorMessage = `${t('Internal server error')} (${mailResponse.status})`
+                    }
+                }
+
+                MessageService.error(
+                    `${t('License info report generation is failed')} (${mailResponse.status}: ${errorMessage})`,
+                )
+            }
+        }
+    }
+
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
             setLoading(true)
             const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
-            if (response.status !== StatusCodes.CREATED) {
+            if (response.status === StatusCodes.CREATED || response.status === StatusCodes.OK) {
+                await downloadHandler(response)
+            } else if (response.status === StatusCodes.FORBIDDEN) {
+                MessageService.warn(t('Could not save the attachment usages'))
+                await downloadHandler(response)
+            } else {
                 const err = (await response.json()) as ErrorDetails
                 throw new Error(err.message)
-            }
-
-            // Display warnings (e.g. stale sub-project/release references) without blocking download
-            try {
-                const responseBody = await response.json()
-                if (responseBody.warnings && responseBody.warnings.length > 0) {
-                    responseBody.warnings.forEach((warning: string) => {
-                        MessageService.warn(warning, {
-                            autoClose: false,
-                        })
-                    })
-                }
-            } catch {
-                // Response was plain text (no warnings) - continue normally
-            }
-            const variant = params.get('variant') ?? 'DISCLOSURE'
-            const downloadUrl = CommonUtils.createUrlWithParams(`reports`, {
-                withlinkedreleases: 'false',
-                projectId,
-                module: 'licenseInfo',
-                withSubProject: withSubProject ? 'true' : 'false',
-                generatorClassName,
-                variant,
-                selectedRelRelationship,
-            })
-            const mailEnabled = mailRequestForReport === 'true'
-            if (!mailEnabled) {
-                const currentDate = new Date().toISOString().split('T')[0]
-                const extensionMap: Record<string, string> = {
-                    DocxGenerator: 'docx',
-                    XhtmlGenerator: 'html',
-                    TextGenerator: 'txt',
-                }
-                const ext = extensionMap[generatorClassName] ?? 'zip'
-                const downloadStatus = await DownloadService.download(downloadUrl, `LicenseInfo-${currentDate}.${ext}`)
-                if (downloadStatus === StatusCodes.OK) {
-                    setShow(false)
-                }
-            } else {
-                const mailResponse = await ApiUtils.GET(downloadUrl)
-                if (mailResponse.status === StatusCodes.OK) {
-                    MessageService.success(t('License info report generation has started'))
-                    setShow(false)
-                } else {
-                    let errorMessage = t('Internal server error')
-                    try {
-                        const errorBody = (await mailResponse.json()) as ErrorDetails
-                        if (!CommonUtils.isNullOrUndefined(errorBody?.message)) {
-                            errorMessage = errorBody.message
-                        }
-                    } catch {
-                        // Fallback to status-based message when no JSON body is available.
-                        if (mailResponse.status === StatusCodes.FORBIDDEN) {
-                            errorMessage = t('Access Denied')
-                        } else if (mailResponse.status === StatusCodes.UNAUTHORIZED) {
-                            errorMessage = t('Unauthorized request')
-                        } else if (mailResponse.status >= 500) {
-                            errorMessage = `${t('Internal server error')} (${mailResponse.status})`
-                        }
-                    }
-
-                    MessageService.error(`License info report generation failed: ${errorMessage}`)
-                }
             }
         } catch (error) {
             const details = error as ErrorDetails

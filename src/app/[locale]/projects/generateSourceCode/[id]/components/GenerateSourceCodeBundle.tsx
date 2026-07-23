@@ -108,15 +108,23 @@ function GenerateSourceCodeBundle({
                 return
             }
             const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
-            if (response.status !== StatusCodes.CREATED) {
+            if (response.status === StatusCodes.CREATED || response.status === StatusCodes.OK) {
+                const currentDate = new Date().toISOString().split('T')[0]
+                DownloadService.download(
+                    `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`,
+                    `SourceCodeBundle-${currentDate}.zip`,
+                )
+            } else if (response.status === StatusCodes.FORBIDDEN) {
+                MessageService.warn(t('Could not save the attachment usages'))
+                const currentDate = new Date().toISOString().split('T')[0]
+                DownloadService.download(
+                    `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`,
+                    `SourceCodeBundle-${currentDate}.zip`,
+                )
+            } else {
                 MessageService.error(t('Something went wrong'))
                 return notFound()
             }
-            const currentDate = new Date().toISOString().split('T')[0]
-            DownloadService.download(
-                `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`,
-                `SourceCodeBundle-${currentDate}.zip`,
-            )
         } catch (e) {
             console.error(e)
         } finally {
