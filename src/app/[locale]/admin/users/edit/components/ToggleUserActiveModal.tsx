@@ -9,6 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 
