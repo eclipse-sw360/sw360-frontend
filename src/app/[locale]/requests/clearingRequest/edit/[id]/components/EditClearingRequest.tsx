@@ -40,9 +40,8 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
         agreedClearingDate: '',
         requestingUser: '',
     })
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const requestsPath = `/${locale}/requests`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const requestsPath = '/requests'
 
     const fetchData = async (url: string) => {
         const response = await ApiUtils.GET(url)

@@ -33,9 +33,8 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
     const t = useTranslations('default')
     const [openCardIndex, setOpenCardIndex] = useState<number>(0)
     const router = useRouter()
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const requestsPath = `/${locale}/requests`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const requestsPath = '/requests'
     const [moderationRequestData, setModerationRequestData] = useState<ModerationRequestDetails | undefined>({
         id: '',
         revision: '',

@@ -1,4 +1,5 @@
 // Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
@@ -15,7 +16,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
-import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
+import { type JSX, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ReleaseDetail } from '@/object-types'
 import { CommonUtils } from '@/utils'
@@ -40,7 +41,10 @@ function RecentReleasesWidget(): ReactNode {
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return dispatchSessionExpiredEvent()
         } else {
-            notFound()
+            const err = (await response.json()) as ErrorDetails
+            throw new ApiError(err.message, {
+                status: response.status,
+            })
         }
     }, [])
 
@@ -60,7 +64,7 @@ function RecentReleasesWidget(): ReactNode {
                         releases['_embedded']['sw360:releases'].map((item: ReleaseDetail) => [
                             <li key={item.name}>
                                 <Link
-                                    href={'components/releases/detail/' + item.id}
+                                    href={`/components/releases/detail/${item.id}`}
                                     style={{
                                         color: 'orange',
                                         textDecoration: 'none',

@@ -534,9 +534,8 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         },
     }
 
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const componentsPath = `/${locale}/components`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const componentsPath = '/components'
 
     return (
         release && (

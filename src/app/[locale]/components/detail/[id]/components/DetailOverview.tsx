@@ -272,9 +272,8 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         componentId,
     ])
 
-    const param = useParams()
-    const locale = (param.locale as string) || 'en'
-    const componentsPath = `/${locale}/components`
+    // localePrefix is 'never' — do not embed locale in public URLs
+    const componentsPath = '/components'
 
     // Early return for loading state
     if (!component) {

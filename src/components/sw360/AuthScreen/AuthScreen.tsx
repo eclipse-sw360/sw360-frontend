@@ -14,7 +14,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, useSession } from 'next-auth/react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { LanguageSwitcher, PageSpinner } from 'next-sw360'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Form, InputGroup, Modal } from 'react-bootstrap'
@@ -22,6 +22,7 @@ import { BsEye, BsEyeSlash } from 'react-icons/bs'
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { resolveAuthCallbackUrl } from '@/utils/authRedirect.utils'
 import { AUTH_PROVIDER } from '@/utils/env'
+import { homePath } from '@/utils/localePath.utils'
 
 function AuthScreen(): ReactNode {
     const router = useRouter()
