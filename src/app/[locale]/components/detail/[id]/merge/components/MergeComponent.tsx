@@ -657,7 +657,9 @@ export default function MergeComponent({
                                     className='d-flex row mb-1'
                                     key={release.id ?? ''}
                                 >
-                                    <div className='mt-2 col text-end'>{release.name}</div>
+                                    <div className='mt-2 col text-end'>
+                                        {release.name} {`(${release.version})`}
+                                    </div>
                                     <div className='col-12 col-md-2 mx-5 text-center'>
                                         <button
                                             className='btn btn-secondary px-2'
@@ -675,7 +677,9 @@ export default function MergeComponent({
                                         className='d-flex row mb-1'
                                         key={release.id ?? ''}
                                     >
-                                        <div className='mt-2 col text-end'>{release.name}</div>
+                                        <div className='mt-2 col text-end'>
+                                            {release.name} {`(${release.version})`}
+                                        </div>
                                         <div className='col-12 col-md-2 mx-5 text-center'>
                                             <button
                                                 className='btn btn-secondary px-2'
@@ -684,7 +688,9 @@ export default function MergeComponent({
                                                 <BsArrowCounterclockwise size={20} />
                                             </button>
                                         </div>
-                                        <div className='mt-2 col text-start'>{release.name}</div>
+                                        <div className='mt-2 col text-start'>
+                                            {release.name} {`(${release.version})`}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
