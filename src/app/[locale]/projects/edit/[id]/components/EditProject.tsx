@@ -612,24 +612,21 @@ function EditProject({
             }
             const responses = await Promise.all(requests)
             for (const r of responses) {
-                if (
-                    !(
-                        r.status === StatusCodes.OK ||
-                        r.status === StatusCodes.CREATED ||
-                        r.status === StatusCodes.ACCEPTED
+                if (r.status === StatusCodes.OK || r.status === StatusCodes.CREATED) {
+                    MessageService.success(
+                        t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
                     )
-                ) {
+                    router.push(`/projects/detail/${projectId}`)
+                } else if (r.status === StatusCodes.ACCEPTED) {
+                    MessageService.success(t('Moderation request is created'))
+                    router.push(`/projects/detail/${projectId}`)
+                } else {
                     const err = (await r.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: r.status,
                     })
                 }
             }
-
-            MessageService.success(
-                t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
-            )
-            router.push(`/projects/detail/${projectId}`)
         } catch (error: unknown) {
             ApiUtils.reportError(error)
         }
