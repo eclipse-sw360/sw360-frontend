@@ -158,15 +158,33 @@ export default function DownloadLicenseInfoModal({
                 if (mailResponse.status === StatusCodes.OK) {
                     MessageService.success(t('License info report generation has started'))
                     setShow(false)
-                } else if (mailResponse.status === StatusCodes.FORBIDDEN) {
-                    MessageService.warn(t('Access Denied'))
-                } else if (mailResponse.status === StatusCodes.INTERNAL_SERVER_ERROR) {
-                    MessageService.error(t('Internal server error'))
-                } else if (mailResponse.status === StatusCodes.UNAUTHORIZED) {
-                    MessageService.error(t('Unauthorized request'))
+                } else {
+                    let errorMessage = t('Internal server error')
+                    try {
+                        const errorBody = (await mailResponse.json()) as ErrorDetails
+                        if (!CommonUtils.isNullOrUndefined(errorBody?.message)) {
+                            errorMessage = errorBody.message
+                        }
+                    } catch {
+                        // Fallback to status-based message when no JSON body is available.
+                        if (mailResponse.status === StatusCodes.FORBIDDEN) {
+                            errorMessage = t('Access Denied')
+                        } else if (mailResponse.status === StatusCodes.UNAUTHORIZED) {
+                            errorMessage = t('Unauthorized request')
+                        } else if (mailResponse.status >= 500) {
+                            errorMessage = `${t('Internal server error')} (${mailResponse.status})`
+                        }
+                    }
+
+                    MessageService.error(`License info report generation failed: ${errorMessage}`)
                 }
             }
         } catch (error) {
+            const details = error as ErrorDetails
+            const errorMessage = !CommonUtils.isNullOrUndefined(details?.message)
+                ? details.message
+                : t('Internal server error')
+            MessageService.error(`License info report generation failed: ${errorMessage}`)
             ApiUtils.reportError(error)
         } finally {
             setLoading(false)
