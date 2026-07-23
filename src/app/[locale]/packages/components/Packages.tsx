@@ -12,23 +12,14 @@
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { useConfigKeyValue, useSW360BackendConfigContext } from '@/contexts'
-import {
-    ConfigKeys,
-    Embedded,
-    ErrorDetails,
-    Package,
-    PageableQueryParam,
-    PaginationMeta,
-    UserGroupType,
-} from '@/object-types'
+import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -61,12 +52,6 @@ function Packages(): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
     const router = useRouter()
-    const { isLoading } = useSW360BackendConfigContext()
-    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED)
-
-    if (!isLoading && isPackageFeatureEnabled !== 'true') {
-        notFound()
-    }
 
     const [deletePackageModalMetaData, setDeletePackageModalMetaData] = useState<DeletePackageModalMetData>({
         show: false,
