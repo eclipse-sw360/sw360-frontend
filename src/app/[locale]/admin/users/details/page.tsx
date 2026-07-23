@@ -12,25 +12,30 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useParams } from 'next/navigation'
+import { notFound, useSearchParams } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
 import { type JSX, useEffect, useState } from 'react'
 import { PageButtonHeader, PageSpinner } from '@/components/sw360'
 import { User } from '@/object-types'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import CommonUtils from '@/utils/common.utils'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const UserDetailPage = (): JSX.Element => {
-    const params = useParams<{
-        id: string
-    }>()
+    const searchParams = useSearchParams()
+    const userId = searchParams.get('id')
     const t = useTranslations('default')
     const [user, setUser] = useState<User | undefined>(undefined)
 
     useEffect(() => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(userId)) {
+            notFound()
+            return
+        }
+
         ;(async () => {
-            const response = await ApiUtils.GET(`users/byid/${params.id}`)
+            const response = await ApiUtils.GET(`users/byid/${userId}`)
             if (response.status === StatusCodes.UNAUTHORIZED) {
                 return dispatchSessionExpiredEvent()
             } else if (response.status !== StatusCodes.OK) {
@@ -39,10 +44,17 @@ const UserDetailPage = (): JSX.Element => {
             const user = (await response.json()) as User
             setUser(user)
         })()
-    }, [])
+    }, [
+        userId,
+    ])
+
+    if (CommonUtils.isNullEmptyOrUndefinedString(userId)) {
+        return notFound()
+    }
+
     const headerbuttons = {
         'Edit User': {
-            link: `/admin/users/edit/${params.id}`,
+            link: `/admin/users/edit?id=${encodeURIComponent(userId)}`,
             type: 'primary',
             name: t('Edit User'),
         },

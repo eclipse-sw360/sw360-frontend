@@ -11,7 +11,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useParams, useRouter } from 'next/navigation'
+import { notFound, useRouter, useSearchParams } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
 import { PageSpinner } from 'next-sw360'
@@ -27,9 +27,8 @@ import ToggleUserActiveModal from './components/ToggleUserActiveModal'
 
 const AdminEditUserPage = (): JSX.Element => {
     const router = useRouter()
-    const params = useParams<{
-        id: string
-    }>()
+    const searchParams = useSearchParams()
+    const userId = searchParams.get('id')
     const t = useTranslations('default')
     const [userPayload, setUserPayload] = useState<UserPayload>({
         email: '',
@@ -46,9 +45,14 @@ const AdminEditUserPage = (): JSX.Element => {
     const [showToggleActiveModal, setShowToggleActiveModal] = useState(false)
 
     useEffect(() => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(userId)) {
+            notFound()
+            return
+        }
+
         void (async () => {
             try {
-                const queryUrl = `users/byid/${params.id}`
+                const queryUrl = `users/byid/${userId}`
                 const response = await ApiUtils.GET(queryUrl)
                 if (response.status === StatusCodes.UNAUTHORIZED) {
                     return dispatchSessionExpiredEvent()
@@ -72,7 +76,13 @@ const AdminEditUserPage = (): JSX.Element => {
                 console.error(e)
             }
         })()
-    }, [])
+    }, [
+        userId,
+    ])
+
+    if (CommonUtils.isNullEmptyOrUndefinedString(userId)) {
+        return notFound()
+    }
 
     const handleUpdateUser = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -81,10 +91,10 @@ const AdminEditUserPage = (): JSX.Element => {
             if (CommonUtils.isNullEmptyOrUndefinedString(userPayload.password)) {
                 delete userPayload.password
             }
-            const response = await ApiUtils.PATCH(`users/${params.id}`, userPayload)
+            const response = await ApiUtils.PATCH(`users/${userId}`, userPayload)
             if (response.status === StatusCodes.OK) {
                 MessageService.success(t('Your request completed successfully'))
-                router.push(`/admin/users/details/${params.id}`)
+                router.push(`/admin/users/details?id=${encodeURIComponent(userId)}`)
             } else if (response.status === StatusCodes.UNAUTHORIZED) {
                 MessageService.success(t('Session has expired'))
                 return dispatchSessionExpiredEvent()
@@ -106,7 +116,7 @@ const AdminEditUserPage = (): JSX.Element => {
     }
 
     const handleCancel = () => {
-        router.push(`/admin/users/details/${params.id}`)
+        router.push(`/admin/users/details?id=${encodeURIComponent(userId)}`)
     }
 
     return !CommonUtils.isNullEmptyOrUndefinedString(userPayload.email) ? (
@@ -149,7 +159,7 @@ const AdminEditUserPage = (): JSX.Element => {
                 />
             </form>
             <ToggleUserActiveModal
-                userId={params.id}
+                userId={userId}
                 isUserDeactived={isUserDeactived}
                 showToggleActiveModal={showToggleActiveModal}
                 setShowToggleActiveModal={setShowToggleActiveModal}
