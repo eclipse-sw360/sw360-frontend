@@ -9,10 +9,22 @@
 
 'use client'
 
+import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Spinner } from 'react-bootstrap'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
-import { Attachment, Component, ListFieldProcessComponent } from '@/object-types'
+import {
+    Attachment,
+    Component,
+    Embedded,
+    ErrorDetails,
+    ListFieldProcessComponent,
+    MaxEntries,
+    Release,
+} from '@/object-types'
+import { ApiError } from '@/utils'
+import ApiUtils from '@/utils/api/authenticatedApi.util'
 import GeneralSection from './GeneralSection'
 import RolesSection from './RolesSection'
 
@@ -20,14 +32,20 @@ interface AdditionalRolesMergeLists {
     [k: string]: ListFieldProcessComponent[]
 }
 
+type EmbeddedReleases = Embedded<Release, 'sw360:releaseLinks'>
+
 export default function MergeComponent({
     targetComponent,
+    setTargetComponent,
     sourceComponent,
+    setSourceComponent,
     finalComponentPayload,
     setFinalComponentPayload,
 }: {
     targetComponent: Component | null
+    setTargetComponent: Dispatch<SetStateAction<null | Component>>
     sourceComponent: Component | null
+    setSourceComponent: Dispatch<SetStateAction<null | Component>>
     finalComponentPayload: Component | null
     setFinalComponentPayload: Dispatch<SetStateAction<null | Component>>
 }): ReactNode {
@@ -36,6 +54,89 @@ export default function MergeComponent({
     const [additionalDataMergeList, setAdditionalDataMergeList] = useState<ListFieldProcessComponent[]>([])
     const [additionalRolesMergeLists, setAdditionalRolesMergeLists] = useState<AdditionalRolesMergeLists>({})
     const [attachmentsMergeList, setAttachmentsMergeList] = useState<ListFieldProcessComponent[]>([])
+    const [areReleasesLoaded, setAreReleasesLoaded] = useState(false)
+
+    useEffect(() => {
+        if (!targetComponent?.id || !sourceComponent?.id) {
+            setAreReleasesLoaded(false)
+            return
+        }
+
+        setAreReleasesLoaded(false)
+
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                const [targetResponse, sourceResponse] = await Promise.all([
+                    ApiUtils.GET(`components/${targetComponent.id}/releases?page=0&page_entries=${MaxEntries}`, signal),
+                    ApiUtils.GET(`components/${sourceComponent.id}/releases?page=0&page_entries=${MaxEntries}`, signal),
+                ])
+
+                if (targetResponse.status !== StatusCodes.OK) {
+                    const err = (await targetResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: targetResponse.status,
+                    })
+                }
+
+                if (sourceResponse.status !== StatusCodes.OK) {
+                    const err = (await sourceResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: sourceResponse.status,
+                    })
+                }
+
+                const [targetData, sourceData] = await Promise.all([
+                    targetResponse.json() as Promise<EmbeddedReleases>,
+                    sourceResponse.json() as Promise<EmbeddedReleases>,
+                ])
+
+                const targetReleases = targetData['_embedded']?.['sw360:releaseLinks'] ?? []
+                const sourceReleases = sourceData['_embedded']?.['sw360:releaseLinks'] ?? []
+
+                setTargetComponent((prev) => {
+                    if (prev === null) {
+                        return prev
+                    }
+
+                    return {
+                        ...prev,
+                        _embedded: {
+                            ...(prev._embedded ?? {}),
+                            'sw360:releases': targetReleases,
+                        },
+                    }
+                })
+
+                setSourceComponent((prev) => {
+                    if (prev === null) {
+                        return prev
+                    }
+
+                    return {
+                        ...prev,
+                        _embedded: {
+                            ...(prev._embedded ?? {}),
+                            'sw360:releases': sourceReleases,
+                        },
+                    }
+                })
+            } catch (error) {
+                ApiUtils.reportError(error)
+            } finally {
+                setAreReleasesLoaded(true)
+            }
+        })()
+
+        return () => {
+            controller.abort()
+        }
+    }, [
+        targetComponent?.id,
+        sourceComponent?.id,
+    ])
 
     useEffect(() => {
         setFinalComponentPayload({
@@ -201,7 +302,7 @@ export default function MergeComponent({
 
     return (
         <>
-            {targetComponent && sourceComponent && finalComponentPayload && (
+            {targetComponent && sourceComponent && finalComponentPayload && areReleasesLoaded ? (
                 <>
                     <GeneralSection
                         targetComponent={targetComponent}
@@ -855,6 +956,10 @@ export default function MergeComponent({
                         })}
                     </div>
                 </>
+            ) : (
+                <div className='col-12 mt-1 text-center'>
+                    <Spinner className='spinner' />
+                </div>
             )}
         </>
     )

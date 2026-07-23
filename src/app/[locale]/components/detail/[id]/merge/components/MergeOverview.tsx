@@ -166,6 +166,8 @@ function MergeOverview({
                         <MergeComponent
                             targetComponent={targetComponent}
                             sourceComponent={sourceComponent}
+                            setTargetComponent={setTargetComponent}
+                            setSourceComponent={setSourceComponent}
                             finalComponentPayload={finalComponentPayload}
                             setFinalComponentPayload={setFinalComponentPayload}
                         />
