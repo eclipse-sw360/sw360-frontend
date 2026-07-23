@@ -10,13 +10,12 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import { ListGroup, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { useConfigKeyValue, useSW360BackendConfigContext } from '@/contexts'
-import { ConfigKeys, Package, UserGroupType } from '@/object-types'
+import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
@@ -26,17 +25,11 @@ import { extractPackageManagerFromPurl } from '../../components/purlUtils'
 function CreatePackage(): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
-    const { isLoading } = useSW360BackendConfigContext()
-    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED)
     const d = new Date()
     const [packagePayload, setPackagePayload] = useState<Package>({
         createdOn: `${d.getFullYear()}-${d.getMonth() < 10 ? `0${d.getMonth()}` : d.getMonth()}-${d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()}`,
     })
     const [creatingPackage, setCreatingPackage] = useState(false)
-
-    if (!isLoading && isPackageFeatureEnabled !== 'true') {
-        notFound()
-    }
 
     const handleGoBack = () => {
         if (window.history.length > 1) {

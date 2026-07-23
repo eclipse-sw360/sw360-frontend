@@ -17,8 +17,7 @@ import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { useConfigKeyValue, useSW360BackendConfigContext } from '@/contexts'
-import { ConfigKeys, Package, UserGroupType } from '@/object-types'
+import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
@@ -28,14 +27,8 @@ import { extractPackageManagerFromPurl } from '../../../components/purlUtils'
 function EditPackage({ packageId }: { packageId: string }): JSX.Element {
     const t = useTranslations('default')
     const router = useRouter()
-    const { isLoading } = useSW360BackendConfigContext()
-    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED)
     const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
     const [updatingPackage, setUpdatingPackage] = useState(false)
-
-    if (!isLoading && isPackageFeatureEnabled !== 'true') {
-        notFound()
-    }
 
     useEffect(() => {
         void (async () => {
