@@ -12,8 +12,6 @@ interface ProjectDetailTabCounts {
     vulnerabilityRatedCount: number
     obligationCount: number
     obligationNonOpenCount: number
-    eccClassifiedCount: number
-    eccOpenCount: number
 }
 
 export default ProjectDetailTabCounts
