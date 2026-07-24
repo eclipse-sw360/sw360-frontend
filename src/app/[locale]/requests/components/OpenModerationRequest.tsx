@@ -214,10 +214,6 @@ function OpenModerationRequest(): ReactNode {
         getCoreRowModel: getCoreRowModel(),
 
         getPaginationRowModel: getPaginationRowModel(),
-
-        meta: {
-            rowHeightConstant: true,
-        },
     })
 
     const handleCheckboxes = (moderationRequestId: string, documentName: string) => {
