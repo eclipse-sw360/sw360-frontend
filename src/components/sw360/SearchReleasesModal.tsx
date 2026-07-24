@@ -297,13 +297,22 @@ export default function SearchReleasesModal({
                     ),
                 )
                 const response = await ApiUtils.GET(queryUrl, signal)
-                if (response.status !== StatusCodes.OK) {
+                if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: response.status,
                     })
                 }
-
+                if (response.status === StatusCodes.NO_CONTENT) {
+                    setPaginationMeta({
+                        size: 0,
+                        totalElements: 0,
+                        totalPages: 0,
+                        number: 0,
+                    })
+                    setReleaseData([])
+                    return
+                }
                 const data = (await response.json()) as EmbeddedReleases
                 setPaginationMeta(data.page)
                 setReleaseData(
@@ -333,6 +342,16 @@ export default function SearchReleasesModal({
                     })
                 }
 
+                if (response.status === StatusCodes.NO_CONTENT) {
+                    setPaginationMeta({
+                        size: 0,
+                        totalElements: 0,
+                        totalPages: 0,
+                        number: 0,
+                    })
+                    setReleaseData([])
+                    return
+                }
                 const data = (await response.json()) as EmbeddedSearchResults
                 setPaginationMeta(data.page)
 
