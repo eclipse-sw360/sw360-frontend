@@ -27,12 +27,13 @@ import ComponentPayload from './ComponentPayLoad'
 import Configuration from './Configuration'
 import CreateClearingRequestPayload from './CreateClearingRequestPayload'
 import CVEReference from './CVEReference'
-// Enums + Constants
 import AttachmentTypes from './constants/AttachmentTypes'
 import CommonTabIds from './constants/CommonTabsIds'
 import ComponentTabIds from './constants/ComponentTabIds'
 import ConfigurationContainers from './constants/ConfigurationContainers'
 import LicenseTabIds from './constants/LicenseTabIds'
+// Enums + Constants
+import MaxEntries from './constants/PaginationDefaults'
 import ReleaseTabIds from './constants/ReleaseTabIds'
 import ImportSBOMMetadata from './cyclonedx/ImportSBOMMetadata'
 import ImportSummary from './cyclonedx/ImportSummary'
@@ -265,6 +266,7 @@ export {
     ConfigurationContainers,
     DocumentTypes,
     LicenseTabIds,
+    MaxEntries,
     MergeOrSplitActionType,
     NavList,
     ObligationType,
