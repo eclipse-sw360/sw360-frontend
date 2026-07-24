@@ -13,7 +13,7 @@ import type { JSX } from 'react'
 import ConfigurationsTabs from '@/app/[locale]/admin/configurations/components/ConfigurationsTabs'
 
 export const metadata: Metadata = {
-    title: 'Configurations',
+    title: 'Admin - Configurations',
 }
 
 const ConfigurationsPage = (): JSX.Element => {

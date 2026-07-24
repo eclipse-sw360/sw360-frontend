@@ -13,7 +13,7 @@ import { ReactNode } from 'react'
 import { AuthScreen } from '@/components/sw360'
 
 export const metadata: Metadata = {
-    title: 'Welcome - SW360',
+    title: 'Welcome',
 }
 
 function AuthPage(): ReactNode {
