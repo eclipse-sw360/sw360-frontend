@@ -31,10 +31,12 @@ import {
     BsCaretRightFill,
     BsCheck2Square,
     BsClipboard,
+    BsFillArchiveFill,
     BsFillTrashFill,
     BsPaperclip,
     BsPencil,
 } from 'react-icons/bs'
+import { ArchiveModal } from '@/components/ArchiveModal'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import {
@@ -142,6 +144,14 @@ function Project(): JSX.Element {
         setHasClearingRequest(!!hasOpenCR)
         setDeleteDialogOpen(true)
     }
+
+    const [archiveProjectId, setArchiveProjectId] = useState<string | null>(null)
+    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
+    const handleArchiveProject = (projectId: string) => {
+        setArchiveProjectId(projectId)
+        setShowArchiveModal(true)
+    }
+    const isAdmin = userIdentity?.userGroup === UserGroupType.ADMIN
 
     const handleAddProject = () => {
         router.push('/projects/add')
@@ -643,6 +653,26 @@ function Project(): JSX.Element {
                                         </Link>
                                     </OverlayTrigger>
 
+                                    {isAdmin && (
+                                        <>
+                                            <span className='border-start align-self-stretch mx-1 my-1' />
+                                            <OverlayTrigger overlay={<Tooltip>{t('Archive')}</Tooltip>}>
+                                                <span
+                                                    className='d-inline-flex align-items-center justify-content-center'
+                                                    style={{
+                                                        width: 28,
+                                                        height: 28,
+                                                    }}
+                                                >
+                                                    <BsFillArchiveFill
+                                                        className='btn-icon'
+                                                        size={20}
+                                                        onClick={() => handleArchiveProject(id)}
+                                                    />
+                                                </span>
+                                            </OverlayTrigger>
+                                        </>
+                                    )}
                                     <span className='border-start align-self-stretch mx-1 my-1' />
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span
@@ -679,6 +709,7 @@ function Project(): JSX.Element {
             t,
             licenseClearingData,
             showLinkedProjects,
+            isAdmin,
         ],
     )
 
@@ -1100,6 +1131,16 @@ function Project(): JSX.Element {
                     show={deleteDialogOpen}
                     setShow={setDeleteDialogOpen}
                     hasClearingRequest={hasClearingRequest}
+                />
+            )}
+            {archiveProjectId && (
+                <ArchiveModal
+                    entityType='PROJECT'
+                    entityIds={[
+                        archiveProjectId,
+                    ]}
+                    show={showArchiveModal}
+                    setShow={setShowArchiveModal}
                 />
             )}
             <Breadcrumb name={t('Projects')} />

@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
+import { ArchiveModal } from '@/components/ArchiveModal'
 import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
@@ -88,6 +89,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
     const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
+    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
         show: false,
         importType: 'CycloneDx',
@@ -321,6 +323,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                     mode='UPDATE'
                 />
             )}
+            <ArchiveModal
+                entityType='PROJECT'
+                entityIds={[projectId]}
+                entityLabel={summaryData?.name}
+                show={showArchiveModal}
+                setShow={setShowArchiveModal}
+            />
             {summaryData?.name ? (
                 <Breadcrumb
                     name={`${summaryData.name}${
@@ -545,6 +554,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                     </Dropdown>
                                                 </>
                                             )}
+                                        {userIdentity?.userGroup === UserGroupType.ADMIN && (
+                                            <Button
+                                                variant='danger'
+                                                className='ms-2 col-auto'
+                                                onClick={() => setShowArchiveModal(true)}
+                                            >
+                                                {t('Archive')}
+                                            </Button>
+                                        )}
                                     </Row>
                                 </Col>
                                 <Col

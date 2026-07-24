@@ -1706,6 +1706,23 @@
     "use_license_info_from_file_description": "Use license info from files",
     "vector": "vector",
     "which means someone is already working on it": "which means someone is already working on it",
-    "wrong_spdx_information": "If the wrong SPDX is entered, the information will not be registered correctly"
+    "wrong_spdx_information": "If the wrong SPDX is entered, the information will not be registered correctly",
+    "Archive": "Archive",
+    "Archive Warning": "Archiving removes the selected items from the live database and downloads them as a tar gz bundle. Items still referenced by another live entity are kept alive in the database but included in the bundle for completeness.",
+    "Archive and Download": "Archive and Download",
+    "Archive {count} {entity}": "Archive {count} {entity}",
+    "Archive {entity}": "Archive {entity}",
+    "Archiving": "Archiving",
+    "Blocked items will be skipped": "Blocked items will be skipped",
+    "Checking dependencies": "Checking dependencies",
+    "Include attachments": "Include attachments",
+    "Include changelogs": "Include changelogs",
+    "Please add a comment describing why this is being archived": "Please add a comment describing why this is being archived",
+    "Reason": "Reason",
+    "What will happen": "What will happen",
+    "Why is this being archived?": "Why is this being archived?",
+    "blocked": "blocked",
+    "kept alive": "kept alive",
+    "to archive": "to archive"
   }
 }
