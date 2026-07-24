@@ -398,10 +398,6 @@ export default function ObligationTab({
             }
             return row.depth === 0
         },
-
-        meta: {
-            rowHeightConstant: true,
-        },
     })
 
     detailTable.getRowModel().rows.forEach((row) => {
@@ -454,10 +450,6 @@ export default function ObligationTab({
                 }
             }
             return row.depth === 0
-        },
-
-        meta: {
-            rowHeightConstant: true,
         },
     })
 
