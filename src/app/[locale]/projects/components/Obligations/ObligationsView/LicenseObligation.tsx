@@ -562,10 +562,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             }
             return row.depth === 0
         },
-
-        meta: {
-            rowHeightConstant: true,
-        },
     })
 
     detailTable.getRowModel().rows.forEach((row) => {
@@ -618,10 +614,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 }
             }
             return row.depth === 0
-        },
-
-        meta: {
-            rowHeightConstant: true,
         },
     })
 
