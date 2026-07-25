@@ -63,8 +63,9 @@ function Packages(): ReactNode {
     })
     const [archivePackageId, setArchivePackageId] = useState<string | null>(null)
     const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
-    const [userIdentity, setUserIdentity] =
-        useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(null)
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
     const isAdmin = userIdentity?.userGroup === UserGroupType.ADMIN
 
     useEffect(() => {

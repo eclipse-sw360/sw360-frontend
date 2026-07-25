@@ -325,7 +325,9 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
             )}
             <ArchiveModal
                 entityType='PROJECT'
-                entityIds={[projectId]}
+                entityIds={[
+                    projectId,
+                ]}
                 entityLabel={summaryData?.name}
                 show={showArchiveModal}
                 setShow={setShowArchiveModal}

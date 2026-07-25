@@ -15,6 +15,7 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -27,7 +28,6 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import DeleteComponentDialog from './DeleteComponentDialog'
-import { useSession } from 'next-auth/react'
 
 interface Props {
     setNumberOfComponent: React.Dispatch<React.SetStateAction<number>>
@@ -43,7 +43,6 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const [archiveComponentId, setArchiveComponentId] = useState<string | null>(null)
     const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
     const isAdmin = useSession().data?.user?.userGroup === UserGroupType.ADMIN
-    const session = useSession()
     const router = useRouter()
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
