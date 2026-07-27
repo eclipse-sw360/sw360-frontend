@@ -18,17 +18,6 @@ function archivalUrl(path: string): string {
     return `${SW360_ARCHIVAL_URL}/archival/api/${path}`
 }
 
-function userEmailFromToken(token: string): string {
-    const basic = token.match(/^Basic\s+(.+)$/i)
-    if (!basic) return ''
-    try {
-        const decoded = atob(basic[1])
-        return decoded.split(':')[0] ?? ''
-    } catch {
-        return ''
-    }
-}
-
 /**
  * Kicks off an archive on the backend and downloads the resulting TAR.GZ.
  * Returns the filename picked by the browser after the download finishes.
@@ -42,7 +31,6 @@ async function archive(req: ArchiveRequest, token: string): Promise<string> {
             'Content-Type': 'application/json',
             Accept: 'application/gzip',
             Authorization: authHeader,
-            'X-User-Email': userEmailFromToken(token),
         },
         body: JSON.stringify(req),
     })
@@ -82,7 +70,6 @@ async function preview(req: ArchiveRequest, token: string): Promise<ArchivePrevi
             'Content-Type': 'application/json',
             Accept: 'application/json',
             Authorization: authHeader,
-            'X-User-Email': userEmailFromToken(token),
         },
         body: JSON.stringify(req),
     })
