@@ -6,6 +6,170 @@ the first project location:
 
 https://github.com/eclipse-sw360/sw360/releases
 
+## v1.0.0
+
+This is the first stable major release (1.0.0) of the new SW360 frontend from Liferay.
+
+Key benefits over the previous Liferay instance include:
+
+* Modernized frontend foundation with improved maintainability and long-term extensibility.
+* Stronger internationalization and accessibility improvements, including persistent language preferences.
+* Better user experience with enhanced performance.
+* More robust authentication with Keycloak.
+
+For Docker-based setup, see the deployment guide:
+[Deploy SW360 with containers](https://eclipse.dev/sw360/docs/deployment/containers/deploy-20-containers/).
+
+### Credits
+
+The following GitHub users have contributed to the source code since the last release (in alphabetical order):
+
+```
+> aaryan359 <aaryanmeena96@gmail.com>
+> Amrit Kumar Verma <amrit.verma@siemens.com>
+> Bibhuti Bhusan Dash <bibhuti230185@gmail.com>
+> Christian Knopp <Christian.Knopp@tq-group.com>
+> Dearsh Oberoi <oberoidearsh@gmail.com>
+> Farooq Fateh Aftab <farooq-fateh.aftab@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Nikesh Kumar <kumar.nikesh@siemens.com>
+> rudra-superrr <prabhuchopra@gmail.com>
+> saad-mohammed1 <mohammed.saad@siemens-healthineers.com>
+```
+
+Please note that also many other persons usually contribute to the project with
+reviews, testing, documentations, conversations or presentations.
+
+### Features
+
+* `8b91296f` feat(sort): Add sort to vendors table
+* `7d7aa0c7` feat(docker): Add missing SW360_API_URL
+* `931521c9` feat(language): Persistent ui language for 1 year
+* `07324b25` feat(elements): Use api to fetch obligation elements
+* `20c52b41` feat(release): Release state editable
+* `709644f9` feat(projects): Remember tabs when editing
+* `96823690` feat(interval): Make refresh interval configurable
+* `4e3f5446` feat(auth): Centralized session fetch and check
+* `0e11466f` feat(releases): add config flag to enable/disable nested release linking
+
+### Corrections
+
+* `dac331a6` fix(Release): Auto fill vendor data from component
+* `0ab82a74` fix(modal): Handle no content response in link releases modal correctly
+* `3f0d555c` fix(requests): Show all moderators in moderation requests page
+* `e51e693f` fix(releases): Make all releases visible in obligations table
+* `b59b03fb` fix(releases): Get releases from api call instead of embedded object due to number mismatch
+* `a3024b0c` fix(license): Fixed lincese text alignment
+* `63071356` fix(dept): Allow depts other than the ones in list
+* `fe0a2cae` fix(Vendor): Vendor preselection in vendor search in the project component edit page
+* `33f0e93e` fix(project): Handled forbidden case for save attachments
+* `ae216ba9` fix(project): Show error message when license report download fails
+* `85952c2f` fix(project): Permission check while editing project
+* `1215e0eb` fix(merge): Add version to releases in component merge
+* `fe3e83ac` fix(package): Add layout file and check package enalblement in it
+* `d191a1a7` fix(UI): Enable or disable package tab based on feature flag
+* `09ec6659` fix(report): Add missing params to report download
+* `b783f70b` fix(url): Fix issues caused in urls of user detail and edit page by special symbols in email
+* `a0b20148` fix(url): Make docs url take env var from browser bundle
+* `d6043f50` Revert "fix(UI): Show ECC pill in red when open ECC exists"
+* `dc1999fb` fix(docs): Fix docker docs
+* `7aa2d969` fix(Attchment): Fixed attachment update status keyword
+* `74908a42` fix(translation): Fixed german translations
+* `e9dcc736` fix(PackagesSearch): Fixed advance search for packges based on created on and purl
+* `48d88e79` fix(cd): Fix docker compose setup
+* `0a772a6d` fix(css): Fixed table content  alignment issue
+* `eda01539` fix(ui): Add keyboard navigation support for suggestion lists
+* `4bd68a1a` fix(UI): Show ECC pill in red when open ECC exists
+* `a98f6063` fix(CI): Fixed pnpm setup step in github workflow
+* `19d94df4` fix(codeql): Fix codeql version
+* `42149d9c` fix(Project): Fixed info message on edit project based on user role
+* `a9d51bfc` fix(search): Fix pagination on search page
+* `244f1e56` fix(UI): Preserve selected release in package link modal on reopen
+* `6276ad6c` fix(forms): Add spinner to edit forms till the payload is set
+* `010576b7` fix(env): Prefer runtime SW360_API_URL for server-side requests
+* `be6f5a36` fix(docker): Fix the API token salt docs
+* `2c3a07f7` fix(Project): Fixed vendor selection upon edit
+* `3e70a686` fix(config): Refresh backend config on update
+* `44b25cc0` fix(sbom): Disable import and export of sbom on project based on config
+* `1670d71a` fix(docker): Remove nouveau overrides for h2c
+* `d3ed7b76` fix(licensefilelist): Ignore not found error from license file list endpoint
+* `24275641` fix(licenseclearing): Remove redundant api calls in license clearing
+* `6deba34a` fix(packages): Enable pre-existing licenses in license modal
+* `5e614828` fix(attachments): Fix showing of attachments tab and faulty api calls
+* `44a86748` fix(update): Fix obligation update with new node format
+* `3033494f` fix(build): Fix build errors
+* `0c503e03` fix(ci): Fix biome update workflow commit case
+* `7b492d48` fix(components): Dont fetch empty emails
+* `e3a1c6b4` fix(session): Remove more raw session handling
+* `bf9fd366` fix(frontend): Add use client files using ApiUtils
+* `06c1aa12` fix(requests): Fixed translations at requests page
+* `5a061e63` fix: Sanitize vulnerability history tooltip formatting
+* `f8ac8c10` fix(VulnerabilityTab): Enhance vulnerability history formatting and tooltip display
+* `7719c2c3` fix(VulnerabilityTab): Enhance tooltip to display formatted vulnerability history
+* `84f59d52` fix(frontend): Enforce valid use client directives
+* `48cce27a` fix(signout): Handle signOut centrally
+* `2251ed9f` fix(color): Applied soften colors globally
+* `1c160a90` fix(Project): Differentiate and fixed create project clearing report from generate license info
+* `af6265ba` fix(redirect): Redirect user to path after auth
+* `5343de78` fix(sort): Add sorting to license clearing page
+* `635c379f` fix: Correct Bulk Release Edit link in admin nav list
+* `b4775d84` fix(user): Add externalid upon create and edit of user
+
+### Infrastructure
+
+* `d24c394c` chore(deps): bump html-react-parser from 6.1.3 to 6.1.5
+* `33ab109d` chore(deps-dev): bump @commitlint/cli from 21.0.2 to 21.2.1
+* `2da85a22` chore: Update biome schema to match CLI version
+* `552a9095` chore(deps-dev): bump @biomejs/biome from 2.5.3 to 2.5.4
+* `1a31126e` chore(deps-dev): bump cypress from 15.17.0 to 15.18.1
+* `d9a29bf2` chore(deps): bump actions/setup-node from 6.4.0 to 7.0.0
+* `5d4ac867` chore(deps-dev): bump systeminformation from 5.31.13 to 5.31.17
+* `890f088c` chore(deps): bump github/codeql-action/init from 4.37.0 to 4.37.1
+* `f764af03` chore(deps): bump github/codeql-action/analyze from 4.37.0 to 4.37.1
+* `2fa8b4b2` chore(deps): bump github/codeql-action/upload-sarif
+* `50177f42` chore(deps): bump eclipse-sw360/sw360/keycloak from 26.6.4 to 26.7.0
+* `7a8b593b` chore(deps): bump library/nginx from 1.31.2-trixie to 1.31.3-trixie
+* `09b70285` chore(deps): bump softprops/action-gh-release from 3.0.1 to 3.0.2
+* `6d34cf59` chore(deps-dev): bump @biomejs/biome from 2.4.16 to 2.5.3
+* `83a75a10` chore(deps-dev): bump @types/node from 26.1.0 to 26.1.1
+* `d65b8896` chore(deps): bump next-intl from 4.13.0 to 4.13.2
+* `624ce4c5` chore(deps): bump preact from 10.29.2 to 10.29.7
+* `138c768c` chore(deps): bump docker/setup-buildx-action from 4.1.0 to 4.2.0
+* `07775396` chore(deps-dev): bump prettier from 3.8.4 to 3.9.5
+* `8bfdad62` chore(deps): bump step-security/harden-runner from 2.19.4 to 2.20.0
+* `8b0508d3` chore(deps-dev): bump react-icons from 5.6.0 to 5.7.0
+* `77d02cf7` chore(deps): bump github/codeql-action/analyze from 4.36.3 to 4.37.0
+* `fc598817` chore(deps): bump github/codeql-action/upload-sarif
+* `8f6d187b` chore(deps): bump github/codeql-action/init from 4.36.3 to 4.37.0
+* `ec522f02` chore(deps-dev): bump systeminformation from 5.31.7 to 5.31.13
+* `45bb7e22` chore(deps): bump next from 16.2.9 to 16.2.10
+* `23cc2860` chore(deps-dev): bump @types/node from 26.0.0 to 26.1.0
+* `a1e9037d` chore(deps): bump github/codeql-action/init from 4.36.2 to 4.36.3
+* `cd9689c3` chore(deps-dev): bump lint-staged from 17.0.7 to 17.0.8
+* `64052ef2` chore(deps): bump github/codeql-action/upload-sarif
+* `be8990df` chore(deps): bump docker/metadata-action from 6.1.0 to 6.2.0
+* `9f74f694` chore(deps): bump docker/login-action from 4.2.0 to 4.4.0
+* `38a1d12b` chore(deps): bump eclipse-sw360/sw360/keycloak from 26.6.3 to 26.6.4
+* `1204f8a3` chore(deps): bump docker/build-push-action from 7.2.0 to 7.3.0
+* `e02960ba` chore(deps): bump actions/cache from 5.0.5 to 6.1.0
+* `a73721fb` refactor(modals): Consolidate implementations of link projects modals
+* `2e9a55f2` chore(deps-dev): bump @types/node from 25.9.3 to 26.0.0
+* `60c72cb5` chore(deps): bump softprops/action-gh-release from 3.0.0 to 3.0.1
+* `3e831102` chore(deps): bump actions/checkout from 6.0.3 to 7.0.0
+* `d98907d5` chore(deps): bump pnpm/action-setup from 6.0.8 to 6.0.9
+* `979b17f7` chore(deps): bump library/nginx from 1.31.1-trixie to 1.31.2-trixie
+* `25131cf6` chore(deps-dev): bump @types/node from 25.9.1 to 25.9.3
+* `e6972968` chore(deps): bump next from 16.2.7 to 16.2.9
+* `27e8f521` chore(deps-dev): bump cypress from 15.16.0 to 15.17.0
+* `6738f357` chore(deps): bump react-dom from 19.2.6 to 19.2.7
+* `7180903d` chore(deps-dev): bump prettier from 3.8.3 to 3.8.4
+* `31d7d103` chore(deps): bump eclipse-sw360/sw360/keycloak from 26.5.5 to 26.6.3
+* `2584aa04` chore(translation): Update string to match translation
+* `4884156f` chore(deps): bump next from 16.2.6 to 16.2.7
+* `8b0e1c9b` chore(deps): bump react and @types/react
+
+**Full Changelog**: https://github.com/eclipse-sw360/sw360-frontend/compare/v1.0.0-rc.2...v1.0.0
+
 ## v1.0.0-rc.2
 
 This is the second release candidate for SW360-Frontend in the line of next major
