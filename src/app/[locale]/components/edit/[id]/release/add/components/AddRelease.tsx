@@ -187,9 +187,17 @@ function AddRelease({ componentId }: Props): ReactNode {
                     return notFound()
                 }
                 const component: Component = (await response.json()) as Component
+                const defaultVendor = component._embedded?.defaultVendor
+                if (defaultVendor) {
+                    setVendor({
+                        id: component.defaultVendorId,
+                        fullName: defaultVendor.fullName ?? '',
+                    })
+                }
                 setReleasePayload({
                     ...releasePayload,
                     name: component.name,
+                    vendorId: component.defaultVendorId ?? releasePayload.vendorId,
                 })
                 if (component.componentType === 'COTS') {
                     setWithCotsDetails(true)

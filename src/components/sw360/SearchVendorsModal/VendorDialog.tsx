@@ -210,6 +210,26 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
         setVendorData([
             vendor,
         ])
+
+        const vendorId = getVendorIdentifier(vendor)
+        if (vendorId === '') return
+        if ((vendor.shortName ?? '') !== '' && (vendor.url ?? '') !== '') return
+
+        const controller = new AbortController()
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET(`vendors/${vendorId}`, controller.signal)
+                if (response.status !== StatusCodes.OK) return
+                const fullVendor = (await response.json()) as Vendor
+                setSelectedVendor(fullVendor)
+                setVendorData([
+                    fullVendor,
+                ])
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+        return () => controller.abort()
     }, [
         show,
     ])
