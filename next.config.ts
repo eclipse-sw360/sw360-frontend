@@ -31,7 +31,11 @@ const config: NextConfig = {
     reactStrictMode: true,
     output: 'standalone',
     typescript: {
-        ignoreBuildErrors: false,
+        // Temp fix, until typescipt 7.x is supported by Next.js.
+        // Type checking is handled by the faster native compiler via the
+        // `type-check` script (tsgo) in local dev and CI, so we skip Next.js'
+        // slower build-time TypeScript pass to speed up the bundling step.
+        ignoreBuildErrors: true,
     },
     // biome-ignore-start lint: Next.js config requires this async method pattern for custom headers
     async headers() {

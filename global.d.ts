@@ -7,6 +7,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+// Ambient declarations for static asset imports (*.svg, *.png, *.jpg, ...).
+// Next.js normally provides these via the auto-generated, git-ignored
+// `next-env.d.ts`, which only exists after `next dev` / `next build`. The
+// standalone `type-check` step (tsgo) runs before the build in CI, so we
+// reference Next's image types directly here to keep type-checking independent
+// of the build step (reusing the exact same declarations avoids type drift).
+/// <reference types="next/image-types/global" />
+
 type Messages = typeof import('./messages/en.json')
 declare interface IntlMessages extends Messages {}
 

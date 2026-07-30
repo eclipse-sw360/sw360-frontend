@@ -19,6 +19,14 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Temp fix, until typescipt 7.x is supported by Next.js.
+      # TypeScript 7.x is the native (Go) rewrite and ships a different package
+      # layout (no lib/typescript.js). Next.js 16.x build-time type checking
+      # cannot load it and fails with "do not have the required package(s)
+      # installed". Stay on the JS-based 6.x line until Next.js supports it.
+      - dependency-name: typescript
+        versions: ['7.x']
 
   - package-ecosystem: docker-compose
     directory: /
