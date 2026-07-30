@@ -48,7 +48,10 @@ function MySubscriptionsWidget(): ReactNode {
         setLoading(true)
         fetchData('components/mySubscriptions')
             .then((components) => {
-                if (components === undefined) return
+                if (components === undefined) {
+                    setComponentData([])
+                    return
+                }
                 if (
                     !CommonUtils.isNullOrUndefined(components['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(components['_embedded']['sw360:components'])
@@ -61,7 +64,10 @@ function MySubscriptionsWidget(): ReactNode {
             .catch((err) => console.error(err))
         fetchData('releases/mySubscriptions')
             .then((releases) => {
-                if (releases === undefined) return
+                if (releases === undefined) {
+                    setReleaseData([])
+                    return
+                }
                 if (
                     !CommonUtils.isNullOrUndefined(releases['_embedded']) &&
                     !CommonUtils.isNullOrUndefined(releases['_embedded']['sw360:releases'])
