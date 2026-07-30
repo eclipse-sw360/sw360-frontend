@@ -17,12 +17,14 @@ import { useTranslations } from 'next-intl'
 import { AdvancedSearch, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
-import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
+import { BsFillArchiveFill, BsFillTrashFill, BsPencil } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { ArchiveModal } from '@/components/ArchiveModal'
 import { Embedded, ErrorDetails, Package, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import DeletePackageModal from './DeletePackageModal'
 import { packageManagers } from './PackageManagers'
 
@@ -59,6 +61,16 @@ function Packages(): ReactNode {
         packageName: '',
         packageVersion: '',
     })
+    const [archivePackageId, setArchivePackageId] = useState<string | null>(null)
+    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+    const isAdmin = userIdentity?.userGroup === UserGroupType.ADMIN
+
+    useEffect(() => {
+        void (async () => setUserIdentity(await getAuthenticatedUserIdentity()))()
+    }, [])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
@@ -219,8 +231,22 @@ function Packages(): ReactNode {
                                         </span>
                                     </OverlayTrigger>
 
+                                    {isAdmin && (
+                                        <OverlayTrigger overlay={<Tooltip>{t('Archive')}</Tooltip>}>
+                                            <span className='d-inline-block'>
+                                                <BsFillArchiveFill
+                                                    className='btn-icon'
+                                                    size={20}
+                                                    onClick={() => {
+                                                        setArchivePackageId(id ?? '')
+                                                        setShowArchiveModal(true)
+                                                    }}
+                                                />
+                                            </span>
+                                        </OverlayTrigger>
+                                    )}
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                        <span className='d-inline-block'>
+                                        <span className='d-inline-block ms-2'>
                                             <BsFillTrashFill
                                                 className='btn-icon'
                                                 size={20}
@@ -244,6 +270,7 @@ function Packages(): ReactNode {
         ],
         [
             t,
+            isAdmin,
         ],
     )
 
@@ -480,6 +507,16 @@ function Packages(): ReactNode {
                     setPackageData((prev) => prev.filter((pkg) => pkg.id !== deletedPackageId))
                 }}
             />
+            {archivePackageId && (
+                <ArchiveModal
+                    entityType='PACKAGE'
+                    entityIds={[
+                        archivePackageId,
+                    ]}
+                    show={showArchiveModal}
+                    setShow={setShowArchiveModal}
+                />
+            )}
             <div className='container page-content'>
                 <div className='row'>
                     <div className='col-2'>

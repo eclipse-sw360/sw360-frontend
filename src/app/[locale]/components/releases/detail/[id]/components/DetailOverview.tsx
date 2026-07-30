@@ -20,6 +20,7 @@ import { Col, Dropdown, ListGroup, Row, Tab } from 'react-bootstrap'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
 import LinkedPackagesTab from '@/app/[locale]/components/releases/detail/[id]/components/LinkedPackagesTab'
+import { ArchiveModal } from '@/components/ArchiveModal'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -70,6 +71,7 @@ interface Props {
 const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const t = useTranslations('default')
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
+    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
     const searchParams = useSearchParams()
     const router = useRouter()
     const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
@@ -364,6 +366,16 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             name: isUserSubscribed() ? t('Unsubscribe') : t('Subscribe'),
             onClick: handleSubcriptions,
         },
+        ...(userIdentity?.userGroup === UserGroupType.ADMIN
+            ? {
+                  Archive: {
+                      link: '',
+                      type: 'danger',
+                      name: t('Archive'),
+                      onClick: () => setShowArchiveModal(true),
+                  },
+              }
+            : {}),
     }
 
     const param = useParams()
@@ -378,6 +390,15 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                     show={linkProjectModalShow}
                     setShow={setLinkProjectModalShow}
                     releaseId={releaseId}
+                />
+                <ArchiveModal
+                    entityType='RELEASE'
+                    entityIds={[
+                        releaseId,
+                    ]}
+                    entityLabel={release?.name}
+                    show={showArchiveModal}
+                    setShow={setShowArchiveModal}
                 />
                 <Breadcrumb className='container page-content'>
                     <Breadcrumb.Item

@@ -19,6 +19,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
+import { ArchiveModal } from '@/components/ArchiveModal'
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
@@ -61,6 +62,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
     const [changeLogId, setChangeLogId] = useState('')
+    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
     const [changelogTab, setChangelogTab] = useState('list-change')
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
@@ -209,6 +211,16 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             name: isUserSubscribed() ? t('Unsubscribe') : t('Subscribe'),
             onClick: handleSubcriptions,
         },
+        ...(userIdentity?.userGroup === UserGroupType.ADMIN
+            ? {
+                  Archive: {
+                      link: '',
+                      type: 'danger',
+                      name: t('Archive'),
+                      onClick: () => setShowArchiveModal(true),
+                  },
+              }
+            : {}),
     }
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -304,6 +316,15 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     // Normal render when component data is available
     return (
         <>
+            <ArchiveModal
+                entityType='COMPONENT'
+                entityIds={[
+                    componentId,
+                ]}
+                entityLabel={component?.name}
+                show={showArchiveModal}
+                setShow={setShowArchiveModal}
+            />
             <Breadcrumb className='container page-content'>
                 <Breadcrumb.Item
                     linkAs={Link}

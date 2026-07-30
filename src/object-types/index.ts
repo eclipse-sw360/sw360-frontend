@@ -12,6 +12,13 @@
 import AccessToken from './AccessToken'
 import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
+import {
+    ArchivalEntityType,
+    ArchivePreview,
+    ArchivePreviewAction,
+    ArchivePreviewEntry,
+    ArchiveRequest,
+} from './Archival'
 import Attachment from './Attachment'
 import { AttachmentUsage, AttachmentUsages, SaveUsagesPayload } from './AttachmentUsages'
 import AuthToken from './AuthToken'
@@ -138,6 +145,11 @@ export type {
     AddtionalDataType,
     AdministrationDataType,
     Annotations,
+    ArchivalEntityType,
+    ArchivePreview,
+    ArchivePreviewAction,
+    ArchivePreviewEntry,
+    ArchiveRequest,
     Attachment,
     AttachmentUsage,
     AttachmentUsages,

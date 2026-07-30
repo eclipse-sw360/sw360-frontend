@@ -20,8 +20,9 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
+import { BsClipboard, BsFillArchiveFill, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
+import { ArchiveModal } from '@/components/ArchiveModal'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink, UserGroupType } from '@/object-types'
@@ -51,6 +52,9 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+    const [archiveReleaseId, setArchiveReleaseId] = useState<string | null>(null)
+    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
+    const isAdmin = userIdentity?.userGroup === UserGroupType.ADMIN
 
     useEffect(() => {
         void (async () => {
@@ -196,8 +200,22 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                     />
                                 </Link>
                             </OverlayTrigger>
+                            {isAdmin && (
+                                <OverlayTrigger overlay={<Tooltip>{t('Archive')}</Tooltip>}>
+                                    <span className='d-inline-block'>
+                                        <BsFillArchiveFill
+                                            className='btn-icon'
+                                            size={20}
+                                            onClick={() => {
+                                                setArchiveReleaseId(id)
+                                                setShowArchiveModal(true)
+                                            }}
+                                        />
+                                    </span>
+                                </OverlayTrigger>
+                            )}
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                <span className='d-inline-block'>
+                                <span className='d-inline-block ms-2'>
                                     <BsFillTrashFill
                                         className='btn-icon'
                                         size={20}
@@ -215,6 +233,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         ],
         [
             t,
+            isAdmin,
         ],
     )
 
@@ -397,6 +416,16 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 show={deleteModalOpen}
                 setShow={setDeleteModalOpen}
             />
+            {archiveReleaseId && (
+                <ArchiveModal
+                    entityType='RELEASE'
+                    entityIds={[
+                        archiveReleaseId,
+                    ]}
+                    show={showArchiveModal}
+                    setShow={setShowArchiveModal}
+                />
+            )}
             {!CommonUtils.isNullOrUndefined(clearingReleaseId) && (
                 <FossologyClearing
                     show={fossologyClearingModelOpen}
