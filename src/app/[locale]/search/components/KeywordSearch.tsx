@@ -169,15 +169,15 @@ function KeywordSearch({
     const t = useTranslations('default')
 
     const initialState: SEARCH_STATE = {
-        project: false,
-        component: false,
-        license: false,
-        release: false,
-        obligation: false,
-        user: false,
-        vendor: false,
+        project: true,
+        component: true,
+        license: true,
+        release: true,
+        obligation: true,
+        user: true,
+        vendor: true,
         entireDocument: true,
-        package: false,
+        package: true,
     }
 
     const [searchOptions, dispatch] = useReducer(reducer, initialState)
