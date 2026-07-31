@@ -12,6 +12,14 @@
 import AccessToken from './AccessToken'
 import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
+import {
+    AdsInformation,
+    AdsInformationCandidateRelease,
+    AdsInformationClearingAssessment,
+    AdsInformationReleaseSummary,
+    AdsInformationRow,
+    AdsInformationRowValue,
+} from './AdsInformation'
 import Attachment from './Attachment'
 import { AttachmentUsage, AttachmentUsages, SaveUsagesPayload } from './AttachmentUsages'
 import AuthToken from './AuthToken'
@@ -135,6 +143,12 @@ export type {
     AccessToken,
     AddtionalDataType,
     AdministrationDataType,
+    AdsInformation,
+    AdsInformationCandidateRelease,
+    AdsInformationClearingAssessment,
+    AdsInformationReleaseSummary,
+    AdsInformationRow,
+    AdsInformationRowValue,
     Annotations,
     Attachment,
     AttachmentUsage,
