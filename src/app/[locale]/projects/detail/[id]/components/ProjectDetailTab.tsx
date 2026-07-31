@@ -447,7 +447,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             onClick={() => void preRequisite()}
                                             disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                         >
-                                            {t('Edit Projects')}
+                                            {t('Edit Project')}
                                         </Button>
                                         <Button
                                             variant='secondary'
