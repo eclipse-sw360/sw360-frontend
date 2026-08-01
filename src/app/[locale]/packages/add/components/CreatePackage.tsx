@@ -71,7 +71,15 @@ function CreatePackage(): JSX.Element {
                     handleGoBack()
                 }
             } else {
-                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
+                const errorMessage = res.message ?? response.statusText
+                if (
+                    errorMessage?.includes('Dependent document Id/ids not valid') ||
+                    errorMessage?.includes('Invalid pURL')
+                ) {
+                    MessageService.error(t('Enter a valid pURL'))
+                } else {
+                    MessageService.error(`${t('Something went wrong')}: ${errorMessage}`)
+                }
             }
         } catch (e) {
             ApiUtils.reportError(e)
