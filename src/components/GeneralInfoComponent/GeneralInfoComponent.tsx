@@ -242,7 +242,7 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             <input
                                 type='URL'
                                 className='form-control'
-                                placeholder={t('Will be set automatically')}
+                                placeholder={t('Enter Homepage URL')}
                                 id='tag'
                                 aria-describedby='Tag'
                                 name='homepage'
