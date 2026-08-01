@@ -8,29 +8,19 @@
 // License-Filename: LICENSE
 
 import { ArchivePreview, ArchiveRequest } from '@/object-types'
-import { SW360_ARCHIVAL_URL } from '@/utils/env'
+import { SW360_API_URL } from '@/utils/env'
 
-/**
- * Archival lives in its own Spring Boot service at /archival/api/... so we hit it
- * directly instead of going through the resource-server proxy (/resource/api/...).
- */
 function archivalUrl(path: string): string {
-    return `${SW360_ARCHIVAL_URL}/archival/api/${path}`
+    return `${SW360_API_URL}/resource/api/archival/${path}`
 }
 
-/**
- * Kicks off an archive on the backend and downloads the resulting TAR.GZ.
- * Returns the filename picked by the browser after the download finishes.
- */
 async function archive(req: ArchiveRequest, token: string): Promise<string> {
-    const authHeader = /^(Bearer|Basic)\s/i.test(token) ? token : `Bearer ${token}`
-
-    const response = await fetch(archivalUrl('archival/archive'), {
+    const response = await fetch(archivalUrl('archive'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/gzip',
-            Authorization: authHeader,
+            Authorization: token,
         },
         body: JSON.stringify(req),
     })
@@ -57,19 +47,13 @@ async function archive(req: ArchiveRequest, token: string): Promise<string> {
     return filename
 }
 
-/**
- * Dry run: asks the backend what an archive would do (which dependencies get
- * archived, kept alive, or block the operation) without changing anything.
- */
 async function preview(req: ArchiveRequest, token: string): Promise<ArchivePreview> {
-    const authHeader = /^(Bearer|Basic)\s/i.test(token) ? token : `Bearer ${token}`
-
-    const response = await fetch(archivalUrl('archival/preview'), {
+    const response = await fetch(archivalUrl('preview'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            Authorization: authHeader,
+            Authorization: token,
         },
         body: JSON.stringify(req),
     })

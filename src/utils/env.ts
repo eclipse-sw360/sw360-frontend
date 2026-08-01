@@ -11,11 +11,6 @@
 
 // Server/Client side env
 export const SW360_API_URL: string | undefined = process.env.NEXT_PUBLIC_SW360_API_URL
-// Archival runs as its own Spring Boot service. In a full deployment it lives on
-// the same host as the rest of the API, so default there; override with
-// NEXT_PUBLIC_SW360_ARCHIVAL_URL when running the service standalone (e.g. :8081).
-export const SW360_ARCHIVAL_URL: string =
-    process.env.NEXT_PUBLIC_SW360_ARCHIVAL_URL ?? process.env.NEXT_PUBLIC_SW360_API_URL ?? ''
 export const AUTH_PROVIDER: string | undefined = process.env.NEXT_PUBLIC_SW360_AUTH_PROVIDER
 export const TENANT_NAME: string | undefined = process.env.NEXT_PUBLIC_TENANT_NAME
 
