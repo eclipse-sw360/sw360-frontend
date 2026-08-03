@@ -59,6 +59,7 @@ export interface ObligationEntry {
 export interface ObligationResponse {
     obligations: ObligationEntry
     page?: PaginationMeta
+    warnings?: string[]
 }
 
 type TYPE = string
