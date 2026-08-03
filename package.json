@@ -40,7 +40,7 @@
     "react-bootstrap": "^2.10.10",
     "react-cookie": "^8.1.2",
     "react-datepicker": "^9.1.0",
-    "react-dom": "19.2.7",
+    "react-dom": "19.2.8",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
@@ -52,7 +52,7 @@
     "@types/he": "^1.2.3",
     "@types/node": "^26.1.2",
     "@types/react": "19.2.17",
-    "@types/react-dom": "19.2.3",
+    "@types/react-dom": "19.2.4",
     "bootstrap": "^5.3.8",
     "classnames": "^2.3.2",
     "commitlint": "^19.8.0",
