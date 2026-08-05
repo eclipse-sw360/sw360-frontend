@@ -82,6 +82,8 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                                     systemTestStart: val,
                                 })
                             }
+                            minDate={null}
+                            maxDate={null}
                         />
                     </div>
                     <div className='col-lg-4'>
@@ -98,6 +100,8 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                                     systemTestEnd: val,
                                 })
                             }
+                            minDate={null}
+                            maxDate={null}
                         />
                     </div>
                 </div>
@@ -116,6 +120,8 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                                     deliveryStart: val,
                                 })
                             }
+                            minDate={null}
+                            maxDate={null}
                         />
                     </div>
                     <div className='col-lg-4'>
@@ -132,6 +138,8 @@ export default function Lifecycle({ projectPayload, setProjectPayload }: Props):
                                     phaseOutSince: val,
                                 })
                             }
+                            minDate={null}
+                            maxDate={null}
                         />
                     </div>
                 </div>
