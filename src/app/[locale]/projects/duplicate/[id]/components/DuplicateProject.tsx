@@ -63,6 +63,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         fullName: '',
     })
 
+    const [isReleaseLoading, setIsReleaseLoading] = useState(false)
+
     const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
 
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
@@ -101,8 +103,6 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         description: '',
         domain: '',
         vendorId: '',
-        modifiedOn: '',
-        modifiedBy: '',
         additionalData: {},
         ownerAccountingUnit: '',
         ownerGroup: '',
@@ -181,6 +181,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
 
     const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
         try {
+            setIsReleaseLoading(true)
             const linkedReleasesObject: {
                 [key: string]: LinkedReleaseData
             } = {}
@@ -202,7 +203,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 linkedReleases: linkedReleasesObject,
             }))
         } catch (e) {
-            console.error(e)
+            ApiUtils.reportError(e)
+        } finally {
+            setIsReleaseLoading(false)
         }
     }
 
@@ -300,8 +303,6 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     tag: project.tag ?? '',
                     description: project.description ?? '',
                     domain: project.domain ?? '',
-                    modifiedOn: project.modifiedOn ?? '',
-                    modifiedBy: project.modifiedBy ?? '',
                     externalIds: project.externalIds ?? {},
                     externalUrls: project.externalUrls ?? {},
                     additionalData: project.additionalData ?? {},
@@ -373,7 +374,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 setProjectPayload(projectPayloadData)
                 setIsDuplicateProjectFetched(true)
             } catch (e) {
-                console.error(e)
+                ApiUtils.reportError(e)
             }
         })()
     }, [
@@ -470,6 +471,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                     type='submit'
                                                     className='me-2 col-auto'
                                                     onClick={() => void createProject()}
+                                                    disabled={isReleaseLoading}
                                                 >
                                                     {t('Create Project')}
                                                 </Button>
@@ -538,6 +540,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                         isDependencyNetworkFeatureEnabled={
                                                             isDependencyNetworkFeatureEnabled
                                                         }
+                                                        isReleaseLoading={isReleaseLoading}
                                                     />
                                                 )}
                                             </Tab.Pane>
