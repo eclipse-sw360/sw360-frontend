@@ -12,7 +12,6 @@
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
@@ -21,9 +20,14 @@ import { LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types
 interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    isReleaseLoading?: boolean
 }
 
-export default function LinkedReleases({ projectPayload, setProjectPayload }: Props): JSX.Element {
+export default function LinkedReleases({
+    projectPayload,
+    setProjectPayload,
+    isReleaseLoading = false,
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
     const [tableData, setTableData] = useState<
@@ -300,16 +304,10 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
                     </h6>
                 </div>
                 <div className='mb-3'>
-                    {table ? (
-                        <SW360Table
-                            table={table}
-                            showProcessing={false}
-                        />
-                    ) : (
-                        <div className='col-12 mt-1 text-center'>
-                            <Spinner className='spinner' />
-                        </div>
-                    )}
+                    <SW360Table
+                        table={table}
+                        showProcessing={isReleaseLoading}
+                    />
                 </div>
                 <div
                     className='row'
