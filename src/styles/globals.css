@@ -1220,6 +1220,138 @@ a.text-primary {
     word-wrap: break-word;
 }
 
+.ads-info-section {
+    border: 1px solid lightgray;
+    margin-bottom: 2rem;
+}
+
+.ads-info-header {
+    background-color: var(--sw360-primary-background-color);
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+}
+
+.ads-info-body {
+    background-color: #ffffff;
+    padding: 0.75rem;
+}
+
+.ads-info-cards-row {
+    margin: 0;
+}
+
+.ads-info-card {
+    border: 1px solid #d7dee7;
+    border-radius: 4px;
+    background-color: #ebf0f5;
+    height: 100%;
+    overflow: hidden;
+}
+
+.ads-info-card-title {
+    background-color: #dfe6ee;
+    color: #3a4350;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    padding: 0.75rem;
+}
+
+.ads-info-card .table {
+    background-color: #ffffff;
+}
+
+.ads-info-card .table td {
+    border-top: 1px solid #dfe4ea;
+    padding: 0.45rem 0.75rem !important;
+}
+
+.ads-info-card .table td:first-child {
+    color: #41464d;
+    width: 56%;
+}
+
+.ads-info-count-badge {
+    background-color: #f7941e;
+    border-radius: 999px;
+    color: #ffffff;
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 1.8rem;
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+}
+
+.ads-info-count-badge--nav {
+    border: 0;
+    cursor: pointer;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.ads-info-count-badge--nav:hover,
+.ads-info-count-badge--nav:focus {
+    opacity: 0.8;
+    outline: 2px solid #c97415;
+    outline-offset: 2px;
+}
+
+.ads-info-tabs {
+    background-color: #edf1f5;
+    border-bottom: 0;
+    padding: 0 0.5rem;
+}
+
+.ads-info-tabs .nav-link {
+    border: 0;
+    border-radius: 0;
+    color: #4f5a68 !important;
+    font-weight: 700 !important;
+    margin-top: 0.25rem;
+    padding: 0.6rem 0.9rem;
+}
+
+.ads-info-tabs .nav-link.active {
+    background-color: #ffffff;
+    color: #272833 !important;
+}
+
+.ads-info-search-input {
+    max-width: 420px;
+}
+
+.ads-info-table-wrapper {
+    border: 1px solid #d7dee7;
+    max-height: 290px;
+    overflow: auto;
+}
+
+.ads-info-table-wrapper .table {
+    margin-bottom: 0;
+}
+
+.ads-info-table-wrapper .table td,
+.ads-info-table-wrapper .table th {
+    padding: 0.45rem 0.65rem !important;
+    white-space: nowrap;
+}
+
+.ads-info-loading {
+    align-items: center;
+    color: #4f5a68;
+    display: flex;
+    font-weight: 600;
+    padding: 0.5rem 0;
+}
+
+.ads-info-attachment-selector {
+    margin-bottom: 0.75rem;
+    max-width: 460px;
+}
+
 .mapDisplayRootItem {
     max-width: 70%;
 }
