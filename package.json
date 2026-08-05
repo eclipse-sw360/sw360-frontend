@@ -65,7 +65,7 @@
     "systeminformation": "^5.33.1",
     "ts-node": "^10.9.2",
     "tsc-files": "^1.1.4",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "husky": {
     "hooks": {
