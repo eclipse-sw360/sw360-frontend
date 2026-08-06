@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { useParams, useRouter, useSelectedLayoutSegment } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { LocaleSwitcher, Logo, ProfileDropdown } from 'next-sw360'
-import { type JSX, useState } from 'react'
+import { type FormEvent, type JSX, useState } from 'react'
 import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
 import { useConfigKeyValue } from '@/contexts'
 import { ConfigKeys, NavList } from '@/object-types'
@@ -26,6 +26,7 @@ function Navbar(): JSX.Element {
 
     const { data: session, status } = useSession()
     const [show, setShow] = useState(false)
+    const [globalSearchText, setGlobalSearchText] = useState('')
     const selectedLayoutSegment = useSelectedLayoutSegment()
     const pathname = selectedLayoutSegment !== null ? `/${selectedLayoutSegment}` : '/'
     const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
@@ -39,6 +40,21 @@ function Navbar(): JSX.Element {
     const getLocalizedPath = (path: string) => {
         if (path === '#' || path === '/') return path
         return `/${locale}${path}`
+    }
+
+    const handleGlobalSearch = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        const trimmedSearchText = globalSearchText.trim()
+
+        if (trimmedSearchText === '') {
+            router.push(`/${locale}/search`)
+            return
+        }
+
+        const params = new URLSearchParams({
+            searchText: trimmedSearchText,
+        })
+        router.push(`/${locale}/search?${params.toString()}`)
     }
     // NavItems receives an array of links with possible entries:
     // href: the link (mandatory)
@@ -133,11 +149,16 @@ function Navbar(): JSX.Element {
                             </Nav>
                         )}
                         {pathname != '/' && (
-                            <Form className='d-flex gap-3'>
+                            <Form
+                                className='d-flex gap-3'
+                                onSubmit={handleGlobalSearch}
+                            >
                                 <Form.Control
                                     type='text'
                                     placeholder='Search'
                                     className='me-2'
+                                    value={globalSearchText}
+                                    onChange={(event) => setGlobalSearchText(event.target.value)}
                                 />
                                 <ProfileDropdown />
                                 <LocaleSwitcher />

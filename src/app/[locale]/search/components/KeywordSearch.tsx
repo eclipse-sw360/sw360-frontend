@@ -10,6 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useReducer, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
@@ -167,6 +168,8 @@ function KeywordSearch({
     setPageableQueryParam: Dispatch<SetStateAction<PageableQueryParam>>
 }): ReactNode {
     const t = useTranslations('default')
+    const searchParams = useSearchParams()
+    const querySearchText = searchParams.get('searchText')?.trim() ?? ''
 
     const initialState: SEARCH_STATE = {
         project: false,
@@ -181,7 +184,21 @@ function KeywordSearch({
     }
 
     const [searchOptions, dispatch] = useReducer(reducer, initialState)
-    const [searchText, setSearchText] = useState('')
+    const [searchText, setSearchText] = useState(querySearchText)
+
+    useEffect(() => {
+        if (querySearchText === searchText) {
+            return
+        }
+
+        setSearchText(querySearchText)
+        setPageableQueryParam((prev) => ({
+            ...prev,
+            page: 0,
+        }))
+    }, [
+        querySearchText,
+    ])
 
     function appendTypeMasksToParams(searchOptions: SEARCH_STATE, params = new URLSearchParams()) {
         const entries = Object.entries(searchOptions)
