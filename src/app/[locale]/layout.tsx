@@ -24,8 +24,8 @@ import { Providers } from '../provider'
 
 export const metadata: Metadata = {
     title: {
-        template: '%s | SW360 Frontend',
-        default: 'SW360 Frontend',
+        template: '%s | SW360',
+        default: 'SW360',
     },
     description: 'SW360 Compliance Management System Graphical Interface.',
     metadataBase: new URL('https://eclipse.org/sw360/'),

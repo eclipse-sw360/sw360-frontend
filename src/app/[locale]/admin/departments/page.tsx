@@ -15,7 +15,7 @@ import ImportSecondaryDepartmentsSection from './components/ImportSecondaryDepar
 import SecondaryDepartmentsTable from './components/SecondaryDepartmentsTable'
 
 export const metadata: Metadata = {
-    title: 'Departments',
+    title: 'Admin - Departments',
 }
 
 const DepartmentAdministrationPage = async (): Promise<JSX.Element> => {

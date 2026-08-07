@@ -12,7 +12,7 @@ import type { JSX } from 'react'
 import DatabaseSanitation from './components/DatabaseSanitation'
 
 export const metadata: Metadata = {
-    title: 'Admin',
+    title: 'Admin - Database Sanitation',
 }
 
 function DatabaseSanitationAdministrationPage(): JSX.Element {
