@@ -315,6 +315,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
     const eccCountValue = `${eccOpenCount} / ${eccClassifiedCount}`
 
+    const obligationsBadgeClassName =
+        obligationsNonOpenCount === 0
+            ? 'obligations-badge--danger'
+            : obligationsTotal === obligationsNonOpenCount
+              ? 'obligations-badge--success'
+              : 'obligations-badge'
+
     return (
         <>
             <ImportSBOMModal
@@ -392,13 +399,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
-                                        badgeClassName={
-                                            obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
-                                                ? 'obligations-badge--success'
-                                                : obligationsNonOpenCount === 0
-                                                  ? 'obligations-badge--danger'
-                                                  : 'obligations-badge'
-                                        }
+                                        badgeClassName={obligationsBadgeClassName}
                                         countId='obligationsCount'
                                         isLoading={obligationsLoading}
                                         label={t('Obligations')}
