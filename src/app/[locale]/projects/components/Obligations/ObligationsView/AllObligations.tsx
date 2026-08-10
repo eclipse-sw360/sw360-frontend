@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Spinner } from 'react-bootstrap'
+import { BsInfoCircle } from 'react-icons/bs'
 import {
     Embedded,
     ErrorDetails,
@@ -473,6 +474,13 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             )}
             {pageableQueryParam && paginationMeta && table ? (
                 <>
+                    <div className='d-flex align-items-start gap-2 mb-2'>
+                        <BsInfoCircle
+                            size={15}
+                            className='mt-1'
+                        />
+                        <span>{t('Deferred Obligation Info')}</span>
+                    </div>
                     <PageSizeSelector
                         pageableQueryParam={pageableQueryParam}
                         setPageableQueryParam={setPageableQueryParam}

@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -36,6 +36,7 @@ import {
     ObligationEntry,
     ObligationType,
     Project,
+    ProjectDetailTabCounts,
     ProjectPayload,
     User,
     UserGroupType,
@@ -130,55 +131,10 @@ function EditProject({
         [k: string]: string
     }>({})
     const [obligations, setObligations] = useState<ObligationEntry>({})
-    const [serverObl, setServerObl] = useState<
-        Record<
-            string,
-            {
-                status?: string
-            }
-        >
-    >({})
-    const [serverTotal, setServerTotal] = useState<number>(0)
-
-    const { obligationsTotal, obligationsNonOpenCount } = useMemo(() => {
-        const isOpen = (s?: string | null) => (s ?? '').trim().toUpperCase() === 'OPEN'
-
-        const total = serverTotal
-
-        const merged: Record<
-            string,
-            {
-                status?: string
-            }
-        > = {
-            ...serverObl,
-        }
-
-        Object.keys(obligations).forEach((key) => {
-            if (merged[key]) {
-                merged[key] = {
-                    ...merged[key],
-                    status: obligations[key]?.status,
-                }
-            } else {
-                merged[key] = {
-                    status: obligations[key]?.status,
-                }
-            }
-        })
-
-        const list = Object.values(merged)
-        const nonOpen = list.filter((o) => !isOpen(o?.status)).length
-
-        return {
-            obligationsTotal: total,
-            obligationsNonOpenCount: nonOpen,
-        }
-    }, [
-        serverObl,
-        serverTotal,
-        obligations,
-    ])
+    const [obligationsTotal, setObligationsTotal] = useState<number>(0)
+    const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
+    const baselineObligationStatusRef = useRef<Record<string, string>>({})
+    const prevObligationsRef = useRef<ObligationEntry>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -272,43 +228,85 @@ function EditProject({
         const controller = new AbortController()
         const signal = controller.signal
 
-        const loadServerObligations = async () => {
+        const fetchObligationCounts = async () => {
+            try {
+                const response = await ApiUtils.GET(`projects/${projectId}/tabCounts`, signal)
+                const body = (await response.json().catch(() => ({}))) as ProjectDetailTabCounts | ErrorDetails
+
+                if (response.status !== StatusCodes.OK) {
+                    throw new ApiError(('message' in body ? body.message : undefined) ?? `Status ${response.status}`, {
+                        status: response.status,
+                    })
+                }
+
+                const data = body as ProjectDetailTabCounts
+                setObligationsTotal(Math.max(0, data.readmeOssObligationCount))
+                setObligationsNonOpenCount(Math.max(0, data.obligationNonOpenCount))
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        }
+
+        const fetchBaselineObligationStatuses = async () => {
             try {
                 const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
                     page: '0',
                     page_entries: '9999',
                 })
-
-                const resp = await ApiUtils.GET(url, signal)
-                const body = (await resp.json().catch(() => ({}))) as {
+                const response = await ApiUtils.GET(url, signal)
+                if (response.status !== StatusCodes.OK) return
+                const body = (await response.json().catch(() => ({}))) as {
                     obligations?: Record<
                         string,
                         {
                             status?: string
                         }
                     >
-                    page?: {
-                        totalElements?: number
-                    }
                 }
-
-                if (resp.status !== StatusCodes.OK) return
-
-                const obl = body?.obligations ?? {}
-                const total =
-                    typeof body?.page?.totalElements === 'number' ? body.page.totalElements : Object.keys(obl).length
-
-                setServerObl(obl)
-                setServerTotal(total)
+                const baseline: Record<string, string> = {}
+                Object.entries(body?.obligations ?? {}).forEach(([key, value]) => {
+                    baseline[key] = value?.status ?? 'OPEN'
+                })
+                baselineObligationStatusRef.current = baseline
             } catch (_e) {
-                setIsLoading(false)
+                // Baseline is only used for live badge updates, ignore failures silently
             }
         }
 
-        void loadServerObligations()
+        void fetchObligationCounts()
+        void fetchBaselineObligationStatuses()
         return () => controller.abort()
     }, [
         projectId,
+    ])
+
+    useEffect(() => {
+        const isOpen = (status?: string) => (status ?? 'OPEN').trim().toUpperCase() === 'OPEN'
+        const prevObligations = prevObligationsRef.current
+        let delta = 0
+
+        Object.keys(obligations).forEach((key) => {
+            const entry = obligations[key]
+            if (entry?.obligationType !== ObligationType.LICENSE_OBLIGATION) return
+
+            const prevStatus = prevObligations[key]?.status ?? baselineObligationStatusRef.current[key]
+            const wasOpen = isOpen(prevStatus)
+            const isNowOpen = isOpen(entry.status)
+
+            if (wasOpen && !isNowOpen) {
+                delta += 1
+            } else if (!wasOpen && isNowOpen) {
+                delta -= 1
+            }
+        })
+
+        if (delta !== 0) {
+            setObligationsNonOpenCount((count) => Math.max(0, count + delta))
+        }
+
+        prevObligationsRef.current = obligations
+    }, [
+        obligations,
     ])
 
     useEffect(() => {
@@ -691,6 +689,13 @@ function EditProject({
         router.push(`/projects/detail/${projectId}?tab=${activeKey ?? DEFAULT_ACTIVE_TAB}`)
     }
 
+    const obligationsBadgeClassName =
+        obligationsNonOpenCount === 0
+            ? 'obligations-badge--danger'
+            : obligationsTotal === obligationsNonOpenCount
+              ? 'obligations-badge--success'
+              : 'obligations-badge'
+
     return (
         <>
             {projectPayload?.name ? <Breadcrumb name={projectPayload?.name} /> : <Breadcrumb name={' '} />}
@@ -785,7 +790,7 @@ function EditProject({
                                                     eventKey='obligations'
                                                 >
                                                     <SidebarCountBadge
-                                                        badgeClassName='obligations-badge--danger'
+                                                        badgeClassName={obligationsBadgeClassName}
                                                         countId='obligationsCount'
                                                         isLoading={false}
                                                         label={t('Obligations')}
