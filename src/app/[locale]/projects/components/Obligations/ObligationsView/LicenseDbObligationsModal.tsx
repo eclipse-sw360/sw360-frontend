@@ -103,7 +103,11 @@ export default function LicenseDbObligationsModal({
                 id: 'expand',
                 cell: ({ row }) => {
                     if (row.depth > 0) {
-                        return <p>{row.original.node[1].text ?? ''}</p>
+                        return (
+                            <p className='obligation-text-preview'>
+                                {CommonUtils.formatObligationText(row.original.node[1].text ?? '')}
+                            </p>
+                        )
                     } else {
                         return <PaddedCell row={row}></PaddedCell>
                     }

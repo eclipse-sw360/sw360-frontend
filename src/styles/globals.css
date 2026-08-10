@@ -47,6 +47,12 @@ code {
     height: 120px;
 }
 
+.obligation-text-preview {
+    white-space: pre-line;
+    max-height: 10rem;
+    overflow-y: auto;
+}
+
 .oauth-client-response-json {
     max-height: 60vh;
 }
