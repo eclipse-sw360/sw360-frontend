@@ -122,7 +122,7 @@ export const selectors = {
 
     // ─── Detail Page Buttons ──────────────────────────────
     detailActions: {
-        editButton: 'button:has-text("Edit Projects")',
+        editButton: 'button:has-text("Edit Project")',
         linkToProjectsButton: 'button:has-text("Link to Projects")',
         importSbomButton: 'button:has-text("Import SBOM")',
         exportSbomDropdown: '#exportSBOM, button:has-text("Export SBOM")',
