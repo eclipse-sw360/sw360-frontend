@@ -115,7 +115,7 @@ function Project(): JSX.Element {
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: params.toString() ? 'score,asc' : 'name,asc',
+        sort: '',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
