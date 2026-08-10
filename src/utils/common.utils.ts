@@ -345,6 +345,12 @@ const isCrAllowed = (
     )
 }
 
+const formatObligationText = (text: string): string =>
+    text
+        .replace(/\r\n/g, '\n')
+        .replace(/\s*\n\s*/g, '\n')
+        .trim()
+
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
@@ -362,6 +368,7 @@ const CommonUtils = {
     fillTime,
     readDateTime,
     nullToEmptyString,
+    formatObligationText,
 }
 
 export default CommonUtils
