@@ -10,10 +10,12 @@
 'use client'
 
 import { type JSX } from 'react'
+import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
 
 interface SidebarCountBadgeProps {
     badgeClassName: string
     countId: string
+    infoText?: string
     isLoading: boolean
     label: string
     value: string
@@ -22,6 +24,7 @@ interface SidebarCountBadgeProps {
 export default function SidebarCountBadge({
     badgeClassName,
     countId,
+    infoText,
     isLoading,
     label,
     value,
@@ -44,6 +47,11 @@ export default function SidebarCountBadge({
                     value
                 )}
             </span>
+            {infoText ? (
+                <span className='ms-1 d-inline-flex align-items-center'>
+                    <ShowInfoOnHover text={infoText} />
+                </span>
+            ) : null}
         </div>
     )
 }

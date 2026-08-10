@@ -14,6 +14,7 @@ interface ProjectDetailTabCounts {
     obligationNonOpenCount: number
     eccClassifiedCount: number
     eccOpenCount: number
+    readmeOssObligationCount: number
 }
 
 export default ProjectDetailTabCounts
