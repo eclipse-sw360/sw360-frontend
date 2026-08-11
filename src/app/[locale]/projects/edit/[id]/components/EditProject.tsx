@@ -570,42 +570,86 @@ function EditProject({
                 ),
             ]
             if (Object.keys(obligations).length !== 0) {
+                const licenseObligations: Record<string, object> = {}
+                const componentObligations: Record<string, object> = {}
+                const projectObligations: Record<string, object> = {}
+                const organisationObligations: Record<string, object> = {}
+
                 for (const key in obligations) {
-                    if (obligations[key]?.obligationType === ObligationType.LICENSE_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
+                    const obligation = {
+                        ...obligations[key],
+                    }
+                    const obligationType = obligation.obligationType
+                    delete obligation.obligationType
+
+                    if (obligationType === ObligationType.LICENSE_OBLIGATION) {
+                        licenseObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.LICENSE_OBLIGATION,
                         }
+                    } else if (obligationType === ObligationType.COMPONENT_OBLIGATION) {
+                        componentObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.COMPONENT_OBLIGATION,
+                        }
+                    } else if (obligationType === ObligationType.PROJECT_OBLIGATION) {
+                        projectObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.PROJECT_OBLIGATION,
+                        }
+                    } else if (obligationType === ObligationType.ORGANISATION_OBLIGATION) {
+                        organisationObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.ORGANISATION_OBLIGATION,
+                        }
+                    }
+                }
+
+                const nonEmptyBuckets = [
+                    licenseObligations,
+                    componentObligations,
+                    projectObligations,
+                    organisationObligations,
+                ].filter((b) => Object.keys(b).length > 0)
+
+                if (nonEmptyBuckets.length > 1) {
+                    const allObligations = {
+                        ...licenseObligations,
+                        ...componentObligations,
+                        ...projectObligations,
+                        ...organisationObligations,
+                    }
+                    requests.push(
+                        ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=all`, allObligations),
+                    )
+                } else {
+                    if (Object.keys(licenseObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, licenseObligations),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationType.COMPONENT_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
-                        }
+                    }
+                    if (Object.keys(componentObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=component`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=component`,
+                                componentObligations,
+                            ),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationType.PROJECT_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
-                        }
+                    }
+                    if (Object.keys(projectObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=project`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=project`,
+                                projectObligations,
+                            ),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationType.ORGANISATION_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
-                        }
+                    }
+                    if (Object.keys(organisationObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=organization`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=organization`,
+                                organisationObligations,
+                            ),
                         )
                     }
                 }
