@@ -35,13 +35,14 @@ interface Field {
 interface Props {
     title: string
     fields?: Array<Field>
+    dateField?: string
 }
 
 interface SearchParams {
     [k: string]: string
 }
 
-function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Element {
+function AdvancedSearch({ title = 'Advanced Search', fields, dateField = 'createdOn' }: Props): JSX.Element {
     const router = useRouter()
     const pathname = usePathname()
     const t = useTranslations('default')
@@ -152,7 +153,7 @@ function AdvancedSearch({ title = 'Advanced Search', fields }: Props): JSX.Eleme
 
         if (!CommonUtils.isNullEmptyOrUndefinedString(createdOnQueryValue)) {
             effectiveParams.push([
-                'createdOn',
+                dateField,
                 createdOnQueryValue,
             ])
         }

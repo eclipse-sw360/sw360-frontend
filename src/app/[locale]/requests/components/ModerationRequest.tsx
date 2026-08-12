@@ -9,15 +9,15 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'next-sw360'
+import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { Embedded, ErrorDetails, ModerationRequest } from '@/object-types'
+import { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import BulkDeclineModerationRequestModal from './BulkDeclineModerationRequestModal'
@@ -28,7 +28,7 @@ interface ModerationRequestMap {
     [key: string]: string
 }
 
-function OpenModerationRequest(): ReactNode {
+function ModerationRequestComponent({ status }: { status: string }): ReactNode {
     const t = useTranslations('default')
     const [mrIdArray, setMrIdArray] = useState<Array<string>>([])
     const [disableBulkDecline, setDisableBulkDecline] = useState(true)
@@ -59,20 +59,24 @@ function OpenModerationRequest(): ReactNode {
     const columns = useMemo<ColumnDef<ModerationRequest>[]>(
         () => [
             {
-                id: 'date',
+                id: 'requestDate',
                 header: t('Date'),
+                accessorKey: 'requestDate',
+                enableSorting: true,
                 cell: ({ row }) => <>{formatDate(row.original.timestamp)}</>,
             },
             {
                 id: 'documentType',
                 header: t('Type'),
                 accessorKey: 'documentType',
-                enableSorting: false,
+                enableSorting: true,
                 cell: (info) => info.getValue(),
             },
             {
                 id: 'documentName',
                 header: t('Document Name'),
+                enableSorting: true,
+                accessorKey: 'documentName',
                 cell: ({ row }) => {
                     const { id, documentName } = row.original
                     return (
@@ -88,6 +92,8 @@ function OpenModerationRequest(): ReactNode {
             {
                 id: 'requestingUser',
                 header: t('Requesting User'),
+                enableSorting: true,
+                accessorKey: 'requestingUser',
                 cell: ({ row }) => {
                     const { requestingUser: email } = row.original
                     return (
@@ -101,18 +107,23 @@ function OpenModerationRequest(): ReactNode {
                 },
             },
             {
-                id: 'department',
+                id: 'requestingUserDepartment',
                 header: t('Department'),
+                enableSorting: true,
+                accessorKey: 'requestingUserDepartment',
                 cell: ({ row }) => <>{row.original.requestingUserDepartment}</>,
             },
             {
                 id: 'moderators',
                 header: t('Moderators'),
+                enableSorting: false,
                 cell: ({ row }) => <ExpandingModeratorCell moderators={row.original.moderators ?? []} />,
             },
             {
-                id: 'state',
+                id: 'moderationState',
                 header: t('State'),
+                enableSorting: true,
+                accessorKey: 'moderationState',
                 cell: ({ row }) => (
                     <>{row.original.moderationState ? moderationRequestStatus[row.original.moderationState] : ''}</>
                 ),
@@ -146,6 +157,18 @@ function OpenModerationRequest(): ReactNode {
         ],
     )
 
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: 'requestDate,desc',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+
     const [moderationRequestData, setModerationRequestData] = useState<ModerationRequest[]>(() => [])
     const memoizedData = useMemo(
         () => moderationRequestData,
@@ -171,7 +194,9 @@ function OpenModerationRequest(): ReactNode {
                     `moderationrequest`,
                     Object.fromEntries(
                         Object.entries({
+                            moderationState: status,
                             ...searchParams,
+                            ...pageableQueryParam,
                         }).map(([key, value]) => [
                             key,
                             String(value),
@@ -187,13 +212,12 @@ function OpenModerationRequest(): ReactNode {
                 }
 
                 const data = (await response.json()) as EmbeddedModerationRequest
+                setPaginationMeta(data.page)
                 const openModerationRequests = CommonUtils.isNullOrUndefined(
-                    data['_embedded']['sw360:moderationRequests'],
+                    data['_embedded']?.['sw360:moderationRequests'],
                 )
                     ? []
-                    : data['_embedded']['sw360:moderationRequests'].filter(
-                          (mr) => mr.moderationState === 'PENDING' || mr.moderationState === 'INPROGRESS',
-                      )
+                    : data['_embedded']['sw360:moderationRequests']
                 setModerationRequestData(openModerationRequests)
             } catch (error) {
                 ApiUtils.reportError(error)
@@ -205,6 +229,17 @@ function OpenModerationRequest(): ReactNode {
 
         return () => controller.abort()
     }, [
+        pageableQueryParam,
+        params.toString(),
+    ])
+
+    useEffect(() => {
+        setPageableQueryParam({
+            page: 0,
+            page_entries: 10,
+            sort: params.toString() ? 'score,desc' : '',
+        })
+    }, [
         params.toString(),
     ])
 
@@ -213,7 +248,70 @@ function OpenModerationRequest(): ReactNode {
         columns,
         getCoreRowModel: getCoreRowModel(),
 
-        getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            pagination: {
+                pageIndex: pageableQueryParam.page,
+                pageSize: pageableQueryParam.page_entries,
+            },
+            sorting: pageableQueryParam.sort
+                ? [
+                      {
+                          id: pageableQueryParam.sort.split(',')[0],
+                          desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                      },
+                  ]
+                : [],
+        },
+
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = prev.sort
+                    ? [
+                          {
+                              id: prev.sort.split(',')[0],
+                              desc: prev.sort.split(',')[1] === 'desc',
+                          },
+                      ]
+                    : []
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        page: 0,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    page: 0,
+                    sort: '',
+                }
+            })
+        },
+
+        manualPagination: true,
+        pageCount: paginationMeta?.totalPages ?? 1,
+        onPaginationChange: (updater) => {
+            const next =
+                typeof updater === 'function'
+                    ? updater({
+                          pageIndex: pageableQueryParam.page,
+                          pageSize: pageableQueryParam.page_entries,
+                      })
+                    : updater
+
+            setPageableQueryParam((prev) => ({
+                ...prev,
+                page: next.pageIndex + 1,
+                page_entries: next.pageSize,
+            }))
+        },
     })
 
     const handleCheckboxes = (moderationRequestId: string, documentName: string) => {
@@ -254,14 +352,21 @@ function OpenModerationRequest(): ReactNode {
                     </button>
                 </div>
                 <div className='mb-3'>
-                    {table ? (
+                    {pageableQueryParam && table && paginationMeta ? (
                         <>
-                            <ClientSidePageSizeSelector table={table} />
+                            <PageSizeSelector
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                            />
                             <SW360Table
                                 table={table}
                                 showProcessing={showProcessing}
                             />
-                            <ClientSideTableFooter table={table} />
+                            <TableFooter
+                                pageableQueryParam={pageableQueryParam}
+                                setPageableQueryParam={setPageableQueryParam}
+                                paginationMeta={paginationMeta}
+                            />
                         </>
                     ) : (
                         <div className='col-12 mt-1 text-center'>
@@ -274,4 +379,4 @@ function OpenModerationRequest(): ReactNode {
     )
 }
 
-export default OpenModerationRequest
+export default ModerationRequestComponent

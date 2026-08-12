@@ -20,8 +20,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ClearingRequestComponent from './ClearingRequest'
-import ClosedModerationRequest from './ClosedModerationRequest'
-import OpenModerationRequest from './OpenModerationRequest'
+import ModerationRequestComponent from './ModerationRequest'
 
 type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
@@ -60,28 +59,16 @@ function Requests(): ReactNode | undefined {
             fieldName: t('Type'),
             value: [
                 {
-                    key: 'Customer Project',
-                    text: t('Customer Project'),
+                    key: 'PROJECT',
+                    text: t('Project'),
                 },
                 {
-                    key: 'Internal Project',
-                    text: t('Internal Project'),
+                    key: 'COMPONENT',
+                    text: t('Component'),
                 },
                 {
-                    key: 'Product',
-                    text: t('Product'),
-                },
-                {
-                    key: 'Service',
-                    text: t('Service'),
-                },
-                {
-                    key: 'Inner Source',
-                    text: t('Inner Source'),
-                },
-                {
-                    key: 'Cloud Backend',
-                    text: t('Cloud Backend'),
+                    key: 'RELEASE',
+                    text: t('Release'),
                 },
             ],
             paramName: 'type',
@@ -89,7 +76,7 @@ function Requests(): ReactNode | undefined {
         {
             fieldName: t('Document Name'),
             value: '',
-            paramName: 'name',
+            paramName: 'documentName',
         },
         {
             fieldName: t('Requesting User Email'),
@@ -104,35 +91,13 @@ function Requests(): ReactNode | undefined {
                     text: t('None'),
                 },
             ],
-            paramName: 'group',
+            paramName: 'requestingUserDepartment',
         },
 
         {
             fieldName: t('Moderators'),
             value: '',
             paramName: 'moderators',
-        },
-        {
-            fieldName: t('State'),
-            value: [
-                {
-                    key: 'approved',
-                    text: t('APPROVED'),
-                },
-                {
-                    key: 'pending',
-                    text: t('Pending'),
-                },
-                {
-                    key: 'rejected',
-                    text: t('REJECTED'),
-                },
-                {
-                    key: 'inProgress',
-                    text: t('In Progress'),
-                },
-            ],
-            paramName: 'state',
         },
     ]
 
@@ -238,6 +203,7 @@ function Requests(): ReactNode | undefined {
                                 <AdvancedSearch
                                     title='Advanced Search'
                                     fields={advancedSearch}
+                                    dateField='requestDate'
                                 />
                             </div>
                         </Col>
@@ -255,7 +221,7 @@ function Requests(): ReactNode | undefined {
                                                 `(${openModerationRequestCount}/
                                             ${closedModerationRequestCount})`}
                                         </Row>
-                                        <OpenModerationRequest />
+                                        <ModerationRequestComponent status='open' />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='closedModerationrequests'>
                                         <Row className='text-truncate buttonheader-title '>
@@ -263,7 +229,7 @@ function Requests(): ReactNode | undefined {
                                                 `(${openModerationRequestCount}/
                                             ${closedModerationRequestCount})`}
                                         </Row>
-                                        <ClosedModerationRequest />
+                                        <ModerationRequestComponent status='closed' />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='openClearingRequests'>
                                         <Row className='text-truncate buttonheader-title '>
