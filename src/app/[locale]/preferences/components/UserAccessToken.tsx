@@ -11,13 +11,14 @@
 
 'use client'
 
+import { addDays, format } from 'date-fns'
 import { StatusCodes } from 'http-status-codes'
 
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import React, { ReactNode, useState } from 'react'
 import { Form } from 'react-bootstrap'
-import { useConfigValue } from '@/contexts'
+import { useConfigValue, useSW360BackendConfigContext } from '@/contexts'
 import { ErrorDetails, UIConfigKeys } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -36,11 +37,33 @@ const UserAccessToken = (): ReactNode => {
     const [generatedToken, setGeneratedToken] = useState<string>('')
 
     // Config values from backend
-    const apiTokenGenerator = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE)
-    const writeAuthorityAllowed = apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
+    const apiTokenGeneratorEnabled = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE)
+    const writeAccessOptionInPreferences = useConfigValue(
+        UIConfigKeys.UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED,
+    )
+    const { config: sw360BackendConfig } = useSW360BackendConfigContext()
+    const showTokenGenerationSection = apiTokenGeneratorEnabled === null ? true : (apiTokenGeneratorEnabled as boolean)
+    const isTokenGenerationDisabled = !showTokenGenerationSection
+    const showWriteAuthorityCheckbox =
+        writeAccessOptionInPreferences === null ? true : (writeAccessOptionInPreferences as boolean)
+
+    const maxValidityDaysValue = (sw360BackendConfig as Record<string, string> | null)?.[
+        'rest.apitoken.max.validity.days'
+    ]
+    const parsedMaxValidityDays = maxValidityDaysValue ? parseInt(maxValidityDaysValue, 10) : NaN
+    const hasValidMaxValidityDays = !isNaN(parsedMaxValidityDays) && parsedMaxValidityDays > 0
+
+    const minExpirationDate = format(new Date(), 'yyyy-MM-dd')
+    const maxExpirationDate = hasValidMaxValidityDays
+        ? format(addDays(new Date(), parsedMaxValidityDays), 'yyyy-MM-dd')
+        : undefined
 
     const generateToken = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+        if (isTokenGenerationDisabled) {
+            return
+        }
+
         const form = event.currentTarget
 
         if (form.checkValidity() === false) {
@@ -49,7 +72,7 @@ const UserAccessToken = (): ReactNode => {
         } else {
             setValidated(false)
             try {
-                if (!writeAuthorityAllowed && 'WRITE' in tokenData.authorities) {
+                if (!showWriteAuthorityCheckbox && tokenData.authorities.includes('WRITE')) {
                     tokenData.authorities = tokenData.authorities.filter((v) => v.toLowerCase() !== 'write')
                 }
                 const response = await ApiUtils.POST('users/tokens', tokenData)
@@ -133,6 +156,8 @@ const UserAccessToken = (): ReactNode => {
                                                 type='text'
                                                 placeholder='Enter token name'
                                                 value={tokenData.name}
+                                                readOnly={isTokenGenerationDisabled}
+                                                disabled={isTokenGenerationDisabled}
                                                 onChange={handleChangeText}
                                             />
                                             <Form.Control.Feedback type='invalid'>
@@ -155,9 +180,10 @@ const UserAccessToken = (): ReactNode => {
                                                 feedback='Read Access is required'
                                                 feedbackType='invalid'
                                                 checked={tokenData.authorities.includes('READ')}
+                                                disabled={isTokenGenerationDisabled}
                                                 onChange={handleChangeAuthorities}
                                             />
-                                            {writeAuthorityAllowed && (
+                                            {showWriteAuthorityCheckbox && (
                                                 <Form.Check
                                                     type='checkbox'
                                                     value='WRITE'
@@ -165,6 +191,7 @@ const UserAccessToken = (): ReactNode => {
                                                     name='authorities'
                                                     label='Write Access'
                                                     checked={tokenData.authorities.includes('WRITE')}
+                                                    disabled={isTokenGenerationDisabled}
                                                     onChange={handleChangeAuthorities}
                                                 />
                                             )}
@@ -176,9 +203,12 @@ const UserAccessToken = (): ReactNode => {
                                     <td>
                                         <Form.Control
                                             type='date'
-                                            min={new Date().toISOString().split('T')[0]}
+                                            min={minExpirationDate}
+                                            max={maxExpirationDate}
                                             required
                                             name='expirationDate'
+                                            readOnly={isTokenGenerationDisabled}
+                                            disabled={isTokenGenerationDisabled}
                                             onChange={handleChangeText}
                                             value={tokenData.expirationDate}
                                         />
@@ -207,6 +237,7 @@ const UserAccessToken = (): ReactNode => {
                         <button
                             type='submit'
                             className='btn btn-secondary'
+                            disabled={isTokenGenerationDisabled}
                         >
                             {t('Generate Token')}
                         </button>

@@ -234,12 +234,27 @@ jobs:
               --project=chromium
           fi
 
+          # Preserve the first tranche report before running accessControl tests
+          if [ -d tests/reports ]; then
+            mv tests/reports tests/reports-main
+          fi
+
           # Always run accessControl tests with role-based projects
           echo "🔐 Running accessControl tests with role-based projects"
           npx playwright test tests/e2e/accessControl/ \
             --project=chromium-user \
             --project=chromium-viewer \
             --project=chromium-clearing
+
+          # Merge both reports into tests/reports/
+          mv tests/reports tests/reports-access-control
+          mkdir -p tests/reports
+          if [ -d tests/reports-main ]; then
+            cp -r tests/reports-main/. tests/reports/main/
+          fi
+          if [ -d tests/reports-access-control ]; then
+            cp -r tests/reports-access-control/. tests/reports/access-control/
+          fi
         env:
           CI: true
           ENABLE_ROLE_TESTS: 'true'
