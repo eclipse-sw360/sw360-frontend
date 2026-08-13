@@ -30,10 +30,15 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
 
     const [showProcessing, setShowProcessing] = useState(false)
 
+    const projectUsings = resourcesUsing?._embedded['sw360:projects'] ?? []
+    const componentsUsing = resourcesUsing?._embedded['sw360:components'] ?? []
+    const restrictedResource = resourcesUsing?._embedded['sw360:restrictedResources']?.[0]
+    const shouldRenderProjectsUsing = showProcessing || !CommonUtils.isNullEmptyOrUndefinedArray(projectUsings)
+    const shouldRenderComponentsUsing = !CommonUtils.isNullEmptyOrUndefinedArray(componentsUsing)
+
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-
         void (async () => {
             try {
                 setShowProcessing(true)
@@ -65,29 +70,20 @@ const ResourcesUsing = ({ documentId, documentType, documentName }: Props): JSX.
 
     return (
         <>
-            {' '}
-            {resourcesUsing !== undefined && (
-                <>
-                    {!CommonUtils.isNullEmptyOrUndefinedArray(resourcesUsing._embedded['sw360:projects']) && (
-                        <ProjectsUsing
-                            projectUsings={resourcesUsing._embedded['sw360:projects']}
-                            documentName={documentName}
-                            restrictedResource={
-                                !CommonUtils.isNullOrUndefined(resourcesUsing._embedded['sw360:restrictedResources'])
-                                    ? resourcesUsing._embedded['sw360:restrictedResources'][0]
-                                    : undefined
-                            }
-                            showProcessing={showProcessing}
-                        />
-                    )}
-                    {!CommonUtils.isNullEmptyOrUndefinedArray(resourcesUsing._embedded['sw360:components']) && (
-                        <ComponentsUsing
-                            componentsUsing={resourcesUsing._embedded['sw360:components']}
-                            documentName={documentName}
-                            showProcessing={showProcessing}
-                        />
-                    )}
-                </>
+            {shouldRenderProjectsUsing && (
+                <ProjectsUsing
+                    projectUsings={projectUsings}
+                    documentName={documentName}
+                    restrictedResource={restrictedResource}
+                    showProcessing={showProcessing}
+                />
+            )}
+            {shouldRenderComponentsUsing && (
+                <ComponentsUsing
+                    componentsUsing={componentsUsing}
+                    documentName={documentName}
+                    showProcessing={showProcessing}
+                />
             )}
         </>
     )
