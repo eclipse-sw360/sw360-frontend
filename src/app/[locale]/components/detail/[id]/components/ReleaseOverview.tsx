@@ -17,8 +17,8 @@ import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
+import { KeyboardEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
@@ -42,6 +42,12 @@ interface Props {
 
 const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props): ReactNode => {
     const t = useTranslations('default')
+    const [search, setSearch] = useState<{
+        searchText: string
+        luceneSearch?: boolean
+    }>({
+        searchText: '',
+    })
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [clearingReleaseId, setClearingReleaseId] = useState<string | undefined>(undefined)
@@ -92,6 +98,19 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const handleLinkToProject = (releaseId: string) => {
         setLinkToProjectModalOpen(true)
         setLinkingReleaseId(releaseId)
+    }
+
+    const searchFunction = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.currentTarget.value === '') {
+            setSearch({
+                searchText: '',
+            })
+        } else {
+            setSearch({
+                searchText: event.currentTarget.value,
+                luceneSearch: true,
+            })
+        }
     }
 
     const columns = useMemo<ColumnDef<ReleaseLink>[]>(
@@ -252,7 +271,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
                     Object.fromEntries(
-                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                        Object.entries({
+                            ...search,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
@@ -293,6 +315,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     }, [
         componentId,
         pageableQueryParam,
+        search,
     ])
 
     const table = useReactTable({
@@ -375,11 +398,14 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     return (
         <>
             <div className='mb-3'>
-                <PageSizeSelector
-                    pageableQueryParam={pageableQueryParam}
-                    setPageableQueryParam={setPageableQueryParam}
-                    totalElements={paginationMeta?.totalElements}
-                />
+                <div className='d-flex justify-content-between'>
+                    <PageSizeSelector
+                        pageableQueryParam={pageableQueryParam}
+                        setPageableQueryParam={setPageableQueryParam}
+                        totalElements={paginationMeta?.totalElements}
+                    />
+                    <TableSearch searchFunction={searchFunction} />
+                </div>
                 <SW360Table
                     table={table}
                     showProcessing={showProcessing}
