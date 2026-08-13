@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner, PillsInput } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useState } from 'react'
+import { type Dispatch, type JSX, type SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
 import OnOffSwitch from '@/app/[locale]/admin/configurations/components/OnOffSwitch'
 import { useUiConfigContext } from '@/contexts'
 import {
@@ -30,9 +30,21 @@ import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 const FrontEndConfigs = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentUiConfig, setCurrentUiConfig] = useState<UiConfiguration | undefined>(undefined)
+    const currentUiConfigRef = useRef<UiConfiguration | undefined>(undefined)
     const [arrayKeyStates, setArrayKeyStates] = useState<ProcessedUiConfig>({} as ProcessedUiConfig)
     const { refreshConfig } = useUiConfigContext()
     const apiEndpoint = `configurations/container/${ConfigurationContainers.UI_CONFIGURATION}`
+
+    const setCurrentUiConfigWithRef: Dispatch<SetStateAction<UiConfiguration | undefined>> = useCallback((update) => {
+        setCurrentUiConfig((prev) => {
+            const next =
+                typeof update === 'function'
+                    ? (update as (prev: UiConfiguration | undefined) => UiConfiguration | undefined)(prev)
+                    : update
+            currentUiConfigRef.current = next
+            return next
+        })
+    }, [])
 
     const fetchUiConfig = useCallback(async () => {
         const response = await ApiUtils.GET(apiEndpoint)
@@ -51,6 +63,12 @@ const FrontEndConfigs = (): JSX.Element => {
     }, [])
 
     useEffect(() => {
+        currentUiConfigRef.current = currentUiConfig
+    }, [
+        currentUiConfig,
+    ])
+
+    useEffect(() => {
         updateInternalState()
     }, [
         currentUiConfig,
@@ -58,8 +76,8 @@ const FrontEndConfigs = (): JSX.Element => {
 
     const updateConfig = async (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
-        if (currentUiConfig === undefined) return
-        const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfig)
+        if (currentUiConfigRef.current === undefined) return
+        const response = await ApiUtils.PATCH(apiEndpoint, currentUiConfigRef.current)
         if (response.status == StatusCodes.OK) {
             MessageService.success(t('Updated frontend configurations successfully'))
             refreshConfig()
@@ -86,7 +104,7 @@ const FrontEndConfigs = (): JSX.Element => {
 
     const onArrayStateChangeHandler = (key: UIConfigKeys) => (newValues: string[]) => {
         // Update the global state, internal state will be updated by useEffect
-        setCurrentUiConfig(
+        setCurrentUiConfigWithRef(
             (prev) =>
                 ({
                     ...prev,
@@ -350,7 +368,7 @@ const FrontEndConfigs = (): JSX.Element => {
                                     <td>
                                         <OnOffSwitch
                                             size={25}
-                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            setCurrentUiConfig={setCurrentUiConfigWithRef}
                                             checked={
                                                 currentUiConfig[UIConfigKeys.UI_CUSTOM_WELCOME_PAGE_GUIDELINE] ===
                                                 'true'
@@ -367,7 +385,7 @@ const FrontEndConfigs = (): JSX.Element => {
                                     <td>
                                         <OnOffSwitch
                                             size={25}
-                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            setCurrentUiConfig={setCurrentUiConfigWithRef}
                                             checked={
                                                 currentUiConfig[
                                                     UIConfigKeys.UI_ENABLE_SECURITY_VULNERABILITY_MONITORING
@@ -383,23 +401,40 @@ const FrontEndConfigs = (): JSX.Element => {
                                     <td>
                                         <OnOffSwitch
                                             size={25}
-                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            setCurrentUiConfig={setCurrentUiConfigWithRef}
                                             checked={
-                                                currentUiConfig[
-                                                    UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE
-                                                ] === 'true'
+                                                currentUiConfig[UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE] ===
+                                                'true'
                                             }
-                                            propKey={UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE}
+                                            propKey={UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE}
                                         />
                                     </td>
                                     <td>{t('ui_rest_apitoken_generator_enable')}</td>
+                                </tr>
+                                <tr id='rest-api-write-access-token-in-preferences-enabled'>
+                                    <td className='align-middle fw-bold'>
+                                        {t('Enable Write Access option for REST API Tokens in Preferences')}
+                                    </td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentUiConfig={setCurrentUiConfigWithRef}
+                                            checked={
+                                                currentUiConfig[
+                                                    UIConfigKeys.UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED
+                                                ] === 'true'
+                                            }
+                                            propKey={UIConfigKeys.UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED}
+                                        />
+                                    </td>
+                                    <td>{t('rest_api_write_access_token_in_preferences_enabled')}</td>
                                 </tr>
                                 <tr id='enable-linked-projects-display'>
                                     <td className='align-middle fw-bold'>{t('Enable Linked Projects Display')}</td>
                                     <td>
                                         <OnOffSwitch
                                             size={25}
-                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            setCurrentUiConfig={setCurrentUiConfigWithRef}
                                             checked={
                                                 currentUiConfig[UIConfigKeys.UI_ENABLE_LINKED_PROJECTS_DISPLAY] ===
                                                 'true'
