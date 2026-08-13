@@ -20,61 +20,63 @@ test.describe('Search Filters', () => {
         await expect(page.locator(selectors.checkboxes.entireDocument)).toBeChecked()
     })
 
-    test('TC17: Projects checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.projects)).not.toBeChecked()
-    })
-
-    test('TC18: Components checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.components)).not.toBeChecked()
-    })
-
-    test('TC19: Licenses checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.licenses)).not.toBeChecked()
-    })
-
-    test('TC20: Releases checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.releases)).not.toBeChecked()
-    })
-
-    test('TC21: Packages checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.packages)).not.toBeChecked()
-    })
-
-    test('TC22: Obligations checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.obligations)).not.toBeChecked()
-    })
-
-    test('TC23: Users checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.users)).not.toBeChecked()
-    })
-
-    test('TC24: Vendors checkbox is unchecked by default', async ({ page }) => {
-        await expect(page.locator(selectors.checkboxes.vendors)).not.toBeChecked()
-    })
-
-    test('TC25: Clicking Projects checkbox toggles it on', async ({ page }) => {
-        await page.locator(selectors.checkboxes.projects).check()
+    test('TC17: Projects checkbox is checked by default', async ({ page }) => {
         await expect(page.locator(selectors.checkboxes.projects)).toBeChecked()
     })
 
-    test('TC26: Clicking a checked checkbox toggles it off', async ({ page }) => {
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+    test('TC18: Components checkbox is checked by default', async ({ page }) => {
+        await expect(page.locator(selectors.checkboxes.components)).toBeChecked()
+    })
+
+    test('TC19: Licenses checkbox is checked by default', async ({ page }) => {
+        await expect(page.locator(selectors.checkboxes.licenses)).toBeChecked()
+    })
+
+    test('TC20: Releases checkbox is checked by default', async ({ page }) => {
+        await expect(page.locator(selectors.checkboxes.releases)).toBeChecked()
+    })
+
+    test('TC21: Packages checkbox is checked by default', async ({ page }) => {
+        await expect(page.locator(selectors.checkboxes.packages)).toBeChecked()
+    })
+
+    test('TC22: Obligations checkbox is checked by default', async ({ page }) => {
+        await expect(page.locator(selectors.checkboxes.obligations)).toBeChecked()
+    })
+
+    test('TC23: Users checkbox is checked by default', async ({ page }) => {
+        await expect(page.locator(selectors.checkboxes.users)).toBeChecked()
+    })
+
+    test('TC24: Vendors checkbox is checked by default', async ({ page }) => {
+        await expect(page.locator(selectors.checkboxes.vendors)).toBeChecked()
+    })
+
+    test('TC25: Clicking Projects checkbox toggles it off', async ({ page }) => {
+        await page.locator(selectors.checkboxes.projects).click()
+        await expect(page.locator(selectors.checkboxes.projects)).not.toBeChecked()
+    })
+
+    test('TC26: Clicking a checked checkbox toggles it', async ({ page }) => {
+        await page.locator(selectors.checkboxes.entireDocument).click()
         await expect(page.locator(selectors.checkboxes.entireDocument)).not.toBeChecked()
     })
 
     test('TC27: Toggle button inverts all checkbox states', async ({ page }) => {
-        // Initially: entireDocument=checked, all others=unchecked
+        // Initially: entireDocument=unchecked, users=unchecked, all others=checked
+        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.checkboxes.users).uncheck()
         await page.click(selectors.buttons.toggle)
-        // After toggle: entireDocument=unchecked, all others=checked
-        await expect(page.locator(selectors.checkboxes.entireDocument)).not.toBeChecked()
-        await expect(page.locator(selectors.checkboxes.projects)).toBeChecked()
-        await expect(page.locator(selectors.checkboxes.components)).toBeChecked()
-        await expect(page.locator(selectors.checkboxes.licenses)).toBeChecked()
-        await expect(page.locator(selectors.checkboxes.releases)).toBeChecked()
-        await expect(page.locator(selectors.checkboxes.packages)).toBeChecked()
-        await expect(page.locator(selectors.checkboxes.obligations)).toBeChecked()
+        // After toggle: entireDocument=checked, users=checked, all others=unchecked
+        await expect(page.locator(selectors.checkboxes.entireDocument)).toBeChecked()
+        await expect(page.locator(selectors.checkboxes.projects)).not.toBeChecked()
+        await expect(page.locator(selectors.checkboxes.components)).not.toBeChecked()
+        await expect(page.locator(selectors.checkboxes.licenses)).not.toBeChecked()
+        await expect(page.locator(selectors.checkboxes.releases)).not.toBeChecked()
+        await expect(page.locator(selectors.checkboxes.packages)).not.toBeChecked()
+        await expect(page.locator(selectors.checkboxes.obligations)).not.toBeChecked()
         await expect(page.locator(selectors.checkboxes.users)).toBeChecked()
-        await expect(page.locator(selectors.checkboxes.vendors)).toBeChecked()
+        await expect(page.locator(selectors.checkboxes.vendors)).not.toBeChecked()
     })
 
     test('TC28: Deselect All button unchecks all checkboxes', async ({ page }) => {

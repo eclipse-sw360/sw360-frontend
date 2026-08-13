@@ -20,7 +20,7 @@ test.describe('Search Navigation', () => {
     })
 
     test('TC46: Clicking a project result link navigates to project detail', async ({ page }) => {
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.projects).check()
         await performSearch(page, fixtures.keywords.generic)
 
@@ -34,7 +34,7 @@ test.describe('Search Navigation', () => {
     })
 
     test('TC47: Clicking a component result link navigates to component detail', async ({ page }) => {
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.components).check()
         await performSearch(page, fixtures.keywords.generic)
 
@@ -48,7 +48,7 @@ test.describe('Search Navigation', () => {
     })
 
     test('TC48: Clicking a license result link navigates to license detail', async ({ page }) => {
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.licenses).check()
         await performSearch(page, fixtures.keywords.license)
 
@@ -56,8 +56,8 @@ test.describe('Search Navigation', () => {
         if (count > 0) {
             const link = page.locator(`${selectors.results.table} tbody a.text-link`).first()
             await link.click()
-            await page.waitForURL(/\/licenses\/detail\//, { timeout: 15000 })
-            await expect(page).toHaveURL(/\/licenses\/detail\//)
+            await page.waitForURL(/\/licenses\/detail\?id=/, { timeout: 15000 })
+            await expect(page).toHaveURL(/\/licenses\/detail\?id=/)
         }
     })
 
@@ -87,7 +87,7 @@ test.describe('Search Navigation', () => {
         const fullCount = await getResultCount(page)
 
         // Now restrict to only projects
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.projects).check()
         await performSearch(page, fixtures.keywords.generic)
         const filteredCount = await getResultCount(page)

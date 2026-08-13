@@ -46,7 +46,7 @@ export const fixtures = {
         project: '/projects/detail/',
         component: '/components/detail/',
         release: '/components/releases/detail/',
-        license: '/licenses/detail/',
+        license: '/licenses/detail?=',
         package: '/packages/detail/',
         obligation: '/obligations/detail/',
     },

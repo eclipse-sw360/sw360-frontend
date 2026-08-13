@@ -145,7 +145,7 @@ test.describe.serial('Search Results', () => {
     test('TC39: Search with Projects filter only shows project results', async ({ page }) => {
         test.skip(!searchAvailable, 'Skipped - Nouveau search not available')
         // Uncheck Entire Document and check only Projects
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.projects).check()
 
         await performSearch(page, seededSearchTerm)
@@ -159,7 +159,7 @@ test.describe.serial('Search Results', () => {
 
     test('TC40: Search with Components filter shows component links', async ({ page }) => {
         test.skip(!searchAvailable, 'Skipped - Nouveau search not available')
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.components).check()
 
         await performSearch(page, fixtures.keywords.generic)
@@ -173,7 +173,7 @@ test.describe.serial('Search Results', () => {
 
     test('TC41: Search with Licenses filter shows license links', async ({ page }) => {
         test.skip(!searchAvailable, 'Skipped - Nouveau search not available')
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.licenses).check()
 
         await performSearch(page, fixtures.keywords.license)
@@ -181,13 +181,13 @@ test.describe.serial('Search Results', () => {
         if (count > 0) {
             const links = page.locator(`${selectors.results.table} tbody a.text-link`)
             const firstHref = await links.first().getAttribute('href')
-            expect(firstHref).toContain('/licenses/detail/')
+            expect(firstHref).toContain('/licenses/detail?id=')
         }
     })
 
     test('TC42: Search with Users filter shows user names as text (no links)', async ({ page }) => {
         test.skip(!searchAvailable, 'Skipped - Nouveau search not available')
-        await page.locator(selectors.checkboxes.entireDocument).uncheck()
+        await page.locator(selectors.buttons.deselectAll).click()
         await page.locator(selectors.checkboxes.users).check()
 
         await performSearch(page, 'sw360')
