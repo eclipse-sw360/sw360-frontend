@@ -9,7 +9,7 @@
 
 import { test as setup, expect, Page } from '@playwright/test'
 import { config } from '../config'
-import { testUsers, createAllTestUsers, deleteAllTestUsers } from './helpers/testUserSetup'
+import { testUsers, createAllTestUsers } from './helpers/testUserSetup'
 
 /**
  * Authentication Setup
