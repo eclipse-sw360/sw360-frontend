@@ -1,5 +1,6 @@
 # Eclipse SW360 Frontend
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10706/badge)](https://www.bestpractices.dev/projects/10706)
+[![Using Weblate](https://img.shields.io/badge/Using-Weblate-green?style=flat-square&logo=weblate&color=%231fa385)](https://hosted.weblate.org/projects/sw360-frontend/)
 
 This is the main UI interface for SW360 project.
 
@@ -57,5 +58,10 @@ pnpm test:pw tests/e2e/ --project=chromium
 For more detailed instructions on running SW360 Frontend testcases, see
 [README](./tests/README.md).
 
+---
 
+### Translation
+The project Eclipse SW360 supports internationalization. Found translation
+missing? A bug? Or want to add your language? Checkout our Project at Weblate
+[![Translation status](https://hosted.weblate.org/widget/sw360-frontend/sw360-frontend/open-graph.png)](https://hosted.weblate.org/engage/sw360-frontend/)
 
