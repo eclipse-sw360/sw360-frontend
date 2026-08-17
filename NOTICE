@@ -1,6 +1,45 @@
-Eclipe SW360 Project <https://eclipse.org/sw360>
+# Notices for Eclipse SW360
+
+This content is produced and maintained by the Eclipse SW360 project.
+
+* Project home: https://projects.eclipse.org/projects/technology.sw360
+
+## Trademarks
+
+SW360™ is a trademark of the Eclipse Foundation.
+
+## Copyright
+
+All content is the property of the respective authors or their employers. For
+more information regarding authorship of content, please consult the listed
+source code repository logs.
 
 Copyright (C) Helio Chissini de Castro <heliocastro@gmail.com>, 2023
 Copyright (C) TOSHIBA CORPORATION, 2023
 Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023
-Copyright (C) Siemens AG, 2023
+Copyright (C) Siemens AG, 2023-2026
+
+## Declared Project Licenses
+
+This program and the accompanying materials are made available under the terms
+of the Eclipse Public License v. 2.0 which is available at
+https://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+## Source Code
+
+The project maintains the following source code repositories:
+
+* https://github.com/eclipse-sw360/sw360
+* https://github.com/eclipse-sw360/sw360-frontend
+* https://github.com/eclipse-sw360/sw360.website
+
+## Cryptography
+
+Content may contain encryption software. The country in which you are currently
+may have restrictions on the import, possession, and use, and/or re-export to
+another country, of encryption software. BEFORE using any encryption software,
+please check the country's laws, regulations and policies concerning the import,
+possession, or use, and re-export of encryption software, to see if this is
+permitted.
