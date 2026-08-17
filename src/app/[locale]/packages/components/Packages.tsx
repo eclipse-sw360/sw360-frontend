@@ -9,7 +9,14 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    getCoreRowModel,
+    getSortedRowModel,
+    RowSelectionState,
+    SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -61,12 +68,14 @@ function Packages(): ReactNode {
         packageName: '',
         packageVersion: '',
     })
-    const [archivePackageId, setArchivePackageId] = useState<string | null>(null)
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
     const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
+    const [selectionMode, setSelectionMode] = useState<boolean>(false)
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
     const isAdmin = userIdentity?.userGroup === UserGroupType.ADMIN
+    const selectedPackageIds = Object.keys(rowSelection).filter((id) => rowSelection[id])
 
     useEffect(() => {
         void (async () => setUserIdentity(await getAuthenticatedUserIdentity()))()
@@ -105,6 +114,32 @@ function Packages(): ReactNode {
 
     const columns = useMemo<ColumnDef<PackageWithRelease>[]>(
         () => [
+            ...(isAdmin
+                ? [
+                      {
+                          id: 'select',
+                          enableSorting: false,
+                          header: ({ table }) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={table.getIsAllPageRowsSelected()}
+                                  onChange={table.getToggleAllPageRowsSelectedHandler()}
+                              />
+                          ),
+                          cell: ({ row }) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={row.getIsSelected()}
+                                  onChange={row.getToggleSelectedHandler()}
+                              />
+                          ),
+                      } as ColumnDef<PackageWithRelease>,
+                  ]
+                : []),
             {
                 id: 'name',
                 header: `${t('Package Name')} (${t('Version')})`,
@@ -231,20 +266,6 @@ function Packages(): ReactNode {
                                         </span>
                                     </OverlayTrigger>
 
-                                    {isAdmin && (
-                                        <OverlayTrigger overlay={<Tooltip>{t('Archive')}</Tooltip>}>
-                                            <span className='d-inline-block'>
-                                                <BsFillArchiveFill
-                                                    className='btn-icon'
-                                                    size={20}
-                                                    onClick={() => {
-                                                        setArchivePackageId(id ?? '')
-                                                        setShowArchiveModal(true)
-                                                    }}
-                                                />
-                                            </span>
-                                        </OverlayTrigger>
-                                    )}
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span className='d-inline-block ms-2'>
                                             <BsFillTrashFill
@@ -380,12 +401,19 @@ function Packages(): ReactNode {
     const table = useReactTable({
         data: memoizedData,
         columns,
+        getRowId: (row) => row.id ?? '',
+        enableRowSelection: true,
+        onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         manualSorting: true,
         manualPagination: true,
         pageCount: paginationMeta?.totalPages ?? 1,
         state: {
+            rowSelection,
+            columnVisibility: {
+                select: selectionMode,
+            },
             pagination: {
                 pageIndex: pageableQueryParam.page,
                 pageSize: pageableQueryParam.page_entries,
@@ -507,14 +535,17 @@ function Packages(): ReactNode {
                     setPackageData((prev) => prev.filter((pkg) => pkg.id !== deletedPackageId))
                 }}
             />
-            {archivePackageId && (
+            {isAdmin && (
                 <ArchiveModal
                     entityType='PACKAGE'
-                    entityIds={[
-                        archivePackageId,
-                    ]}
+                    entityIds={selectedPackageIds}
                     show={showArchiveModal}
                     setShow={setShowArchiveModal}
+                    onArchived={() => {
+                        setPackageData((prev) => prev.filter((pkg) => !selectedPackageIds.includes(pkg.id ?? '')))
+                        setRowSelection({})
+                        setSelectionMode(false)
+                    }}
                 />
             )}
             <div className='container page-content'>
@@ -528,12 +559,46 @@ function Packages(): ReactNode {
                     <div className='col-10'>
                         <div className='row'>
                             <div className='col d-flex justify-content-between'>
-                                <button
-                                    className='btn btn-primary col-auto'
-                                    onClick={handleCreatePackage}
-                                >
-                                    {t('Add Package')}
-                                </button>
+                                <div className='d-flex'>
+                                    <button
+                                        className='btn btn-primary col-auto'
+                                        onClick={handleCreatePackage}
+                                    >
+                                        {t('Add Package')}
+                                    </button>
+                                    {isAdmin &&
+                                        (!selectionMode ? (
+                                            <button
+                                                className='btn btn-secondary col-auto ms-2'
+                                                onClick={() => setSelectionMode(true)}
+                                            >
+                                                <BsFillArchiveFill className='me-2' />
+                                                {t('Archive')}
+                                            </button>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    className='btn btn-primary col-auto ms-2'
+                                                    disabled={selectedPackageIds.length === 0}
+                                                    onClick={() => setShowArchiveModal(true)}
+                                                >
+                                                    <BsFillArchiveFill className='me-2' />
+                                                    {selectedPackageIds.length > 0
+                                                        ? `${t('Confirm')} (${selectedPackageIds.length})`
+                                                        : t('Confirm')}
+                                                </button>
+                                                <button
+                                                    className='btn btn-outline-secondary col-auto ms-2'
+                                                    onClick={() => {
+                                                        setSelectionMode(false)
+                                                        setRowSelection({})
+                                                    }}
+                                                >
+                                                    {t('Cancel')}
+                                                </button>
+                                            </>
+                                        ))}
+                                </div>
                                 <div className='col-auto buttonheader-title'>{t('PACKAGES')}</div>
                             </div>
                         </div>

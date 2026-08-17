@@ -11,7 +11,14 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    getCoreRowModel,
+    getSortedRowModel,
+    RowSelectionState,
+    SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -40,9 +47,11 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const params = useSearchParams()
     const [deletingComponent, setDeletingComponent] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const [archiveComponentId, setArchiveComponentId] = useState<string | null>(null)
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
     const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
+    const [selectionMode, setSelectionMode] = useState<boolean>(false)
     const isAdmin = useSession().data?.user?.userGroup === UserGroupType.ADMIN
+    const selectedComponentIds = Object.keys(rowSelection).filter((id) => rowSelection[id])
     const router = useRouter()
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
@@ -70,6 +79,35 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
 
     const columns = useMemo<ColumnDef<Component>[]>(
         () => [
+            ...(isAdmin
+                ? [
+                      {
+                          id: 'select',
+                          enableSorting: false,
+                          meta: {
+                              width: '3%',
+                          },
+                          header: ({ table }) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={table.getIsAllPageRowsSelected()}
+                                  onChange={table.getToggleAllPageRowsSelectedHandler()}
+                              />
+                          ),
+                          cell: ({ row }) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={row.getIsSelected()}
+                                  onChange={row.getToggleSelectedHandler()}
+                              />
+                          ),
+                      } as ColumnDef<Component>,
+                  ]
+                : []),
             {
                 id: 'vendor',
                 header: t('Vendor'),
@@ -170,20 +208,6 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                                         </span>
                                     </OverlayTrigger>
 
-                                    {isAdmin && (
-                                        <OverlayTrigger overlay={<Tooltip>{t('Archive')}</Tooltip>}>
-                                            <span className='d-inline-block'>
-                                                <BsFillArchiveFill
-                                                    className='btn-icon'
-                                                    size={20}
-                                                    onClick={() => {
-                                                        setArchiveComponentId(id)
-                                                        setShowArchiveModal(true)
-                                                    }}
-                                                />
-                                            </span>
-                                        </OverlayTrigger>
-                                    )}
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span className='d-inline-block ms-2'>
                                             <BsFillTrashFill
@@ -295,11 +319,16 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const table = useReactTable({
         data: memoizedData,
         columns,
+        getRowId: (row) => row.id ?? '',
+        enableRowSelection: true,
+        onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
 
         // table state config
         state: {
+            rowSelection,
             columnVisibility: {
+                select: selectionMode,
                 actions: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
             },
             pagination: {
@@ -371,6 +400,41 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
             <div className='mb-3'>
                 {pageableQueryParam && table && paginationMeta ? (
                     <>
+                        {isAdmin && (
+                            <div className='d-flex mb-2'>
+                                {!selectionMode ? (
+                                    <button
+                                        className='btn btn-secondary'
+                                        onClick={() => setSelectionMode(true)}
+                                    >
+                                        <BsFillArchiveFill className='me-2' />
+                                        {t('Archive')}
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button
+                                            className='btn btn-primary'
+                                            disabled={selectedComponentIds.length === 0}
+                                            onClick={() => setShowArchiveModal(true)}
+                                        >
+                                            <BsFillArchiveFill className='me-2' />
+                                            {selectedComponentIds.length > 0
+                                                ? `${t('Confirm')} (${selectedComponentIds.length})`
+                                                : t('Confirm')}
+                                        </button>
+                                        <button
+                                            className='btn btn-outline-secondary ms-2'
+                                            onClick={() => {
+                                                setSelectionMode(false)
+                                                setRowSelection({})
+                                            }}
+                                        >
+                                            {t('Cancel')}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
                         <PageSizeSelector
                             pageableQueryParam={pageableQueryParam}
                             setPageableQueryParam={setPageableQueryParam}
@@ -396,14 +460,17 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                 show={deleteDialogOpen}
                 setShow={setDeleteDialogOpen}
             />
-            {archiveComponentId && (
+            {isAdmin && (
                 <ArchiveModal
                     entityType='COMPONENT'
-                    entityIds={[
-                        archiveComponentId,
-                    ]}
+                    entityIds={selectedComponentIds}
                     show={showArchiveModal}
                     setShow={setShowArchiveModal}
+                    onArchived={() => {
+                        setComponentData((prev) => prev.filter((c) => !selectedComponentIds.includes(c.id ?? '')))
+                        setRowSelection({})
+                        setSelectionMode(false)
+                    }}
                 />
             )}
         </>

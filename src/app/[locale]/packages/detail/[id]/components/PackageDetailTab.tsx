@@ -16,7 +16,6 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ArchiveModal } from '@/components/ArchiveModal'
 import { ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError } from '@/utils'
@@ -28,7 +27,6 @@ import Summary from './Summary'
 function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const t = useTranslations('default')
     const [summaryData, setSummaryData] = useState<Package | undefined>(undefined)
-    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
     const router = useRouter()
     const param = useParams()
     const locale = (param.locale as string) || 'en'
@@ -89,15 +87,6 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
 
     return (
         <>
-            <ArchiveModal
-                entityType='PACKAGE'
-                entityIds={[
-                    packageId,
-                ]}
-                entityLabel={summaryData?.name}
-                show={showArchiveModal}
-                setShow={setShowArchiveModal}
-            />
             <Breadcrumb className='container page-content'>
                 <Breadcrumb.Item
                     linkAs={Link}
@@ -142,15 +131,6 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
                                     >
                                         {t('Edit Package')}
                                     </button>
-                                    {userIdentity?.userGroup === UserGroupType.ADMIN && (
-                                        <button
-                                            type='button'
-                                            className='btn btn-danger'
-                                            onClick={() => setShowArchiveModal(true)}
-                                        >
-                                            {t('Archive')}
-                                        </button>
-                                    )}
                                 </div>
                                 <div className='col-lg-5 text-truncate buttonheader-title me-3'>
                                     {summaryData && `${summaryData.name} (${summaryData.version})`}

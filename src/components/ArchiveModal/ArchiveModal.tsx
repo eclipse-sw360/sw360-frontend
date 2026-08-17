@@ -40,7 +40,6 @@ function ArchiveModal({ entityType, entityIds, entityLabel, show, setShow, onArc
 
     const [comment, setComment] = useState('')
     const [includeAttachments, setIncludeAttachments] = useState(true)
-    const [includeChangelogs, setIncludeChangelogs] = useState(true)
     const [busy, setBusy] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -75,7 +74,6 @@ function ArchiveModal({ entityType, entityIds, entityLabel, show, setShow, onArc
                         entityIds,
                         comment: '',
                         includeAttachments,
-                        includeChangelogs,
                     },
                     session.user.access_token,
                 )
@@ -127,7 +125,6 @@ function ArchiveModal({ entityType, entityIds, entityLabel, show, setShow, onArc
                     entityIds,
                     comment: comment.trim(),
                     includeAttachments,
-                    includeChangelogs,
                 },
                 session.user.access_token,
             )
@@ -216,8 +213,8 @@ function ArchiveModal({ entityType, entityIds, entityLabel, show, setShow, onArc
                                 </tr>
                             </thead>
                             <tbody>
-                                {preview.entries.map((e) => (
-                                    <tr key={`${e.entityType}-${e.entityId}`}>
+                                {preview.entries.map((e, i) => (
+                                    <tr key={`${e.entityType}-${e.entityId}-${i}`}>
                                         <td>{e.entityType}</td>
                                         <td>{e.entityName}</td>
                                         <td>
@@ -256,14 +253,6 @@ function ArchiveModal({ entityType, entityIds, entityLabel, show, setShow, onArc
                     label={t('Include attachments')}
                     checked={includeAttachments}
                     onChange={(e) => setIncludeAttachments(e.target.checked)}
-                    disabled={busy}
-                    className='mb-2'
-                />
-                <Form.Check
-                    id='archive-include-changelogs'
-                    label={t('Include changelogs')}
-                    checked={includeChangelogs}
-                    onChange={(e) => setIncludeChangelogs(e.target.checked)}
                     disabled={busy}
                 />
 

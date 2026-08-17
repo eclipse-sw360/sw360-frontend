@@ -14,7 +14,6 @@ export interface ArchiveRequest {
     entityIds: string[]
     comment: string
     includeAttachments: boolean
-    includeChangelogs: boolean
 }
 
 export type ArchivePreviewAction = 'ARCHIVE' | 'KEEP_ALIVE' | 'BLOCKED'

@@ -16,6 +16,8 @@ import {
     getCoreRowModel,
     getExpandedRowModel,
     HeaderContext,
+    Row,
+    RowSelectionState,
     SortingState,
     useReactTable,
 } from '@tanstack/react-table'
@@ -145,12 +147,9 @@ function Project(): JSX.Element {
         setDeleteDialogOpen(true)
     }
 
-    const [archiveProjectId, setArchiveProjectId] = useState<string | null>(null)
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
     const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
-    const handleArchiveProject = (projectId: string) => {
-        setArchiveProjectId(projectId)
-        setShowArchiveModal(true)
-    }
+    const [selectionMode, setSelectionMode] = useState<boolean>(false)
     const isAdmin = userIdentity?.userGroup === UserGroupType.ADMIN
 
     const handleAddProject = () => {
@@ -205,6 +204,35 @@ function Project(): JSX.Element {
 
     const columns = useMemo<ColumnDef<ProjectWithSubRows>[]>(
         () => [
+            ...(isAdmin
+                ? [
+                      {
+                          id: 'select',
+                          enableSorting: false,
+                          meta: {
+                              width: '3%',
+                          },
+                          header: ({ table }: HeaderContext<ProjectWithSubRows, unknown>) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={table.getIsAllPageRowsSelected()}
+                                  onChange={table.getToggleAllPageRowsSelectedHandler()}
+                              />
+                          ),
+                          cell: ({ row }: { row: Row<ProjectWithSubRows> }) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={row.getIsSelected()}
+                                  onChange={row.getToggleSelectedHandler()}
+                              />
+                          ),
+                      } as ColumnDef<ProjectWithSubRows>,
+                  ]
+                : []),
             ...(showLinkedProjects
                 ? [
                       {
@@ -653,26 +681,6 @@ function Project(): JSX.Element {
                                         </Link>
                                     </OverlayTrigger>
 
-                                    {isAdmin && (
-                                        <>
-                                            <span className='border-start align-self-stretch mx-1 my-1' />
-                                            <OverlayTrigger overlay={<Tooltip>{t('Archive')}</Tooltip>}>
-                                                <span
-                                                    className='d-inline-flex align-items-center justify-content-center'
-                                                    style={{
-                                                        width: 28,
-                                                        height: 28,
-                                                    }}
-                                                >
-                                                    <BsFillArchiveFill
-                                                        className='btn-icon'
-                                                        size={20}
-                                                        onClick={() => handleArchiveProject(id)}
-                                                    />
-                                                </span>
-                                            </OverlayTrigger>
-                                        </>
-                                    )}
                                     <span className='border-start align-self-stretch mx-1 my-1' />
                                     <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                         <span
@@ -879,6 +887,9 @@ function Project(): JSX.Element {
     const table = useReactTable<ProjectWithSubRows>({
         data: memoizedData,
         columns,
+        enableRowSelection: true,
+        enableSubRowSelection: false,
+        onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
         getRowId: (
             row: ProjectWithSubRows,
@@ -901,10 +912,12 @@ function Project(): JSX.Element {
 
         // table state config
         state: {
+            rowSelection,
             ...(showLinkedProjects && {
                 expanded: expandedState,
             }),
             columnVisibility: {
+                select: selectionMode,
                 actions: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
                 licenseClearing: !(userIdentity?.userGroup === UserGroupType.SECURITY_USER),
             },
@@ -1119,6 +1132,16 @@ function Project(): JSX.Element {
         },
     ]
 
+    // Derived from the table so sub-row composite ids resolve back to project ids.
+    const selectedProjectIds = [
+        ...new Set(
+            table
+                .getSelectedRowModel()
+                .rows.map((r) => r.original['_links']?.['self']?.['href']?.split('/').at(-1) ?? '')
+                .filter((id) => id !== ''),
+        ),
+    ]
+
     return (
         <>
             <ImportSBOMModal
@@ -1133,14 +1156,24 @@ function Project(): JSX.Element {
                     hasClearingRequest={hasClearingRequest}
                 />
             )}
-            {archiveProjectId && (
+            {isAdmin && (
                 <ArchiveModal
                     entityType='PROJECT'
-                    entityIds={[
-                        archiveProjectId,
-                    ]}
+                    entityIds={selectedProjectIds}
                     show={showArchiveModal}
                     setShow={setShowArchiveModal}
+                    onArchived={() => {
+                        setProjectData((prev) =>
+                            prev.filter(
+                                (p) =>
+                                    !selectedProjectIds.includes(
+                                        p['_links']?.['self']?.['href']?.split('/').at(-1) ?? '',
+                                    ),
+                            ),
+                        )
+                        setRowSelection({})
+                        setSelectionMode(false)
+                    }}
                 />
             )}
             <Breadcrumb name={t('Projects')} />
@@ -1221,6 +1254,38 @@ function Project(): JSX.Element {
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
+                                    {isAdmin &&
+                                        (!selectionMode ? (
+                                            <button
+                                                className='btn btn-secondary col-auto ms-2'
+                                                onClick={() => setSelectionMode(true)}
+                                            >
+                                                <BsFillArchiveFill className='me-2' />
+                                                {t('Archive')}
+                                            </button>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    className='btn btn-primary col-auto ms-2'
+                                                    disabled={selectedProjectIds.length === 0}
+                                                    onClick={() => setShowArchiveModal(true)}
+                                                >
+                                                    <BsFillArchiveFill className='me-2' />
+                                                    {selectedProjectIds.length > 0
+                                                        ? `${t('Confirm')} (${selectedProjectIds.length})`
+                                                        : t('Confirm')}
+                                                </button>
+                                                <button
+                                                    className='btn btn-outline-secondary col-auto ms-2'
+                                                    onClick={() => {
+                                                        setSelectionMode(false)
+                                                        setRowSelection({})
+                                                    }}
+                                                >
+                                                    {t('Cancel')}
+                                                </button>
+                                            </>
+                                        ))}
                                 </div>
                             </div>
                             <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
