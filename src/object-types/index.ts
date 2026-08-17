@@ -14,10 +14,17 @@ import AddtionalDataType from './AddtionalDataType'
 import AdministrationDataType from './AdministrationDataType'
 import {
     ArchivalEntityType,
+    ArchivalRecord,
+    ArchivalStatus,
     ArchivePreview,
     ArchivePreviewAction,
     ArchivePreviewEntry,
     ArchiveRequest,
+    RestoreOutcome,
+    RestorePreview,
+    RestorePreviewEntry,
+    RestoreResult,
+    RestoreResultEntry,
 } from './Archival'
 import Attachment from './Attachment'
 import { AttachmentUsage, AttachmentUsages, SaveUsagesPayload } from './AttachmentUsages'
@@ -146,6 +153,8 @@ export type {
     AdministrationDataType,
     Annotations,
     ArchivalEntityType,
+    ArchivalRecord,
+    ArchivalStatus,
     ArchivePreview,
     ArchivePreviewAction,
     ArchivePreviewEntry,
@@ -236,6 +245,11 @@ export type {
     RequestContent,
     RequestedAction,
     Resources,
+    RestoreOutcome,
+    RestorePreview,
+    RestorePreviewEntry,
+    RestoreResult,
+    RestoreResultEntry,
     RestrictedResource,
     RolesType,
     SaveUsagesPayload,

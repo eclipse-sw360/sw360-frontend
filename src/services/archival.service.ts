@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ArchivePreview, ArchiveRequest } from '@/object-types'
+import { ArchivalRecord, ArchivePreview, ArchiveRequest, RestorePreview, RestoreResult } from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 
 function archivalUrl(path: string): string {
@@ -66,9 +66,85 @@ async function preview(req: ArchiveRequest, token: string): Promise<ArchivePrevi
     return (await response.json()) as ArchivePreview
 }
 
+async function listRecords(token: string): Promise<ArchivalRecord[]> {
+    const response = await fetch(archivalUrl('records'), {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            Authorization: token,
+        },
+    })
+
+    if (!response.ok) {
+        const body = await response.text().catch(() => '')
+        throw new Error(`Loading archival records failed (${response.status}): ${body || response.statusText}`)
+    }
+
+    return (await response.json()) as ArchivalRecord[]
+}
+
+async function restorePreview(bundle: File, token: string): Promise<RestorePreview> {
+    const form = new FormData()
+    form.append('bundle', bundle)
+    // No Content-Type header: the browser sets multipart/form-data with the boundary.
+    const response = await fetch(archivalUrl('restore/preview'), {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            Authorization: token,
+        },
+        body: form,
+    })
+
+    if (!response.ok) {
+        const body = await response.text().catch(() => '')
+        throw new Error(`Restore preview failed (${response.status}): ${body || response.statusText}`)
+    }
+
+    return (await response.json()) as RestorePreview
+}
+
+async function restore(bundle: File, token: string): Promise<RestoreResult> {
+    const form = new FormData()
+    form.append('bundle', bundle)
+    const response = await fetch(archivalUrl('restore'), {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            Authorization: token,
+        },
+        body: form,
+    })
+
+    if (!response.ok) {
+        const body = await response.text().catch(() => '')
+        throw new Error(`Restore failed (${response.status}): ${body || response.statusText}`)
+    }
+
+    return (await response.json()) as RestoreResult
+}
+
+async function deleteRecord(id: string, token: string): Promise<void> {
+    const response = await fetch(archivalUrl(`records/${encodeURIComponent(id)}`), {
+        method: 'DELETE',
+        headers: {
+            Authorization: token,
+        },
+    })
+
+    if (!response.ok && response.status !== 404) {
+        const body = await response.text().catch(() => '')
+        throw new Error(`Deleting archival record failed (${response.status}): ${body || response.statusText}`)
+    }
+}
+
 const ArchivalService = {
     archive,
     preview,
+    listRecords,
+    restorePreview,
+    restore,
+    deleteRecord,
 }
 
 export default ArchivalService

@@ -32,3 +32,51 @@ export interface ArchivePreview {
     keepAliveCount: number
     blockedCount: number
 }
+
+export type ArchivalStatus = 'ARCHIVED' | 'PARTIALLY_ARCHIVED' | 'RESTORED' | 'FAILED'
+
+export interface ArchivalRecord {
+    id: string
+    bundleId: string
+    entityId: string
+    entityName?: string
+    entityType: ArchivalEntityType
+    status: ArchivalStatus
+    archivedBy?: string
+    archivedAt?: string
+    restoredBy?: string
+    restoredAt?: string
+    attachmentCount?: number
+    comment?: string
+}
+
+export interface RestorePreviewEntry {
+    entityId: string
+    entityName?: string
+    entityType: ArchivalEntityType
+    attachmentCount?: number
+    // true when the entity is already present in the live database and would be skipped
+    conflict: boolean
+}
+
+export interface RestorePreview {
+    bundleId: string
+    entries: RestorePreviewEntry[]
+}
+
+export type RestoreOutcome = 'RESTORED' | 'SKIPPED' | 'FAILED'
+
+export interface RestoreResultEntry {
+    entityId: string
+    entityType: ArchivalEntityType
+    outcome: RestoreOutcome
+    reason?: string
+}
+
+export interface RestoreResult {
+    bundleId: string
+    entries: RestoreResultEntry[]
+    restoredCount: number
+    skippedCount: number
+    failedCount: number
+}
