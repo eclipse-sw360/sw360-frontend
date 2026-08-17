@@ -123,13 +123,15 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
                         </div>
                         <div className='col ps-2 me-3'>
                             <div className=' row d-flex justify-content-between'>
-                                <button
-                                    type='button'
-                                    className='me-2 col-auto btn btn-primary'
-                                    onClick={() => handleEditPackage()}
-                                >
-                                    {t('Edit Package')}
-                                </button>
+                                <div className='col-auto'>
+                                    <button
+                                        type='button'
+                                        className='me-2 btn btn-primary'
+                                        onClick={() => handleEditPackage()}
+                                    >
+                                        {t('Edit Package')}
+                                    </button>
+                                </div>
                                 <div className='col-lg-5 text-truncate buttonheader-title me-3'>
                                     {summaryData && `${summaryData.name} (${summaryData.version})`}
                                 </div>

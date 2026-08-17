@@ -110,6 +110,11 @@ function NavList(): NavItem[] {
                     id: 'admin_import_export',
                 },
                 {
+                    href: '/admin/archival',
+                    name: t('Restore Archives'),
+                    id: 'admin_restore_archives',
+                },
+                {
                     href: '/admin/databaseSanitation',
                     name: t('Database Sanitation'),
                     id: 'admin_database_sanitation',

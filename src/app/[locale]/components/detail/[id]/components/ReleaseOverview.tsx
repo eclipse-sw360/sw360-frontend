@@ -11,7 +11,7 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, RowSelectionState, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
@@ -20,8 +20,9 @@ import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
+import { BsClipboard, BsFillArchiveFill, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
+import { ArchiveModal } from '@/components/ArchiveModal'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
 import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink, UserGroupType } from '@/object-types'
@@ -51,6 +52,11 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+    const [showArchiveModal, setShowArchiveModal] = useState<boolean>(false)
+    const [selectionMode, setSelectionMode] = useState<boolean>(false)
+    const isAdmin = userIdentity?.userGroup === UserGroupType.ADMIN
+    const selectedReleaseIds = Object.keys(rowSelection).filter((id) => rowSelection[id])
 
     useEffect(() => {
         void (async () => {
@@ -96,6 +102,35 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
 
     const columns = useMemo<ColumnDef<ReleaseLink>[]>(
         () => [
+            ...(isAdmin
+                ? [
+                      {
+                          id: 'select',
+                          enableSorting: false,
+                          meta: {
+                              width: '3%',
+                          },
+                          header: ({ table }) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={table.getIsAllPageRowsSelected()}
+                                  onChange={table.getToggleAllPageRowsSelectedHandler()}
+                              />
+                          ),
+                          cell: ({ row }) => (
+                              <input
+                                  type='checkbox'
+                                  className='form-check-input'
+                                  aria-label={t('Archive')}
+                                  checked={row.getIsSelected()}
+                                  onChange={row.getToggleSelectedHandler()}
+                              />
+                          ),
+                      } as ColumnDef<ReleaseLink>,
+                  ]
+                : []),
             {
                 id: 'name',
                 header: t('Name'),
@@ -197,7 +232,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                 </Link>
                             </OverlayTrigger>
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                <span className='d-inline-block'>
+                                <span className='d-inline-block ms-2'>
                                     <BsFillTrashFill
                                         className='btn-icon'
                                         size={20}
@@ -215,6 +250,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         ],
         [
             t,
+            isAdmin,
         ],
     )
 
@@ -298,11 +334,16 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const table = useReactTable({
         data: memoizedData,
         columns,
+        getRowId: (row) => row.id ?? '',
+        enableRowSelection: true,
+        onRowSelectionChange: setRowSelection,
         getCoreRowModel: getCoreRowModel(),
 
         // table state config
         state: {
+            rowSelection,
             columnVisibility: {
+                select: selectionMode,
                 actions:
                     !(userIdentity?.userGroup === UserGroupType.SECURITY_USER) ||
                     calledFromModerationRequestDetail === undefined ||
@@ -375,6 +416,41 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     return (
         <>
             <div className='mb-3'>
+                {isAdmin && (
+                    <div className='d-flex mb-2'>
+                        {!selectionMode ? (
+                            <button
+                                className='btn btn-secondary'
+                                onClick={() => setSelectionMode(true)}
+                            >
+                                <BsFillArchiveFill className='me-2' />
+                                {t('Archive')}
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    className='btn btn-primary'
+                                    disabled={selectedReleaseIds.length === 0}
+                                    onClick={() => setShowArchiveModal(true)}
+                                >
+                                    <BsFillArchiveFill className='me-2' />
+                                    {selectedReleaseIds.length > 0
+                                        ? `${t('Confirm')} (${selectedReleaseIds.length})`
+                                        : t('Confirm')}
+                                </button>
+                                <button
+                                    className='btn btn-outline-secondary ms-2'
+                                    onClick={() => {
+                                        setSelectionMode(false)
+                                        setRowSelection({})
+                                    }}
+                                >
+                                    {t('Cancel')}
+                                </button>
+                            </>
+                        )}
+                    </div>
+                )}
                 <PageSizeSelector
                     pageableQueryParam={pageableQueryParam}
                     setPageableQueryParam={setPageableQueryParam}
@@ -397,6 +473,19 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 show={deleteModalOpen}
                 setShow={setDeleteModalOpen}
             />
+            {isAdmin && (
+                <ArchiveModal
+                    entityType='RELEASE'
+                    entityIds={selectedReleaseIds}
+                    show={showArchiveModal}
+                    setShow={setShowArchiveModal}
+                    onArchived={() => {
+                        setReleaseData((prev) => prev.filter((r) => !selectedReleaseIds.includes(r.id ?? '')))
+                        setRowSelection({})
+                        setSelectionMode(false)
+                    }}
+                />
+            )}
             {!CommonUtils.isNullOrUndefined(clearingReleaseId) && (
                 <FossologyClearing
                     show={fossologyClearingModelOpen}

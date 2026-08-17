@@ -12,7 +12,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { type JSX } from 'react'
 import { AiOutlineTags, AiOutlineUnorderedList } from 'react-icons/ai'
-import { BsBag, BsFileEarmarkText, BsFilter, BsSearch } from 'react-icons/bs'
+import { BsArchive, BsBag, BsFileEarmarkText, BsFilter, BsSearch } from 'react-icons/bs'
 import { FiEdit2 } from 'react-icons/fi'
 import { GrConfigure } from 'react-icons/gr'
 import { HiOutlineDocumentDuplicate } from 'react-icons/hi'
@@ -146,6 +146,14 @@ const AdminMainPage = (): JSX.Element => {
                             className='btn btn-secondary mb-2 mx-2 admin-button'
                         >
                             <GrConfigure /> {t('Configurations')}
+                        </button>
+                    </Link>
+                    <Link href='/admin/archival'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary mb-2 mx-2 admin-button'
+                        >
+                            <BsArchive /> {t('Archive and Restore')}
                         </button>
                     </Link>
                 </div>
