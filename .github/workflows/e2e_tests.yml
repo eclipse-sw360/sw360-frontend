@@ -11,6 +11,10 @@ name: E2E Tests
 
 on:
   pull_request:
+    paths:
+      - 'src/**'
+      - 'messages/**'
+      - 'tests/**'
   schedule:
     - cron: '0 2 * * *'  # Daily at 2 AM UTC (runs on main)
   workflow_dispatch:
