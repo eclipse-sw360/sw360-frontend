@@ -238,7 +238,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                             paddingLeft: '0px',
                         }}
                     >
-                        {t('Linked Projects')}
+                        {t('LINKED PROJECTS')}
                         <hr
                             className='my-2 mb-2'
                             style={{
