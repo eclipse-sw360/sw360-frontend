@@ -179,7 +179,7 @@ test.describe('Projects - Create', () => {
 
         // Switch to Linked Releases and Projects
         await clickFormTab(page, 'Linked Releases and Projects')
-        await expect(page.getByRole('button', { name: /link releases/i })).toBeVisible()
+        await expect(page.getByRole('button', { name: /add releases/i })).toBeVisible()
 
         // Switch to Linked Packages
         await clickFormTab(page, 'Linked Packages')
