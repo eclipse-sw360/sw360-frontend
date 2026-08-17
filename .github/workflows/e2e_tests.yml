@@ -150,8 +150,8 @@ jobs:
           timeout 60 bash -c 'until curl -fsS http://localhost:5984/_up >/dev/null 2>&1; do sleep 3; done'
           echo "✅ CouchDB is ready"
 
-          echo "⏳ Waiting for SW360 backend (this may take 1-2 minutes)..."
-          timeout 300 bash -c 'until curl -fsS http://localhost:8080/resource/api/health 2>/dev/null | grep -iq "status.*up"; do sleep 5; done'
+          echo "⏳ Waiting for SW360 backend (this may take 4-5 minutes)..."
+          timeout 600 bash -c 'until curl -fsS http://localhost:8080/resource/api/health 2>/dev/null | grep -iq "status.*up"; do sleep 5; done'
           echo "✅ SW360 backend is healthy"
 
           # Verify the REST API actually accepts authenticated requests (DB init may lag behind health)
