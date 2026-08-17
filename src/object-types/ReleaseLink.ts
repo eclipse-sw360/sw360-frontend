@@ -9,6 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import Attachment from './Attachment'
+
 interface ReleaseLink {
     id: string
     name: string
@@ -17,6 +19,7 @@ interface ReleaseLink {
     clearingReport?:
         | {
               clearingReportStatus: string
+              attachments?: Attachment[]
           }
         | undefined
     clearingState?: string
