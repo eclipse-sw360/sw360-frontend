@@ -73,7 +73,7 @@ const AdminEditUserPage = (): JSX.Element => {
                 })
                 setIsUserDeactived(user.deactivated === true)
             } catch (e) {
-                console.error(e)
+                ApiUtils.reportError(e)
             }
         })()
     }, [
@@ -104,7 +104,7 @@ const AdminEditUserPage = (): JSX.Element => {
                 MessageService.error(t('Something went wrong'))
             }
         } catch (e) {
-            console.error(e)
+            ApiUtils.reportError(e)
         }
     }
 

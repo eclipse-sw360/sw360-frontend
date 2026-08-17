@@ -216,12 +216,12 @@ test.describe('Projects - Export Spreadsheet', () => {
  * Projects — Linked Releases and Projects tab functionality.
  */
 test.describe('Projects - Linked Releases and Projects Tab', () => {
-    test('TC82: Linked Releases tab shows Link Releases button on add page', async ({ page }) => {
+    test('TC82: Linked Releases tab shows Add Releases button on add page', async ({ page }) => {
         await gotoProjectsPage(page, 'add')
         await page.getByText('Linked Releases and Projects').click()
         await page.waitForTimeout(500)
 
-        await expect(page.getByRole('button', { name: /link releases/i })).toBeVisible()
+        await expect(page.getByRole('button', { name: /add releases/i })).toBeVisible()
     })
 
     test('TC83: Linked Releases tab shows Add Projects button on add page', async ({ page }) => {
@@ -232,13 +232,13 @@ test.describe('Projects - Linked Releases and Projects Tab', () => {
         await expect(page.getByRole('button', { name: /add projects/i })).toBeVisible()
     })
 
-    test('TC84: Link Releases button opens search modal', async ({ page }) => {
+    test('TC84: Add Releases button opens search modal', async ({ page }) => {
         test.setTimeout(60000)
         await gotoProjectsPage(page, 'add')
         await page.getByText('Linked Releases and Projects').click()
         await page.waitForTimeout(500)
 
-        await page.getByRole('button', { name: /link releases/i }).click()
+        await page.getByRole('button', { name: /add releases/i }).click()
 
         const modal = page.locator(selectors.common.modalShow)
         await expect(modal).toBeVisible()

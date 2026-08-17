@@ -321,7 +321,7 @@ export default function LinkedReleases({
                             className='btn btn-secondary'
                             onClick={() => setShowLinkedReleasesModal(true)}
                         >
-                            {t('Link Releases')}
+                            {t('Add Releases')}
                         </button>
                     </div>
                 </div>
