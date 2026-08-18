@@ -25,6 +25,7 @@ import { Attachment, Embedded, ErrorDetails, NestedRows, UserGroupType } from '@
 import DownloadService from '@/services/download.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
 import ImportSummary from '../../object-types/cyclonedx/ImportSummary'
 import ReleaseCheckStates from '../../object-types/enums/ReleaseCheckStates'
 
@@ -134,7 +135,7 @@ function Attachments({ documentId, documentType }: { documentId: string; documen
                 header: t('Type'),
                 cell: ({ row }) => {
                     if (row.depth > 0) return
-                    return <p className='text-center'>{row.original.node.attachmentType ?? ''}</p>
+                    return <p className='text-center'>{getAttachmentTypeShortForm(row.original.node.attachmentType)}</p>
                 },
             },
             {

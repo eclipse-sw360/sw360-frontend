@@ -41,6 +41,7 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -607,7 +608,11 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                         header: t('Type'),
                         cell: ({ row }) => {
                             if (row.original.node.type === 'attachment') {
-                                return <div className='text-center'>{row.original.node.entity.attachmentType}</div>
+                                return (
+                                    <div className='text-center'>
+                                        {getAttachmentTypeShortForm(row.original.node.entity.attachmentType)}
+                                    </div>
+                                )
                             }
                         },
                         meta: {
