@@ -33,6 +33,11 @@
   },
   "linter": {
     "enabled": true,
+    "domains": {
+      "project": "recommended",
+      "next": "recommended",
+      "react": "recommended"
+    },
     "rules": {
       "preset": "none",
       "complexity": {
