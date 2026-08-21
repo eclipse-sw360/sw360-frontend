@@ -13,7 +13,7 @@ import { ReactNode } from 'react'
 import AddObligation from './components/AddObligation'
 
 export const metadata: Metadata = {
-    title: 'Admin',
+    title: 'Admin - Obligations',
 }
 
 function AddObligationPage(): ReactNode {

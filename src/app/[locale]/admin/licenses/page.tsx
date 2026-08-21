@@ -12,7 +12,7 @@ import { ReactNode } from 'react'
 import LicenseAdministration from './components/LicenseAdministration'
 
 export const metadata: Metadata = {
-    title: 'Admin',
+    title: 'Admin - Licenses',
 }
 
 function LicenseAdministrationPage(): ReactNode {
