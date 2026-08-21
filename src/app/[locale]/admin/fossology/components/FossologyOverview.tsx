@@ -104,7 +104,17 @@ export default function FossologyOverview(): ReactNode {
             MessageService.warn(t('Unauthorized request'))
             return
         } else {
-            MessageService.error(t('Fossology configuration update failed'))
+            try {
+                const errorData = await response.json()
+                const detail = errorData?.message ?? errorData?.detail ?? errorData?.error
+                if (detail) {
+                    MessageService.error(detail)
+                } else {
+                    MessageService.error(t('Fossology configuration update failed'))
+                }
+            } catch {
+                MessageService.error(t('Fossology configuration update failed'))
+            }
         }
     }
 
