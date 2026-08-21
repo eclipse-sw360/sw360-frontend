@@ -7,13 +7,27 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
+import {
+    ChangeEvent,
+    Dispatch,
+    Fragment,
+    ReactNode,
+    SetStateAction,
+    useDeferredValue,
+    useEffect,
+    useState,
+} from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
 import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
+
+// How long an empty table must stay empty and idle before the "no data" message replaces the overlay.
+const EMPTY_STATE_GRACE_MS = 300
 
 export function TableFooter({
     pageableQueryParam,
@@ -295,6 +309,30 @@ export function SW360Table<K>({
 }): ReactNode {
     const t = useTranslations('default')
 
+    // Defer the row model so the previous rows (and processing overlay) stay on screen
+    // while the new rows are being computed/rendered, instead of committing a blank tbody first.
+    const rows = table.getRowModel().rows
+    const deferredRows = useDeferredValue(rows)
+    const isRenderPending = deferredRows !== rows
+
+    // Consumers flip `showProcessing` only after mount/effects, so an empty table is briefly
+    // indistinguishable from one whose fetch has not started yet. Keep the overlay up until the
+    // emptiness has held for EMPTY_STATE_GRACE_MS, so "no data" never flashes before loading.
+    const isEmptyAndIdle = !showProcessing && !isRenderPending && deferredRows.length === 0
+    const [isEmptyConfirmed, setIsEmptyConfirmed] = useState(false)
+    useEffect(() => {
+        if (!isEmptyAndIdle) {
+            setIsEmptyConfirmed(false)
+            return
+        }
+        const timeout = setTimeout(() => setIsEmptyConfirmed(true), EMPTY_STATE_GRACE_MS)
+        return () => clearTimeout(timeout)
+    }, [
+        isEmptyAndIdle,
+    ])
+
+    const displayProcessing = showProcessing || isRenderPending || (isEmptyAndIdle && !isEmptyConfirmed)
+
     return (
         <div className='table-component position-relative'>
             <table
@@ -340,7 +378,7 @@ export function SW360Table<K>({
                     ))}
                 </thead>
                 <tbody>
-                    {!showProcessing && table.getRowModel().rows.length === 0 && (
+                    {!displayProcessing && deferredRows.length === 0 && (
                         <tr>
                             <td colSpan={table.getVisibleFlatColumns().length}>
                                 <div className='text-center'>
@@ -349,7 +387,7 @@ export function SW360Table<K>({
                             </td>
                         </tr>
                     )}
-                    {table.getRowModel().rows.map((row) =>
+                    {deferredRows.map((row) =>
                         row.meta?.isFullSpanRow ? (
                             <tr key={row.id}>
                                 <td colSpan={table.getVisibleLeafColumns().length}>
@@ -380,7 +418,7 @@ export function SW360Table<K>({
                     )}
                 </tbody>
             </table>
-            {showProcessing && (
+            {displayProcessing && (
                 <div className='position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center'>
                     <div className='bg-white p-4 border rounded shadow'>{t('Processing')}…</div>
                 </div>

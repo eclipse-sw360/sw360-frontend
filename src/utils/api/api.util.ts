@@ -222,6 +222,15 @@ async function send({
 
             lastError = handleError(error)
 
+            // A request cancelled through the caller's own signal is superseded work (effect
+            // cleanup on refetch/unmount). Never settle, so its stale catch/finally handlers
+            // cannot reset loading flags or state that the newer request already owns.
+            if (lastError.isAborted && signal instanceof AbortSignal && signal.aborted) {
+                return new Promise<Response>(() => {
+                    // intentionally never settles
+                })
+            }
+
             // Only retry if error is retryable and we have retries left
             if (isRetryableError(error) && attempt < retries) {
                 await sleep(getRetryDelay(attempt))
