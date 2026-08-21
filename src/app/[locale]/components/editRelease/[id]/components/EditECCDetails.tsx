@@ -233,8 +233,8 @@ const EditECCDetails = ({ releasePayload, setReleasePayload }: Props) => {
                                     className='form-text'
                                     id='containsCryptography.HelpBlock'
                                 >
-                                    <ShowInfoOnHover text={t('Contains Cryptography')} />
-                                    {t('cryptoinfo')}.
+                                    <ShowInfoOnHover text={t('cryptoinfo')} />
+                                    {t('Learn more about Cryptotechnology')}.
                                 </div>
                             </div>
                         </div>
