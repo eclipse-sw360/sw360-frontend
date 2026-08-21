@@ -36,8 +36,8 @@ export default function ObligationView({ projectId, actionType, payload, setPayl
         >
             {actionType === ActionType.DETAIL && (
                 <Tab
-                    eventKey='all-obligations'
-                    title={t('All Obligations')}
+                    eventKey='deferred-obligation'
+                    title={t('Deferred Obligation')}
                 >
                     <AllObligations projectId={projectId} />
                 </Tab>
