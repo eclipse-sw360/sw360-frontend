@@ -237,6 +237,7 @@ function AddProjects(): JSX.Element {
                                     <Tab.Content>
                                         <Tab.Pane eventKey='summary'>
                                             <Summary
+                                                archivedType='PROJECT'
                                                 vendor={vendor}
                                                 setVendor={setVendor}
                                                 externalUrls={externalUrls}

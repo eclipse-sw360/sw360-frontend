@@ -13,15 +13,18 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
+import ArchivedSuggestions from '@/components/ArchivedSuggestions/ArchivedSuggestions'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
-import { ProjectPayload, UIConfigKeys, Vendor } from '@/object-types'
+import { ArchivalEntityType, ProjectPayload, UIConfigKeys, Vendor } from '@/object-types'
 
 interface Param {
     vendor: Vendor
     setVendor: Dispatch<SetStateAction<Vendor>>
     projectPayload: ProjectPayload
     setProjectPayload: Dispatch<SetStateAction<ProjectPayload>>
+    // Set by the create form only; when present, shows archived-duplicate suggestions under the name field.
+    archivedType?: ArchivalEntityType
 }
 
 export default function GeneralInformation({
@@ -29,6 +32,7 @@ export default function GeneralInformation({
     setVendor,
     projectPayload,
     setProjectPayload,
+    archivedType,
 }: Param): JSX.Element {
     const t = useTranslations('default')
     const [showVendorsModal, setShowVendorsModal] = useState<boolean>(false)
@@ -133,6 +137,12 @@ export default function GeneralInformation({
                             value={projectPayload.name}
                             onChange={updateInputField}
                         />
+                        {archivedType && (
+                            <ArchivedSuggestions
+                                entityType={archivedType}
+                                name={projectPayload.name}
+                            />
+                        )}
                     </div>
                     <div className='col-lg-4'>
                         <label

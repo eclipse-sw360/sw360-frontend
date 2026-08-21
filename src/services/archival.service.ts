@@ -7,7 +7,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { ArchivalRecord, ArchivePreview, ArchiveRequest, RestorePreview, RestoreResult } from '@/object-types'
+import {
+    ArchivalEntityType,
+    ArchivalRecord,
+    ArchivePreview,
+    ArchiveRequest,
+    RestorePreview,
+    RestoreResult,
+} from '@/object-types'
 import { SW360_API_URL } from '@/utils/env'
 
 function archivalUrl(path: string): string {
@@ -138,6 +145,26 @@ async function deleteRecord(id: string, token: string): Promise<void> {
     }
 }
 
+async function searchArchived(name: string, type: ArchivalEntityType, token: string): Promise<ArchivalRecord[]> {
+    const response = await fetch(
+        archivalUrl(`records/search?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`),
+        {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                Authorization: token,
+            },
+        },
+    )
+
+    if (!response.ok) {
+        const body = await response.text().catch(() => '')
+        throw new Error(`Archived-entity search failed (${response.status}): ${body || response.statusText}`)
+    }
+
+    return (await response.json()) as ArchivalRecord[]
+}
+
 const ArchivalService = {
     archive,
     preview,
@@ -145,6 +172,7 @@ const ArchivalService = {
     restorePreview,
     restore,
     deleteRecord,
+    searchArchived,
 }
 
 export default ArchivalService
