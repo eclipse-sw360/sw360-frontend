@@ -189,19 +189,25 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             link: `/components/edit/${componentId}`,
             type: 'primary',
             name: t('Edit component'),
-            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
+            disable:
+                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                userIdentity?.userGroup === UserGroupType.VIEWER,
         },
         Merge: {
             link: `/components/detail/${componentId}/merge`,
             type: 'secondary',
             name: t('Merge'),
-            hidden: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
+            hidden:
+                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                userIdentity?.userGroup === UserGroupType.VIEWER,
         },
         Split: {
             link: `/components/detail/${componentId}/split`,
             type: 'secondary',
             name: t('Split'),
-            hidden: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
+            hidden:
+                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                userIdentity?.userGroup === UserGroupType.VIEWER,
         },
         Subscribe: {
             link: '',

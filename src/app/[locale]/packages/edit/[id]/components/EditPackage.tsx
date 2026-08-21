@@ -130,4 +130,5 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(EditPackage, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

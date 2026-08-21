@@ -749,4 +749,5 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(EditRelease, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])
