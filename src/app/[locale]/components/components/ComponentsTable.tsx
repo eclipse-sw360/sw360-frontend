@@ -354,6 +354,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                         <PageSizeSelector
                             pageableQueryParam={pageableQueryParam}
                             setPageableQueryParam={setPageableQueryParam}
+                            totalElements={paginationMeta?.totalElements}
                         />
                         <SW360Table
                             table={table}
