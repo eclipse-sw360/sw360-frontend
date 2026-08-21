@@ -15,9 +15,18 @@ import { useTranslations } from 'next-intl'
 import { SelectUsersDialog, ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
+import ArchivedSuggestions from '@/components/ArchivedSuggestions/ArchivedSuggestions'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
-import { ActionType, Release, ReleaseDetail, UIConfigKeys, UserGroupType, Vendor } from '@/object-types'
+import {
+    ActionType,
+    ArchivalEntityType,
+    Release,
+    ReleaseDetail,
+    UIConfigKeys,
+    UserGroupType,
+    Vendor,
+} from '@/object-types'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
@@ -44,6 +53,8 @@ interface Props {
         }>
     >
     releaseDetail?: ReleaseDetail
+    // Set by the create form only; when present, shows archived-duplicate suggestions under the name field.
+    archivedType?: ArchivalEntityType
 }
 
 const ReleaseSummary = ({
@@ -57,6 +68,7 @@ const ReleaseSummary = ({
     moderators,
     setModerators,
     releaseDetail,
+    archivedType,
 }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [currentDate] = useState(new Date().toLocaleDateString())
@@ -299,6 +311,12 @@ const ReleaseSummary = ({
                                     readOnly={true}
                                     value={releasePayload.name ?? ''}
                                 />
+                                {archivedType && (
+                                    <ArchivedSuggestions
+                                        entityType={archivedType}
+                                        name={releasePayload.name}
+                                    />
+                                )}
                                 <div
                                     id='learn_more_about_component_name'
                                     className='form-text'

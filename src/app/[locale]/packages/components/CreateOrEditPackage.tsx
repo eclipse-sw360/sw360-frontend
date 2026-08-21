@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import { Dispatch, type FormEvent, type ReactElement, SetStateAction, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
+import ArchivedSuggestions from '@/components/ArchivedSuggestions/ArchivedSuggestions'
 import LicensesDialog from '@/components/sw360/SearchLicensesDialog/LicensesDialog'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { ErrorDetails, Package, ReleaseDetail } from '@/object-types'
@@ -262,6 +263,12 @@ export default function CreateOrEditPackage({
                                 onChange={handleChange}
                                 required
                             />
+                            {!isEditPage && (
+                                <ArchivedSuggestions
+                                    entityType='PACKAGE'
+                                    name={packagePayload.name}
+                                />
+                            )}
                         </div>
                         <div className='col-lg-4'>
                             <label

@@ -14,6 +14,7 @@ import type { JSX } from 'react'
 import { useConfigValue } from '@/contexts'
 import {
     AddtionalDataType,
+    ArchivalEntityType,
     DocumentTypes,
     InputKeyValue,
     ProjectPayload,
@@ -89,6 +90,8 @@ interface Props {
             [k: string]: string
         }>
     >
+    // Set by the create form only; when present, shows archived-duplicate suggestions under the name field.
+    archivedType?: ArchivalEntityType
 }
 
 export default function Summary({
@@ -120,6 +123,7 @@ export default function Summary({
     setLeadArchitect,
     securityResponsibles,
     setSecurityResponsibles,
+    archivedType,
 }: Props): JSX.Element {
     const t = useTranslations('default')
 
@@ -141,6 +145,7 @@ export default function Summary({
                     setVendor={setVendor}
                     projectPayload={projectPayload}
                     setProjectPayload={setProjectPayload}
+                    archivedType={archivedType}
                 />
                 <div className='row mb-4'>
                     <AddKeyValue

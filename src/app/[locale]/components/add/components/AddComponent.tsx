@@ -178,6 +178,7 @@ function AddComponent(): ReactNode {
                                                 setVendor={setVendor}
                                                 componentPayload={componentPayload}
                                                 setComponentPayload={setComponentPayload}
+                                                archivedType='COMPONENT'
                                             />
                                             <RolesInformation
                                                 componentOwner={componentOwner}

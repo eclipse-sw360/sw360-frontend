@@ -120,6 +120,7 @@ function ReleaseAddSummary({ releasePayload, setReleasePayload, vendor, setVendo
                         setModerators={setModerators}
                         contributors={contributors}
                         setContributors={setContributors}
+                        archivedType='RELEASE'
                     />
                     <div className='row mb-4'>
                         <AddAdditionalRoles

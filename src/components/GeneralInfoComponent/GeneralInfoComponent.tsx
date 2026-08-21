@@ -14,18 +14,21 @@
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { useCallback, useState } from 'react'
+import ArchivedSuggestions from '@/components/ArchivedSuggestions/ArchivedSuggestions'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
-import { ComponentPayload, UIConfigKeys, Vendor } from '@/object-types'
+import { ArchivalEntityType, ComponentPayload, UIConfigKeys, Vendor } from '@/object-types'
 
 interface Props {
     componentPayload: ComponentPayload
     setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
+    // Set by the create form only; when present, shows archived-duplicate suggestions under the name field.
+    archivedType?: ArchivalEntityType
 }
 
-const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, setVendor }: Props) => {
+const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, setVendor, archivedType }: Props) => {
     const t = useTranslations('default')
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
@@ -111,6 +114,12 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 value={componentPayload.name ?? ''}
                                 onChange={updateField}
                             />
+                            {archivedType && (
+                                <ArchivedSuggestions
+                                    entityType={archivedType}
+                                    name={componentPayload.name}
+                                />
+                            )}
                         </div>
                         <div className='col-lg-4'>
                             <label
