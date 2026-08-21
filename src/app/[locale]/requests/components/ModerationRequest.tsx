@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { Embedded, ErrorDetails, ModerationRequest, PageableQueryParam, PaginationMeta } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
@@ -28,7 +28,13 @@ interface ModerationRequestMap {
     [key: string]: string
 }
 
-function ModerationRequestComponent({ status }: { status: string }): ReactNode {
+function ModerationRequestComponent({
+    status,
+    setModerationRequestCount,
+}: {
+    status: string
+    setModerationRequestCount: Dispatch<SetStateAction<number>>
+}): ReactNode {
     const t = useTranslations('default')
     const [mrIdArray, setMrIdArray] = useState<Array<string>>([])
     const [disableBulkDecline, setDisableBulkDecline] = useState(true)
@@ -213,6 +219,11 @@ function ModerationRequestComponent({ status }: { status: string }): ReactNode {
 
                 const data = (await response.json()) as EmbeddedModerationRequest
                 setPaginationMeta(data.page)
+                if (data.page) {
+                    setModerationRequestCount(data.page.totalElements)
+                } else {
+                    setModerationRequestCount(0)
+                }
                 const openModerationRequests = CommonUtils.isNullOrUndefined(
                     data['_embedded']?.['sw360:moderationRequests'],
                 )
@@ -231,6 +242,8 @@ function ModerationRequestComponent({ status }: { status: string }): ReactNode {
     }, [
         pageableQueryParam,
         params.toString(),
+        setModerationRequestCount,
+        status,
     ])
 
     useEffect(() => {
