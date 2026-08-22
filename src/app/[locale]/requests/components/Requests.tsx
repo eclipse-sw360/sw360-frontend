@@ -10,7 +10,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound } from 'next/navigation'
+import { notFound, usePathname, useRouter } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
 import { AdvancedSearch } from 'next-sw360'
@@ -20,18 +20,38 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ClearingRequestComponent from './ClearingRequest'
+import ClearingRequestAdvancedFilter from './ClearingRequestAdvancedFilter'
 import ClosedModerationRequest from './ClosedModerationRequest'
 import OpenModerationRequest from './OpenModerationRequest'
+
+const CLEARING_REQUEST_TABS: Record<string, RequestType> = {
+    openClearingRequests: RequestType.OPEN,
+    closedClearingRequests: RequestType.CLOSED,
+}
 
 type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
 function Requests(): ReactNode | undefined {
     const t = useTranslations('default')
+    const router = useRouter()
+    const pathname = usePathname()
+    const [activeTab, setActiveTab] = useState('openModerationrequests')
     const [openModerationRequestCount, setOpenModerationRequestCount] = useState(0)
     const [closedModerationRequestCount, setClosedModerationRequestCount] = useState(0)
     const [openClearingRequestCount, setOpenClearingRequestCount] = useState(0)
     const [closedClearingRequestCount, setClosedClearingRequestCount] = useState(0)
+
+    const handleTabSelect = (eventKey: string | null) => {
+        if (eventKey === null || eventKey === activeTab) {
+            return
+        }
+        setActiveTab(eventKey)
+        // Filters are tab specific, so drop them instead of leaking them into the next tab.
+        router.replace(pathname, {
+            scroll: false,
+        })
+    }
 
     const advancedSearch = [
         {
@@ -199,7 +219,8 @@ function Requests(): ReactNode | undefined {
         <>
             <div className='container page-content'>
                 <Tab.Container
-                    defaultActiveKey='openModerationrequests'
+                    activeKey={activeTab}
+                    onSelect={handleTabSelect}
                     mountOnEnter={true}
                     unmountOnExit={true}
                 >
@@ -235,10 +256,14 @@ function Requests(): ReactNode | undefined {
                                 </ListGroup.Item>
                             </ListGroup>
                             <div className='mt-4 mb-4'>
-                                <AdvancedSearch
-                                    title='Advanced Search'
-                                    fields={advancedSearch}
-                                />
+                                {activeTab in CLEARING_REQUEST_TABS ? (
+                                    <ClearingRequestAdvancedFilter requestType={CLEARING_REQUEST_TABS[activeTab]} />
+                                ) : (
+                                    <AdvancedSearch
+                                        title='Advanced Search'
+                                        fields={advancedSearch}
+                                    />
+                                )}
                             </div>
                         </Col>
                         <Col>
