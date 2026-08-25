@@ -455,7 +455,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                     if (row.original.node.type === 'release') {
                         return (
                             <div className='text-center'>
-                                {Capitalize(row.original.node.entity.mainlineState ?? '')}
+                                {Capitalize(row.original.node.entity.releaseMainLineState ?? '')}
                             </div>
                         )
                     }
@@ -470,7 +470,11 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                 enableColumnFilter: false,
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
-                        return <div className='text-center'></div>
+                        return (
+                            <div className='text-center'>
+                                {Capitalize(row.original.node.entity.mainlineState ?? '')}
+                            </div>
+                        )
                     }
                 },
                 meta: {

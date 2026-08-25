@@ -44,7 +44,11 @@ const Capitalize = (text: string) =>
 
 type TypedProject = TypedEntity<Project, 'project'>
 
-type TypedRelease = TypedEntity<Release, 'release'>
+interface TreeViewRelease extends Release {
+    projectMainlineState?: string
+}
+
+type TypedRelease = TypedEntity<TreeViewRelease, 'release'>
 
 const typeFilterOptions: FilterOption[] = [
     {
@@ -194,7 +198,10 @@ const buildTable = (
         const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
             node: {
                 type: 'release',
-                entity: release,
+                entity: {
+                    ...release,
+                    projectMainlineState: l.mainlineState,
+                },
             },
             children: [],
         }
@@ -238,7 +245,10 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
                 node: {
                     type: 'release',
-                    entity: release,
+                    entity: {
+                        ...release,
+                        projectMainlineState: l.mainlineState,
+                    },
                 },
                 children: [],
             }
@@ -590,7 +600,11 @@ export default function TreeView({
                 enableColumnFilter: false,
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
-                        return <div className='text-center'></div>
+                        return (
+                            <div className='text-center'>
+                                {Capitalize((row.original.node.entity as TreeViewRelease).projectMainlineState ?? '')}
+                            </div>
+                        )
                     }
                 },
                 meta: {
