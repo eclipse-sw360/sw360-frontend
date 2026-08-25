@@ -357,6 +357,16 @@ The backend container is configured via
 [backend Docker documentation](https://github.com/eclipse-sw360/sw360/blob/main/README_DOCKER.md#environment-variables)
 for the full variable list.
 
+Pagination cap override for backend REST endpoints:
+
+```env
+SPRING_DATA_REST_MAX_PAGE_SIZE=1000
+```
+
+`page_entries` values above this limit are capped by Spring Data REST. The
+theoretical maximum is Java `Integer.MAX_VALUE` (`2147483647`), but large values
+can cause high memory usage and slow responses.
+
 Keep the backend trusted-issuer list aligned with the token issuers used by the
 selected auth provider:
 
