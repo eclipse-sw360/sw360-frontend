@@ -42,6 +42,7 @@ interface ListViewProject extends Project {
 interface ListViewRelease extends Release {
     releaseRelation?: string
     path?: string
+    projectMainlineState?: string
 }
 
 type TypedProject = TypedEntity<ListViewProject, 'project'>
@@ -189,6 +190,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                     ...release,
                     path: path.join(' -> '),
                     releaseRelation: l.relation,
+                    projectMainlineState: l.mainlineState,
                 },
             })
         }
@@ -222,6 +224,7 @@ const extractLinkedReleases = (
                 ...release,
                 path: path.join('->'),
                 releaseRelation: l.relation,
+                projectMainlineState: l.mainlineState,
             },
         })
     }
@@ -567,7 +570,11 @@ export default function ListView({
                 enableSorting: false,
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
-                        return <div className='text-center'></div>
+                        return (
+                            <div className='text-center'>
+                                {Capitalize((row.original.entity as ListViewRelease).projectMainlineState ?? '')}
+                            </div>
+                        )
                     }
                 },
                 meta: {
