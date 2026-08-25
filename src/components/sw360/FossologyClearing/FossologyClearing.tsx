@@ -331,11 +331,13 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     showMessage(clearingMessages.CLEARING_SUCCESS)
                     return
                 }
+                if (numberOfSourceAttachment.current !== 1) {
+                    return
+                }
                 if (
-                    countDownInterval.current !== undefined &&
-                    progressInterval.current !== undefined &&
-                    progressStatus.percent === 0 &&
-                    numberOfSourceAttachment.current == 1
+                    countDownInterval.current === undefined &&
+                    progressInterval.current === undefined &&
+                    progressStatus.percent === 0
                 ) {
                     handleFossologyClearing({}).catch((err) => console.error(err))
                 }
