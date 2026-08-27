@@ -138,7 +138,7 @@ export default defineConfig({
     webServer: process.env.CI
         ? undefined
         : {
-              command: 'npx next dev --turbopack',
+              command: 'pnpm dev',
               url: 'http://localhost:3000',
               reuseExistingServer: true,
               timeout: 120000,

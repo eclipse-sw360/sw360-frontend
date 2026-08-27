@@ -16,11 +16,12 @@ import 'bootstrap/dist/css/bootstrap.css'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { type JSX, useEffect, useState } from 'react'
+import frontendVersionInfo from '@/build-info'
 import { VersionInfo } from '@/object-types'
 import { ApiUtils } from '@/utils'
 
 function Footer(): JSX.Element {
-    const [versionInfo, setVersionInfo] = useState<VersionInfo>()
+    const [backendVersionInfo, setBackendVersionInfo] = useState<VersionInfo>()
 
     useEffect(() => {
         const controller = new AbortController()
@@ -31,7 +32,7 @@ function Footer(): JSX.Element {
                 const response = await ApiUtils.GET('version', '', signal)
                 if (response.status == StatusCodes.OK) {
                     const data = (await response.json()) as VersionInfo
-                    setVersionInfo(data)
+                    setBackendVersionInfo(data)
                 }
             } catch {
                 // Silently fail - version display is non-critical
@@ -88,14 +89,15 @@ function Footer(): JSX.Element {
                     </Link>
                 </div>
                 <div className='footerVersion'>
-                    {versionInfo ? (
+                    Frontend: {frontendVersionInfo.version} | Branch: {frontendVersionInfo.gitBranch} (
+                    {frontendVersionInfo.gitCommit.slice(0, 7)}) |&nbsp;
+                    {backendVersionInfo ? (
                         <>
-                            Version: {versionInfo.sw360Version} | Branch: {versionInfo.gitBranch} (
-                            {versionInfo.buildNumber}) | Build time: {versionInfo.buildTime} | API:{' '}
-                            {versionInfo.apiVersion}
+                            Backend: {backendVersionInfo.sw360Version} | Branch: {backendVersionInfo.gitBranch} (
+                            {backendVersionInfo.buildNumber}) | API: {backendVersionInfo.apiVersion}
                         </>
                     ) : (
-                        'No build information available.'
+                        'No backend build information available.'
                     )}
                 </div>
             </footer>
