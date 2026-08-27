@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
@@ -34,9 +34,10 @@ import {
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError, CommonUtils } from '@/utils'
+import { ApiError, CommonUtils, PermissionUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { RequestedAction } from '@/utils/permission.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -104,6 +105,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         null,
     )
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>()
+
+    // Check if user can change vulnerability ratings for this project
+    const canChangeVulnerability = useMemo(
+        () => PermissionUtils.getStandardPermissions(RequestedAction.WRITE, summaryData?._embedded, userIdentity),
+        [
+            summaryData,
+            userIdentity,
+        ],
+    )
 
     useEffect(() => {
         void (async () => {
@@ -396,7 +406,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='obligations'
-                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
+                                    hidden={
+                                        userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                                        userIdentity?.userGroup === UserGroupType.VIEWER
+                                    }
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={obligationsBadgeClassName}
@@ -409,7 +422,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='ecc'
-                                    hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
+                                    hidden={
+                                        userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                                        userIdentity?.userGroup === UserGroupType.VIEWER
+                                    }
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={eccBadgeClassName}
@@ -422,6 +438,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilityTrackingStatus'
+                                    hidden={userIdentity?.userGroup === UserGroupType.VIEWER}
                                 >
                                     <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
                                 </ListGroup.Item>
@@ -442,6 +459,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilities'
+                                    hidden={userIdentity?.userGroup === UserGroupType.VIEWER}
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={vulnerabilitiesBadgeClassName}
@@ -468,7 +486,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             variant='primary'
                                             className='me-2 col-auto'
                                             onClick={() => void preRequisite()}
-                                            disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
+                                            disabled={
+                                                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                                                userIdentity?.userGroup === UserGroupType.VIEWER
+                                            }
                                         >
                                             {t('Edit Project')}
                                         </Button>
@@ -476,11 +497,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             variant='secondary'
                                             className='col-auto'
                                             onClick={() => setShow(true)}
-                                            disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
+                                            disabled={
+                                                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                                                userIdentity?.userGroup === UserGroupType.VIEWER
+                                            }
                                         >
                                             {t('Link to Projects')}
                                         </Button>
                                         {userIdentity?.userGroup &&
+                                            userIdentity.userGroup !== UserGroupType.VIEWER &&
                                             UserGroupPriority[userIdentity.userGroup] <=
                                                 UserGroupPriority[normalizedSbomImportExportAccessUserRole] && (
                                                 <>
@@ -677,6 +702,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                     enableVulnerabilitiesDisplay:
                                                         summaryData.enableVulnerabilitiesDisplay ?? false,
                                                 }}
+                                                canChangeVulnerability={canChangeVulnerability}
                                             />
                                         )}
                                     </Tab.Pane>

@@ -257,4 +257,5 @@ function Requests(): ReactNode | undefined {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(Requests, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

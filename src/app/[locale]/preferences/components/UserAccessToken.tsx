@@ -15,12 +15,13 @@ import { StatusCodes } from 'http-status-codes'
 
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue } from '@/contexts'
-import { ErrorDetails, UIConfigKeys } from '@/object-types'
+import { ErrorDetails, UIConfigKeys, UserGroupType } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -34,10 +35,24 @@ const UserAccessToken = (): ReactNode => {
         ],
     })
     const [generatedToken, setGeneratedToken] = useState<string>('')
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     // Config values from backend
     const apiTokenGenerator = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE)
-    const writeAuthorityAllowed = apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
+    const isViewer = userIdentity?.userGroup === UserGroupType.VIEWER
+    const writeAuthorityAllowed = isViewer ? false : apiTokenGenerator === null ? true : (apiTokenGenerator as boolean)
 
     const generateToken = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
