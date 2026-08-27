@@ -565,6 +565,8 @@ export default function TreeView({
                                         <span className='badge bg-danger overlay-badge'>{'CS'}</span>
                                     ) : clearingState === 'REPORT_AVAILABLE' ? (
                                         <span className='badge bg-primary overlay-badge'>{'CS'}</span>
+                                    ) : clearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
+                                        <span className='badge bg-internal-use-scan overlay-badge'>{'CS'}</span>
                                     ) : (
                                         <span className='badge bg-success overlay-badge'>{'CS'}</span>
                                     )}

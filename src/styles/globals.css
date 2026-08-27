@@ -2112,3 +2112,7 @@ ol.formatedMessageForVul {
     table-layout: fixed;
     width: 100%;
 }
+
+.bg-internal-use-scan {
+    background-color: #9370db !important;
+}
