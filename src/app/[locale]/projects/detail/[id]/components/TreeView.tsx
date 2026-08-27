@@ -184,10 +184,70 @@ const sortAllLevels = (rows: NestedRows<TypedProject | TypedRelease>[]) => {
     rows.sort(comparator)
 }
 
+const extractSearchFields = (entity: unknown): (string | number)[] => {
+    if (!entity || typeof entity !== 'object') return []
+    const anyEntity = entity as Record<string, unknown>
+
+    const mainLicenseIds = Array.isArray(anyEntity.mainLicenseIds) ? anyEntity.mainLicenseIds : []
+    const otherLicenseIds = Array.isArray(anyEntity.otherLicenseIds) ? anyEntity.otherLicenseIds : []
+    const comment = anyEntity.comment
+    const projectType = anyEntity.projectType
+    const componentType = anyEntity.componentType
+    const clearingState = anyEntity.clearingState
+    const state = anyEntity.state
+    const mainlineState = anyEntity.mainlineState
+    const name = anyEntity.name
+    const version = anyEntity.version
+
+    return [
+        name,
+        version,
+        projectType,
+        componentType,
+        clearingState,
+        state,
+        mainlineState,
+        comment,
+        ...mainLicenseIds,
+        ...otherLicenseIds,
+    ].filter(Boolean) as (string | number)[]
+}
+
+const filterTreeNodes = (
+    nodes: NestedRows<TypedProject | TypedRelease>[],
+    searchTerm: string,
+): NestedRows<TypedProject | TypedRelease>[] => {
+    const lower = searchTerm.trim().toLowerCase()
+    if (!lower) return nodes
+
+    const matches = (value: unknown): boolean => {
+        if (value === undefined || value === null) return false
+        return String(value).toLowerCase().includes(lower)
+    }
+
+    const result: NestedRows<TypedProject | TypedRelease>[] = []
+    for (const node of nodes) {
+        const fields = extractSearchFields(node.node.entity)
+        const selfMatches = fields.some((f) => matches(f))
+        let filteredChildren: NestedRows<TypedProject | TypedRelease>[] = []
+        if (Array.isArray(node.children) && node.children.length > 0) {
+            filteredChildren = filterTreeNodes(node.children, searchTerm)
+        }
+        if (selfMatches || filteredChildren.length > 0) {
+            result.push({
+                ...node,
+                children: filteredChildren,
+            })
+        }
+    }
+    return result
+}
+
 const buildTable = (
     setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease>[]>>,
     licenseClearing: LicenseClearing,
     linkedProjects: Project[],
+    searchTerm = '',
 ) => {
     const embeddedReleases = licenseClearing._embedded?.['sw360:release'] ?? []
     const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(embeddedReleases, linkedProjects)
@@ -215,7 +275,9 @@ const buildTable = (
 
     sortAllLevels(rows)
 
-    setRowData(rows)
+    const finalRows = searchTerm.trim() ? filterTreeNodes(rows, searchTerm) : rows
+
+    setRowData(finalRows)
 }
 
 const extractLinkedProjectsAndTheirLinkedReleases = (
@@ -701,114 +763,14 @@ export default function TreeView({
             setIsDataReady(!isLoadingClearingData)
             return
         }
-        buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
+        buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects, searchTerm)
         // Mark data as ready only after setting row data
         setIsDataReady(true)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,
         isLoadingClearingData,
-    ])
-
-    useEffect(() => {
-        if (!searchTerm || !searchTerm.trim()) {
-            if (memoizedLicenseClearing !== undefined && memoizedLinkedProjects !== undefined) {
-                buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
-            }
-            return
-        }
-
-        const lower = searchTerm.trim().toLowerCase()
-
-        type SearchNode = NestedRows<TypedProject | TypedRelease>
-
-        const matches = (value: unknown): boolean => {
-            if (value === undefined || value === null) return false
-            return String(value).toLowerCase().includes(lower)
-        }
-        const extractFields = (entity: unknown): (string | number)[] => {
-            if (!entity || typeof entity !== 'object') return []
-            const anyEntity = entity as Record<string, unknown>
-
-            const mainLicenseIds = Array.isArray(anyEntity.mainLicenseIds) ? anyEntity.mainLicenseIds : []
-            const otherLicenseIds = Array.isArray(anyEntity.otherLicenseIds) ? anyEntity.otherLicenseIds : []
-            const comment = anyEntity.comment
-            const projectType = anyEntity.projectType
-            const componentType = anyEntity.componentType
-            const clearingState = anyEntity.clearingState
-            const state = anyEntity.state
-            const mainlineState = anyEntity.mainlineState
-            const name = anyEntity.name
-            const version = anyEntity.version
-
-            return [
-                name,
-                version,
-                projectType,
-                componentType,
-                clearingState,
-                state,
-                mainlineState,
-                comment,
-                ...mainLicenseIds,
-                ...otherLicenseIds,
-            ].filter(Boolean) as (string | number)[]
-        }
-        const buildFullTree = (): SearchNode[] => {
-            if (memoizedLicenseClearing === undefined) return []
-
-            const releaseEmbed = (memoizedLicenseClearing as LicenseClearing)['_embedded']?.['sw360:release'] ?? []
-            const linked = extractLinkedProjectsAndTheirLinkedReleases(
-                releaseEmbed as Release[],
-                memoizedLinkedProjects,
-            )
-
-            const releaseRows: SearchNode[] = []
-            for (const l of (memoizedLicenseClearing as LicenseClearing)['linkedReleases'] ?? []) {
-                const release = (memoizedLicenseClearing as LicenseClearing)['_embedded']?.['sw360:release']?.filter(
-                    (r: Release) => r.id === l.release.split('/').at(-1),
-                )?.[0]
-                if (!release) continue
-                releaseRows.push({
-                    node: {
-                        type: 'release',
-                        entity: release,
-                    },
-                    children: [],
-                } as SearchNode)
-            }
-
-            return [
-                ...linked,
-                ...releaseRows,
-            ]
-        }
-
-        const fullTree: SearchNode[] = buildFullTree()
-        const filterRecursive = (nodes: SearchNode[]): SearchNode[] => {
-            const result: SearchNode[] = []
-            for (const node of nodes) {
-                const fields = extractFields(node.node.entity)
-                const selfMatches = fields.some((f) => matches(f))
-                let filteredChildren: SearchNode[] = []
-                if (Array.isArray(node.children) && node.children.length > 0) {
-                    filteredChildren = filterRecursive(node.children)
-                }
-                if (selfMatches || filteredChildren.length > 0) {
-                    result.push({
-                        ...node,
-                        children: filteredChildren,
-                    })
-                }
-            }
-            return result
-        }
-        const filtered = filterRecursive(fullTree)
-        setRowData(filtered)
-    }, [
         searchTerm,
-        memoizedLicenseClearing,
-        memoizedLinkedProjects,
     ])
 
     useEffect(() => {
