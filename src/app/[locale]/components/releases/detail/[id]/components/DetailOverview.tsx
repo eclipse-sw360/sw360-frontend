@@ -184,7 +184,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
                     .then((embeddedReleaseLinks) => {
                         if (embeddedReleaseLinks) {
-                            setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
+                            setReleasesSameComponent(
+                                embeddedReleaseLinks['_embedded']['sw360:releaseLinks']
+                                    .slice()
+                                    .sort((left, right) => left.version.localeCompare(right.version)),
+                            )
                         }
                     })
                     .catch((err) => console.error(err))
