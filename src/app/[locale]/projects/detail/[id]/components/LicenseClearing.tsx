@@ -329,7 +329,6 @@ function LicenseClearing({
                             <DependencyNetworkListView projectId={projectId} />
                         ) : (
                             <ListView
-                                projectId={projectId}
                                 projectName={projectName}
                                 projectVersion={projectVersion}
                                 licenseClearingData={licenseClearingData}
