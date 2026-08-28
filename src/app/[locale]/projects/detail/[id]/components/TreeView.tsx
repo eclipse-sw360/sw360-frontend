@@ -15,6 +15,8 @@ import {
     ExpandedState,
     getCoreRowModel,
     getExpandedRowModel,
+    getSortedRowModel,
+    SortingState,
     useReactTable,
 } from '@tanstack/react-table'
 import Link from 'next/link'
@@ -49,6 +51,11 @@ interface TreeViewRelease extends Release {
 }
 
 type TypedRelease = TypedEntity<TreeViewRelease, 'release'>
+
+interface Sort {
+    columnName: string
+    isAsc: boolean
+}
 
 const typeFilterOptions: FilterOption[] = [
     {
@@ -163,25 +170,46 @@ const stateFilterOptions: FilterOption[] = [
     },
 ]
 
-const comparator = (a: NestedRows<TypedProject | TypedRelease>, b: NestedRows<TypedProject | TypedRelease>): number => {
+const comparatorName = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
     if (a.node.type === 'release' && b.node.type === 'project') {
         return -1
     } else if (a.node.type === 'project' && b.node.type === 'release') {
         return 1
     } else {
-        const aName = `${a.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.node.entity.version) && `(${a.node.entity.version})`}`
-        const bName = `${b.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.node.entity.version) && `(${b.node.entity.version})`}`
-        if (aName === bName) return 0
-        else if (aName < bName) return -1
-        else return 1
+        let diff = 0
+        const aName = `${a.node.entity.name ?? ''} ${!CommonUtils.isNullEmptyOrUndefinedString(a.node.entity.version) ? `(${a.node.entity.version})` : ''}`
+        const bName = `${b.node.entity.name ?? ''} ${!CommonUtils.isNullEmptyOrUndefinedString(b.node.entity.version) ? `(${b.node.entity.version})` : ''}`
+        diff = aName.localeCompare(bName, undefined, {
+            sensitivity: 'base',
+        })
+        return sort?.isAsc === false ? -diff : diff
     }
 }
 
-const sortAllLevels = (rows: NestedRows<TypedProject | TypedRelease>[]) => {
-    for (const r of rows) {
-        if (r.children && r.children.length !== 0) sortAllLevels(r.children)
+const comparatorFactory = (
+    columnName?: string,
+): ((
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+) => number) => {
+    switch (columnName) {
+        // add other cases here
+        default:
+            return comparatorName
     }
-    rows.sort(comparator)
+}
+
+const sortAllLevels = (rows: NestedRows<TypedProject | TypedRelease>[], sort?: Sort) => {
+    for (const r of rows) {
+        if (r.children && r.children.length !== 0) sortAllLevels(r.children, sort)
+    }
+    const comparator = comparatorFactory(sort?.columnName)
+    rows.sort((a, b) => comparator(a, b, sort))
 }
 
 const extractSearchFields = (entity: unknown): (string | number)[] => {
@@ -248,6 +276,7 @@ const buildTable = (
     licenseClearing: LicenseClearing,
     linkedProjects: Project[],
     searchTerm = '',
+    sort?: Sort,
 ) => {
     const embeddedReleases = licenseClearing._embedded?.['sw360:release'] ?? []
     const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(embeddedReleases, linkedProjects)
@@ -273,7 +302,7 @@ const buildTable = (
         ...releaseRows,
     ]
 
-    sortAllLevels(rows)
+    sortAllLevels(rows, sort)
 
     const finalRows = searchTerm.trim() ? filterTreeNodes(rows, searchTerm) : rows
 
@@ -365,6 +394,10 @@ export default function TreeView({
 
     const [rowData, setRowData] = useState<NestedRows<TypedProject | TypedRelease>[]>([])
     const [searchTerm, setSearchTerm] = useState('')
+    const [sort, setSort] = useState<Sort>({
+        columnName: 'name',
+        isAsc: true,
+    })
 
     useEffect(() => {
         setLicenseClearing(licenseClearingData)
@@ -398,6 +431,8 @@ export default function TreeView({
             {
                 id: 'name',
                 enableColumnFilter: false,
+                enableSorting: true,
+                accessorKey: 'name',
                 header: () => (
                     <>
                         {t('Name')}
@@ -741,6 +776,12 @@ export default function TreeView({
         state: {
             expanded: expandedState,
             columnFilters,
+            sorting: [
+                {
+                    id: sort.columnName,
+                    desc: !sort.isAsc,
+                },
+            ],
         },
 
         data: rowData,
@@ -753,6 +794,34 @@ export default function TreeView({
         getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
         onExpandedChange: setExpandedState,
 
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setSort((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.columnName,
+                        desc: !prev.isAsc,
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        columnName: id,
+                        isAsc: !desc,
+                    }
+                }
+
+                return {
+                    columnName: '',
+                    isAsc: true,
+                }
+            })
+        },
+
         // server side filtering config
         manualFiltering: true,
         onColumnFiltersChange: setColumnFilters,
@@ -763,7 +832,7 @@ export default function TreeView({
             setIsDataReady(!isLoadingClearingData)
             return
         }
-        buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects, searchTerm)
+        buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects, searchTerm, sort)
         // Mark data as ready only after setting row data
         setIsDataReady(true)
     }, [
@@ -771,6 +840,7 @@ export default function TreeView({
         memoizedLinkedProjects,
         isLoadingClearingData,
         searchTerm,
+        sort,
     ])
 
     useEffect(() => {

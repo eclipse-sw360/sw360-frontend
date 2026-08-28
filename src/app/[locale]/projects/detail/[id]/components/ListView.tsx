@@ -238,9 +238,9 @@ const comparator = (a: TypedProject | TypedRelease, b: TypedProject | TypedRelea
     } else {
         const aName = `${a.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.entity.version) && `(${a.entity.version})`}`
         const bName = `${b.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.entity.version) && `(${b.entity.version})`}`
-        if (aName === bName) return 0
-        else if (aName < bName) return -1
-        else return 1
+        return aName.localeCompare(bName, undefined, {
+            sensitivity: 'base',
+        })
     }
 }
 
@@ -267,7 +267,6 @@ const buildTable = (
 }
 
 export default function ListView({
-    projectId,
     projectName,
     projectVersion,
     licenseClearingData,
@@ -276,7 +275,6 @@ export default function ListView({
     columnFilters,
     setColumnFilters,
 }: {
-    projectId: string
     projectName: string
     projectVersion: string
     licenseClearingData?: LicenseClearing
