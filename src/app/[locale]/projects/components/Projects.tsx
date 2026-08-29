@@ -46,6 +46,7 @@ import {
     PaginationMeta,
     Project as TypeProject,
     UIConfigKeys,
+    UserGroupPriority,
     UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
@@ -135,6 +136,12 @@ function Project(): JSX.Element {
             }
         })()
     }, [])
+
+    const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
+    const normalizedSbomImportExportAccessUserRole: UserGroupType =
+        sbomImportExportAccessUserRole && sbomImportExportAccessUserRole in UserGroupType
+            ? (sbomImportExportAccessUserRole as UserGroupType)
+            : UserGroupType.VIEWER
 
     const handleDeleteProject = (projectId: string, clearingRequestId?: string, clearingState?: string) => {
         setDeleteProjectId(projectId)
@@ -1126,36 +1133,37 @@ function Project(): JSX.Element {
                                         >
                                             {t('Add Project')}
                                         </button>
-                                        <Dropdown>
-                                            <Dropdown.Toggle
-                                                variant='secondary'
-                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
-                                            >
-                                                {t('Import SBOM')}
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item
-                                                    onClick={() =>
-                                                        setImportSBOMMetadata({
-                                                            importType: 'SPDX',
-                                                            show: true,
-                                                        })
-                                                    }
-                                                >
-                                                    {t('SPDX')}
-                                                </Dropdown.Item>
-                                                <Dropdown.Item
-                                                    onClick={() =>
-                                                        setImportSBOMMetadata({
-                                                            importType: 'CycloneDx',
-                                                            show: true,
-                                                        })
-                                                    }
-                                                >
-                                                    {t('CycloneDX')}
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
+                                        {userIdentity?.userGroup &&
+                                            UserGroupPriority[userIdentity.userGroup] <=
+                                                UserGroupPriority[normalizedSbomImportExportAccessUserRole] && (
+                                                <Dropdown>
+                                                    <Dropdown.Toggle variant='secondary'>
+                                                        {t('Import SBOM')}
+                                                    </Dropdown.Toggle>
+                                                    <Dropdown.Menu>
+                                                        <Dropdown.Item
+                                                            onClick={() =>
+                                                                setImportSBOMMetadata({
+                                                                    importType: 'SPDX',
+                                                                    show: true,
+                                                                })
+                                                            }
+                                                        >
+                                                            {t('SPDX')}
+                                                        </Dropdown.Item>
+                                                        <Dropdown.Item
+                                                            onClick={() =>
+                                                                setImportSBOMMetadata({
+                                                                    importType: 'CycloneDx',
+                                                                    show: true,
+                                                                })
+                                                            }
+                                                        >
+                                                            {t('CycloneDX')}
+                                                        </Dropdown.Item>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            )}
                                     </div>
                                     <Dropdown className='col-auto'>
                                         <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
