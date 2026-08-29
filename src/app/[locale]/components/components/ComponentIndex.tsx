@@ -16,7 +16,7 @@ import { Alert, Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
-import { ConfigKeys, UIConfigKeys, UserGroupType } from '@/object-types'
+import { ConfigKeys, UIConfigKeys, UserGroupPriority, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
@@ -37,7 +37,11 @@ const ComponentIndex = (): ReactNode => {
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
-
+    const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
+    const normalizedSbomImportExportAccessUserRole: UserGroupType =
+        sbomImportExportAccessUserRole && sbomImportExportAccessUserRole in UserGroupType
+            ? (sbomImportExportAccessUserRole as UserGroupType)
+            : UserGroupType.VIEWER
     useEffect(() => {
         void (async () => {
             try {
@@ -86,7 +90,9 @@ const ComponentIndex = (): ReactNode => {
             type: 'secondary',
             onClick: handleClickImportSBOM,
             name: t('Import SBOM'),
-            hidden: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
+            hidden:
+                !userIdentity?.userGroup ||
+                UserGroupPriority[userIdentity.userGroup] > UserGroupPriority[normalizedSbomImportExportAccessUserRole],
         },
     }
 
