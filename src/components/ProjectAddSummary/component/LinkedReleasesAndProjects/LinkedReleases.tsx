@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
@@ -30,6 +30,12 @@ export default function LinkedReleases({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'name',
+            desc: false,
+        },
+    ])
     const [tableData, setTableData] = useState<
         [
             string,
@@ -168,6 +174,7 @@ export default function LinkedReleases({
             {
                 id: 'name',
                 header: t('Release Name'),
+                accessorFn: (row) => row[1].name,
                 cell: ({ row }) => <>{row.original[1].name}</>,
             },
             {
@@ -272,9 +279,14 @@ export default function LinkedReleases({
         ],
     )
     const table = useReactTable({
+        state: {
+            sorting,
+        },
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
     })
 
     return (
