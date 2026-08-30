@@ -77,6 +77,7 @@ export default function DownloadLicenseInfoModal({
     projectId,
     isCalledFromProjectLicenseTab,
     projectRelationships,
+    canEditUsage,
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
@@ -85,6 +86,7 @@ export default function DownloadLicenseInfoModal({
     projectId: string
     isCalledFromProjectLicenseTab: boolean
     projectRelationships: string[]
+    canEditUsage: boolean
 }): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -179,6 +181,14 @@ export default function DownloadLicenseInfoModal({
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
             setLoading(true)
+            if (!canEditUsage) {
+                await downloadHandler(
+                    new Response(null, {
+                        status: StatusCodes.OK,
+                    }),
+                )
+                return
+            }
             const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status === StatusCodes.CREATED || response.status === StatusCodes.OK) {
                 await downloadHandler(response)

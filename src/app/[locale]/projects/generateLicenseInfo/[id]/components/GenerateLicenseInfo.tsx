@@ -33,6 +33,7 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 
@@ -288,6 +289,8 @@ function GenerateLicenseInfo({
     const t = useTranslations('default')
     const [project, setProject] = useState<Project>()
     const params = useSearchParams()
+    // Only Admins, Clearing Admins/Experts and project contributors may save attachment usages.
+    const [canEditUsage, setCanEditUsage] = useState(false)
     const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
         selected: [],
         deselected: [],
@@ -356,6 +359,22 @@ function GenerateLicenseInfo({
         project,
     ])
 
+    useEffect(() => {
+        if (!project) return
+        void (async () => {
+            try {
+                const userIdentity = await getAuthenticatedUserIdentity()
+                setCanEditUsage(
+                    CommonUtils.canManageAttachmentUsage(project, userIdentity.email, userIdentity.userGroup),
+                )
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+    }, [
+        project,
+    ])
+
     const columns = useMemo<
         ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject | TypedLicense>>[]
     >(
@@ -387,6 +406,7 @@ function GenerateLicenseInfo({
                                 <input
                                     type='checkbox'
                                     className='form-check-input'
+                                    disabled={!canEditUsage}
                                     checked={saveUsagesPayload.selected.indexOf(key) !== -1}
                                     onChange={() => {
                                         if (saveUsagesPayload.selected.indexOf(key) === -1) {
@@ -449,6 +469,7 @@ function GenerateLicenseInfo({
                             <input
                                 type='checkbox'
                                 className='form-check-input'
+                                disabled={!canEditUsage}
                                 checked={checked}
                                 onChange={() => {
                                     let ignoredList: string[] = saveUsagesPayload.ignoredLicenses[key] ?? []
@@ -710,6 +731,7 @@ function GenerateLicenseInfo({
         [
             t,
             saveUsagesPayload,
+            canEditUsage,
         ],
     )
 
@@ -938,6 +960,7 @@ function GenerateLicenseInfo({
                 projectId={projectId}
                 isCalledFromProjectLicenseTab={isCalledFromProjectLicenseTab}
                 projectRelationships={projectRelationships}
+                canEditUsage={canEditUsage}
             />
             <LicenseInfoDownloadConfirmationModal
                 show={showConfirmation}

@@ -10,7 +10,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { InputKeyValue, User } from '@/object-types'
+import { InputKeyValue, Project, User, UserGroupType } from '@/object-types'
 
 /**
  * Checks if the given object is void, null or undefined.
@@ -351,6 +351,43 @@ const formatObligationText = (text: string): string =>
         .replace(/\s*\n\s*/g, '\n')
         .trim()
 
+/**
+ * User groups with global permission to save attachment usages.
+ */
+const ATTACHMENT_USAGE_WRITE_GROUPS: UserGroupType[] = [
+    UserGroupType.ADMIN,
+    UserGroupType.SW360_ADMIN,
+    UserGroupType.CLEARING_ADMIN,
+]
+
+const isProjectContributor = (project: Project, userEmail?: string | null): boolean => {
+    if (isNullEmptyOrUndefinedString(userEmail)) return false
+    const projectMembers = [
+        project.createdBy,
+        project.leadArchitect,
+        project.projectResponsible,
+        ...(project.moderators ?? []),
+        ...(project.contributors ?? []),
+    ]
+    return projectMembers.includes(userEmail)
+}
+
+/**
+ * Checks whether a user is allowed to save attachment usages. Global admins and
+ * clearing admins may always edit; other users need to be project contributors.
+ */
+const canManageAttachmentUsage = (
+    project: Project | undefined | null,
+    userEmail?: string | null,
+    userGroup?: UserGroupType,
+): boolean => {
+    if (userGroup !== undefined && ATTACHMENT_USAGE_WRITE_GROUPS.includes(userGroup)) {
+        return true
+    }
+    if (isNullOrUndefined(project)) return false
+    return isProjectContributor(project, userEmail)
+}
+
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
@@ -369,6 +406,7 @@ const CommonUtils = {
     readDateTime,
     nullToEmptyString,
     formatObligationText,
+    canManageAttachmentUsage,
 }
 
 export default CommonUtils

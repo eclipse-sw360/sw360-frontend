@@ -1595,6 +1595,7 @@
     "You are editing the original document": "元のドキュメントを編集しています。",
     "You are the last moderator for this request you are not allowed to unsubscribe": "あなたはこのリクエストの最後のモデレータです。登録を解除することはできません。",
     "You can write to the entity": "変更を実行できます。\nミスターは必要ありません！",
+    "You do not have permission to save attachment usages for this project": "You do not have permission to save attachment usages for this project",
     "You have accepted the moderation request": "モデレーションリクエストを承認しました",
     "You have assigned yourself to this moderation request": "あなたはこのモデレーションリクエストに自分自身を割り当てました。",
     "You have postponed the moderation request": "モデレートリクエストを延期しました",
