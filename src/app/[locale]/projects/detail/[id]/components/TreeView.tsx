@@ -190,6 +190,91 @@ const comparatorName = (
     }
 }
 
+const comparatorState = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
+    }
+
+    const getStateValue = (row: NestedRows<TypedProject | TypedRelease>): string => {
+        if (row.node.type === 'project') {
+            const { clearingState, state } = row.node.entity
+            return `${state ?? ''} ${clearingState ?? ''}`
+        }
+
+        return row.node.entity.clearingState ?? ''
+    }
+
+    const aState = getStateValue(a)
+    const bState = getStateValue(b)
+    const diff = aState.localeCompare(bState, undefined, {
+        sensitivity: 'base',
+    })
+
+    return sort?.isAsc === false ? -diff : diff
+}
+
+const comparatorReleaseMainlineState = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
+    }
+
+    const getMainlineStateValue = (row: NestedRows<TypedProject | TypedRelease>): string => {
+        if (row.node.type === 'project') {
+            return ''
+        }
+
+        return row.node.entity.mainlineState ?? ''
+    }
+
+    const aState = getMainlineStateValue(a)
+    const bState = getMainlineStateValue(b)
+    const diff = aState.localeCompare(bState, undefined, {
+        sensitivity: 'base',
+    })
+
+    return sort?.isAsc === false ? -diff : diff
+}
+
+const comparatorProjectMainlineState = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
+    }
+
+    const getMainlineStateValue = (row: NestedRows<TypedProject | TypedRelease>): string => {
+        if (row.node.type === 'project') {
+            return ''
+        }
+
+        return row.node.entity.projectMainlineState ?? ''
+    }
+
+    const aState = getMainlineStateValue(a)
+    const bState = getMainlineStateValue(b)
+    const diff = aState.localeCompare(bState, undefined, {
+        sensitivity: 'base',
+    })
+
+    return sort?.isAsc === false ? -diff : diff
+}
+
 const comparatorFactory = (
     columnName?: string,
 ): ((
@@ -198,7 +283,12 @@ const comparatorFactory = (
     sort?: Sort,
 ) => number) => {
     switch (columnName) {
-        // add other cases here
+        case 'state':
+            return comparatorState
+        case 'releaseMainlineState':
+            return comparatorReleaseMainlineState
+        case 'projectMainlineState':
+            return comparatorProjectMainlineState
         default:
             return comparatorName
     }
@@ -600,6 +690,8 @@ export default function TreeView({
             },
             {
                 id: 'state',
+                enableSorting: true,
+                accessorKey: 'state',
                 header: () => {
                     return (
                         <>
@@ -680,6 +772,8 @@ export default function TreeView({
                 id: 'releaseMainlineState',
                 header: t('Release Mainline State'),
                 enableColumnFilter: false,
+                enableSorting: true,
+                accessorKey: 'releaseMainlineState',
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
                         return (
@@ -696,6 +790,8 @@ export default function TreeView({
             {
                 id: 'projectMainlineState',
                 header: t('Project Mainline State'),
+                enableSorting: true,
+                accessorKey: 'projectMainlineState',
                 enableColumnFilter: false,
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
