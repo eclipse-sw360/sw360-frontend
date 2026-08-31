@@ -17,9 +17,10 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table } from 'n
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Form, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle, BsQuestionCircle } from 'react-icons/bs'
-import { ModerationRequestPayload } from '@/object-types'
+import { ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface propType {
@@ -184,6 +185,44 @@ export default function BulkDeclineModerationRequestModal({
         )
     }, [
         mrIdNameMap,
+    ])
+
+    useEffect(() => {
+        if (!show) {
+            return
+        }
+
+        void (async () => {
+            try {
+                const currentUser = await getAuthenticatedUserIdentity()
+
+                const isAdminUser =
+                    currentUser.userGroup === UserGroupType.ADMIN || currentUser.userGroup === UserGroupType.SW360_ADMIN
+
+                if (isAdminUser) {
+                    const defaultComment = 'Accepted'
+                    setModerationRequestPayload((prev) => ({
+                        ...prev,
+                        comment: defaultComment,
+                    }))
+                    setHasComment(true)
+                } else {
+                    setModerationRequestPayload((prev) => ({
+                        ...prev,
+                        comment: '',
+                    }))
+                    setHasComment(false)
+                }
+            } catch {
+                setModerationRequestPayload((prev) => ({
+                    ...prev,
+                    comment: '',
+                }))
+                setHasComment(false)
+            }
+        })()
+    }, [
+        show,
     ])
 
     const handleCommentValidation = (comment: string) => {
@@ -465,6 +504,7 @@ export default function BulkDeclineModerationRequestModal({
                                 as='textarea'
                                 name='comment'
                                 aria-label='With textarea'
+                                value={moderationRequestPayload.comment}
                                 placeholder='Comment your message...'
                                 onChange={handleUserComment}
                                 required
