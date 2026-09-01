@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -109,7 +109,7 @@ export default function VendorsList(): JSX.Element {
     const columns = useMemo<ColumnDef<Vendor>[]>(
         () => [
             {
-                id: 'name',
+                id: 'fullName',
                 header: t('Full Name'),
                 cell: ({ row }) => {
                     return (
@@ -126,7 +126,7 @@ export default function VendorsList(): JSX.Element {
                 },
             },
             {
-                id: 'shortName',
+                id: 'name',
                 accessorKey: 'shortName',
                 header: t('Short Name'),
                 cell: (info) => info.getValue(),
@@ -279,6 +279,41 @@ export default function VendorsList(): JSX.Element {
                 pageIndex: pageableQueryParam.page,
                 pageSize: pageableQueryParam.page_entries,
             },
+            sorting: [
+                {
+                    id: pageableQueryParam.sort.split(',')[0],
+                    desc: pageableQueryParam.sort.split(',')[1] === 'desc',
+                },
+            ],
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
         },
 
         // server side pagination config

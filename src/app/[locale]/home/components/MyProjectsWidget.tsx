@@ -8,6 +8,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
@@ -102,7 +104,7 @@ export default function MyProjectsWidget(): ReactNode {
                 accessorKey: 'description',
                 cell: (info) => info.getValue(),
                 meta: {
-                    width: '50%',
+                    width: '48%',
                 },
             },
             {

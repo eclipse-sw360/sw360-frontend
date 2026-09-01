@@ -8,7 +8,7 @@
 // License-Filename: LICENSE
 
 'use client'
-import React, { JSX, useEffect, useState } from 'react'
+import React, { JSX, useEffect, useRef, useState } from 'react'
 
 type SuggestionBoxProps = {
     id: string
@@ -33,8 +33,11 @@ function SuggestionBox({
 }): JSX.Element {
     const [inputValue, setInputValue] = useState<string>(initialValue ?? '')
     const [suggestions, setSuggestions] = useState<string[]>([])
+    const [focusedIndex, setFocusedIndex] = useState<number>(-1)
+    const suggestionItemRefs = useRef<Array<HTMLLIElement | null>>([])
     const inputElementId = customInputProps.id ?? 'suggestion-box'
     const suggestionListId = inputElementId + '-autocomplete-list'
+    const focusedOptionId = focusedIndex >= 0 ? `${suggestionListId}-option-${focusedIndex}` : undefined
 
     // Sometimes initialValues are loaded with an API call, thus async
     useEffect(() => {
@@ -48,6 +51,21 @@ function SuggestionBox({
         onValueChange(inputValue)
     }, [
         inputValue,
+    ])
+
+    useEffect(() => {
+        if (focusedIndex < 0) {
+            return
+        }
+
+        const focusedSuggestionItem = suggestionItemRefs.current[focusedIndex]
+        if (focusedSuggestionItem) {
+            focusedSuggestionItem.scrollIntoView({
+                block: 'nearest',
+            })
+        }
+    }, [
+        focusedIndex,
     ])
 
     // When user types an input. If multi value supported, split everything via `,` else take as is.
@@ -66,6 +84,7 @@ function SuggestionBox({
                     : []
         }
         setInputValue(value)
+        setFocusedIndex(-1)
         if (values.length > 0) {
             const lastInput = values.at(-1) ?? ''
             const filteredSuggestions = possibleValues.filter((suggestion) =>
@@ -97,16 +116,52 @@ function SuggestionBox({
     const handleSuggestionClick = (value: string) => {
         setInputValue(addToCsvEnd(inputValue, value))
         setSuggestions([])
+        setFocusedIndex(-1)
     }
 
-    // Clear the suggestions when user inputs escape
-    const closeSuggestionOnKey = (e: React.KeyboardEvent<HTMLInputElement> | undefined) => {
-        if (e && (e.code.toLowerCase() === 'escape' || e.key.toLowerCase() === 'escape')) {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        const key = e.key
+        const isArrowUp = key === 'ArrowUp'
+        const isArrowDown = key === 'ArrowDown'
+        const isEnter = key === 'Enter'
+        const isTab = key === 'Tab'
+        const isEscape = key === 'Escape'
+
+        if (isEscape) {
             setSuggestions([])
+            setFocusedIndex(-1)
+            return
+        }
+
+        // Only handle arrow, enter, and tab if suggestions are visible
+        if (suggestions.length === 0) {
+            return
+        }
+
+        if (isArrowDown) {
+            e.preventDefault()
+            setFocusedIndex((prev) => {
+                const nextIndex = prev < suggestions.length - 1 ? prev + 1 : 0
+                return nextIndex
+            })
+        } else if (isArrowUp) {
+            e.preventDefault()
+            setFocusedIndex((prev) => {
+                const nextIndex = prev > 0 ? prev - 1 : suggestions.length - 1
+                return nextIndex
+            })
+        } else if (isEnter && focusedIndex >= 0) {
+            e.preventDefault()
+            handleSuggestionClick(suggestions[focusedIndex])
+        } else if (isTab && focusedIndex >= 0) {
+            e.preventDefault()
+            handleSuggestionClick(suggestions[focusedIndex])
+        } else if (isTab && focusedIndex < 0 && suggestions.length > 0) {
+            e.preventDefault()
+            handleSuggestionClick(suggestions[0])
         }
     }
 
-    // Renter the auto complete suggestion input box
     return (
         <div className='autocomplete-wrapper'>
             <input
@@ -116,13 +171,14 @@ function SuggestionBox({
                 type='text'
                 value={inputValue}
                 onChange={handleInputChange}
-                onKeyDown={closeSuggestionOnKey}
+                onKeyDown={handleKeyDown}
                 placeholder={customInputProps.placeHolder ?? 'Start typing...'}
                 required={customInputProps.required ?? false}
                 aria-autocomplete='list'
-                aria-controls='autocomplete-list'
-                aria-haspopup={true}
-                aria-expanded={true}
+                aria-controls={suggestionListId}
+                aria-haspopup='listbox'
+                aria-expanded={suggestions.length > 0}
+                aria-activedescendant={focusedOptionId}
                 aria-describedby={customInputProps.aria_describedby}
                 data-toggle={'dropdown'}
             />
@@ -135,8 +191,16 @@ function SuggestionBox({
                     {suggestions.map((suggestion, index) => (
                         <li
                             key={index}
+                            ref={(element) => {
+                                suggestionItemRefs.current[index] = element
+                            }}
+                            id={`${suggestionListId}-option-${index}`}
                             onClick={() => handleSuggestionClick(suggestion)}
+                            onMouseEnter={() => setFocusedIndex(index)}
+                            onMouseLeave={() => setFocusedIndex(-1)}
+                            className={focusedIndex === index ? 'suggestion-focused' : ''}
                             role='option'
+                            aria-selected={focusedIndex === index}
                         >
                             {suggestion}
                         </li>

@@ -25,7 +25,7 @@ import {
 import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
-import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail, SearchResult } from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseDetail } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
@@ -34,13 +34,12 @@ interface SearchReleasesModalProps {
     setShow: (show: boolean) => void
     onSelect: (releases: ReleaseDetail[]) => void
     multiSelect?: boolean
+    preSelectedReleases?: ReleaseDetail[]
     projectId?: string
-    showExactMatch?: boolean
     showSubProjectReleases?: boolean
 }
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
-type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -50,13 +49,13 @@ export default function SearchReleasesModal({
     setShow,
     onSelect,
     multiSelect = true,
+    preSelectedReleases = [],
     projectId,
     showSubProjectReleases = false,
 }: SearchReleasesModalProps): JSX.Element {
     const t = useTranslations('default')
     const [selectedReleases, setSelectedReleases] = useState<Array<ReleaseDetail>>([])
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
-    const [exactMatch, setExactMatch] = useState(false)
     const [byNameOnly, setByNameOnly] = useState(true)
     const [onlySubProjectReleases, setOnlySubProjectReleases] = useState(false)
 
@@ -115,14 +114,19 @@ export default function SearchReleasesModal({
             {
                 id: 'componentName',
                 header: t('Component Name'),
-                cell: ({ row }) => (
-                    <Link
-                        className='text-link'
-                        href={`/components/detail/${row.original['_links']['sw360:component']['href'].split('/').pop() ?? ''}`}
-                    >
-                        {row.original.name}
-                    </Link>
-                ),
+                cell: ({ row }) => {
+                    const componentId = row.original['_links']?.['sw360:component']?.['href']?.split('/').pop()
+                    return componentId ? (
+                        <Link
+                            className='text-link'
+                            href={`/components/detail/${componentId}`}
+                        >
+                            {row.original.name}
+                        </Link>
+                    ) : (
+                        <>{row.original.name}</>
+                    )
+                },
                 meta: {
                     width: '20%',
                 },
@@ -190,6 +194,29 @@ export default function SearchReleasesModal({
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
+        if (!show || !preSelectedReleases || preSelectedReleases.length === 0) {
+            return
+        }
+
+        setSelectedReleases(preSelectedReleases)
+        setReleaseData(preSelectedReleases)
+        setPaginationMeta({
+            size: preSelectedReleases.length,
+            totalElements: preSelectedReleases.length,
+            totalPages: 1,
+            number: 0,
+        })
+        setPageableQueryParam((prev) => ({
+            ...prev,
+            page: 0,
+            page_entries: Math.max(prev.page_entries, preSelectedReleases.length),
+        }))
+    }, [
+        show,
+        preSelectedReleases,
+    ])
+
+    useEffect(() => {
         if (searchText === undefined) return
         const controller = new AbortController()
         const signal = controller.signal
@@ -246,84 +273,55 @@ export default function SearchReleasesModal({
         try {
             setShowProcessing(true)
 
+            let filterFieldName: string
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
-                // Search by name only using /releases endpoint
-                const queryUrl = CommonUtils.createUrlWithParams(
-                    `releases`,
-                    Object.fromEntries(
-                        Object.entries({
-                            ...pageableQueryParam,
-                            ...(searchText && searchText !== ''
-                                ? {
-                                      name: searchText,
-                                      luceneSearch: !exactMatch,
-                                  }
-                                : {}),
-                            allDetails: true,
-                        }).map(([key, value]) => [
-                            key,
-                            String(value),
-                        ]),
-                    ),
-                )
-                const response = await ApiUtils.GET(queryUrl, signal)
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const data = (await response.json()) as EmbeddedReleases
-                setPaginationMeta(data.page)
-                setReleaseData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
-                        ? []
-                        : data['_embedded']['sw360:releases'],
-                )
+                filterFieldName = 'name'
             } else {
-                // Full-text search using /search endpoint
-                const params = new URLSearchParams()
-                if (searchText && searchText !== '') {
-                    params.append('searchText', searchText)
-                }
-                params.append('typeMasks', 'release')
-                if (!exactMatch) {
-                    params.append('typeMasks', 'document')
-                }
-                Object.entries(pageableQueryParam)
-                    .filter(([k]) => k !== 'sort')
-                    .forEach(([key, value]) => params.append(key, String(value)))
-
-                const response = await ApiUtils.GET(`search?${params.toString()}`, signal)
-                if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const data = (await response.json()) as EmbeddedSearchResults
-                setPaginationMeta(data.page)
-
-                // Fetch full release details for search results
-                const searchResults = data['_embedded']?.['sw360:searchResults'] ?? []
-                const releaseIds = searchResults.filter((r) => r.type === 'release').map((r) => r.id)
-
-                if (releaseIds.length === 0) {
-                    setReleaseData([])
-                    return
-                }
-
-                // Fetch full details for each release
-                const releasePromises = releaseIds.map((id) =>
-                    ApiUtils.GET(`releases/${id}`, signal)
-                        .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
-                        .catch(() => null),
-                )
-                const releases = (await Promise.all(releasePromises)).filter((r): r is ReleaseDetail => r !== null)
-                setReleaseData(releases)
+                filterFieldName = 'searchText'
             }
+            // Search using /releases endpoint
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `releases`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  [filterFieldName]: searchText,
+                                  luceneSearch: true,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, signal)
+            if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+            if (response.status === StatusCodes.NO_CONTENT) {
+                setPaginationMeta({
+                    size: 0,
+                    totalElements: 0,
+                    totalPages: 0,
+                    number: 0,
+                })
+                setReleaseData([])
+                return
+            }
+            const data = (await response.json()) as EmbeddedReleases
+            setPaginationMeta(data.page)
+            setReleaseData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
+                    ? []
+                    : data['_embedded']['sw360:releases'],
+            )
         } catch (error) {
             ApiUtils.reportError(error)
         } finally {
@@ -360,7 +358,6 @@ export default function SearchReleasesModal({
         setShow(false)
         setReleaseData([])
         setSelectedReleases([])
-        setExactMatch(false)
         setByNameOnly(true)
         setOnlySubProjectReleases(false)
         setPaginationMeta({
@@ -419,41 +416,6 @@ export default function SearchReleasesModal({
                             </Col>
                         )}
                         <Col xs='auto'>
-                            <Form.Group controlId='exact-match-group'>
-                                <Form.Check
-                                    inline
-                                    name='exact-match'
-                                    type='checkbox'
-                                    id='exact-match-release'
-                                    checked={exactMatch}
-                                    onChange={() => setExactMatch(!exactMatch)}
-                                />
-                                <Form.Label className='pt-2'>
-                                    {t('Restricted Search')}{' '}
-                                    <OverlayTrigger
-                                        overlay={
-                                            <Tooltip>
-                                                <div>
-                                                    {t(
-                                                        'In case By Name Only is unchecked checking this will search for elements with name and description matching the input Otherwise the entire document will be searched',
-                                                    )}
-                                                </div>
-                                                {t(
-                                                    'In case By Name Only is checked Checking this will search for elements with name exactly matching the input',
-                                                )}
-                                                .
-                                            </Tooltip>
-                                        }
-                                        placement='top'
-                                    >
-                                        <sup>
-                                            <BsInfoCircle size={20} />
-                                        </sup>
-                                    </OverlayTrigger>
-                                </Form.Label>
-                            </Form.Group>
-                        </Col>
-                        <Col xs='auto'>
                             <Form.Group controlId='by-name-only-group'>
                                 <Form.Check
                                     inline
@@ -468,8 +430,13 @@ export default function SearchReleasesModal({
                                     <OverlayTrigger
                                         overlay={
                                             <Tooltip>
+                                                <div>
+                                                    {t(
+                                                        'Keep this checkbox checked to search elements only by name field',
+                                                    )}
+                                                </div>
                                                 {t(
-                                                    'The search result will display elements with name matching the input',
+                                                    'Uncheck it to search for elements where other fields like description matches the search terms',
                                                 )}
                                             </Tooltip>
                                         }

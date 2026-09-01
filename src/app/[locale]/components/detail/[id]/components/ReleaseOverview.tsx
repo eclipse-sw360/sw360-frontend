@@ -17,14 +17,23 @@ import { StaticImport } from 'next/dist/shared/lib/get-img-props'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
+import { KeyboardEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { BsClipboard, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
+import { BsClipboard, BsDownload, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
-import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, ReleaseLink, UserGroupType } from '@/object-types'
+import {
+    Attachment,
+    Embedded,
+    ErrorDetails,
+    PageableQueryParam,
+    PaginationMeta,
+    ReleaseLink,
+    UserGroupType,
+} from '@/object-types'
+import DownloadService from '@/services/download.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
@@ -42,6 +51,12 @@ interface Props {
 
 const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props): ReactNode => {
     const t = useTranslations('default')
+    const [search, setSearch] = useState<{
+        searchText: string
+        luceneSearch?: boolean
+    }>({
+        searchText: '',
+    })
     const [deletingRelease, setDeletingRelease] = useState('')
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [clearingReleaseId, setClearingReleaseId] = useState<string | undefined>(undefined)
@@ -94,6 +109,82 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         setLinkingReleaseId(releaseId)
     }
 
+    const handleClearingReportDownload = async (releaseId: string, attachment: Attachment) => {
+        if (!attachment.attachmentContentId) return
+
+        await DownloadService.download(
+            `releases/${releaseId}/attachments/${attachment.attachmentContentId}`,
+            attachment.filename,
+        )
+    }
+
+    const buildClearingReportTooltip = (attachment: Attachment): string => {
+        const status = attachment.checkStatus
+            ? `${attachment.checkStatus}${attachment.checkedBy ? ` by ${attachment.checkedBy}` : ''}${attachment.checkedOn ? ` on ${attachment.checkedOn}` : ''}`
+            : ''
+        const created = `${attachment.createdBy ?? ''}${attachment.createdOn ? ` on ${attachment.createdOn}` : ''}`
+
+        return [
+            `Filename: ${attachment.filename}`,
+            `Status: ${status}`,
+            `Comment: ${attachment.checkedComment ?? ''}`,
+            `Created: ${created}`,
+        ].join('\n')
+    }
+
+    const renderClearingReportCell = (release: ReleaseLink) => {
+        const reports = release.clearingReport?.attachments ?? []
+
+        if (reports.length === 0) {
+            const clearingReportStatus = release.clearingReport?.clearingReportStatus
+            return <>{clearingReportStatus ? t(clearingReportStatus as never) : t('NO_REPORT')}</>
+        }
+
+        return (
+            <span className='d-flex flex-wrap gap-1'>
+                {reports.map((attachment) => (
+                    <OverlayTrigger
+                        key={attachment.attachmentContentId ?? attachment.filename}
+                        placement='left'
+                        overlay={
+                            <Tooltip>
+                                <span
+                                    className='text-start d-inline-block'
+                                    style={{
+                                        whiteSpace: 'pre-line',
+                                    }}
+                                >
+                                    {buildClearingReportTooltip(attachment)}
+                                </span>
+                            </Tooltip>
+                        }
+                    >
+                        <span
+                            className='btn-icon text-warning'
+                            role='button'
+                            onClick={() => void handleClearingReportDownload(release.id, attachment)}
+                        >
+                            <BsDownload size={18} />
+                        </span>
+                    </OverlayTrigger>
+                ))}
+            </span>
+        )
+    }
+
+    const searchFunction = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.currentTarget.value === '') {
+            setSearch({
+                searchText: '',
+            })
+        } else {
+            setSearch({
+                searchText: event.currentTarget.value,
+                luceneSearch: true,
+            })
+        }
+    }
+
     const columns = useMemo<ColumnDef<ReleaseLink>[]>(
         () => [
             {
@@ -103,7 +194,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 enableSorting: true,
                 cell: (info) => info.getValue(),
                 meta: {
-                    width: '20%',
+                    width: '18%',
                 },
             },
             {
@@ -123,7 +214,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     )
                 },
                 meta: {
-                    width: '20%',
+                    width: '18%',
                 },
             },
             {
@@ -134,7 +225,16 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 cell: ({ row }) => <>{Capitalize(row.original.clearingState ?? '')}</>,
 
                 meta: {
-                    width: '20%',
+                    width: '16%',
+                },
+            },
+            {
+                id: 'clearingReport',
+                header: t('CLEARING_REPORT'),
+                enableSorting: false,
+                cell: ({ row }) => renderClearingReportCell(row.original),
+                meta: {
+                    width: '16%',
                 },
             },
             {
@@ -144,7 +244,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 enableSorting: true,
                 cell: ({ row }) => <>{Capitalize(row.original.mainlineState ?? '')}</>,
                 meta: {
-                    width: '20%',
+                    width: '16%',
                 },
             },
             {
@@ -209,7 +309,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                     )
                 },
                 meta: {
-                    width: '20%',
+                    width: '16%',
                 },
             },
         ],
@@ -252,7 +352,10 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `components/${componentId}/releases`,
                     Object.fromEntries(
-                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                        Object.entries({
+                            ...search,
+                            ...pageableQueryParam,
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
@@ -282,6 +385,9 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 setPaginationMeta(data.page)
                 setReleaseData(data['_embedded']?.['sw360:releaseLinks'] ?? [])
             } catch (error) {
+                if (error instanceof DOMException && error.name === 'AbortError') {
+                    return
+                }
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
@@ -293,6 +399,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     }, [
         componentId,
         pageableQueryParam,
+        search,
     ])
 
     const table = useReactTable({
@@ -375,11 +482,14 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     return (
         <>
             <div className='mb-3'>
-                <PageSizeSelector
-                    pageableQueryParam={pageableQueryParam}
-                    setPageableQueryParam={setPageableQueryParam}
-                    totalElements={paginationMeta?.totalElements}
-                />
+                <div className='d-flex justify-content-between'>
+                    <PageSizeSelector
+                        pageableQueryParam={pageableQueryParam}
+                        setPageableQueryParam={setPageableQueryParam}
+                        totalElements={paginationMeta?.totalElements}
+                    />
+                    <TableSearch searchFunction={searchFunction} />
+                </div>
                 <SW360Table
                     table={table}
                     showProcessing={showProcessing}

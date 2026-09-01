@@ -15,6 +15,21 @@ server {
     keepalive_timeout 70;
     server_name ${SERVER_DOMAIN};
 
+    # NextAuth callback can emit large Set-Cookie headers (OIDC claims/session payload).
+    # Increase upstream response header buffers to avoid 502 "upstream sent too big header".
+    # Buffer expansions for OIDC cookies and Application large I/O bounds
+    client_body_buffer_size 16M;
+    client_max_body_size 500M;
+    proxy_buffer_size 32k;
+    proxy_buffers 32 32k;
+    proxy_busy_buffers_size 128k;
+    large_client_header_buffers 4 32k;
+
+    # Proxy timeouts for long-running tasks (30 minutes)
+    proxy_connect_timeout 1800s;
+    proxy_send_timeout 1800s;
+    proxy_read_timeout 1800s;
+
     # Snakeoil certificate configuration
     ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
     ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
@@ -29,7 +44,7 @@ server {
         include    proxy_params;
     }
 
-    # Proxy for backend
+    # Proxy for backend with keepalive connection reuse
     location /authorization {
         proxy_pass http://sw360:8080/authorization;
         include    proxy_params;
@@ -41,7 +56,7 @@ server {
 
     # Proxy for KeyCloak
     location /kc {
-        proxy_pass http://keycloak:8533/kc;
+        proxy_pass http://keycloak:8083/kc;
         include    proxy_params;
     }
 }

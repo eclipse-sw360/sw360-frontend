@@ -71,7 +71,7 @@ function CreatePackage(): JSX.Element {
                     handleGoBack()
                 }
             } else {
-                MessageService.error(`${t('Something went wrong')}: ${res.message ?? response.statusText}`)
+                MessageService.error(res.message ?? response.statusText)
             }
         } catch (e) {
             ApiUtils.reportError(e)

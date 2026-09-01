@@ -18,16 +18,19 @@ import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-boots
 import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
+import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
     AdministrationDataType,
     ClearingDetailsCount,
+    ConfigKeys,
     ErrorDetails,
     LinkedProjectData,
     Project,
     ProjectDetailTabCounts,
     ProjectPayload,
     SummaryDataType,
+    UserGroupPriority,
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -50,11 +53,15 @@ import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
     const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
     const [obligationsLoading, setObligationsLoading] = useState<boolean>(false)
+    const [eccClassifiedCount, setEccClassifiedCount] = useState<number>(0)
+    const [eccOpenCount, setEccOpenCount] = useState<number>(0)
+    const [eccLoading, setEccLoading] = useState<boolean>(false)
     const [vulnerabilitiesTotal, setVulnerabilitiesTotal] = useState<number>(0)
     const [vulnerabilitiesRatedCount, setVulnerabilitiesRatedCount] = useState<number>(0)
     const [vulnerabilitiesLoading, setVulnerabilitiesLoading] = useState<boolean>(false)
@@ -67,7 +74,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         'summary',
         'administration',
         'licenseClearing',
-        'linkedPackages',
         'obligations',
         'ecc',
         'vulnerabilityTrackingStatus',
@@ -76,6 +82,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         'vulnerabilities',
         'attachments',
         'changeLog',
+        ...(isPackageFeatureEnabled
+            ? [
+                  'linkedPackages',
+              ]
+            : []),
     ]
 
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
@@ -84,6 +95,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         show: false,
         importType: 'CycloneDx',
     })
+    const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
+    const normalizedSbomImportExportAccessUserRole: UserGroupType =
+        sbomImportExportAccessUserRole && sbomImportExportAccessUserRole in UserGroupType
+            ? (sbomImportExportAccessUserRole as UserGroupType)
+            : UserGroupType.VIEWER
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
@@ -190,14 +206,50 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         projectId,
     ])
 
-    const handleEditProject = (projectId: string) => {
-        if (userIdentity?.email === summaryData?.['_embedded']?.['createdBy']?.['email']) {
-            MessageService.success(t('You are editing the original document'))
-            router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
-        } else {
-            MessageService.success(t('You will create a moderation request if you update'))
-            router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
+    const checkUpdateEligibility = async (projectId: string) => {
+        const url = CommonUtils.createUrlWithParams(`moderationrequest/validate`, {
+            entityType: 'PROJECT',
+            entityId: projectId,
+        })
+        const response = await ApiUtils.POST(url, {})
+        switch (response.status) {
+            case StatusCodes.UNAUTHORIZED:
+                MessageService.warn(t('Unauthorized request'))
+                return 'DENIED'
+            case StatusCodes.FORBIDDEN:
+                MessageService.warn(t('Access Denied'))
+                return 'DENIED'
+            case StatusCodes.BAD_REQUEST:
+                MessageService.warn(t('Invalid input or missing required parameters'))
+                return 'DENIED'
+            case StatusCodes.INTERNAL_SERVER_ERROR:
+                MessageService.error(t('Internal server error'))
+                return 'DENIED'
+            case StatusCodes.OK:
+                MessageService.info(t('You can write to the entity'))
+                return 'OK'
+            case StatusCodes.ACCEPTED:
+                MessageService.info(t('You are allowed to perform write with MR'))
+                return 'ACCEPTED'
+            default:
+                MessageService.error(t('Error while processing'))
+                return 'DENIED'
         }
+    }
+
+    const preRequisite = async () => {
+        try {
+            const isEligible = await checkUpdateEligibility(projectId)
+            if (isEligible === 'OK' || isEligible === 'ACCEPTED') {
+                handleEditProject(projectId)
+            }
+        } catch (error) {
+            ApiUtils.reportError(error)
+        }
+    }
+
+    const handleEditProject = (projectId: string) => {
+        router.push(`/projects/edit/${projectId}?tab=${activeKey}`)
     }
 
     useEffect(() => {
@@ -206,6 +258,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         const fetchCounts = async () => {
             setObligationsLoading(true)
+            setEccLoading(true)
             setVulnerabilitiesLoading(true)
             try {
                 const response = await ApiUtils.GET(`projects/${projectId}/tabCounts`, signal)
@@ -220,12 +273,15 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 const data = body as ProjectDetailTabCounts
                 setObligationsTotal(data.obligationCount)
                 setObligationsNonOpenCount(data.obligationNonOpenCount)
+                setEccClassifiedCount(Math.max(0, data.eccClassifiedCount))
+                setEccOpenCount(Math.max(0, data.eccOpenCount))
                 setVulnerabilitiesTotal(Math.max(0, data.vulnerabilityCount))
                 setVulnerabilitiesRatedCount(Math.max(0, data.vulnerabilityRatedCount))
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
                 setObligationsLoading(false)
+                setEccLoading(false)
                 setVulnerabilitiesLoading(false)
             }
         }
@@ -249,6 +305,22 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
         ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
         : '?/?'
+
+    const eccBadgeClassName =
+        eccOpenCount > 0
+            ? 'obligations-badge--danger'
+            : eccClassifiedCount > 0
+              ? 'obligations-badge--success'
+              : 'obligations-badge'
+
+    const eccCountValue = `${eccOpenCount} / ${eccClassifiedCount}`
+
+    const obligationsBadgeClassName =
+        obligationsNonOpenCount === 0
+            ? 'obligations-badge--danger'
+            : obligationsTotal === obligationsNonOpenCount
+              ? 'obligations-badge--success'
+              : 'obligations-badge'
 
     return (
         <>
@@ -313,25 +385,21 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
                                 </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    eventKey='linkedPackages'
-                                >
-                                    <div className='my-2'>{t('Linked Packages')}</div>
-                                </ListGroup.Item>
+                                {isPackageFeatureEnabled && (
+                                    <ListGroup.Item
+                                        action
+                                        eventKey='linkedPackages'
+                                    >
+                                        <div className='my-2'>{t('Linked Packages')}</div>
+                                    </ListGroup.Item>
+                                )}
                                 <ListGroup.Item
                                     action
                                     eventKey='obligations'
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
-                                        badgeClassName={
-                                            obligationsNonOpenCount === obligationsTotal && obligationsTotal > 0
-                                                ? 'obligations-badge--success'
-                                                : obligationsNonOpenCount === 0
-                                                  ? 'obligations-badge--danger'
-                                                  : 'obligations-badge'
-                                        }
+                                        badgeClassName={obligationsBadgeClassName}
                                         countId='obligationsCount'
                                         isLoading={obligationsLoading}
                                         label={t('Obligations')}
@@ -343,7 +411,13 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     eventKey='ecc'
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
-                                    <div className='my-2'>{t('ECC')}</div>
+                                    <SidebarCountBadge
+                                        badgeClassName={eccBadgeClassName}
+                                        countId='eccCount'
+                                        isLoading={eccLoading}
+                                        label={t('ECC')}
+                                        value={eccCountValue}
+                                    />
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
@@ -393,10 +467,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         <Button
                                             variant='primary'
                                             className='me-2 col-auto'
-                                            onClick={() => handleEditProject(projectId)}
+                                            onClick={() => void preRequisite()}
                                             disabled={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                         >
-                                            {t('Edit Projects')}
+                                            {t('Edit Project')}
                                         </Button>
                                         <Button
                                             variant='secondary'
@@ -406,90 +480,94 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         >
                                             {t('Link to Projects')}
                                         </Button>
-                                        <Dropdown className='col-auto'>
-                                            <Dropdown.Toggle
-                                                variant='dark'
-                                                id='exportSBOM'
-                                                className='px-2'
-                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
-                                            >
-                                                {t('Import SBOM')}
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setImportSBOMMetadata({
-                                                            importType: 'CycloneDx',
-                                                            show: true,
-                                                            projectId: projectId,
-                                                            doNotReplace: false,
-                                                        })
-                                                    }}
-                                                >
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-flex',
-                                                            alignItems: 'center',
-                                                            gap: '6px',
-                                                        }}
-                                                    >
-                                                        {t('replace existing releases and packages')}
-                                                        <ShowInfoOnHover
-                                                            text={t(
-                                                                'This will remove all current releases and packages and replace them with data from the SBOM',
-                                                            )}
-                                                        />
-                                                    </span>
-                                                </Dropdown.Item>
-                                                <Dropdown.Item
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setImportSBOMMetadata({
-                                                            importType: 'CycloneDx',
-                                                            show: true,
-                                                            projectId: projectId,
-                                                            doNotReplace: true,
-                                                        })
-                                                    }}
-                                                >
-                                                    <span
-                                                        style={{
-                                                            display: 'inline-flex',
-                                                            alignItems: 'center',
-                                                            gap: '6px',
-                                                        }}
-                                                    >
-                                                        {t('Add new releases and packages')}
-                                                        <ShowInfoOnHover
-                                                            text={t(
-                                                                'Adds new data from the SBOM without modifying existing releases and packages',
-                                                            )}
-                                                        />
-                                                    </span>
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                        <Dropdown className='col-auto'>
-                                            <Dropdown.Toggle
-                                                variant='dark'
-                                                id='exportSBOM'
-                                                className='px-2'
-                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
-                                            >
-                                                {t('Export SBOM')}
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        setShowExportProjectSbomModal(true)
-                                                    }}
-                                                >
-                                                    {t('CycloneDX')}
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
+                                        {userIdentity?.userGroup &&
+                                            UserGroupPriority[userIdentity.userGroup] <=
+                                                UserGroupPriority[normalizedSbomImportExportAccessUserRole] && (
+                                                <>
+                                                    <Dropdown className='col-auto'>
+                                                        <Dropdown.Toggle
+                                                            variant='dark'
+                                                            id='exportSBOM'
+                                                            className='px-2'
+                                                        >
+                                                            {t('Import SBOM')}
+                                                        </Dropdown.Toggle>
+                                                        <Dropdown.Menu>
+                                                            <Dropdown.Item
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setImportSBOMMetadata({
+                                                                        importType: 'CycloneDx',
+                                                                        show: true,
+                                                                        projectId: projectId,
+                                                                        doNotReplace: false,
+                                                                    })
+                                                                }}
+                                                            >
+                                                                <span
+                                                                    style={{
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '6px',
+                                                                    }}
+                                                                >
+                                                                    {t('replace existing releases and packages')}
+                                                                    <ShowInfoOnHover
+                                                                        text={t(
+                                                                            'This will remove all current releases and packages and replace them with data from the SBOM',
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            </Dropdown.Item>
+                                                            <Dropdown.Item
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setImportSBOMMetadata({
+                                                                        importType: 'CycloneDx',
+                                                                        show: true,
+                                                                        projectId: projectId,
+                                                                        doNotReplace: true,
+                                                                    })
+                                                                }}
+                                                            >
+                                                                <span
+                                                                    style={{
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '6px',
+                                                                    }}
+                                                                >
+                                                                    {t('Add new releases and packages')}
+                                                                    <ShowInfoOnHover
+                                                                        text={t(
+                                                                            'Adds new data from the SBOM without modifying existing releases and packages',
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            </Dropdown.Item>
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
+                                                    <Dropdown className='col-auto'>
+                                                        <Dropdown.Toggle
+                                                            variant='dark'
+                                                            id='exportSBOM'
+                                                            className='px-2'
+                                                        >
+                                                            {t('Export SBOM')}
+                                                        </Dropdown.Toggle>
+                                                        <Dropdown.Menu>
+                                                            <Dropdown.Item
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setShowExportProjectSbomModal(true)
+                                                                }}
+                                                            >
+                                                                {t('CycloneDX')}
+                                                            </Dropdown.Item>
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
+                                                </>
+                                            )}
                                     </Row>
                                 </Col>
                                 <Col
@@ -545,9 +623,11 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             />
                                         )}
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey='linkedPackages'>
-                                        <LinkedPackagesTab projectId={projectId} />
-                                    </Tab.Pane>
+                                    {isPackageFeatureEnabled && (
+                                        <Tab.Pane eventKey='linkedPackages'>
+                                            <LinkedPackagesTab projectId={projectId} />
+                                        </Tab.Pane>
+                                    )}
                                     <Tab.Pane eventKey='obligations'>
                                         <Obligations
                                             projectId={projectId}

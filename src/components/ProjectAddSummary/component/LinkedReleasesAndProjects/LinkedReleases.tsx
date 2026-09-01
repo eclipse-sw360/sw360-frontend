@@ -9,10 +9,9 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
@@ -21,11 +20,22 @@ import { LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types
 interface Props {
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
+    isReleaseLoading?: boolean
 }
 
-export default function LinkedReleases({ projectPayload, setProjectPayload }: Props): JSX.Element {
+export default function LinkedReleases({
+    projectPayload,
+    setProjectPayload,
+    isReleaseLoading = false,
+}: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedReleasesModal, setShowLinkedReleasesModal] = useState(false)
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'name',
+            desc: false,
+        },
+    ])
     const [tableData, setTableData] = useState<
         [
             string,
@@ -164,6 +174,7 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
             {
                 id: 'name',
                 header: t('Release Name'),
+                accessorFn: (row) => row[1].name,
                 cell: ({ row }) => <>{row.original[1].name}</>,
             },
             {
@@ -268,9 +279,14 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
         ],
     )
     const table = useReactTable({
+        state: {
+            sorting,
+        },
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
     })
 
     return (
@@ -300,16 +316,10 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
                     </h6>
                 </div>
                 <div className='mb-3'>
-                    {table ? (
-                        <SW360Table
-                            table={table}
-                            showProcessing={false}
-                        />
-                    ) : (
-                        <div className='col-12 mt-1 text-center'>
-                            <Spinner className='spinner' />
-                        </div>
-                    )}
+                    <SW360Table
+                        table={table}
+                        showProcessing={isReleaseLoading}
+                    />
                 </div>
                 <div
                     className='row'
@@ -323,7 +333,7 @@ export default function LinkedReleases({ projectPayload, setProjectPayload }: Pr
                             className='btn btn-secondary'
                             onClick={() => setShowLinkedReleasesModal(true)}
                         >
-                            {t('Link Releases')}
+                            {t('Add Releases')}
                         </button>
                     </div>
                 </div>

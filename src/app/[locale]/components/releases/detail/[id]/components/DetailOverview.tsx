@@ -73,6 +73,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const searchParams = useSearchParams()
     const router = useRouter()
     const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
@@ -183,7 +184,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
                     .then((embeddedReleaseLinks) => {
                         if (embeddedReleaseLinks) {
-                            setReleasesSameComponent(embeddedReleaseLinks['_embedded']['sw360:releaseLinks'])
+                            setReleasesSameComponent(
+                                embeddedReleaseLinks['_embedded']['sw360:releaseLinks']
+                                    .slice()
+                                    .sort((left, right) => left.version.localeCompare(right.version)),
+                            )
                         }
                     })
                     .catch((err) => console.error(err))
@@ -216,7 +221,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             try {
                 const response = await ApiUtils.GET(`releases/${releaseId}/licenseFileList`, signal)
                 if (response.status !== StatusCodes.OK) {
-                    if (response.status === StatusCodes.CONFLICT) return
+                    if (response.status === StatusCodes.CONFLICT || response.status === StatusCodes.NOT_FOUND) return
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: response.status,
@@ -233,7 +238,6 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         return () => controller.abort()
     }, [
         releaseId,
-        release,
     ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -427,12 +431,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                             <div className='my-2'>{t('Linked Releases')}</div>
                                         </ListGroup.Item>
                                     )}
-                                    <ListGroup.Item
-                                        action
-                                        eventKey={ReleaseTabIds.LINKED_PACKAGES}
-                                    >
-                                        <div className='my-2'>{t('Linked Packages')}</div>
-                                    </ListGroup.Item>
+                                    {isPackageFeatureEnabled && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey={ReleaseTabIds.LINKED_PACKAGES}
+                                        >
+                                            <div className='my-2'>{t('Linked Packages')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item
                                         action
                                         eventKey={ReleaseTabIds.CLEARING_DETAILS}
@@ -597,9 +603,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 <LinkedReleases releaseId={releaseId} />
                                             </Tab.Pane>
                                         )}
-                                        <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
-                                            <LinkedPackagesTab releaseId={releaseId} />
-                                        </Tab.Pane>
+                                        {isPackageFeatureEnabled && (
+                                            <Tab.Pane eventKey={ReleaseTabIds.LINKED_PACKAGES}>
+                                                <LinkedPackagesTab releaseId={releaseId} />
+                                            </Tab.Pane>
+                                        )}
                                         <Tab.Pane eventKey={ReleaseTabIds.CLEARING_DETAILS}>
                                             <ClearingDetails
                                                 release={release}

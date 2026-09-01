@@ -95,14 +95,6 @@ function AddRelease({ componentId }: Props): ReactNode {
         fullName: '',
     })
 
-    const [mainLicenses, setMainLicenses] = useState<{
-        [k: string]: string
-    }>({})
-
-    const [otherLicenses, setOtherLicenses] = useState<{
-        [k: string]: string
-    }>({})
-
     const [cotsResponsible, setCotsResponsible] = useState<{
         [k: string]: string
     }>({})
@@ -144,36 +136,6 @@ function AddRelease({ componentId }: Props): ReactNode {
                         id: CommonUtils.getIdFromUrl(v._links?.self?.href ?? ''),
                         fullName: v.fullName ?? '',
                     })
-                }
-
-                if (release._embedded?.['sw360:licenses']) {
-                    setMainLicenses(
-                        release._embedded['sw360:licenses'].reduce(
-                            (acc, item) => {
-                                const id = item._links?.self?.href.split('/').at(-1)
-                                if (id) acc[id] = item.fullName ?? ''
-                                return acc
-                            },
-                            {} as {
-                                [k: string]: string
-                            },
-                        ),
-                    )
-                }
-
-                if (release._embedded?.['sw360:otherLicenses']) {
-                    setOtherLicenses(
-                        release._embedded['sw360:otherLicenses'].reduce(
-                            (acc, item) => {
-                                const id = item._links?.self?.href.split('/').at(-1)
-                                if (id) acc[id] = item.fullName ?? ''
-                                return acc
-                            },
-                            {} as {
-                                [k: string]: string
-                            },
-                        ),
-                    )
                 }
 
                 const vendorId = !CommonUtils.isNullEmptyOrUndefinedArray(release._embedded?.['sw360:vendors'])
@@ -225,9 +187,17 @@ function AddRelease({ componentId }: Props): ReactNode {
                     return notFound()
                 }
                 const component: Component = (await response.json()) as Component
+                const defaultVendor = component._embedded?.defaultVendor
+                if (defaultVendor) {
+                    setVendor({
+                        id: component.defaultVendorId,
+                        fullName: defaultVendor.fullName ?? '',
+                    })
+                }
                 setReleasePayload({
                     ...releasePayload,
                     name: component.name,
+                    vendorId: component.defaultVendorId ?? releasePayload.vendorId,
                 })
                 if (component.componentType === 'COTS') {
                     setWithCotsDetails(true)
@@ -317,10 +287,6 @@ function AddRelease({ componentId }: Props): ReactNode {
                                             setReleasePayload={setReleasePayload}
                                             vendor={vendor}
                                             setVendor={setVendor}
-                                            mainLicenses={mainLicenses}
-                                            setMainLicenses={setMainLicenses}
-                                            otherLicenses={otherLicenses}
-                                            setOtherLicenses={setOtherLicenses}
                                             releaseDetail={sourceRelease ?? undefined}
                                         />
                                     </Tab.Pane>

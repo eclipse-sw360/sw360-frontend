@@ -400,14 +400,31 @@ const FrontEndConfigs = (): JSX.Element => {
                                             size={25}
                                             setCurrentUiConfig={setCurrentUiConfig}
                                             checked={
-                                                currentUiConfig[
-                                                    UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE
-                                                ] === 'true'
+                                                currentUiConfig[UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE] ===
+                                                'true'
                                             }
-                                            propKey={UIConfigKeys.UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE}
+                                            propKey={UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE}
                                         />
                                     </td>
                                     <td>{t('ui_rest_apitoken_generator_enable')}</td>
+                                </tr>
+                                <tr id='rest-api-write-access-token-in-preferences-enabled'>
+                                    <td className='align-middle fw-bold'>
+                                        {t('Enable Write Access option for REST API Tokens in Preferences')}
+                                    </td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            checked={
+                                                currentUiConfig[
+                                                    UIConfigKeys.UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED
+                                                ] === 'true'
+                                            }
+                                            propKey={UIConfigKeys.UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED}
+                                        />
+                                    </td>
+                                    <td>{t('rest_api_write_access_token_in_preferences_enabled')}</td>
                                 </tr>
                                 <tr id='enable-linked-projects-display'>
                                     <td className='align-middle fw-bold'>{t('Enable Linked Projects Display')}</td>

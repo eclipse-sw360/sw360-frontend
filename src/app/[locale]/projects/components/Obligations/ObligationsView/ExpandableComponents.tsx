@@ -127,6 +127,7 @@ export function ExpandableList({
                                 size={20}
                             />{' '}
                             {previewString}
+                            {'...'}
                         </div>
                     )}
                 </div>

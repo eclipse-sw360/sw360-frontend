@@ -14,7 +14,9 @@ import {
     ExpandedState,
     getCoreRowModel,
     getExpandedRowModel,
+    getSortedRowModel,
     type Row,
+    SortingState,
     type Table,
     useReactTable,
 } from '@tanstack/react-table'
@@ -41,6 +43,7 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -75,6 +78,49 @@ interface ExtendedNestedRows<K> {
     children?: ExtendedNestedRows<K>[]
     projectPath?: string
 }
+
+interface Sort {
+    columnName: string
+    isAsc: boolean
+}
+
+const comparatorName = (
+    firstRow: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>,
+    secondRow: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>,
+    sort?: Sort,
+): number => {
+    const typeOrder = {
+        attachment: 0,
+        release: 1,
+        project: 2,
+    }
+    const typeDifference = typeOrder[firstRow.node.type] - typeOrder[secondRow.node.type]
+    if (typeDifference !== 0) return typeDifference
+
+    const firstName =
+        firstRow.node.type === 'attachment'
+            ? firstRow.node.entity.filename
+            : `${firstRow.node.entity.name ?? ''} (${firstRow.node.entity.version ?? ''})`
+    const secondName =
+        secondRow.node.type === 'attachment'
+            ? secondRow.node.entity.filename
+            : `${secondRow.node.entity.name ?? ''} (${secondRow.node.entity.version ?? ''})`
+    const difference = firstName.localeCompare(secondName, undefined, {
+        sensitivity: 'base',
+    })
+    return sort?.isAsc === false ? -difference : difference
+}
+
+const sortAllLevels = (
+    rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
+    sort?: Sort,
+): void => {
+    for (const row of rows) {
+        if (row.children && row.children.length !== 0) sortAllLevels(row.children, sort)
+    }
+    rows.sort((firstRow, secondRow) => comparatorName(firstRow, secondRow, sort))
+}
+
 const releaseMatchesFilter = (
     release: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>,
     filter: string,
@@ -232,6 +278,10 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [data, setData] = useState<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
+    const [sort, setSort] = useState<Sort>({
+        columnName: 'name',
+        isAsc: true,
+    })
     const [releaseFilter, setReleaseFilter] = useState<string>('')
     const [searchTerm, setSearchTerm] = useState<string>('')
     const filteredData = useMemo(
@@ -498,6 +548,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 columns: [
                     {
                         id: 'name',
+                        enableSorting: true,
+                        accessorKey: 'name',
                         header: t('Name'),
                         cell: ({ row }) => {
                             if (row.original.node.type === 'attachment') {
@@ -607,7 +659,11 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                         header: t('Type'),
                         cell: ({ row }) => {
                             if (row.original.node.type === 'attachment') {
-                                return <div className='text-center'>{row.original.node.entity.attachmentType}</div>
+                                return (
+                                    <div className='text-center'>
+                                        {getAttachmentTypeShortForm(row.original.node.entity.attachmentType)}
+                                    </div>
+                                )
                             }
                         },
                         meta: {
@@ -810,6 +866,12 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         // table state config
         state: {
             expanded: expandedState,
+            sorting: [
+                {
+                    id: sort.columnName,
+                    desc: !sort.isAsc,
+                },
+            ],
         },
 
         data: filteredData,
@@ -821,6 +883,33 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         getSubRows: (row) => row.children ?? [],
         getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
         onExpandedChange: setExpandedState,
+
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setSort((previousSort) => {
+                const previousSorting: SortingState = [
+                    {
+                        id: previousSort.columnName,
+                        desc: !previousSort.isAsc,
+                    },
+                ]
+                const nextSorting = typeof updater === 'function' ? updater(previousSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        columnName: id,
+                        isAsc: !desc,
+                    }
+                }
+
+                return {
+                    columnName: '',
+                    isAsc: true,
+                }
+            })
+        },
     })
 
     tableRef.current = table
@@ -849,6 +938,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         setRowData: Dispatch<SetStateAction<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[]>>,
         attachmentUsages: AttachmentUsages,
         linkedProjects: Project[],
+        sort: Sort,
     ) => {
         const tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
         const projectPath: string[] = []
@@ -893,6 +983,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
             tableData.push(nodeProject)
         }
         projectPath.pop()
+        sortAllLevels(tableData, sort)
         setRowData(tableData)
     }
 
@@ -942,7 +1033,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         // Use requestAnimationFrame to allow the browser to paint the loading indicator
         // before starting the expensive table build
         requestAnimationFrame(() => {
-            buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects)
+            buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects, sort)
             setIsTableBuilding(false)
         })
     }, [
@@ -950,6 +1041,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         memoizedLinkedProjects,
         saveUsagesPayload,
         projectId,
+        sort,
     ])
 
     return (

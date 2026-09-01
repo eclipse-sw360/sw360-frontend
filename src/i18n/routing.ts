@@ -18,6 +18,11 @@ export const routing = defineRouting({
     localePrefix: {
         mode: 'never',
     },
+    // Persist the user's selected language across sessions in the same browser.
+    // Currently the maxAge is set to one year, which means the preference will be remembered for one year.
+    localeCookie: {
+        maxAge: 60 * 60 * 24 * 365,
+    },
 })
 
 export const { Link, redirect, usePathname, useRouter } = createNavigation(routing)

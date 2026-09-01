@@ -21,6 +21,7 @@ interface Props {
     existingReleaseData?: Map<string, LinkedReleaseData>
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     isDependencyNetworkFeatureEnabled: boolean
+    isReleaseLoading?: boolean
 }
 
 interface LinkedReleaseData {
@@ -36,6 +37,7 @@ export default function LinkedReleasesAndProjects({
     projectPayload,
     setProjectPayload,
     isDependencyNetworkFeatureEnabled,
+    isReleaseLoading = false,
 }: Props): JSX.Element {
     return (
         <>
@@ -54,6 +56,7 @@ export default function LinkedReleasesAndProjects({
                     <LinkedReleases
                         projectPayload={projectPayload}
                         setProjectPayload={setProjectPayload}
+                        isReleaseLoading={isReleaseLoading}
                     />
                 )}
             </div>

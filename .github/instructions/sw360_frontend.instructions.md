@@ -464,7 +464,7 @@ const columns = useMemo<ColumnDef<User>[]>(() => [
         header: t('Email'),
         enableSorting: true,
         cell: ({ row }) => (
-            <Link href={`/admin/users/${row.original.id}`}>
+            <Link href={`/admin/users/details?id=${encodeURIComponent(row.original.id)}`}>
                 {row.original.email}
             </Link>
         ),

@@ -14,7 +14,7 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { Alert, Spinner } from 'react-bootstrap'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter, UpdateCommentModal } from '@/components/sw360'
 import {
     ActionType,
@@ -50,6 +50,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
     const [showLicenseDbObligationsModal, setShowLicenseDbObligationsModal] = useState(false)
     const [showCompareObligationsModal, setShowCompareObligationsModal] = useState(false)
     const [refresh, setRefresh] = useState(false)
+    const [warnings, setWarnings] = useState<string[]>([])
 
     const detailColumns = useMemo<
         ColumnDef<
@@ -66,7 +67,11 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 id: 'expand',
                 cell: ({ row }) => {
                     if (row.depth > 0) {
-                        return <p>{row.original.node[1].text ?? ''}</p>
+                        return (
+                            <p className='obligation-text-preview'>
+                                {CommonUtils.formatObligationText(row.original.node[1].text ?? '')}
+                            </p>
+                        )
                     } else {
                         return <PaddedCell row={row}></PaddedCell>
                     }
@@ -203,7 +208,11 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 id: 'expand',
                 cell: ({ row }) => {
                     if (row.depth > 0) {
-                        return <p>{row.original.node[1].text ?? ''}</p>
+                        return (
+                            <p className='obligation-text-preview'>
+                                {CommonUtils.formatObligationText(row.original.node[1].text ?? '')}
+                            </p>
+                        )
                     } else {
                         return <PaddedCell row={row}></PaddedCell>
                     }
@@ -457,6 +466,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
 
                 const data = (await response.json()) as ObligationResponse
                 setPaginationMeta(data.page)
+                setWarnings(data.warnings ?? [])
                 setObligationData(
                     Object.entries(data.obligations).map(
                         (o) =>
@@ -562,10 +572,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             }
             return row.depth === 0
         },
-
-        meta: {
-            rowHeightConstant: true,
-        },
     })
 
     detailTable.getRowModel().rows.forEach((row) => {
@@ -619,10 +625,6 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             }
             return row.depth === 0
         },
-
-        meta: {
-            rowHeightConstant: true,
-        },
     })
 
     editTable.getRowModel().rows.forEach((row) => {
@@ -665,6 +667,20 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 setShow={setShowCompareObligationsModal}
                 setSelectedProjectId={setSelectedProjectId}
             />
+            {warnings.length > 0 && (
+                <div className='mb-3'>
+                    {warnings.map((warning, index) => (
+                        <Alert
+                            key={index}
+                            variant='warning'
+                            dismissible
+                            onClose={() => setWarnings((prev) => prev.filter((_, i) => i !== index))}
+                        >
+                            {warning}
+                        </Alert>
+                    ))}
+                </div>
+            )}
             <div className='d-flex justify-content-end'>
                 {actionType === ActionType.EDIT && (
                     <>

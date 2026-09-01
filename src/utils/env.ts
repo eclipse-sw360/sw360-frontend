@@ -9,8 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-// Server/Client side env
-export const SW360_API_URL: string | undefined = process.env.NEXT_PUBLIC_SW360_API_URL
+// Server/Client side env — prefer server-only SW360_API_URL at runtime (not baked in at build time)
+export const SW360_API_URL: string | undefined = process.env.SW360_API_URL || process.env.NEXT_PUBLIC_SW360_API_URL
 export const AUTH_PROVIDER: string | undefined = process.env.NEXT_PUBLIC_SW360_AUTH_PROVIDER
 export const TENANT_NAME: string | undefined = process.env.NEXT_PUBLIC_TENANT_NAME
 

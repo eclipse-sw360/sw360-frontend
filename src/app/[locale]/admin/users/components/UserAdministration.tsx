@@ -117,10 +117,11 @@ export default function UserAdminstration(): JSX.Element {
                 header: t('Email'),
                 enableSorting: true,
                 cell: ({ row }) => {
+                    const userId = CommonUtils.getIdFromUrl(row.original._links?.self.href)
                     return (
                         <Link
                             className='text-link'
-                            href={`/admin/users/details/${CommonUtils.getIdFromUrl(row.original._links?.self.href)}`}
+                            href={`/admin/users/details?id=${encodeURIComponent(userId)}`}
                         >
                             {row.original.email}
                         </Link>
@@ -189,11 +190,12 @@ export default function UserAdminstration(): JSX.Element {
                 id: 'actions',
                 header: t('Actions'),
                 cell: ({ row }) => {
+                    const userId = CommonUtils.getIdFromUrl(row.original._links?.self.href)
                     return (
                         <span className='d-flex justify-content-evenly'>
                             <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
                                 <Link
-                                    href={`/admin/users/edit/${CommonUtils.getIdFromUrl(row.original._links?.self.href)}`}
+                                    href={`/admin/users/edit?id=${encodeURIComponent(userId)}`}
                                     className='overlay-trigger'
                                 >
                                     <BsPencil
@@ -209,11 +211,7 @@ export default function UserAdminstration(): JSX.Element {
                             >
                                 <span
                                     className='d-inline-block'
-                                    onClick={() =>
-                                        handleEditSecondaryDepartmentAndRoles(
-                                            CommonUtils.getIdFromUrl(row.original._links?.self.href),
-                                        )
-                                    }
+                                    onClick={() => handleEditSecondaryDepartmentAndRoles(userId)}
                                 >
                                     <BsFiles
                                         className='btn-icon overlay-trigger cursor-pointer'

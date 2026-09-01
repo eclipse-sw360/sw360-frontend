@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode } from 'react'
 import { BsCheck2Circle, BsXCircle } from 'react-icons/bs'
 import { Release, ReleaseDetail } from '@/object-types'
+import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
 
 export default function MergeReleaseConfirmation({
     targetRelease,
@@ -570,7 +571,7 @@ export default function MergeReleaseConfirmation({
                                         key={index}
                                         className='mb-2'
                                     >
-                                        {attachment.filename} ({attachment.attachmentType})
+                                        {attachment.filename} ({getAttachmentTypeShortForm(attachment.attachmentType)})
                                     </div>
                                 ))}
                             </div>

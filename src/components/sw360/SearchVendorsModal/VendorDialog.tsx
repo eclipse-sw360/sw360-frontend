@@ -34,6 +34,28 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const t = useTranslations('default')
     const [showAddVendor, setShowAddVendor] = useState(false)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
+
+    const getVendorIdentifier = (vendorData?: Vendor): string => {
+        if (!vendorData) return ''
+        return vendorData._links?.self.href.split('/').at(-1) ?? vendorData.id ?? ''
+    }
+
+    const isVendorMatched = (currentVendor?: Vendor, comparedVendor?: Vendor): boolean => {
+        const currentIdentifier = getVendorIdentifier(currentVendor)
+        const comparedIdentifier = getVendorIdentifier(comparedVendor)
+
+        if (currentIdentifier !== '' && comparedIdentifier !== '') {
+            return currentIdentifier === comparedIdentifier
+        }
+
+        return (
+            (currentVendor?.fullName ?? '') !== '' &&
+            (currentVendor?.fullName ?? '') === (comparedVendor?.fullName ?? '') &&
+            (currentVendor?.shortName ?? '') === (comparedVendor?.shortName ?? '') &&
+            (currentVendor?.url ?? '') === (comparedVendor?.url ?? '')
+        )
+    }
+
     const handleCloseDialog = () => {
         setShow(!show)
         setSelectedVendor(vendor)
@@ -53,6 +75,12 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     }
     const [selectedVendor, setSelectedVendor] = useState<Vendor>(vendor)
 
+    useEffect(() => {
+        setSelectedVendor(vendor)
+    }, [
+        vendor,
+    ])
+
     const columns = useMemo<ColumnDef<Vendor>[]>(
         () => [
             {
@@ -60,11 +88,7 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 cell: ({ row }) => (
                     <Form.Check
                         type='radio'
-                        checked={
-                            selectedVendor !== null &&
-                            row.original._links?.self.href.split('/').at(-1) ===
-                                selectedVendor._links?.self.href.split('/').at(-1)
-                        }
+                        checked={isVendorMatched(row.original, selectedVendor)}
                         onChange={() => setSelectedVendor(row.original)}
                     ></Form.Check>
                 ),
@@ -126,7 +150,8 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     )
     const [showProcessing, setShowProcessing] = useState(false)
 
-    const searchVendor = async (signal?: AbortSignal) => {
+    const searchVendor = async (signal?: AbortSignal, overrideSearchText?: string) => {
+        const effectiveSearchText = overrideSearchText ?? searchText
         try {
             setShowProcessing(true)
             const queryUrl = CommonUtils.createUrlWithParams(
@@ -134,9 +159,9 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                 Object.fromEntries(
                     Object.entries({
                         ...pageableQueryParam,
-                        ...(searchText !== undefined && searchText !== ''
+                        ...(effectiveSearchText !== undefined && effectiveSearchText !== ''
                             ? {
-                                  searchText: searchText,
+                                  searchText: effectiveSearchText,
                               }
                             : {}),
                     }).map(([key, value]) => [
@@ -175,6 +200,38 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
         return () => controller.abort()
     }, [
         pageableQueryParam,
+    ])
+
+    useEffect(() => {
+        if (!show) return
+        const vendorName = vendor.fullName ?? ''
+        if (vendorName === '') return
+        setSelectedVendor(vendor)
+        setVendorData([
+            vendor,
+        ])
+
+        const vendorId = getVendorIdentifier(vendor)
+        if (vendorId === '') return
+        if ((vendor.shortName ?? '') !== '' && (vendor.url ?? '') !== '') return
+
+        const controller = new AbortController()
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET(`vendors/${vendorId}`, controller.signal)
+                if (response.status !== StatusCodes.OK) return
+                const fullVendor = (await response.json()) as Vendor
+                setSelectedVendor(fullVendor)
+                setVendorData([
+                    fullVendor,
+                ])
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+        return () => controller.abort()
+    }, [
+        show,
     ])
 
     const table = useReactTable({
@@ -255,6 +312,8 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
     const handleClickSelectVendor = () => {
         setVendor(selectedVendor)
         setShow(!show)
+        setSearchText(undefined)
+        setVendorData([])
     }
 
     return (

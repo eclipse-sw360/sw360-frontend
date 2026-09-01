@@ -338,7 +338,6 @@ function Packages(): ReactNode {
     }, [
         pageableQueryParam,
         params.toString(),
-        status,
     ])
 
     useEffect(() => {

@@ -46,6 +46,7 @@ import {
     PaginationMeta,
     Project as TypeProject,
     UIConfigKeys,
+    UserGroupPriority,
     UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
@@ -112,6 +113,19 @@ function Project(): JSX.Element {
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
+        page: 0,
+        page_entries: 10,
+        sort: '',
+    })
+    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+    })
+    const [projectData, setProjectData] = useState<ProjectWithSubRows[]>(() => [])
+    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
         void (async () => {
@@ -122,6 +136,12 @@ function Project(): JSX.Element {
             }
         })()
     }, [])
+
+    const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
+    const normalizedSbomImportExportAccessUserRole: UserGroupType =
+        sbomImportExportAccessUserRole && sbomImportExportAccessUserRole in UserGroupType
+            ? (sbomImportExportAccessUserRole as UserGroupType)
+            : UserGroupType.VIEWER
 
     const handleDeleteProject = (projectId: string, clearingRequestId?: string, clearingState?: string) => {
         setDeleteProjectId(projectId)
@@ -135,8 +155,15 @@ function Project(): JSX.Element {
     }
 
     const handleEditProject = (projectId: string) => {
-        router.push(`/projects/edit/${projectId}`)
-        MessageService.success(t('You are editing the original document'))
+        const project = projectData.find((proj) => proj['_links']?.['self']?.['href']?.split('/').at(-1) === projectId)
+        const createdByEmail = project?.['_embedded']?.['createdBy']
+        if (userIdentity?.email === createdByEmail || userIdentity?.userGroup === UserGroupType.ADMIN) {
+            MessageService.info(t('You are editing the original document'))
+            router.push(`/projects/edit/${projectId}`)
+        } else {
+            MessageService.info(t('You will create a moderation request if you update'))
+            router.push(`/projects/edit/${projectId}`)
+        }
     }
 
     const fetchLinkedProjects = useCallback(async (projectId: string) => {
@@ -661,18 +688,7 @@ function Project(): JSX.Element {
             showLinkedProjects,
         ],
     )
-    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
-        page: 0,
-        page_entries: 10,
-        sort: params.toString() ? 'score,asc' : 'name,asc',
-    })
-    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
-        size: 0,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-    })
-    const [projectData, setProjectData] = useState<ProjectWithSubRows[]>(() => [])
+
     const memoizedData = useMemo(() => {
         if (!showLinkedProjects) return projectData
 
@@ -707,7 +723,6 @@ function Project(): JSX.Element {
         showLinkedProjects,
         linkedProjectsData,
     ])
-    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -1118,36 +1133,37 @@ function Project(): JSX.Element {
                                         >
                                             {t('Add Project')}
                                         </button>
-                                        <Dropdown>
-                                            <Dropdown.Toggle
-                                                variant='secondary'
-                                                hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
-                                            >
-                                                {t('Import SBOM')}
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item
-                                                    onClick={() =>
-                                                        setImportSBOMMetadata({
-                                                            importType: 'SPDX',
-                                                            show: true,
-                                                        })
-                                                    }
-                                                >
-                                                    {t('SPDX')}
-                                                </Dropdown.Item>
-                                                <Dropdown.Item
-                                                    onClick={() =>
-                                                        setImportSBOMMetadata({
-                                                            importType: 'CycloneDx',
-                                                            show: true,
-                                                        })
-                                                    }
-                                                >
-                                                    {t('CycloneDX')}
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
+                                        {userIdentity?.userGroup &&
+                                            UserGroupPriority[userIdentity.userGroup] <=
+                                                UserGroupPriority[normalizedSbomImportExportAccessUserRole] && (
+                                                <Dropdown>
+                                                    <Dropdown.Toggle variant='secondary'>
+                                                        {t('Import SBOM')}
+                                                    </Dropdown.Toggle>
+                                                    <Dropdown.Menu>
+                                                        <Dropdown.Item
+                                                            onClick={() =>
+                                                                setImportSBOMMetadata({
+                                                                    importType: 'SPDX',
+                                                                    show: true,
+                                                                })
+                                                            }
+                                                        >
+                                                            {t('SPDX')}
+                                                        </Dropdown.Item>
+                                                        <Dropdown.Item
+                                                            onClick={() =>
+                                                                setImportSBOMMetadata({
+                                                                    importType: 'CycloneDx',
+                                                                    show: true,
+                                                                })
+                                                            }
+                                                        >
+                                                            {t('CycloneDX')}
+                                                        </Dropdown.Item>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            )}
                                     </div>
                                     <Dropdown className='col-auto'>
                                         <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>

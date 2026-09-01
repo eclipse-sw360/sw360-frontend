@@ -41,6 +41,12 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
     const t = useTranslations('default')
     const [selectingDepartment, setSelectingDepartment] = useState<string>(department || '')
 
+    useEffect(() => {
+        setSelectingDepartment(department || '')
+    }, [
+        department,
+    ])
+
     const columns = useMemo<ColumnDef<Department>[]>(
         () => [
             {
@@ -51,7 +57,7 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
                             className='form-check-input'
                             type='radio'
                             checked={row.original.departmentName == selectingDepartment}
-                            onClick={() => handleDepartmentSelect(row.original.departmentName)}
+                            onChange={() => handleDepartmentSelect(row.original.departmentName)}
                         />
                     </div>
                 ),
@@ -179,7 +185,7 @@ export default function DepartmentModal({ show, setShow, department, setDepartme
                                         type='text'
                                         name='department'
                                         value={selectingDepartment}
-                                        readOnly
+                                        onChange={(e) => handleDepartmentSelect(e.target.value)}
                                     />
                                 </Col>
                             </Row>

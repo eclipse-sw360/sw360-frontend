@@ -9,7 +9,7 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
@@ -26,6 +26,12 @@ interface Props {
 export default function LinkedProjects({ projectPayload, setProjectPayload }: Props): JSX.Element {
     const t = useTranslations('default')
     const [showLinkedProjectsModal, setShowLinkedProjectsModal] = useState(false)
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: 'name',
+            desc: false,
+        },
+    ])
     const [tableData, setTableData] = useState<
         [
             string,
@@ -114,6 +120,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
             {
                 id: 'name',
                 header: t('Name'),
+                accessorFn: (row) => row[1].name,
                 cell: ({ row }) => <>{row.original[1].name}</>,
                 meta: {
                     width: '25%',
@@ -215,9 +222,14 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
     )
 
     const table = useReactTable({
+        state: {
+            sorting,
+        },
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
     })
 
     return (
@@ -238,7 +250,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                             paddingLeft: '0px',
                         }}
                     >
-                        {t('Linked Projects')}
+                        {t('LINKED PROJECTS')}
                         <hr
                             className='my-2 mb-2'
                             style={{

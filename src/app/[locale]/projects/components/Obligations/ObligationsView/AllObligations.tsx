@@ -15,7 +15,8 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { JSX, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { Alert, Spinner } from 'react-bootstrap'
+import { BsInfoCircle } from 'react-icons/bs'
 import {
     Embedded,
     ErrorDetails,
@@ -48,6 +49,7 @@ interface ProjectObligationData extends ObligationData {
 
 export default function LicenseObligation({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
+    const [warnings, setWarnings] = useState<string[]>([])
 
     const columns = useMemo<
         ColumnDef<
@@ -64,7 +66,11 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                 id: 'expand',
                 cell: ({ row }) => {
                     if (row.depth > 0) {
-                        return <p>{row.original.node[1].text ?? ''}</p>
+                        return (
+                            <p className='obligation-text-preview'>
+                                {CommonUtils.formatObligationText(row.original.node[1].text ?? '')}
+                            </p>
+                        )
                     } else {
                         return <PaddedCell row={row}></PaddedCell>
                     }
@@ -250,6 +256,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
 
                 const data = (await response.json()) as ObligationResponse
                 setPaginationMeta(data.page)
+                setWarnings(data.warnings ?? [])
                 setObligationData(data.obligations)
             } catch (error) {
                 ApiUtils.reportError(error)
@@ -451,8 +458,29 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
 
     return (
         <div className='mb-3'>
+            {warnings.length > 0 && (
+                <div className='mb-3'>
+                    {warnings.map((warning, index) => (
+                        <Alert
+                            key={index}
+                            variant='warning'
+                            dismissible
+                            onClose={() => setWarnings((prev) => prev.filter((_, i) => i !== index))}
+                        >
+                            {warning}
+                        </Alert>
+                    ))}
+                </div>
+            )}
             {pageableQueryParam && paginationMeta && table ? (
                 <>
+                    <div className='d-flex align-items-start gap-2 mb-2'>
+                        <BsInfoCircle
+                            size={15}
+                            className='mt-1'
+                        />
+                        <span>{t('Deferred Obligation Info')}</span>
+                    </div>
                     <PageSizeSelector
                         pageableQueryParam={pageableQueryParam}
                         setPageableQueryParam={setPageableQueryParam}

@@ -358,7 +358,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                                         >
                                             <option
                                                 className='textlabel'
-                                                value='NOT_CHECKED'
+                                                value='NOTCHECKED'
                                             >
                                                 {t('NOT_CHECKED')}
                                             </option>

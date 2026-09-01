@@ -1,0 +1,100 @@
+# -----------------------------------------------------------------------------
+# SPDX-FileCopyrightText: Copyright Siemens AG, 2026
+# SPDX-FileContributor: Gaurav Mishra <mishra.gaurav@siemens.com>
+# Part of the SW360 Project.
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# -----------------------------------------------------------------------------
+
+name: Generate SBOM
+
+# Trigger on new releases published
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        default: "main"
+        required: true
+
+# Product specific settings
+env:
+  PRODUCT_PATH: "./"
+  CDXGEN_VERSION: "12.8.4"
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    outputs:
+      project-version: ${{ steps.version.outputs.PROJECT_VERSION }}
+
+    permissions:
+      packages: read
+
+    steps:
+      - name: Extract version
+        id: version
+        run: |
+          VERSION="${{ github.event_name == 'release' && github.event.release.tag_name || github.event.inputs.version }}"
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Product version: $VERSION"
+
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.version.outputs.PROJECT_VERSION }}
+
+      - name: pnpm-setup
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          pnpm i
+
+      - name: Install cdxgen
+        run: |
+          npm install -g @cyclonedx/cdxgen@${{ env.CDXGEN_VERSION }}
+
+      - name: Generate SBOM
+        run: |
+          cdxgen -r -o ${{ env.PRODUCT_PATH }}/bom.json --deep
+
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sbom
+          path: ${{ env.PRODUCT_PATH }}/bom.json
+
+#  store-sbom-data: # stores sbom and metadata in a predefined format for otterdog to pick up
+#    needs: ["generate-sbom"]
+#    uses: eclipse-csi/workflows/.github/workflows/store-sbom-data.yml@main
+#    with:
+#      projectName: "sw360"
+#      projectVersion: ${{ needs.generate-sbom.outputs.project-version }}
+#      bomArtifact: "sbom"
+#      bomFilename: "bom.json"
+#      parentProject: "uuid-here"

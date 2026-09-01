@@ -27,22 +27,6 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: {
-        [k: string]: string
-    }
-    setMainLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
-    otherLicenses: {
-        [k: string]: string
-    }
-    setOtherLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
     contributors: {
         [k: string]: string
     }
@@ -68,10 +52,6 @@ const ReleaseSummary = ({
     setReleasePayload,
     vendor,
     setVendor,
-    mainLicenses,
-    setMainLicenses,
-    otherLicenses,
-    setOtherLicenses,
     contributors,
     setContributors,
     moderators,
@@ -119,19 +99,17 @@ const ReleaseSummary = ({
         })()
     }, [])
 
-    const setMainLicensesToPayload = (mainLicenses: { [k: string]: string }) => {
-        setMainLicenses(mainLicenses)
+    const setMainLicensesToPayload = (mainLicenses: string[]) => {
         setReleasePayload({
             ...releasePayload,
-            mainLicenseIds: Object.keys(mainLicenses),
+            mainLicenseIds: mainLicenses,
         })
     }
 
-    const setOtherLicensesToPayload = (otherLicenses: { [k: string]: string }) => {
-        setOtherLicenses(otherLicenses)
+    const setOtherLicensesToPayload = (otherLicenses: string[]) => {
         setReleasePayload({
             ...releasePayload,
-            otherLicenseIds: Object.keys(otherLicenses),
+            otherLicenseIds: otherLicenses,
         })
     }
 
@@ -485,14 +463,14 @@ const ReleaseSummary = ({
                                     aria-describedby='MainLicense'
                                     readOnly={true}
                                     name='mainLicenseIds'
-                                    value={Object.values(mainLicenses).join(', ')}
+                                    value={(releasePayload.mainLicenseIds ?? []).join(', ')}
                                     onClick={handleClickSearchMainLicenses}
                                 />
                                 <LicensesDialog
                                     show={dialogOpenMainLicenses}
                                     setShow={setDialogOpenMainLicenses}
                                     selectLicenses={setMainLicensesToPayload}
-                                    releaseLicenses={mainLicenses}
+                                    releaseLicenses={releasePayload.mainLicenseIds ?? []}
                                 />
                             </div>
                         </div>
@@ -515,13 +493,13 @@ const ReleaseSummary = ({
                                     readOnly={true}
                                     name='otherLicenseIds'
                                     onClick={handleClickSearchOtherLicenses}
-                                    value={Object.values(otherLicenses).join(', ')}
+                                    value={(releasePayload.otherLicenseIds ?? []).join(', ')}
                                 />
                                 <LicensesDialog
                                     show={dialogOpenOtherLicenses}
                                     setShow={setDialogOpenOtherLicenses}
                                     selectLicenses={setOtherLicensesToPayload}
-                                    releaseLicenses={otherLicenses}
+                                    releaseLicenses={releasePayload.otherLicenseIds ?? []}
                                 />
                             </div>
                             <div className='col-lg-4'>

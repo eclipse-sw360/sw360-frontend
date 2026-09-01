@@ -94,6 +94,7 @@ function AddProjects(): JSX.Element {
 
     const isDependencyNetworkFeatureEnabled =
         useConfigKeyValue(ConfigKeys.ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP) === 'true'
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
 
     const setExternalUrlsData = (externalUrls: Map<string, string>) => {
         const obj = Object.fromEntries(externalUrls)
@@ -194,12 +195,14 @@ function AddProjects(): JSX.Element {
                                     >
                                         <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                     </ListGroup.Item>
-                                    <ListGroup.Item
-                                        action
-                                        eventKey='linkedPackages'
-                                    >
-                                        <div className='my-2'>{t('Linked Packages')}</div>
-                                    </ListGroup.Item>
+                                    {isPackageFeatureEnabled && (
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='linkedPackages'
+                                        >
+                                            <div className='my-2'>{t('Linked Packages')}</div>
+                                        </ListGroup.Item>
+                                    )}
                                 </ListGroup>
                             </Col>
                             <Col>
@@ -274,12 +277,14 @@ function AddProjects(): JSX.Element {
                                                 isDependencyNetworkFeatureEnabled={isDependencyNetworkFeatureEnabled}
                                             />
                                         </Tab.Pane>
-                                        <Tab.Pane eventKey='linkedPackages'>
-                                            <LinkedPackages
-                                                payload={projectPayload}
-                                                setPayload={setProjectPayload}
-                                            />
-                                        </Tab.Pane>
+                                        {isPackageFeatureEnabled && (
+                                            <Tab.Pane eventKey='linkedPackages'>
+                                                <LinkedPackages
+                                                    payload={projectPayload}
+                                                    setPayload={setProjectPayload}
+                                                />
+                                            </Tab.Pane>
+                                        )}
                                     </Tab.Content>
                                 </Row>
                             </Col>

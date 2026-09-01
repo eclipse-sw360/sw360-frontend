@@ -20,11 +20,11 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW360Table } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
-import { Embedded, ErrorDetails, FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
-import { ApiError, CommonUtils } from '@/utils'
+import { FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface Attachment {
@@ -35,8 +35,6 @@ interface Attachment {
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-type LinkedProjects = Embedded<Project, 'sw360:projects'>
-
 interface ListViewProject extends Project {
     path?: string
 }
@@ -44,6 +42,7 @@ interface ListViewProject extends Project {
 interface ListViewRelease extends Release {
     releaseRelation?: string
     path?: string
+    projectMainlineState?: string
 }
 
 type TypedProject = TypedEntity<ListViewProject, 'project'>
@@ -191,6 +190,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                     ...release,
                     path: path.join(' -> '),
                     releaseRelation: l.relation,
+                    projectMainlineState: l.mainlineState,
                 },
             })
         }
@@ -224,15 +224,10 @@ const extractLinkedReleases = (
                 ...release,
                 path: path.join('->'),
                 releaseRelation: l.relation,
+                projectMainlineState: l.mainlineState,
             },
         })
     }
-}
-
-const tableIdToUrlParamMapper: Record<string, string> = {
-    type: 'componentType',
-    relation: 'releaseRelation',
-    state: 'clearingState',
 }
 
 const comparator = (a: TypedProject | TypedRelease, b: TypedProject | TypedRelease): number => {
@@ -243,9 +238,9 @@ const comparator = (a: TypedProject | TypedRelease, b: TypedProject | TypedRelea
     } else {
         const aName = `${a.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.entity.version) && `(${a.entity.version})`}`
         const bName = `${b.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.entity.version) && `(${b.entity.version})`}`
-        if (aName === bName) return 0
-        else if (aName < bName) return -1
-        else return 1
+        return aName.localeCompare(bName, undefined, {
+            sensitivity: 'base',
+        })
     }
 }
 
@@ -272,17 +267,24 @@ const buildTable = (
 }
 
 export default function ListView({
-    projectId,
     projectName,
     projectVersion,
+    licenseClearingData,
+    linkedProjectsData,
+    isLoadingClearingData,
+    columnFilters,
+    setColumnFilters,
 }: {
-    projectId: string
     projectName: string
     projectVersion: string
+    licenseClearingData?: LicenseClearing
+    linkedProjectsData: Project[]
+    isLoadingClearingData: boolean
+    columnFilters: ColumnFiltersState
+    setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>
 }): JSX.Element {
     const t = useTranslations('default')
 
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
@@ -308,6 +310,14 @@ export default function ListView({
     )
 
     const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
+
+    useEffect(() => {
+        setLicenseClearing(licenseClearingData)
+        setLinkedProjects(linkedProjectsData)
+    }, [
+        licenseClearingData,
+        linkedProjectsData,
+    ])
 
     const handleShowLicenseFiles = useCallback(async (release: Release) => {
         setSelectedRelease(release)
@@ -520,6 +530,8 @@ export default function ListView({
                                         <span className='badge bg-danger overlay-badge'>{'CS'}</span>
                                     ) : clearingState === 'REPORT_AVAILABLE' ? (
                                         <span className='badge bg-primary overlay-badge'>{'CS'}</span>
+                                    ) : clearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
+                                        <span className='badge bg-internal-use-scan overlay-badge'>{'CS'}</span>
                                     ) : (
                                         <span className='badge bg-success overlay-badge'>{'CS'}</span>
                                     )}
@@ -558,7 +570,11 @@ export default function ListView({
                 enableSorting: false,
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
-                        return <div className='text-center'></div>
+                        return (
+                            <div className='text-center'>
+                                {Capitalize((row.original.entity as ListViewRelease).projectMainlineState ?? '')}
+                            </div>
+                        )
                     }
                 },
                 meta: {
@@ -655,72 +671,9 @@ export default function ListView({
     })
 
     useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-        const timeLimit = memoizedLicenseClearing === undefined ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
-
-        void (async () => {
-            try {
-                const filterParams = columnFilters
-                    .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
-                    .filter((param) => param !== '')
-                    .join('&')
-
-                const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? '&' + filterParams : ''}`
-                const response = await ApiUtils.GET(url, signal)
-
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-                const licenseClearingData = (await response.json()) as LicenseClearing
-                setLicenseClearing(licenseClearingData)
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
-            }
-        })()
-        return () => controller.abort()
+        setShowProcessing(isLoadingClearingData)
     }, [
-        projectId,
-        columnFilters,
-    ])
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-        const timeLimit = memoizedLinkedProjects.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
-        void (async () => {
-            try {
-                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-                const linkedProjectsData = (await response.json()) as LinkedProjects
-                setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
-            }
-        })()
-        return () => controller.abort()
-    }, [
-        projectId,
+        isLoadingClearingData,
     ])
 
     useEffect(() => {

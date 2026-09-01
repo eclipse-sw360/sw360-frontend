@@ -44,7 +44,7 @@ function UpdateReleaseModal({
     useEffect(() => {
         setVendor(release?.vendor ?? {})
     }, [
-        release,
+        release?.id,
     ])
 
     function handleClose() {
@@ -57,7 +57,8 @@ function UpdateReleaseModal({
     const handleEditRelease = async (release: Release | null) => {
         if (release === null) return
         try {
-            const response = await ApiUtils.PATCH(`releases/${release.id}`, release)
+            const { vendor: _vendor, ...releasePayload } = release
+            const response = await ApiUtils.PATCH(`releases/${release.id}`, releasePayload)
 
             if (response.status == StatusCodes.OK) {
                 setAlert({

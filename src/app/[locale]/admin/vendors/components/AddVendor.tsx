@@ -68,7 +68,6 @@ export default function AddVendor(): JSX.Element {
                         <button
                             type='submit'
                             className='btn btn-primary col-auto me-2'
-                            disabled={status !== 'authenticated'}
                         >
                             {t('Create Vendor')}
                         </button>

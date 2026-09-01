@@ -19,15 +19,7 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Col, Form, Modal, OverlayTrigger, Row, Spinner, Tooltip } from 'react-bootstrap'
 import { BsCheck2, BsInfoCircle } from 'react-icons/bs'
 import { PageSizeSelector, SW360Table, TableFooter } from '@/components/sw360'
-import {
-    Embedded,
-    ErrorDetails,
-    PageableQueryParam,
-    PaginationMeta,
-    Project,
-    ReleaseDetail,
-    SearchResult,
-} from '@/object-types'
+import { Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, Project, ReleaseDetail } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
@@ -38,7 +30,6 @@ interface Props {
 }
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
-type EmbeddedSearchResults = Embedded<SearchResult, 'sw360:searchResults'>
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -48,7 +39,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const [linkingReleaseName, setLinkingReleaseName] = useState('')
     const [withLinkedProject, setWithLinkedProject] = useState(true)
     const [showMessage, setShowMessage] = useState(false)
-    const [exactMatch, setExactMatch] = useState(false)
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [byNameOnly, setByNameOnly] = useState(true)
     const [selectedProject, setSelectedProject] = useState<Project>()
@@ -194,7 +184,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: 'score,asc',
+        sort: '',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -296,84 +286,46 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
         try {
             setShowProcessing(true)
 
+            let filterFieldName: string
             if (byNameOnly || CommonUtils.isNullEmptyOrUndefinedString(searchText)) {
-                // Search by name only using /projects endpoint
-                const queryUrl = CommonUtils.createUrlWithParams(
-                    `projects`,
-                    Object.fromEntries(
-                        Object.entries({
-                            ...pageableQueryParam,
-                            ...(searchText && searchText !== ''
-                                ? {
-                                      name: searchText,
-                                      luceneSearch: !exactMatch,
-                                  }
-                                : {}),
-                            allDetails: true,
-                        }).map(([key, value]) => [
-                            key,
-                            String(value),
-                        ]),
-                    ),
-                )
-                const response = await ApiUtils.GET(queryUrl, signal)
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const data = (await response.json()) as EmbeddedProjects
-                setPaginationMeta(data.page)
-                setProjectData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
-                        ? []
-                        : data['_embedded']['sw360:projects'],
-                )
+                filterFieldName = 'name'
             } else {
-                // Full-text search using /search endpoint
-                const params = new URLSearchParams()
-                if (searchText && searchText !== '') {
-                    params.append('searchText', searchText)
-                }
-                params.append('typeMasks', 'project')
-                if (!exactMatch) {
-                    params.append('typeMasks', 'document')
-                }
-                Object.entries(pageableQueryParam)
-                    .filter(([k]) => k !== 'sort')
-                    .forEach(([key, value]) => params.append(key, String(value)))
-
-                const response = await ApiUtils.GET(`search?${params.toString()}`, signal)
-                if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const data = (await response.json()) as EmbeddedSearchResults
-                setPaginationMeta(data.page)
-
-                // Fetch full project details for search results
-                const searchResults = data['_embedded']?.['sw360:searchResults'] ?? []
-                const projectIds = searchResults.filter((r) => r.type === 'project').map((r) => r.id)
-
-                if (projectIds.length === 0) {
-                    setProjectData([])
-                    return
-                }
-
-                // Fetch full details for each project
-                const projectPromises = projectIds.map((id) =>
-                    ApiUtils.GET(`projects/${id}`, signal)
-                        .then((res) => (res.status === StatusCodes.OK ? res.json() : null))
-                        .catch(() => null),
-                )
-                const projects = (await Promise.all(projectPromises)).filter((p): p is Project => p !== null)
-                setProjectData(projects)
+                filterFieldName = 'searchText'
             }
+            // Search using /projects endpoint
+            const queryUrl = CommonUtils.createUrlWithParams(
+                `projects`,
+                Object.fromEntries(
+                    Object.entries({
+                        ...pageableQueryParam,
+                        ...(searchText && searchText !== ''
+                            ? {
+                                  [filterFieldName]: searchText,
+                                  luceneSearch: true,
+                              }
+                            : {}),
+                        allDetails: true,
+                    }).map(([key, value]) => [
+                        key,
+                        String(value),
+                    ]),
+                ),
+            )
+            const response = await ApiUtils.GET(queryUrl, signal)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+
+            const data = (await response.json()) as EmbeddedProjects
+            setPaginationMeta(data.page)
+            setProjectData(
+                CommonUtils.isNullOrUndefined(data['_embedded']['sw360:projects'])
+                    ? []
+                    : data['_embedded']['sw360:projects'],
+            )
         } catch (error) {
             ApiUtils.reportError(error)
         } finally {
@@ -542,41 +494,6 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                     <Form.Group>
                                         <Form.Check
                                             inline
-                                            name='exact-match'
-                                            type='checkbox'
-                                            id='exact-match'
-                                            checked={exactMatch}
-                                            onChange={() => setExactMatch(!exactMatch)}
-                                        />
-                                        <Form.Label className='pt-2'>
-                                            {t('Restricted Search')}{' '}
-                                            <OverlayTrigger
-                                                overlay={
-                                                    <Tooltip>
-                                                        <div>
-                                                            {t(
-                                                                'In case By Name Only is unchecked checking this will search for elements with name and description matching the input Otherwise the entire document will be searched',
-                                                            )}
-                                                        </div>
-                                                        {t(
-                                                            'In case By Name Only is checked Checking this will search for elements with name exactly matching the input',
-                                                        )}
-                                                        .
-                                                    </Tooltip>
-                                                }
-                                                placement='top'
-                                            >
-                                                <sup>
-                                                    <BsInfoCircle size={20} />
-                                                </sup>
-                                            </OverlayTrigger>
-                                        </Form.Label>
-                                    </Form.Group>
-                                </Col>
-                                <Col xs='auto'>
-                                    <Form.Group>
-                                        <Form.Check
-                                            inline
                                             name='by-name-only'
                                             type='checkbox'
                                             id='by-name-only'
@@ -588,8 +505,13 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                             <OverlayTrigger
                                                 overlay={
                                                     <Tooltip>
+                                                        <div>
+                                                            {t(
+                                                                'Keep this checkbox checked to search elements only by name field',
+                                                            )}
+                                                        </div>
                                                         {t(
-                                                            'The search result will display elements with name matching the input',
+                                                            'Uncheck it to search for elements where other fields like description matches the search terms',
                                                         )}
                                                     </Tooltip>
                                                 }

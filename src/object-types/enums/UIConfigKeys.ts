@@ -32,6 +32,8 @@ export enum UIConfigKeys {
     UI_ENABLE_SECURITY_VULNERABILITY_MONITORING = 'ui.enable.security.vulnerability.monitoring',
     UI_ENABLE_ADS_INFORMATION_DISPLAY = 'ui.enable.ads.in.clearing.details.display',
     UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE = 'ui.rest.apitoken.write.generator.enable',
+    UI_REST_APITOKEN_GENERATOR_ENABLE = 'ui.rest.apitoken.generator.enable',
+    UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED = 'ui.rest.api.write.access.token.in.preferences.enabled',
     UI_SVM_NOTIFICATION_URL = 'svm.notification.url',
 }
 

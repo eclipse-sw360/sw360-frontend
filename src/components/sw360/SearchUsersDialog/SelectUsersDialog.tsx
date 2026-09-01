@@ -114,10 +114,11 @@ const SelectUsersDialog = ({
                 header: t('Email'),
                 enableSorting: true,
                 cell: ({ row }) => {
+                    const userId = CommonUtils.getIdFromUrl(row.original._links?.self.href)
                     return (
                         <Link
                             className='text-link'
-                            href={`/admin/users/details/${CommonUtils.getIdFromUrl(row.original._links?.self.href)}`}
+                            href={`/admin/users/details?id=${encodeURIComponent(userId)}`}
                         >
                             {row.original.email}
                         </Link>

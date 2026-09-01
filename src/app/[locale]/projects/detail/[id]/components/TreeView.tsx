@@ -15,9 +15,10 @@ import {
     ExpandedState,
     getCoreRowModel,
     getExpandedRowModel,
+    getSortedRowModel,
+    SortingState,
     useReactTable,
 } from '@tanstack/react-table'
-import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table } from 'next-sw360'
@@ -27,8 +28,6 @@ import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
 import { useConfigValue } from '@/contexts'
 import {
-    Embedded,
-    ErrorDetails,
     FilterOption,
     LicenseClearing,
     NestedRows,
@@ -38,19 +37,25 @@ import {
     UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
-import { ApiError, CommonUtils } from '@/utils'
-import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { CommonUtils } from '@/utils'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-type LinkedProjects = Embedded<Project, 'sw360:projects'>
-
 type TypedProject = TypedEntity<Project, 'project'>
 
-type TypedRelease = TypedEntity<Release, 'release'>
+interface TreeViewRelease extends Release {
+    projectMainlineState?: string
+}
+
+type TypedRelease = TypedEntity<TreeViewRelease, 'release'>
+
+interface Sort {
+    columnName: string
+    isAsc: boolean
+}
 
 const typeFilterOptions: FilterOption[] = [
     {
@@ -165,31 +170,203 @@ const stateFilterOptions: FilterOption[] = [
     },
 ]
 
-const comparator = (a: NestedRows<TypedProject | TypedRelease>, b: NestedRows<TypedProject | TypedRelease>): number => {
+const comparatorName = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
     if (a.node.type === 'release' && b.node.type === 'project') {
         return -1
     } else if (a.node.type === 'project' && b.node.type === 'release') {
         return 1
     } else {
-        const aName = `${a.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(a.node.entity.version) && `(${a.node.entity.version})`}`
-        const bName = `${b.node.entity.name} ${!CommonUtils.isNullEmptyOrUndefinedString(b.node.entity.version) && `(${b.node.entity.version})`}`
-        if (aName === bName) return 0
-        else if (aName < bName) return -1
-        else return 1
+        let diff = 0
+        const aName = `${a.node.entity.name ?? ''} ${!CommonUtils.isNullEmptyOrUndefinedString(a.node.entity.version) ? `(${a.node.entity.version})` : ''}`
+        const bName = `${b.node.entity.name ?? ''} ${!CommonUtils.isNullEmptyOrUndefinedString(b.node.entity.version) ? `(${b.node.entity.version})` : ''}`
+        diff = aName.localeCompare(bName, undefined, {
+            sensitivity: 'base',
+        })
+        return sort?.isAsc === false ? -diff : diff
     }
 }
 
-const sortAllLevels = (rows: NestedRows<TypedProject | TypedRelease>[]) => {
-    for (const r of rows) {
-        if (r.children && r.children.length !== 0) sortAllLevels(r.children)
+const comparatorState = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
     }
-    rows.sort(comparator)
+
+    const getStateValue = (row: NestedRows<TypedProject | TypedRelease>): string => {
+        if (row.node.type === 'project') {
+            const { clearingState, state } = row.node.entity
+            return `${state ?? ''} ${clearingState ?? ''}`
+        }
+
+        return row.node.entity.clearingState ?? ''
+    }
+
+    const aState = getStateValue(a)
+    const bState = getStateValue(b)
+    const diff = aState.localeCompare(bState, undefined, {
+        sensitivity: 'base',
+    })
+
+    return sort?.isAsc === false ? -diff : diff
+}
+
+const comparatorReleaseMainlineState = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
+    }
+
+    const getMainlineStateValue = (row: NestedRows<TypedProject | TypedRelease>): string => {
+        if (row.node.type === 'project') {
+            return ''
+        }
+
+        return row.node.entity.mainlineState ?? ''
+    }
+
+    const aState = getMainlineStateValue(a)
+    const bState = getMainlineStateValue(b)
+    const diff = aState.localeCompare(bState, undefined, {
+        sensitivity: 'base',
+    })
+
+    return sort?.isAsc === false ? -diff : diff
+}
+
+const comparatorProjectMainlineState = (
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+): number => {
+    if (a.node.type === 'release' && b.node.type === 'project') {
+        return -1
+    } else if (a.node.type === 'project' && b.node.type === 'release') {
+        return 1
+    }
+
+    const getMainlineStateValue = (row: NestedRows<TypedProject | TypedRelease>): string => {
+        if (row.node.type === 'project') {
+            return ''
+        }
+
+        return row.node.entity.projectMainlineState ?? ''
+    }
+
+    const aState = getMainlineStateValue(a)
+    const bState = getMainlineStateValue(b)
+    const diff = aState.localeCompare(bState, undefined, {
+        sensitivity: 'base',
+    })
+
+    return sort?.isAsc === false ? -diff : diff
+}
+
+const comparatorFactory = (
+    columnName?: string,
+): ((
+    a: NestedRows<TypedProject | TypedRelease>,
+    b: NestedRows<TypedProject | TypedRelease>,
+    sort?: Sort,
+) => number) => {
+    switch (columnName) {
+        case 'state':
+            return comparatorState
+        case 'releaseMainlineState':
+            return comparatorReleaseMainlineState
+        case 'projectMainlineState':
+            return comparatorProjectMainlineState
+        default:
+            return comparatorName
+    }
+}
+
+const sortAllLevels = (rows: NestedRows<TypedProject | TypedRelease>[], sort?: Sort) => {
+    for (const r of rows) {
+        if (r.children && r.children.length !== 0) sortAllLevels(r.children, sort)
+    }
+    const comparator = comparatorFactory(sort?.columnName)
+    rows.sort((a, b) => comparator(a, b, sort))
+}
+
+const extractSearchFields = (entity: unknown): (string | number)[] => {
+    if (!entity || typeof entity !== 'object') return []
+    const anyEntity = entity as Record<string, unknown>
+
+    const mainLicenseIds = Array.isArray(anyEntity.mainLicenseIds) ? anyEntity.mainLicenseIds : []
+    const otherLicenseIds = Array.isArray(anyEntity.otherLicenseIds) ? anyEntity.otherLicenseIds : []
+    const comment = anyEntity.comment
+    const projectType = anyEntity.projectType
+    const componentType = anyEntity.componentType
+    const clearingState = anyEntity.clearingState
+    const state = anyEntity.state
+    const mainlineState = anyEntity.mainlineState
+    const name = anyEntity.name
+    const version = anyEntity.version
+
+    return [
+        name,
+        version,
+        projectType,
+        componentType,
+        clearingState,
+        state,
+        mainlineState,
+        comment,
+        ...mainLicenseIds,
+        ...otherLicenseIds,
+    ].filter(Boolean) as (string | number)[]
+}
+
+const filterTreeNodes = (
+    nodes: NestedRows<TypedProject | TypedRelease>[],
+    searchTerm: string,
+): NestedRows<TypedProject | TypedRelease>[] => {
+    const lower = searchTerm.trim().toLowerCase()
+    if (!lower) return nodes
+
+    const matches = (value: unknown): boolean => {
+        if (value === undefined || value === null) return false
+        return String(value).toLowerCase().includes(lower)
+    }
+
+    const result: NestedRows<TypedProject | TypedRelease>[] = []
+    for (const node of nodes) {
+        const fields = extractSearchFields(node.node.entity)
+        const selfMatches = fields.some((f) => matches(f))
+        let filteredChildren: NestedRows<TypedProject | TypedRelease>[] = []
+        if (Array.isArray(node.children) && node.children.length > 0) {
+            filteredChildren = filterTreeNodes(node.children, searchTerm)
+        }
+        if (selfMatches || filteredChildren.length > 0) {
+            result.push({
+                ...node,
+                children: filteredChildren,
+            })
+        }
+    }
+    return result
 }
 
 const buildTable = (
     setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease>[]>>,
     licenseClearing: LicenseClearing,
     linkedProjects: Project[],
+    searchTerm = '',
+    sort?: Sort,
 ) => {
     const embeddedReleases = licenseClearing._embedded?.['sw360:release'] ?? []
     const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(embeddedReleases, linkedProjects)
@@ -200,7 +377,10 @@ const buildTable = (
         const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
             node: {
                 type: 'release',
-                entity: release,
+                entity: {
+                    ...release,
+                    projectMainlineState: l.mainlineState,
+                },
             },
             children: [],
         }
@@ -212,9 +392,11 @@ const buildTable = (
         ...releaseRows,
     ]
 
-    sortAllLevels(rows)
+    sortAllLevels(rows, sort)
 
-    setRowData(rows)
+    const finalRows = searchTerm.trim() ? filterTreeNodes(rows, searchTerm) : rows
+
+    setRowData(finalRows)
 }
 
 const extractLinkedProjectsAndTheirLinkedReleases = (
@@ -244,7 +426,10 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
             const nodeRelease: NestedRows<TypedProject | TypedRelease> = {
                 node: {
                     type: 'release',
-                    entity: release,
+                    entity: {
+                        ...release,
+                        projectMainlineState: l.mainlineState,
+                    },
                 },
                 children: [],
             }
@@ -256,27 +441,29 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
     return rows
 }
 
-const tableIdToUrlParamMapper: Record<string, string> = {
-    type: 'componentType',
-    relation: 'releaseRelation',
-    state: 'clearingState',
-}
-
-export default function TreeView({ projectId }: { projectId: string }): JSX.Element {
+export default function TreeView({
+    projectId,
+    licenseClearingData,
+    linkedProjectsData,
+    isLoadingClearingData,
+    columnFilters,
+    setColumnFilters,
+}: {
+    projectId: string
+    licenseClearingData?: LicenseClearing
+    linkedProjectsData: Project[]
+    isLoadingClearingData: boolean
+    columnFilters: ColumnFiltersState
+    setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>
+}): JSX.Element {
     const t = useTranslations('default')
 
     const [expandLevel, setExpandLevel] = useState(-1)
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
     const [show, setShow] = useState<boolean>(false)
-    // Track loading state for each API call separately
-    const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState(true)
-    const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState(true)
     const [isDataReady, setIsDataReady] = useState(false)
 
-    // Show processing until both API calls complete AND data is ready to render
-    const showProcessing = isLoadingLicenseClearing || isLoadingLinkedProjects || !isDataReady
+    const showProcessing = isLoadingClearingData || !isDataReady
     const [showFilter, setShowFilter] = useState<undefined | string>()
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
@@ -297,6 +484,18 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
 
     const [rowData, setRowData] = useState<NestedRows<TypedProject | TypedRelease>[]>([])
     const [searchTerm, setSearchTerm] = useState('')
+    const [sort, setSort] = useState<Sort>({
+        columnName: 'name',
+        isAsc: true,
+    })
+
+    useEffect(() => {
+        setLicenseClearing(licenseClearingData)
+        setLinkedProjects(linkedProjectsData)
+    }, [
+        licenseClearingData,
+        linkedProjectsData,
+    ])
 
     // Configs from backend
     const showAddLicenseButton = useConfigValue(UIConfigKeys.UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON) as
@@ -322,6 +521,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
             {
                 id: 'name',
                 enableColumnFilter: false,
+                enableSorting: true,
+                accessorKey: 'name',
                 header: () => (
                     <>
                         {t('Name')}
@@ -489,6 +690,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
             },
             {
                 id: 'state',
+                enableSorting: true,
+                accessorKey: 'state',
                 header: () => {
                     return (
                         <>
@@ -551,6 +754,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                                         <span className='badge bg-danger overlay-badge'>{'CS'}</span>
                                     ) : clearingState === 'REPORT_AVAILABLE' ? (
                                         <span className='badge bg-primary overlay-badge'>{'CS'}</span>
+                                    ) : clearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
+                                        <span className='badge bg-internal-use-scan overlay-badge'>{'CS'}</span>
                                     ) : (
                                         <span className='badge bg-success overlay-badge'>{'CS'}</span>
                                     )}
@@ -567,6 +772,8 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
                 id: 'releaseMainlineState',
                 header: t('Release Mainline State'),
                 enableColumnFilter: false,
+                enableSorting: true,
+                accessorKey: 'releaseMainlineState',
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
                         return (
@@ -583,10 +790,16 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
             {
                 id: 'projectMainlineState',
                 header: t('Project Mainline State'),
+                enableSorting: true,
+                accessorKey: 'projectMainlineState',
                 enableColumnFilter: false,
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
-                        return <div className='text-center'></div>
+                        return (
+                            <div className='text-center'>
+                                {Capitalize((row.original.node.entity as TreeViewRelease).projectMainlineState ?? '')}
+                            </div>
+                        )
                     }
                 },
                 meta: {
@@ -659,6 +872,12 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         state: {
             expanded: expandedState,
             columnFilters,
+            sorting: [
+                {
+                    id: sort.columnName,
+                    desc: !sort.isAsc,
+                },
+            ],
         },
 
         data: rowData,
@@ -671,120 +890,53 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
         getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
         onExpandedChange: setExpandedState,
 
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setSort((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.columnName,
+                        desc: !prev.isAsc,
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        columnName: id,
+                        isAsc: !desc,
+                    }
+                }
+
+                return {
+                    columnName: '',
+                    isAsc: true,
+                }
+            })
+        },
+
         // server side filtering config
         manualFiltering: true,
         onColumnFiltersChange: setColumnFilters,
     })
 
     useEffect(() => {
-        if (memoizedLicenseClearing === undefined) return
-        buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
+        if (memoizedLicenseClearing === undefined) {
+            setIsDataReady(!isLoadingClearingData)
+            return
+        }
+        buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects, searchTerm, sort)
         // Mark data as ready only after setting row data
         setIsDataReady(true)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,
-    ])
-
-    useEffect(() => {
-        if (!searchTerm || !searchTerm.trim()) {
-            if (memoizedLicenseClearing !== undefined && memoizedLinkedProjects !== undefined) {
-                buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects)
-            }
-            return
-        }
-
-        const lower = searchTerm.trim().toLowerCase()
-
-        type SearchNode = NestedRows<TypedProject | TypedRelease>
-
-        const matches = (value: unknown): boolean => {
-            if (value === undefined || value === null) return false
-            return String(value).toLowerCase().includes(lower)
-        }
-        const extractFields = (entity: unknown): (string | number)[] => {
-            if (!entity || typeof entity !== 'object') return []
-            const anyEntity = entity as Record<string, unknown>
-
-            const mainLicenseIds = Array.isArray(anyEntity.mainLicenseIds) ? anyEntity.mainLicenseIds : []
-            const otherLicenseIds = Array.isArray(anyEntity.otherLicenseIds) ? anyEntity.otherLicenseIds : []
-            const comment = anyEntity.comment
-            const projectType = anyEntity.projectType
-            const componentType = anyEntity.componentType
-            const clearingState = anyEntity.clearingState
-            const state = anyEntity.state
-            const mainlineState = anyEntity.mainlineState
-            const name = anyEntity.name
-            const version = anyEntity.version
-
-            return [
-                name,
-                version,
-                projectType,
-                componentType,
-                clearingState,
-                state,
-                mainlineState,
-                comment,
-                ...mainLicenseIds,
-                ...otherLicenseIds,
-            ].filter(Boolean) as (string | number)[]
-        }
-        const buildFullTree = (): SearchNode[] => {
-            if (memoizedLicenseClearing === undefined) return []
-
-            const releaseEmbed = (memoizedLicenseClearing as LicenseClearing)['_embedded']?.['sw360:release'] ?? []
-            const linked = extractLinkedProjectsAndTheirLinkedReleases(
-                releaseEmbed as Release[],
-                memoizedLinkedProjects,
-            )
-
-            const releaseRows: SearchNode[] = []
-            for (const l of (memoizedLicenseClearing as LicenseClearing)['linkedReleases'] ?? []) {
-                const release = (memoizedLicenseClearing as LicenseClearing)['_embedded']?.['sw360:release']?.filter(
-                    (r: Release) => r.id === l.release.split('/').at(-1),
-                )?.[0]
-                if (!release) continue
-                releaseRows.push({
-                    node: {
-                        type: 'release',
-                        entity: release,
-                    },
-                    children: [],
-                } as SearchNode)
-            }
-
-            return [
-                ...linked,
-                ...releaseRows,
-            ]
-        }
-
-        const fullTree: SearchNode[] = buildFullTree()
-        const filterRecursive = (nodes: SearchNode[]): SearchNode[] => {
-            const result: SearchNode[] = []
-            for (const node of nodes) {
-                const fields = extractFields(node.node.entity)
-                const selfMatches = fields.some((f) => matches(f))
-                let filteredChildren: SearchNode[] = []
-                if (Array.isArray(node.children) && node.children.length > 0) {
-                    filteredChildren = filterRecursive(node.children)
-                }
-                if (selfMatches || filteredChildren.length > 0) {
-                    result.push({
-                        ...node,
-                        children: filteredChildren,
-                    })
-                }
-            }
-            return result
-        }
-        const filtered = filterRecursive(fullTree)
-        setRowData(filtered)
-    }, [
+        isLoadingClearingData,
         searchTerm,
-        memoizedLicenseClearing,
-        memoizedLinkedProjects,
+        sort,
     ])
 
     useEffect(() => {
@@ -803,74 +955,6 @@ export default function TreeView({ projectId }: { projectId: string }): JSX.Elem
     }, [
         table,
         expandLevel,
-    ])
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        // Reset data ready state when starting new fetch
-        setIsLoadingLicenseClearing(true)
-        setIsDataReady(false)
-
-        void (async () => {
-            try {
-                const url = `projects/${projectId}/licenseClearing?transitive=true&${columnFilters
-                    .map((f) => (f.value as string[]).map((v) => `${tableIdToUrlParamMapper[f.id]}=${v}`).join('&'))
-                    .join('&')}`
-                const response = await ApiUtils.GET(url, signal)
-
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const licenseClearingData = (await response.json()) as LicenseClearing
-                setLicenseClearing(licenseClearingData)
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                setIsLoadingLicenseClearing(false)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [
-        projectId,
-        columnFilters,
-    ])
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        setIsLoadingLinkedProjects(true)
-
-        void (async () => {
-            try {
-                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
-
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const linkedProjectsData = (await response.json()) as LinkedProjects
-                setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                setIsLoadingLinkedProjects(false)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [
-        projectId,
     ])
 
     return (

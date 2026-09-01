@@ -17,19 +17,18 @@ import { AdvancedSearch } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ClearingRequest, Embedded, ModerationRequest, RequestType, UserGroupType } from '@/object-types'
+import { ClearingRequest, Embedded, PaginationMeta, RequestType, UserGroupType } from '@/object-types'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ClearingRequestComponent from './ClearingRequest'
-import ClosedModerationRequest from './ClosedModerationRequest'
-import OpenModerationRequest from './OpenModerationRequest'
+import ModerationRequestComponent from './ModerationRequest'
 
-type EmbeddedModerationRequest = Embedded<ModerationRequest, 'sw360:moderationRequests'>
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
 function Requests(): ReactNode | undefined {
     const t = useTranslations('default')
     const [openModerationRequestCount, setOpenModerationRequestCount] = useState(0)
     const [closedModerationRequestCount, setClosedModerationRequestCount] = useState(0)
+    const [totalModerationRequestCount, setTotalModerationRequestCount] = useState(0)
     const [openClearingRequestCount, setOpenClearingRequestCount] = useState(0)
     const [closedClearingRequestCount, setClosedClearingRequestCount] = useState(0)
 
@@ -60,28 +59,16 @@ function Requests(): ReactNode | undefined {
             fieldName: t('Type'),
             value: [
                 {
-                    key: 'Customer Project',
-                    text: t('Customer Project'),
+                    key: 'PROJECT',
+                    text: t('Project'),
                 },
                 {
-                    key: 'Internal Project',
-                    text: t('Internal Project'),
+                    key: 'COMPONENT',
+                    text: t('Component'),
                 },
                 {
-                    key: 'Product',
-                    text: t('Product'),
-                },
-                {
-                    key: 'Service',
-                    text: t('Service'),
-                },
-                {
-                    key: 'Inner Source',
-                    text: t('Inner Source'),
-                },
-                {
-                    key: 'Cloud Backend',
-                    text: t('Cloud Backend'),
+                    key: 'RELEASE',
+                    text: t('Release'),
                 },
             ],
             paramName: 'type',
@@ -89,7 +76,7 @@ function Requests(): ReactNode | undefined {
         {
             fieldName: t('Document Name'),
             value: '',
-            paramName: 'name',
+            paramName: 'documentName',
         },
         {
             fieldName: t('Requesting User Email'),
@@ -104,35 +91,13 @@ function Requests(): ReactNode | undefined {
                     text: t('None'),
                 },
             ],
-            paramName: 'group',
+            paramName: 'requestingUserDepartment',
         },
 
         {
             fieldName: t('Moderators'),
             value: '',
             paramName: 'moderators',
-        },
-        {
-            fieldName: t('State'),
-            value: [
-                {
-                    key: 'approved',
-                    text: t('APPROVED'),
-                },
-                {
-                    key: 'pending',
-                    text: t('Pending'),
-                },
-                {
-                    key: 'rejected',
-                    text: t('REJECTED'),
-                },
-                {
-                    key: 'inProgress',
-                    text: t('In Progress'),
-                },
-            ],
-            paramName: 'state',
         },
     ]
 
@@ -141,7 +106,10 @@ function Requests(): ReactNode | undefined {
         const signal = controller.signal
         void (async () => {
             try {
-                const moderationRequestsPromsies = ApiUtils.GET('moderationrequest', signal)
+                const moderationRequestsPromsies = ApiUtils.GET(
+                    'moderationrequest?moderationState=all&page_entries=1',
+                    signal,
+                )
                 const clearingRequestsPromises = ApiUtils.GET('clearingrequests', signal)
 
                 const responses = await Promise.all([
@@ -152,18 +120,10 @@ function Requests(): ReactNode | undefined {
                     return notFound()
                 }
 
-                const moderationRequests = (await responses[0].json()) as EmbeddedModerationRequest
-                let openMRCount = 0
-                let closedMRCount = 0
-                moderationRequests['_embedded']['sw360:moderationRequests'].map((item: ModerationRequest) => {
-                    if (item.moderationState === 'PENDING' || item.moderationState === 'INPROGRESS') {
-                        openMRCount++
-                    } else if (item.moderationState === 'APPROVED' || item.moderationState === 'REJECTED') {
-                        closedMRCount++
-                    }
-                })
-                setOpenModerationRequestCount(openMRCount)
-                setClosedModerationRequestCount(closedMRCount)
+                const moderationRequests = (await responses[0].json()) as {
+                    page: PaginationMeta
+                }
+                setTotalModerationRequestCount(moderationRequests.page.totalElements)
 
                 const clearingRequests = (await responses[1].json()) as EmbeddedClearingRequest
                 let openCRCount = 0
@@ -238,6 +198,7 @@ function Requests(): ReactNode | undefined {
                                 <AdvancedSearch
                                     title='Advanced Search'
                                     fields={advancedSearch}
+                                    dateField='requestDate'
                                 />
                             </div>
                         </Col>
@@ -252,32 +213,34 @@ function Requests(): ReactNode | undefined {
                                     <Tab.Pane eventKey='openModerationrequests'>
                                         <Row className='text-truncate buttonheader-title '>
                                             {t('MODERATIONS') +
-                                                `(${openModerationRequestCount}/
-                                            ${closedModerationRequestCount})`}
+                                                `(${openModerationRequestCount}/${totalModerationRequestCount})`}
                                         </Row>
-                                        <OpenModerationRequest />
+                                        <ModerationRequestComponent
+                                            status='open'
+                                            setModerationRequestCount={setOpenModerationRequestCount}
+                                        />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='closedModerationrequests'>
                                         <Row className='text-truncate buttonheader-title '>
                                             {t('MODERATIONS') +
-                                                `(${openModerationRequestCount}/
-                                            ${closedModerationRequestCount})`}
+                                                `(${closedModerationRequestCount}/${totalModerationRequestCount})`}
                                         </Row>
-                                        <ClosedModerationRequest />
+                                        <ModerationRequestComponent
+                                            status='closed'
+                                            setModerationRequestCount={setClosedModerationRequestCount}
+                                        />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='openClearingRequests'>
                                         <Row className='text-truncate buttonheader-title '>
                                             {t('CLEARING') +
-                                                `(${openClearingRequestCount}/
-                                            ${closedClearingRequestCount})`}
+                                                `(${openClearingRequestCount}/${closedClearingRequestCount})`}
                                         </Row>
                                         <ClearingRequestComponent requestType={RequestType.OPEN} />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='closedClearingRequests'>
                                         <Row className='text-truncate buttonheader-title '>
                                             {t('CLEARING') +
-                                                `(${openClearingRequestCount}/
-                                            ${closedClearingRequestCount})`}
+                                                `(${openClearingRequestCount}/${closedClearingRequestCount})`}
                                         </Row>
                                         <ClearingRequestComponent requestType={RequestType.CLOSED} />
                                     </Tab.Pane>

@@ -16,6 +16,7 @@ import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader, PageSpinner } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
+import { useSW360BackendConfigContext } from '@/contexts'
 import { ConfigKeys, Configuration, ConfigurationContainers } from '@/object-types'
 import MessageService from '@/services/message.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -31,6 +32,7 @@ const FeatureConfigurations = (): JSX.Element => {
     const t = useTranslations('default')
     const [currentConfig, setCurrentConfig] = useState<Configuration | undefined>(undefined)
     const apiEndpoint = `configurations/container/${ConfigurationContainers.SW360_CONFIGURATION}`
+    const { refreshConfig } = useSW360BackendConfigContext()
 
     const fetchSw360Config = useCallback(async () => {
         const response = await ApiUtils.GET(apiEndpoint)
@@ -64,6 +66,7 @@ const FeatureConfigurations = (): JSX.Element => {
         }
         const response = await ApiUtils.PATCH(apiEndpoint, currentConfig)
         if (response.status == StatusCodes.OK) {
+            refreshConfig()
             MessageService.success(t('Update backend configurations successfully'))
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
             dispatchSessionExpiredEvent()

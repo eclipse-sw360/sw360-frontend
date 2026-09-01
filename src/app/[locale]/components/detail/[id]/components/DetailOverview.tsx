@@ -62,7 +62,6 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [subscribers, setSubscribers] = useState<Array<string>>([])
     const [changeLogId, setChangeLogId] = useState('')
     const [changelogTab, setChangelogTab] = useState('list-change')
-    const [refreshSubscriptions, setRefreshSubscriptions] = useState(false)
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
@@ -163,8 +162,23 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
     const handleSubcriptions = async () => {
         try {
-            await ApiUtils.POST(`components/${componentId}/subscriptions`, {})
-            setRefreshSubscriptions(!refreshSubscriptions)
+            const subscriptionResponse = await ApiUtils.POST(`components/${componentId}/subscriptions`, {})
+            if (subscriptionResponse.status !== StatusCodes.OK) {
+                const err = (await subscriptionResponse.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: subscriptionResponse.status,
+                })
+            }
+            const response = await ApiUtils.GET(`components/${componentId}`)
+            if (response.status !== StatusCodes.OK) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message, {
+                    status: response.status,
+                })
+            }
+            const updatedComponent = (await response.json()) as Component
+            setComponent(updatedComponent)
+            setSubscribers(getSubcribersEmail(updatedComponent))
         } catch (error) {
             ApiUtils.reportError(error)
         }

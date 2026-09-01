@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 import { notFound, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
-import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import EditAttachments from '@/components/Attachments/EditAttachments'
@@ -23,8 +23,10 @@ import LinkedPackages from '@/components/ProjectAddSummary/LinkedPackages'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
+import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
+    ConfigKeys,
     DocumentTypes,
     ErrorDetails,
     InputKeyValue,
@@ -34,6 +36,7 @@ import {
     ObligationEntry,
     ObligationType,
     Project,
+    ProjectDetailTabCounts,
     ProjectPayload,
     User,
     UserGroupType,
@@ -54,6 +57,7 @@ function EditProject({
 }): JSX.Element {
     const router = useRouter()
     const t = useTranslations('default')
+    const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const [vendor, setVendor] = useState<Vendor>({
         id: '',
         fullName: '',
@@ -66,7 +70,11 @@ function EditProject({
         'linkedProjectsAndReleases',
         'attachments',
         'obligations',
-        'linkedPackages',
+        ...(isPackageFeatureEnabled
+            ? [
+                  'linkedPackages',
+              ]
+            : []),
     ]
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
@@ -123,55 +131,10 @@ function EditProject({
         [k: string]: string
     }>({})
     const [obligations, setObligations] = useState<ObligationEntry>({})
-    const [serverObl, setServerObl] = useState<
-        Record<
-            string,
-            {
-                status?: string
-            }
-        >
-    >({})
-    const [serverTotal, setServerTotal] = useState<number>(0)
-
-    const { obligationsTotal, obligationsNonOpenCount } = useMemo(() => {
-        const isOpen = (s?: string | null) => (s ?? '').trim().toUpperCase() === 'OPEN'
-
-        const total = serverTotal
-
-        const merged: Record<
-            string,
-            {
-                status?: string
-            }
-        > = {
-            ...serverObl,
-        }
-
-        Object.keys(obligations).forEach((key) => {
-            if (merged[key]) {
-                merged[key] = {
-                    ...merged[key],
-                    status: obligations[key]?.status,
-                }
-            } else {
-                merged[key] = {
-                    status: obligations[key]?.status,
-                }
-            }
-        })
-
-        const list = Object.values(merged)
-        const nonOpen = list.filter((o) => !isOpen(o?.status)).length
-
-        return {
-            obligationsTotal: total,
-            obligationsNonOpenCount: nonOpen,
-        }
-    }, [
-        serverObl,
-        serverTotal,
-        obligations,
-    ])
+    const [obligationsTotal, setObligationsTotal] = useState<number>(0)
+    const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
+    const baselineObligationStatusRef = useRef<Record<string, string>>({})
+    const prevObligationsRef = useRef<ObligationEntry>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -265,43 +228,85 @@ function EditProject({
         const controller = new AbortController()
         const signal = controller.signal
 
-        const loadServerObligations = async () => {
+        const fetchObligationCounts = async () => {
+            try {
+                const response = await ApiUtils.GET(`projects/${projectId}/tabCounts`, signal)
+                const body = (await response.json().catch(() => ({}))) as ProjectDetailTabCounts | ErrorDetails
+
+                if (response.status !== StatusCodes.OK) {
+                    throw new ApiError(('message' in body ? body.message : undefined) ?? `Status ${response.status}`, {
+                        status: response.status,
+                    })
+                }
+
+                const data = body as ProjectDetailTabCounts
+                setObligationsTotal(Math.max(0, data.readmeOssObligationCount))
+                setObligationsNonOpenCount(Math.max(0, data.obligationNonOpenCount))
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        }
+
+        const fetchBaselineObligationStatuses = async () => {
             try {
                 const url = CommonUtils.createUrlWithParams(`projects/${projectId}/licenseObligations`, {
                     page: '0',
                     page_entries: '9999',
                 })
-
-                const resp = await ApiUtils.GET(url, signal)
-                const body = (await resp.json().catch(() => ({}))) as {
+                const response = await ApiUtils.GET(url, signal)
+                if (response.status !== StatusCodes.OK) return
+                const body = (await response.json().catch(() => ({}))) as {
                     obligations?: Record<
                         string,
                         {
                             status?: string
                         }
                     >
-                    page?: {
-                        totalElements?: number
-                    }
                 }
-
-                if (resp.status !== StatusCodes.OK) return
-
-                const obl = body?.obligations ?? {}
-                const total =
-                    typeof body?.page?.totalElements === 'number' ? body.page.totalElements : Object.keys(obl).length
-
-                setServerObl(obl)
-                setServerTotal(total)
+                const baseline: Record<string, string> = {}
+                Object.entries(body?.obligations ?? {}).forEach(([key, value]) => {
+                    baseline[key] = value?.status ?? 'OPEN'
+                })
+                baselineObligationStatusRef.current = baseline
             } catch (_e) {
-                setIsLoading(false)
+                // Baseline is only used for live badge updates, ignore failures silently
             }
         }
 
-        void loadServerObligations()
+        void fetchObligationCounts()
+        void fetchBaselineObligationStatuses()
         return () => controller.abort()
     }, [
         projectId,
+    ])
+
+    useEffect(() => {
+        const isOpen = (status?: string) => (status ?? 'OPEN').trim().toUpperCase() === 'OPEN'
+        const prevObligations = prevObligationsRef.current
+        let delta = 0
+
+        Object.keys(obligations).forEach((key) => {
+            const entry = obligations[key]
+            if (entry?.obligationType !== ObligationType.LICENSE_OBLIGATION) return
+
+            const prevStatus = prevObligations[key]?.status ?? baselineObligationStatusRef.current[key]
+            const wasOpen = isOpen(prevStatus)
+            const isNowOpen = isOpen(entry.status)
+
+            if (wasOpen && !isNowOpen) {
+                delta += 1
+            } else if (!wasOpen && isNowOpen) {
+                delta -= 1
+            }
+        })
+
+        if (delta !== 0) {
+            setObligationsNonOpenCount((count) => Math.max(0, count + delta))
+        }
+
+        prevObligationsRef.current = obligations
+    }, [
+        obligations,
     ])
 
     useEffect(() => {
@@ -404,12 +409,10 @@ function EditProject({
                 }
 
                 if (project['_embedded']?.['sw360:vendors']?.[0] !== undefined) {
-                    const vendorData = project['_embedded']['sw360:vendors'][0]
+                    const selectedVendor = project['_embedded']['sw360:vendors'][0]
                     setVendor({
-                        id: vendorData.id ?? '',
-                        fullName: vendorData.fullName ?? '',
-                        shortName: vendorData.shortName ?? '',
-                        url: vendorData.url ?? '',
+                        ...selectedVendor,
+                        id: project.vendorId ?? selectedVendor.id ?? '',
                     })
                 }
 
@@ -565,66 +568,107 @@ function EditProject({
                 ),
             ]
             if (Object.keys(obligations).length !== 0) {
+                const licenseObligations: Record<string, object> = {}
+                const componentObligations: Record<string, object> = {}
+                const projectObligations: Record<string, object> = {}
+                const organisationObligations: Record<string, object> = {}
+
                 for (const key in obligations) {
-                    if (obligations[key]?.obligationType === ObligationType.LICENSE_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
+                    const obligation = {
+                        ...obligations[key],
+                    }
+                    const obligationType = obligation.obligationType
+                    delete obligation.obligationType
+
+                    if (obligationType === ObligationType.LICENSE_OBLIGATION) {
+                        licenseObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.LICENSE_OBLIGATION,
                         }
+                    } else if (obligationType === ObligationType.COMPONENT_OBLIGATION) {
+                        componentObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.COMPONENT_OBLIGATION,
+                        }
+                    } else if (obligationType === ObligationType.PROJECT_OBLIGATION) {
+                        projectObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.PROJECT_OBLIGATION,
+                        }
+                    } else if (obligationType === ObligationType.ORGANISATION_OBLIGATION) {
+                        organisationObligations[key] = {
+                            ...obligation,
+                            obligationLevel: ObligationType.ORGANISATION_OBLIGATION,
+                        }
+                    }
+                }
+
+                const nonEmptyBuckets = [
+                    licenseObligations,
+                    componentObligations,
+                    projectObligations,
+                    organisationObligations,
+                ].filter((b) => Object.keys(b).length > 0)
+
+                if (nonEmptyBuckets.length > 1) {
+                    const allObligations = {
+                        ...licenseObligations,
+                        ...componentObligations,
+                        ...projectObligations,
+                        ...organisationObligations,
+                    }
+                    requests.push(
+                        ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=all`, allObligations),
+                    )
+                } else {
+                    if (Object.keys(licenseObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(`projects/${projectId}/updateLicenseObligation`, licenseObligations),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationType.COMPONENT_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
-                        }
+                    }
+                    if (Object.keys(componentObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=component`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=component`,
+                                componentObligations,
+                            ),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationType.PROJECT_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
-                        }
+                    }
+                    if (Object.keys(projectObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=project`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=project`,
+                                projectObligations,
+                            ),
                         )
-                    } else if (obligations[key]?.obligationType === ObligationType.ORGANISATION_OBLIGATION) {
-                        if (Object.hasOwn(obligations[key], 'obligationType')) {
-                            delete obligations[key].obligationType
-                        }
+                    }
+                    if (Object.keys(organisationObligations).length > 0) {
                         requests.push(
-                            ApiUtils.PATCH(`projects/${projectId}/updateObligation?obligationLevel=organization`, {
-                                [key]: obligations[key],
-                            }),
+                            ApiUtils.PATCH(
+                                `projects/${projectId}/updateObligation?obligationLevel=organization`,
+                                organisationObligations,
+                            ),
                         )
                     }
                 }
             }
             const responses = await Promise.all(requests)
             for (const r of responses) {
-                if (
-                    !(
-                        r.status === StatusCodes.OK ||
-                        r.status === StatusCodes.CREATED ||
-                        r.status === StatusCodes.ACCEPTED
+                if (r.status === StatusCodes.OK || r.status === StatusCodes.CREATED) {
+                    MessageService.success(
+                        t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
                     )
-                ) {
+                    router.push(`/projects/detail/${projectId}`)
+                } else if (r.status === StatusCodes.ACCEPTED) {
+                    MessageService.success(t('Moderation request is created'))
+                    router.push(`/projects/detail/${projectId}`)
+                } else {
                     const err = (await r.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: r.status,
                     })
                 }
             }
-
-            MessageService.success(
-                t('Project') + ` ${dataToUpdate.name} (${dataToUpdate.version}) ` + t('updated successfully'),
-            )
-            router.push(`/projects/detail/${projectId}`)
         } catch (error: unknown) {
             ApiUtils.reportError(error)
         }
@@ -644,6 +688,13 @@ function EditProject({
     const handleCancelClick = () => {
         router.push(`/projects/detail/${projectId}?tab=${activeKey ?? DEFAULT_ACTIVE_TAB}`)
     }
+
+    const obligationsBadgeClassName =
+        obligationsNonOpenCount === 0
+            ? 'obligations-badge--danger'
+            : obligationsTotal === obligationsNonOpenCount
+              ? 'obligations-badge--success'
+              : 'obligations-badge'
 
     return (
         <>
@@ -720,12 +771,14 @@ function EditProject({
                                                 >
                                                     <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                                 </ListGroup.Item>
-                                                <ListGroup.Item
-                                                    action
-                                                    eventKey='linkedPackages'
-                                                >
-                                                    <div className='my-2'>{t('Linked Packages')}</div>
-                                                </ListGroup.Item>
+                                                {isPackageFeatureEnabled && (
+                                                    <ListGroup.Item
+                                                        action
+                                                        eventKey='linkedPackages'
+                                                    >
+                                                        <div className='my-2'>{t('Linked Packages')}</div>
+                                                    </ListGroup.Item>
+                                                )}
                                                 <ListGroup.Item
                                                     action
                                                     eventKey='attachments'
@@ -737,7 +790,7 @@ function EditProject({
                                                     eventKey='obligations'
                                                 >
                                                     <SidebarCountBadge
-                                                        badgeClassName='obligations-badge--danger'
+                                                        badgeClassName={obligationsBadgeClassName}
                                                         countId='obligationsCount'
                                                         isLoading={false}
                                                         label={t('Obligations')}
@@ -834,13 +887,15 @@ function EditProject({
                                                             />
                                                         )}
                                                     </Tab.Pane>
-                                                    <Tab.Pane eventKey='linkedPackages'>
-                                                        <LinkedPackages
-                                                            projectId={projectId}
-                                                            payload={projectPayload}
-                                                            setPayload={setProjectPayload}
-                                                        />
-                                                    </Tab.Pane>
+                                                    {isPackageFeatureEnabled && (
+                                                        <Tab.Pane eventKey='linkedPackages'>
+                                                            <LinkedPackages
+                                                                projectId={projectId}
+                                                                payload={projectPayload}
+                                                                setPayload={setProjectPayload}
+                                                            />
+                                                        </Tab.Pane>
+                                                    )}
                                                     <Tab.Pane eventKey='attachments'>
                                                         <EditAttachments
                                                             documentId={projectId}

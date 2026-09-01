@@ -18,6 +18,7 @@ import { Spinner } from 'react-bootstrap'
 import { Attachment, ErrorDetails, ModerationRequestDetails, RequestDocumentTypes } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
 import TableHeader from './TableHeader'
 
 type RowValue =
@@ -169,7 +170,7 @@ export default function ProposedChanges({
                     if (row.depth > 0) return
                     const { attachmentType } = row.original
 
-                    return <span className='text-center'>{attachmentType}</span>
+                    return <span className='text-center'>{getAttachmentTypeShortForm(attachmentType)}</span>
                 },
                 meta: {
                     width: '7%',

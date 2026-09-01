@@ -18,7 +18,6 @@ import Link from 'next/link'
 import { type JSX, useEffect, useState } from 'react'
 import { VersionInfo } from '@/object-types'
 import { ApiUtils } from '@/utils'
-import { SW360_API_URL } from '@/utils/env'
 
 function Footer(): JSX.Element {
     const [versionInfo, setVersionInfo] = useState<VersionInfo>()
@@ -70,7 +69,7 @@ function Footer(): JSX.Element {
                     |
                     <Link
                         className='text-link'
-                        href={`${SW360_API_URL}/resource/swagger-ui/index.html#/`}
+                        href={`${process.env.NEXT_PUBLIC_SW360_API_URL}/resource/swagger-ui/index.html#/`}
                         rel='noopener noreferrer'
                         target='_blank'
                     >

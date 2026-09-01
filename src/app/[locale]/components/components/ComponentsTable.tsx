@@ -191,7 +191,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: params.toString() ? 'score,asc' : 'name,asc',
+        sort: '',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -354,6 +354,7 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                         <PageSizeSelector
                             pageableQueryParam={pageableQueryParam}
                             setPageableQueryParam={setPageableQueryParam}
+                            totalElements={paginationMeta?.totalElements}
                         />
                         <SW360Table
                             table={table}
