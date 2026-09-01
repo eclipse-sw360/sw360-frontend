@@ -526,14 +526,24 @@ export default function ListView({
                                         )}`}</Tooltip>
                                     }
                                 >
-                                    {clearingState === 'NEW_CLEARING' ? (
+                                    {clearingState === 'NEW_CLEARING' ? ( // red
                                         <span className='badge bg-danger overlay-badge'>{'CS'}</span>
-                                    ) : clearingState === 'REPORT_AVAILABLE' ? (
+                                    ) : clearingState === 'UNDER_CLEARING' ? ( // yellow
+                                        <span className='badge bg-warning overlay-badge'>{'CS'}</span>
+                                    ) : clearingState === 'SENT_TO_CLEARING_TOOL' ||
+                                      clearingState === 'SCAN_AVAILABLE' ? ( // orange
+                                        <span className='badge clearingStateSentToClearingTool overlay-badge'>
+                                            {'CS'}
+                                        </span>
+                                    ) : clearingState === 'REPORT_AVAILABLE' ? ( // blue
                                         <span className='badge bg-primary overlay-badge'>{'CS'}</span>
-                                    ) : clearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? (
+                                    ) : clearingState === 'INTERNAL_USE_SCAN_AVAILABLE' ? ( // purple
                                         <span className='badge bg-internal-use-scan overlay-badge'>{'CS'}</span>
-                                    ) : (
+                                    ) : clearingState === 'APPROVED' ? ( // green
                                         <span className='badge bg-success overlay-badge'>{'CS'}</span>
+                                    ) : (
+                                        // gray: unknown state (null/undefined/empty/unmapped)
+                                        <span className='badge bg-secondary overlay-badge'>{'CS'}</span>
                                     )}
                                 </OverlayTrigger>
                             </div>
