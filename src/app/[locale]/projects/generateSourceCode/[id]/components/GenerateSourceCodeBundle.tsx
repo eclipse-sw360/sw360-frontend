@@ -18,6 +18,7 @@ import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Button, Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import {
     Attachment,
     AttachmentUsage,
@@ -63,12 +64,13 @@ function GenerateSourceCodeBundle({
     })
     const [loading, setLoading] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
-
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
     const [project, setProject] = useState<Project>()
-
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
+    const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
+    const [data, setData] = useState<NestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
+
     const memoizedLinkedProjects = useMemo(
         () => linkedProjects,
         [
@@ -76,15 +78,12 @@ function GenerateSourceCodeBundle({
         ],
     )
 
-    const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
     const memoizedAttachmentUsages = useMemo(
         () => attachmentUsages,
         [
             attachmentUsages,
         ],
     )
-
-    const [data, setData] = useState<NestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
 
     const hasSourceUsageSet = (release: Release): boolean => {
         const sourceAttachments =
@@ -131,6 +130,8 @@ function GenerateSourceCodeBundle({
             setLoading(false)
         }
     }
+
+    useDocumentTitle(project?.name ? CommonUtils.formatDocumentTitle(project.name, project.version) : undefined)
 
     useEffect(() => {
         const controller = new AbortController()

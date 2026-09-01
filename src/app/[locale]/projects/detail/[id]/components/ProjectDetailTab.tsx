@@ -1,4 +1,4 @@
-// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023-2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import { useConfigKeyValue } from '@/contexts'
+import { useDocumentTitle } from '@/hooks'
 import {
     ActionType,
     AdministrationDataType,
@@ -70,6 +71,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const router = useRouter()
     const searchParams = useSearchParams()
     const DEFAULT_ACTIVE_TAB = 'summary'
+    const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
+    const [projectPayload, setProjectPayload] = useState<ProjectPayload>()
+    const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
+    const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
     const TABS = [
         'summary',
         'administration',
@@ -88,14 +93,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
               ]
             : []),
     ]
-
-    const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
-    const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
         show: false,
         importType: 'CycloneDx',
     })
-    const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
     const normalizedSbomImportExportAccessUserRole: UserGroupType =
         sbomImportExportAccessUserRole && sbomImportExportAccessUserRole in UserGroupType
             ? (sbomImportExportAccessUserRole as UserGroupType)
@@ -103,7 +104,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
-    const [projectPayload, setProjectPayload] = useState<ProjectPayload>()
+
+    useDocumentTitle(
+        summaryData?.name ? CommonUtils.formatDocumentTitle(summaryData.name, summaryData.version) : undefined,
+    )
 
     useEffect(() => {
         void (async () => {

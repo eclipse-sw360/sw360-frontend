@@ -18,6 +18,7 @@ import { PaddedCell, SW360Table } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Nav, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import {
     Attachment,
     AttachmentUsage,
@@ -301,15 +302,15 @@ function GenerateLicenseInfo({
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
     const [projectRelationships, setProjectRelationships] = useState<string[]>([])
-
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
+    const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
+    const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
 
     const [data, setData] = useState<
         ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[]
     >(() => [])
 
-    const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const memoizedLinkedProjects = useMemo(
         () => linkedProjects,
         [
@@ -317,7 +318,6 @@ function GenerateLicenseInfo({
         ],
     )
 
-    const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
     const memoizedAttachmentUsages = useMemo(
         () => attachmentUsages,
         [
@@ -337,6 +337,8 @@ function GenerateLicenseInfo({
             licenses,
         ],
     )
+
+    useDocumentTitle(project?.name ? CommonUtils.formatDocumentTitle(project.name, project.version) : undefined)
 
     useEffect(() => {
         if (!project || !memoizedLinkedProjects) return

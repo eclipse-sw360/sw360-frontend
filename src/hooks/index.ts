@@ -1,4 +1,5 @@
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -7,8 +8,9 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { useDocumentTitle } from './useDocumentTitle'
 import useLocalStorage from './useLocalStorage'
 import { useSW360BackendConfig } from './useSW360BackendConfig'
 import { useUiConfig } from './useUiConfig'
 
-export { useLocalStorage, useSW360BackendConfig, useUiConfig }
+export { useDocumentTitle, useLocalStorage, useSW360BackendConfig, useUiConfig }

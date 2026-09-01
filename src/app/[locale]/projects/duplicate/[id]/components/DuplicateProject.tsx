@@ -19,6 +19,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
 import Summary from '@/components/ProjectAddSummary/Summary'
+import { useDocumentTitle } from '@/hooks'
 import {
     InputKeyValue,
     LinkedPackageData,
@@ -208,6 +209,10 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
             setIsReleaseLoading(false)
         }
     }
+
+    useDocumentTitle(
+        projectPayload.name ? CommonUtils.formatDocumentTitle(projectPayload.name, projectPayload.version) : undefined,
+    )
 
     useEffect(() => {
         void (async () => {
