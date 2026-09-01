@@ -18,9 +18,10 @@ import { useTranslations } from 'next-intl'
 import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
-import { ActionType, Component } from '@/object-types'
+import { ActionType, Component, UserGroupType } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 const DEFAULT_COMPONENT_INFO: Component = {
@@ -183,7 +184,25 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
         fetchData,
     ])
 
-    const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!show) return
+
+        void (async () => {
+            try {
+                const currentUser = await getAuthenticatedUserIdentity()
+                const isAdminUser =
+                    currentUser.userGroup === UserGroupType.ADMIN || currentUser.userGroup === UserGroupType.SW360_ADMIN
+
+                setComment(isAdminUser ? `Deleted by user ${currentUser.email}` : '')
+            } catch {
+                setComment('')
+            }
+        })()
+    }, [
+        show,
+    ])
+
+    const handleUserComment = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setComment(e.target.value)
     }
 
@@ -258,6 +277,7 @@ const DeleteComponentDialog = ({ componentId, show, setShow, actionType }: Props
                                 as='textarea'
                                 aria-label='With textarea'
                                 placeholder='Comment your message...'
+                                value={comment}
                                 onChange={handleUserComment}
                             />
                         </Form.Group>

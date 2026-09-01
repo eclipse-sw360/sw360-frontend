@@ -17,9 +17,10 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal } from 'react-bootstrap'
-import { ActionType, ReleaseDetail } from '@/object-types'
+import { ActionType, ReleaseDetail, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
@@ -154,7 +155,24 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
         fetchData,
     ])
 
-    const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!show) return
+
+        void (async () => {
+            try {
+                const currentUser = await getAuthenticatedUserIdentity()
+                const isAdminUser =
+                    currentUser.userGroup === UserGroupType.ADMIN || currentUser.userGroup === UserGroupType.SW360_ADMIN
+                setComment(isAdminUser ? `Deleted by user ${currentUser.email}` : '')
+            } catch {
+                setComment('')
+            }
+        })()
+    }, [
+        show,
+    ])
+
+    const handleUserComment = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setComment(e.target.value)
     }
 
@@ -233,6 +251,7 @@ const DeleteReleaseModal = ({ componentId, actionType, releaseId, show, setShow 
                                     as='textarea'
                                     aria-label='With textarea'
                                     placeholder='Comment your message...'
+                                    value={comment}
                                     onChange={handleUserComment}
                                 />
                             </Form.Group>
