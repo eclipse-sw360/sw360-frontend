@@ -1,7 +1,7 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
-// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023,2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -351,6 +351,21 @@ const formatObligationText = (text: string): string =>
         .replace(/\s*\n\s*/g, '\n')
         .trim()
 
+/**
+ * Builds a browser tab title from a document name and optional version.
+ *
+ * @example
+ * formatDocumentTitle('Project-Name', '2.0')   // 'Project-Name (2.0) | SW360'
+ * formatDocumentTitle('Project-Name')          // 'Project-Name | SW360'
+ * @param name - The name of the document,
+ * @param version - The optional version of the document.
+ * @returns The formatted document title.
+ */
+const formatDocumentTitle = (name: string, version?: string | null): string => {
+    const nameWithVersion = isNullEmptyOrUndefinedString(version) ? name : `${name} (${version})`
+    return `${nameWithVersion} | SW360`
+}
+
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
@@ -369,6 +384,7 @@ const CommonUtils = {
     readDateTime,
     nullToEmptyString,
     formatObligationText,
+    formatDocumentTitle,
 }
 
 export default CommonUtils

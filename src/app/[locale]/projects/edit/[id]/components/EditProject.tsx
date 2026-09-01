@@ -24,6 +24,7 @@ import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedRele
 import Summary from '@/components/ProjectAddSummary/Summary'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import { useConfigKeyValue } from '@/contexts'
+import { useDocumentTitle } from '@/hooks'
 import {
     ActionType,
     ConfigKeys,
@@ -78,40 +79,14 @@ function EditProject({
     ]
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
-
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [hasClearingRequest, setHasClearingRequest] = useState(false)
-
-    const handleDeleteProject = () => {
-        setDeleteDialogOpen(true)
-    }
-
-    useEffect(() => {
-        let tab = searchParams.get('tab')
-        if (tab === null || TABS.indexOf(tab) === -1) {
-            tab = DEFAULT_ACTIVE_TAB
-        }
-        setActiveKey(tab)
-    }, [
-        searchParams,
-    ])
-
-    const handleSelect = (key: string | null) => {
-        setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
-        router.push(`?tab=${key}`)
-    }
-
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
-
     const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
-
     const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
-
     const [additionalData, setAdditionalData] = useState<InputKeyValue[]>([])
-
     const [additionalRoles, setAdditionalRoles] = useState<InputKeyValue[]>([])
-
     const [moderators, setModerators] = useState<{
         [k: string]: string
     }>({})
@@ -223,6 +198,29 @@ function EditProject({
             return undefined
         }
     }, [])
+
+    const handleDeleteProject = () => {
+        setDeleteDialogOpen(true)
+    }
+
+    const handleSelect = (key: string | null) => {
+        setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
+        router.push(`?tab=${key}`)
+    }
+
+    useDocumentTitle(
+        projectPayload.name ? CommonUtils.formatDocumentTitle(projectPayload.name, projectPayload.version) : undefined,
+    )
+
+    useEffect(() => {
+        let tab = searchParams.get('tab')
+        if (tab === null || TABS.indexOf(tab) === -1) {
+            tab = DEFAULT_ACTIVE_TAB
+        }
+        setActiveKey(tab)
+    }, [
+        searchParams,
+    ])
 
     useEffect(() => {
         const controller = new AbortController()
