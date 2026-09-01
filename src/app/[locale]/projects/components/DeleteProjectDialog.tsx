@@ -16,9 +16,10 @@ import { useTranslations } from 'next-intl'
 import { ChangeEvent, type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Button, Form, Modal, Spinner } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
-import { Project } from '@/object-types'
+import { Project, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Data {
@@ -151,7 +152,25 @@ function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = fa
         setInternalData(dataCount)
     }
 
-    const handleUserComment = (e: ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!show) return
+
+        void (async () => {
+            try {
+                const currentUser = await getAuthenticatedUserIdentity()
+                const isAdminUser =
+                    currentUser.userGroup === UserGroupType.ADMIN || currentUser.userGroup === UserGroupType.SW360_ADMIN
+
+                setComment(isAdminUser ? `Deleted by user ${currentUser.email}` : '')
+            } catch {
+                setComment('')
+            }
+        })()
+    }, [
+        show,
+    ])
+
+    const handleUserComment = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setComment(e.target.value)
     }
 
@@ -240,6 +259,7 @@ function DeleteProjectDialog({ projectId, show, setShow, hasClearingRequest = fa
                                         as='textarea'
                                         aria-label='With textarea'
                                         placeholder='Comment your message...'
+                                        value={comment}
                                         onChange={handleUserComment}
                                     />
                                 </Form.Group>

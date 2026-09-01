@@ -36,7 +36,7 @@ test.describe('Projects - Delete', () => {
         await expect(modal.locator(selectors.deleteDialog.title)).toContainText('Delete Project')
     })
 
-    test('TC45: Delete button is disabled until comment is provided', async ({ page }) => {
+    test('TC45: Delete button is disabled when comment is empty', async ({ page }) => {
         const id = await createProjectApi({ name: `PW DelDisabled ${ts}`, version: '1.0.0' })
 
         await page.goto(`/projects/edit/${id}`)
@@ -47,6 +47,7 @@ test.describe('Projects - Delete', () => {
         await expect(modal).toBeVisible()
 
         const confirmBtn = page.locator(selectors.deleteDialog.confirmButton)
+        await modal.locator('textarea').clear()
         await expect(confirmBtn).toBeDisabled()
 
         await modal.locator('textarea').fill('Test deletion comment')
