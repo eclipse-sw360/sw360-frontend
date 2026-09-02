@@ -16,8 +16,9 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import { Component, ErrorDetails, MergeOrSplitActionType, UserGroupType } from '@/object-types'
-import { ApiError } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import ComponentTable from '../../components/ComponentTable'
@@ -83,6 +84,8 @@ function MergeOverview({
             redirect(`/components/detail/${id}`)
         }
     }
+
+    useDocumentTitle(targetComponent?.name ? CommonUtils.formatDocumentTitle(targetComponent.name) : undefined)
 
     useEffect(() => {
         const controller = new AbortController()

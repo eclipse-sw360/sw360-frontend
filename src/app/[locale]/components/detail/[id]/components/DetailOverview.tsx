@@ -1,6 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
-// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025,2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDet
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import { PageButtonHeader } from '@/components/sw360'
+import { useDocumentTitle } from '@/hooks'
 import {
     Changelogs,
     CommonTabIds,
@@ -65,6 +66,8 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+
+    useDocumentTitle(component?.name ? CommonUtils.formatDocumentTitle(component.name) : undefined)
 
     useEffect(() => {
         void (async () => {

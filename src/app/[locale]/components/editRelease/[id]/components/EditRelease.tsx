@@ -1,6 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
-// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025,2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import AddCommercialDetails from '@/components/CommercialDetails/AddCommercialDe
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import LinkedReleases from '@/components/LinkedReleases/LinkedReleases'
 import { useConfigKeyValue } from '@/contexts'
+import { useDocumentTitle } from '@/hooks'
 import {
     ActionType,
     ClearingInformation,
@@ -72,6 +73,8 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
+
+    useDocumentTitle(release?.name ? CommonUtils.formatDocumentTitle(release.name, release.version) : undefined)
 
     useEffect(() => {
         const fragment = params.get('tab') ?? CommonTabIds.SUMMARY

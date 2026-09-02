@@ -7,8 +7,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { Metadata } from 'next'
 import { ReactNode } from 'react'
 import MergeReleaseOverview from './components/MergeReleaseOverview'
+
+export const metadata: Metadata = {
+    title: 'Releases',
+}
 
 interface Context {
     params: Promise<{

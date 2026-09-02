@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import {
     Attachment,
     Embedded,
@@ -91,6 +92,10 @@ function MergeReleaseOverview({
     }, [
         releaseUsages,
     ])
+
+    useDocumentTitle(
+        targetRelease?.name ? CommonUtils.formatDocumentTitle(targetRelease.name, targetRelease.version) : undefined,
+    )
 
     useEffect(() => {
         const controller = new AbortController()
