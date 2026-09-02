@@ -17,8 +17,10 @@ import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
 import { ListGroup, Spinner, Tab } from 'react-bootstrap'
 
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import { Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
+import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import CreateOrEditPackage from '../../../components/CreateOrEditPackage'
@@ -29,6 +31,10 @@ function EditPackage({ packageId }: { packageId: string }): JSX.Element {
     const router = useRouter()
     const [packagePayload, setPackagePayload] = useState<Package | undefined>(undefined)
     const [updatingPackage, setUpdatingPackage] = useState(false)
+
+    useDocumentTitle(
+        packagePayload?.name ? CommonUtils.formatDocumentTitle(packagePayload.name, packagePayload.version) : undefined,
+    )
 
     useEffect(() => {
         void (async () => {

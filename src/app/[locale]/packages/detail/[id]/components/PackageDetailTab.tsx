@@ -16,9 +16,10 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, ListGroup, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import { ErrorDetails, Package, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
-import { ApiError } from '@/utils'
+import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ChangeLog from './Changelog'
@@ -33,6 +34,10 @@ function PackageDetailTab({ packageId }: { packageId: string }): ReactNode {
     const packagesPath = `/${locale}/packages`
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
+    )
+
+    useDocumentTitle(
+        summaryData?.name ? CommonUtils.formatDocumentTitle(summaryData.name, summaryData.version) : undefined,
     )
 
     useEffect(() => {
