@@ -1,6 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
-// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025,2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
+import { useDocumentTitle } from '@/hooks'
 import {
     ActionType,
     Attachment,
@@ -78,6 +79,8 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     })
     const [loadingComponent, setLoadingComponent] = useState<boolean>(true)
     const [loadingAttachments, setLoadingAttachments] = useState<boolean>(true)
+
+    useDocumentTitle(component?.name ? CommonUtils.formatDocumentTitle(component.name) : undefined)
 
     useEffect(() => {
         const controller = new AbortController()

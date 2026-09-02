@@ -1,6 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
-// Copyright (C) Siemens AG, 2025. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2025,2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/Comp
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import { PageButtonHeader } from '@/components/sw360'
 import { useConfigKeyValue } from '@/contexts'
+import { useDocumentTitle } from '@/hooks'
 import {
     Attachment,
     Changelogs,
@@ -91,6 +92,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+
+    useDocumentTitle(release?.name ? CommonUtils.formatDocumentTitle(release.name, release.version) : undefined)
 
     useEffect(() => {
         void (async () => {
