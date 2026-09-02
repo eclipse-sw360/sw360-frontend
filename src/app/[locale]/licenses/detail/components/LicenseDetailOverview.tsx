@@ -20,6 +20,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import { PageButtonHeader } from '@/components/sw360'
+import { useDocumentTitle } from '@/hooks'
 import {
     Changelogs,
     Embedded,
@@ -56,6 +57,10 @@ const LicenseDetailOverview = ({ licenseId }: Props): ReactNode => {
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
     }
+
+    useDocumentTitle(
+        license?.fullName ? CommonUtils.formatDocumentTitle(license.fullName, license.shortName) : undefined,
+    )
 
     useEffect(() => {
         const controller = new AbortController()
