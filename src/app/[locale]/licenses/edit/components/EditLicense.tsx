@@ -20,6 +20,7 @@ import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import LinkedObligations from '@/components/LinkedObligations/LinkedObligations'
 import LinkedObligationsDialog from '@/components/sw360/SearchObligations/LinkedObligationsDialog'
+import { useDocumentTitle } from '@/hooks'
 import { LicenseDetail, LicensePayload, LicenseTabIds, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
@@ -41,6 +42,9 @@ function EditLicense({ licenseId }: Props): ReactNode {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false)
     const [inputValid, setInputValid] = useState<boolean>(false)
     const [errorFullName, setErrorFullName] = useState<boolean>(false)
+    const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
+    const [loading, setLoading] = useState<boolean>(true)
+    const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
     const [licensePayload, setLicensePayload] = useState<LicensePayload>({
         shortName: '',
         fullName: '',
@@ -52,14 +56,16 @@ function EditLicense({ licenseId }: Props): ReactNode {
         checked: false,
         licenseTypeDatabaseId: '',
     })
-    const [activeKey, setActiveKey] = useState(LicenseTabIds.DETAILS)
-    const [loading, setLoading] = useState<boolean>(true)
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? LicenseTabIds.DETAILS)
     }
 
-    const handleClickAddObligations = useCallback(() => setAddObligationDiaglog(true), [])
+    useDocumentTitle(
+        licensePayload.fullName
+            ? CommonUtils.formatDocumentTitle(licensePayload.fullName, licensePayload.shortName)
+            : undefined,
+    )
 
     useEffect(() => {
         const controller = new AbortController()
