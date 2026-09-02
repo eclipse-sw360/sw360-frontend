@@ -32,6 +32,7 @@ enum ConfigKeys {
     RELEASE_SOURCECODE_URL_SKIP_DOMAINS = 'release.sourcecodeurl.skip.domains',
     REST_API_TOKEN_LENGTH = 'rest.apitoken.length',
     IS_NESTED_RELEASE_ENABLED = 'nested.release.enabled',
+    PROJECTS_CLOSED_UPDATE_STRICT = 'projects.closed.update.strict',
 }
 
 export default ConfigKeys

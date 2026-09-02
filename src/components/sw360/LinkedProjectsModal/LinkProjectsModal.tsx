@@ -373,6 +373,12 @@ export default function LinkProjectsModal({
             }
 
             const response = await ApiUtils.PATCH(`projects/${projectId}`, data)
+            if (response.status === StatusCodes.FORBIDDEN) {
+                const err = (await response.json()) as ErrorDetails
+                throw new ApiError(err.message || t('Access Denied'), {
+                    status: response.status,
+                })
+            }
             if (response.status !== StatusCodes.OK) {
                 const err = (await response.json()) as ErrorDetails
                 throw new ApiError(err.message, {
@@ -415,6 +421,7 @@ export default function LinkProjectsModal({
                     </>
                 ),
             })
+            ApiUtils.reportError(error)
         } finally {
             setLinking(false)
         }
