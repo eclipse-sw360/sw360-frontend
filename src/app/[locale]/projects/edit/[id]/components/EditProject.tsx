@@ -660,6 +660,11 @@ function EditProject({
                 } else if (r.status === StatusCodes.ACCEPTED) {
                     MessageService.success(t('Moderation request is created'))
                     router.push(`/projects/detail/${projectId}`)
+                } else if (r.status === StatusCodes.FORBIDDEN) {
+                    const err = (await r.json()) as ErrorDetails
+                    throw new ApiError(err.message || t('Access Denied'), {
+                        status: r.status,
+                    })
                 } else {
                     const err = (await r.json()) as ErrorDetails
                     throw new ApiError(err.message, {

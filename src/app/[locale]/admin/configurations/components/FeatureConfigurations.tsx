@@ -220,6 +220,18 @@ const FeatureConfigurations = (): JSX.Element => {
                                     </td>
                                     <td className='align-middle'>{t('force_update_enabled_description')}</td>
                                 </tr>
+                                <tr id='projects-closed-update-strict'>
+                                    <td className='align-middle fw-bold'>{t('Restrict Updates On Closed Projects')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.PROJECTS_CLOSED_UPDATE_STRICT] === 'true'}
+                                            propKey={ConfigKeys.PROJECTS_CLOSED_UPDATE_STRICT}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('projects_closed_update_strict_description')}</td>
+                                </tr>
                                 <tr id='admin-private-access-enabled'>
                                     <td className='align-middle fw-bold'>{t('Enable Admin Private Access')}</td>
                                     <td>
