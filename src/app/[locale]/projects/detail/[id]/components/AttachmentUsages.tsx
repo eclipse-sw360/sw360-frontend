@@ -22,7 +22,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
@@ -43,6 +42,7 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -255,6 +255,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     })
     const [saveUsagesLoading, setSaveUsagesLoading] = useState(false)
 
+    const [canEditUsage, setCanEditUsage] = useState(false)
+
     const [showProcessingLinkedProjects, setShowProcessingLinkedProjects] = useState(false)
     const [showProcessingAttachmentUsages, setShowProcessingAttachmentUsages] = useState(false)
     const [isTableBuilding, setIsTableBuilding] = useState(false)
@@ -295,12 +297,16 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     )
 
     const handleSaveUsages = async () => {
+        if (!canEditUsage) {
+            MessageService.warn(t('You do not have permission to save attachment usages for this project'))
+            return
+        }
         try {
             setSaveUsagesLoading(true)
             const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status !== StatusCodes.CREATED) {
                 MessageService.error(t('Something went wrong'))
-                return notFound()
+                return
             }
 
             // Check for warnings in response (e.g. stale sub-project or release references)
@@ -326,6 +332,31 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
             setSaveUsagesLoading(false)
         }
     }
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                const [projectResponse, userIdentity] = await Promise.all([
+                    ApiUtils.GET(`projects/${projectId}`, signal),
+                    getAuthenticatedUserIdentity(),
+                ])
+                if (projectResponse.status !== StatusCodes.OK) return
+                const project = (await projectResponse.json()) as Project
+                setCanEditUsage(
+                    CommonUtils.canManageAttachmentUsage(project, userIdentity.email, userIdentity.userGroup),
+                )
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [
+        projectId,
+    ])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -688,7 +719,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                                     <input
                                                         type='checkbox'
                                                         className='form-check-input'
-                                                        disabled={!isLicenseInfoEnabled(attachmentType ?? '')}
+                                                        disabled={
+                                                            !canEditUsage || !isLicenseInfoEnabled(attachmentType ?? '')
+                                                        }
                                                         checked={
                                                             saveUsagesPayload.selected.indexOf(
                                                                 `${
@@ -758,7 +791,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                             <input
                                                 type='checkbox'
                                                 className='form-check-input'
-                                                disabled={!isSourceCodeBundleEnabled(attachmentType ?? '')}
+                                                disabled={
+                                                    !canEditUsage || !isSourceCodeBundleEnabled(attachmentType ?? '')
+                                                }
                                                 checked={
                                                     saveUsagesPayload.selected.indexOf(
                                                         `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${attachmentContentId}`,
@@ -809,7 +844,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                             <input
                                                 type='checkbox'
                                                 className='form-check-input'
-                                                disabled={!isSourceCodeBundleEnabled(attachmentType ?? '')}
+                                                disabled={
+                                                    !canEditUsage || !isSourceCodeBundleEnabled(attachmentType ?? '')
+                                                }
                                                 checked={
                                                     saveUsagesPayload.selected.indexOf(
                                                         `${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${attachmentContentId}`,
@@ -859,6 +896,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
             memoizedAttachmentUsages,
             saveUsagesPayload,
             releaseFilter,
+            canEditUsage,
         ],
     )
 
@@ -1050,6 +1088,12 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 type='button'
                 className='btn btn-secondary mb-2'
                 onClick={() => void handleSaveUsages()}
+                disabled={!canEditUsage}
+                title={
+                    canEditUsage
+                        ? undefined
+                        : t('You do not have permission to save attachment usages for this project')
+                }
             >
                 {t('Save Usages')}{' '}
                 {saveUsagesLoading === true && (

@@ -12,7 +12,7 @@
 import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react'
@@ -35,6 +35,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -67,6 +68,7 @@ function GenerateSourceCodeBundle({
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
     const [project, setProject] = useState<Project>()
+    const [canEditUsage, setCanEditUsage] = useState(false)
 
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const memoizedLinkedProjects = useMemo(
@@ -107,26 +109,28 @@ function GenerateSourceCodeBundle({
             if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
                 return
             }
+
+            const currentDate = new Date().toISOString().split('T')[0]
+            const downloadUrl = `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`
+
+            // Skip save if user doesn't have permission, proceed directly to download
+            if (!canEditUsage) {
+                await DownloadService.download(downloadUrl, `SourceCodeBundle-${currentDate}.zip`)
+                return
+            }
+
             const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status === StatusCodes.CREATED || response.status === StatusCodes.OK) {
-                const currentDate = new Date().toISOString().split('T')[0]
-                DownloadService.download(
-                    `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`,
-                    `SourceCodeBundle-${currentDate}.zip`,
-                )
+                await DownloadService.download(downloadUrl, `SourceCodeBundle-${currentDate}.zip`)
             } else if (response.status === StatusCodes.FORBIDDEN) {
                 MessageService.warn(t('Could not save the attachment usages'))
-                const currentDate = new Date().toISOString().split('T')[0]
-                DownloadService.download(
-                    `reports?withlinkedreleases=false&projectId=${projectId}&module=licenseResourceBundle&excludeReleaseVersion=false&withSubProject=${searchParams.withSubProjects}`,
-                    `SourceCodeBundle-${currentDate}.zip`,
-                )
+                await DownloadService.download(downloadUrl, `SourceCodeBundle-${currentDate}.zip`)
             } else {
                 MessageService.error(t('Something went wrong'))
-                return notFound()
             }
-        } catch (e) {
-            console.error(e)
+        } catch (error) {
+            MessageService.error(t('Download failed'))
+            ApiUtils.reportError(error)
         } finally {
             setLoading(false)
         }
@@ -235,6 +239,22 @@ function GenerateSourceCodeBundle({
         memoizedAttachmentUsages,
         hideWithUsage,
         saveUsagesPayload,
+    ])
+
+    useEffect(() => {
+        if (!project) return
+        void (async () => {
+            try {
+                const userIdentity = await getAuthenticatedUserIdentity()
+                setCanEditUsage(
+                    CommonUtils.canManageAttachmentUsage(project, userIdentity.email, userIdentity.userGroup),
+                )
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+    }, [
+        project,
     ])
 
     // function to add attachments to a release
@@ -371,6 +391,7 @@ function GenerateSourceCodeBundle({
                                 <input
                                     type='checkbox'
                                     className='form-check-input'
+                                    disabled={!canEditUsage}
                                     checked={
                                         saveUsagesPayload.selected.indexOf(
                                             `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${attachmentContentId}`,
@@ -612,6 +633,7 @@ function GenerateSourceCodeBundle({
         [
             t,
             saveUsagesPayload,
+            canEditUsage,
         ],
     )
 
