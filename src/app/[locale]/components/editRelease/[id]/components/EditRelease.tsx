@@ -33,7 +33,6 @@ import {
     ConfigKeys,
     Creator,
     DocumentCreationInformation,
-    DocumentTypes,
     ECCInformation,
     Release,
     ReleaseDetail,
@@ -212,34 +211,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     }
                 }
 
-                if (release['_embedded']['sw360:licenses']) {
-                    const mainLicenses = release['_embedded']['sw360:licenses'].reduce(
-                        (result, item) => {
-                            const licenseId = item._links?.self.href.split('/').at(-1)
-                            if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
-                            return result
-                        },
-                        {} as {
-                            [k: string]: string
-                        },
-                    )
-                    setMainLicenses(mainLicenses)
-                }
-
-                if (release['_embedded']['sw360:otherLicenses']) {
-                    const otherLicenses = release['_embedded']['sw360:otherLicenses'].reduce(
-                        (result, item) => {
-                            const licenseId = item._links?.self.href.split('/').at(-1)
-                            if (licenseId !== undefined) result[licenseId] = item.fullName ?? ''
-                            return result
-                        },
-                        {} as {
-                            [k: string]: string
-                        },
-                    )
-                    setOtherLicenses(otherLicenses)
-                }
-
                 if (typeof release.clearingInformation !== 'undefined') {
                     const clearingInformation: ClearingInformation = release.clearingInformation
                     setClearingInformation(clearingInformation)
@@ -338,14 +309,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         id: '',
         fullName: '',
     })
-
-    const [mainLicenses, setMainLicenses] = useState<{
-        [k: string]: string
-    }>({})
-
-    const [otherLicenses, setOtherLicenses] = useState<{
-        [k: string]: string
-    }>({})
 
     const [cotsResponsible, setCotsResponsible] = useState<{
         [k: string]: string
@@ -660,10 +623,6 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                                 setReleasePayload={setReleasePayload}
                                                 vendor={vendor}
                                                 setVendor={setVendor}
-                                                mainLicenses={mainLicenses}
-                                                setMainLicenses={setMainLicenses}
-                                                otherLicenses={otherLicenses}
-                                                setOtherLicenses={setOtherLicenses}
                                                 cotsDetails={cotsDetails}
                                                 eccInformation={eccInformation}
                                                 clearingInformation={clearingInformation}
@@ -716,14 +675,10 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                                             />
                                         </Tab.Pane>
                                         <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
-                                            {releasePayload.componentId !== null && (
-                                                <EditAttachments
-                                                    documentId={releaseId}
-                                                    documentType={DocumentTypes.RELEASE}
-                                                    documentPayload={releasePayload}
-                                                    setDocumentPayload={setReleasePayload}
-                                                />
-                                            )}
+                                            <EditAttachments
+                                                documentPayload={releasePayload}
+                                                setDocumentPayload={setReleasePayload}
+                                            />
                                         </Tab.Pane>
                                         {release.componentType === 'COTS' && (
                                             <Tab.Pane eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}>

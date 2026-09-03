@@ -27,7 +27,6 @@ import { useConfigKeyValue } from '@/contexts'
 import {
     ActionType,
     ConfigKeys,
-    DocumentTypes,
     ErrorDetails,
     InputKeyValue,
     LinkedPackageData,
@@ -513,6 +512,7 @@ function EditProject({
                             [key: string]: LinkedPackageData
                         },
                     ),
+                    attachments: project._embedded?.['sw360:attachments'] ?? [],
                 }
                 setProjectPayload(projectPayloadData)
                 setIsLoading(false)
@@ -898,8 +898,6 @@ function EditProject({
                                                     )}
                                                     <Tab.Pane eventKey='attachments'>
                                                         <EditAttachments
-                                                            documentId={projectId}
-                                                            documentType={DocumentTypes.PROJECT}
                                                             documentPayload={projectPayload}
                                                             setDocumentPayload={setProjectPayload}
                                                         />

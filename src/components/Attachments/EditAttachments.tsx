@@ -12,46 +12,36 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
-import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useCallback, useMemo, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsExclamationTriangle, BsFillTrashFill, BsQuestionCircle } from 'react-icons/bs'
 import { SW360Table, UpdateCommentModal } from '@/components/sw360'
-import { Attachment, AttachmentTypes, Embedded, ErrorDetails, UpdateCommentModalMetadata } from '@/object-types'
-import { ApiError, CommonUtils } from '@/utils'
-import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { Attachment, AttachmentTypes, UpdateCommentModalMetadata } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import SelectAttachment from './SelectAttachment/SelectAttachment'
 
-interface Props<T> {
-    documentId: string
-    documentType: string
+interface DocumentPayloadWithAttachments {
+    attachments?: Attachment[] | null
+}
+
+const EMPTY_ATTACHMENTS: Attachment[] = []
+
+interface Props<T extends DocumentPayloadWithAttachments> {
     documentPayload: T
     setDocumentPayload: React.Dispatch<React.SetStateAction<T>>
 }
-
-type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
 
 const DeleteAttachmentModal = ({
     deletingAttachment,
     attachmentsData,
     setAttachmentsData,
     setDeletingAttachment,
-    beforeUpdateAttachmentsCheckStatus,
-    setBeforeUpdateAttachmentsCheckStatus,
 }: {
     deletingAttachment: Attachment | undefined
     attachmentsData: Attachment[]
     setAttachmentsData: Dispatch<SetStateAction<Attachment[]>>
     setDeletingAttachment: Dispatch<SetStateAction<Attachment | undefined>>
-    beforeUpdateAttachmentsCheckStatus: {
-        [k: string]: string
-    }
-    setBeforeUpdateAttachmentsCheckStatus: Dispatch<
-        SetStateAction<{
-            [k: string]: string
-        }>
-    >
 }) => {
     const t = useTranslations('default')
 
@@ -61,12 +51,6 @@ const DeleteAttachmentModal = ({
             (att) => att.attachmentContentId !== (deletingAttachment.attachmentContentId ?? ''),
         )
         setAttachmentsData(atts)
-
-        const statuses = {
-            ...beforeUpdateAttachmentsCheckStatus,
-        }
-        delete statuses[deletingAttachment.attachmentContentId ?? '']
-        setBeforeUpdateAttachmentsCheckStatus(statuses)
         setDeletingAttachment(undefined)
     }
 
@@ -77,16 +61,11 @@ const DeleteAttachmentModal = ({
             backdrop='static'
             centered
             size='lg'
-            dialogClassName={
-                beforeUpdateAttachmentsCheckStatus[deletingAttachment?.attachmentContentId ?? ''] === 'ACCEPTED'
-                    ? 'modal-warning'
-                    : 'modal-danger'
-            }
+            dialogClassName={deletingAttachment?.checkStatus === 'ACCEPTED' ? 'modal-warning' : 'modal-danger'}
         >
             <Modal.Header closeButton>
                 <Modal.Title>
-                    {beforeUpdateAttachmentsCheckStatus[deletingAttachment?.attachmentContentId ?? ''] ===
-                    'ACCEPTED' ? (
+                    {deletingAttachment?.checkStatus === 'ACCEPTED' ? (
                         <>
                             <BsExclamationTriangle size={20} />
                             {t('Warning')}
@@ -99,7 +78,7 @@ const DeleteAttachmentModal = ({
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {beforeUpdateAttachmentsCheckStatus[deletingAttachment?.attachmentContentId ?? ''] === 'ACCEPTED' ? (
+                {deletingAttachment?.checkStatus === 'ACCEPTED' ? (
                     <p>{t('An attachment cannot be deleted while it is approved')}.</p>
                 ) : (
                     <p className='confirm-delete-message'>
@@ -109,7 +88,7 @@ const DeleteAttachmentModal = ({
                 )}
             </Modal.Body>
             <Modal.Footer className='justify-content-end'>
-                {beforeUpdateAttachmentsCheckStatus[deletingAttachment?.attachmentContentId ?? ''] === 'ACCEPTED' ? (
+                {deletingAttachment?.checkStatus === 'ACCEPTED' ? (
                     <>
                         <button
                             type='button'
@@ -144,23 +123,27 @@ const DeleteAttachmentModal = ({
     )
 }
 
-function EditAttachments<T>({ documentId, documentType, documentPayload, setDocumentPayload }: Props<T>): JSX.Element {
+function EditAttachments<T extends DocumentPayloadWithAttachments>({
+    documentPayload,
+    setDocumentPayload,
+}: Props<T>): JSX.Element {
     const t = useTranslations('default')
-    const [beforeUpdateAttachmentsCheckStatus, setBeforeUpdateAttachmentsCheckStatus] = useState<{
-        [k: string]: string
-    }>({})
     const [dialogOpenSelectAttachment, setDialogOpenSelectAttachment] = useState(false)
     const handleClickSelectAttachment = useCallback(() => setDialogOpenSelectAttachment(true), [])
     const [updateCommentModalData, setUpdateCommentModalData] = useState<UpdateCommentModalMetadata | null>(null)
 
-    const [attachmentsData, setAttachmentsData] = useState<Attachment[]>(() => [])
-    const memoizedData = useMemo(
-        () => attachmentsData,
+    const attachmentsData = documentPayload.attachments ?? EMPTY_ATTACHMENTS
+    const setAttachmentsData: Dispatch<SetStateAction<Attachment[]>> = useCallback(
+        (value) => {
+            setDocumentPayload((currentPayload) => ({
+                ...currentPayload,
+                attachments: typeof value === 'function' ? value(currentPayload.attachments ?? []) : value,
+            }))
+        },
         [
-            attachmentsData,
+            setDocumentPayload,
         ],
     )
-    const [showProcessing, setShowProcessing] = useState(false)
     const [deletingAttachment, setDeletingAttachment] = useState<Attachment | undefined>(undefined)
 
     const handleInputChange = useCallback(
@@ -187,61 +170,6 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
             setAttachmentsData,
         ],
     )
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        const timeLimit = attachmentsData.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
-
-        void (async () => {
-            try {
-                const response = await ApiUtils.GET(`${documentType}/${documentId}/attachments`, signal)
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-
-                const data = (await response.json()) as EmbeddedAttachments
-                setAttachmentsData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']?.['sw360:attachments'])
-                        ? []
-                        : data['_embedded']['sw360:attachments'],
-                )
-
-                const status: {
-                    [k: string]: string
-                } = {}
-                for (const att of data['_embedded']?.['sw360:attachments'] ?? []) {
-                    if (!CommonUtils.isNullEmptyOrUndefinedString(att.attachmentContentId)) {
-                        status[att.attachmentContentId] = att.checkStatus ?? 'NOT_CHECKED'
-                    }
-                }
-                setBeforeUpdateAttachmentsCheckStatus(status)
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [])
-
-    useEffect(() => {
-        setDocumentPayload({
-            ...documentPayload,
-            attachments: attachmentsData,
-        })
-    }, [
-        attachmentsData,
-    ])
 
     const columns = useMemo<ColumnDef<Attachment>[]>(
         () => [
@@ -457,7 +385,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
     )
 
     const table = useReactTable({
-        data: memoizedData,
+        data: attachmentsData,
         columns,
         getCoreRowModel: getCoreRowModel(),
     })
@@ -494,8 +422,6 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
                 attachmentsData={attachmentsData}
                 setAttachmentsData={setAttachmentsData}
                 setDeletingAttachment={setDeletingAttachment}
-                beforeUpdateAttachmentsCheckStatus={beforeUpdateAttachmentsCheckStatus}
-                setBeforeUpdateAttachmentsCheckStatus={setBeforeUpdateAttachmentsCheckStatus}
             />
             <SelectAttachment
                 attachmentsData={attachmentsData}
@@ -506,7 +432,7 @@ function EditAttachments<T>({ documentId, documentType, documentPayload, setDocu
             <div className='col mb-3'>
                 <SW360Table
                     table={table}
-                    showProcessing={showProcessing}
+                    showProcessing={false}
                 />
             </div>
             <div className='mb-3'>

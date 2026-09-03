@@ -12,7 +12,7 @@
 'use client'
 
 import { StatusCodes } from 'http-status-codes'
-import { notFound, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
 import { PageButtonHeader } from 'next-sw360'
@@ -22,18 +22,16 @@ import EditAttachments from '@/components/Attachments/EditAttachments'
 import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCommentDialog'
 import {
     ActionType,
-    Attachment,
     CommonTabIds,
     Component,
     ComponentPayload,
-    DocumentTypes,
-    Embedded,
     ErrorDetails,
+    InputKeyValue,
+    Vendor,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import DeleteComponentDialog from '../../../components/DeleteComponentDialog'
 import ComponentEditSummary from './ComponentEditSummary'
 import Releases from './Releases'
@@ -42,14 +40,10 @@ interface Props {
     componentId: string
 }
 
-type EmbeddedAttachments = Embedded<Attachment, 'sw360:attachments'>
-
 const EditComponent = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const params = useSearchParams()
     const router = useRouter()
-    const [component, setComponent] = useState<Component>()
-    const [attachmentData, setAttachmentData] = useState<Array<Attachment>>([])
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [showCommentModal, setShowCommentModal] = useState<boolean>(false)
     const [componentPayload, setComponentPayload] = useState<ComponentPayload>({
@@ -76,8 +70,15 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         attachments: null,
         comment: '',
     })
+    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
+    const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
+    const [vendor, setVendor] = useState<Vendor>({
+        id: '',
+        fullName: '',
+    })
+    const [componentOwner, setComponentOwner] = useState<Record<string, string>>({})
+    const [moderators, setModerators] = useState<Record<string, string>>({})
     const [loadingComponent, setLoadingComponent] = useState<boolean>(true)
-    const [loadingAttachments, setLoadingAttachments] = useState<boolean>(true)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -96,38 +97,78 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                     })
                 }
                 const component = (await response.json()) as Component
-                setComponent(component)
+
+                if (component.externalIds) {
+                    setExternalIds(CommonUtils.convertObjectToMap(component.externalIds))
+                }
+
+                if (component.additionalData) {
+                    setAddtionalData(CommonUtils.convertObjectToMap(component.additionalData))
+                }
+
+                if (component._embedded && component._embedded.defaultVendor) {
+                    const vendor: Vendor = {
+                        id: component.defaultVendorId,
+                        fullName: component._embedded.defaultVendor.fullName,
+                    }
+                    setVendor(vendor)
+                }
+
+                let modifiedBy = ''
+                if (component._embedded && component._embedded.modifiedBy) {
+                    modifiedBy = component._embedded.modifiedBy.fullName ?? ''
+                }
+
+                let createdBy = ''
+                if (component._embedded && component._embedded.createdBy) {
+                    createdBy = component._embedded.createdBy.fullName ?? ''
+                }
+
+                let componentOwnerEmail = ''
+                if (component._embedded && component._embedded.componentOwner) {
+                    componentOwnerEmail = component._embedded.componentOwner.email
+                    setComponentOwner({
+                        [componentOwnerEmail]: component._embedded.componentOwner.fullName ?? '',
+                    })
+                }
+
+                let moderatorsFromComponent = {}
+                if (component._embedded && component._embedded['sw360:moderators']) {
+                    moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(
+                        component._embedded['sw360:moderators'],
+                    )
+                    setModerators(moderatorsFromComponent)
+                }
+
+                const componentPayloadData: ComponentPayload = {
+                    name: component.name,
+                    createBy: createdBy,
+                    description: component.description,
+                    componentType: component.componentType,
+                    moderators: Object.keys(moderatorsFromComponent),
+                    modifiedBy: modifiedBy,
+                    modifiedOn: component.modifiedOn,
+                    componentOwner: componentOwnerEmail,
+                    ownerAccountingUnit: component.ownerAccountingUnit,
+                    ownerGroup: component.ownerGroup,
+                    ownerCountry: component.ownerCountry,
+                    roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(component.roles ?? {})),
+                    externalIds: component.externalIds,
+                    additionalData: component.additionalData,
+                    defaultVendorId: component.defaultVendorId,
+                    categories: component.categories,
+                    homepage: component.homepage,
+                    vcs: component.vcs,
+                    mailinglist: component.mailinglist,
+                    wiki: component.wiki,
+                    blog: component.blog,
+                    attachments: component._embedded?.['sw360:attachments'] ?? [],
+                }
+                setComponentPayload(componentPayloadData)
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
                 setLoadingComponent(false)
-            }
-        })()
-        void (async () => {
-            try {
-                const queryUrl = CommonUtils.createUrlWithParams(
-                    `components/${componentId}/attachments`,
-                    Object.fromEntries(params),
-                )
-                const response = await ApiUtils.GET(queryUrl, signal)
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return dispatchSessionExpiredEvent()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
-                }
-
-                const responseText = await response.text()
-                if (CommonUtils.isNullEmptyOrUndefinedString(responseText)) {
-                    setAttachmentData([])
-                    return
-                }
-
-                const dataAttachments = JSON.parse(responseText) as EmbeddedAttachments
-                setAttachmentData(dataAttachments._embedded?.['sw360:attachments'] ?? [])
-            } catch (error) {
-                ApiUtils.reportError(error)
-            } finally {
-                setLoadingAttachments(false)
             }
         })()
 
@@ -218,7 +259,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
         },
     }
 
-    return loadingComponent || loadingAttachments || !component ? (
+    return loadingComponent ? (
         <div className='col-12 mt-1 text-center'>
             <Spinner className='spinner' />
         </div>
@@ -267,7 +308,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                         <Col>
                             <Row className='mb-3'>
                                 <PageButtonHeader
-                                    title={component.name}
+                                    title={componentPayload.name}
                                     buttons={headerButtons}
                                 ></PageButtonHeader>
                             </Row>
@@ -275,10 +316,18 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                                 <Tab.Content>
                                     <Tab.Pane eventKey={CommonTabIds.SUMMARY}>
                                         <ComponentEditSummary
-                                            attachmentData={attachmentData}
-                                            componentId={componentId}
                                             componentPayload={componentPayload}
                                             setComponentPayload={setComponentPayload}
+                                            externalIds={externalIds}
+                                            setExternalIds={setExternalIds}
+                                            addtionalData={addtionalData}
+                                            setAddtionalData={setAddtionalData}
+                                            vendor={vendor}
+                                            setVendor={setVendor}
+                                            componentOwner={componentOwner}
+                                            setComponentOwner={setComponentOwner}
+                                            moderators={moderators}
+                                            setModerators={setModerators}
                                         />
                                     </Tab.Pane>
                                     <Tab.Pane eventKey={CommonTabIds.RELEASES}>
@@ -286,8 +335,6 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                                     </Tab.Pane>
                                     <Tab.Pane eventKey={CommonTabIds.ATTACHMENTS}>
                                         <EditAttachments
-                                            documentId={componentId}
-                                            documentType={DocumentTypes.COMPONENT}
                                             documentPayload={componentPayload}
                                             setDocumentPayload={setComponentPayload}
                                         />
