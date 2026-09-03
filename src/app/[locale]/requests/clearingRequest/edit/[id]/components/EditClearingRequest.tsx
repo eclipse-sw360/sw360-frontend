@@ -18,6 +18,7 @@ import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import { ClearingRequestDetails, UpdateClearingRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
@@ -55,6 +56,8 @@ function EditClearingRequest({ clearingRequestId }: { clearingRequestId: string 
             notFound()
         }
     }
+
+    useDocumentTitle(clearingRequestData?.id ? CommonUtils.formatDocumentTitle(clearingRequestData.id) : undefined)
 
     useEffect(() => {
         void fetchData(`clearingrequest/${clearingRequestId}`).then(

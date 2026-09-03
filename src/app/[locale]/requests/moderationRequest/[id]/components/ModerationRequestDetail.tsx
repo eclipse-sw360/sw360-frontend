@@ -17,6 +17,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import { ErrorDetails, ModerationRequestDetails, ModerationRequestPayload, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
@@ -85,6 +86,12 @@ function ModerationRequestDetail({ moderationRequestId }: { moderationRequestId:
             ApiUtils.reportError(error)
         }
     }
+
+    useDocumentTitle(
+        moderationRequestData?.documentName
+            ? CommonUtils.formatDocumentTitle(moderationRequestData.documentName)
+            : undefined,
+    )
 
     useEffect(() => {
         void fetchData(`moderationrequest/${moderationRequestId}`).then(
