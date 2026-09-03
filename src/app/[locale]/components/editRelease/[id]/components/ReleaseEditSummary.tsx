@@ -38,22 +38,6 @@ interface Props {
     setReleasePayload: React.Dispatch<React.SetStateAction<Release>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
-    mainLicenses: {
-        [k: string]: string
-    }
-    setMainLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
-    otherLicenses: {
-        [k: string]: string
-    }
-    setOtherLicenses: React.Dispatch<
-        React.SetStateAction<{
-            [k: string]: string
-        }>
-    >
     cotsDetails: COTSDetails
     eccInformation?: ECCInformation
     clearingInformation?: ClearingInformation
@@ -66,10 +50,6 @@ function ReleaseEditSummary({
     setReleasePayload,
     vendor,
     setVendor,
-    mainLicenses,
-    setMainLicenses,
-    otherLicenses,
-    setOtherLicenses,
     cotsDetails,
     eccInformation,
     clearingInformation,
@@ -187,6 +167,7 @@ function ReleaseEditSummary({
             cotsDetails: cotsDetails,
             eccInformation: eccInformation,
             clearingInformation: clearingInformation,
+            attachments: release._embedded?.['sw360:attachments'] ?? [],
         }
         setReleasePayload(releasePayload)
     }, [])
