@@ -18,6 +18,7 @@ import { ShowInfoOnHover } from 'next-sw360'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Breadcrumb, Button, Card, Col, Collapse, Row, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useDocumentTitle } from '@/hooks'
 import { ClearingRequestDetails, UserGroupType } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -51,6 +52,8 @@ function ClearingRequestDetail({ clearingRequestId }: { clearingRequestId: strin
             notFound()
         }
     }
+
+    useDocumentTitle(clearingRequestData?.id ? CommonUtils.formatDocumentTitle(clearingRequestData.id) : undefined)
 
     useEffect(() => {
         if (!toastShownRef.current) {
