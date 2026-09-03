@@ -81,7 +81,7 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
     const [moderators, setModerators] = useState<Record<string, string>>({})
     const [loadingComponent, setLoadingComponent] = useState<boolean>(true)
 
-    useDocumentTitle(component?.name ? CommonUtils.formatDocumentTitle(component.name) : undefined)
+    useDocumentTitle(componentPayload?.name ? CommonUtils.formatDocumentTitle(componentPayload.name) : undefined)
 
     useEffect(() => {
         const controller = new AbortController()
