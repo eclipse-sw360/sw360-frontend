@@ -171,9 +171,13 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
         if (response === undefined) return
 
         if (response.status === 'SUCCESS') {
+            // Check number of steps to determine final message
+            const stepCount = response.fossologyProcessInfo?.processSteps?.length ?? 0
+            const finalStepName = stepCount === 2 ? 'Scanning source done' : 'Report generation done'
+
             setProgressStatus({
                 percent: PERCENT_DONE,
-                stepName: 'Report generation done',
+                stepName: finalStepName,
             })
             showMessage(clearingMessages.CLEARING_SUCCESS)
             clearAllInterval()
@@ -260,7 +264,13 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
 
         if (fossologyProcessInfo.processSteps.at(-1)?.stepStatus === 'DONE') {
             progressText += ' done'
-            progressPercent += 2 * STEP_PERCENT
+            // When report download is disabled and we have 2 steps, show 100%
+            // When report download is enabled and we have 3 steps, add bonus as before
+            if (fossologyProcessInfo.processSteps.length === 2) {
+                progressPercent = PERCENT_DONE
+            } else {
+                progressPercent += 2 * STEP_PERCENT
+            }
         } else if (fossologyProcessInfo.processSteps.at(-1)?.stepStatus === 'IN_WORK') {
             progressText += ' in progress'
             progressPercent += 1 * STEP_PERCENT
@@ -321,11 +331,13 @@ const FossologyClearing = ({ show, setShow, releaseId }: Props): JSX.Element => 
                     showMessage(clearingMessages.CLEARING_SUCCESS)
                     return
                 }
+                if (numberOfSourceAttachment.current !== 1) {
+                    return
+                }
                 if (
-                    countDownInterval.current !== undefined &&
-                    progressInterval.current !== undefined &&
-                    progressStatus.percent === 0 &&
-                    numberOfSourceAttachment.current == 1
+                    countDownInterval.current === undefined &&
+                    progressInterval.current === undefined &&
+                    progressStatus.percent === 0
                 ) {
                     handleFossologyClearing({}).catch((err) => console.error(err))
                 }

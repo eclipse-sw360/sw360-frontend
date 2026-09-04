@@ -11,152 +11,51 @@
 
 'use client'
 
-import { StatusCodes } from 'http-status-codes'
-import { notFound } from 'next/navigation'
-
 import { useTranslations } from 'next-intl'
 import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
 import { useConfigValue } from '@/contexts'
-import {
-    Attachment,
-    Component,
-    ComponentPayload,
-    DocumentTypes,
-    InputKeyValue,
-    UIConfigKeys,
-    Vendor,
-} from '@/object-types'
+import { ComponentPayload, DocumentTypes, InputKeyValue, UIConfigKeys, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
-import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
-    componentId: string
     componentPayload: ComponentPayload
     setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
-    attachmentData?: Array<Attachment>
+    externalIds: InputKeyValue[]
+    setExternalIds: Dispatch<SetStateAction<InputKeyValue[]>>
+    addtionalData: InputKeyValue[]
+    setAddtionalData: Dispatch<SetStateAction<InputKeyValue[]>>
+    vendor: Vendor
+    setVendor: Dispatch<SetStateAction<Vendor>>
+    componentOwner: Record<string, string>
+    setComponentOwner: Dispatch<SetStateAction<Record<string, string>>>
+    moderators: Record<string, string>
+    setModerators: Dispatch<SetStateAction<Record<string, string>>>
 }
 
 export default function ComponentEditSummary({
-    componentId,
     componentPayload,
     setComponentPayload,
-    attachmentData,
+    externalIds,
+    setExternalIds,
+    addtionalData,
+    setAddtionalData,
+    vendor,
+    setVendor,
+    componentOwner,
+    setComponentOwner,
+    moderators,
+    setModerators,
 }: Props): ReactNode {
     const t = useTranslations('default')
-    const [externalIds, setExternalIds] = useState<InputKeyValue[]>([])
-    const [addtionalData, setAddtionalData] = useState<InputKeyValue[]>([])
-    const [vendor, setVendor] = useState<Vendor>({
-        id: '',
-        fullName: '',
-    })
-
-    const [componentOwner, setComponentOwner] = useState<{
-        [k: string]: string
-    }>({})
-    const [moderators, setModerators] = useState<{
-        [k: string]: string
-    }>({})
 
     // Configs from backend
     const componentExternalIdSuggestions =
         useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) !== null
             ? (useConfigValue(UIConfigKeys.UI_COMPONENT_EXTERNALKEYS) as string[])
             : undefined
-
-    const fetchData = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url)
-        if (response.status === StatusCodes.OK) {
-            const data = (await response.json()) as Component
-            return data
-        } else if (response.status == StatusCodes.UNAUTHORIZED) {
-            return dispatchSessionExpiredEvent()
-        } else {
-            return notFound()
-        }
-    }, [])
-
-    useEffect(() => {
-        void fetchData(`components/${componentId}`).then((component) => {
-            if (!component) return
-
-            if (component.externalIds) {
-                setExternalIds(CommonUtils.convertObjectToMap(component.externalIds))
-            }
-
-            if (component.additionalData) {
-                setAddtionalData(CommonUtils.convertObjectToMap(component.additionalData))
-            }
-
-            if (component._embedded && component._embedded.defaultVendor) {
-                const vendor: Vendor = {
-                    id: component.defaultVendorId,
-                    fullName: component._embedded.defaultVendor.fullName,
-                }
-                setVendor(vendor)
-            }
-
-            let modifiedBy = ''
-            if (component._embedded && component._embedded.modifiedBy) {
-                modifiedBy = component._embedded.modifiedBy.fullName ?? ''
-            }
-
-            let createdBy = ''
-            if (component._embedded && component._embedded.createdBy) {
-                createdBy = component._embedded.createdBy.fullName ?? ''
-            }
-
-            let componentOwnerEmail = ''
-            if (component._embedded && component._embedded.componentOwner) {
-                componentOwnerEmail = component._embedded.componentOwner.email
-                setComponentOwner({
-                    [componentOwnerEmail]: component._embedded.componentOwner.fullName ?? '',
-                })
-            }
-
-            let moderatorsFromComponent = {}
-            if (component._embedded && component._embedded['sw360:moderators']) {
-                moderatorsFromComponent = CommonUtils.extractEmailsAndFullNamesFromUsers(
-                    component._embedded['sw360:moderators'],
-                )
-                setModerators(moderatorsFromComponent)
-            }
-
-            const componentPayloadData: ComponentPayload = {
-                name: component.name,
-                createBy: createdBy,
-                description: component.description,
-                componentType: component.componentType,
-                moderators: Object.keys(moderatorsFromComponent),
-                modifiedBy: modifiedBy,
-                modifiedOn: component.modifiedOn,
-                componentOwner: componentOwnerEmail,
-                ownerAccountingUnit: component.ownerAccountingUnit,
-                ownerGroup: component.ownerGroup,
-                ownerCountry: component.ownerCountry,
-                roles: CommonUtils.convertRoles(CommonUtils.convertObjectToMapRoles(component.roles ?? {})),
-                externalIds: component.externalIds,
-                additionalData: component.additionalData,
-                defaultVendorId: component.defaultVendorId,
-                categories: component.categories,
-                homepage: component.homepage,
-                vcs: component.vcs,
-                mailinglist: component.mailinglist,
-                wiki: component.wiki,
-                blog: component.blog,
-                attachments: attachmentData,
-            }
-            setComponentPayload(componentPayloadData)
-        })
-    }, [
-        componentId,
-        fetchData,
-        attachmentData,
-        setComponentPayload,
-    ])
 
     const setDataAddtionalData = (additionalDatas: Map<string, string>) => {
         const obj = Object.fromEntries(additionalDatas)

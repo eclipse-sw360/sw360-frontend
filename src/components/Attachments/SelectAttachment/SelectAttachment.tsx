@@ -111,20 +111,24 @@ function SelectAttachment({ show, setShow, attachmentsData, setAttachmentsData }
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
         if (e.dataTransfer.items.length !== 0) {
-            if (e.dataTransfer.items[0].kind === 'file') {
-                const f = e.dataTransfer.items[0].getAsFile()
-                if (!CommonUtils.isNullOrUndefined(f))
-                    setFiles((prev) => [
-                        ...prev,
-                        f,
-                    ])
-            } else {
+            const droppedFiles = Array.from(e.dataTransfer.items)
+                .filter((item) => item.kind === 'file')
+                .map((item) => item.getAsFile())
+                .filter((file): file is File => !CommonUtils.isNullOrUndefined(file))
+
+            if (droppedFiles.length === 0) {
                 return
             }
-        } else if (e.dataTransfer.files.length !== 0) {
+
             setFiles((prev) => [
                 ...prev,
-                e.dataTransfer.files[0],
+                ...droppedFiles,
+            ])
+        } else if (e.dataTransfer.files.length !== 0) {
+            const droppedFiles = Array.from(e.dataTransfer.files)
+            setFiles((prev) => [
+                ...prev,
+                ...droppedFiles,
             ])
         } else {
             return
