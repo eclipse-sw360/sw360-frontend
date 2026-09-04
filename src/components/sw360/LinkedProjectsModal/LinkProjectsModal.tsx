@@ -62,10 +62,17 @@ export default function LinkProjectsModal({
     const [linking, setLinking] = useState(false)
 
     useEffect(() => {
-        setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
+        if (mode === 'SET') {
+            setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
+            return
+        }
+
+        // In update mode, the selected list should only contain user-picked parent projects from this modal session.
+        setLinkProjects(new Map())
     }, [
         projectPayload,
         show,
+        mode,
     ])
 
     const columns = useMemo<ColumnDef<Project>[]>(
@@ -365,34 +372,113 @@ export default function LinkProjectsModal({
         setLinkProjects(m)
     }
 
+    const toLinkedProjectsPayload = (project: Project): Record<string, LinkedProjectData> =>
+        Object.fromEntries(
+            (project.linkedProjects ?? []).flatMap((linkedProject) => {
+                const linkedProjectId = linkedProject.project.split('/').at(-1)
+                if (!linkedProjectId) return []
+
+                return [
+                    [
+                        linkedProjectId,
+                        {
+                            enableSvm: linkedProject.enableSvm === 'true',
+                            name: '',
+                            projectRelationship: linkedProject.relation,
+                            version: '',
+                        } satisfies LinkedProjectData,
+                    ],
+                ]
+            }),
+        )
+
+    const formatProjectDisplayName = (
+        name: string | undefined,
+        version: string | undefined,
+        fallback: string,
+    ): string => {
+        if (CommonUtils.isNullEmptyOrUndefinedString(name)) {
+            return fallback
+        }
+
+        if (CommonUtils.isNullEmptyOrUndefinedString(version)) {
+            return name
+        }
+
+        return `${name}(${version})`
+    }
+
     const handleLinkProjects = async (projectId: string) => {
         setLinking(true)
         try {
-            const data = {
-                linkedProjects: Object.fromEntries(linkProjects),
+            let sourceProjectName = projectPayload.name
+            let sourceProjectVersion = projectPayload.version
+            if (CommonUtils.isNullEmptyOrUndefinedString(sourceProjectName)) {
+                const sourceProjectResponse = await ApiUtils.GET(`projects/${projectId}`)
+                if (sourceProjectResponse.status === StatusCodes.OK) {
+                    const sourceProject = (await sourceProjectResponse.json()) as Project
+                    sourceProjectName = sourceProject.name ?? projectId
+                    sourceProjectVersion = sourceProject.version
+                }
             }
 
-            const response = await ApiUtils.PATCH(`projects/${projectId}`, data)
-            if (response.status === StatusCodes.FORBIDDEN) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message || t('Access Denied'), {
-                    status: response.status,
+            for (const [selectedProjectId, selectedProjectData] of linkProjects.entries()) {
+                const selectedProjectResponse = await ApiUtils.GET(`projects/${selectedProjectId}`)
+                if (selectedProjectResponse.status !== StatusCodes.OK) {
+                    const err = (await selectedProjectResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: selectedProjectResponse.status,
+                    })
+                }
+
+                const selectedProject = (await selectedProjectResponse.json()) as Project
+                const selectedProjectLinkedProjects = toLinkedProjectsPayload(selectedProject)
+
+                selectedProjectLinkedProjects[projectId] = {
+                    enableSvm: false,
+                    name: '',
+                    projectRelationship: selectedProjectData.projectRelationship,
+                    version: '',
+                }
+
+                const patchResponse = await ApiUtils.PATCH(`projects/${selectedProjectId}`, {
+                    linkedProjects: selectedProjectLinkedProjects,
                 })
+
+                if (patchResponse.status === StatusCodes.FORBIDDEN) {
+                    const err = (await patchResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message || t('Access Denied'), {
+                        status: patchResponse.status,
+                    })
+                }
+                if (patchResponse.status !== StatusCodes.OK) {
+                    const err = (await patchResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: patchResponse.status,
+                    })
+                }
             }
-            if (response.status !== StatusCodes.OK) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message, {
-                    status: response.status,
-                })
-            }
-            const res = (await response.json()) as Project
+
+            const sourceProjectDisplayName = formatProjectDisplayName(
+                sourceProjectName,
+                sourceProjectVersion,
+                projectId,
+            )
+
+            const linkedToProjectDisplayName = Array.from(linkProjects.entries())
+                .map(([linkedProjectId, linkedProject]) =>
+                    formatProjectDisplayName(linkedProject.name, linkedProject.version, linkedProjectId),
+                )
+                .join(', ')
+
             setAlert({
                 variant: 'success',
                 message: (
                     <>
                         <p>
-                            {`${t('The projects have been successfully linked to project')} `}
-                            <span className='fw-bold'>{res.name}</span>.{' '}
+                            The project <span className='fw-bold'>{sourceProjectDisplayName}</span> has been
+                            successfully linked to project <span className='fw-bold'>{linkedToProjectDisplayName}</span>
+                            .
                         </p>
                         <p>
                             {t('Click')}{' '}
