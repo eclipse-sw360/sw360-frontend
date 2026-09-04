@@ -12,9 +12,10 @@
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Dispatch, type JSX, SetStateAction, useState } from 'react'
-import { Dropdown, Nav, Tab } from 'react-bootstrap'
+import { Button, Dropdown, Nav, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { ActionType, ObligationEntry, UserGroupType } from '@/object-types'
+import DownloadService from '@/services/download.service'
 import ObligationView from './ObligationsView/ObligationsView'
 import ReleaseView from './ReleaseView'
 
@@ -29,11 +30,27 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
     const router = useRouter()
     const t = useTranslations('default')
     const [key, setKey] = useState('obligations-view')
+    const [exportingObligations, setExportingObligations] = useState<boolean>(false)
 
     const generateLicenseInfo = (withSubProjects: boolean) => {
         const isCalledFromProjectLicenseTab = false
         sessionStorage.setItem('isCalledFromProjectLicenseTab', JSON.stringify(isCalledFromProjectLicenseTab))
         router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects}&variant=REPORT`)
+    }
+
+    // Download the current project's obligations as an XLSX report.
+    const handleExportObligations = async () => {
+        if (!projectId) return
+        setExportingObligations(true)
+        try {
+            const currentDate = new Date().toISOString().split('T')[0]
+            await DownloadService.download(
+                `reports?module=Obligations&projectId=${projectId}&format=xlsx`,
+                `obligations-${currentDate}.xlsx`,
+            )
+        } finally {
+            setExportingObligations(false)
+        }
     }
 
     return (
@@ -62,17 +79,35 @@ function Obligations({ projectId, actionType, payload, setPayload }: Props): JSX
                         </Nav>
                     </div>
                     {actionType === ActionType.DETAIL && (
-                        <Dropdown className='col-auto'>
-                            <Dropdown.Toggle variant='primary'>{t('Create Project Clearing Report')}</Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
-                                    {t('Projects only')}
-                                </Dropdown.Item>
-                                <Dropdown.Item onClick={() => generateLicenseInfo(true)}>
-                                    {t('Projects with sub projects')}
-                                </Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
+                        <div className='col-auto d-flex gap-2'>
+                            <Button
+                                variant='secondary'
+                                aria-label={t('Export Obligations Report')}
+                                disabled={!projectId || exportingObligations}
+                                onClick={() => void handleExportObligations()}
+                            >
+                                {t('Export Obligations Report')}
+                                {exportingObligations && (
+                                    <Spinner
+                                        size='sm'
+                                        className='ms-1 spinner'
+                                    />
+                                )}
+                            </Button>
+                            <Dropdown>
+                                <Dropdown.Toggle variant='primary'>
+                                    {t('Create Project Clearing Report')}
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
+                                        {t('Projects only')}
+                                    </Dropdown.Item>
+                                    <Dropdown.Item onClick={() => generateLicenseInfo(true)}>
+                                        {t('Projects with sub projects')}
+                                    </Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div>
                     )}
                 </div>
                 <Tab.Content className='mt-4'>
