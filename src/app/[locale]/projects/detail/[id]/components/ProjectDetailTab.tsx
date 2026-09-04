@@ -175,6 +175,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 })
                 setProjectPayload({
                     id: projectId,
+                    name: project.name ?? '',
+                    version: project.version ?? '',
                     linkedProjects: ob,
                 })
             } catch (error) {
