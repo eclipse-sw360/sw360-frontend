@@ -41,11 +41,7 @@ type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
 type TypedProject = TypedEntity<Project, 'project'>
 
-interface ReleaseWithAttachmentInfo extends Release {
-    hasMultipleAttachments: boolean
-}
-
-type TypedRelease = TypedEntity<ReleaseWithAttachmentInfo, 'release'>
+type TypedRelease = TypedEntity<Release, 'release'>
 
 type TypedAttachment = TypedEntity<Attachment, 'attachment'>
 
@@ -88,8 +84,18 @@ const formatReleaseAttachmentDataToTableData = (
     },
     release: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>,
     projectPath: string[],
+    approvedOnly: boolean,
+    filterWithoutUsage: boolean,
+    saveUsagesPayload: SaveUsagesPayload,
 ) => {
+    if (filterWithoutUsage && hasCliUsageSet(r, projectPath.join(':'), saveUsagesPayload)) {
+        return
+    }
+
     for (const att of r.attachments ?? []) {
+        if (approvedOnly) {
+            if (att.checkStatus === undefined || att.checkStatus !== 'ACCEPTED') break
+        }
         const relId = r._links?.self.href.split('/').at(-1) ?? ''
         const attachment: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
             node: {
@@ -121,6 +127,9 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
     },
     project: Project,
     projectPath: string[],
+    approvedOnly: boolean,
+    filterWithoutUsage: boolean,
+    saveUsagesPayload: SaveUsagesPayload,
 ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] => {
     const rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] = []
 
@@ -131,7 +140,15 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                 type: 'project',
                 entity: p,
             },
-            children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, licenses, p, projectPath),
+            children: extractLinkedProjectsAndTheirLinkedReleases(
+                attachmentUsages,
+                licenses,
+                p,
+                projectPath,
+                approvedOnly,
+                filterWithoutUsage,
+                saveUsagesPayload,
+            ),
         }
         projectPath.pop()
         if (nodeProject.children && nodeProject.children.length !== 0) {
@@ -141,18 +158,26 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
 
     for (const l of project['linkedReleases'] ?? []) {
         for (const r of attachmentUsages['_embedded']['sw360:release']) {
+            if (approvedOnly) {
+                if (r.clearingState === undefined || r.clearingState !== 'APPROVED') break
+            }
             if (r._links?.self.href.split('/').at(-1) === l.release.split('/').at(-1)) {
                 const nodeRelease: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
                     node: {
-                        entity: {
-                            ...r,
-                            hasMultipleAttachments: (r.attachments?.length ?? 0) > 1,
-                        },
+                        entity: r,
                         type: 'release',
                     },
                     children: [],
                 }
-                formatReleaseAttachmentDataToTableData(r, licenses, nodeRelease, projectPath)
+                formatReleaseAttachmentDataToTableData(
+                    r,
+                    licenses,
+                    nodeRelease,
+                    projectPath,
+                    approvedOnly,
+                    filterWithoutUsage,
+                    saveUsagesPayload,
+                )
                 if (nodeRelease.children && nodeRelease.children.length !== 0) {
                     rows.push(nodeRelease)
                 }
@@ -170,7 +195,7 @@ const buildTable = (
     licenses: {
         [id: string]: License[]
     },
-    key: string,
+    approvedOnly: boolean,
     filterWithoutUsage: boolean,
     saveUsagesPayload: SaveUsagesPayload,
 ) => {
@@ -181,18 +206,26 @@ const buildTable = (
     // adding releases and attachments of the base project
     for (const id in attachmentUsages.releaseIdToUsage) {
         for (const r of attachmentUsages['_embedded']['sw360:release']) {
+            if (approvedOnly) {
+                if (r.clearingState === undefined || r.clearingState !== 'APPROVED') break
+            }
             if (id === r._links?.self.href.split('/').at(-1)) {
                 const nodeRelease: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
                     node: {
-                        entity: {
-                            ...r,
-                            hasMultipleAttachments: (r.attachments?.length ?? 0) > 1,
-                        },
+                        entity: r,
                         type: 'release',
                     },
                     children: [],
                 }
-                formatReleaseAttachmentDataToTableData(r, licenses, nodeRelease, projectPath)
+                formatReleaseAttachmentDataToTableData(
+                    r,
+                    licenses,
+                    nodeRelease,
+                    projectPath,
+                    approvedOnly,
+                    filterWithoutUsage,
+                    saveUsagesPayload,
+                )
                 if (nodeRelease.children && nodeRelease.children.length !== 0) {
                     tableData.push(nodeRelease)
                 }
@@ -217,86 +250,22 @@ const buildTable = (
                 entity: project,
             },
             // adding releases and attachments of > 1st level linked projects
-            children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, licenses, project, projectPath),
+            children: extractLinkedProjectsAndTheirLinkedReleases(
+                attachmentUsages,
+                licenses,
+                project,
+                projectPath,
+                approvedOnly,
+                filterWithoutUsage,
+                saveUsagesPayload,
+            ),
         }
         projectPath.pop()
         if (nodeProject.children && nodeProject.children.length !== 0) {
             tableData.push(nodeProject)
         }
     }
-    const approvedReleaseData = key === 'only_approved' ? filterApprovedReleases(tableData) : tableData
-    return filterWithoutUsage
-        ? filterReleasesWithUsage(
-              approvedReleaseData,
-              [
-                  projectId,
-              ],
-              saveUsagesPayload,
-          )
-        : approvedReleaseData
-}
-
-function filterApprovedReleases(
-    tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[],
-): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] {
-    return tableData.reduce<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[]>(
-        (rows, row) => {
-            if (row.node.type === 'release' && row.node.entity.clearingState !== 'APPROVED') return rows
-
-            if (row.node.type === 'project') {
-                const children = filterApprovedReleases(row.children ?? [])
-                if (children.length === 0) return rows
-                rows.push({
-                    ...row,
-                    children,
-                })
-                return rows
-            }
-
-            rows.push(row)
-            return rows
-        },
-        [],
-    )
-}
-
-function filterReleasesWithUsage(
-    tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[],
-    projectPath: string[],
-    saveUsagesPayload: SaveUsagesPayload,
-): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] {
-    return tableData.reduce<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[]>(
-        (rows, row) => {
-            if (
-                row.node.type === 'release' &&
-                hasCliUsageSet(row.node.entity, projectPath.join(':'), saveUsagesPayload)
-            ) {
-                return rows
-            }
-
-            if (row.node.type === 'project') {
-                const projectId = row.node.entity._links.self.href.split('/').at(-1) ?? ''
-                const filteredChildren = filterReleasesWithUsage(
-                    row.children ?? [],
-                    [
-                        ...projectPath,
-                        projectId,
-                    ],
-                    saveUsagesPayload,
-                )
-                if (filteredChildren.length === 0) return rows
-                rows.push({
-                    ...row,
-                    children: filteredChildren,
-                })
-                return rows
-            }
-
-            rows.push(row)
-            return rows
-        },
-        [],
-    )
+    return tableData
 }
 
 const fetchReleaseRelationsFromLinkedProjects = (linkedProjects: Project[], filters: string[]) => {
@@ -455,11 +424,7 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}
                             ></div>
                         )
                     } else if (row.original.node.type === 'license') {
@@ -556,11 +521,7 @@ function GenerateLicenseInfo({
                         )
                     } else if (row.original.node.type === 'release') {
                         return (
-                            <div
-                                className={`text-center ${
-                                    (row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'
-                                }`}
-                            >
+                            <div className={(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}>
                                 <PaddedCell row={row}>
                                     <div className='text-center'>{row.depth + 1}</div>
                                 </PaddedCell>
@@ -590,12 +551,7 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.getParentRow()?.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
                                 {row.original.node.entity.filename}
                             </div>
@@ -603,13 +559,7 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         const { name, version } = row.original.node.entity
                         return (
-                            <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
-                            >
+                            <div className={(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}>
                                 <Link
                                     className='text-link'
                                     href={`/components/releases/detail/${row.original.node.entity._links?.self.href.split('/').at(-1)}`}
@@ -642,11 +592,7 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
                                 {Capitalize(row.original.node.entity.componentType ?? '')}
                             </div>
@@ -659,12 +605,11 @@ function GenerateLicenseInfo({
                         const att = row.original.node.entity
                         return (
                             <p
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
+                                className={
+                                    (row.getParentRow()?.original?.children?.length ?? 0) > 1
                                         ? 'orange-cell'
                                         : 'green-cell'
-                                }`}
+                                }
                             >
                                 {att.attachmentUsageCount === undefined || att.attachmentUsageCount === 0
                                     ? t('not used in any project yet')
@@ -690,11 +635,7 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
                                 {Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
@@ -708,12 +649,7 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.getParentRow()?.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
                                 {Capitalize(row.original.node.entity.checkStatus ?? '')}
                             </div>
@@ -731,12 +667,7 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.getParentRow()?.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
                                 {row.original.node.entity.createdBy}
                             </div>
@@ -744,11 +675,7 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             ></div>
                         )
                     }
@@ -764,12 +691,7 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.getParentRow()?.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
                                 {row.original.node.entity.checkedTeam}
                             </div>
@@ -777,11 +699,7 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             ></div>
                         )
                     }
@@ -998,7 +916,7 @@ function GenerateLicenseInfo({
                 memoizedAttachmentUsages,
                 memoizedLinkedProjects,
                 memoizedLicenses,
-                key,
+                key === 'only_approved',
                 hideWithUsage,
                 saveUsagesPayload,
             ),
