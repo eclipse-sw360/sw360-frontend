@@ -174,7 +174,8 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                                     <span className='fw-bold'>{name}</span>{' '}
                                     <Link
                                         className='text-link'
-                                        href={`mailto:${value}`}
+                                        href={value}
+                                        target='_blank'
                                     >
                                         {value}
                                     </Link>
