@@ -88,6 +88,13 @@ services:
         NEXT_PUBLIC_SW360_API_URL: ${NEXT_PUBLIC_SW360_API_URL:-https://localhost}
         NEXT_PUBLIC_SW360_AUTH_PROVIDER: ${NEXT_PUBLIC_SW360_AUTH_PROVIDER:-sw360basic}
         NEXTAUTH_URL: https://localhost
+        # Footer build metadata. Export SOURCE_BRANCH/SOURCE_COMMIT in your shell before
+        # `docker compose build`, e.g.:
+        #   export SOURCE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        #   export SOURCE_COMMIT=$(git rev-parse --short HEAD)
+        # If unset, the frontend footer will display 'unknown' (build still succeeds).
+        SOURCE_BRANCH: ${SOURCE_BRANCH:-}
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-}
     secrets:
       - NEXTAUTH_SECRET
       - SW360_FRONTEND_KC_SECRET
