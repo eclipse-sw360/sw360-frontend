@@ -9,7 +9,15 @@
 
 'use client'
 
-import { ColumnDef, ExpandedState, getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    ExpandedState,
+    getCoreRowModel,
+    getExpandedRowModel,
+    getSortedRowModel,
+    SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -173,6 +181,7 @@ const buildTable = (
     key: string,
     filterWithoutUsage: boolean,
     saveUsagesPayload: SaveUsagesPayload,
+    sort: Sort,
 ) => {
     const tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] = []
     const projectPath: string[] = [
@@ -224,6 +233,7 @@ const buildTable = (
             tableData.push(nodeProject)
         }
     }
+    sortAllLevels(tableData, sort)
     const approvedReleaseData = key === 'only_approved' ? filterApprovedReleases(tableData) : tableData
     return filterWithoutUsage
         ? filterReleasesWithUsage(
@@ -312,6 +322,49 @@ const fetchReleaseRelationsFromLinkedProjects = (linkedProjects: Project[], filt
     }
 }
 
+interface Sort {
+    columnName: string
+    isAsc: boolean
+}
+
+// This function sorts only projects and releases. Child attachments and licenses are not sorted
+const comparator = (
+    firstRow: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>,
+    secondRow: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>,
+    sort?: Sort,
+): number => {
+    if (
+        firstRow.node.type === 'attachment' ||
+        secondRow.node.type === 'attachment' ||
+        firstRow.node.type === 'license' ||
+        secondRow.node.type === 'license'
+    )
+        return 0
+    const typeOrder = {
+        release: 0,
+        project: 1,
+    }
+    const typeDifference = typeOrder[firstRow.node.type] - typeOrder[secondRow.node.type]
+    if (typeDifference !== 0) return typeDifference
+
+    const firstName = `${firstRow.node.entity.name ?? ''} (${firstRow.node.entity.version ?? ''})`
+    const secondName = `${secondRow.node.entity.name ?? ''} (${secondRow.node.entity.version ?? ''})`
+    const difference = firstName.localeCompare(secondName, undefined, {
+        sensitivity: 'base',
+    })
+    return sort?.isAsc === false ? -difference : difference
+}
+
+const sortAllLevels = (
+    rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[],
+    sort?: Sort,
+): void => {
+    for (const row of rows) {
+        if (row.children && row.children.length !== 0) sortAllLevels(row.children, sort)
+    }
+    rows.sort((firstRow, secondRow) => comparator(firstRow, secondRow, sort))
+}
+
 function GenerateLicenseInfo({
     projectId,
 }: Readonly<{
@@ -333,6 +386,10 @@ function GenerateLicenseInfo({
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
     const [projectRelationships, setProjectRelationships] = useState<string[]>([])
+    const [sort, setSort] = useState<Sort>({
+        columnName: 'name',
+        isAsc: true,
+    })
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
     const [showProcessing, setShowProcessing] = useState(false)
     const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
@@ -586,6 +643,8 @@ function GenerateLicenseInfo({
             {
                 id: 'name',
                 header: t('Name'),
+                enableSorting: true,
+                accessorKey: 'name',
                 cell: ({ row }) => {
                     if (row.original.node.type === 'attachment') {
                         return (
@@ -801,6 +860,12 @@ function GenerateLicenseInfo({
         // table state config
         state: {
             expanded: expandedState,
+            sorting: [
+                {
+                    id: sort.columnName,
+                    desc: !sort.isAsc,
+                },
+            ],
         },
 
         data: data,
@@ -812,6 +877,33 @@ function GenerateLicenseInfo({
         getSubRows: (row) => row.children ?? [],
         getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
         onExpandedChange: setExpandedState,
+
+        manualSorting: true,
+        getSortedRowModel: getSortedRowModel(),
+        onSortingChange: (updater) => {
+            setSort((previousSort) => {
+                const previousSorting: SortingState = [
+                    {
+                        id: previousSort.columnName,
+                        desc: !previousSort.isAsc,
+                    },
+                ]
+                const nextSorting = typeof updater === 'function' ? updater(previousSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        columnName: id,
+                        isAsc: !desc,
+                    }
+                }
+
+                return {
+                    columnName: '',
+                    isAsc: true,
+                }
+            })
+        },
 
         meta: {
             rowHeightConstant: true,
@@ -1001,6 +1093,7 @@ function GenerateLicenseInfo({
                 key,
                 hideWithUsage,
                 saveUsagesPayload,
+                sort,
             ),
         )
     }, [
@@ -1010,6 +1103,7 @@ function GenerateLicenseInfo({
         hideWithUsage,
         memoizedLicenses,
         saveUsagesPayload,
+        sort,
     ])
 
     return (

@@ -1,4 +1,4 @@
-// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023-2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,13 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface AlertData {
-    variant: string
-    message: JSX.Element
+    [k: string]: {
+        variant?: string
+        name?: string
+        id?: string
+        version?: string
+        message?: JSX.Element
+    }
 }
 
 interface Props {
@@ -56,16 +61,23 @@ export default function LinkProjectsModal({
 }: Props): JSX.Element {
     const t = useTranslations('default')
     const [linkProjects, setLinkProjects] = useState<Map<string, LinkedProjectData>>(new Map())
-    const [alert, setAlert] = useState<AlertData | null>(null)
+    const [alert, setAlert] = useState<AlertData[] | null>([])
     const [searchText, setSearchText] = useState<string | undefined>(undefined)
     const [byNameOnly, setByNameOnly] = useState(true)
     const [linking, setLinking] = useState(false)
 
     useEffect(() => {
-        setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
+        if (mode === 'SET') {
+            setLinkProjects(new Map(Object.entries(projectPayload.linkedProjects ?? {})))
+            return
+        }
+
+        // In update mode, the selected list should only contain user-picked parent projects from this modal session.
+        setLinkProjects(new Map())
     }, [
         projectPayload,
         show,
+        mode,
     ])
 
     const columns = useMemo<ColumnDef<Project>[]>(
@@ -365,62 +377,174 @@ export default function LinkProjectsModal({
         setLinkProjects(m)
     }
 
+    const toLinkedProjectsPayload = (project: Project): Record<string, LinkedProjectData> =>
+        Object.fromEntries(
+            (project.linkedProjects ?? []).flatMap((linkedProject) => {
+                const linkedProjectId = linkedProject.project.split('/').at(-1)
+                if (!linkedProjectId) return []
+
+                return [
+                    [
+                        linkedProjectId,
+                        {
+                            enableSvm: linkedProject.enableSvm === 'true',
+                            name: '',
+                            projectRelationship: linkedProject.relation,
+                            version: '',
+                        } satisfies LinkedProjectData,
+                    ],
+                ]
+            }),
+        )
+
     const handleLinkProjects = async (projectId: string) => {
         setLinking(true)
         try {
-            const data = {
-                linkedProjects: Object.fromEntries(linkProjects),
+            const sourceProjectName = projectPayload.name
+            const sourceProjectVersion = projectPayload.version
+            const completeAlertData: AlertData[] = []
+            for (const [targetProjectId, targetProjectData] of linkProjects.entries()) {
+                let singleAlertData: AlertData = {}
+                const targetProjectResponse = await ApiUtils.GET(`projects/${targetProjectId}`)
+                if (targetProjectResponse.status !== StatusCodes.OK) {
+                    const err = (await targetProjectResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: targetProjectResponse.status,
+                    })
+                }
+
+                const targetProject = (await targetProjectResponse.json()) as Project
+                const selectedProjectLinkedProjects = toLinkedProjectsPayload(targetProject)
+
+                selectedProjectLinkedProjects[projectId] = {
+                    enableSvm: false,
+                    name: '',
+                    projectRelationship: targetProjectData.projectRelationship,
+                    version: '',
+                }
+
+                const patchResponse = await ApiUtils.PATCH(`projects/${targetProjectId}`, {
+                    linkedProjects: selectedProjectLinkedProjects,
+                })
+
+                if (patchResponse.status === StatusCodes.FORBIDDEN) {
+                    singleAlertData = {
+                        [targetProjectId]: {
+                            variant: 'danger',
+                            name: targetProjectData.name,
+                            id: targetProjectId,
+                            version: targetProjectData.version,
+                            message: (
+                                <>
+                                    <p>
+                                        You do not have permission to link the project
+                                        <span className='fw-bold'>
+                                            {sourceProjectName} ({sourceProjectVersion})
+                                        </span>{' '}
+                                        to the target project{' '}
+                                        <span className='fw-bold'>
+                                            {targetProjectData.name} ({targetProjectData.version})
+                                        </span>
+                                        .
+                                    </p>
+                                </>
+                            ),
+                        },
+                    }
+                }
+                if (patchResponse.status === StatusCodes.BAD_REQUEST) {
+                    singleAlertData = {
+                        [targetProjectId]: {
+                            variant: 'danger',
+                            name: targetProjectData.name,
+                            id: targetProjectId,
+                            version: targetProjectData.version,
+                            message: (
+                                <>
+                                    <p>
+                                        The project
+                                        <span className='fw-bold'>
+                                            {sourceProjectName} ({sourceProjectVersion})
+                                        </span>{' '}
+                                        is already linked to the target project
+                                        <span className='fw-bold'>
+                                            {targetProjectData.name} ({targetProjectData.version})
+                                        </span>
+                                        .
+                                    </p>
+                                </>
+                            ),
+                        },
+                    }
+                }
+                if (patchResponse.status === StatusCodes.ACCEPTED) {
+                    singleAlertData = {
+                        [targetProjectId]: {
+                            variant: 'success',
+                            name: targetProjectData.name,
+                            id: targetProjectId,
+                            version: targetProjectData.version,
+                            message: (
+                                <>
+                                    <p>
+                                        Moderation request is created to link the project
+                                        <span className='fw-bold'>
+                                            {sourceProjectName} ({sourceProjectVersion})
+                                        </span>{' '}
+                                        to the target project
+                                        <span className='fw-bold'>
+                                            {targetProjectData.name} ({targetProjectData.version})
+                                        </span>
+                                        .
+                                    </p>
+                                </>
+                            ),
+                        },
+                    }
+                }
+                if (patchResponse.status === StatusCodes.OK) {
+                    singleAlertData = {
+                        [targetProjectId]: {
+                            variant: 'success',
+                            name: targetProjectData.name,
+                            id: targetProjectId,
+                            version: targetProjectData.version,
+                            message: (
+                                <>
+                                    <p>
+                                        The project{' '}
+                                        <span className='fw-bold'>
+                                            {sourceProjectName} ({sourceProjectVersion})
+                                        </span>{' '}
+                                        has been successfully linked to project{' '}
+                                        <span className='fw-bold'>
+                                            {targetProjectData.name} ({targetProjectData.version})
+                                        </span>
+                                        .
+                                    </p>
+                                    <p>
+                                        {t('Click')}{' '}
+                                        <Link
+                                            href={`/projects/edit/${targetProjectId}?tab=linkedProjectsAndReleases`}
+                                            className='text-link'
+                                        >
+                                            {t('here')}
+                                        </Link>{' '}
+                                        {t('to edit the project relation')}.
+                                    </p>
+                                </>
+                            ),
+                        },
+                    }
+                }
+                completeAlertData.push(singleAlertData)
             }
 
-            const response = await ApiUtils.PATCH(`projects/${projectId}`, data)
-            if (response.status === StatusCodes.FORBIDDEN) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message || t('Access Denied'), {
-                    status: response.status,
-                })
-            }
-            if (response.status !== StatusCodes.OK) {
-                const err = (await response.json()) as ErrorDetails
-                throw new ApiError(err.message, {
-                    status: response.status,
-                })
-            }
-            const res = (await response.json()) as Project
-            setAlert({
-                variant: 'success',
-                message: (
-                    <>
-                        <p>
-                            {`${t('The projects have been successfully linked to project')} `}
-                            <span className='fw-bold'>{res.name}</span>.{' '}
-                        </p>
-                        <p>
-                            {t('Click')}{' '}
-                            <Link
-                                href={`/projects/edit/${projectId}?tab=linkedProjectsAndReleases`}
-                                className='text-link'
-                            >
-                                {t('here')}
-                            </Link>{' '}
-                            {t('to edit the project relation')}.
-                        </p>
-                    </>
-                ),
-            })
+            setAlert(completeAlertData)
         } catch (error) {
             if (error instanceof ApiError && error.isAborted) {
                 return
             }
-            const message =
-                error instanceof ApiError ? error.message : error instanceof Error ? error.message : String(error)
-            setAlert({
-                variant: 'danger',
-                message: (
-                    <>
-                        <p>{message}</p>
-                    </>
-                ),
-            })
             ApiUtils.reportError(error)
         } finally {
             setLinking(false)
@@ -462,13 +586,16 @@ export default function LinkProjectsModal({
                 <Modal.Title id='linked-projects-modal'>{t('Link Projects')}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {alert && (
-                    <Alert
-                        variant={alert.variant}
-                        id='linkProjects.alert'
-                    >
-                        {alert.message}
-                    </Alert>
+                {alert?.map((alertData) =>
+                    Object.entries(alertData).map(([targetProjectId, targetAlert]) => (
+                        <Alert
+                            key={`linkProjects.alert.${targetProjectId}`}
+                            variant={targetAlert.variant}
+                            id={`linkProjects.alert.${targetProjectId}`}
+                        >
+                            {targetAlert.message}
+                        </Alert>
+                    )),
                 )}
                 <Form>
                     <Col>
