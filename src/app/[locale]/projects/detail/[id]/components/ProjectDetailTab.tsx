@@ -626,6 +626,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                                 businessUnit={summaryData.businessUnit ?? ''}
                                                 clearingState={summaryData.clearingState ?? ''}
                                                 visibility={summaryData.visibility}
+                                                totalReleases={clearingDetailCount?.totalReleases}
                                             />
                                         )}
                                     </Tab.Pane>
