@@ -184,6 +184,49 @@ test.describe('Projects - Detail Page', () => {
         }
     })
 
+    test('TC71: Export obligations report', async ({ page }) => {
+        const downloadedFileName = 'obligations-report.xlsx'
+        await clickDetailTab(page, /Obligations/)
+        await page.route('**/reports?**', async (route) => {
+            const url = new URL(route.request().url())
+            if (
+                url.pathname === '/resource/api/reports' &&
+                url.searchParams.get('module') === 'Obligations' &&
+                url.searchParams.get('projectId') === projectId &&
+                url.searchParams.get('format') === 'xlsx'
+            ) {
+                await route.fulfill({
+                    status: 200,
+                    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    headers: {
+                        'Content-Disposition': `attachment; filename="${downloadedFileName}"`,
+                    },
+                    body: 'obligations report',
+                })
+                return
+            }
+
+            await route.continue()
+        })
+
+        const [download, request] = await Promise.all([
+            page.waitForEvent('download'),
+            page.waitForRequest((request) => {
+                const url = new URL(request.url())
+                return (
+                    url.pathname === '/resource/api/reports' &&
+                    url.searchParams.get('module') === 'Obligations' &&
+                    url.searchParams.get('projectId') === projectId &&
+                    url.searchParams.get('format') === 'xlsx'
+                )
+            }),
+            page.getByRole('button', { name: 'Export Obligations Report' }).click(),
+        ])
+
+        expect(request.method()).toBe('GET')
+        expect(download.suggestedFilename()).toBe(downloadedFileName)
+    })
+
     // ─── Detail Page Buttons ─────────────────────────────────
 
     test('TC67: Edit Projects button is visible on detail page', async ({ page }) => {
