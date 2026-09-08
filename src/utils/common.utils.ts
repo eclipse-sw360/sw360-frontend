@@ -363,7 +363,7 @@ const formatObligationText = (text: string): string =>
  */
 const formatDocumentTitle = (name: string, version?: string | null): string => {
     const nameWithVersion = isNullEmptyOrUndefinedString(version) ? name : `${name} (${version})`
-    return `${nameWithVersion} | SW360`
+    return `${nameWithVersion} | SW360`.trim()
 }
 
 const CommonUtils = {
