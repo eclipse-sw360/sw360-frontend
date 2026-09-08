@@ -19,8 +19,15 @@ import { type JSX, useEffect, useState } from 'react'
 import { VersionInfo } from '@/object-types'
 import { ApiUtils } from '@/utils'
 
+// Compile-time constants injected by next.config.ts `env` block.
+const frontendVersionInfo: VersionInfo = {
+    sw360FrontendVersion: process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown',
+    gitBranch: process.env.NEXT_PUBLIC_APP_GIT_BRANCH ?? 'unknown',
+    buildNumber: process.env.NEXT_PUBLIC_APP_GIT_COMMIT ?? 'unknown',
+}
+
 function Footer(): JSX.Element {
-    const [versionInfo, setVersionInfo] = useState<VersionInfo>()
+    const [backendVersionInfo, setBackendVersionInfo] = useState<VersionInfo>()
 
     useEffect(() => {
         const controller = new AbortController()
@@ -31,7 +38,7 @@ function Footer(): JSX.Element {
                 const response = await ApiUtils.GET('version', '', signal)
                 if (response.status == StatusCodes.OK) {
                     const data = (await response.json()) as VersionInfo
-                    setVersionInfo(data)
+                    setBackendVersionInfo(data)
                 }
             } catch {
                 // Silently fail - version display is non-critical
@@ -88,14 +95,21 @@ function Footer(): JSX.Element {
                     </Link>
                 </div>
                 <div className='footerVersion'>
-                    {versionInfo ? (
+                    {frontendVersionInfo ? (
                         <>
-                            Version: {versionInfo.sw360Version} | Branch: {versionInfo.gitBranch} (
-                            {versionInfo.buildNumber}) | Build time: {versionInfo.buildTime} | API:{' '}
-                            {versionInfo.apiVersion}
+                            Frontend: {frontendVersionInfo.sw360FrontendVersion} | Branch:{' '}
+                            {frontendVersionInfo.gitBranch} ({frontendVersionInfo.buildNumber}) |&nbsp;
                         </>
                     ) : (
-                        'No build information available.'
+                        'No frontend build information available.'
+                    )}
+                    {backendVersionInfo ? (
+                        <>
+                            Backend: {backendVersionInfo.sw360Version} | Branch: {backendVersionInfo.gitBranch} (
+                            {backendVersionInfo.buildNumber}) | API: {backendVersionInfo.apiVersion}
+                        </>
+                    ) : (
+                        'No backend build information available.'
                     )}
                 </div>
             </footer>

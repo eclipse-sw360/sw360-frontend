@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.4
 
 # Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
+# Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -17,6 +18,13 @@ ARG NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
 # define build-time args
 ARG NEXT_PUBLIC_SW360_API_URL
 ARG NEXT_PUBLIC_SW360_AUTH_PROVIDER=sw360basic
+
+# Frontend build metadata — .git is excluded via .dockerignore, so pass these
+# from CI (e.g. `docker build --build-arg SOURCE_BRANCH=$(git rev-parse --abbrev-ref HEAD) ...`).
+ARG SOURCE_BRANCH
+ARG SOURCE_COMMIT
+ENV SOURCE_BRANCH=${SOURCE_BRANCH}
+ENV SOURCE_COMMIT=${SOURCE_COMMIT}
 
 # define run-time args
 ARG NEXTAUTH_URL=http://localhost:3000
