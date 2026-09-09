@@ -345,6 +345,17 @@ const VendorDialog = ({ show, setShow, setVendor, vendor }: Props): JSX.Element 
                                     onChange={(event) => {
                                         setSearchText(event.target.value)
                                     }}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault()
+                                            if (searchText === undefined) setSearchText('')
+                                            setPageableQueryParam((prev) => ({
+                                                ...prev,
+                                                page: 0,
+                                            }))
+                                            void searchVendor()
+                                        }
+                                    }}
                                 />
                             </div>
                             <div className='col-lg-4'>

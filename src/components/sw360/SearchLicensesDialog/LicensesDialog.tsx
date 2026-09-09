@@ -228,6 +228,17 @@ const LicensesDialog = ({ show, setShow, selectLicenses, releaseLicenses }: Prop
                                 onChange={(event) => {
                                     setSearchText(event.target.value)
                                 }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault()
+                                        if (!searchText) setSearchText('')
+                                        setPageableQueryParam((prev) => ({
+                                            ...prev,
+                                            page: 0,
+                                        }))
+                                        handleSearch()
+                                    }
+                                }}
                             />
                         </div>
                         <div className='col-lg-4'>
