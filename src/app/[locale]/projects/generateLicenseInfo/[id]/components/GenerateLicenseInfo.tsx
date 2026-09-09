@@ -23,13 +23,12 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Nav, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { useDocumentTitle } from '@/hooks'
 import {
     Attachment,
-    AttachmentUsage,
     AttachmentUsages,
     Embedded,
     ErrorDetails,
@@ -44,6 +43,13 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
+import {
+    type License,
+    LicenseDetailLoader,
+    restoreLicenseUsages,
+    toggleAttachmentUsage,
+    toggleLicenseUsage,
+} from './licenseInfo.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -59,11 +65,8 @@ type TypedAttachment = TypedEntity<Attachment, 'attachment'>
 
 interface ExtendedNestedRows<K> extends NestedRows<K> {
     projectPath?: string
-}
-
-interface License {
-    name: string
-    text: string
+    id?: string
+    releaseId?: string
 }
 
 type TypedLicense = TypedEntity<License, 'license'>
@@ -71,7 +74,7 @@ type TypedLicense = TypedEntity<License, 'license'>
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
-const hasCliUsageSet = (release: Release, projectPath: string, saveUsagesPayload: SaveUsagesPayload): boolean => {
+const hasCliUsageSet = (release: Release, projectPath: string, selectedUsages: Set<string>): boolean => {
     const cliAttachments =
         release.attachments?.filter(
             (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
@@ -84,7 +87,7 @@ const hasCliUsageSet = (release: Release, projectPath: string, saveUsagesPayload
     // Check if ANY CLI attachment has license info usage set
     return cliAttachments.some((att) => {
         const pathPrefix = projectPath ? `${projectPath}-` : ''
-        return saveUsagesPayload.selected.includes(`${pathPrefix}${releaseId}_licenseInfo_${att.attachmentContentId}`)
+        return selectedUsages.has(`${pathPrefix}${releaseId}_licenseInfo_${att.attachmentContentId}`)
     })
 }
 
@@ -100,13 +103,16 @@ const formatReleaseAttachmentDataToTableData = (
     for (const att of r.attachments ?? []) {
         const relId = r._links?.self.href.split('/').at(-1) ?? ''
         const attachment: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
+            id: `${projectPath.join(':')}-${relId}_${att.attachmentContentId}`,
+            releaseId: relId,
             node: {
                 entity: att,
                 type: 'attachment',
             },
-            children: licenses[`${relId}_${att.attachmentContentId}`].map(
+            children: (licenses[`${relId}_${att.attachmentContentId}`] ?? []).map(
                 (lic) =>
                     ({
+                        id: `${projectPath.join(':')}-${relId}_${att.attachmentContentId}_${lic.name}`,
                         node: {
                             entity: lic,
                             type: 'license',
@@ -123,7 +129,7 @@ const formatReleaseAttachmentDataToTableData = (
 }
 
 const extractLinkedProjectsAndTheirLinkedReleases = (
-    attachmentUsages: AttachmentUsages,
+    releasesById: Map<string, Release>,
     licenses: {
         [id: string]: License[]
     },
@@ -134,12 +140,13 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
 
     for (const p of project._embedded?.['sw360:linkedProjects'] ?? []) {
         projectPath.push(p._links.self.href.split('/').at(-1) ?? '')
-        const nodeProject: NestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
+        const nodeProject: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
+            id: projectPath.join(':'),
             node: {
                 type: 'project',
                 entity: p,
             },
-            children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, licenses, p, projectPath),
+            children: extractLinkedProjectsAndTheirLinkedReleases(releasesById, licenses, p, projectPath),
         }
         projectPath.pop()
         if (nodeProject.children && nodeProject.children.length !== 0) {
@@ -148,22 +155,22 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
     }
 
     for (const l of project['linkedReleases'] ?? []) {
-        for (const r of attachmentUsages['_embedded']['sw360:release']) {
-            if (r._links?.self.href.split('/').at(-1) === l.release.split('/').at(-1)) {
-                const nodeRelease: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
-                    node: {
-                        entity: {
-                            ...r,
-                            hasMultipleAttachments: (r.attachments?.length ?? 0) > 1,
-                        },
-                        type: 'release',
+        const r = releasesById.get(l.release.split('/').at(-1) ?? '')
+        if (r) {
+            const nodeRelease: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
+                id: `${projectPath.join(':')}-${l.release.split('/').at(-1)}`,
+                node: {
+                    entity: {
+                        ...r,
+                        hasMultipleAttachments: (r.attachments?.length ?? 0) > 1,
                     },
-                    children: [],
-                }
-                formatReleaseAttachmentDataToTableData(r, licenses, nodeRelease, projectPath)
-                if (nodeRelease.children && nodeRelease.children.length !== 0) {
-                    rows.push(nodeRelease)
-                }
+                    type: 'release',
+                },
+                children: [],
+            }
+            formatReleaseAttachmentDataToTableData(r, licenses, nodeRelease, projectPath)
+            if (nodeRelease.children && nodeRelease.children.length !== 0) {
+                rows.push(nodeRelease)
             }
         }
     }
@@ -178,55 +185,59 @@ const buildTable = (
     licenses: {
         [id: string]: License[]
     },
-    key: string,
-    filterWithoutUsage: boolean,
-    saveUsagesPayload: SaveUsagesPayload,
     sort: Sort,
 ) => {
+    const releasesById = new Map(
+        attachmentUsages._embedded['sw360:release'].map((release) => [
+            release._links?.self.href.split('/').at(-1) ?? '',
+            release,
+        ]),
+    )
+    const projectsById = new Map(
+        linkedProjects.map((project) => [
+            project._links.self.href.split('/').at(-1) ?? '',
+            project,
+        ]),
+    )
     const tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] = []
     const projectPath: string[] = [
         projectId,
     ]
     // adding releases and attachments of the base project
     for (const id in attachmentUsages.releaseIdToUsage) {
-        for (const r of attachmentUsages['_embedded']['sw360:release']) {
-            if (id === r._links?.self.href.split('/').at(-1)) {
-                const nodeRelease: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
-                    node: {
-                        entity: {
-                            ...r,
-                            hasMultipleAttachments: (r.attachments?.length ?? 0) > 1,
-                        },
-                        type: 'release',
+        const r = releasesById.get(id)
+        if (r) {
+            const nodeRelease: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
+                id: `${projectPath.join(':')}-${id}`,
+                node: {
+                    entity: {
+                        ...r,
+                        hasMultipleAttachments: (r.attachments?.length ?? 0) > 1,
                     },
-                    children: [],
-                }
-                formatReleaseAttachmentDataToTableData(r, licenses, nodeRelease, projectPath)
-                if (nodeRelease.children && nodeRelease.children.length !== 0) {
-                    tableData.push(nodeRelease)
-                }
+                    type: 'release',
+                },
+                children: [],
+            }
+            formatReleaseAttachmentDataToTableData(r, licenses, nodeRelease, projectPath)
+            if (nodeRelease.children && nodeRelease.children.length !== 0) {
+                tableData.push(nodeRelease)
             }
         }
     }
 
     // adding releases and attachments of the 1st level linked projects
     for (const pid in attachmentUsages['linkedProjects'] ?? {}) {
-        let project: Project | undefined
-        for (const p of linkedProjects) {
-            if (p['_links']['self']['href'].split('/').at(-1) === pid) {
-                project = p
-                break
-            }
-        }
+        const project = projectsById.get(pid)
         if (!project) continue
         projectPath.push(pid)
         const nodeProject: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
+            id: projectPath.join(':'),
             node: {
                 type: 'project',
                 entity: project,
             },
             // adding releases and attachments of > 1st level linked projects
-            children: extractLinkedProjectsAndTheirLinkedReleases(attachmentUsages, licenses, project, projectPath),
+            children: extractLinkedProjectsAndTheirLinkedReleases(releasesById, licenses, project, projectPath),
         }
         projectPath.pop()
         if (nodeProject.children && nodeProject.children.length !== 0) {
@@ -234,16 +245,7 @@ const buildTable = (
         }
     }
     sortAllLevels(tableData, sort)
-    const approvedReleaseData = key === 'only_approved' ? filterApprovedReleases(tableData) : tableData
-    return filterWithoutUsage
-        ? filterReleasesWithUsage(
-              approvedReleaseData,
-              [
-                  projectId,
-              ],
-              saveUsagesPayload,
-          )
-        : approvedReleaseData
+    return tableData
 }
 
 function filterApprovedReleases(
@@ -273,14 +275,11 @@ function filterApprovedReleases(
 function filterReleasesWithUsage(
     tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[],
     projectPath: string[],
-    saveUsagesPayload: SaveUsagesPayload,
+    selectedUsages: Set<string>,
 ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] {
     return tableData.reduce<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[]>(
         (rows, row) => {
-            if (
-                row.node.type === 'release' &&
-                hasCliUsageSet(row.node.entity, projectPath.join(':'), saveUsagesPayload)
-            ) {
+            if (row.node.type === 'release' && hasCliUsageSet(row.node.entity, projectPath.join(':'), selectedUsages)) {
                 return rows
             }
 
@@ -292,7 +291,7 @@ function filterReleasesWithUsage(
                         ...projectPath,
                         projectId,
                     ],
-                    saveUsagesPayload,
+                    selectedUsages,
                 )
                 if (filteredChildren.length === 0) return rows
                 rows.push({
@@ -373,6 +372,7 @@ function GenerateLicenseInfo({
     const t = useTranslations('default')
     const [project, setProject] = useState<Project>()
     const params = useSearchParams()
+    const withSubProjects = params.get('withSubProjects')
     const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
         selected: [],
         deselected: [],
@@ -380,6 +380,12 @@ function GenerateLicenseInfo({
         deselectedConcludedUsages: [],
         ignoredLicenses: {},
     })
+    const selectedUsages = useMemo(
+        () => new Set(saveUsagesPayload.selected),
+        [
+            saveUsagesPayload.selected,
+        ],
+    )
     const [show, setShow] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
     const [key, setKey] = useState<string>('show_all')
@@ -391,45 +397,80 @@ function GenerateLicenseInfo({
         isAsc: true,
     })
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
-    const [showProcessing, setShowProcessing] = useState(false)
+    const [showProcessing, setShowProcessing] = useState(true)
+    const [metadataLoaded, setMetadataLoaded] = useState(false)
     const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
 
-    const [data, setData] = useState<
-        ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[]
-    >(() => [])
-
-    const memoizedLinkedProjects = useMemo(
-        () => linkedProjects,
+    const [licenses, setLicenses] = useState<Record<string, License[]>>({})
+    const detailLoader = useRef<LicenseDetailLoader | null>(null)
+    const detailStatuses = useRef(new Map<string, 'loading' | 'loaded' | 'error'>())
+    const [detailErrors, setDetailErrors] = useState<Set<string>>(new Set())
+    const loadLicenses = useCallback(async (releaseId: string, attachmentId: string, retry = false) => {
+        const loader = detailLoader.current
+        const key = `${releaseId}_${attachmentId}`
+        if (
+            !releaseId ||
+            !attachmentId ||
+            !loader ||
+            loader.signal.aborted ||
+            (!retry && detailStatuses.current.has(key))
+        )
+            return
+        detailStatuses.current.set(key, 'loading')
+        setDetailErrors((previous) => {
+            const next = new Set(previous)
+            next.delete(key)
+            return next
+        })
+        try {
+            const result = await loader.load(releaseId, attachmentId)
+            if (loader.signal.aborted) return
+            detailStatuses.current.set(key, 'loaded')
+            setLicenses((previous) => ({
+                ...previous,
+                [key]: result,
+            }))
+        } catch (error) {
+            if (loader.signal.aborted) return
+            detailStatuses.current.set(key, 'error')
+            setDetailErrors((previous) => new Set(previous).add(key))
+            ApiUtils.reportError(error)
+        }
+    }, [])
+    const tableData = useMemo(
+        () => (attachmentUsages ? buildTable(projectId, attachmentUsages, linkedProjects, licenses, sort) : []),
         [
-            linkedProjects,
-        ],
-    )
-
-    const memoizedAttachmentUsages = useMemo(
-        () => attachmentUsages,
-        [
+            projectId,
             attachmentUsages,
-        ],
-    )
-
-    const [licenses, setLicenses] = useState<
-        | {
-              [id: string]: License[]
-          }
-        | undefined
-    >()
-    const memoizedLicenses = useMemo(
-        () => licenses,
-        [
+            linkedProjects,
             licenses,
+            sort,
         ],
     )
+    const data = useMemo(() => {
+        const approved = key === 'only_approved' ? filterApprovedReleases(tableData) : tableData
+        return hideWithUsage
+            ? filterReleasesWithUsage(
+                  approved,
+                  [
+                      projectId,
+                  ],
+                  selectedUsages,
+              )
+            : approved
+    }, [
+        tableData,
+        key,
+        hideWithUsage,
+        projectId,
+        selectedUsages,
+    ])
 
     useDocumentTitle(project?.name ? CommonUtils.formatDocumentTitle(project.name, project.version) : undefined)
 
     useEffect(() => {
-        if (!project || !memoizedLinkedProjects) return
+        if (!project) return
 
         const filters: string[] = []
 
@@ -461,11 +502,6 @@ function GenerateLicenseInfo({
                                 ? `${row.original.projectPath}-`
                                 : ''
                         }${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${attachmentContentId}`
-                        const ignoredLicenseKey = `${
-                            !CommonUtils.isNullEmptyOrUndefinedString(row.original.projectPath)
-                                ? `${row.original.projectPath}-`
-                                : ''
-                        }${r._links?.self.href.split('/').at(-1) ?? ''}_${attachmentContentId}`
                         return (
                             <div
                                 className={
@@ -477,34 +513,9 @@ function GenerateLicenseInfo({
                                 <input
                                     type='checkbox'
                                     className='form-check-input'
-                                    checked={saveUsagesPayload.selected.indexOf(key) !== -1}
+                                    checked={selectedUsages.has(key)}
                                     onChange={() => {
-                                        if (saveUsagesPayload.selected.indexOf(key) === -1) {
-                                            setSaveUsagesPayload({
-                                                ...saveUsagesPayload,
-                                                selected: [
-                                                    ...saveUsagesPayload.selected,
-                                                    key,
-                                                ],
-                                                deselected: saveUsagesPayload.deselected.filter((item) => item !== key),
-                                                ignoredLicenses: {},
-                                            })
-                                        } else {
-                                            const newIgnoredLicenses = {
-                                                ...saveUsagesPayload.ignoredLicenses,
-                                            }
-                                            delete newIgnoredLicenses[ignoredLicenseKey]
-
-                                            setSaveUsagesPayload({
-                                                ...saveUsagesPayload,
-                                                selected: saveUsagesPayload.selected.filter((item) => item !== key),
-                                                deselected: [
-                                                    ...saveUsagesPayload.deselected,
-                                                    key,
-                                                ],
-                                                ignoredLicenses: newIgnoredLicenses,
-                                            })
-                                        }
+                                        setSaveUsagesPayload((previous) => toggleAttachmentUsage(previous, key))
                                     }}
                                 />
                             </div>
@@ -538,52 +549,24 @@ function GenerateLicenseInfo({
 
                         const checked =
                             (saveUsagesPayload.ignoredLicenses?.[key] ?? []).indexOf(lic.name) === -1 &&
-                            saveUsagesPayload.selected.indexOf(att_key) !== -1
+                            selectedUsages.has(att_key)
                         return (
                             <input
                                 type='checkbox'
                                 className='form-check-input'
                                 checked={checked}
                                 onChange={() => {
-                                    let ignoredList: string[] = saveUsagesPayload.ignoredLicenses[key] ?? []
-                                    let selectedList = saveUsagesPayload.selected
-                                    let deselectedList = saveUsagesPayload.deselected
-                                    if (checked) {
-                                        ignoredList.push(lic.name)
-                                        if (
-                                            ignoredList.length === (row.getParentRow()?.original.children ?? []).length
-                                        ) {
-                                            ignoredList = []
-                                            selectedList = selectedList.filter((item) => item !== att_key)
-                                            deselectedList.push(att_key)
-                                        }
-                                    } else {
-                                        if (selectedList.indexOf(att_key) !== -1) {
-                                            ignoredList = ignoredList.filter((item) => item !== lic.name)
-                                        } else {
-                                            selectedList.push(att_key)
-                                            deselectedList = deselectedList.filter((item) => item !== att_key)
-                                            for (const lic_it of (row.getParentRow()?.original.children ??
-                                                []) as ExtendedNestedRows<
-                                                TypedProject | TypedRelease | TypedAttachment | TypedLicense
-                                            >[]) {
-                                                const typedLicense = lic_it.node.entity as License
-                                                const name = typedLicense.name
-                                                if (name !== lic.name) {
-                                                    ignoredList.push(name)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    setSaveUsagesPayload({
-                                        ...saveUsagesPayload,
-                                        selected: selectedList,
-                                        deselected: deselectedList,
-                                        ignoredLicenses: {
-                                            ...(saveUsagesPayload.ignoredLicenses ?? {}),
-                                            [key]: ignoredList,
-                                        },
-                                    })
+                                    setSaveUsagesPayload((previous) =>
+                                        toggleLicenseUsage(
+                                            previous,
+                                            att_key,
+                                            key,
+                                            lic.name,
+                                            (row.getParentRow()?.original.children ?? []).map(
+                                                (child) => child.node.entity as License,
+                                            ),
+                                        ),
+                                    )
                                 }}
                             />
                         )
@@ -647,6 +630,9 @@ function GenerateLicenseInfo({
                 accessorKey: 'name',
                 cell: ({ row }) => {
                     if (row.original.node.type === 'attachment') {
+                        const attachmentId = row.original.node.entity.attachmentContentId ?? ''
+                        const releaseId = row.original.releaseId ?? ''
+                        const detailKey = `${releaseId}_${attachmentId}`
                         return (
                             <div
                                 className={`text-center ${
@@ -657,6 +643,22 @@ function GenerateLicenseInfo({
                                 }`}
                             >
                                 {row.original.node.entity.filename}
+                                {row.getIsExpanded() && detailErrors.has(detailKey) ? (
+                                    <Button
+                                        variant='link'
+                                        onClick={() => void loadLicenses(releaseId, attachmentId, true)}
+                                    >
+                                        {t('Retry')}
+                                    </Button>
+                                ) : (
+                                    row.getIsExpanded() &&
+                                    licenses[detailKey] === undefined && (
+                                        <Spinner
+                                            size='sm'
+                                            className='ms-2'
+                                        />
+                                    )
+                                )}
                             </div>
                         )
                     } else if (row.original.node.type === 'release') {
@@ -853,6 +855,10 @@ function GenerateLicenseInfo({
         [
             t,
             saveUsagesPayload,
+            selectedUsages,
+            licenses,
+            detailErrors,
+            loadLicenses,
         ],
     )
 
@@ -871,11 +877,15 @@ function GenerateLicenseInfo({
         data: data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getRowId: (row, index, parent) => row.id ?? `${parent?.id ?? ''}.${index}`,
 
         // expand config
         getExpandedRowModel: getExpandedRowModel(),
         getSubRows: (row) => row.children ?? [],
-        getRowCanExpand: (row) => row.original.children !== undefined && row.original.children.length !== 0,
+        getRowCanExpand: (row) =>
+            row.original.node.type === 'attachment'
+                ? Boolean(row.original.releaseId && row.original.node.entity.attachmentContentId)
+                : (row.original.children?.length ?? 0) !== 0,
         onExpandedChange: setExpandedState,
 
         manualSorting: true,
@@ -911,9 +921,16 @@ function GenerateLicenseInfo({
     })
 
     useEffect(() => {
-        table.toggleAllRowsExpanded(true)
+        for (const row of table.getRowModel().rows) {
+            if (row.original.node.type === 'attachment' && row.getIsExpanded()) {
+                void loadLicenses(row.original.releaseId ?? '', row.original.node.entity.attachmentContentId ?? '')
+            }
+        }
     }, [
+        expandedState,
+        data,
         table,
+        loadLicenses,
     ])
 
     useEffect(() => {
@@ -926,22 +943,30 @@ function GenerateLicenseInfo({
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
-
-        const timeLimit = data.length !== 0 ? 700 : 0
-        const timeout = setTimeout(() => {
-            setShowProcessing(true)
-        }, timeLimit)
+        const loader = new LicenseDetailLoader(async (releaseId, attachmentId, signal) => {
+            const response = await ApiUtils.GET(`releases/${releaseId}/licenseData/${attachmentId}`, signal)
+            if (response.status !== StatusCodes.OK) {
+                throw new ApiError(`Request failed with status ${response.status}`, {
+                    status: response.status,
+                })
+            }
+            return (await response.json()) as License[]
+        })
+        detailLoader.current = loader
+        detailStatuses.current.clear()
+        setDetailErrors(new Set())
+        setLicenses({})
+        setExpandedState({})
+        setShowProcessing(true)
+        setMetadataLoaded(false)
+        setAttachmentUsages(undefined)
 
         void (async () => {
             try {
-                const searchParams = Object.fromEntries(params)
-                if (Object.hasOwn(searchParams, 'withSubProjects') === false) {
-                    return
-                }
                 const requests = [
                     ApiUtils.GET(`projects/${projectId}`, signal),
                 ]
-                if (searchParams.withSubProjects === 'true') {
+                if (withSubProjects === 'true') {
                     requests.push(
                         ApiUtils.GET(
                             `projects/${projectId}/attachmentUsage?transitive=true&filter=withCliAttachment`,
@@ -974,136 +999,30 @@ function GenerateLicenseInfo({
                 }
 
                 const proj = (await responses[0].json()) as Project
-                setProject(proj)
-
                 const attachmentUsages = (await responses[1].json()) as AttachmentUsages
-                setAttachmentUsages(attachmentUsages)
-
                 const linkedProjects =
-                    searchParams.withSubProjects === 'true'
+                    withSubProjects === 'true'
                         ? ((await responses[2].json()) as LinkedProjects)['_embedded']['sw360:projects']
                         : ([] as Project[])
+                if (signal.aborted) return
+                setProject(proj)
+                setAttachmentUsages(attachmentUsages)
                 setLinkedProjects(linkedProjects)
-
-                const licenseRequests: Promise<Response>[] = []
-                for (const r of attachmentUsages['_embedded']['sw360:release']) {
-                    const relId = r._links?.self.href.split('/').at(-1) ?? ''
-                    for (const att of r.attachments ?? []) {
-                        licenseRequests.push(
-                            ApiUtils.GET(`releases/${relId}/licenseData/${att.attachmentContentId}`, signal),
-                        )
-                    }
-                }
-
-                const licenseResponses = await Promise.all(licenseRequests)
-                licenseResponses.map(async (r) => {
-                    if (r.status !== StatusCodes.OK) {
-                        const err = (await r.json()) as ErrorDetails
-                        throw new ApiError(err.message, {
-                            status: r.status,
-                        })
-                    }
-                })
-                const _licenses = licenseResponses.map(async (licRes) => (await licRes.json()) as License[])
-                const licenses: License[][] = await Promise.all(_licenses)
-
-                const m: {
-                    [id: string]: License[]
-                } = {}
-                let i = 0
-                for (const r of attachmentUsages['_embedded']['sw360:release']) {
-                    const relId = r._links?.self.href.split('/').at(-1) ?? ''
-                    for (const att of r.attachments ?? []) {
-                        licenses[i].sort((a, b) => a.name.localeCompare(b.name))
-                        const lics = licenses[i++].filter(function (item, pos, ary) {
-                            return !pos || item.name != ary[pos - 1].name
-                        })
-                        m[`${relId}_${att.attachmentContentId}`] = lics
-                    }
-                }
-                setLicenses(m)
-
-                const saveUsages: SaveUsagesPayload = {
-                    selected: [],
-                    deselected: [],
-                    selectedConcludedUsages: [],
-                    deselectedConcludedUsages: [],
-                    ignoredLicenses: {},
-                }
-
-                for (const r of attachmentUsages['_embedded']['sw360:release']) {
-                    for (const att of r.attachments ?? []) {
-                        const usages = attachmentUsages['_embedded']['sw360:attachmentUsages'].filter(
-                            (elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId,
-                        )
-                        for (const u of usages) {
-                            if (u.usageData && u.usageData.licenseInfo) {
-                                saveUsages.selected = [
-                                    ...new Set<string>([
-                                        ...saveUsages.selected,
-                                        `${
-                                            !CommonUtils.isNullEmptyOrUndefinedString(
-                                                u.usageData.licenseInfo.projectPath,
-                                            )
-                                                ? `${u.usageData.licenseInfo.projectPath}-`
-                                                : ''
-                                        }${
-                                            r._links?.self.href.split('/').at(-1) ?? ''
-                                        }_licenseInfo_${att.attachmentContentId}`,
-                                    ]),
-                                ]
-                                saveUsages.ignoredLicenses[
-                                    `${
-                                        !CommonUtils.isNullEmptyOrUndefinedString(u.usageData.licenseInfo.projectPath)
-                                            ? `${u.usageData.licenseInfo.projectPath}-`
-                                            : ''
-                                    }${r._links?.self.href.split('/').at(-1) ?? ''}_${att.attachmentContentId}`
-                                ] = u.usageData.licenseInfo.excludedLicenseIds
-                            }
-                        }
-                    }
-                }
-                setSaveUsagesPayload(saveUsages)
+                setSaveUsagesPayload(restoreLicenseUsages(attachmentUsages))
+                setMetadataLoaded(true)
             } catch (error) {
-                ApiUtils.reportError(error)
+                if (!signal.aborted) ApiUtils.reportError(error)
             } finally {
-                clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) setShowProcessing(false)
             }
         })()
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            loader.dispose()
+        }
     }, [
         projectId,
-        params,
-    ])
-
-    useEffect(() => {
-        if (
-            memoizedAttachmentUsages === undefined ||
-            memoizedLinkedProjects === undefined ||
-            memoizedLicenses === undefined
-        )
-            return
-        setData(
-            buildTable(
-                projectId,
-                memoizedAttachmentUsages,
-                memoizedLinkedProjects,
-                memoizedLicenses,
-                key,
-                hideWithUsage,
-                saveUsagesPayload,
-                sort,
-            ),
-        )
-    }, [
-        key,
-        memoizedLinkedProjects,
-        memoizedAttachmentUsages,
-        hideWithUsage,
-        memoizedLicenses,
-        saveUsagesPayload,
-        sort,
+        withSubProjects,
     ])
 
     return (
@@ -1149,6 +1068,7 @@ function GenerateLicenseInfo({
                                             <Button
                                                 variant='primary'
                                                 className='me-2 py-2 col-auto'
+                                                disabled={!metadataLoaded || showProcessing}
                                                 onClick={() => setShow(true)}
                                             >
                                                 {t('Download')}{' '}
