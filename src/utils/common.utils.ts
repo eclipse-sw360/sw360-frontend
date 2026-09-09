@@ -330,6 +330,13 @@ const extractEmailsAndFullNamesFromUsers = (
     )
 }
 
+const truncateShortText = (item: string | undefined): string => {
+    const STRING_TRUNCATE_LIMIT = 10
+    const displayText: string | undefined =
+        item && item.length > STRING_TRUNCATE_LIMIT ? `${item.slice(0, STRING_TRUNCATE_LIMIT)}…` : item
+    return displayText ?? ''
+}
+
 const nullToEmptyString = (item: string | null | undefined): string => (item != null ? item : '')
 
 const isCrAllowed = (
@@ -378,6 +385,7 @@ const CommonUtils = {
     convertObjectToMapRoles,
     convertRoles,
     truncateText,
+    truncateShortText,
     extractEmailsAndFullNamesFromUsers,
     fillDate,
     fillTime,
