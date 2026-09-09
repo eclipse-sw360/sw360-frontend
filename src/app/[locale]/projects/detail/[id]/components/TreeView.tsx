@@ -380,6 +380,7 @@ const buildTable = (
                 entity: {
                     ...release,
                     projectMainlineState: l.mainlineState,
+                    comment: l.comment,
                 },
             },
             children: [],
@@ -821,18 +822,36 @@ export default function TreeView({
                 header: t('Comment'),
                 enableColumnFilter: false,
                 cell: ({ row }) => {
-                    if (row.original.node.type === 'release') {
+                    if (row.original.node.type !== 'release') return null
+
+                    const parentRow = row.getParentRow()
+                    const parentNode = parentRow?.original.node
+
+                    let comment = ''
+                    if (!parentNode) {
+                        // Top-level release (direct release of the current project) — no parent row
+                        comment = row.original.node.entity.comment ?? ''
+                    } else if (parentNode.type === 'project') {
+                        // Release nested under a linked project — look up the comment from parent's linkedReleases
                         const { id: releaseId } = row.original.node.entity
-                        const entity = row.getParentRow()?.original.node.entity as Project
-                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
-                            const linkedRelease = entity.linkedReleases.filter(
-                                (lr) => lr.release.split('/').at(-1) === releaseId,
-                            )
-                            if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
-                                return <div className='text-center'>{linkedRelease?.[0].comment}</div>
-                            }
-                        }
+                        const linkedRelease = parentNode.entity.linkedReleases?.find(
+                            (lr) => lr.release.split('/').at(-1) === releaseId,
+                        )
+                        comment = linkedRelease?.comment ?? ''
                     }
+
+                    if (comment === '') {
+                        return <div className='text-center' />
+                    }
+
+                    return (
+                        <OverlayTrigger
+                            placement='top'
+                            overlay={<Tooltip>{comment}</Tooltip>}
+                        >
+                            <span className='overlay-badge'>{CommonUtils.truncateShortText(comment)}</span>
+                        </OverlayTrigger>
+                    )
                 },
                 meta: {
                     width: '8%',

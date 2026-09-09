@@ -191,6 +191,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                     path: path.join(' -> '),
                     releaseRelation: l.relation,
                     projectMainlineState: l.mainlineState,
+                    comment: l.comment,
                 },
             })
         }
@@ -225,6 +226,7 @@ const extractLinkedReleases = (
                 path: path.join('->'),
                 releaseRelation: l.relation,
                 projectMainlineState: l.mainlineState,
+                comment: l.comment,
             },
         })
     }
@@ -597,18 +599,21 @@ export default function ListView({
                 enableColumnFilter: false,
                 enableSorting: false,
                 cell: ({ row }) => {
-                    if (row.original.type === 'release') {
-                        const { id: releaseId } = row.original.entity
-                        const entity = row.getParentRow()?.original.entity as Project
-                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
-                            const linkedRelease = entity.linkedReleases.filter(
-                                (lr) => lr.release.split('/').at(-1) === releaseId,
-                            )
-                            if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
-                                return <div className='text-center'>{linkedRelease?.[0].comment}</div>
-                            }
-                        }
+                    if (row.original.type !== 'release') return null
+
+                    const comment = row.original.entity.comment ?? ''
+                    if (comment === '') {
+                        return <div className='text-center' />
                     }
+
+                    return (
+                        <OverlayTrigger
+                            placement='top'
+                            overlay={<Tooltip>{comment}</Tooltip>}
+                        >
+                            <span className='overlay-badge'>{CommonUtils.truncateShortText(comment)}</span>
+                        </OverlayTrigger>
+                    )
                 },
                 meta: {
                     width: '8%',
