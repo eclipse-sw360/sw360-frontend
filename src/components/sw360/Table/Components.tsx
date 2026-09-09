@@ -148,6 +148,7 @@ function TableFooterUI({
                 <ul className='pagination mb-0'>
                     <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
                         <button
+                            type='button'
                             className='page-link'
                             onClick={() => goToPage(currentPage - 1)}
                             disabled={currentPage === 0}
@@ -171,6 +172,7 @@ function TableFooterUI({
                                 key={page}
                             >
                                 <button
+                                    type='button'
                                     className='page-link'
                                     onClick={() => goToPage(page)}
                                 >
@@ -182,6 +184,7 @@ function TableFooterUI({
 
                     <li className={`page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}`}>
                         <button
+                            type='button'
                             className='page-link'
                             onClick={() => goToPage(currentPage + 1)}
                             disabled={currentPage === totalPages - 1}
