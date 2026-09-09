@@ -7,13 +7,35 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
+import {
+    ChangeEvent,
+    Dispatch,
+    Fragment,
+    ReactNode,
+    SetStateAction,
+    useDeferredValue,
+    useEffect,
+    useRef,
+    useState,
+    useSyncExternalStore,
+} from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
 import { ColumnMeta, FilterOption, PageableQueryParam, PaginationMeta } from '@/object-types'
+import { getPendingRequestCount, subscribeToPendingRequests } from '@/utils/api/api.util'
+
+// How long nothing may be in flight before an empty table counts as loaded. Bridges the gap
+// between a superseded request and the one replacing it.
+const NETWORK_QUIET_MS = 1000
+
+// Same, for a table that never showed a loading state: it is either fed by static props or has not
+// started fetching yet, so wait longer before assuming it is really empty.
+const NO_LOAD_SEEN_MS = 5000
 
 export function TableFooter({
     pageableQueryParam,
@@ -295,6 +317,39 @@ export function SW360Table<K>({
 }): ReactNode {
     const t = useTranslations('default')
 
+    // Defer the row model so the previous rows (and processing overlay) stay on screen
+    // while the new rows are being computed/rendered, instead of committing a blank tbody first.
+    const rows = table.getRowModel().rows
+    const deferredRows = useDeferredValue(rows)
+    const isRenderPending = deferredRows !== rows
+
+    // An empty table is ambiguous: the consumer may not have started fetching yet (the markup is
+    // rendered on the server), and a request aborted on effect cleanup still runs the consumer's
+    // `finally`, clearing `showProcessing` while its replacement runs. So only trust an empty table
+    // once nothing is in flight and it has stayed that way, longer if no load was ever seen.
+    const isEmptyAndIdle = !showProcessing && !isRenderPending && deferredRows.length === 0
+    const pendingRequests = useSyncExternalStore(subscribeToPendingRequests, getPendingRequestCount, () => 1)
+    const hasLoadedOnce = useRef(false)
+    const [showEmptyMessage, setShowEmptyMessage] = useState(false)
+    useEffect(() => {
+        if (showProcessing) hasLoadedOnce.current = true
+        if (!isEmptyAndIdle || pendingRequests > 0) {
+            setShowEmptyMessage(false)
+            return
+        }
+        const timeout = setTimeout(
+            () => setShowEmptyMessage(true),
+            hasLoadedOnce.current ? NETWORK_QUIET_MS : NO_LOAD_SEEN_MS,
+        )
+        return () => clearTimeout(timeout)
+    }, [
+        isEmptyAndIdle,
+        pendingRequests,
+        showProcessing,
+    ])
+
+    const displayProcessing = showProcessing || isRenderPending || (isEmptyAndIdle && !showEmptyMessage)
+
     return (
         <div className='table-component position-relative'>
             <table
@@ -340,7 +395,7 @@ export function SW360Table<K>({
                     ))}
                 </thead>
                 <tbody>
-                    {!showProcessing && table.getRowModel().rows.length === 0 && (
+                    {showEmptyMessage && (
                         <tr>
                             <td colSpan={table.getVisibleFlatColumns().length}>
                                 <div className='text-center'>
@@ -349,7 +404,7 @@ export function SW360Table<K>({
                             </td>
                         </tr>
                     )}
-                    {table.getRowModel().rows.map((row) =>
+                    {deferredRows.map((row) =>
                         row.meta?.isFullSpanRow ? (
                             <tr key={row.id}>
                                 <td colSpan={table.getVisibleLeafColumns().length}>
@@ -380,7 +435,7 @@ export function SW360Table<K>({
                     )}
                 </tbody>
             </table>
-            {showProcessing && (
+            {displayProcessing && (
                 <div className='position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center'>
                     <div className='bg-white p-4 border rounded shadow'>{t('Processing')}…</div>
                 </div>

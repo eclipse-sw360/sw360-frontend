@@ -127,9 +127,39 @@ function handleError(error: unknown): ApiError {
 }
 
 /**
+ * Number of requests currently in flight, published so the UI can tell a superseded request
+ * (aborted on effect cleanup) from one that really finished. See SW360Table.
+ */
+let pendingRequestCount = 0
+const pendingRequestListeners = new Set<() => void>()
+
+export function getPendingRequestCount(): number {
+    return pendingRequestCount
+}
+
+export function subscribeToPendingRequests(listener: () => void): () => void {
+    pendingRequestListeners.add(listener)
+    return () => pendingRequestListeners.delete(listener)
+}
+
+function trackPendingRequest(delta: number): void {
+    pendingRequestCount += delta
+    pendingRequestListeners.forEach((listener) => listener())
+}
+
+async function send(args: Parameters<typeof sendRequest>[0]): Promise<Response> {
+    trackPendingRequest(1)
+    try {
+        return await sendRequest(args)
+    } finally {
+        trackPendingRequest(-1)
+    }
+}
+
+/**
  * Core send function with timeout, retry, and error handling
  */
-async function send({
+async function sendRequest({
     method,
     path,
     data,
