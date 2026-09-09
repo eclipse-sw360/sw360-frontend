@@ -380,6 +380,7 @@ const buildTable = (
                 entity: {
                     ...release,
                     projectMainlineState: l.mainlineState,
+                    comment: l.comment,
                 },
             },
             children: [],
@@ -429,6 +430,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                     entity: {
                         ...release,
                         projectMainlineState: l.mainlineState,
+                        comment: l.comment,
                     },
                 },
                 children: [],
@@ -821,18 +823,22 @@ export default function TreeView({
                 header: t('Comment'),
                 enableColumnFilter: false,
                 cell: ({ row }) => {
-                    if (row.original.node.type === 'release') {
-                        const { id: releaseId } = row.original.node.entity
-                        const entity = row.getParentRow()?.original.node.entity as Project
-                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
-                            const linkedRelease = entity.linkedReleases.filter(
-                                (lr) => lr.release.split('/').at(-1) === releaseId,
-                            )
-                            if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
-                                return <div className='text-center'>{linkedRelease?.[0].comment}</div>
-                            }
-                        }
+                    if (row.original.node.type !== 'release') return null
+
+                    const comment = row.original.node.entity.comment ?? ''
+
+                    if (comment === '') {
+                        return <div className='text-center' />
                     }
+
+                    return (
+                        <OverlayTrigger
+                            placement='top'
+                            overlay={<Tooltip>{comment}</Tooltip>}
+                        >
+                            <span className='overlay-badge'>{CommonUtils.truncateText(comment, 10)}</span>
+                        </OverlayTrigger>
+                    )
                 },
                 meta: {
                     width: '8%',
