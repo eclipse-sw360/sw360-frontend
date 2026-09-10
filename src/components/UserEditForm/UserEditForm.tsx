@@ -11,7 +11,8 @@
 
 import { useTranslations } from 'next-intl'
 import type { JSX } from 'react'
-import { UserGroupType, UserPayload } from '@/object-types'
+import { useConfigValue } from '@/contexts'
+import { UIConfigKeys, UserGroupType, UserPayload } from '@/object-types'
 import SecondaryDepartmentsAndRoles from './SecondaryDepartmentsAndRoles'
 import UserOperationType from './UserOperationType'
 
@@ -24,6 +25,11 @@ interface Props {
 
 const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPayload }: Props): JSX.Element => {
     const t = useTranslations('default')
+    const allowUserGeneralInformationWriteAccess = useConfigValue(
+        UIConfigKeys.UI_ENABLE_USER_GENERAL_INFORMATION_WRITE_ACCESS,
+    )
+    const isGeneralInformationReadonly =
+        userOperationType === UserOperationType.EDIT && allowUserGeneralInformationWriteAccess === false
 
     return (
         <div className='row mx-0'>
@@ -46,6 +52,7 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         className='form-control'
                         id='user.givenName'
                         placeholder={t('Enter user given name')}
+                        readOnly={isGeneralInformationReadonly}
                         required
                     />
                 </div>
@@ -64,6 +71,7 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         className='form-control'
                         id='user.lastName'
                         placeholder={t('Enter user last name')}
+                        readOnly={isGeneralInformationReadonly}
                         required
                     />
                 </div>
@@ -84,6 +92,7 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         className='form-control'
                         id='user.email'
                         placeholder={t('Enter user email')}
+                        readOnly={isGeneralInformationReadonly}
                         required
                     />
                 </div>
@@ -102,6 +111,7 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         className='form-control'
                         id='user.globalIdentifier'
                         placeholder={t('Enter user externaId or Global Identifier')}
+                        readOnly={isGeneralInformationReadonly}
                         required
                     />
                 </div>
@@ -128,6 +138,7 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         id='user.password'
                         placeholder={t('Enter user password')}
                         autoComplete='new-password'
+                        readOnly={isGeneralInformationReadonly}
                         required={userOperationType === UserOperationType.CREATE}
                     />
                 </div>
@@ -149,6 +160,7 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         className='form-control'
                         id='user.department'
                         placeholder={t('Enter user primary department')}
+                        readOnly={isGeneralInformationReadonly}
                         required
                     />
                 </div>
@@ -164,6 +176,7 @@ const UserEditForm = ({ userPayload, handleChange, userOperationType, setUserPay
                         name='userGroup'
                         defaultValue={userPayload.userGroup}
                         onChange={handleChange}
+                        disabled={isGeneralInformationReadonly}
                         required
                     >
                         <option value=''>{t('Select primary role')}</option>
