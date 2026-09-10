@@ -159,11 +159,16 @@ const CurrentReleaseDetail = ({ releaseId }: Props): ReactNode => {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
         releaseId,

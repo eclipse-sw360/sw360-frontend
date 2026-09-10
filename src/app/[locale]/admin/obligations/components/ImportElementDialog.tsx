@@ -138,11 +138,16 @@ function ImportElementDialog({ show, setShow, onImport }: Props): ReactNode {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [])
 
     const table = useReactTable({

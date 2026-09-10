@@ -173,11 +173,16 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
     ])
