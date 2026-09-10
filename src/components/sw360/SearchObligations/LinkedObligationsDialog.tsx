@@ -42,14 +42,14 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
         search: '',
     })
 
-    const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.currentTarget.value === '') {
+    const searchFunction = (value: string) => {
+        if (value === '') {
             setSearch({
                 search: '',
             })
         } else {
             setSearch({
-                search: event.currentTarget.value,
+                search: value,
             })
         }
     }
@@ -215,11 +215,16 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         search,
     ])

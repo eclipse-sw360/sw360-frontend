@@ -391,7 +391,8 @@ function GenerateLicenseInfo({
         isAsc: true,
     })
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
-    const [showProcessing, setShowProcessing] = useState(false)
+    const [isFetchingData, setIsFetchingData] = useState(false)
+    const [isBuildingTable, setIsBuildingTable] = useState(false)
     const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
 
@@ -929,7 +930,7 @@ function GenerateLicenseInfo({
 
         const timeLimit = data.length !== 0 ? 700 : 0
         const timeout = setTimeout(() => {
-            setShowProcessing(true)
+            setIsFetchingData(true)
         }, timeLimit)
 
         void (async () => {
@@ -1068,10 +1069,17 @@ function GenerateLicenseInfo({
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setIsFetchingData(false)
+                    // keep the overlay up until the table effect rebuilds `data` from the fetched pieces
+                    setIsBuildingTable(true)
+                }
             }
         })()
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
         params,
@@ -1084,6 +1092,7 @@ function GenerateLicenseInfo({
             memoizedLicenses === undefined
         )
             return
+        setIsBuildingTable(true)
         setData(
             buildTable(
                 projectId,
@@ -1096,6 +1105,7 @@ function GenerateLicenseInfo({
                 sort,
             ),
         )
+        setIsBuildingTable(false)
     }, [
         key,
         memoizedLinkedProjects,
@@ -1195,7 +1205,7 @@ function GenerateLicenseInfo({
                                             {table ? (
                                                 <SW360Table
                                                     table={table}
-                                                    showProcessing={showProcessing}
+                                                    showProcessing={isFetchingData || isBuildingTable}
                                                 />
                                             ) : (
                                                 <div className='col-12 mt-1 text-center'>
@@ -1209,7 +1219,7 @@ function GenerateLicenseInfo({
                                             {table ? (
                                                 <SW360Table
                                                     table={table}
-                                                    showProcessing={showProcessing}
+                                                    showProcessing={isFetchingData || isBuildingTable}
                                                 />
                                             ) : (
                                                 <div className='col-12 mt-1 text-center'>

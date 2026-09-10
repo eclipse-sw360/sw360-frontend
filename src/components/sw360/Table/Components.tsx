@@ -7,9 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
+import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction, useRef } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
@@ -516,12 +518,23 @@ export function FilterComponent({
     )
 }
 
-export function TableSearch({
-    searchFunction,
-}: {
-    searchFunction: (event: React.KeyboardEvent<HTMLInputElement>) => void
-}) {
+export function TableSearch({ searchFunction }: { searchFunction: (value: string) => void }) {
     const t = useTranslations('default')
+
+    const debounceRef = useRef<NodeJS.Timeout | null>(null)
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current)
+        }
+
+        debounceRef.current = setTimeout(() => {
+            searchFunction?.(value)
+        }, 700)
+    }
+
     return (
         <div className='row mt-3'>
             <div className='col-auto px-0'>
@@ -536,7 +549,7 @@ export function TableSearch({
                 <input
                     className='form-control'
                     type='text'
-                    onKeyUp={searchFunction}
+                    onChange={handleChange}
                     id='table-search'
                 />
             </div>

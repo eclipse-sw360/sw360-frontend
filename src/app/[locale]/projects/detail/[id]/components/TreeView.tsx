@@ -935,9 +935,9 @@ export default function TreeView({
 
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) {
-            setIsDataReady(!isLoadingClearingData)
             return
         }
+        setIsDataReady(false)
         buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects, searchTerm, sort)
         // Mark data as ready only after setting row data
         setIsDataReady(true)

@@ -65,7 +65,8 @@ function GenerateSourceCodeBundle({
     const [loading, setLoading] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
-    const [showProcessing, setShowProcessing] = useState(false)
+    const [isFetchingData, setIsFetchingData] = useState(false)
+    const [isBuildingTable, setIsBuildingTable] = useState(false)
     const [project, setProject] = useState<Project>()
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
@@ -139,7 +140,7 @@ function GenerateSourceCodeBundle({
 
         const timeLimit = data.length !== 0 ? 700 : 0
         const timeout = setTimeout(() => {
-            setShowProcessing(true)
+            setIsFetchingData(true)
         }, timeLimit)
 
         void (async () => {
@@ -219,10 +220,17 @@ function GenerateSourceCodeBundle({
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setIsFetchingData(false)
+                    // keep the overlay up until the table effect rebuilds `data` from the fetched pieces
+                    setIsBuildingTable(true)
+                }
             }
         })()
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
         params,
@@ -230,7 +238,9 @@ function GenerateSourceCodeBundle({
 
     useEffect(() => {
         if (memoizedAttachmentUsages === undefined || memoizedLinkedProjects === undefined) return
+        setIsBuildingTable(true)
         buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects, hideWithUsage)
+        setIsBuildingTable(false)
     }, [
         memoizedLinkedProjects,
         memoizedAttachmentUsages,
@@ -683,7 +693,7 @@ function GenerateSourceCodeBundle({
                             {table ? (
                                 <SW360Table
                                     table={table}
-                                    showProcessing={showProcessing}
+                                    showProcessing={isFetchingData || isBuildingTable}
                                 />
                             ) : (
                                 <div className='col-12 mt-1 text-center'>
