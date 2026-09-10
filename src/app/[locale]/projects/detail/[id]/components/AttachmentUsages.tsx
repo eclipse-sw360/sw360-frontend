@@ -353,11 +353,16 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessingLinkedProjects(false)
+                if (!signal.aborted) {
+                    setShowProcessingLinkedProjects(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
     ])
@@ -433,11 +438,16 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessingAttachmentUsages(false)
+                if (!signal.aborted) {
+                    setShowProcessingAttachmentUsages(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
     ])

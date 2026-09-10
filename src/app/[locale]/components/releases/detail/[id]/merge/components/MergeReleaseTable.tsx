@@ -40,14 +40,14 @@ export default function MergeReleaseTable({
         name: '',
     })
 
-    const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.currentTarget.value === '') {
+    const searchFunction = (value: string) => {
+        if (value === '') {
             setSearch({
                 name: '',
             })
         } else {
             setSearch({
-                name: event.currentTarget.value,
+                name: value,
                 luceneSearch: true,
             })
         }
@@ -156,11 +156,16 @@ export default function MergeReleaseTable({
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         search,
     ])
