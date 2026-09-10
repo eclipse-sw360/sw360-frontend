@@ -9,12 +9,13 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { Button, Spinner } from 'react-bootstrap'
+import { BsPrinter } from 'react-icons/bs'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     ECCInterface,
@@ -34,12 +35,14 @@ const Capitalize = (text: string) =>
 
 function ECC(): ReactNode {
     const t = useTranslations('default')
+    const [sorting, setSorting] = useState<SortingState>([])
 
     const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
             {
                 id: 'status',
                 header: t('Status'),
+                accessorFn: (row) => row.eccInformation?.eccStatus ?? '',
                 cell: ({ row }) => <>{Capitalize(row.original.eccInformation.eccStatus)}</>,
                 meta: {
                     width: '10%',
@@ -48,6 +51,7 @@ function ECC(): ReactNode {
             {
                 id: 'releaseName',
                 header: t('Release name'),
+                accessorFn: (row) => row.name ?? '',
                 cell: ({ row }) => {
                     const { name, version } = row.original
                     return <div>{`${name} (${version})`}</div>
@@ -57,11 +61,19 @@ function ECC(): ReactNode {
                 },
             },
             {
+                id: 'eccn',
+                header: t('ECCN'),
+                accessorFn: (row) => row.eccInformation?.eccn ?? '',
+                cell: ({ row }) => <>{row.original.eccInformation?.eccn ?? ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
                 id: 'version',
                 header: t('Release version'),
                 accessorKey: 'version',
                 cell: (info) => info.getValue(),
-                enableSorting: false,
                 meta: {
                     width: '10%',
                 },
@@ -69,6 +81,7 @@ function ECC(): ReactNode {
             {
                 id: 'creatorGroup',
                 header: t('Creator Group'),
+                accessorFn: (row) => row.eccInformation?.creatorGroup ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.creatorGroup}</>,
                 meta: {
                     width: '10%',
@@ -77,25 +90,28 @@ function ECC(): ReactNode {
             {
                 id: 'eccAssessor',
                 header: t('ECC Assessor'),
+                accessorFn: (row) => row.eccInformation?.assessorContactPerson ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessorContactPerson}</>,
                 meta: {
-                    width: '20%',
+                    width: '12%',
                 },
             },
             {
                 id: 'eccAssessorGroup',
                 header: t('ECC Assessor Group'),
+                accessorFn: (row) => row.eccInformation?.assessorDepartment ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessorDepartment}</>,
                 meta: {
-                    width: '20%',
+                    width: '18%',
                 },
             },
             {
                 id: 'ecc.eccAssessmentDate',
                 header: t('ECC Assessment Date'),
+                accessorFn: (row) => row.eccInformation?.assessmentDate ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessmentDate}</>,
                 meta: {
-                    width: '10%',
+                    width: '16%',
                 },
             },
         ],
@@ -175,14 +191,17 @@ function ECC(): ReactNode {
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
 
         // table state config
         state: {
+            sorting,
             pagination: {
                 pageIndex: pageableQueryParam.page,
                 pageSize: pageableQueryParam.page_entries,
             },
         },
+        onSortingChange: setSorting,
 
         // server side pagination config
         manualPagination: true,
@@ -208,6 +227,24 @@ function ECC(): ReactNode {
         },
     })
 
+    const openCurrentPageEccDetails = () => {
+        CommonUtils.printEccTable({
+            title: t('ECC Overview'),
+            rows: table.getRowModel().rows.map((row) => row.original),
+            headers: {
+                status: t('Status'),
+                releaseName: t('Release name'),
+                eccn: t('ECCN'),
+                releaseVersion: t('Release version'),
+                creatorGroup: t('Creator Group'),
+                eccAssessor: t('ECC Assessor'),
+                eccAssessorGroup: t('ECC Assessor Group'),
+                eccAssessmentDate: t('ECC Assessment Date'),
+            },
+            noRowsMessage: 'No ECC rows available for the current page.',
+        })
+    }
+
     return (
         <div className='container page-content'>
             <div className='row'>
@@ -221,10 +258,21 @@ function ECC(): ReactNode {
                     <div className='mb-3'>
                         {pageableQueryParam && table && paginationMeta ? (
                             <>
-                                <PageSizeSelector
-                                    pageableQueryParam={pageableQueryParam}
-                                    setPageableQueryParam={setPageableQueryParam}
-                                />
+                                <div className='d-flex justify-content-between align-items-center mb-2'>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <Button
+                                        variant='outline-secondary'
+                                        size='sm'
+                                        className='py-1 px-2 ms-2'
+                                        onClick={openCurrentPageEccDetails}
+                                    >
+                                        <BsPrinter className='me-1' />
+                                        Print
+                                    </Button>
+                                </div>
                                 <SW360Table
                                     table={table}
                                     showProcessing={showProcessing}
