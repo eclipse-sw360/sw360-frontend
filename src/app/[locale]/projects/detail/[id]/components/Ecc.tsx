@@ -9,15 +9,23 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import {
+    ColumnDef,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    SortingState,
+    useReactTable,
+} from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
-import { type JSX, useEffect, useMemo, useState } from 'react'
+import { ClientSidePageSizeSelector, ClientSideTableFooter, SW360Table, TableSearch } from 'next-sw360'
+import { type JSX, KeyboardEvent, useEffect, useMemo, useState } from 'react'
 import { Button, Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
-import { ECCInterface, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
+import { ECCInterface, Embedded, ErrorDetails, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -35,12 +43,17 @@ const Capitalize = (text: string) =>
 
 function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Element {
     const t = useTranslations('default')
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [globalFilter, setGlobalFilter] = useState('')
+    const [eccData, setEccData] = useState<ECCInterface[]>(() => [])
+    const [showProcessing, setShowProcessing] = useState(false)
 
     const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
             {
                 id: 'status',
                 header: t('Status'),
+                accessorFn: (row) => row.eccInformation?.eccStatus ?? '',
                 cell: ({ row }) => <>{Capitalize(row.original.eccInformation.eccStatus)}</>,
                 meta: {
                     width: '10%',
@@ -49,6 +62,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
             {
                 id: 'releaseName',
                 header: t('Release name'),
+                accessorFn: (row) => row.name ?? '',
                 cell: ({ row }) => {
                     const { name, version, id } = row.original
                     return (
@@ -65,11 +79,19 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                 },
             },
             {
+                id: 'eccn',
+                header: t('ECCN'),
+                accessorFn: (row) => row.eccInformation?.eccn ?? '',
+                cell: ({ row }) => <>{row.original.eccInformation?.eccn ?? ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
                 id: 'version',
                 header: t('Release version'),
                 accessorKey: 'version',
                 cell: (info) => info.getValue(),
-                enableSorting: false,
                 meta: {
                     width: '10%',
                 },
@@ -77,6 +99,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
             {
                 id: 'creatorGroup',
                 header: t('Creator Group'),
+                accessorFn: (row) => row.eccInformation?.creatorGroup ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.creatorGroup}</>,
                 meta: {
                     width: '10%',
@@ -85,6 +108,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
             {
                 id: 'eccAssessor',
                 header: t('ECC Assessor'),
+                accessorFn: (row) => row.eccInformation?.assessorContactPerson ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessorContactPerson}</>,
                 meta: {
                     width: '20%',
@@ -93,6 +117,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
             {
                 id: 'eccAssessorGroup',
                 header: t('ECC Assessor Group'),
+                accessorFn: (row) => row.eccInformation?.assessorDepartment ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessorDepartment}</>,
                 meta: {
                     width: '20%',
@@ -101,6 +126,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
             {
                 id: 'ecc.eccAssessmentDate',
                 header: t('ECC Assessment Date'),
+                accessorFn: (row) => row.eccInformation?.assessmentDate ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessmentDate}</>,
                 meta: {
                     width: '10%',
@@ -111,31 +137,18 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
             t,
         ],
     )
-    const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
-        page: 0,
-        page_entries: 10,
-        sort: '',
-    })
-    const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
-        size: 0,
-        totalElements: 0,
-        totalPages: 0,
-        number: 0,
-    })
-    const [eccData, setEccData] = useState<ECCInterface[]>(() => [])
     const memoizedData = useMemo(
         () => eccData,
         [
             eccData,
         ],
     )
-    const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit = eccData.length !== 0 ? 700 : 0
+        const timeLimit = memoizedData.length !== 0 ? 700 : 0
         const timeout = setTimeout(() => {
             setShowProcessing(true)
         }, timeLimit)
@@ -146,7 +159,6 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                     `projects/${projectId}/releases/ecc`,
                     Object.fromEntries(
                         Object.entries({
-                            ...pageableQueryParam,
                             transitive: true,
                         }).map(([key, value]) => [
                             key,
@@ -163,12 +175,10 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                 }
 
                 const data = (await response.json()) as EmbeddedProjectReleaseEcc
-                setPaginationMeta(data.page)
-                setEccData(
-                    CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
-                        ? []
-                        : data['_embedded']['sw360:releases'],
-                )
+                const rows = CommonUtils.isNullOrUndefined(data['_embedded']['sw360:releases'])
+                    ? []
+                    : data['_embedded']['sw360:releases']
+                setEccData(rows)
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
@@ -179,82 +189,86 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
 
         return () => controller.abort()
     }, [
-        pageableQueryParam,
+        memoizedData.length,
+        projectId,
     ])
 
     const table = useReactTable({
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
-
-        // table state config
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
         state: {
-            pagination: {
-                pageIndex: pageableQueryParam.page,
-                pageSize: pageableQueryParam.page_entries,
-            },
+            sorting,
+            globalFilter,
         },
+        onSortingChange: setSorting,
+        onGlobalFilterChange: setGlobalFilter,
+        globalFilterFn: (row, _columnId, filterValue) => {
+            const normalizedFilter = String(filterValue ?? '')
+                .trim()
+                .toLocaleLowerCase()
+            if (normalizedFilter.length === 0) {
+                return true
+            }
 
-        // server side pagination config
-        manualPagination: true,
-        pageCount: paginationMeta?.totalPages ?? 1,
-        onPaginationChange: (updater) => {
-            const next =
-                typeof updater === 'function'
-                    ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
-                    : updater
+            const searchFields = [
+                row.original.name,
+                row.original.version,
+                row.original.eccInformation?.eccn,
+                row.original.eccInformation?.eccStatus,
+                row.original.eccInformation?.assessorContactPerson,
+                row.original.eccInformation?.assessorDepartment,
+                row.original.eccInformation?.creatorGroup,
+                row.original.eccInformation?.assessmentDate,
+            ]
 
-            setPageableQueryParam((prev) => ({
-                ...prev,
-                page: next.pageIndex + 1,
-                page_entries: next.pageSize,
-            }))
+            return searchFields.some((field) =>
+                String(field ?? '')
+                    .toLocaleLowerCase()
+                    .includes(normalizedFilter),
+            )
         },
-
         meta: {
             rowHeightConstant: true,
         },
     })
 
+    const searchFunction = (event: KeyboardEvent<HTMLInputElement>) => {
+        table.setPageIndex(0)
+        setGlobalFilter(event.currentTarget.value)
+    }
+
     const exportSpreadsheet = () => {
-        try {
-            const currentDate = new Date().toISOString().split('T')[0]
-            const eccSpreadSheetName = `releases-${projectName}-${projectVersion}-${currentDate}.xlsx`
-            const url = `reports?projectId=${projectId}&module=projectReleaseSpreadSheetWithEcc&mimetype=xlsx`
-            void DownloadService.download(url, eccSpreadSheetName)
-        } catch (e) {
-            console.error(e)
-        }
+        const currentDate = new Date().toISOString().split('T')[0]
+        const eccSpreadSheetName = `releases-${projectName}-${projectVersion}-${currentDate}.xlsx`
+        const url = `reports?projectId=${projectId}&module=projectReleaseSpreadSheetWithEcc&mimetype=xlsx`
+        void DownloadService.download(url, eccSpreadSheetName).catch(ApiUtils.reportError)
     }
 
     return (
         <>
-            <Button
-                variant='secondary'
-                className='col-auto'
-                onClick={() => void exportSpreadsheet()}
-            >
-                {t('Export Spreadsheet')}
-            </Button>
+            <div className='d-flex flex-wrap justify-content-between align-items-center gap-3'>
+                <Button
+                    variant='secondary'
+                    className='col-auto'
+                    onClick={() => void exportSpreadsheet()}
+                >
+                    {t('Export Spreadsheet')}
+                </Button>
+                <TableSearch searchFunction={searchFunction} />
+            </div>
             <div className='mb-3'>
-                {pageableQueryParam && table && paginationMeta ? (
+                {table ? (
                     <>
-                        <PageSizeSelector
-                            pageableQueryParam={pageableQueryParam}
-                            setPageableQueryParam={setPageableQueryParam}
-                        />
+                        <ClientSidePageSizeSelector table={table} />
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
                         />
-                        <TableFooter
-                            pageableQueryParam={pageableQueryParam}
-                            setPageableQueryParam={setPageableQueryParam}
-                            paginationMeta={paginationMeta}
-                        />
+                        <ClientSideTableFooter table={table} />
                     </>
                 ) : (
                     <div className='col-12 mt-1 text-center'>
