@@ -27,7 +27,7 @@ export default interface ModerationRequestDetails {
     requestingUserDepartment?: string
     componentType?: string
     commentRequestingUser?: string
-    commentDecisionModerator?: null
+    commentDecisionModerator?: string | null
     'sw360:project'?: Project
     componentAdditions?: {
         [k: string]: string
