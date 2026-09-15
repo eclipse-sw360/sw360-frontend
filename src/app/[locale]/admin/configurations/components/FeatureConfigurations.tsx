@@ -300,6 +300,31 @@ const FeatureConfigurations = (): JSX.Element => {
                                         {t('Regex for domains to skip URL check in Release Source Download URL')}
                                     </td>
                                 </tr>
+                                <tr id='release-friendly-url'>
+                                    <td className='align-middle fw-bold'>
+                                        <label htmlFor='release-friendly-url-input'>{t('Release Friendly URL')}</label>
+                                    </td>
+                                    <td>
+                                        <input
+                                            type='text'
+                                            className='form-control'
+                                            id='release-friendly-url-input'
+                                            name='release-friendly-url'
+                                            placeholder='http://localhost:3000/components/releases/detail/releaseId'
+                                            value={currentConfig[ConfigKeys.RELEASE_FRIENDLY_URL]}
+                                            onChange={(event) => {
+                                                setCurrentConfig((prev) => {
+                                                    return {
+                                                        ...prev,
+                                                        [ConfigKeys.RELEASE_FRIENDLY_URL]:
+                                                            event.target.value.toString(),
+                                                    } as Configuration
+                                                })
+                                            }}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('RELEASE_FRIENDLY_URL_DESC')}</td>
+                                </tr>
                             </tbody>
                         </table>
                         <AttachmentStorageConfigurations
