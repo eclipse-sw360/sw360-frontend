@@ -29,6 +29,7 @@ export enum UIConfigKeys {
     UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP = 'ui.org.eclipse.sw360.disable.clearing.request.for.project.group',
     UI_CUSTOMMAP_COMPONENT_ROLES = 'ui.custommap.component.roles',
     UI_CUSTOMMAP_PROJECT_ROLES = 'ui.custommap.project.roles',
+    UI_ENABLE_USER_GENERAL_INFORMATION_WRITE_ACCESS = 'ui.enable.user.general.information.write.access',
     UI_ENABLE_SECURITY_VULNERABILITY_MONITORING = 'ui.enable.security.vulnerability.monitoring',
     UI_REST_APITOKEN_GENERATOR_ENABLE = 'ui.rest.apitoken.generator.enable',
     UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED = 'ui.rest.api.write.access.token.in.preferences.enabled',
