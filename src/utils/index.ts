@@ -10,6 +10,7 @@
 import UnauthenticatedApiUtils, { ApiError } from './api/api.util'
 import AuthenticatedApiUtils from './api/authenticatedApi.util'
 import CommonUtils from './common.utils'
+import PermissionUtils from './permission.utils'
 
 // API client usage guide:
 // - Use AuthenticatedApiUtils for protected backend endpoints.
@@ -18,4 +19,4 @@ import CommonUtils from './common.utils'
 // Backward compatibility: ApiUtils stays mapped to the unauthenticated/transport client.
 const ApiUtils = UnauthenticatedApiUtils
 
-export { ApiError, ApiUtils, AuthenticatedApiUtils, CommonUtils, UnauthenticatedApiUtils }
+export { ApiError, ApiUtils, AuthenticatedApiUtils, CommonUtils, PermissionUtils, UnauthenticatedApiUtils }

@@ -224,4 +224,5 @@ function AddComponent(): ReactNode {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(AddComponent, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])
