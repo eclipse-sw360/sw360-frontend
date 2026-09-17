@@ -150,6 +150,34 @@ const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
 }
 
 /**
+ * Converts an array of key-value pairs to a map.
+ * Special handling for 'package-url' key: multiple entries with this key are
+ * combined into a single JSON array string instead of overwriting one another.
+ * @param list - The array of key-value pairs to convert.
+ * @returns A map of key-value pairs.
+ */
+const convertInputListToMap = (list: InputKeyValue[]): Map<string, string> => {
+    const map = new Map<string, string>()
+    const multiValues: string[] = []
+
+    list.forEach((item) => {
+        if (item.key === 'package-url') {
+            if (item.value.trim() !== '') {
+                multiValues.push(item.value)
+            }
+        } else {
+            map.set(item.key, item.value)
+        }
+    })
+
+    if (multiValues.length > 0) {
+        map.set('package-url', JSON.stringify(multiValues))
+    }
+
+    return map
+}
+
+/**
  * Converts an object with string keys and string array values to an array of key-value pairs.
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
@@ -375,6 +403,7 @@ const CommonUtils = {
     getIdFromUrl,
     getEmailsModerators,
     convertObjectToMap,
+    convertInputListToMap,
     convertObjectToMapRoles,
     convertRoles,
     truncateText,
