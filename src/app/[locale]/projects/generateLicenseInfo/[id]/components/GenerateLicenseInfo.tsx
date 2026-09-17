@@ -322,6 +322,38 @@ const fetchReleaseRelationsFromLinkedProjects = (linkedProjects: Project[], filt
     }
 }
 
+const collectAttachmentSelectionKeys = (
+    rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[],
+): string[] => {
+    const keys = new Set<string>()
+
+    const visit = (
+        currentRows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[],
+        releaseId?: string,
+    ) => {
+        for (const row of currentRows) {
+            if (row.node.type === 'release') {
+                const currentReleaseId = row.node.entity._links?.self.href.split('/').at(-1) ?? ''
+                visit(row.children ?? [], currentReleaseId)
+                continue
+            }
+
+            if (row.node.type === 'attachment' && releaseId) {
+                const key = `${
+                    !CommonUtils.isNullEmptyOrUndefinedString(row.projectPath) ? `${row.projectPath}-` : ''
+                }${releaseId}_licenseInfo_${row.node.entity.attachmentContentId}`
+                keys.add(key)
+            }
+
+            visit(row.children ?? [], releaseId)
+        }
+    }
+
+    visit(rows)
+
+    return Array.from(keys)
+}
+
 interface Sort {
     columnName: string
     isAsc: boolean
@@ -441,11 +473,66 @@ function GenerateLicenseInfo({
                 filters.push(l.relation)
             }
         }
-        fetchReleaseRelationsFromLinkedProjects(project._embedded?.['sw360:linkedProjects'] ?? [], filters)
+        if (linkedProjects && linkedProjects.length > 0) {
+            fetchReleaseRelationsFromLinkedProjects(linkedProjects, filters)
+        }
         setProjectRelationships(filters)
     }, [
         project,
+        linkedProjects,
     ])
+
+    const attachmentSelectionKeys = useMemo(
+        () => collectAttachmentSelectionKeys(data),
+        [
+            data,
+        ],
+    )
+
+    const areAllAttachmentsSelected =
+        attachmentSelectionKeys.length > 0 &&
+        attachmentSelectionKeys.every((key) => saveUsagesPayload.selected.indexOf(key) !== -1)
+
+    const toggleAllAttachments = (checked: boolean) => {
+        const keySet = new Set(attachmentSelectionKeys)
+
+        setSaveUsagesPayload((prev) => {
+            const ignoredLicenses = {
+                ...(prev.ignoredLicenses ?? {}),
+            }
+
+            for (const key of attachmentSelectionKeys) {
+                const ignoredKey = key.replace('_licenseInfo_', '_')
+                delete ignoredLicenses[ignoredKey]
+            }
+
+            if (checked) {
+                const selectedSet = new Set(prev.selected)
+                for (const key of attachmentSelectionKeys) {
+                    selectedSet.add(key)
+                }
+
+                return {
+                    ...prev,
+                    selected: Array.from(selectedSet),
+                    deselected: prev.deselected.filter((item) => !keySet.has(item)),
+                    ignoredLicenses,
+                }
+            }
+
+            const deselectedSet = new Set(prev.deselected)
+            for (const key of attachmentSelectionKeys) {
+                deselectedSet.add(key)
+            }
+
+            return {
+                ...prev,
+                selected: prev.selected.filter((item) => !keySet.has(item)),
+                deselected: Array.from(deselectedSet),
+                ignoredLicenses,
+            }
+        })
+    }
 
     const columns = useMemo<
         ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject | TypedLicense>>[]
@@ -453,6 +540,17 @@ function GenerateLicenseInfo({
         () => [
             {
                 id: 'licenseInfo',
+                header: () => (
+                    <input
+                        id='project_clearing_report_select_all_attachments'
+                        type='checkbox'
+                        className='form-check-input'
+                        checked={areAllAttachmentsSelected}
+                        onChange={(event) => toggleAllAttachments(event.target.checked)}
+                        disabled={attachmentSelectionKeys.length === 0}
+                        aria-label='Select all attachments'
+                    />
+                ),
                 cell: ({ row }) => {
                     if (row.original.node.type === 'attachment') {
                         const { attachmentContentId } = row.original.node.entity
@@ -854,6 +952,8 @@ function GenerateLicenseInfo({
         [
             t,
             saveUsagesPayload,
+            areAllAttachmentsSelected,
+            attachmentSelectionKeys,
         ],
     )
 
