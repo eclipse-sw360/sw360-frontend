@@ -49,26 +49,7 @@ function AddKeyValue(props: Props): JSX.Element {
      * Multiple 'package-url' entries are combined into a single JSON array string.
      */
     const convertListToMap = useCallback((list: Input[]): Map<string, string> => {
-        const map = new Map<string, string>()
-        const packageUrls: string[] = []
-
-        list.forEach((item) => {
-            if (item.key === 'package-url') {
-                // Collect all package-url values
-                if (item.value.trim() !== '') {
-                    packageUrls.push(item.value)
-                }
-            } else {
-                map.set(item.key, item.value)
-            }
-        })
-
-        // Combine package-url values into a JSON array string
-        if (packageUrls.length > 0) {
-            map.set('package-url', JSON.stringify(packageUrls))
-        }
-
-        return map
+        return CommonUtils.convertInputListToMap(list)
     }, [])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
