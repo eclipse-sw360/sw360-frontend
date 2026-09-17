@@ -23,9 +23,16 @@ interface Props {
     setComponentPayload: React.Dispatch<React.SetStateAction<ComponentPayload>>
     vendor: Vendor
     setVendor: React.Dispatch<React.SetStateAction<Vendor>>
+    showVisibility?: boolean
 }
 
-const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, setVendor }: Props) => {
+const GeneralInfoComponent = ({
+    componentPayload,
+    setComponentPayload,
+    vendor,
+    setVendor,
+    showVisibility = false,
+}: Props) => {
     const t = useTranslations('default')
     const [dialogOpenVendor, setDialogOpenVendor] = useState(false)
     const handleClickSearchVendor = useCallback(() => setDialogOpenVendor(true), [])
@@ -159,6 +166,44 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                                 isMultiValue={true}
                             />
                         </div>
+                        {showVisibility && (
+                            <div className='col-lg-4'>
+                                <label
+                                    htmlFor='visibility'
+                                    className='form-label fw-bold'
+                                >
+                                    {t('Visibility')}{' '}
+                                    <span
+                                        className='text-red'
+                                        style={{
+                                            color: '#F7941E',
+                                        }}
+                                    >
+                                        *
+                                    </span>
+                                </label>
+                                <select
+                                    className='form-select'
+                                    id='visibility'
+                                    aria-describedby='visibility.HelpBlock'
+                                    name='visbility'
+                                    value={componentPayload.visbility ?? 'EVERYONE'}
+                                    onChange={updateField}
+                                    required
+                                >
+                                    <option value='PRIVATE'>{t('Private')}</option>
+                                    <option value='ME_AND_MODERATORS'>{t('Me and Moderators')}</option>
+                                    <option value='BUISNESSUNIT_AND_MODERATORS'>{t('Group and Moderators')}</option>
+                                    <option value='EVERYONE'>{t('Everyone')}</option>
+                                </select>
+                                <div
+                                    className='form-text'
+                                    id='visibility.HelpBlock'
+                                >
+                                    <ShowInfoOnHover text={t('VISIBILITY_INFO')} />
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className='row with-divider pt-2 pb-2'>
                         <div className='col-lg-4'>

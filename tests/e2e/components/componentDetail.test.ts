@@ -26,6 +26,7 @@ test.describe('Components - Detail Page', () => {
             categories: 'Library',
             componentType: 'OSS',
             description: 'Component for testing detail page tabs',
+            visbility: 'BUISNESSUNIT_AND_MODERATORS',
         })
     })
 
@@ -68,6 +69,12 @@ test.describe('Components - Detail Page', () => {
 
     test('TC34: Summary tab shows created by info', async ({ page }) => {
         await expect(page.getByText(/SW360 Admin|setup@sw360/).first()).toBeVisible()
+    })
+
+    test('TC34a: Summary tab displays component visibility', async ({ page }) => {
+        const visibilityLabel = page.getByText('Visibility:', { exact: true })
+        await expect(visibilityLabel).toBeVisible()
+        await expect(visibilityLabel.locator('xpath=following-sibling::td')).toHaveText('Group and Moderators')
     })
 
     // ─── Release Overview Tab ────────────────────────────────
