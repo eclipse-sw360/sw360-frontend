@@ -30,6 +30,7 @@ import {
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { CLEARING_REQUEST_STATUSES } from './ClearingRequestAdvancedFilter'
 
 type EmbeddedClearingRequest = Embedded<ClearingRequest, 'sw360:clearingRequests'>
 
@@ -361,17 +362,39 @@ function ClearingRequestComponent({ requestType }: { requestType: RequestType })
 
         void (async () => {
             try {
-                const searchParams = Object.fromEntries(params.entries())
+                const allowedStatuses = CLEARING_REQUEST_STATUSES[requestType]
+                const selectedStatus = params.get('status')
                 const statusFilter =
-                    requestType === 'OPEN'
-                        ? 'NEW,ACCEPTED,IN_PROGRESS,PENDING_INPUT,SANITY_CHECK,IN_QUEUE,AWAITING_RESPONSE,ON_HOLD'
-                        : 'CLOSED,REJECTED'
+                    selectedStatus !== null && allowedStatuses.includes(selectedStatus)
+                        ? selectedStatus
+                        : allowedStatuses.join(',')
+
+                const filterParams: Record<string, string> = {}
+                const dateField = params.get('dateField')
+                const days = params.get('days')
+                // A date field is only meaningful to the backend together with a range.
+                if (
+                    !CommonUtils.isNullEmptyOrUndefinedString(dateField) &&
+                    !CommonUtils.isNullEmptyOrUndefinedString(days)
+                ) {
+                    filterParams.dateField = dateField
+                    filterParams.days = days
+                }
+                for (const key of [
+                    'priority',
+                    'clearingType',
+                ]) {
+                    const value = params.get(key)
+                    if (!CommonUtils.isNullEmptyOrUndefinedString(value)) {
+                        filterParams[key] = value
+                    }
+                }
 
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `clearingrequests`,
                     Object.fromEntries(
                         Object.entries({
-                            ...searchParams,
+                            ...filterParams,
                             ...pageableQueryParam,
                             status: statusFilter,
                         }).map(([key, value]) => [
