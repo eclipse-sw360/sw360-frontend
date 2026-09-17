@@ -49,6 +49,7 @@ export const selectors = {
         createdBy: '#createdBy',
         categories: '#categories',
         componentType: '#component_type',
+        visibility: '#visibility',
         defaultVendor: '#default_vendor',
         homepage: '#tag',
         vcsUrl: '#vcs_url',
