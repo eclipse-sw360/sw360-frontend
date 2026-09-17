@@ -11,7 +11,7 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -106,14 +106,16 @@ export default function SearchReleasesModal({
             {
                 id: 'vendor',
                 header: t('Vendor'),
+                accessorFn: (row) => row.vendor?.fullName ?? '',
                 cell: ({ row }) => <>{row.original.vendor ? (row.original.vendor.fullName ?? '') : ''}</>,
                 meta: {
                     width: '22%',
                 },
             },
             {
-                id: 'componentName',
+                id: 'name',
                 header: t('Component Name'),
+                accessorKey: 'name',
                 cell: ({ row }) => {
                     const componentId = row.original['_links']?.['sw360:component']?.['href']?.split('/').pop()
                     return componentId ? (
@@ -132,8 +134,9 @@ export default function SearchReleasesModal({
                 },
             },
             {
-                id: 'releaseVersion',
+                id: 'version',
                 header: t('Release version'),
+                accessorKey: 'version',
                 cell: ({ row }) => {
                     const { id, version } = row.original
                     return (
@@ -152,6 +155,7 @@ export default function SearchReleasesModal({
             {
                 id: 'clearingState',
                 header: t('Clearing State'),
+                accessorKey: 'clearingState',
                 cell: ({ row }) => <>{Capitalize(row.original.clearingState ?? '')}</>,
                 meta: {
                     width: '15%',
@@ -160,6 +164,7 @@ export default function SearchReleasesModal({
             {
                 id: 'mainlineState',
                 header: t('Mainline State'),
+                accessorKey: 'mainlineState',
                 cell: ({ row }) => <>{Capitalize(row.original.mainlineState ?? '')}</>,
                 meta: {
                     width: '15%',
@@ -243,6 +248,34 @@ export default function SearchReleasesModal({
                     desc: pageableQueryParam.sort.split(',')[1] === 'desc',
                 },
             ],
+        },
+
+        // server side sorting config
+        manualSorting: true,
+        onSortingChange: (updater) => {
+            setPageableQueryParam((prev) => {
+                const prevSorting: SortingState = [
+                    {
+                        id: prev.sort.split(',')[0],
+                        desc: prev.sort.split(',')[1] === 'desc',
+                    },
+                ]
+
+                const nextSorting = typeof updater === 'function' ? updater(prevSorting) : updater
+
+                if (nextSorting.length > 0) {
+                    const { id, desc } = nextSorting[0]
+                    return {
+                        ...prev,
+                        sort: `${id},${desc ? 'desc' : 'asc'}`,
+                    }
+                }
+
+                return {
+                    ...prev,
+                    sort: '',
+                }
+            })
         },
 
         // server side pagination config
