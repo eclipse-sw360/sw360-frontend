@@ -706,6 +706,9 @@ export default function ListView({
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
+                            noRecordsFoundMessage={t(
+                                'No releases linked to this project. Add releases to view license clearing information.',
+                            )}
                         />
                         <ClientSideTableFooter table={table} />
                     </>
