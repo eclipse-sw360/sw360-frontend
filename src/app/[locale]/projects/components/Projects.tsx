@@ -37,6 +37,7 @@ import {
 } from 'react-icons/bs'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
+import { useApiQuery } from '@/hooks'
 import {
     Attachment,
     ConfigKeys,
@@ -103,11 +104,30 @@ function Project(): JSX.Element {
     const [showViewCRModal, setShowViewCRModal] = useState(false)
     const [clearingRequestId, setClearingRequestId] = useState('')
     const [licenseClearingData, setLicenseClearingData] = useState<LicenseClearingMap>({})
-    const [projectGroups, setProjectGroups] = useState<GroupEntry[]>([
-        {
-            key: 'None',
-            text: t('None'),
-        },
+    const { data: projectGroupsData } = useApiQuery<string[]>({
+        queryKey: [
+            'projects',
+            'groups',
+        ],
+        path: 'projects/groups',
+        staleTime: 10 * 60_000, // 10 min: group list changes rarely
+    })
+    const projectGroups = useMemo<GroupEntry[]>(() => {
+        if (!projectGroupsData) {
+            return [
+                {
+                    key: 'None',
+                    text: t('None'),
+                },
+            ]
+        }
+        return projectGroupsData.map((d) => ({
+            key: d,
+            text: d,
+        }))
+    }, [
+        projectGroupsData,
+        t,
     ])
 
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
@@ -723,36 +743,6 @@ function Project(): JSX.Element {
         showLinkedProjects,
         linkedProjectsData,
     ])
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        void (async () => {
-            try {
-                const response = await ApiUtils.GET('projects/groups', signal)
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
-                const data = (await response.json()) as string[]
-                const mappedData = data.map(
-                    (d: string) =>
-                        ({
-                            key: d,
-                            text: d,
-                        }) as GroupEntry,
-                )
-                setProjectGroups(mappedData)
-            } catch (error) {
-                ApiUtils.reportError(error)
-            }
-        })()
-
-        return () => controller.abort()
-    }, [])
 
     useEffect(() => {
         const controller = new AbortController()

@@ -17,6 +17,7 @@ import { Image, NavDropdown } from 'react-bootstrap'
 
 import sw360ProfileIcon from '@/assets/images/profile.svg'
 import { useLocalStorage } from '@/hooks'
+import Link from 'next/link'
 
 function ProfileDropdown(): JSX.Element {
     const t = useTranslations('default')
@@ -49,7 +50,12 @@ function ProfileDropdown(): JSX.Element {
             }
             className='no-border'
         >
-            <NavDropdown.Item href='/preferences'>{t('Preferences')}</NavDropdown.Item>
+            <NavDropdown.Item
+                as={Link}
+                href='/preferences'
+            >
+                {t('Preferences')}
+            </NavDropdown.Item>
             <NavDropdown.Divider />
             <NavDropdown.Item
                 href=''
