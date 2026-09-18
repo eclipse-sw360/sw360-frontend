@@ -99,6 +99,7 @@ function Navbar(): JSX.Element {
                         >
                             {item.childs?.map((child) => (
                                 <NavDropdown.Item
+                                    as={Link}
                                     href={getLocalizedPath(child.href)}
                                     key={child.id}
                                 >
@@ -110,6 +111,7 @@ function Navbar(): JSX.Element {
                 } else {
                     return (
                         <Nav.Link
+                            as={Link}
                             key={item.name}
                             className={`${pathname == item.href ? 'active' : ''}`}
                             href={localizedHref}
