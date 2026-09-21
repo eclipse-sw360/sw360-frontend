@@ -26,6 +26,7 @@ header:
 
   paths-ignore:
     - .dockerignore
+    - .gitattributes
     - .gitignore
     - .husky
     - .prettierrc
