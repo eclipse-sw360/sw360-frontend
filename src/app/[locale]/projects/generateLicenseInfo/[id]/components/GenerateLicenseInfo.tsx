@@ -16,6 +16,7 @@ import {
     getCoreRowModel,
     getExpandedRowModel,
     getSortedRowModel,
+    type RowData,
     SortingState,
     useReactTable,
 } from '@tanstack/react-table'
@@ -71,6 +72,26 @@ interface ExtendedNestedRows<K> extends NestedRows<K> {
 }
 
 type TypedLicense = TypedEntity<License, 'license'>
+
+// Selection state exposed via table meta so `columns` doesn't need to be rebuilt on every checkbox click
+interface LicenseInfoTableMeta {
+    selectedUsages: Set<string>
+    ignoredLicenses: Record<string, string[]>
+    areAllAttachmentsSelected: boolean
+    attachmentSelectionKeys: string[]
+    licenses: Record<string, License[]>
+    detailErrors: Set<string>
+    onToggleAllAttachments: (checked: boolean) => void
+    onToggleAttachment: (key: string) => void
+    onToggleLicense: (attKey: string, key: string, licenseName: string, siblingLicenses: License[]) => void
+    onRetryLoadLicenses: (releaseId: string, attachmentId: string) => void
+}
+
+declare module '@tanstack/react-table' {
+    interface TableMeta<TData extends RowData> {
+        licenseInfo?: LicenseInfoTableMeta
+    }
+}
 
 const Capitalize = (text: string) =>
     text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
@@ -582,18 +603,22 @@ function GenerateLicenseInfo({
         () => [
             {
                 id: 'licenseInfo',
-                header: () => (
-                    <input
-                        id='project_clearing_report_select_all_attachments'
-                        type='checkbox'
-                        className='form-check-input'
-                        checked={areAllAttachmentsSelected}
-                        onChange={(event) => toggleAllAttachments(event.target.checked)}
-                        disabled={attachmentSelectionKeys.length === 0}
-                        aria-label='Select all attachments'
-                    />
-                ),
-                cell: ({ row }) => {
+                header: ({ table }) => {
+                    const meta = table.options.meta?.licenseInfo
+                    return (
+                        <input
+                            id='project_clearing_report_select_all_attachments'
+                            type='checkbox'
+                            className='form-check-input'
+                            checked={meta?.areAllAttachmentsSelected ?? false}
+                            onChange={(event) => meta?.onToggleAllAttachments(event.target.checked)}
+                            disabled={(meta?.attachmentSelectionKeys.length ?? 0) === 0}
+                            aria-label='Select all attachments'
+                        />
+                    )
+                },
+                cell: ({ row, table }) => {
+                    const meta = table.options.meta?.licenseInfo
                     if (row.original.node.type === 'attachment') {
                         const { attachmentContentId } = row.original.node.entity
                         const r = row.getParentRow()?.original.node.entity as Release
@@ -613,10 +638,8 @@ function GenerateLicenseInfo({
                                 <input
                                     type='checkbox'
                                     className='form-check-input'
-                                    checked={selectedUsages.has(key)}
-                                    onChange={() => {
-                                        setSaveUsagesPayload((previous) => toggleAttachmentUsage(previous, key))
-                                    }}
+                                    checked={meta?.selectedUsages.has(key) ?? false}
+                                    onChange={() => meta?.onToggleAttachment(key)}
                                 />
                             </div>
                         )
@@ -648,26 +671,23 @@ function GenerateLicenseInfo({
                         }${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId ?? ''}`
 
                         const checked =
-                            (saveUsagesPayload.ignoredLicenses?.[key] ?? []).indexOf(lic.name) === -1 &&
-                            selectedUsages.has(att_key)
+                            (meta?.ignoredLicenses[key] ?? []).indexOf(lic.name) === -1 &&
+                            (meta?.selectedUsages.has(att_key) ?? false)
                         return (
                             <input
                                 type='checkbox'
                                 className='form-check-input'
                                 checked={checked}
-                                onChange={() => {
-                                    setSaveUsagesPayload((previous) =>
-                                        toggleLicenseUsage(
-                                            previous,
-                                            att_key,
-                                            key,
-                                            lic.name,
-                                            (row.getParentRow()?.original.children ?? []).map(
-                                                (child) => child.node.entity as License,
-                                            ),
+                                onChange={() =>
+                                    meta?.onToggleLicense(
+                                        att_key,
+                                        key,
+                                        lic.name,
+                                        (row.getParentRow()?.original.children ?? []).map(
+                                            (child) => child.node.entity as License,
                                         ),
                                     )
-                                }}
+                                }
                             />
                         )
                     }
@@ -728,8 +748,9 @@ function GenerateLicenseInfo({
                 header: t('Name'),
                 enableSorting: true,
                 accessorKey: 'name',
-                cell: ({ row }) => {
+                cell: ({ row, table }) => {
                     if (row.original.node.type === 'attachment') {
+                        const meta = table.options.meta?.licenseInfo
                         const attachmentId = row.original.node.entity.attachmentContentId ?? ''
                         const releaseId = row.original.releaseId ?? ''
                         const detailKey = `${releaseId}_${attachmentId}`
@@ -743,16 +764,16 @@ function GenerateLicenseInfo({
                                 }`}
                             >
                                 {row.original.node.entity.filename}
-                                {row.getIsExpanded() && detailErrors.has(detailKey) ? (
+                                {row.getIsExpanded() && meta?.detailErrors.has(detailKey) ? (
                                     <Button
                                         variant='link'
-                                        onClick={() => void loadLicenses(releaseId, attachmentId, true)}
+                                        onClick={() => meta?.onRetryLoadLicenses(releaseId, attachmentId)}
                                     >
                                         {t('Retry')}
                                     </Button>
                                 ) : (
                                     row.getIsExpanded() &&
-                                    licenses[detailKey] === undefined && (
+                                    meta?.licenses[detailKey] === undefined && (
                                         <Spinner
                                             size='sm'
                                             className='ms-2'
@@ -952,13 +973,6 @@ function GenerateLicenseInfo({
         ],
         [
             t,
-            saveUsagesPayload,
-            areAllAttachmentsSelected,
-            attachmentSelectionKeys,
-            selectedUsages,
-            licenses,
-            detailErrors,
-            loadLicenses,
         ],
     )
 
@@ -1017,6 +1031,21 @@ function GenerateLicenseInfo({
 
         meta: {
             rowHeightConstant: true,
+            licenseInfo: {
+                selectedUsages,
+                ignoredLicenses: saveUsagesPayload.ignoredLicenses ?? {},
+                areAllAttachmentsSelected,
+                attachmentSelectionKeys,
+                licenses,
+                detailErrors,
+                onToggleAllAttachments: toggleAllAttachments,
+                onToggleAttachment: (key) => setSaveUsagesPayload((previous) => toggleAttachmentUsage(previous, key)),
+                onToggleLicense: (attKey, key, licenseName, siblingLicenses) =>
+                    setSaveUsagesPayload((previous) =>
+                        toggleLicenseUsage(previous, attKey, key, licenseName, siblingLicenses),
+                    ),
+                onRetryLoadLicenses: (releaseId, attachmentId) => void loadLicenses(releaseId, attachmentId, true),
+            },
         },
     })
 
@@ -1229,36 +1258,18 @@ function GenerateLicenseInfo({
                                         'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
                                     )}
                                 </div>
-                                <Tab.Content className='mt-3'>
-                                    <Tab.Pane eventKey='show_all'>
-                                        <div className='mb-3'>
-                                            {table ? (
-                                                <SW360Table
-                                                    table={table}
-                                                    showProcessing={showProcessing}
-                                                />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
-                                            )}
+                                <div className='mb-3 mt-3'>
+                                    {table ? (
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                    ) : (
+                                        <div className='col-12 mt-1 text-center'>
+                                            <Spinner className='spinner' />
                                         </div>
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='only_approved'>
-                                        <div className='mb-3'>
-                                            {table ? (
-                                                <SW360Table
-                                                    table={table}
-                                                    showProcessing={showProcessing}
-                                                />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </Tab.Pane>
-                                </Tab.Content>
+                                    )}
+                                </div>
                             </Tab.Container>
                         ) : (
                             <div className='col-12 text-center'>
