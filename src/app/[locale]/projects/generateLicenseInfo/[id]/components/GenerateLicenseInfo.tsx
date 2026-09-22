@@ -309,16 +309,21 @@ function filterReleasesWithUsage(
     )
 }
 
-const fetchReleaseRelationsFromLinkedProjects = (linkedProjects: Project[], filters: string[]) => {
+const fetchReleaseRelationsFromLinkedProjects = (linkedProjects: Project[], filters: Set<string>) => {
     for (const p of linkedProjects) {
         for (const l of p.linkedReleases ?? []) {
-            const ind = filters.indexOf(l.relation)
-
-            if (ind === -1) {
-                filters.push(l.relation)
-            }
+            filters.add(l.relation)
         }
         fetchReleaseRelationsFromLinkedProjects(p._embedded?.['sw360:linkedProjects'] ?? [], filters)
+    }
+}
+
+const fetchProjectRelationsFromLinkedProjects = (linkedProjects: Project[], filters: Set<string>) => {
+    for (const p of linkedProjects) {
+        for (const l of p.linkedProjects ?? []) {
+            filters.add(l.relation)
+        }
+        fetchProjectRelationsFromLinkedProjects(p._embedded?.['sw360:linkedProjects'] ?? [], filters)
     }
 }
 
@@ -424,7 +429,8 @@ function GenerateLicenseInfo({
     const [key, setKey] = useState<string>('show_all')
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [isCalledFromProjectLicenseTab, setIsCalledFromProjectLicenseTab] = useState<boolean>(false)
-    const [projectRelationships, setProjectRelationships] = useState<string[]>([])
+    const [projectReleaseRelationships, setProjectReleaseRelationships] = useState<string[]>([])
+    const [projectProjectRelationships, setProjectProjectRelationships] = useState<string[]>([])
     const [sort, setSort] = useState<Sort>({
         columnName: 'name',
         isAsc: true,
@@ -506,19 +512,25 @@ function GenerateLicenseInfo({
     useEffect(() => {
         if (!project) return
 
-        const filters: string[] = []
+        const releaseRelationFilters: Set<string> = new Set<string>()
+        const projectRelationFilters: Set<string> = new Set<string>()
 
         for (const l of project.linkedReleases ?? []) {
-            const ind = filters.indexOf(l.relation)
-
-            if (ind === -1) {
-                filters.push(l.relation)
-            }
+            releaseRelationFilters.add(l.relation)
+        }
+        for (const l of project.linkedProjects ?? []) {
+            projectRelationFilters.add(l.relation)
         }
         if (linkedProjects && linkedProjects.length > 0) {
-            fetchReleaseRelationsFromLinkedProjects(linkedProjects, filters)
+            fetchReleaseRelationsFromLinkedProjects(linkedProjects, releaseRelationFilters)
+            fetchProjectRelationsFromLinkedProjects(linkedProjects, projectRelationFilters)
         }
-        setProjectRelationships(filters)
+        setProjectReleaseRelationships([
+            ...releaseRelationFilters,
+        ])
+        setProjectProjectRelationships([
+            ...projectRelationFilters,
+        ])
     }, [
         project,
         linkedProjects,
@@ -1154,7 +1166,8 @@ function GenerateLicenseInfo({
                 setShowConfirmation={setShowConfirmation}
                 projectId={projectId}
                 isCalledFromProjectLicenseTab={isCalledFromProjectLicenseTab}
-                projectRelationships={projectRelationships}
+                projectReleaseRelationships={projectReleaseRelationships}
+                projectProjectRelationships={projectProjectRelationships}
             />
             <LicenseInfoDownloadConfirmationModal
                 show={showConfirmation}
