@@ -11,23 +11,44 @@
 
 'use client'
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Alert, Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import { ConfigKeys, UIConfigKeys, UserGroupPriority, UserGroupType } from '@/object-types'
+import { useApiQuery } from '@/hooks'
 import DownloadService from '@/services/download.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ComponentsTable from './ComponentsTable'
 import ImportSBOMModal from './ImportSBOMModal'
 
+interface VendorsResponse {
+    _embedded?: {
+        'sw360:vendors'?: Array<{
+            fullName: string
+        }>
+    }
+}
+
 const ComponentIndex = (): ReactNode => {
     const t = useTranslations('default')
     const [numberOfComponent, setNumberOfComponent] = useState(0)
     const [importModalOpen, setImportModalOpen] = useState(false)
-    const [vendorsSuggestions, setVendorsSuggestions] = useState<string[]>([])
+    const { data: vendorsData } = useApiQuery<VendorsResponse>({
+        queryKey: [
+            'vendors',
+        ],
+        path: 'vendors',
+        staleTime: 10 * 60_000, // 10 min: vendor list changes rarely
+    })
+    const vendorsSuggestions = useMemo<string[]>(
+        () => vendorsData?._embedded?.['sw360:vendors']?.map((v) => v.fullName) ?? [],
+        [
+            vendorsData,
+        ],
+    )
     const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
     const platformsSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
     const osSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
@@ -50,27 +71,6 @@ const ComponentIndex = (): ReactNode => {
                 setUserIdentity(null)
             }
         })()
-    }, [])
-
-    useEffect(() => {
-        const controller = new AbortController()
-
-        const fetchVendors = async () => {
-            const response = await ApiUtils.GET('vendors')
-            if (!controller.signal.aborted && response.ok) {
-                const data = await response.json()
-                const names = data._embedded?.['sw360:vendors']?.map((v: { fullName: string }) => v.fullName) || []
-                if (!controller.signal.aborted) {
-                    setVendorsSuggestions(names)
-                }
-            }
-        }
-
-        fetchVendors()
-
-        return () => {
-            controller.abort()
-        }
     }, [])
 
     const handleClickImportSBOM = (e: React.MouseEvent<HTMLElement>) => {
