@@ -10,8 +10,9 @@
 'use client'
 
 import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction, useRef } from 'react'
+import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction, useLayoutEffect, useRef } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
@@ -301,7 +302,7 @@ export function SW360Table<K>({
     const t = useTranslations('default')
 
     return (
-        <div className='table-component position-relative'>
+        <div className='table-component position-relative overflow-auto'>
             <table
                 className='sw360-table table-bordered mt-3'
                 style={{
@@ -386,7 +387,169 @@ export function SW360Table<K>({
                 </tbody>
             </table>
             {showProcessing && (
-                <div className='position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center'>
+                <div className='position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center z-3'>
+                    <div className='bg-white p-4 border rounded shadow'>{t('Processing')}…</div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+// Virtualized variant: renders only rows within the scroll viewport, use for very large row counts.
+export function SW360TableVirtual<K>({
+    table,
+    showProcessing,
+    noRecordsFoundMessage,
+}: {
+    table: Table<K>
+    showProcessing: boolean
+    noRecordsFoundMessage?: string
+}): ReactNode {
+    const t = useTranslations('default')
+    const parentRef = useRef<HTMLDivElement>(null)
+    const parentOffsetRef = useRef(0)
+
+    useLayoutEffect(() => {
+        parentOffsetRef.current = parentRef?.current?.offsetTop ?? 0
+    }, [])
+
+    const rows = table.getRowModel().rows
+
+    const rowVirtualizer = useWindowVirtualizer({
+        count: rows.length,
+        scrollMargin: parentOffsetRef.current,
+        estimateSize: () => 35,
+        overscan: 35,
+    })
+
+    const virtualRows = rowVirtualizer.getVirtualItems()
+    const paddingTop = virtualRows.length > 0 ? virtualRows[0].start - rowVirtualizer.options.scrollMargin : 0
+    const paddingBottom =
+        virtualRows.length > 0 ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end : 0
+
+    return (
+        <div
+            className='table-component position-relative'
+            ref={parentRef}
+        >
+            <table
+                className='sw360-table table-bordered mt-3'
+                style={{
+                    width: '100%',
+                    tableLayout: 'auto',
+                }}
+            >
+                <thead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => (
+                                <th
+                                    key={header.id}
+                                    colSpan={header.colSpan}
+                                    style={{
+                                        width: (header.column.columnDef.meta as ColumnMeta | undefined)?.width,
+                                    }}
+                                >
+                                    {header.isPlaceholder ? null : (
+                                        <div className='d-flex justify-content-between align-items-center'>
+                                            <span>
+                                                {flexRender(header.column.columnDef.header, header.getContext())}
+                                            </span>
+
+                                            {header.column.getCanSort() && (
+                                                <span onClick={header.column.getToggleSortingHandler()}>
+                                                    {header.column.getIsSorted() === 'asc' ? (
+                                                        <BsSortDownAlt size={20} />
+                                                    ) : header.column.getIsSorted() === 'desc' ? (
+                                                        <BsSortDown size={20} />
+                                                    ) : (
+                                                        <BiSort size={20} />
+                                                    )}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </th>
+                            ))}
+                        </tr>
+                    ))}
+                </thead>
+                <tbody>
+                    {!showProcessing && rows.length === 0 && (
+                        <tr>
+                            <td colSpan={table.getVisibleFlatColumns().length}>
+                                <div className='text-center'>
+                                    {noRecordsFoundMessage ?? t('No data available in table')}
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                    {paddingTop > 0 && (
+                        <tr>
+                            <td
+                                colSpan={table.getVisibleFlatColumns().length}
+                                style={{
+                                    height: `${paddingTop}px`,
+                                    padding: 0,
+                                    border: 'none',
+                                }}
+                            />
+                        </tr>
+                    )}
+                    {virtualRows.map((virtualRow) => {
+                        const row = rows[virtualRow.index]
+                        return row.meta?.isFullSpanRow ? (
+                            <tr
+                                key={row.id}
+                                data-index={virtualRow.index}
+                                ref={rowVirtualizer.measureElement}
+                            >
+                                <td colSpan={table.getVisibleLeafColumns().length}>
+                                    <div className={table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''}>
+                                        {row.getVisibleCells()?.[0] &&
+                                            flexRender(
+                                                row.getVisibleCells()[0].column.columnDef.cell,
+                                                row.getVisibleCells()[0].getContext(),
+                                            )}
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : (
+                            <tr
+                                key={row.id}
+                                data-index={virtualRow.index}
+                                ref={rowVirtualizer.measureElement}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td key={cell.id}>
+                                        <div
+                                            className={
+                                                table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''
+                                            }
+                                        >
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </div>
+                                    </td>
+                                ))}
+                            </tr>
+                        )
+                    })}
+                    {paddingBottom > 0 && (
+                        <tr>
+                            <td
+                                colSpan={table.getVisibleFlatColumns().length}
+                                style={{
+                                    height: `${paddingBottom}px`,
+                                    padding: 0,
+                                    border: 'none',
+                                }}
+                            />
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+            {showProcessing && (
+                <div className='position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center z-3'>
                     <div className='bg-white p-4 border rounded shadow'>{t('Processing')}…</div>
                 </div>
             )}

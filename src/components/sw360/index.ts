@@ -39,6 +39,7 @@ import {
     PaddedCell,
     PageSizeSelector,
     SW360Table,
+    SW360TableVirtual,
     TableFooter,
     TableSearch,
 } from './Table/Components'
@@ -76,6 +77,7 @@ export {
     SelectUsersDialog,
     ShowInfoOnHover,
     SW360Table,
+    SW360TableVirtual,
     TableFooter,
     TableSearch,
     ThemeSwitcher,

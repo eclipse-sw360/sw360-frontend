@@ -24,7 +24,7 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { PaddedCell, SW360Table } from 'next-sw360'
+import { PaddedCell, SW360TableVirtual } from 'next-sw360'
 import { ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Button, Nav, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
@@ -1260,7 +1260,7 @@ function GenerateLicenseInfo({
                                 </div>
                                 <div className='mb-3 mt-3'>
                                     {table ? (
-                                        <SW360Table
+                                        <SW360TableVirtual
                                             table={table}
                                             showProcessing={showProcessing}
                                         />
