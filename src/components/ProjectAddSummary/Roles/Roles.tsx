@@ -267,7 +267,7 @@ export default function Roles({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             id='addProjects.group'
                             aria-label={t('Group')}
                             placeholder={t('Click to edit')}
@@ -293,7 +293,7 @@ export default function Roles({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             placeholder={t('Click to edit')}
                             id='addProjects.projectManager'
                             aria-label={t('Project Manager')}
@@ -326,7 +326,7 @@ export default function Roles({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             placeholder={t('Click to edit')}
                             id='addProjects.projectOwner'
                             aria-label={t('Project Owner')}
@@ -405,7 +405,7 @@ export default function Roles({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             placeholder={t('Click to edit')}
                             id='addProjects.leadArchitect'
                             aria-label={t('Lead Architect')}
@@ -438,7 +438,7 @@ export default function Roles({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             id='addProjects.moderators'
                             aria-label={t('Moderators')}
                             placeholder={t('Click to edit')}
@@ -471,7 +471,7 @@ export default function Roles({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             id='addProjects.contributors'
                             aria-label={t('Contributors')}
                             placeholder={t('Click to edit')}
@@ -506,7 +506,7 @@ export default function Roles({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             id='addProjects.securityResponsibles'
                             aria-label={t('Security Responsibles')}
                             placeholder={t('Click to edit')}

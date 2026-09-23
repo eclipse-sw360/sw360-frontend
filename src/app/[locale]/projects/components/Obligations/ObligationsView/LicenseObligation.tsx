@@ -390,7 +390,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                 id: row.original.node[0],
                             })
                         }}
-                        className='form-control'
+                        className='form-control cursor-pointer'
                         placeholder={t('Enter comments')}
                         readOnly
                     />
