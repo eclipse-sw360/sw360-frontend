@@ -221,7 +221,7 @@ function EditAttachments<T extends DocumentPayloadWithAttachments>({
                                 cell: ({ row }) => (
                                     <input
                                         type='text'
-                                        className='form-control'
+                                        className='form-control cursor-pointer'
                                         placeholder='Enter comments'
                                         name='createdComment'
                                         value={row.original.createdComment ?? ''}
@@ -317,7 +317,7 @@ function EditAttachments<T extends DocumentPayloadWithAttachments>({
                                         <input
                                             type='text'
                                             name='checkedComment'
-                                            className='form-control'
+                                            className='form-control cursor-pointer'
                                             placeholder='Enter comments'
                                             value={row.original.checkedComment ?? ''}
                                             onClick={() =>

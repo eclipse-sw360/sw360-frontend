@@ -252,7 +252,7 @@ export default function ObligationTab({
                                 id: row.original.node[0],
                             })
                         }}
-                        className='form-control'
+                        className='form-control cursor-pointer'
                         placeholder={t('Enter comments')}
                         readOnly
                     />

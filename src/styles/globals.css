@@ -1229,8 +1229,8 @@ a.text-primary {
     color: var(--sw360-primary-color) !important;
 }
 
-.cursor-pointer {
-    cursor: pointer;
+.form-control.cursor-pointer {
+    cursor: pointer !important;
 }
 
 .tooltip-inner {

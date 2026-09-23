@@ -119,7 +119,7 @@ const RolesInformation = ({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             data-bs-toggle='modal'
                             data-bs-target='#search_users_modal'
                             placeholder={t('Click to edit')}
@@ -192,7 +192,7 @@ const RolesInformation = ({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             data-bs-toggle='modal'
                             data-bs-target='#search_users_modal'
                             placeholder={t('Click to edit')}

@@ -213,7 +213,7 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
                             </label>
                             <input
                                 type='text'
-                                className='form-control'
+                                className='form-control cursor-pointer'
                                 data-bs-toggle='modal'
                                 data-bs-target='#search_vendors_modal'
                                 placeholder={t('Click to set vendor')}
