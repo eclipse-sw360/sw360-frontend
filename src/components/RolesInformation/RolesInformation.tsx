@@ -13,6 +13,7 @@
 import { useTranslations } from 'next-intl'
 import { SelectCountry, SelectUsersDialog } from 'next-sw360'
 import React, { useCallback, useState } from 'react'
+import { BsXCircle } from 'react-icons/bs'
 import { ComponentPayload } from '@/object-types'
 
 interface Props {
@@ -137,7 +138,13 @@ const RolesInformation = ({
                             selectedUsers={componentOwner}
                             multiple={false}
                         />
-                        <span onClick={handleClearComponentOwner}>x</span>
+                        <div
+                            className='form-text'
+                            onClick={handleClearComponentOwner}
+                        >
+                            {' '}
+                            <BsXCircle size={20} />
+                        </div>
                     </div>
                     <div className='col-lg-4'>
                         <label
@@ -211,7 +218,13 @@ const RolesInformation = ({
                             selectedUsers={moderators}
                             multiple={true}
                         />
-                        <span onClick={handleClearModerators}>x</span>
+                        <div
+                            className='form-text'
+                            onClick={handleClearModerators}
+                        >
+                            {' '}
+                            <BsXCircle size={20} />
+                        </div>
                     </div>
                 </div>
             </div>
