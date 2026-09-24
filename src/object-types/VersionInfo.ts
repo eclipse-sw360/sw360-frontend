@@ -8,10 +8,11 @@
 // License-Filename: LICENSE
 
 interface VersionInfo {
-    apiVersion: string
-    buildTime: string
+    apiVersion?: string
+    buildTime?: string
     buildNumber: string
-    sw360Version: string
+    sw360Version?: string
+    sw360FrontendVersion?: string
     gitBranch: string
 }
 

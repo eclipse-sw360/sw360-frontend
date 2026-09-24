@@ -8,5 +8,6 @@ NOTICE
 CODE_OF_CONDUCT.md
 Dockerfile
 .dockerignore
-.git
+# Keep .git available for the build-only bind mount; never copy it into image layers.
+frontend-build-info.json
 .env
