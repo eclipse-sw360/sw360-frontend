@@ -133,6 +133,14 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                     </td>
                 </tr>
                 <tr>
+                    <td>{t('Visibility')}:</td>
+                    <td>
+                        {component.visbility === 'BUISNESSUNIT_AND_MODERATORS'
+                            ? t('Group and Moderators')
+                            : component.visbility}
+                    </td>
+                </tr>
+                <tr>
                     <td>{t('CycloneDX Component Type')}:</td>
                     <td>
                         {!CommonUtils.isNullEmptyOrUndefinedString(component.cycloneDxComponentType)
