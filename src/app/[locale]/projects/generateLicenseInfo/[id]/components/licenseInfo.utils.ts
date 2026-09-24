@@ -7,125 +7,138 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import type { AttachmentUsages, SaveUsagesPayload } from '@/object-types'
+import type { AttachmentUsage, AttachmentUsages } from '@/object-types'
 
 export interface License {
     name: string
     text: string
 }
 
-export function restoreLicenseUsages(attachmentUsages: AttachmentUsages): SaveUsagesPayload {
-    const releasesByAttachment = new Map<string, Set<string>>()
-    for (const release of attachmentUsages._embedded['sw360:release']) {
-        const releaseId = release._links?.self.href.split('/').at(-1) ?? ''
-        for (const attachment of release.attachments ?? []) {
-            if (!attachment.attachmentContentId) continue
-            const releaseIds = releasesByAttachment.get(attachment.attachmentContentId) ?? new Set<string>()
-            releaseIds.add(releaseId)
-            releasesByAttachment.set(attachment.attachmentContentId, releaseIds)
-        }
-    }
+type AttachmentId = string
+type ReleaseId = string
+type ProjectPath = string
+export type UsageType = 'sourcePackage' | 'licenseInfo' | 'manuallySet'
+export type AttachmentKey = [
+    AttachmentId,
+    ReleaseId,
+    ProjectPath,
+    UsageType,
+]
 
-    const selected = new Set<string>()
-    const selectedConcludedUsages = new Set<string>()
-    const deselectedConcludedUsages = new Set<string>()
-    const ignoredLicenses: SaveUsagesPayload['ignoredLicenses'] = {}
+export const isLicenseExcluded = (
+    store: {
+        [key: string]: AttachmentUsage
+    },
+    key: string,
+    license: string,
+): boolean => store[key]?.usageData?.licenseInfo?.excludedLicenseIds.includes(license) ?? false
+
+export const clearExcludedLicenses = (store: Record<string, AttachmentUsage>, key: string): void => {
+    const licenseInfo = store[key]?.usageData?.licenseInfo
+    if (licenseInfo) licenseInfo.excludedLicenseIds = []
+}
+
+export const createStoreFromAttachmentUsages = (
+    attachmentUsages: AttachmentUsages,
+): Record<string, AttachmentUsage> => {
+    const store: Record<string, AttachmentUsage> = {}
+
     for (const usage of attachmentUsages._embedded['sw360:attachmentUsages']) {
-        const licenseInfo = usage.usageData?.licenseInfo
-        if (!licenseInfo) continue
-        const attachmentReleaseIds = releasesByAttachment.get(usage.attachmentContentId) ?? new Set<string>()
-        const releaseIds = usage.owner?.releaseId
-            ? [
-                  ...attachmentReleaseIds,
-              ].filter((releaseId) => releaseId === usage.owner?.releaseId)
-            : attachmentReleaseIds
-        for (const releaseId of releaseIds) {
-            const prefix = `${licenseInfo.projectPath ? `${licenseInfo.projectPath}-` : ''}${releaseId}`
-            const key = `${prefix}_licenseInfo_${usage.attachmentContentId}`
-            selected.add(key)
-            ignoredLicenses[`${prefix}_${usage.attachmentContentId}`] = [
-                ...(licenseInfo.excludedLicenseIds ?? []),
-            ]
-            if (licenseInfo.includeConcludedLicense === true) selectedConcludedUsages.add(key)
-            else if (licenseInfo.includeConcludedLicense === false) deselectedConcludedUsages.add(key)
-        }
+        const releaseId = usage.owner?.releaseId
+        const usageType = (Object.keys(usage.usageData ?? {}) as UsageType[]).find(
+            (type) => usage.usageData?.[type] !== undefined,
+        )
+        if (!releaseId || !usageType) continue
+
+        const projectPath =
+            usageType === 'licenseInfo' ? usage.usageData?.licenseInfo?.projectPath : usage.usedBy?.projectId
+        if (projectPath === undefined) continue
+
+        const key = JSON.stringify([
+            usage.attachmentContentId,
+            releaseId,
+            projectPath,
+            usageType,
+        ])
+        store[key] = usage
     }
-    return {
-        selected: [
-            ...selected,
-        ],
-        deselected: [],
-        selectedConcludedUsages: [
-            ...selectedConcludedUsages,
-        ],
-        deselectedConcludedUsages: [
-            ...deselectedConcludedUsages,
-        ],
-        ignoredLicenses,
-    }
+
+    return store
 }
 
-export function toggleAttachmentUsage(payload: SaveUsagesPayload, key: string): SaveUsagesPayload {
-    const selected = payload.selected.includes(key)
-    const ignoredLicenses = {
-        ...payload.ignoredLicenses,
-    }
-    if (selected) delete ignoredLicenses[key.replace('_licenseInfo_', '_')]
-    return {
-        ...payload,
-        ignoredLicenses,
-        selectedConcludedUsages: selected
-            ? payload.selectedConcludedUsages.filter((value) => value !== key)
-            : payload.selectedConcludedUsages,
-        deselectedConcludedUsages: selected
-            ? payload.deselectedConcludedUsages.filter((value) => value !== key)
-            : payload.deselectedConcludedUsages,
-        selected: selected
-            ? payload.selected.filter((value) => value !== key)
-            : [
-                  ...payload.selected,
-                  key,
-              ],
-        deselected: selected
-            ? [
-                  ...payload.deselected,
-                  key,
-              ]
-            : payload.deselected.filter((value) => value !== key),
-    }
-}
+export const payloadFromStore = (store: Record<string, AttachmentUsage>): AttachmentUsage[] => Object.values(store)
 
-export function toggleLicenseUsage(
-    payload: SaveUsagesPayload,
-    attachmentKey: string,
-    ignoredKey: string,
-    licenseName: string,
-    licenses: License[],
-): SaveUsagesPayload {
-    const attachmentSelected = payload.selected.includes(attachmentKey)
-    const ignored = new Set(payload.ignoredLicenses[ignoredKey] ?? [])
-    if (!attachmentSelected) {
-        ignored.clear()
-        for (const license of licenses) {
-            if (license.name !== licenseName) ignored.add(license.name)
-        }
-    } else if (ignored.has(licenseName)) {
-        ignored.delete(licenseName)
-    } else {
-        ignored.add(licenseName)
+export const applyAttachmentToggle = (
+    store: {
+        [key: string]: AttachmentUsage
+    },
+    key: string,
+) => {
+    const [attachmentId, releaseId, projectPath, _] = JSON.parse(key) as AttachmentKey
+    if (store[key]) {
+        delete store[key]
+        return false
     }
-    const allIgnored = licenses.every((license) => ignored.has(license.name))
-    const nextPayload = attachmentSelected === !allIgnored ? payload : toggleAttachmentUsage(payload, attachmentKey)
-    if (allIgnored) return nextPayload
-    return {
-        ...nextPayload,
-        ignoredLicenses: {
-            ...nextPayload.ignoredLicenses,
-            [ignoredKey]: [
-                ...ignored,
-            ],
+    store[key] = {
+        attachmentContentId: attachmentId,
+        owner: {
+            releaseId: releaseId,
+        },
+        usedBy: {
+            projectId: projectPath.split(':')[0],
+        },
+        usageData: {
+            licenseInfo: {
+                excludedLicenseIds: [],
+                projectPath: projectPath,
+                includeConcludedLicense: false,
+            },
         },
     }
+    return true
+}
+
+// Toggle a specific license in the store, adding it to or removing it from the excludedLicenseIds array.
+// Returns whether the attachment should be selected or not
+export const toggleLicenseInStore = (
+    store: {
+        [key: string]: AttachmentUsage
+    },
+    key: string,
+    license: string,
+    allLicenses: License[],
+) => {
+    const [attachmentId, releaseId, projectPath, _] = JSON.parse(key) as AttachmentKey
+    const usage = store[key]
+    if (usage) {
+        if (!usage.usageData?.licenseInfo) return false
+        const ind = usage.usageData.licenseInfo.excludedLicenseIds.indexOf(license)
+        if (ind >= 0) {
+            usage.usageData.licenseInfo.excludedLicenseIds.splice(ind, 1)
+            return true
+        } else {
+            usage.usageData.licenseInfo.excludedLicenseIds.push(license)
+            if (usage.usageData.licenseInfo.excludedLicenseIds.length === allLicenses.length) return false
+            return true
+        }
+    }
+    store[key] = {
+        attachmentContentId: attachmentId,
+        owner: {
+            releaseId: releaseId,
+        },
+        usedBy: {
+            projectId: projectPath.split(':')[0],
+        },
+        usageData: {
+            licenseInfo: {
+                excludedLicenseIds: allLicenses.filter((l) => l.name !== license).map((l) => l.name),
+                projectPath: projectPath,
+                includeConcludedLicense: false,
+            },
+        },
+    }
+    return true
 }
 
 // One cache per page load, shared across project paths. Only explicitly requested details enter the queue.
