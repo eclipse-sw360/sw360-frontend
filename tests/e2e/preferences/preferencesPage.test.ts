@@ -321,3 +321,54 @@ test.describe('REST API Token', () => {
         })
     })
 })
+
+test.describe('User General Information Write Access Configuration', () => {
+    const openFrontendConfigurations = async (page: Page): Promise<void> => {
+        await navigateToAdminPage(page, adminFixtures.urls.configurations)
+        const frontendTab = page.locator(adminSelectors.configurations.tabFrontend)
+        await expect(frontendTab).toBeVisible()
+        await frontendTab.click()
+
+        const row = page.locator(selectors.userInfoWriteAccess.row)
+        if ((await row.count()) === 0) {
+            const backendTab = page.locator(adminSelectors.configurations.tabBackend)
+            if (await backendTab.count()) {
+                await backendTab.click()
+            }
+            await frontendTab.click()
+        }
+
+        await expect(row).toHaveCount(1, { timeout: 10000 })
+    }
+
+    test.beforeEach(async ({ page }) => {
+        await openFrontendConfigurations(page)
+    })
+
+    test('TC24: should display the User General Information Write Access toggle', async ({ page }) => {
+        await expect(page.locator(selectors.userInfoWriteAccess.row)).toBeVisible()
+    })
+
+    test('TC25: should display the toggle label', async ({ page }) => {
+        await expect(page.locator(selectors.userInfoWriteAccess.label)).toContainText(
+            fixtures.userGeneralInfoWriteAccess.labelText,
+        )
+    })
+
+    test('TC26: should display the toggle checkbox', async ({ page }) => {
+        await expect(page.locator(selectors.userInfoWriteAccess.toggleSwitch)).toBeVisible()
+    })
+
+    test('TC27: should allow toggling the User General Information Write Access', async ({ page }) => {
+        const toggle = page.locator(selectors.userInfoWriteAccess.toggle)
+        const toggleSwitch = page.locator(selectors.userInfoWriteAccess.toggleSwitch)
+
+        await expect(toggle).toHaveCount(1)
+        await expect(toggleSwitch).toBeVisible()
+
+        const initialState = await toggle.isChecked()
+        await toggleSwitch.click()
+        const newState = await toggle.isChecked()
+        expect(newState).not.toBe(initialState)
+    })
+})
