@@ -30,6 +30,7 @@ import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { useDocumentTitle } from '@/hooks'
 import {
     Attachment,
+    AttachmentUsage,
     AttachmentUsages,
     Embedded,
     ErrorDetails,
@@ -38,7 +39,6 @@ import {
     ProjectRelationship,
     Release,
     ReleaseRelationship,
-    SaveUsagesPayload,
     TypedEntity,
     UserGroupType,
 } from '@/object-types'
@@ -47,11 +47,14 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 import {
+    applyAttachmentToggle,
+    clearExcludedLicenses,
+    createStoreFromAttachmentUsages,
+    isLicenseExcluded,
     type License,
     LicenseDetailLoader,
-    restoreLicenseUsages,
-    toggleAttachmentUsage,
-    toggleLicenseUsage,
+    payloadFromStore,
+    toggleLicenseInStore,
 } from './licenseInfo.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -74,7 +77,13 @@ interface ExtendedNestedRows<K> extends NestedRows<K> {
 
 type TypedLicense = TypedEntity<License, 'license'>
 
-const hasCliUsageSet = (release: Release, projectPath: string, selectedUsages: Set<string>): boolean => {
+const hasCliUsageSet = (
+    release: Release,
+    projectPath: string,
+    store: {
+        [key: string]: AttachmentUsage
+    },
+): boolean => {
     const cliAttachments =
         release.attachments?.filter(
             (att) => att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR',
@@ -86,8 +95,14 @@ const hasCliUsageSet = (release: Release, projectPath: string, selectedUsages: S
 
     // Check if ANY CLI attachment has license info usage set
     return cliAttachments.some((att) => {
-        const pathPrefix = projectPath ? `${projectPath}-` : ''
-        return selectedUsages.has(`${pathPrefix}${releaseId}_licenseInfo_${att.attachmentContentId}`)
+        return (
+            JSON.stringify([
+                att.attachmentContentId,
+                releaseId,
+                projectPath,
+                'licenseInfo',
+            ]) in store
+        )
     })
 }
 
@@ -103,7 +118,12 @@ const formatReleaseAttachmentDataToTableData = (
     for (const att of r.attachments ?? []) {
         const relId = r._links?.self.href.split('/').at(-1) ?? ''
         const attachment: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
-            id: `${projectPath.join(':')}-${relId}_${att.attachmentContentId}`,
+            id: JSON.stringify([
+                att.attachmentContentId,
+                relId,
+                projectPath.join(':'),
+                'licenseInfo',
+            ]),
             releaseId: relId,
             node: {
                 entity: att,
@@ -112,7 +132,13 @@ const formatReleaseAttachmentDataToTableData = (
             children: (licenses[`${relId}_${att.attachmentContentId}`] ?? []).map(
                 (lic) =>
                     ({
-                        id: `${projectPath.join(':')}-${relId}_${att.attachmentContentId}_${lic.name}`,
+                        id: JSON.stringify([
+                            att.attachmentContentId,
+                            relId,
+                            projectPath.join(':'),
+                            'licenseInfo',
+                            lic.name,
+                        ]),
                         node: {
                             entity: lic,
                             type: 'license',
@@ -141,7 +167,6 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
     for (const p of project._embedded?.['sw360:linkedProjects'] ?? []) {
         projectPath.push(p._links.self.href.split('/').at(-1) ?? '')
         const nodeProject: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
-            id: projectPath.join(':'),
             node: {
                 type: 'project',
                 entity: p,
@@ -158,7 +183,6 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
         const r = releasesById.get(l.release.split('/').at(-1) ?? '')
         if (r) {
             const nodeRelease: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense> = {
-                id: `${projectPath.join(':')}-${l.release.split('/').at(-1)}`,
                 node: {
                     entity: {
                         ...r,
@@ -275,11 +299,16 @@ function filterApprovedReleases(
 function filterReleasesWithUsage(
     tableData: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[],
     projectPath: string[],
-    selectedUsages: Set<string>,
+    attachmentUsages: {
+        [key: string]: AttachmentUsage
+    },
 ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[] {
     return tableData.reduce<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment | TypedLicense>[]>(
         (rows, row) => {
-            if (row.node.type === 'release' && hasCliUsageSet(row.node.entity, projectPath.join(':'), selectedUsages)) {
+            if (
+                row.node.type === 'release' &&
+                hasCliUsageSet(row.node.entity, projectPath.join(':'), attachmentUsages)
+            ) {
                 return rows
             }
 
@@ -291,7 +320,7 @@ function filterReleasesWithUsage(
                         ...projectPath,
                         projectId,
                     ],
-                    selectedUsages,
+                    attachmentUsages,
                 )
                 if (filteredChildren.length === 0) return rows
                 rows.push({
@@ -349,10 +378,14 @@ const collectAttachmentSelectionKeys = (
             }
 
             if (row.node.type === 'attachment' && releaseId) {
-                const key = `${
-                    !CommonUtils.isNullEmptyOrUndefinedString(row.projectPath) ? `${row.projectPath}-` : ''
-                }${releaseId}_licenseInfo_${row.node.entity.attachmentContentId}`
-                keys.add(key)
+                keys.add(
+                    JSON.stringify([
+                        row.node.entity.attachmentContentId,
+                        releaseId,
+                        row.projectPath,
+                        'licenseInfo',
+                    ]),
+                )
             }
 
             visit(row.children ?? [], releaseId)
@@ -416,20 +449,18 @@ function GenerateLicenseInfo({
     const [project, setProject] = useState<Project>()
     const params = useSearchParams()
     const withSubProjects = params.get('withSubProjects')
-    const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
-        selected: [],
-        deselected: [],
-        selectedConcludedUsages: [],
-        deselectedConcludedUsages: [],
-        ignoredLicenses: {},
-    })
-    const selectedUsages = useMemo(
-        () => new Set(saveUsagesPayload.selected),
-        [
-            saveUsagesPayload.selected,
-        ],
-    )
+
+    const storeRef = useRef<{
+        [key: string]: AttachmentUsage
+    }>({})
+
+    const attachmentInputRefs = useRef(new Map<string, HTMLInputElement>())
+    const licenseInputRefs = useRef(new Map<string, Map<string, HTMLInputElement>>())
+    const selectAllRef = useRef<HTMLInputElement | null>(null)
+    const attachmentSelectionKeysRef = useRef<string[]>([])
+
     const [show, setShow] = useState(false)
+    const [downloadPayload, setDownloadPayload] = useState<AttachmentUsage[]>([])
     const [hideWithUsage, setHideWithUsage] = useState(false)
     const [key, setKey] = useState<string>('show_all')
     const [showConfirmation, setShowConfirmation] = useState(false)
@@ -493,23 +524,24 @@ function GenerateLicenseInfo({
             sort,
         ],
     )
+    // `hideWithUsage` reads a snapshot of the ref store at the time the tab/filter changes rather
+    // than reacting to every checkbox click (which would defeat the point of the ref-based store).
     const data = useMemo(() => {
         const approved = key === 'only_approved' ? filterApprovedReleases(tableData) : tableData
         return hideWithUsage
             ? filterReleasesWithUsage(
-                  approved,
-                  [
-                      projectId,
-                  ],
-                  selectedUsages,
-              )
+                approved,
+                [
+                    projectId,
+                ],
+                storeRef.current,
+            )
             : approved
     }, [
         tableData,
         key,
         hideWithUsage,
         projectId,
-        selectedUsages,
     ])
 
     useDocumentTitle(project?.name ? CommonUtils.formatDocumentTitle(project.name, project.version) : undefined)
@@ -547,51 +579,112 @@ function GenerateLicenseInfo({
             data,
         ],
     )
+    attachmentSelectionKeysRef.current = attachmentSelectionKeys
 
-    const areAllAttachmentsSelected =
-        attachmentSelectionKeys.length > 0 &&
-        attachmentSelectionKeys.every((key) => saveUsagesPayload.selected.indexOf(key) !== -1)
+    // Recomputes and imperatively applies the header checkbox's checked/indeterminate state.
+    const updateSelectAllHeader = useCallback(() => {
+        const el = selectAllRef.current
+        if (!el) return
+        const keys = attachmentSelectionKeysRef.current
+        if (keys.length === 0) {
+            el.checked = false
+            el.indeterminate = false
+            return
+        }
+        const selectedCount = keys.reduce((acc, k) => acc + (k in storeRef.current ? 1 : 0), 0)
+        el.checked = selectedCount === keys.length
+        el.indeterminate = selectedCount > 0 && selectedCount < keys.length
+    }, [])
 
-    const toggleAllAttachments = (checked: boolean) => {
-        const keySet = new Set(attachmentSelectionKeys)
+    // Recompute the header checkbox whenever the visible dataset changes (tab/filter/sort),
+    // since defaultChecked on the (uncontrolled) input only applies on first mount.
+    useEffect(() => {
+        updateSelectAllHeader()
+    }, [
+        data,
+        updateSelectAllHeader,
+    ])
 
-        setSaveUsagesPayload((prev) => {
-            const ignoredLicenses = {
-                ...(prev.ignoredLicenses ?? {}),
-            }
-
-            for (const key of attachmentSelectionKeys) {
-                const ignoredKey = key.replace('_licenseInfo_', '_')
-                delete ignoredLicenses[ignoredKey]
-            }
-
-            if (checked) {
-                const selectedSet = new Set(prev.selected)
-                for (const key of attachmentSelectionKeys) {
-                    selectedSet.add(key)
+    const handleToggleAllAttachments = useCallback(
+        (checked: boolean) => {
+            const store = storeRef.current
+            for (const key of attachmentSelectionKeysRef.current) {
+                if (checked) {
+                    if (!(key in store)) applyAttachmentToggle(store, key)
+                    else clearExcludedLicenses(store, key)
+                } else {
+                    if (key in store) applyAttachmentToggle(store, key)
                 }
-
-                return {
-                    ...prev,
-                    selected: Array.from(selectedSet),
-                    deselected: prev.deselected.filter((item) => !keySet.has(item)),
-                    ignoredLicenses,
+                const attEl = attachmentInputRefs.current.get(key)
+                if (attEl) attEl.checked = checked
+                const licenseMap = licenseInputRefs.current.get(key)
+                if (licenseMap) {
+                    for (const el of licenseMap.values()) el.checked = checked
                 }
             }
+            updateSelectAllHeader()
+        },
+        [
+            updateSelectAllHeader,
+        ],
+    )
 
-            const deselectedSet = new Set(prev.deselected)
-            for (const key of attachmentSelectionKeys) {
-                deselectedSet.add(key)
+    const handleToggleAttachment = useCallback(
+        (key: string) => {
+            const store = storeRef.current
+            const nowSelected = applyAttachmentToggle(store, key)
+            const licenseMap = licenseInputRefs.current.get(key)
+            if (licenseMap) {
+                for (const [name, el] of licenseMap) {
+                    el.checked = nowSelected && !isLicenseExcluded(store, key, name)
+                }
             }
+            updateSelectAllHeader()
+        },
+        [
+            updateSelectAllHeader,
+        ],
+    )
 
-            return {
-                ...prev,
-                selected: prev.selected.filter((item) => !keySet.has(item)),
-                deselected: Array.from(deselectedSet),
-                ignoredLicenses,
+    const handleToggleLicense = useCallback(
+        (attKey: string, licenseName: string, siblingLicenses: License[]) => {
+            const store = storeRef.current
+            const attachmentSelectedBefore = attKey in store
+            const attachmentSelectedAfter = toggleLicenseInStore(store, attKey, licenseName, siblingLicenses)
+
+            const attEl = attachmentInputRefs.current.get(attKey)
+            if (attEl) attEl.checked = attachmentSelectedAfter
+            if (attachmentSelectedAfter !== attachmentSelectedBefore) updateSelectAllHeader()
+        },
+        [
+            updateSelectAllHeader,
+        ],
+    )
+
+    const registerAttachmentInput = useCallback(
+        (key: string) => (el: HTMLInputElement | null) => {
+            if (el) attachmentInputRefs.current.set(key, el)
+            else attachmentInputRefs.current.delete(key)
+        },
+        [],
+    )
+
+    const registerLicenseInput = useCallback(
+        (attKey: string, licenseName: string) => (el: HTMLInputElement | null) => {
+            let licenseMap = licenseInputRefs.current.get(attKey)
+            if (el) {
+                if (!licenseMap) {
+                    licenseMap = new Map()
+                    licenseInputRefs.current.set(attKey, licenseMap)
+                }
+                licenseMap.set(licenseName, el)
+            } else if (licenseMap) {
+                licenseMap.delete(licenseName)
+                if (licenseMap.size === 0) licenseInputRefs.current.delete(attKey)
             }
-        })
-    }
+        },
+        [],
+    )
 
     const columns = useMemo<
         ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject | TypedLicense>>[]
@@ -602,23 +695,18 @@ function GenerateLicenseInfo({
                 header: () => (
                     <input
                         id='project_clearing_report_select_all_attachments'
+                        ref={selectAllRef}
                         type='checkbox'
                         className='form-check-input'
-                        checked={areAllAttachmentsSelected}
-                        onChange={(event) => toggleAllAttachments(event.target.checked)}
+                        defaultChecked={false}
+                        onChange={(event) => handleToggleAllAttachments(event.target.checked)}
                         disabled={attachmentSelectionKeys.length === 0}
                         aria-label='Select all attachments'
                     />
                 ),
                 cell: ({ row }) => {
                     if (row.original.node.type === 'attachment') {
-                        const { attachmentContentId } = row.original.node.entity
-                        const r = row.getParentRow()?.original.node.entity as Release
-                        const key = `${
-                            !CommonUtils.isNullEmptyOrUndefinedString(row.original.projectPath)
-                                ? `${row.original.projectPath}-`
-                                : ''
-                        }${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${attachmentContentId}`
+                        const key = row.original.id ?? ''
                         return (
                             <div
                                 className={
@@ -630,61 +718,42 @@ function GenerateLicenseInfo({
                                 <input
                                     type='checkbox'
                                     className='form-check-input'
-                                    checked={selectedUsages.has(key)}
-                                    onChange={() => {
-                                        setSaveUsagesPayload((previous) => toggleAttachmentUsage(previous, key))
-                                    }}
+                                    ref={registerAttachmentInput(key)}
+                                    defaultChecked={key in storeRef.current}
+                                    onChange={() => handleToggleAttachment(key)}
                                 />
                             </div>
                         )
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             ></div>
                         )
                     } else if (row.original.node.type === 'license') {
+                        const attachmentKey = row.getParentRow()?.original.id ?? ''
                         const lic = row.original.node.entity as License
-                        const r = row.getParentRow()?.getParentRow()?.original.node.entity as Release
-                        const att = row.getParentRow()?.original.node.entity as Attachment
-
-                        const key = `${
-                            !CommonUtils.isNullEmptyOrUndefinedString(row.original.projectPath)
-                                ? `${row.original.projectPath}-`
-                                : ''
-                        }${r._links?.self.href.split('/').at(-1) ?? ''}_${att.attachmentContentId ?? ''}`
-
-                        const att_key = `${
-                            !CommonUtils.isNullEmptyOrUndefinedString(row.original.projectPath)
-                                ? `${row.original.projectPath}-`
-                                : ''
-                        }${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId ?? ''}`
-
-                        const checked =
-                            (saveUsagesPayload.ignoredLicenses?.[key] ?? []).indexOf(lic.name) === -1 &&
-                            selectedUsages.has(att_key)
                         return (
                             <input
                                 type='checkbox'
                                 className='form-check-input'
-                                checked={checked}
-                                onChange={() => {
-                                    setSaveUsagesPayload((previous) =>
-                                        toggleLicenseUsage(
-                                            previous,
-                                            att_key,
-                                            key,
-                                            lic.name,
-                                            (row.getParentRow()?.original.children ?? []).map(
-                                                (child) => child.node.entity as License,
-                                            ),
+                                ref={registerLicenseInput(attachmentKey, lic.name)}
+                                defaultChecked={
+                                    attachmentKey in storeRef.current &&
+                                    !isLicenseExcluded(storeRef.current, attachmentKey, lic.name)
+                                }
+                                onChange={() =>
+                                    handleToggleLicense(
+                                        attachmentKey,
+                                        lic.name,
+                                        (row.getParentRow()?.original.children ?? []).map(
+                                            (child) => child.node.entity as License,
                                         ),
                                     )
-                                }}
+                                }
                             />
                         )
                     }
@@ -714,9 +783,8 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'
+                                    }`}
                             >
                                 <PaddedCell row={row}>
                                     <div className='text-center'>{row.depth + 1}</div>
@@ -752,12 +820,11 @@ function GenerateLicenseInfo({
                         const detailKey = `${releaseId}_${attachmentId}`
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                    ?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 {row.original.node.entity.filename}
                                 {row.getIsExpanded() && detailErrors.has(detailKey) ? (
@@ -782,11 +849,10 @@ function GenerateLicenseInfo({
                         const { name, version } = row.original.node.entity
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 <Link
                                     className='text-link'
@@ -820,11 +886,10 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 {row.original.node.entity.componentType ?? ''}
                             </div>
@@ -835,19 +900,18 @@ function GenerateLicenseInfo({
                         const att = row.original.node.entity
                         return (
                             <p
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                    ?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 {att.attachmentUsageCount === undefined || att.attachmentUsageCount === 0
                                     ? t('not used in any project yet')
                                     : t.rich('USED_BY ATTACHMENTS', {
-                                          num: att.attachmentUsageCount,
-                                          strong: (chunks) => <b>{chunks}</b>,
-                                      })}
+                                        num: att.attachmentUsageCount,
+                                        strong: (chunks) => <b>{chunks}</b>,
+                                    })}
                             </p>
                         )
                     } else {
@@ -866,11 +930,10 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
@@ -884,12 +947,11 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                    ?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 {CommonUtils.Capitalize(row.original.node.entity.checkStatus ?? '')}
                             </div>
@@ -907,12 +969,11 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                    ?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 {row.original.node.entity.createdBy}
                             </div>
@@ -920,11 +981,10 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             ></div>
                         )
                     }
@@ -940,12 +1000,11 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${
-                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                        ?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                    ?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             >
                                 {row.original.node.entity.checkedTeam}
                             </div>
@@ -953,11 +1012,10 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${
-                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
-                                        ? 'orange-cell'
-                                        : 'green-cell'
-                                }`}
+                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
+                                    ? 'orange-cell'
+                                    : 'green-cell'
+                                    }`}
                             ></div>
                         )
                     }
@@ -969,13 +1027,15 @@ function GenerateLicenseInfo({
         ],
         [
             t,
-            saveUsagesPayload,
-            areAllAttachmentsSelected,
             attachmentSelectionKeys,
-            selectedUsages,
-            licenses,
             detailErrors,
+            licenses,
             loadLicenses,
+            handleToggleAllAttachments,
+            handleToggleAttachment,
+            handleToggleLicense,
+            registerAttachmentInput,
+            registerLicenseInput,
         ],
     )
 
@@ -1097,6 +1157,9 @@ function GenerateLicenseInfo({
         setShowProcessing(true)
         setMetadataLoaded(false)
         setAttachmentUsages(undefined)
+        storeRef.current = {}
+        attachmentInputRefs.current.clear()
+        licenseInputRefs.current.clear()
 
         void (async () => {
             try {
@@ -1142,10 +1205,10 @@ function GenerateLicenseInfo({
                         ? ((await responses[2].json()) as LinkedProjects)['_embedded']['sw360:projects']
                         : ([] as Project[])
                 if (signal.aborted) return
+                storeRef.current = createStoreFromAttachmentUsages(attachmentUsages)
                 setProject(proj)
                 setAttachmentUsages(attachmentUsages)
                 setLinkedProjects(linkedProjects)
-                setSaveUsagesPayload(restoreLicenseUsages(attachmentUsages))
                 setMetadataLoaded(true)
             } catch (error) {
                 if (!signal.aborted) ApiUtils.reportError(error)
@@ -1167,7 +1230,7 @@ function GenerateLicenseInfo({
             <DownloadLicenseInfoModal
                 show={show}
                 setShow={setShow}
-                saveUsagesPayload={saveUsagesPayload}
+                attachmentUsages={downloadPayload}
                 setShowConfirmation={setShowConfirmation}
                 projectId={projectId}
                 isCalledFromProjectLicenseTab={isCalledFromProjectLicenseTab}
@@ -1207,7 +1270,10 @@ function GenerateLicenseInfo({
                                                 variant='primary'
                                                 className='me-2 py-2 col-auto'
                                                 disabled={!metadataLoaded || showProcessing}
-                                                onClick={() => setShow(true)}
+                                                onClick={() => {
+                                                    setDownloadPayload(payloadFromStore(storeRef.current))
+                                                    setShow(true)
+                                                }}
                                             >
                                                 {t('Download')}{' '}
                                             </Button>
@@ -1235,48 +1301,26 @@ function GenerateLicenseInfo({
                                         </Nav.Item>
                                     </Nav>
                                 </div>
-                                <div
-                                    className='subscriptionBox my-2'
-                                    style={{
-                                        maxWidth: '98vw',
-                                        textAlign: 'left',
-                                        fontSize: '15px',
-                                    }}
-                                >
+                                <div className='subscriptionBox subscriptionBox-wide my-2'>
+                                    {(CommonUtils.isNullOrUndefined(attachmentUsages) ||
+                                        Object.keys(attachmentUsages).length === 0) ??
+                                        `${t('No previous selection found')}.`}
                                     {t(
-                                        'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
+                                        'If you have writing permissions to this project your selection will be stored automatically when downloading',
                                     )}
                                 </div>
-                                <Tab.Content className='mt-3'>
-                                    <Tab.Pane eventKey='show_all'>
-                                        <div className='mb-3'>
-                                            {table ? (
-                                                <SW360Table
-                                                    table={table}
-                                                    showProcessing={showProcessing}
-                                                />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
-                                            )}
+                                <div className='mb-3 mt-3'>
+                                    {table ? (
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                    ) : (
+                                        <div className='col-12 mt-1 text-center'>
+                                            <Spinner className='spinner' />
                                         </div>
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='only_approved'>
-                                        <div className='mb-3'>
-                                            {table ? (
-                                                <SW360Table
-                                                    table={table}
-                                                    showProcessing={showProcessing}
-                                                />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </Tab.Pane>
-                                </Tab.Content>
+                                    )}
+                                </div>
                             </Tab.Container>
                         ) : (
                             <div className='col-12 text-center'>
