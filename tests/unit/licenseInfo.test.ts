@@ -9,11 +9,13 @@
 
 import { expect, test } from '@playwright/test'
 import {
+    applyAttachmentToggle,
     type License,
     LicenseDetailLoader,
+    payloadFromStore,
     restoreLicenseUsages,
-    toggleAttachmentUsage,
-    toggleLicenseUsage,
+    storeFromPayload,
+    toggleLicenseInStore,
 } from '../../src/app/[locale]/projects/generateLicenseInfo/[id]/components/licenseInfo.utils'
 import type { AttachmentUsage, AttachmentUsages } from '../../src/object-types/AttachmentUsages'
 
@@ -153,19 +155,26 @@ test('attachment selection does not erase exclusions or concluded settings in un
             savedUsage('root:unopened', true),
         ]),
     )
+    const store = storeFromPayload(payload)
     const key = 'root:left-release_licenseInfo_attachment'
-    const deselected = toggleAttachmentUsage(payload, key)
-    expect(deselected.selected).toEqual([
-        'root:right-release_licenseInfo_attachment',
-        'root:unopened-release_licenseInfo_attachment',
-    ])
-    expect(deselected.deselected).toEqual([
-        key,
-    ])
-    const reselected = toggleAttachmentUsage(deselected, key)
+    const deselectedNowSelected = applyAttachmentToggle(store, key)
+    expect(deselectedNowSelected).toBe(false)
+    const deselected = payloadFromStore(store)
+    expect(deselected.selected).toEqual(
+        expect.arrayContaining([
+            'root:right-release_licenseInfo_attachment',
+            'root:unopened-release_licenseInfo_attachment',
+        ]),
+    )
+    expect(deselected.selected).not.toContain(key)
+    expect(deselected.deselected).toContain(key)
     expect(deselected.ignoredLicenses).not.toHaveProperty('root:left-release_attachment')
     expect(deselected.selectedConcludedUsages).not.toContain(key)
     expect(deselected.deselectedConcludedUsages).not.toContain(key)
+
+    const reselectedNowSelected = applyAttachmentToggle(store, key)
+    expect(reselectedNowSelected).toBe(true)
+    const reselected = payloadFromStore(store)
     expect(reselected.ignoredLicenses).toEqual({
         'root:right-release_attachment': [
             'MIT',
@@ -182,12 +191,16 @@ test('attachment selection does not erase exclusions or concluded settings in un
     expect(payload.ignoredLicenses['root:left-release_attachment']).toEqual([
         'MIT',
     ])
-    const deselectedFalseUsage = toggleAttachmentUsage(payload, 'root:right-release_licenseInfo_attachment')
+
+    const otherKey = 'root:right-release_licenseInfo_attachment'
+    const freshStore = storeFromPayload(payload)
+    applyAttachmentToggle(freshStore, otherKey)
+    const deselectedFalseUsage = payloadFromStore(freshStore)
     expect(deselectedFalseUsage.deselectedConcludedUsages).toEqual([])
     expect(deselectedFalseUsage.selectedConcludedUsages).toEqual(payload.selectedConcludedUsages)
 })
 
-test('license selection is immutable, path-specific, and handles all licenses deselected', () => {
+test('license selection is immutable-per-call on the store, path-specific, and handles all licenses deselected', () => {
     const payload = restoreLicenseUsages(
         attachmentUsages([
             savedUsage('root:left', true, [
@@ -197,14 +210,21 @@ test('license selection is immutable, path-specific, and handles all licenses de
             savedUsage('root:right', false),
         ]),
     )
+    const store = storeFromPayload(payload)
     const attachmentKey = 'root:left-release_licenseInfo_attachment'
     const ignoredKey = 'root:left-release_attachment'
-    const deselected = toggleLicenseUsage(payload, attachmentKey, ignoredKey, 'Apache-2.0', licenses)
+
+    const deselectedNowSelected = toggleLicenseInStore(store, attachmentKey, ignoredKey, 'Apache-2.0', licenses)
+    expect(deselectedNowSelected).toBe(false)
+    const deselected = payloadFromStore(store)
     expect(deselected.selected).not.toContain(attachmentKey)
     expect(deselected.deselected).toContain(attachmentKey)
     expect(deselected.selectedConcludedUsages).not.toContain(attachmentKey)
     expect(deselected.ignoredLicenses).not.toHaveProperty(ignoredKey)
-    const selected = toggleLicenseUsage(deselected, attachmentKey, ignoredKey, 'MIT', licenses)
+
+    const selectedNowSelected = toggleLicenseInStore(store, attachmentKey, ignoredKey, 'MIT', licenses)
+    expect(selectedNowSelected).toBe(true)
+    const selected = payloadFromStore(store)
     expect(selected.selected).toContain(attachmentKey)
     expect(selected.deselected).not.toContain(attachmentKey)
     expect(selected.ignoredLicenses[ignoredKey]).toEqual([
