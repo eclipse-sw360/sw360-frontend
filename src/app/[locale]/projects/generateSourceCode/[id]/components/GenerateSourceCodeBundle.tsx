@@ -685,8 +685,11 @@ function GenerateSourceCodeBundle({
                                 fontSize: '15px',
                             }}
                         >
+                            {(CommonUtils.isNullOrUndefined(attachmentUsages) ||
+                                Object.keys(attachmentUsages).length === 0) ??
+                                `${t('No previous selection found')}.`}
                             {t(
-                                'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
+                                'If you have writing permissions to this project your selection will be stored automatically when downloading',
                             )}
                         </div>
                         <div className='mb-3'>
