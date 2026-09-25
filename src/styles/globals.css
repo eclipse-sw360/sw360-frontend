@@ -724,6 +724,12 @@ body {
     border-radius: 5px;
 }
 
+.subscriptionBox-wide {
+    max-width: 98vw;
+    text-align: left;
+    font-size: 15px;
+}
+
 .list-group-item-action:hover {
     border-color: #dbdce4 !important;
     color: #6b6c7e !important;

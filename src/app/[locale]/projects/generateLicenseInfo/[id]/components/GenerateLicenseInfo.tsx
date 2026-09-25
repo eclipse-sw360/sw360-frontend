@@ -45,11 +45,15 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 import {
+    applyAttachmentToggle,
+    createEmptyStore,
     type License,
     LicenseDetailLoader,
+    payloadFromStore,
     restoreLicenseUsages,
-    toggleAttachmentUsage,
-    toggleLicenseUsage,
+    type SelectionStore,
+    storeFromPayload,
+    toggleLicenseInStore,
 } from './licenseInfo.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -411,20 +415,22 @@ function GenerateLicenseInfo({
     const [project, setProject] = useState<Project>()
     const params = useSearchParams()
     const withSubProjects = params.get('withSubProjects')
-    const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
+
+    const storeRef = useRef<SelectionStore>(createEmptyStore())
+
+    const attachmentInputRefs = useRef(new Map<string, HTMLInputElement>())
+    const licenseInputRefs = useRef(new Map<string, Map<string, HTMLInputElement>>())
+    const selectAllRef = useRef<HTMLInputElement | null>(null)
+    const attachmentSelectionKeysRef = useRef<string[]>([])
+
+    const [show, setShow] = useState(false)
+    const [downloadPayload, setDownloadPayload] = useState<SaveUsagesPayload>({
         selected: [],
         deselected: [],
         selectedConcludedUsages: [],
         deselectedConcludedUsages: [],
         ignoredLicenses: {},
     })
-    const selectedUsages = useMemo(
-        () => new Set(saveUsagesPayload.selected),
-        [
-            saveUsagesPayload.selected,
-        ],
-    )
-    const [show, setShow] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
     const [key, setKey] = useState<string>('show_all')
     const [showConfirmation, setShowConfirmation] = useState(false)
@@ -488,6 +494,8 @@ function GenerateLicenseInfo({
             sort,
         ],
     )
+    // `hideWithUsage` reads a snapshot of the ref store at the time the tab/filter changes rather
+    // than reacting to every checkbox click (which would defeat the point of the ref-based store).
     const data = useMemo(() => {
         const approved = key === 'only_approved' ? filterApprovedReleases(tableData) : tableData
         return hideWithUsage
@@ -496,7 +504,7 @@ function GenerateLicenseInfo({
                   [
                       projectId,
                   ],
-                  selectedUsages,
+                  storeRef.current.selected,
               )
             : approved
     }, [
@@ -504,7 +512,6 @@ function GenerateLicenseInfo({
         key,
         hideWithUsage,
         projectId,
-        selectedUsages,
     ])
 
     useDocumentTitle(project?.name ? CommonUtils.formatDocumentTitle(project.name, project.version) : undefined)
@@ -542,51 +549,126 @@ function GenerateLicenseInfo({
             data,
         ],
     )
+    attachmentSelectionKeysRef.current = attachmentSelectionKeys
 
-    const areAllAttachmentsSelected =
-        attachmentSelectionKeys.length > 0 &&
-        attachmentSelectionKeys.every((key) => saveUsagesPayload.selected.indexOf(key) !== -1)
+    // Recomputes and imperatively applies the header checkbox's checked/indeterminate state.
+    const updateSelectAllHeader = useCallback(() => {
+        const el = selectAllRef.current
+        if (!el) return
+        const keys = attachmentSelectionKeysRef.current
+        if (keys.length === 0) {
+            el.checked = false
+            el.indeterminate = false
+            return
+        }
+        const selectedCount = keys.reduce((acc, k) => acc + (storeRef.current.selected.has(k) ? 1 : 0), 0)
+        el.checked = selectedCount === keys.length
+        el.indeterminate = selectedCount > 0 && selectedCount < keys.length
+    }, [])
 
-    const toggleAllAttachments = (checked: boolean) => {
-        const keySet = new Set(attachmentSelectionKeys)
+    // Recompute the header checkbox whenever the visible dataset changes (tab/filter/sort),
+    // since defaultChecked on the (uncontrolled) input only applies on first mount.
+    useEffect(() => {
+        updateSelectAllHeader()
+    }, [
+        data,
+        updateSelectAllHeader,
+    ])
 
-        setSaveUsagesPayload((prev) => {
-            const ignoredLicenses = {
-                ...(prev.ignoredLicenses ?? {}),
-            }
-
-            for (const key of attachmentSelectionKeys) {
+    const handleToggleAllAttachments = useCallback(
+        (checked: boolean) => {
+            const store = storeRef.current
+            for (const key of attachmentSelectionKeysRef.current) {
                 const ignoredKey = key.replace('_licenseInfo_', '_')
-                delete ignoredLicenses[ignoredKey]
-            }
-
-            if (checked) {
-                const selectedSet = new Set(prev.selected)
-                for (const key of attachmentSelectionKeys) {
-                    selectedSet.add(key)
+                store.ignoredLicenses.delete(ignoredKey)
+                if (checked) {
+                    store.selected.add(key)
+                    store.deselected.delete(key)
+                } else {
+                    store.selected.delete(key)
+                    store.deselected.add(key)
+                    store.selectedConcludedUsages.delete(key)
+                    store.deselectedConcludedUsages.delete(key)
                 }
-
-                return {
-                    ...prev,
-                    selected: Array.from(selectedSet),
-                    deselected: prev.deselected.filter((item) => !keySet.has(item)),
-                    ignoredLicenses,
+                const attEl = attachmentInputRefs.current.get(key)
+                if (attEl) attEl.checked = checked
+                const licenseMap = licenseInputRefs.current.get(key)
+                if (licenseMap) {
+                    for (const el of licenseMap.values()) el.checked = checked
                 }
             }
+            updateSelectAllHeader()
+        },
+        [
+            updateSelectAllHeader,
+        ],
+    )
 
-            const deselectedSet = new Set(prev.deselected)
-            for (const key of attachmentSelectionKeys) {
-                deselectedSet.add(key)
+    const handleToggleAttachment = useCallback(
+        (key: string) => {
+            const store = storeRef.current
+            const nowSelected = applyAttachmentToggle(store, key)
+            const licenseMap = licenseInputRefs.current.get(key)
+            if (licenseMap) {
+                const ignoredKey = key.replace('_licenseInfo_', '_')
+                const ignoredSet = store.ignoredLicenses.get(ignoredKey)
+                for (const [name, el] of licenseMap) {
+                    el.checked = nowSelected && !(ignoredSet?.has(name) ?? false)
+                }
             }
+            updateSelectAllHeader()
+        },
+        [
+            updateSelectAllHeader,
+        ],
+    )
 
-            return {
-                ...prev,
-                selected: prev.selected.filter((item) => !keySet.has(item)),
-                deselected: Array.from(deselectedSet),
-                ignoredLicenses,
+    const handleToggleLicense = useCallback(
+        (attKey: string, ignoredKey: string, licenseName: string, siblingLicenses: License[]) => {
+            const store = storeRef.current
+            const attachmentSelectedBefore = store.selected.has(attKey)
+            const attachmentSelectedAfter = toggleLicenseInStore(
+                store,
+                attKey,
+                ignoredKey,
+                licenseName,
+                siblingLicenses,
+            )
+
+            const attEl = attachmentInputRefs.current.get(attKey)
+            if (attEl) attEl.checked = attachmentSelectedAfter
+
+            if (attachmentSelectedAfter !== attachmentSelectedBefore) updateSelectAllHeader()
+        },
+        [
+            updateSelectAllHeader,
+        ],
+    )
+
+    const registerAttachmentInput = useCallback(
+        (key: string) => (el: HTMLInputElement | null) => {
+            if (el) attachmentInputRefs.current.set(key, el)
+            else attachmentInputRefs.current.delete(key)
+        },
+        [],
+    )
+
+    const registerLicenseInput = useCallback(
+        (attKey: string, licenseName: string) => (el: HTMLInputElement | null) => {
+            let licenseMap = licenseInputRefs.current.get(attKey)
+            if (el) {
+                if (!licenseMap) {
+                    licenseMap = new Map()
+                    licenseInputRefs.current.set(attKey, licenseMap)
+                }
+                licenseMap.set(licenseName, el)
+            } else if (licenseMap) {
+                licenseMap.delete(licenseName)
+                if (licenseMap.size === 0) licenseInputRefs.current.delete(attKey)
             }
-        })
-    }
+        },
+        [],
+    )
 
     const columns = useMemo<
         ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject | TypedLicense>>[]
@@ -597,10 +679,11 @@ function GenerateLicenseInfo({
                 header: () => (
                     <input
                         id='project_clearing_report_select_all_attachments'
+                        ref={selectAllRef}
                         type='checkbox'
                         className='form-check-input'
-                        checked={areAllAttachmentsSelected}
-                        onChange={(event) => toggleAllAttachments(event.target.checked)}
+                        defaultChecked={false}
+                        onChange={(event) => handleToggleAllAttachments(event.target.checked)}
                         disabled={attachmentSelectionKeys.length === 0}
                         aria-label='Select all attachments'
                     />
@@ -625,10 +708,9 @@ function GenerateLicenseInfo({
                                 <input
                                     type='checkbox'
                                     className='form-check-input'
-                                    checked={selectedUsages.has(key)}
-                                    onChange={() => {
-                                        setSaveUsagesPayload((previous) => toggleAttachmentUsage(previous, key))
-                                    }}
+                                    ref={registerAttachmentInput(key)}
+                                    defaultChecked={storeRef.current.selected.has(key)}
+                                    onChange={() => handleToggleAttachment(key)}
                                 />
                             </div>
                         )
@@ -659,27 +741,25 @@ function GenerateLicenseInfo({
                                 : ''
                         }${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId ?? ''}`
 
-                        const checked =
-                            (saveUsagesPayload.ignoredLicenses?.[key] ?? []).indexOf(lic.name) === -1 &&
-                            selectedUsages.has(att_key)
+                        const ignoredForKey = storeRef.current.ignoredLicenses.get(key)
+                        const defaultChecked =
+                            !(ignoredForKey?.has(lic.name) ?? false) && storeRef.current.selected.has(att_key)
                         return (
                             <input
                                 type='checkbox'
                                 className='form-check-input'
-                                checked={checked}
-                                onChange={() => {
-                                    setSaveUsagesPayload((previous) =>
-                                        toggleLicenseUsage(
-                                            previous,
-                                            att_key,
-                                            key,
-                                            lic.name,
-                                            (row.getParentRow()?.original.children ?? []).map(
-                                                (child) => child.node.entity as License,
-                                            ),
+                                ref={registerLicenseInput(att_key, lic.name)}
+                                defaultChecked={defaultChecked}
+                                onChange={() =>
+                                    handleToggleLicense(
+                                        att_key,
+                                        key,
+                                        lic.name,
+                                        (row.getParentRow()?.original.children ?? []).map(
+                                            (child) => child.node.entity as License,
                                         ),
                                     )
-                                }}
+                                }
                             />
                         )
                     }
@@ -964,13 +1044,15 @@ function GenerateLicenseInfo({
         ],
         [
             t,
-            saveUsagesPayload,
-            areAllAttachmentsSelected,
             attachmentSelectionKeys,
-            selectedUsages,
-            licenses,
             detailErrors,
+            licenses,
             loadLicenses,
+            handleToggleAllAttachments,
+            handleToggleAttachment,
+            handleToggleLicense,
+            registerAttachmentInput,
+            registerLicenseInput,
         ],
     )
 
@@ -1092,6 +1174,9 @@ function GenerateLicenseInfo({
         setShowProcessing(true)
         setMetadataLoaded(false)
         setAttachmentUsages(undefined)
+        storeRef.current = createEmptyStore()
+        attachmentInputRefs.current.clear()
+        licenseInputRefs.current.clear()
 
         void (async () => {
             try {
@@ -1137,10 +1222,10 @@ function GenerateLicenseInfo({
                         ? ((await responses[2].json()) as LinkedProjects)['_embedded']['sw360:projects']
                         : ([] as Project[])
                 if (signal.aborted) return
+                storeRef.current = storeFromPayload(restoreLicenseUsages(attachmentUsages))
                 setProject(proj)
                 setAttachmentUsages(attachmentUsages)
                 setLinkedProjects(linkedProjects)
-                setSaveUsagesPayload(restoreLicenseUsages(attachmentUsages))
                 setMetadataLoaded(true)
             } catch (error) {
                 if (!signal.aborted) ApiUtils.reportError(error)
@@ -1162,7 +1247,7 @@ function GenerateLicenseInfo({
             <DownloadLicenseInfoModal
                 show={show}
                 setShow={setShow}
-                saveUsagesPayload={saveUsagesPayload}
+                saveUsagesPayload={downloadPayload}
                 setShowConfirmation={setShowConfirmation}
                 projectId={projectId}
                 isCalledFromProjectLicenseTab={isCalledFromProjectLicenseTab}
@@ -1202,7 +1287,10 @@ function GenerateLicenseInfo({
                                                 variant='primary'
                                                 className='me-2 py-2 col-auto'
                                                 disabled={!metadataLoaded || showProcessing}
-                                                onClick={() => setShow(true)}
+                                                onClick={() => {
+                                                    setDownloadPayload(payloadFromStore(storeRef.current))
+                                                    setShow(true)
+                                                }}
                                             >
                                                 {t('Download')}{' '}
                                             </Button>
@@ -1230,48 +1318,23 @@ function GenerateLicenseInfo({
                                         </Nav.Item>
                                     </Nav>
                                 </div>
-                                <div
-                                    className='subscriptionBox my-2'
-                                    style={{
-                                        maxWidth: '98vw',
-                                        textAlign: 'left',
-                                        fontSize: '15px',
-                                    }}
-                                >
+                                <div className='subscriptionBox subscriptionBox-wide my-2'>
                                     {t(
                                         'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
                                     )}
                                 </div>
-                                <Tab.Content className='mt-3'>
-                                    <Tab.Pane eventKey='show_all'>
-                                        <div className='mb-3'>
-                                            {table ? (
-                                                <SW360Table
-                                                    table={table}
-                                                    showProcessing={showProcessing}
-                                                />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
-                                            )}
+                                <div className='mb-3 mt-3'>
+                                    {table ? (
+                                        <SW360Table
+                                            table={table}
+                                            showProcessing={showProcessing}
+                                        />
+                                    ) : (
+                                        <div className='col-12 mt-1 text-center'>
+                                            <Spinner className='spinner' />
                                         </div>
-                                    </Tab.Pane>
-                                    <Tab.Pane eventKey='only_approved'>
-                                        <div className='mb-3'>
-                                            {table ? (
-                                                <SW360Table
-                                                    table={table}
-                                                    showProcessing={showProcessing}
-                                                />
-                                            ) : (
-                                                <div className='col-12 mt-1 text-center'>
-                                                    <Spinner className='spinner' />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </Tab.Pane>
-                                </Tab.Content>
+                                    )}
+                                </div>
                             </Tab.Container>
                         ) : (
                             <div className='col-12 text-center'>

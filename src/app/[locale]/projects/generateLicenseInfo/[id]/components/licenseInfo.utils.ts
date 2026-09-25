@@ -65,67 +65,96 @@ export function restoreLicenseUsages(attachmentUsages: AttachmentUsages): SaveUs
     }
 }
 
-export function toggleAttachmentUsage(payload: SaveUsagesPayload, key: string): SaveUsagesPayload {
-    const selected = payload.selected.includes(key)
-    const ignoredLicenses = {
-        ...payload.ignoredLicenses,
+export interface SelectionStore {
+    selected: Set<string>
+    deselected: Set<string>
+    selectedConcludedUsages: Set<string>
+    deselectedConcludedUsages: Set<string>
+    ignoredLicenses: Map<string, Set<string>>
+}
+
+export const createEmptyStore = (): SelectionStore => ({
+    selected: new Set(),
+    deselected: new Set(),
+    selectedConcludedUsages: new Set(),
+    deselectedConcludedUsages: new Set(),
+    ignoredLicenses: new Map(),
+})
+
+export const storeFromPayload = (payload: SaveUsagesPayload): SelectionStore => ({
+    selected: new Set(payload.selected),
+    deselected: new Set(payload.deselected),
+    selectedConcludedUsages: new Set(payload.selectedConcludedUsages),
+    deselectedConcludedUsages: new Set(payload.deselectedConcludedUsages),
+    ignoredLicenses: new Map(
+        Object.entries(payload.ignoredLicenses).map(([k, v]) => [
+            k,
+            new Set(v),
+        ]),
+    ),
+})
+
+export const payloadFromStore = (store: SelectionStore): SaveUsagesPayload => {
+    const ignoredLicenses: SaveUsagesPayload['ignoredLicenses'] = {}
+    for (const [k, v] of store.ignoredLicenses) {
+        ignoredLicenses[k] = Array.from(v)
     }
-    if (selected) delete ignoredLicenses[key.replace('_licenseInfo_', '_')]
     return {
-        ...payload,
+        selected: Array.from(store.selected),
+        deselected: Array.from(store.deselected),
+        selectedConcludedUsages: Array.from(store.selectedConcludedUsages),
+        deselectedConcludedUsages: Array.from(store.deselectedConcludedUsages),
         ignoredLicenses,
-        selectedConcludedUsages: selected
-            ? payload.selectedConcludedUsages.filter((value) => value !== key)
-            : payload.selectedConcludedUsages,
-        deselectedConcludedUsages: selected
-            ? payload.deselectedConcludedUsages.filter((value) => value !== key)
-            : payload.deselectedConcludedUsages,
-        selected: selected
-            ? payload.selected.filter((value) => value !== key)
-            : [
-                  ...payload.selected,
-                  key,
-              ],
-        deselected: selected
-            ? [
-                  ...payload.deselected,
-                  key,
-              ]
-            : payload.deselected.filter((value) => value !== key),
     }
 }
 
-export function toggleLicenseUsage(
-    payload: SaveUsagesPayload,
-    attachmentKey: string,
+// Mutates the store in place and returns whether the attachment ended up selected.
+export const applyAttachmentToggle = (store: SelectionStore, key: string): boolean => {
+    const wasSelected = store.selected.has(key)
+    if (wasSelected) {
+        store.ignoredLicenses.delete(key.replace('_licenseInfo_', '_'))
+        store.selected.delete(key)
+        store.deselected.add(key)
+        store.selectedConcludedUsages.delete(key)
+        store.deselectedConcludedUsages.delete(key)
+    } else {
+        store.selected.add(key)
+        store.deselected.delete(key)
+    }
+    return !wasSelected
+}
+
+// Mutates the store in place and returns whether the attachment ended up selected.
+export const toggleLicenseInStore = (
+    store: SelectionStore,
+    attKey: string,
     ignoredKey: string,
     licenseName: string,
-    licenses: License[],
-): SaveUsagesPayload {
-    const attachmentSelected = payload.selected.includes(attachmentKey)
-    const ignored = new Set(payload.ignoredLicenses[ignoredKey] ?? [])
-    if (!attachmentSelected) {
+    siblingLicenses: License[],
+): boolean => {
+    const attachmentSelectedBefore = store.selected.has(attKey)
+    const ignored = new Set(store.ignoredLicenses.get(ignoredKey) ?? [])
+    if (!attachmentSelectedBefore) {
         ignored.clear()
-        for (const license of licenses) {
-            if (license.name !== licenseName) ignored.add(license.name)
+        for (const lic of siblingLicenses) {
+            if (lic.name !== licenseName) {
+                ignored.add(lic.name)
+            }
         }
     } else if (ignored.has(licenseName)) {
         ignored.delete(licenseName)
     } else {
         ignored.add(licenseName)
     }
-    const allIgnored = licenses.every((license) => ignored.has(license.name))
-    const nextPayload = attachmentSelected === !allIgnored ? payload : toggleAttachmentUsage(payload, attachmentKey)
-    if (allIgnored) return nextPayload
-    return {
-        ...nextPayload,
-        ignoredLicenses: {
-            ...nextPayload.ignoredLicenses,
-            [ignoredKey]: [
-                ...ignored,
-            ],
-        },
+    const allIgnored = siblingLicenses.length > 0 && siblingLicenses.every((lic) => ignored.has(lic.name))
+    let attachmentSelectedAfter = attachmentSelectedBefore
+    if (attachmentSelectedBefore !== !allIgnored) {
+        attachmentSelectedAfter = applyAttachmentToggle(store, attKey)
     }
+    if (!allIgnored) {
+        store.ignoredLicenses.set(ignoredKey, ignored)
+    }
+    return attachmentSelectedAfter
 }
 
 // One cache per page load, shared across project paths. Only explicitly requested details enter the queue.
