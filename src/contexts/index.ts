@@ -7,6 +7,7 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { PermissionProvider, usePermissionContext } from './PermissionContext'
 import {
     SW360BackendConfigProvider,
     useConfigKeyValue,
@@ -15,10 +16,13 @@ import {
 import { UiConfigProvider, useConfigValue, useUiConfigContext } from './UiConfigContext'
 
 export {
+    // Permission context exports
+    PermissionProvider,
     SW360BackendConfigProvider,
     UiConfigProvider,
     useConfigKeyValue,
     useConfigValue,
+    usePermissionContext,
     useSW360BackendConfigContext,
     useUiConfigContext,
 }

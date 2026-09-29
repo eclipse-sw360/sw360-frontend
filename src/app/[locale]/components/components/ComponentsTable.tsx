@@ -20,6 +20,7 @@ import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill, BsPencil } from 'react-icons/bs'
+import { ViewerGate } from '@/components/AccessControl'
 import { Component, Embedded, ErrorDetails, PageableQueryParam, PaginationMeta, UserGroupType } from '@/object-types'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
@@ -153,27 +154,31 @@ export default function ComponentsTable({ setNumberOfComponent }: Props) {
                         <>
                             {id && (
                                 <span className='d-flex justify-content-evenly'>
-                                    <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
-                                        <span
-                                            className='d-inline-block'
-                                            onClick={() => handleEditComponent(id)}
-                                        >
-                                            <BsPencil
-                                                className='btn-icon'
-                                                size={20}
-                                            />
-                                        </span>
-                                    </OverlayTrigger>
+                                    <ViewerGate>
+                                        <OverlayTrigger overlay={<Tooltip>{t('Edit')}</Tooltip>}>
+                                            <span
+                                                className='d-inline-block'
+                                                onClick={() => handleEditComponent(id)}
+                                            >
+                                                <BsPencil
+                                                    className='btn-icon'
+                                                    size={20}
+                                                />
+                                            </span>
+                                        </OverlayTrigger>
+                                    </ViewerGate>
 
-                                    <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
-                                        <span className='d-inline-block'>
-                                            <BsFillTrashFill
-                                                className='btn-icon'
-                                                size={20}
-                                                onClick={() => handleClickDelete(id)}
-                                            />
-                                        </span>
-                                    </OverlayTrigger>
+                                    <ViewerGate>
+                                        <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
+                                            <span className='d-inline-block'>
+                                                <BsFillTrashFill
+                                                    className='btn-icon'
+                                                    size={20}
+                                                    onClick={() => handleClickDelete(id)}
+                                                />
+                                            </span>
+                                        </OverlayTrigger>
+                                    </ViewerGate>
                                 </span>
                             )}
                         </>

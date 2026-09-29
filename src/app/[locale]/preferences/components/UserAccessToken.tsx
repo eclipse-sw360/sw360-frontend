@@ -16,12 +16,13 @@ import { StatusCodes } from 'http-status-codes'
 
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { useConfigValue, useSW360BackendConfigContext } from '@/contexts'
-import { ErrorDetails, UIConfigKeys } from '@/object-types'
+import { ErrorDetails, UIConfigKeys, UserGroupType } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import TokensTable from './TokensTable'
 
 const UserAccessToken = (): ReactNode => {
@@ -35,6 +36,19 @@ const UserAccessToken = (): ReactNode => {
         ],
     })
     const [generatedToken, setGeneratedToken] = useState<string>('')
+    const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
+        null,
+    )
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                setUserIdentity(await getAuthenticatedUserIdentity())
+            } catch {
+                setUserIdentity(null)
+            }
+        })()
+    }, [])
 
     // Config values from backend
     const apiTokenGeneratorEnabled = useConfigValue(UIConfigKeys.UI_REST_APITOKEN_GENERATOR_ENABLE)
@@ -44,8 +58,9 @@ const UserAccessToken = (): ReactNode => {
     const { config: sw360BackendConfig } = useSW360BackendConfigContext()
     const showTokenGenerationSection = apiTokenGeneratorEnabled === null ? true : (apiTokenGeneratorEnabled as boolean)
     const isTokenGenerationDisabled = !showTokenGenerationSection
+    const isViewer = userIdentity?.userGroup === UserGroupType.VIEWER
     const showWriteAuthorityCheckbox =
-        writeAccessOptionInPreferences === null ? true : (writeAccessOptionInPreferences as boolean)
+        !isViewer && (writeAccessOptionInPreferences === null ? true : (writeAccessOptionInPreferences as boolean))
 
     const maxValidityDaysValue = (sw360BackendConfig as Record<string, string> | null)?.[
         'rest.apitoken.max.validity.days'
