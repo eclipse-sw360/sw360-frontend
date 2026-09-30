@@ -16,6 +16,7 @@ import { Alert, Dropdown } from 'react-bootstrap'
 
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
+import { COMPONENT_NOT_FOUND_WARNING_KEY, useStoredWarning } from '@/hooks'
 import { ConfigKeys, UIConfigKeys, UserGroupPriority, UserGroupType } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -51,6 +52,8 @@ const ComponentIndex = (): ReactNode => {
             }
         })()
     }, [])
+
+    useStoredWarning(COMPONENT_NOT_FOUND_WARNING_KEY, 'Component does not exist')
 
     useEffect(() => {
         const controller = new AbortController()
