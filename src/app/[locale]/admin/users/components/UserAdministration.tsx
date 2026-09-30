@@ -26,6 +26,7 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
 import BulkUserUpload from './BulkUserUpload'
 import EditSecondaryDepartmentAndRolesModal from './EditSecondaryDepartmentsAndRolesModal'
+import { useApiQuery } from '@/hooks'
 
 type EmbeddedUsers = Embedded<User, 'sw360:users'>
 
@@ -34,7 +35,6 @@ export default function UserAdminstration(): JSX.Element {
     const [num, setNum] = useState<number>(0)
     const router = useRouter()
     const [editingUserId, setEditingUserId] = useState<string | undefined>(undefined)
-    const [departments, setDepartments] = useState<Array<string | undefined>>([])
     const [openEditSecondaryDepartmentAndRolesModal, setOpenEditSecondaryDepartmentAndRolesModal] =
         useState<boolean>(false)
     const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
@@ -69,20 +69,14 @@ export default function UserAdminstration(): JSX.Element {
         }
     }, [])
 
-    useEffect(() => {
-        void fetchData('users/departments')
-            .then((departments) => {
-                if (departments === undefined) {
-                    return
-                }
-                if (!CommonUtils.isNullOrUndefined(departments)) {
-                    setDepartments(departments)
-                }
-            })
-            .catch((error) => {
-                ApiUtils.reportError(error)
-            })
-    }, [])
+    const { data: departments = [] } = useApiQuery<string[]>({
+        queryKey: [
+            'users',
+            'departments',
+        ],
+        path: 'users/departments',
+        staleTime: 10 * 60_000, // 10 min: departments change rarely
+    })
 
     const handleEditSecondaryDepartmentAndRoles = (id: string) => {
         setEditingUserId(id)
@@ -374,9 +368,9 @@ export default function UserAdminstration(): JSX.Element {
             const next =
                 typeof updater === 'function'
                     ? updater({
-                          pageIndex: pageableQueryParam.page,
-                          pageSize: pageableQueryParam.page_entries,
-                      })
+                        pageIndex: pageableQueryParam.page,
+                        pageSize: pageableQueryParam.page_entries,
+                    })
                     : updater
 
             setPageableQueryParam((prev) => ({

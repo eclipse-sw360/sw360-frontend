@@ -11,14 +11,10 @@
 
 'use client'
 
-import { StatusCodes } from 'http-status-codes'
-import { notFound, useSearchParams } from 'next/navigation'
-
 import { useTranslations } from 'next-intl'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useState } from 'react'
+import { useApiQuery } from '@/hooks'
 import { Embedded, LicensePayload, LicenseType } from '@/object-types'
-import ApiUtils from '@/utils/api/authenticatedApi.util'
-import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 
 interface Props {
     licensePayload: LicensePayload
@@ -43,8 +39,14 @@ const AddLicenseDetail = ({
 }: Props): ReactNode => {
     const [regexError, setRegexError] = useState(false)
     const t = useTranslations('default')
-    const params = useSearchParams()
-    const [licenseTypes, setLicenseTypes] = useState<Array<LicenseType>>([])
+    const { data: licenseTypesData } = useApiQuery<EmbeddedLicenseTypes>({
+        queryKey: [
+            'licenseTypes',
+        ],
+        path: 'licenseTypes',
+        staleTime: 10 * 60_000, // 10 min: license types change rarely
+    })
+    const licenseTypes = licenseTypesData?._embedded['sw360:licenseTypes'] ?? []
     const validateShortName = (value: string) => {
         return value.match(/^[A-Za-z0-9\-.+]*$/) ? false : true
     }
@@ -70,29 +72,6 @@ const AddLicenseDetail = ({
             [e.target.name]: e.target.checked,
         })
     }
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const signal = controller.signal
-
-        void (async () => {
-            try {
-                const response = await ApiUtils.GET(`licenseTypes`, signal)
-                if (response.status === StatusCodes.UNAUTHORIZED) {
-                    return dispatchSessionExpiredEvent()
-                } else if (response.status !== StatusCodes.OK) {
-                    return notFound()
-                }
-                const licenses = (await response.json()) as EmbeddedLicenseTypes
-                setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
-            } catch (e) {
-                ApiUtils.reportError(e)
-            }
-        })()
-        return () => controller.abort()
-    }, [
-        params,
-    ])
 
     return (
         <div

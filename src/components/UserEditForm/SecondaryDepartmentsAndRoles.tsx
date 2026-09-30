@@ -10,14 +10,11 @@
 
 'use client'
 
-import { StatusCodes } from 'http-status-codes'
-
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { BsFillTrashFill } from 'react-icons/bs'
+import { useApiQuery } from '@/hooks'
 import { UserGroupType, UserPayload } from '@/object-types'
-import MessageService from '@/services/message.service'
-import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 interface SecondaryDepartmentAndRole {
     department: string
@@ -32,7 +29,14 @@ interface Props {
 const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [secondaryDepartmentsAndRoles, setSecondaryDepartmentsAndRoles] = useState<SecondaryDepartmentAndRole[]>([])
-    const [availableDepartments, setAvailableDepartments] = useState<string[]>([])
+    const { data: availableDepartments = [] } = useApiQuery<string[]>({
+        queryKey: [
+            'users',
+            'departments',
+        ],
+        path: 'users/departments',
+        staleTime: 10 * 60_000, // 10 min: departments change rarely
+    })
 
     const onChangeDepartmentAndRole = useCallback(
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
@@ -82,24 +86,9 @@ const SecondaryDepartmentsAndRoles = ({ userPayload, setUserPayload }: Props): J
         )
     }
 
-    const fetchAvailableDepartments = async () => {
-        // Fetch available departments from the backend
-        const response = await ApiUtils.GET('users/departments')
-        if (response.status === StatusCodes.UNAUTHORIZED) {
-            MessageService.error(t('Session has expired'))
-            return
-        }
-        if (response.status !== StatusCodes.OK) {
-            return
-        }
-        const departments = (await response.json()) as string[]
-        setAvailableDepartments(departments)
-    }
-
     useEffect(() => {
         const secondaryDeptsAndRolesListFromPayload = convertSecondaryDeptsAndRolesToList()
         setSecondaryDepartmentsAndRoles(secondaryDeptsAndRolesListFromPayload)
-        void fetchAvailableDepartments()
     }, [])
 
     const updateUserPayload = (newSecondaryDepartmentsAndRoles: Array<SecondaryDepartmentAndRole>) => {

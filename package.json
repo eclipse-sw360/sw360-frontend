@@ -34,6 +34,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
     "country-list": "^2.4.1",
@@ -64,6 +65,7 @@
     "@commitlint/cli": "21.2.2",
     "@commitlint/config-conventional": "19.8.0",
     "@playwright/test": "^1.63.0",
+    "@tanstack/react-query-devtools": "^5.101.4",
     "@types/country-list": "^2.1.4",
     "@types/crypto-js": "^4.2.2",
     "@types/he": "^1.2.3",

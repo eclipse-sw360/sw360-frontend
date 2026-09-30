@@ -12,5 +12,10 @@ import { useDocumentTitle } from './useDocumentTitle'
 import useLocalStorage from './useLocalStorage'
 import { useSW360BackendConfig } from './useSW360BackendConfig'
 import { useUiConfig } from './useUiConfig'
+import { useApiQuery } from './useApiQuery'
 
-export { useDocumentTitle, useLocalStorage, useSW360BackendConfig, useUiConfig }
+export { useApiQuery,
+         useDocumentTitle,
+         useLocalStorage,
+         useSW360BackendConfig,
+         useUiConfig }
