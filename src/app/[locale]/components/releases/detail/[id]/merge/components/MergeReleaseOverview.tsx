@@ -396,14 +396,15 @@ function MergeReleaseOverview({
                                                     ),
                                                 )
                                                 setTimeout(() => setError(null), 5000)
-                                            }
-                                            const isEligible = await checkMergeReleaseEligibility()
-                                            if (!isEligible) {
-                                                setError(t('The selected release cannot be merged'))
-                                                setTimeout(() => setError(null), 6000)
-                                                return
                                             } else {
-                                                setMergeState(GetNextState(mergeState) as MergeOrSplitActionType)
+                                                const isEligible = await checkMergeReleaseEligibility()
+                                                if (!isEligible) {
+                                                    setError(t('The selected release cannot be merged'))
+                                                    setTimeout(() => setError(null), 6000)
+                                                    return
+                                                } else {
+                                                    setMergeState(GetNextState(mergeState) as MergeOrSplitActionType)
+                                                }
                                             }
                                         }
                                     }}

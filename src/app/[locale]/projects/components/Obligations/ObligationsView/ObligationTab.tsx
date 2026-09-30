@@ -252,7 +252,7 @@ export default function ObligationTab({
                                 id: row.original.node[0],
                             })
                         }}
-                        className='form-control'
+                        className='form-control cursor-pointer'
                         placeholder={t('Enter comments')}
                         readOnly
                     />
@@ -356,11 +356,16 @@ export default function ObligationTab({
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
     ])

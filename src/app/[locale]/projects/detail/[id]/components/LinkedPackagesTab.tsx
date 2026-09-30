@@ -328,11 +328,16 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowPackagesProcessing(false)
+                if (!signal.aborted) {
+                    setShowPackagesProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
     ])
@@ -362,11 +367,16 @@ export default function LinkedPackagesTab({ projectId }: Props): JSX.Element {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProjectProcessing(false)
+                if (!signal.aborted) {
+                    setShowProjectProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
     ])

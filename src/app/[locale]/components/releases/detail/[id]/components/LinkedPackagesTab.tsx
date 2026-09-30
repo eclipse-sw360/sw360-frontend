@@ -276,11 +276,16 @@ export default function LinkedPackagesTab({ releaseId }: Props): JSX.Element {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [])
 
     const table = useReactTable({

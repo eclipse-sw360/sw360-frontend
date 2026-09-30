@@ -153,3 +153,14 @@ tests/
   - `trace: on-first-retry`
   - `screenshot: only-on-failure`
   - `video: on-first-retry`
+
+## License-info unit regressions (no services required)
+
+```bash
+pnpm exec playwright test --config tests/unit/playwright.config.ts
+```
+
+This isolated configuration does not start a server, launch a browser, load local
+environment files, or run authentication/database setup. It covers lazy detail
+request caching, concurrency, cancellation and retries, plus path-specific saved
+attachment choices, license exclusions and concluded-license settings.

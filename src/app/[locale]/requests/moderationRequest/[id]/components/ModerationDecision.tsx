@@ -34,6 +34,8 @@ function ModerationDecision({ data, moderationRequestPayload, setModerationReque
         REJECTED: t('REJECTED'),
     }
 
+    const isClosed = data?.moderationState === 'APPROVED' || data?.moderationState === 'REJECTED'
+
     const updateInputField = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setModerationRequestPayload({
             ...moderationRequestPayload,
@@ -71,13 +73,15 @@ function ModerationDecision({ data, moderationRequestPayload, setModerationReque
                     <tr>
                         <td>
                             {t('Comment on Moderation Decision')}:{' '}
-                            <span
-                                style={{
-                                    color: 'red',
-                                }}
-                            >
-                                *
-                            </span>
+                            {!isClosed && (
+                                <span
+                                    style={{
+                                        color: 'red',
+                                    }}
+                                >
+                                    *
+                                </span>
+                            )}
                         </td>
                         <td>
                             <textarea
@@ -88,9 +92,14 @@ function ModerationDecision({ data, moderationRequestPayload, setModerationReque
                                 style={{
                                     height: '120px',
                                 }}
-                                value={moderationRequestPayload.comment || ''}
+                                value={
+                                    isClosed
+                                        ? (data?.commentDecisionModerator ?? '')
+                                        : moderationRequestPayload.comment || ''
+                                }
                                 onChange={updateInputField}
-                                required
+                                readOnly={isClosed}
+                                required={!isClosed}
                             />
                         </td>
                     </tr>

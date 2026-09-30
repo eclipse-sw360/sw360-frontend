@@ -13,6 +13,7 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
+import DeleteReleseLinkConfirmationModal from '@/app/[locale]/projects/components/UnlinkReleaseDialog'
 import { SW360Table } from '@/components/sw360'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
@@ -42,6 +43,13 @@ export default function LinkedReleases({
             LinkedReleaseData,
         ][]
     >([])
+    const [releaseToBeDeleted, setReleaseToBeDeleted] = useState<
+        | [
+              string,
+              LinkedReleaseData,
+          ]
+        | undefined
+    >(undefined)
 
     const updateReleaseRelation = useCallback(
         (releaseId: string, updatedReleaseRelation: string) => {
@@ -101,24 +109,6 @@ export default function LinkedReleases({
                             comment: updatedComment,
                         },
                     },
-                }
-            })
-        },
-        [
-            setProjectPayload,
-        ],
-    )
-
-    const handleClickDelete = useCallback(
-        (releaseId: string) => {
-            setProjectPayload((prev) => {
-                if (!prev.linkedReleases) return prev
-
-                const { [releaseId]: _, ...remainingReleases } = prev.linkedReleases
-
-                return {
-                    ...prev,
-                    linkedReleases: remainingReleases,
                 }
             })
         },
@@ -253,7 +243,7 @@ export default function LinkedReleases({
                                 border: 'none',
                                 minWidth: 'fit-content',
                             }}
-                            onClick={() => handleClickDelete(row.original[0])}
+                            onClick={() => setReleaseToBeDeleted(row.original)}
                             title={t('Delete')}
                             aria-label={t('Delete linked release')}
                         >
@@ -268,7 +258,6 @@ export default function LinkedReleases({
             updateReleaseRelation,
             updateProjectMainlineState,
             handleComments,
-            handleClickDelete,
         ],
     )
 
@@ -295,6 +284,11 @@ export default function LinkedReleases({
                 show={showLinkedReleasesModal}
                 setShow={setShowLinkedReleasesModal}
                 onSelect={handleSelectReleases}
+            />
+            <DeleteReleseLinkConfirmationModal
+                release={releaseToBeDeleted}
+                setRelease={setReleaseToBeDeleted}
+                setProjectPayload={setProjectPayload}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>

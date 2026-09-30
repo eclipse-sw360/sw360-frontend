@@ -23,7 +23,7 @@ import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { FilterComponent, PaddedCell, SW360Table, TableSearch } from 'next-sw360'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
@@ -689,11 +689,11 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
         expandLevel,
     ])
 
-    const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.currentTarget.value === '') {
+    const searchFunction = (value: string) => {
+        if (value === '') {
             setSearch('')
         } else {
-            setSearch(event.currentTarget.value)
+            setSearch(value)
         }
     }
 

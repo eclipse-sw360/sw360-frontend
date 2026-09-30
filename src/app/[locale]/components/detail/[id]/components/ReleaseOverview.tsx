@@ -18,7 +18,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
-import { KeyboardEvent, ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsDownload, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
@@ -172,14 +172,14 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         )
     }
 
-    const searchFunction = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.currentTarget.value === '') {
+    const searchFunction = (value: string) => {
+        if (value === '') {
             setSearch({
                 searchText: '',
             })
         } else {
             setSearch({
-                searchText: event.currentTarget.value,
+                searchText: value,
                 luceneSearch: true,
             })
         }
@@ -391,11 +391,16 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         componentId,
         pageableQueryParam,

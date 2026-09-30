@@ -835,7 +835,11 @@ function EditProject({
                                                     lg={4}
                                                     className='text-truncate buttonheader-title'
                                                 >
-                                                    {t('Update Project')}
+                                                    {`${projectPayload.name}${
+                                                        CommonUtils.isNullEmptyOrUndefinedString(projectPayload.version)
+                                                            ? ''
+                                                            : ` (${projectPayload.version})`
+                                                    }`}
                                                 </Col>
                                             </Row>
                                             <Row className='mt-5'>

@@ -359,7 +359,7 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
         return validate
     }
 
-    const updateRelease = async () => {
+    const updateRelease = async (payload?: Release) => {
         if (isSPDXFeatureEnabled === true) {
             setInputValid(true)
             if (validateLicenseIdentifier(SPDXPayload) && validateExtractedText(SPDXPayload)) {
@@ -388,14 +388,15 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
             }
         }
         try {
-            const eccInfo = releasePayload.eccInformation
+            const dataToUpdate = payload ?? releasePayload
+            const eccInfo = dataToUpdate.eccInformation
             const sanitizedEccInformation: ECCInformation | undefined = eccInfo
                 ? {
                       ...eccInfo,
                       eccStatus: eccInfo.eccStatus?.trim() !== '' ? eccInfo.eccStatus : undefined,
                   }
                 : undefined
-            const { linkedPackages, clearingState, ...cleanPayload } = releasePayload
+            const { linkedPackages, clearingState, ...cleanPayload } = dataToUpdate
 
             const PRIVILEGED_GROUPS = [
                 UserGroupType.CLEARING_ADMIN,

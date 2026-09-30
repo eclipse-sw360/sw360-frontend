@@ -12,6 +12,7 @@ import AddKeyValue from './AddKeyValue/AddKeyValue'
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
 import Breadcrumb from './Breadcrumb/Breadcrumb'
+import EccPrintButton from './EccPrintButton/EccPrintButton'
 import EnumValueWithToolTip from './EnumValueWithToolTip/EnumValueWIthToolTip'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
@@ -53,6 +54,7 @@ export {
     Breadcrumb,
     ClientSidePageSizeSelector,
     ClientSideTableFooter,
+    EccPrintButton,
     EnumValueWithToolTip,
     FilterComponent,
     Footer,

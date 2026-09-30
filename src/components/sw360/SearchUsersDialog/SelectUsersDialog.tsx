@@ -360,6 +360,17 @@ const SelectUsersDialog = ({
                                     onChange={(event) => {
                                         setSearchText(event.target.value)
                                     }}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault()
+                                            if (!searchText) setSearchText('')
+                                            setPageableQueryParam((prev) => ({
+                                                ...prev,
+                                                page: 0,
+                                            }))
+                                            handleSearch()
+                                        }
+                                    }}
                                 />
                             </Col>
                             <Col xs='auto'>

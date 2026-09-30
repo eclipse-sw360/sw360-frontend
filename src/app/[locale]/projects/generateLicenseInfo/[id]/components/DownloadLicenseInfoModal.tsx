@@ -69,6 +69,25 @@ const relationFilterOptions: FilterOption[] = [
     },
 ]
 
+const projectProjFilterOptions: FilterOption[] = [
+    {
+        tag: 'Unknown',
+        value: 'UNKNOWN',
+    },
+    {
+        tag: 'Related',
+        value: 'REFERRED',
+    },
+    {
+        tag: 'Is a subproject',
+        value: 'CONTAINED',
+    },
+    {
+        tag: 'Duplicate',
+        value: 'DUPLICATE',
+    },
+]
+
 export default function DownloadLicenseInfoModal({
     show,
     setShow,
@@ -76,7 +95,8 @@ export default function DownloadLicenseInfoModal({
     setShowConfirmation,
     projectId,
     isCalledFromProjectLicenseTab,
-    projectRelationships,
+    projectReleaseRelationships,
+    projectProjectRelationships,
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
@@ -84,7 +104,8 @@ export default function DownloadLicenseInfoModal({
     saveUsagesPayload: SaveUsagesPayload
     projectId: string
     isCalledFromProjectLicenseTab: boolean
-    projectRelationships: string[]
+    projectReleaseRelationships: string[]
+    projectProjectRelationships: string[]
 }): ReactNode {
     const t = useTranslations('default')
     const params = useSearchParams()
@@ -92,6 +113,7 @@ export default function DownloadLicenseInfoModal({
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
     const [withSubProject, setWithSubProject] = useState(true)
     const [selectedRelRelationship, setSelectedRelRelationship] = useState<string[]>([])
+    const [selectedProjectRelationship, setSelectedProjectRelationship] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
@@ -103,9 +125,15 @@ export default function DownloadLicenseInfoModal({
     ])
 
     useEffect(() => {
-        setSelectedRelRelationship(projectRelationships)
+        setSelectedRelRelationship(projectReleaseRelationships)
     }, [
-        projectRelationships,
+        projectReleaseRelationships,
+    ])
+
+    useEffect(() => {
+        setSelectedProjectRelationship(projectProjectRelationships)
+    }, [
+        projectProjectRelationships,
     ])
 
     const downloadHandler = async (response: Response) => {
@@ -224,9 +252,9 @@ export default function DownloadLicenseInfoModal({
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <h5 className='fw-bold'>{t('Uncheck project release relationships to be excluded')}:</h5>
+                    <h5 className='fw-bold'>{t('Uncheck Project Release Relationships to be excluded')}:</h5>
                     {relationFilterOptions
-                        .filter((fil) => projectRelationships.indexOf(fil.value) !== -1)
+                        .filter((fil) => projectReleaseRelationships.indexOf(fil.value) !== -1)
                         .map((fil) => (
                             <div
                                 className='form-check'
@@ -235,6 +263,7 @@ export default function DownloadLicenseInfoModal({
                                 <input
                                     type='checkbox'
                                     className='form-check-input'
+                                    id={'project_rel_relation_' + selectedRelRelationship.indexOf(fil.value)}
                                     onChange={() => {
                                         const ind = selectedRelRelationship.indexOf(fil.value)
                                         if (ind !== -1) {
@@ -252,7 +281,7 @@ export default function DownloadLicenseInfoModal({
                                 />
                                 <label
                                     className='form-label fw-bold'
-                                    htmlFor='project_clearing_report_unknown'
+                                    htmlFor={'project_rel_relation_' + selectedRelRelationship.indexOf(fil.value)}
                                 >
                                     {fil.tag}
                                 </label>
@@ -261,21 +290,47 @@ export default function DownloadLicenseInfoModal({
                     {Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === true && (
                         <>
                             <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
-                            <div className='form-check'>
-                                <input
-                                    id='project_clearing_report_linked_project_relation'
-                                    type='checkbox'
-                                    className='form-check-input'
-                                    checked={withSubProject}
-                                    onChange={() => setWithSubProject(!withSubProject)}
-                                />
-                                <label
-                                    className='form-label fw-bold'
-                                    htmlFor='project_clearing_report_linked_project_relation'
-                                >
-                                    {t('Is a subproject')}
-                                </label>
-                            </div>
+                            {projectProjFilterOptions
+                                .filter((fil) => projectProjectRelationships.indexOf(fil.value) !== -1)
+                                .map((fil) => (
+                                    <div
+                                        className='form-check'
+                                        key={fil.value}
+                                    >
+                                        <input
+                                            type='checkbox'
+                                            className='form-check-input'
+                                            id={
+                                                'project_project_relation_' +
+                                                selectedProjectRelationship.indexOf(fil.value)
+                                            }
+                                            onChange={() => {
+                                                const ind = selectedProjectRelationship.indexOf(fil.value)
+                                                if (ind !== -1) {
+                                                    const newSelectedProjectRelationship =
+                                                        selectedProjectRelationship.toSpliced(ind, 1)
+                                                    setSelectedProjectRelationship(newSelectedProjectRelationship)
+                                                } else {
+                                                    const newSelectedProjectRelationship = [
+                                                        ...selectedProjectRelationship,
+                                                        fil.value,
+                                                    ]
+                                                    setSelectedProjectRelationship(newSelectedProjectRelationship)
+                                                }
+                                            }}
+                                            checked={selectedProjectRelationship.indexOf(fil.value) !== -1}
+                                        />
+                                        <label
+                                            className='form-label fw-bold'
+                                            htmlFor={
+                                                'project_project_relation_' +
+                                                selectedProjectRelationship.indexOf(fil.value)
+                                            }
+                                        >
+                                            {fil.tag}
+                                        </label>
+                                    </div>
+                                ))}
                         </>
                     )}
                     <h5 className='fw-bold'>{t('Select output format')}:</h5>

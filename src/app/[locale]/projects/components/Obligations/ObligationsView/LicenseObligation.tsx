@@ -390,7 +390,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                                 id: row.original.node[0],
                             })
                         }}
-                        className='form-control'
+                        className='form-control cursor-pointer'
                         placeholder={t('Enter comments')}
                         readOnly
                     />
@@ -489,11 +489,16 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
         refresh,

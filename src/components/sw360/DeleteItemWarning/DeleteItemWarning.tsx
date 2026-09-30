@@ -15,6 +15,7 @@ import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { AddtionalDataType, RolesType } from '@/object-types'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import CommonUtils from '@/utils/common.utils'
 
 interface Input {
     key: string
@@ -55,10 +56,7 @@ const DeleteItemWarning = ({
                 setData(list)
             }
             if (setObject) {
-                const map = new Map<string, string>()
-                list.forEach((item) => {
-                    map.set(item.key, item.value)
-                })
+                const map = CommonUtils.convertInputListToMap(list)
                 setObject(map)
             }
             if (setDataInputList) {

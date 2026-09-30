@@ -248,7 +248,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_vendors_modal'
                                     placeholder={t('Click to set vendor')}
@@ -455,7 +455,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_mainLicense_modal'
                                     placeholder={t('Click to set Licenses')}
@@ -484,7 +484,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_licenses_modal'
                                     placeholder={t('Click to set Licenses')}
@@ -654,7 +654,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_users_modal'
                                     placeholder={t('Click to edit')}
@@ -682,7 +682,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_users_modal'
                                     placeholder={t('Click to edit')}
