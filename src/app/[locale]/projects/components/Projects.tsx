@@ -37,6 +37,7 @@ import {
 } from 'react-icons/bs'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
+import { PROJECT_NOT_FOUND_WARNING_KEY, useStoredWarning } from '@/hooks'
 import {
     Attachment,
     ConfigKeys,
@@ -136,6 +137,8 @@ function Project(): JSX.Element {
             }
         })()
     }, [])
+
+    useStoredWarning(PROJECT_NOT_FOUND_WARNING_KEY, 'Project does not exist')
 
     const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
     const normalizedSbomImportExportAccessUserRole: UserGroupType =
