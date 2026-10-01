@@ -24,7 +24,14 @@ import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDet
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import { PageButtonHeader } from '@/components/sw360'
-import { useDocumentTitle } from '@/hooks'
+import {
+    COMPONENT_NOT_FOUND_WARNING_KEY,
+    LAST_RELEASE_COMPONENT_ID_KEY,
+    RELEASE_NOT_FOUND_WARNING_KEY,
+    redirectWithWarning,
+    useDocumentTitle,
+    useStoredWarning,
+} from '@/hooks'
 import {
     Changelogs,
     CommonTabIds,
@@ -79,6 +86,8 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         })()
     }, [])
 
+    useStoredWarning(RELEASE_NOT_FOUND_WARNING_KEY, 'Release does not exist')
+
     useEffect(() => {
         const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
         setActiveKey(fragment)
@@ -105,6 +114,10 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         void (async () => {
             try {
                 const response = await ApiUtils.GET(`components/${componentId}`, signal)
+                if (response.status === StatusCodes.NOT_FOUND) {
+                    redirectWithWarning(COMPONENT_NOT_FOUND_WARNING_KEY, '/components')
+                    return
+                }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -114,6 +127,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
 
                 const component = (await response.json()) as Component
                 setComponent(component)
+                window.sessionStorage.setItem(LAST_RELEASE_COMPONENT_ID_KEY, componentId)
                 setSubscribers(getSubcribersEmail(component))
                 setAttachmentNumber(component['_embedded']?.['sw360:attachments']?.length ?? 0)
             } catch (error) {
