@@ -15,6 +15,7 @@ export default interface ComponentPayload {
     createBy?: string
     description?: string
     componentType?: string
+    visbility?: string
     modifiedBy?: string
     modifiedOn?: string
     moderators?: Array<string> | null
