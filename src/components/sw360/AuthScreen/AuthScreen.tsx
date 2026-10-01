@@ -21,7 +21,8 @@ import { Alert, Button, Form, InputGroup, Modal } from 'react-bootstrap'
 import { BsEye, BsEyeSlash } from 'react-icons/bs'
 import { CREDENTIALS, KEYCLOAK_PROVIDER, SW360OAUTH_PROVIDER } from '@/constants'
 import { resolveAuthCallbackUrl } from '@/utils/authRedirect.utils'
-import { AUTH_PROVIDER } from '@/utils/env'
+import { AUTH_PROVIDER, SW360_API_URL } from '@/utils/env'
+import CustomWelcomePage from './CustomWelcomePage'
 
 function AuthScreen(): ReactNode {
     const router = useRouter()
@@ -34,6 +35,7 @@ function AuthScreen(): ReactNode {
     const [password, setPassword] = useState<string>('')
     const { status } = useSession()
     const [showPassword, setShowPassword] = useState<boolean>(false)
+    const [welcomePage, setWelcomePage] = useState<string | null>(null)
     const rawCallbackUrl = searchParams.get('callbackUrl')
     const origin = typeof window === 'undefined' ? undefined : window.location.origin
     const callbackUrl = useMemo(
@@ -47,6 +49,46 @@ function AuthScreen(): ReactNode {
     const isRedirectingToCallback = status === 'authenticated' && rawCallbackUrl !== null
 
     const handleClose = () => setDialogShow(false)
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => {
+            console.warn('Custom welcome page request timed out; using the default SW360 welcome page.')
+            controller.abort()
+        }, 10000)
+        const fetchWelcomePage = async () => {
+            try {
+                // This route alone is public. Never send credentials or use the
+                // authenticated config hook (which redirects expired sessions).
+                const response = await fetch(`${SW360_API_URL}/resource/api/customWelcomePage`, {
+                    headers: {
+                        Accept: 'text/html',
+                    },
+                    credentials: 'omit',
+                    cache: 'no-store',
+                    signal: controller.signal,
+                })
+                if (response.status === StatusCodes.NO_CONTENT) return
+                if (!response.ok || !response.headers.get('content-type')?.includes('text/html')) {
+                    throw new Error(`Custom welcome page unavailable (${response.status})`)
+                }
+                const html = await response.text()
+
+                if (!html.trim()) throw new Error('Custom welcome page is empty')
+
+                if (!controller.signal.aborted) setWelcomePage(html)
+            } catch (error) {
+                if (!controller.signal.aborted) console.warn('Using the default SW360 welcome page.', error)
+            } finally {
+                clearTimeout(timeout)
+            }
+        }
+        void fetchWelcomePage()
+        return () => {
+            clearTimeout(timeout)
+            controller.abort()
+        }
+    }, [])
 
     useEffect(() => {
         if (isRedirectingToCallback) {
@@ -108,10 +150,17 @@ function AuthScreen(): ReactNode {
                         <div className='authscreen'>
                             <div className='portlet-body p-5'>
                                 <div className='jumbotron'>
-                                    <h1 className='display-4'>{t('Welcome to SW360!')}</h1>
+                                    {welcomePage ? (
+                                        <CustomWelcomePage
+                                            title={t('Welcome to SW360!')}
+                                            html={welcomePage}
+                                        />
+                                    ) : (
+                                        <h1 className='display-4'>{t('Welcome to SW360!')}</h1>
+                                    )}
                                     <LanguageSwitcher />
                                     <br />
-                                    <p className='mt-3'>{t('SW360_INFO')}</p>
+                                    {!welcomePage && <p className='mt-3'>{t('SW360_INFO')}</p>}
                                     <hr className='my-4' />
                                     <h3>{t('In order to go ahead, please sign in or create a new account!')}</h3>
                                     {status === 'unauthenticated' ? (
