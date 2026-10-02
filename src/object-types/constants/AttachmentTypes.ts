@@ -31,6 +31,7 @@ const AttachmentTypes = {
     INITIAL_SCAN_REPORT: 'INITIAL_SCAN_REPORT',
     SBOM: 'SBOM',
     INTERNAL_USE_SCAN: 'INTERNAL_USE_SCAN',
+    ADS_JSON: 'ADS_JSON',
 }
 
 export default AttachmentTypes
