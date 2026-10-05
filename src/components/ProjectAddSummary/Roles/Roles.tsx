@@ -59,6 +59,14 @@ interface Props {
             [k: string]: string
         }>
     >
+    projectResponsible?: {
+        [k: string]: string
+    }
+    setProjectResponsible?: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
     leadArchitect: {
         [k: string]: string
     }
@@ -80,6 +88,8 @@ export default function Roles({
     setProjectOwner,
     projectManager,
     setProjectManager,
+    projectResponsible,
+    setProjectResponsible,
     leadArchitect,
     setLeadArchitect,
     securityResponsibles,
@@ -94,6 +104,12 @@ export default function Roles({
     const [dialogOpenSecurityResponsibles, setDialogOpenSecurityResponsibles] = useState(false)
     const [dialogOpenProjectManager, setDialogOpenProjectManager] = useState(false)
     const [dialogOpenLeadArchitect, setDialogOpenLeadArchitect] = useState(false)
+
+    const safeValues = (value: Record<string, string> | null | undefined) => Object.values(value ?? {})
+    const resolvedProjectResponsible =
+        Object.keys(projectResponsible ?? {}).length > 0 ? projectResponsible : projectManager
+    const resolvedProjectResponsibleValues = safeValues(resolvedProjectResponsible)
+    const resolvedProjectResponsibleValue = resolvedProjectResponsibleValues[0] ?? ''
 
     const updateField = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) => {
         setProjectPayload({
@@ -177,23 +193,22 @@ export default function Roles({
 
     const setProjectManagerToPayload = (user: { [k: string]: string }) => {
         const userEmails = Object.keys(user)
-        if (userEmails.length === 0) {
-            setProjectManager({})
-            setProjectPayload({
-                ...projectPayload,
-                projectResponsible: '',
-            })
-        } else {
-            setProjectManager(user)
-            setProjectPayload({
-                ...projectPayload,
-                projectResponsible: userEmails[0],
-            })
+        const selected = userEmails.length === 0 ? {} : user
+        setProjectManager(selected)
+        if (typeof setProjectResponsible === 'function') {
+            setProjectResponsible(selected)
         }
+        setProjectPayload({
+            ...projectPayload,
+            projectResponsible: userEmails.length === 0 ? '' : userEmails[0],
+        })
     }
 
     const handleClearProjectManager = () => {
         setProjectManager({})
+        if (typeof setProjectResponsible === 'function') {
+            setProjectResponsible({})
+        }
         setProjectPayload({
             ...projectPayload,
             projectResponsible: '',
@@ -300,13 +315,13 @@ export default function Roles({
                             readOnly={true}
                             name='projectManager'
                             onClick={() => setDialogOpenProjectManager(true)}
-                            value={Object.values(projectManager).length === 0 ? '' : Object.values(projectManager)[0]}
+                            value={resolvedProjectResponsibleValue}
                         />
                         <SelectUsersDialog
                             show={dialogOpenProjectManager}
                             setShow={setDialogOpenProjectManager}
                             setSelectedUsers={setProjectManagerToPayload}
-                            selectedUsers={projectManager}
+                            selectedUsers={resolvedProjectResponsible ?? {}}
                             multiple={false}
                         />
                         <div
@@ -333,13 +348,13 @@ export default function Roles({
                             readOnly={true}
                             name='projectOwner'
                             onClick={() => setDialogOpenProjectOwner(true)}
-                            value={Object.values(projectOwner).length === 0 ? '' : Object.values(projectOwner)[0]}
+                            value={safeValues(projectOwner).length === 0 ? '' : safeValues(projectOwner)[0]}
                         />
                         <SelectUsersDialog
                             show={dialogOpenProjectOwner}
                             setShow={setDialogOpenProjectOwner}
                             setSelectedUsers={setProjectOwnerToPayload}
-                            selectedUsers={projectOwner}
+                            selectedUsers={projectOwner ?? {}}
                             multiple={false}
                         />
                         <div
@@ -412,13 +427,13 @@ export default function Roles({
                             readOnly={true}
                             name='leadArchitect'
                             onClick={() => setDialogOpenLeadArchitect(true)}
-                            value={Object.values(leadArchitect).length === 0 ? '' : Object.values(leadArchitect)[0]}
+                            value={safeValues(leadArchitect).length === 0 ? '' : safeValues(leadArchitect)[0]}
                         />
                         <SelectUsersDialog
                             show={dialogOpenLeadArchitect}
                             setShow={setDialogOpenLeadArchitect}
                             setSelectedUsers={setLeadArchitectToPayload}
-                            selectedUsers={leadArchitect}
+                            selectedUsers={leadArchitect ?? {}}
                             multiple={false}
                         />
                         <div
@@ -444,14 +459,14 @@ export default function Roles({
                             placeholder={t('Click to edit')}
                             readOnly={true}
                             name='moderators'
-                            value={Object.values(moderators).join(', ')}
+                            value={safeValues(moderators).join(', ')}
                             onClick={() => setDialogOpenModerators(true)}
                         />
                         <SelectUsersDialog
                             show={dialogOpenModerators}
                             setShow={setDialogOpenModerators}
                             setSelectedUsers={setModeratorsToPayload}
-                            selectedUsers={moderators}
+                            selectedUsers={moderators ?? {}}
                             multiple={true}
                         />
                         <div
@@ -477,14 +492,14 @@ export default function Roles({
                             placeholder={t('Click to edit')}
                             readOnly={true}
                             name='contributors'
-                            value={Object.values(contributors).join(', ')}
+                            value={safeValues(contributors).join(', ')}
                             onClick={() => setDialogOpenContributors(true)}
                         />
                         <SelectUsersDialog
                             show={dialogOpenContributors}
                             setShow={setDialogOpenContributors}
                             setSelectedUsers={setContributorsToPayload}
-                            selectedUsers={contributors}
+                            selectedUsers={contributors ?? {}}
                             multiple={true}
                         />
                         <div
@@ -512,14 +527,14 @@ export default function Roles({
                             placeholder={t('Click to edit')}
                             readOnly={true}
                             name='securityResponsibles'
-                            value={Object.values(securityResponsibles).join(', ')}
+                            value={safeValues(securityResponsibles).join(', ')}
                             onClick={() => setDialogOpenSecurityResponsibles(true)}
                         />
                         <SelectUsersDialog
                             show={dialogOpenSecurityResponsibles}
                             setShow={setDialogOpenSecurityResponsibles}
                             setSelectedUsers={setSecurityResponsiblesToPayload}
-                            selectedUsers={securityResponsibles}
+                            selectedUsers={securityResponsibles ?? {}}
                             multiple={true}
                         />
                         <div

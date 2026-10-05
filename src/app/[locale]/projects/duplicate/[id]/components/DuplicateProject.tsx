@@ -89,6 +89,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     const [projectManager, setProjectManager] = useState<{
         [k: string]: string
     }>({})
+    const [projectResponsible, setProjectResponsible] = useState<{
+        [k: string]: string
+    }>({})
     const [leadArchitect, setLeadArchitect] = useState<{
         [k: string]: string
     }>({})
@@ -222,19 +225,19 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     return notFound()
                 }
                 const project = (await response.json()) as Project
-                if (project.externalIds !== undefined) {
+                if (project.externalIds != null) {
                     setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
                 }
 
-                if (project.externalUrls !== undefined) {
+                if (project.externalUrls != null) {
                     setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
                 }
 
-                if (project.additionalData !== undefined) {
+                if (project.additionalData != null) {
                     setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
                 }
 
-                if (project.roles !== undefined) {
+                if (project.roles != null) {
                     setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
                 }
 
@@ -262,17 +265,14 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     }
                 }
 
-                if (project?.projectResponsible !== undefined) {
-                    const userData = await fetchUserData(project?.projectResponsible)
-                    if (!CommonUtils.isNullOrUndefined(userData)) {
-                        setProjectManager({
-                            [project?.projectResponsible]: userData?.fullName ?? project?.projectResponsible,
-                        })
-                    } else {
-                        setProjectManager({
-                            [project?.projectResponsible]: project?.projectResponsible,
-                        })
+                const projectResponsibleEmail = project?.projectResponsible?.trim()
+                if (projectResponsibleEmail) {
+                    const userData = await fetchUserData(projectResponsibleEmail)
+                    const projectResponsibleMap = {
+                        [projectResponsibleEmail]: userData?.fullName ?? projectResponsibleEmail,
                     }
+                    setProjectManager(projectResponsibleMap)
+                    setProjectResponsible(projectResponsibleMap)
                 }
 
                 if (project['_embedded']?.['sw360:moderators'] !== undefined) {
@@ -291,11 +291,21 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     setContributors(Object.fromEntries(contributorMap))
                 }
 
-                if (project['_embedded']?.['sw360:securityResponsibles'] !== undefined) {
+                const directSecurityResponsibles = project.securityResponsibles ?? []
+                if (
+                    directSecurityResponsibles.length > 0 ||
+                    project['_embedded']?.['sw360:securityResponsibles'] !== undefined
+                ) {
                     const securityResponsiblesMap = new Map<string, string>()
-                    project['_embedded']['sw360:securityResponsibles'].map((securityResponsible) => {
-                        securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName ?? '')
-                    })
+                    for (const securityResponsible of directSecurityResponsibles) {
+                        securityResponsiblesMap.set(securityResponsible, securityResponsible)
+                    }
+                    for (const securityResponsible of project['_embedded']?.['sw360:securityResponsibles'] ?? []) {
+                        securityResponsiblesMap.set(
+                            securityResponsible.email,
+                            securityResponsible.fullName ?? securityResponsible.email,
+                        )
+                    }
                     setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
                 }
 
@@ -315,7 +325,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     ownerAccountingUnit: project.ownerAccountingUnit ?? '',
                     ownerGroup: project.ownerGroup ?? '',
                     ownerCountry: project.ownerCountry ?? '',
-                    clearingState: project.clearingState ?? 'OPEN',
+                    // Duplicates always start with an open clearing state; backend enforces this too.
+                    clearingState: 'OPEN',
                     businessUnit: project.businessUnit ?? 'CT',
                     preevaluationDeadline: project.preevaluationDeadline ?? '',
                     clearingSummary: project.clearingSummary ?? '',
@@ -526,6 +537,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                     setProjectOwner={setProjectOwner}
                                                     projectManager={projectManager}
                                                     setProjectManager={setProjectManager}
+                                                    projectResponsible={projectResponsible}
+                                                    setProjectResponsible={setProjectResponsible}
                                                     leadArchitect={leadArchitect}
                                                     setLeadArchitect={setLeadArchitect}
                                                 />
