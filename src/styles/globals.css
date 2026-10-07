@@ -714,6 +714,10 @@ body {
     text-transform: none;
 }
 
+.tableSearchInput {
+    width: 250px !important;
+}
+
 .subscriptionBox {
     border: 1px solid #2e5aac;
     background-color: #eef2fa;
