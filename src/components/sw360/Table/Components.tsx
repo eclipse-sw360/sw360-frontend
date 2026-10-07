@@ -11,7 +11,7 @@
 
 import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction, useRef } from 'react'
+import { ChangeEvent, Dispatch, Fragment, ReactElement, ReactNode, SetStateAction, useRef } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
@@ -293,10 +293,12 @@ export function SW360Table<K>({
     table,
     showProcessing,
     noRecordsFoundMessage,
+    renderRow,
 }: {
     table: Table<K>
     showProcessing: boolean
     noRecordsFoundMessage?: string
+    renderRow?: (row: Row<K>, defaultRow: ReactElement) => ReactNode
 }): ReactNode {
     const t = useTranslations('default')
 
@@ -354,8 +356,8 @@ export function SW360Table<K>({
                             </td>
                         </tr>
                     )}
-                    {table.getRowModel().rows.map((row) =>
-                        row.meta?.isFullSpanRow ? (
+                    {table.getRowModel().rows.map((row) => {
+                        const defaultRow = row.meta?.isFullSpanRow ? (
                             <tr key={row.id}>
                                 <td colSpan={table.getVisibleLeafColumns().length}>
                                     <div className={table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''}>
@@ -381,8 +383,10 @@ export function SW360Table<K>({
                                     </td>
                                 ))}
                             </tr>
-                        ),
-                    )}
+                        )
+
+                        return renderRow ? renderRow(row, defaultRow) : defaultRow
+                    })}
                 </tbody>
             </table>
             {showProcessing && (
