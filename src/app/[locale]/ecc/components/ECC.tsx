@@ -35,6 +35,7 @@ const Capitalize = (text: string) =>
 function ECC(): ReactNode {
     const t = useTranslations('default')
     const [sorting, setSorting] = useState<SortingState>([])
+    const [searchText, setSearchText] = useState('')
 
     const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
@@ -152,7 +153,14 @@ function ECC(): ReactNode {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `ecc`,
                     Object.fromEntries(
-                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                        Object.entries({
+                            ...pageableQueryParam,
+                            ...(searchText.trim()
+                                ? {
+                                      searchText: searchText.trim(),
+                                  }
+                                : {}),
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
@@ -189,7 +197,16 @@ function ECC(): ReactNode {
         }
     }, [
         pageableQueryParam,
+        searchText,
     ])
+
+    const handleQuickFilter = (value: string) => {
+        setSearchText(value)
+        setPageableQueryParam((prev) => ({
+            ...prev,
+            page: 0,
+        }))
+    }
 
     const table = useReactTable({
         data: memoizedData,
@@ -236,7 +253,10 @@ function ECC(): ReactNode {
             <div className='row'>
                 <div className='col-lg-2'>
                     <div className='row mb-3'>
-                        <QuickFilter id='vunerabilities.quickSearch' />
+                        <QuickFilter
+                            id='ecc.quickSearch'
+                            searchFunction={handleQuickFilter}
+                        />
                     </div>
                 </div>
                 <div className='col-lg-10'>
