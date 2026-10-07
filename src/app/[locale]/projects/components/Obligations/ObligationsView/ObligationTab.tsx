@@ -39,9 +39,6 @@ interface Props {
     setPayload?: Dispatch<SetStateAction<ObligationEntry>>
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 export default function ObligationTab({
     projectId,
     actionType,
@@ -101,7 +98,7 @@ export default function ObligationTab({
             {
                 id: 'status',
                 header: t('Status'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].status ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].status ?? '')}</>,
                 meta: {
                     width: '17%',
                 },
@@ -109,7 +106,7 @@ export default function ObligationTab({
             {
                 id: 'type',
                 header: t('Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].obligationType ?? '')}</>,
                 meta: {
                     width: '10%',
                 },
@@ -225,7 +222,7 @@ export default function ObligationTab({
             {
                 id: 'type',
                 header: t('Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].obligationType ?? '')}</>,
                 meta: {
                     width: '10%',
                 },

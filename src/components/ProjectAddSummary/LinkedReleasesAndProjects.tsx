@@ -10,7 +10,7 @@
 'use client'
 
 import type { JSX } from 'react'
-import { ProjectPayload } from '@/object-types'
+import { MainlineState, ProjectPayload, ReleaseRelationship } from '@/object-types'
 import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
@@ -26,9 +26,9 @@ interface Props {
 
 interface LinkedReleaseData {
     comment: string
-    mainlineState: string
+    mainlineState: MainlineState
     name: string
-    releaseRelation: string
+    releaseRelation: ReleaseRelationship
     version: string
 }
 

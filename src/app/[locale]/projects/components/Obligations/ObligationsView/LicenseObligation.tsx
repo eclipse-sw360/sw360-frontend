@@ -34,9 +34,6 @@ import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 interface Props {
     projectId: string
     actionType: ActionType
@@ -155,7 +152,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             {
                 id: 'status',
                 header: t('Status'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].status ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].status ?? '')}</>,
                 meta: {
                     width: '10%',
                 },
@@ -163,7 +160,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             {
                 id: 'type',
                 header: t('Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].obligationType ?? '')}</>,
                 meta: {
                     width: '10%',
                 },
@@ -363,7 +360,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
             {
                 id: 'type',
                 header: t('Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].obligationType ?? '')}</>,
                 meta: {
                     width: '10%',
                 },

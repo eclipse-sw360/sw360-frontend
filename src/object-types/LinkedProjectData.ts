@@ -5,10 +5,12 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { ProjectRelationship } from '@/object-types'
+
 interface LinkedProjectData {
     enableSvm: boolean
     name: string
-    projectRelationship: string
+    projectRelationship?: ProjectRelationship
     version: string
 }
 

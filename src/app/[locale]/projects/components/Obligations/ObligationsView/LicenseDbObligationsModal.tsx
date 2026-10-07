@@ -31,9 +31,6 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { ExpandableList } from './ExpandableComponents'
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 export default function LicenseDbObligationsModal({
     show,
     setShow,
@@ -208,7 +205,7 @@ export default function LicenseDbObligationsModal({
             {
                 id: 'status',
                 header: t('Status'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].status ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].status ?? '')}</>,
                 meta: {
                     width: '10%',
                 },
@@ -216,7 +213,7 @@ export default function LicenseDbObligationsModal({
             {
                 id: 'type',
                 header: t('Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].obligationType ?? '')}</>,
                 meta: {
                     width: '10%',
                 },

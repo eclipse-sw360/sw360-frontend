@@ -24,9 +24,12 @@ import {
     InputKeyValue,
     LinkedPackageData,
     LinkedProjectData,
+    MainlineState,
     Project,
     ProjectPayload,
+    ProjectRelationship,
     ReleaseDetail,
+    ReleaseRelationship,
     User,
     UserGroupType,
     Vendor,
@@ -42,17 +45,17 @@ interface Props {
 
 interface LinkedReleaseProps {
     release?: string
-    relation?: string
-    mainlineState?: string
-    releaseRelation?: string
+    relation?: ReleaseRelationship
+    mainlineState?: MainlineState
+    releaseRelation?: ReleaseRelationship
     comment?: string
 }
 
 interface LinkedReleaseData {
     comment: string
-    mainlineState: string
+    mainlineState?: MainlineState
     name: string
-    releaseRelation: string
+    releaseRelation?: ReleaseRelationship
     version: string
 }
 
@@ -194,8 +197,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 linkedReleasesObject[releaseId] = {
                     name: releaseData.name,
                     version: releaseData.version,
-                    releaseRelation: l.relation ?? '',
-                    mainlineState: l.mainlineState ?? '',
+                    releaseRelation: l.relation ?? ReleaseRelationship.CONTAINED,
+                    mainlineState: l.mainlineState ?? MainlineState.OPEN,
                     comment: l.comment ?? '',
                 }
             }
@@ -347,7 +350,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                         ?.enableSvm === 'true',
                                 projectRelationship:
                                     project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
-                                        ?.relation ?? '',
+                                        ?.relation ?? ProjectRelationship.CONTAINED,
                             }
                             return acc
                         },

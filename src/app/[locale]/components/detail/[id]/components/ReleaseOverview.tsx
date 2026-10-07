@@ -28,6 +28,7 @@ import {
     Attachment,
     Embedded,
     ErrorDetails,
+    MainlineState,
     PageableQueryParam,
     PaginationMeta,
     ReleaseLink,
@@ -40,9 +41,6 @@ import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util
 import DeleteReleaseModal from './DeleteReleaseModal'
 
 type EmbeddedLinkedReleases = Embedded<ReleaseLink, 'sw360:releaseLinks'>
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface Props {
     componentId: string
@@ -222,7 +220,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 header: t('Clearing State'),
                 accessorKey: 'clearingState',
                 enableSorting: true,
-                cell: ({ row }) => <>{Capitalize(row.original.clearingState ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.clearingState ?? '')}</>,
 
                 meta: {
                     width: '16%',
@@ -242,7 +240,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 header: t('Release Mainline State'),
                 accessorKey: 'mainlineState',
                 enableSorting: true,
-                cell: ({ row }) => <>{Capitalize(row.original.mainlineState ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.mainlineState ?? MainlineState.OPEN)}</>,
                 meta: {
                     width: '16%',
                 },

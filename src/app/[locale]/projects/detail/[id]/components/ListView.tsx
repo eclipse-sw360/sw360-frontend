@@ -23,7 +23,15 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW3
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
-import { FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
+import {
+    FilterOption,
+    LicenseClearing,
+    MainlineState,
+    Project,
+    Release,
+    ReleaseRelationship,
+    TypedEntity,
+} from '@/object-types'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
@@ -32,17 +40,14 @@ interface Attachment {
     filename: string
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 interface ListViewProject extends Project {
     path?: string
 }
 
 interface ListViewRelease extends Release {
-    releaseRelation?: string
+    releaseRelation?: ReleaseRelationship
     path?: string
-    projectMainlineState?: string
+    projectMainlineState?: MainlineState
 }
 
 type TypedProject = TypedEntity<ListViewProject, 'project'>
@@ -83,52 +88,13 @@ const typeFilterOptions: FilterOption[] = [
     },
 ]
 
-const relationFilterOptions: FilterOption[] = [
-    {
-        tag: 'Contained',
-        value: 'CONTAINED',
-    },
-    {
-        tag: 'Related',
-        value: 'REFERRED',
-    },
-    {
-        tag: 'Unknown',
-        value: 'UNKNOWN',
-    },
-    {
-        tag: 'Dynamically Linked',
-        value: 'DYNAMICALLY_LINKED',
-    },
-    {
-        tag: 'Statically Linked',
-        value: 'STATICALLY_LINKED',
-    },
-    {
-        tag: 'Side By Side',
-        value: 'SIDE_BY_SIDE',
-    },
-    {
-        tag: 'Standalone',
-        value: 'STANDALONE',
-    },
-    {
-        tag: 'Internal Use',
-        value: 'INTERNAL_USE',
-    },
-    {
-        tag: 'Optional',
-        value: 'OPTIONAL',
-    },
-    {
-        tag: 'To Be Replaced',
-        value: 'TO_BE_REPLACED',
-    },
-    {
-        tag: 'Code Snippet',
-        value: 'CODE_SNIPPET',
-    },
-]
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map(
+    (value) =>
+        ({
+            tag: CommonUtils.Capitalize(value),
+            value: value,
+        }) as FilterOption,
+)
 
 const stateFilterOptions: FilterOption[] = [
     {
@@ -393,7 +359,11 @@ export default function ListView({
                 },
                 cell: ({ row }) => {
                     if (row.original.type === 'project') {
-                        return <div className='text-center'>{Capitalize(row.original.entity.projectType ?? '')}</div>
+                        return (
+                            <div className='text-center'>
+                                {CommonUtils.Capitalize(row.original.entity.projectType ?? '')}
+                            </div>
+                        )
                     } else {
                         const matchedOption = typeFilterOptions.find(
                             (op) => op.value === (row.original.entity as Release).componentType,
@@ -442,8 +412,46 @@ export default function ListView({
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
                         return (
-                            <div className='text-center'>{Capitalize(row.original.entity.releaseRelation ?? '')}</div>
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `release_relation_${row.original.entity.releaseRelation ? row.original.entity.releaseRelation.toLowerCase() : 'contained'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(row.original.entity.releaseRelation ?? '')}
+                                </span>
+                            </OverlayTrigger>
                         )
+                    } else if (row.original.type === 'project') {
+                        const { id: projectId } = row.original.entity
+                        const index = (memoizedLicenseClearing?.linkedProjects ?? []).findIndex(
+                            (rel) => rel.project.split('/').at(-1) === projectId,
+                        )
+                        if (index !== -1) {
+                            return (
+                                <OverlayTrigger
+                                    placement='top'
+                                    overlay={
+                                        <Tooltip>
+                                            {t(
+                                                `project_relation_${memoizedLicenseClearing?.linkedProjects?.[index].relation ? memoizedLicenseClearing?.linkedProjects?.[index].relation.toLowerCase() : 'contained'}_tooltip`,
+                                            )}
+                                        </Tooltip>
+                                    }
+                                >
+                                    <span className='text-center'>
+                                        {CommonUtils.Capitalize(
+                                            memoizedLicenseClearing?.linkedProjects?.[index].relation ?? '',
+                                        )}
+                                    </span>
+                                </OverlayTrigger>
+                            )
+                        }
                     }
                 },
                 meta: {
@@ -492,7 +500,9 @@ export default function ListView({
                         return (
                             <div className='text-center'>
                                 <OverlayTrigger
-                                    overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state ?? '')}`}</Tooltip>}
+                                    overlay={
+                                        <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state ?? '')}`}</Tooltip>
+                                    }
                                 >
                                     {state === 'ACTIVE' ? (
                                         <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -502,7 +512,7 @@ export default function ListView({
                                 </OverlayTrigger>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -523,7 +533,7 @@ export default function ListView({
                             <div className='text-center'>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Release Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -568,7 +578,22 @@ export default function ListView({
                 },
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
-                        return <div className='text-center'>{Capitalize(row.original.entity.mainlineState ?? '')}</div>
+                        return (
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `mainline_state_${row.original.entity.mainlineState ? row.original.entity.mainlineState.toLowerCase() : 'open'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(row.original.entity.mainlineState ?? '')}
+                                </span>
+                            </OverlayTrigger>
+                        )
                     }
                 },
                 meta: {
@@ -582,10 +607,22 @@ export default function ListView({
                 enableSorting: false,
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
+                        const projectMainlineState = (row.original.entity as ListViewRelease).projectMainlineState
                         return (
-                            <div className='text-center'>
-                                {Capitalize((row.original.entity as ListViewRelease).projectMainlineState ?? '')}
-                            </div>
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `mainline_state_${projectMainlineState ? projectMainlineState.toLowerCase() : 'open'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(projectMainlineState ?? '')}
+                                </span>
+                            </OverlayTrigger>
                         )
                     }
                 },

@@ -67,9 +67,6 @@ interface ProjectWithSubRows extends TypeProject {
     subRows?: ProjectWithSubRows[]
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 interface GroupEntry {
     key: string
     text: string
@@ -399,7 +396,9 @@ function Project(): JSX.Element {
                             {state && clearingState && (
                                 <div className='text-center'>
                                     <OverlayTrigger
-                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
+                                        overlay={
+                                            <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state)}`}</Tooltip>
+                                        }
                                     >
                                         {state === 'ACTIVE' ? (
                                             <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -411,7 +410,7 @@ function Project(): JSX.Element {
                                     </OverlayTrigger>
                                     <OverlayTrigger
                                         overlay={
-                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
+                                            <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(clearingState)}`}</Tooltip>
                                         }
                                     >
                                         {clearingState === 'OPEN' ? (
