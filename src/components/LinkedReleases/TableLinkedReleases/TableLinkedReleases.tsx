@@ -16,12 +16,13 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useMemo } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
-import { ReleaseLink } from '@/object-types'
+import { ReleaseLink, ReleaseRelationship } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
     setReleaseLinks: React.Dispatch<React.SetStateAction<ReleaseLink[]>>
     releaseLinks: ReleaseLink[]
-    setReleaseIdToRelationshipsToReleasePayLoad: (releaseIdToRelationships: Map<string, string>) => void
+    setReleaseIdToRelationshipsToReleasePayLoad: (releaseIdToRelationships: Map<string, ReleaseRelationship>) => void
 }
 
 export default function TableLinkedReleases({
@@ -37,15 +38,18 @@ export default function TableLinkedReleases({
                 item.id === releaseId
                     ? {
                           ...item,
-                          releaseRelationship: updatedReleaseRelationship,
+                          releaseRelationship:
+                              Object.values(ReleaseRelationship).find(
+                                  (relation) => relation === updatedReleaseRelationship,
+                              ) ?? ReleaseRelationship.CONTAINED,
                       }
                     : item,
             )
             setReleaseLinks(updated)
 
-            const map = new Map<string, string>()
+            const map = new Map<string, ReleaseRelationship>()
             updated.forEach((item) => {
-                map.set(item.id, item.releaseRelationship)
+                map.set(item.id, item.releaseRelationship ?? ReleaseRelationship.UNKNOWN)
             })
             setReleaseIdToRelationshipsToReleasePayLoad(map)
         },
@@ -61,9 +65,9 @@ export default function TableLinkedReleases({
             const updated = releaseLinks.filter((item) => item.id !== releaseId)
             setReleaseLinks(updated)
 
-            const map = new Map<string, string>()
+            const map = new Map<string, ReleaseRelationship>()
             updated.forEach((item) => {
-                map.set(item.id, item.releaseRelationship)
+                map.set(item.id, item.releaseRelationship ?? ReleaseRelationship.UNKNOWN)
             })
             setReleaseIdToRelationshipsToReleasePayLoad(map)
         },
@@ -113,17 +117,15 @@ export default function TableLinkedReleases({
                             }}
                             required
                         >
-                            <option value='CONTAINED'>{t('CONTAINED')}</option>
-                            <option value='REFERRED'>{t('REFERRED')}</option>
-                            <option value='UNKNOWN'>{t('UNKNOWN')}</option>
-                            <option value='DYNAMICALLY_LINKED'>{t('DYNAMICALLY_LINKED')}</option>
-                            <option value='STATICALLY_LINKED'>{t('STATICALLY_LINKED')}</option>
-                            <option value='SIDE_BY_SIDE'>{t('SIDE_BY_SIDE')}</option>
-                            <option value='STANDALONE'>{t('STANDALONE')}</option>
-                            <option value='INTERNAL_USE'>{t('INTERNAL_USE')}</option>
-                            <option value='OPTIONAL'>{t('OPTIONAL')}</option>
-                            <option value='TO_BE_REPLACED'>{t('TO_BE_REPLACED')}</option>
-                            <option value='CODE_SNIPPET'>{t('CODE_SNIPPET')}</option>
+                            {Object.values(ReleaseRelationship).map((rel) => (
+                                <option
+                                    key={rel}
+                                    value={rel}
+                                    title={t(`release_relation_${rel ? rel.toLowerCase() : 'contained'}_tooltip`)}
+                                >
+                                    {CommonUtils.Capitalize(rel)}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 ),

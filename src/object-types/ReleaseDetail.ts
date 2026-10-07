@@ -15,7 +15,9 @@ import {
     COTSDetails,
     ECCInformation,
     LicenseDetail,
+    MainlineState,
     ReleaseLink,
+    ReleaseRelationship,
     Repository,
     User,
     Vendor,
@@ -40,7 +42,7 @@ export default interface ReleaseDetail {
     }
     createdOn?: string
     repository?: Repository
-    mainlineState?: string
+    mainlineState?: MainlineState
     clearingState: string
     createdBy?: string
     roles?: {
@@ -58,7 +60,7 @@ export default interface ReleaseDetail {
     sourceCodeDownloadurl?: string
     binaryDownloadurl?: string
     releaseIdToRelationship?: {
-        [k: string]: string
+        [k: string]: ReleaseRelationship
     }
     modifiedOn?: string
     cpeId?: string

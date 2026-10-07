@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover } from 'next-sw360'
 import type { JSX } from 'react'
 import { Table } from 'react-bootstrap'
+import { MainlineState, ReleaseRelationship } from '@/object-types'
 
 const LinkedReleasesTable = ({ children }: { children: React.ReactNode }): JSX.Element => {
     return (
@@ -42,31 +43,12 @@ const TableHeader = () => {
                     <div>
                         <span className='text-capitalize'>{t('Release Relation')} </span>
                         <ShowInfoOnHover
-                            text={
+                            text={Object.values(ReleaseRelationship).map((rel) => (
                                 <>
-                                    <b>{t('UNKNOWN')}</b>: {t('release_relation_unknown_tooltip')}
+                                    <b>{t(rel)}</b>: {t(`release_relation_${rel.toLowerCase()}_tooltip`)}
                                     <br />
-                                    <b>{t('CONTAINED')}</b>: {t('release_relation_contained_tooltip')}
-                                    <br />
-                                    <b>{t('REFERRED')}</b>: {t('release_relation_referred_tooltip')}
-                                    <br />
-                                    <b>{t('DYNAMICALLY_LINKED')}</b>: {t('release_relation_dynamic_linked_tooltip')}
-                                    <br />
-                                    <b>{t('STATICALLY_LINKED')}</b>: {t('release_relation_static_linked_tooltip')}
-                                    <br />
-                                    <b>{t('SIDE_BY_SIDE')}</b>: {t('release_relation_side_by_side_tooltip')}
-                                    <br />
-                                    <b>{t('STANDALONE')}</b>: {t('release_relation_standalone_tooltip')}
-                                    <br />
-                                    <b>{t('INTERNAL_USE')}</b>: {t('release_relation_interal_use_tooltip')}
-                                    <br />
-                                    <b>{t('OPTIONAL')}</b>: {t('release_relation_optional_tooltip')}
-                                    <br />
-                                    <b>{t('TO_BE_REPLACED')}</b>: {t('release_relation_to_be_replaced_tooltip')}
-                                    <br />
-                                    <b>{t('CODE_SNIPPET')}</b>: {t('release_relation_code_snippest_tooltip')}.
                                 </>
-                            }
+                            ))}
                         />
                     </div>
                 </th>
@@ -74,19 +56,12 @@ const TableHeader = () => {
                     <div>
                         <span className='text-capitalize'>{t('Project Mainline State')} </span>
                         <ShowInfoOnHover
-                            text={
+                            text={Object.values(MainlineState).map((state) => (
                                 <>
-                                    <b>{t('OPEN')}</b>: {t('mainline_state_open_tooltip')}
+                                    <b>{t(state)}</b>: {t(`mainline_state_${state.toLowerCase()}_tooltip`)}
                                     <br />
-                                    <b>{t('MAINLINE')}</b>: {t('mainline_state_mainline_tooltip')}
-                                    <br />
-                                    <b>{t('SPECIFIC')}</b>: {t('mainline_state_specific_tooltip')}
-                                    <br />
-                                    <b>{t('PHASEOUT')}</b>: {t('mainline_state_phaseout_tooltip')}
-                                    <br />
-                                    <b>{t('DENIED')}</b>: {t('mainline_state_denied_tooltip')}
                                 </>
-                            }
+                            ))}
                         />
                     </div>
                 </th>

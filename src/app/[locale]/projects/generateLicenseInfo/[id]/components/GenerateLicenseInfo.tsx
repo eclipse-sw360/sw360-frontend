@@ -35,7 +35,9 @@ import {
     ErrorDetails,
     NestedRows,
     Project,
+    ProjectRelationship,
     Release,
+    ReleaseRelationship,
     SaveUsagesPayload,
     TypedEntity,
     UserGroupType,
@@ -71,9 +73,6 @@ interface ExtendedNestedRows<K> extends NestedRows<K> {
 }
 
 type TypedLicense = TypedEntity<License, 'license'>
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 const hasCliUsageSet = (release: Release, projectPath: string, selectedUsages: Set<string>): boolean => {
     const cliAttachments =
@@ -309,7 +308,10 @@ function filterReleasesWithUsage(
     )
 }
 
-const fetchReleaseRelationsFromLinkedProjects = (linkedProjects: Project[], filters: Set<string>) => {
+const fetchReleaseRelationsFromLinkedProjects = (
+    linkedProjects: Project[],
+    filters: Set<ReleaseRelationship | undefined>,
+) => {
     for (const p of linkedProjects) {
         for (const l of p.linkedReleases ?? []) {
             filters.add(l.relation)
@@ -318,7 +320,10 @@ const fetchReleaseRelationsFromLinkedProjects = (linkedProjects: Project[], filt
     }
 }
 
-const fetchProjectRelationsFromLinkedProjects = (linkedProjects: Project[], filters: Set<string>) => {
+const fetchProjectRelationsFromLinkedProjects = (
+    linkedProjects: Project[],
+    filters: Set<ProjectRelationship | undefined>,
+) => {
     for (const p of linkedProjects) {
         for (const l of p.linkedProjects ?? []) {
             filters.add(l.relation)
@@ -512,14 +517,14 @@ function GenerateLicenseInfo({
     useEffect(() => {
         if (!project) return
 
-        const releaseRelationFilters: Set<string> = new Set<string>()
-        const projectRelationFilters: Set<string> = new Set<string>()
+        const releaseRelationFilters: Set<ReleaseRelationship> = new Set<ReleaseRelationship>()
+        const projectRelationFilters: Set<ProjectRelationship> = new Set<ProjectRelationship>()
 
         for (const l of project.linkedReleases ?? []) {
-            releaseRelationFilters.add(l.relation)
+            releaseRelationFilters.add(l.relation ?? ReleaseRelationship.CONTAINED)
         }
         for (const l of project.linkedProjects ?? []) {
-            projectRelationFilters.add(l.relation)
+            projectRelationFilters.add(l.relation ?? ProjectRelationship.CONTAINED)
         }
         if (linkedProjects && linkedProjects.length > 0) {
             fetchReleaseRelationsFromLinkedProjects(linkedProjects, releaseRelationFilters)
@@ -867,13 +872,13 @@ function GenerateLicenseInfo({
                                         : 'green-cell'
                                 }`}
                             >
-                                {Capitalize(row.original.node.entity.clearingState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
                         )
                     } else if (row.original.node.type === 'project') {
                         return (
                             <div className='text-center'>
-                                {Capitalize(row.original.node.entity.clearingState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
                         )
                     } else if (row.original.node.type === 'attachment') {
@@ -886,7 +891,7 @@ function GenerateLicenseInfo({
                                         : 'green-cell'
                                 }`}
                             >
-                                {Capitalize(row.original.node.entity.checkStatus ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.checkStatus ?? '')}
                             </div>
                         )
                     }

@@ -5,11 +5,13 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { MainlineState, ReleaseRelationship } from '@/object-types'
+
 interface LinkedReleaseData {
     comment?: string
-    mainlineState: string
+    mainlineState?: MainlineState
     name: string
-    releaseRelation: string
+    releaseRelation?: ReleaseRelationship
     version: string
 }
 

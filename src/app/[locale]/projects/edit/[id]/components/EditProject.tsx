@@ -38,6 +38,7 @@ import {
     Project,
     ProjectDetailTabCounts,
     ProjectPayload,
+    ProjectRelationship,
     User,
     UserGroupType,
     Vendor,
@@ -481,7 +482,7 @@ function EditProject({
                                         ?.enableSvm === 'true',
                                 projectRelationship:
                                     project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
-                                        ?.relation ?? '',
+                                        ?.relation ?? ProjectRelationship.CONTAINED,
                             }
                             return acc
                         },

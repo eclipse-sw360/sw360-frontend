@@ -38,9 +38,6 @@ interface Props {
     projectVersion?: string
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Element {
     const t = useTranslations('default')
     const [sorting, setSorting] = useState<SortingState>([])
@@ -54,7 +51,7 @@ function EccDetails({ projectId, projectName, projectVersion }: Props): JSX.Elem
                 id: 'status',
                 header: t('Status'),
                 accessorFn: (row) => row.eccInformation?.eccStatus ?? '',
-                cell: ({ row }) => <>{Capitalize(row.original.eccInformation.eccStatus)}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.eccInformation.eccStatus)}</>,
                 meta: {
                     width: '10%',
                 },

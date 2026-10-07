@@ -15,21 +15,13 @@ import type { useTranslations } from 'next-intl'
 import { type JSX } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { ReleaseClearingStateMapping } from '@/object-types'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     isRelease: boolean
     clearingState: string
     projectState?: string
     t?: ReturnType<typeof useTranslations>
-}
-
-const capitalize = (text: string): string => {
-    return text
-        ? text
-              .split('_')
-              .reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-              .trim()
-        : ''
 }
 
 function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props): JSX.Element {
@@ -65,7 +57,9 @@ function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props
                 <>
                     {projectState !== undefined && (
                         <OverlayTrigger
-                            overlay={<Tooltip>{`${t?.('Project State')}: ${t?.(capitalize(projectState))}`}</Tooltip>}
+                            overlay={
+                                <Tooltip>{`${t?.('Project State')}: ${t?.(CommonUtils.Capitalize(projectState) ?? '')}`}</Tooltip>
+                            }
                         >
                             {projectState === 'ACTIVE' ? (
                                 <span className='state-box projectStateActive capsule-left'>{'PS'}</span>
@@ -76,7 +70,7 @@ function ClearingStateBadge({ isRelease, clearingState, projectState, t }: Props
                     )}
                     <OverlayTrigger
                         overlay={
-                            <Tooltip>{`${t?.('Project Clearing State')}: ${t?.(capitalize(clearingState))}`}</Tooltip>
+                            <Tooltip>{`${t?.('Project Clearing State')}: ${t?.(CommonUtils.Capitalize(clearingState) ?? '')}`}</Tooltip>
                         }
                     >
                         {clearingState === 'OPEN' ? (

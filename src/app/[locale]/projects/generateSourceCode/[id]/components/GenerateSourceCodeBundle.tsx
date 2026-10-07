@@ -45,9 +45,6 @@ type TypedRelease = TypedEntity<Release, 'release'>
 
 type TypedAttachment = TypedEntity<Attachment, 'attachment'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 function GenerateSourceCodeBundle({
     projectId,
 }: Readonly<{
@@ -508,12 +505,14 @@ function GenerateSourceCodeBundle({
                             <div
                                 className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
-                                {Capitalize(row.original.node.entity.componentType ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.componentType ?? '')}
                             </div>
                         )
                     } else if (row.original.node.type === 'project') {
                         return (
-                            <div className='text-center'>{Capitalize(row.original.node.entity.projectType ?? '')}</div>
+                            <div className='text-center'>
+                                {CommonUtils.Capitalize(row.original.node.entity.projectType ?? '')}
+                            </div>
                         )
                     } else {
                         const att = row.original.node.entity
@@ -548,13 +547,13 @@ function GenerateSourceCodeBundle({
                             <div
                                 className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
-                                {Capitalize(row.original.node.entity.clearingState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
                         )
                     } else if (row.original.node.type === 'project') {
                         return (
                             <div className='text-center'>
-                                {Capitalize(row.original.node.entity.clearingState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
                         )
                     } else {
@@ -562,7 +561,7 @@ function GenerateSourceCodeBundle({
                             <div
                                 className={`text-center ${(row.getParentRow()?.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
-                                {Capitalize(row.original.node.entity.checkStatus ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.checkStatus ?? '')}
                             </div>
                         )
                     }

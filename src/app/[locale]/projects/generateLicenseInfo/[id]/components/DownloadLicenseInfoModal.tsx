@@ -13,80 +13,42 @@ import { StatusCodes } from 'http-status-codes'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
-import { Modal } from 'react-bootstrap'
+import { Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { useConfigKeyValue } from '@/contexts'
-import { ConfigKeys, ErrorDetails, FilterOption, SaveUsagesPayload } from '@/object-types'
+import {
+    ConfigKeys,
+    ErrorDetails,
+    FilterOption,
+    ProjectRelationship,
+    ReleaseRelationship,
+    SaveUsagesPayload,
+} from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
-const relationFilterOptions: FilterOption[] = [
-    {
-        tag: 'Contained',
-        value: 'CONTAINED',
-    },
-    {
-        tag: 'Related',
-        value: 'REFERRED',
-    },
-    {
-        tag: 'Unknown',
-        value: 'UNKNOWN',
-    },
-    {
-        tag: 'Dynamically Linked',
-        value: 'DYNAMICALLY_LINKED',
-    },
-    {
-        tag: 'Statically Linked',
-        value: 'STATICALLY_LINKED',
-    },
-    {
-        tag: 'Side By Side',
-        value: 'SIDE_BY_SIDE',
-    },
-    {
-        tag: 'Standalone',
-        value: 'STANDALONE',
-    },
-    {
-        tag: 'Internal Use',
-        value: 'INTERNAL_USE',
-    },
-    {
-        tag: 'Optional',
-        value: 'OPTIONAL',
-    },
-    {
-        tag: 'To Be Replaced',
-        value: 'TO_BE_REPLACED',
-    },
-    {
-        tag: 'Code Snippet',
-        value: 'CODE_SNIPPET',
-    },
-]
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map(
+    (value) =>
+        ({
+            tag: CommonUtils.Capitalize(value),
+            value: value,
+        }) as FilterOption,
+)
 
-const projectProjFilterOptions: FilterOption[] = [
-    {
-        tag: 'Unknown',
-        value: 'UNKNOWN',
-    },
-    {
-        tag: 'Related',
-        value: 'REFERRED',
-    },
-    {
-        tag: 'Is a subproject',
-        value: 'CONTAINED',
-    },
-    {
-        tag: 'Duplicate',
-        value: 'DUPLICATE',
-    },
-]
+const projectProjFilterOptions: FilterOption[] = Object.values(ProjectRelationship).map((value) => {
+    let tag = CommonUtils.Capitalize(value)
+    if (value === ProjectRelationship.CONTAINED) {
+        tag = 'Is a subproject'
+    } else if (value === ProjectRelationship.REFERRED) {
+        tag = 'Related'
+    }
+    return {
+        tag: tag,
+        value: value,
+    } as FilterOption
+})
 
 export default function DownloadLicenseInfoModal({
     show,
@@ -283,7 +245,14 @@ export default function DownloadLicenseInfoModal({
                                     className='form-label fw-bold'
                                     htmlFor={'project_rel_relation_' + selectedRelRelationship.indexOf(fil.value)}
                                 >
-                                    {fil.tag}
+                                    <OverlayTrigger
+                                        placement='top'
+                                        overlay={
+                                            <Tooltip>{t(`release_relation_${fil.tag.toLowerCase()}_tooltip`)}</Tooltip>
+                                        }
+                                    >
+                                        <span className='text-center'>{CommonUtils.Capitalize(fil.tag)}</span>
+                                    </OverlayTrigger>
                                 </label>
                             </div>
                         ))}
@@ -327,7 +296,16 @@ export default function DownloadLicenseInfoModal({
                                                 selectedProjectRelationship.indexOf(fil.value)
                                             }
                                         >
-                                            {fil.tag}
+                                            <OverlayTrigger
+                                                placement='top'
+                                                overlay={
+                                                    <Tooltip>
+                                                        {t(`project_relation_${fil.tag.toLowerCase()}_tooltip`)}
+                                                    </Tooltip>
+                                                }
+                                            >
+                                                <span className='text-center'>{CommonUtils.Capitalize(fil.tag)}</span>
+                                            </OverlayTrigger>
                                         </label>
                                     </div>
                                 ))}

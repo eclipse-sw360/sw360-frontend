@@ -13,12 +13,7 @@ import { decode } from 'he'
 import { useTranslations } from 'next-intl'
 import { type JSX, useState } from 'react'
 import { AdministrationDataType, ClearingDetailsCount } from '@/object-types'
-
-const Capitalize = (text: string) => {
-    return text
-        ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-        : undefined
-}
+import { CommonUtils } from '@/utils'
 
 interface Props {
     clearingDetailCount?: ClearingDetailsCount
@@ -47,7 +42,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                 <tbody hidden={toggleClearing}>
                     <tr>
                         <td>{t('Project Clearing State')}:</td>
-                        <td>{Capitalize(data.clearingState ?? '')}</td>
+                        <td>{CommonUtils.Capitalize(data.clearingState ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('Clearing Details')}:</td>
@@ -177,7 +172,7 @@ export default function Administration({ data, clearingDetailCount }: Props): JS
                 <tbody hidden={toggleLifecycle}>
                     <tr>
                         <td>{t('Project state')}:</td>
-                        <td>{Capitalize(data.state ?? '')}</td>
+                        <td>{CommonUtils.Capitalize(data.state ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{t('System State Begin')}:</td>

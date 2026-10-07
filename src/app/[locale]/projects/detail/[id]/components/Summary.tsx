@@ -17,12 +17,7 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import ResoucesUsing from '@/components/ResourcesUsing/ResourcesUsing'
 import { DocumentTypes, SummaryDataType } from '@/object-types'
-
-const Capitalize = (text: string) => {
-    return text
-        ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-        : undefined
-}
+import { CommonUtils } from '@/utils'
 
 export default function Summary({ summaryData }: { summaryData: SummaryDataType }): JSX.Element {
     const t = useTranslations('default')
@@ -97,7 +92,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     <tr>
                         <td>{t('Visibility')}:</td>
                         <td>
-                            {Capitalize(
+                            {CommonUtils.Capitalize(
                                 summaryData.visibility === 'BUISNESSUNIT_AND_MODERATORS'
                                     ? 'GROUP_AND_MODERATORS'
                                     : summaryData.visibility,
@@ -136,7 +131,7 @@ export default function Summary({ summaryData }: { summaryData: SummaryDataType 
                     </tr>
                     <tr>
                         <td>{t('Project Type')}:</td>
-                        <td>{Capitalize(summaryData.projectType) ?? ''}</td>
+                        <td>{CommonUtils.Capitalize(summaryData.projectType) ?? ''}</td>
                     </tr>
                     <tr>
                         <td>{t('Domain')}:</td>
