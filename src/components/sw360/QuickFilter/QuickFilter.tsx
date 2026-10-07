@@ -28,6 +28,16 @@ function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilter
         }, 700)
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key !== 'Enter') return
+
+        e.preventDefault()
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current)
+        }
+        searchFunction?.(e.currentTarget.value)
+    }
+
     return (
         <div className='card-deck'>
             <div
@@ -48,6 +58,7 @@ function QuickFilter({ id, searchFunction, title = 'Quick Filter' }: QuickFilter
                                 size='sm'
                                 name={title}
                                 onChange={handleChange}
+                                onKeyDown={handleKeyDown}
                             />
                         </Form.Group>
                     </Form>
