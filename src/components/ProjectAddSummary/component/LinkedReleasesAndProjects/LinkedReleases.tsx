@@ -19,12 +19,14 @@ import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
 import { LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
 
 interface Props {
+    existingReleaseData?: Record<string, LinkedReleaseData>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     isReleaseLoading?: boolean
 }
 
 export default function LinkedReleases({
+    existingReleaseData,
     projectPayload,
     setProjectPayload,
     isReleaseLoading = false,
@@ -146,9 +148,23 @@ export default function LinkedReleases({
     )
 
     useEffect(() => {
-        const data = Object.entries(projectPayload.linkedReleases ?? {})
+        const linkedReleases = projectPayload.linkedReleases ?? {}
+        const data = Object.entries(linkedReleases).map(
+            ([releaseId, releaseData]) =>
+                [
+                    releaseId,
+                    {
+                        ...existingReleaseData?.[releaseId],
+                        ...releaseData,
+                    },
+                ] as [
+                    string,
+                    LinkedReleaseData,
+                ],
+        )
         setTableData(data)
     }, [
+        existingReleaseData,
         projectPayload.linkedReleases,
     ])
 
