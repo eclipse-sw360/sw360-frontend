@@ -29,13 +29,16 @@ import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
-const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map(
-    (value) =>
-        ({
-            tag: CommonUtils.Capitalize(value),
-            value: value,
-        }) as FilterOption,
-)
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map((value) => {
+    let tag = CommonUtils.Capitalize(value)
+    if (value === ReleaseRelationship.REFERRED) {
+        tag = 'Related'
+    }
+    return {
+        tag: tag,
+        value: value,
+    } as FilterOption
+})
 
 const projectProjFilterOptions: FilterOption[] = Object.values(ProjectRelationship).map((value) => {
     let tag = CommonUtils.Capitalize(value)

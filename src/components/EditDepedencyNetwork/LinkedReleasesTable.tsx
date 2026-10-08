@@ -43,12 +43,18 @@ const TableHeader = () => {
                     <div>
                         <span className='text-capitalize'>{t('Release Relation')} </span>
                         <ShowInfoOnHover
-                            text={Object.values(ReleaseRelationship).map((rel) => (
-                                <>
-                                    <b>{t(rel)}</b>: {t(`release_relation_${rel.toLowerCase()}_tooltip`)}
-                                    <br />
-                                </>
-                            ))}
+                            text={Object.values(ReleaseRelationship).map((rel) => {
+                                let tag = rel.toString()
+                                if (rel === ReleaseRelationship.REFERRED) {
+                                    tag = 'Related'
+                                }
+                                return (
+                                    <>
+                                        <b>{t(tag)}</b>: {t(`release_relation_${rel.toLowerCase()}_tooltip`)}
+                                        <br />
+                                    </>
+                                )
+                            })}
                         />
                     </div>
                 </th>
