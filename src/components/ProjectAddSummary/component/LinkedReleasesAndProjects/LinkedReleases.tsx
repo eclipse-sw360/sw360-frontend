@@ -191,15 +191,22 @@ export default function LinkedReleases({
                             }}
                             required
                         >
-                            {Object.values(ReleaseRelationship).map((rel) => (
-                                <option
-                                    key={rel}
-                                    value={rel}
-                                    title={t(`release_relation_${rel ? rel.toLowerCase() : 'contained'}_tooltip`)}
-                                >
-                                    {CommonUtils.Capitalize(rel)}
-                                </option>
-                            ))}
+                            {Object.values(ReleaseRelationship).map((rel) => {
+                                let tag = CommonUtils.Capitalize(rel)
+                                if (rel === ReleaseRelationship.REFERRED) {
+                                    tag = 'Related'
+                                }
+
+                                return (
+                                    <option
+                                        key={rel}
+                                        value={rel}
+                                        title={t(`release_relation_${rel ? rel.toLowerCase() : 'contained'}_tooltip`)}
+                                    >
+                                        {tag}
+                                    </option>
+                                )
+                            })}
                         </select>
                     </div>
                 ),

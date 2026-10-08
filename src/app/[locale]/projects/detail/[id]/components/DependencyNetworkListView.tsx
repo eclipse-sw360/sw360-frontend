@@ -83,13 +83,16 @@ const typeFilterOptions: FilterOption[] = [
     },
 ]
 
-const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map(
-    (value) =>
-        ({
-            tag: CommonUtils.Capitalize(value),
-            value: value,
-        }) as FilterOption,
-)
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map((value) => {
+    let tag = CommonUtils.Capitalize(value)
+    if (value === ReleaseRelationship.REFERRED) {
+        tag = 'Related'
+    }
+    return {
+        tag: tag,
+        value: value,
+    } as FilterOption
+})
 
 const stateFilterOptions: FilterOption[] = [
     {
