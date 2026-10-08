@@ -81,6 +81,14 @@ interface Props {
             [k: string]: string
         }>
     >
+    projectResponsible?: {
+        [k: string]: string
+    }
+    setProjectResponsible?: React.Dispatch<
+        React.SetStateAction<{
+            [k: string]: string
+        }>
+    >
     leadArchitect: {
         [k: string]: string
     }
@@ -116,6 +124,8 @@ export default function Summary({
     setProjectOwner,
     projectManager,
     setProjectManager,
+    projectResponsible,
+    setProjectResponsible,
     leadArchitect,
     setLeadArchitect,
     securityResponsibles,
@@ -165,6 +175,8 @@ export default function Summary({
                     setProjectOwner={setProjectOwner}
                     projectManager={projectManager}
                     setProjectManager={setProjectManager}
+                    projectResponsible={projectResponsible}
+                    setProjectResponsible={setProjectResponsible}
                     leadArchitect={leadArchitect}
                     setLeadArchitect={setLeadArchitect}
                 />
