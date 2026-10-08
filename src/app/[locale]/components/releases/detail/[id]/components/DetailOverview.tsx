@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Col, Dropdown, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -27,7 +27,12 @@ import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/Comp
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import { PageButtonHeader } from '@/components/sw360'
 import { useConfigKeyValue } from '@/contexts'
-import { useDocumentTitle } from '@/hooks'
+import {
+    LAST_RELEASE_COMPONENT_ID_KEY,
+    RELEASE_NOT_FOUND_WARNING_KEY,
+    redirectWithWarning,
+    useDocumentTitle,
+} from '@/hooks'
 import {
     Attachment,
     Changelogs,
@@ -142,8 +147,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         router.push(`?tab=${key}`)
     }
 
-    const fetchData = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url)
+    const fetchData = useCallback(async (url: string, signal?: AbortSignal) => {
+        const response = await ApiUtils.GET(url, signal)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail &
                 EmbeddedReleaseLinks &
@@ -164,42 +169,55 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     useEffect(() => {
-        fetchData(`releases/${releaseId}`)
-            .then((release) => {
-                if (CommonUtils.isNullOrUndefined(release)) {
-                    notFound()
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET(`releases/${releaseId}`, signal)
+
+                if (response.status === StatusCodes.NOT_FOUND) {
+                    const storedComponentId = window.sessionStorage.getItem(LAST_RELEASE_COMPONENT_ID_KEY)
+                    const targetPath = storedComponentId ? `/components/detail/${storedComponentId}` : '/components'
+
+                    redirectWithWarning(RELEASE_NOT_FOUND_WARNING_KEY, targetPath)
+                    return
                 }
 
-                setRelease(release)
-
-                setSubscribers(getSubcribersEmail(release))
-
-                if (
-                    !CommonUtils.isNullOrUndefined(release._embedded) &&
-                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
-                ) {
-                    setEmbeddedAttachments(release._embedded['sw360:attachments'])
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    dispatchSessionExpiredEvent()
+                    return
                 }
 
-                return release
-            })
-            .then((release: ReleaseDetail) => {
-                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
-                    .then((embeddedReleaseLinks) => {
-                        if (embeddedReleaseLinks) {
-                            setReleasesSameComponent(
-                                embeddedReleaseLinks['_embedded']['sw360:releaseLinks']
-                                    .slice()
-                                    .sort((left, right) => left.version.localeCompare(right.version)),
-                            )
-                        }
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
                     })
-                    .catch((err) => console.error(err))
-            })
-            .catch((err) => console.error(err))
+                }
 
-        fetchData(`releases/${releaseId}/vulnerabilities`)
-            .then((vulnerabilities) => {
+                const release = (await response.json()) as ReleaseDetail
+                setRelease(release)
+                window.sessionStorage.setItem(
+                    LAST_RELEASE_COMPONENT_ID_KEY,
+                    release._links['sw360:component'].href.split('/').at(-1) ?? '',
+                )
+                setSubscribers(getSubcribersEmail(release))
+                setEmbeddedAttachments(release._embedded?.['sw360:attachments'] ?? [])
+
+                const componentReleases = await fetchData(
+                    `components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`,
+                    signal,
+                )
+                if (componentReleases) {
+                    setReleasesSameComponent(
+                        componentReleases['_embedded']['sw360:releaseLinks']
+                            .slice()
+                            .sort((left, right) => left.version.localeCompare(right.version)),
+                    )
+                }
+
+                const vulnerabilities = await fetchData(`releases/${releaseId}/vulnerabilities`, signal)
                 if (
                     vulnerabilities &&
                     !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
@@ -209,8 +227,12 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 } else {
                     setVulnerData([])
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+
+        return () => controller.abort()
     }, [
         fetchData,
         releaseId,

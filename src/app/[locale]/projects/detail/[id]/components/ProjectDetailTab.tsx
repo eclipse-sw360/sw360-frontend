@@ -19,7 +19,7 @@ import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import { useConfigKeyValue } from '@/contexts'
-import { useDocumentTitle } from '@/hooks'
+import { PROJECT_NOT_FOUND_WARNING_KEY, redirectWithWarning, useDocumentTitle } from '@/hooks'
 import {
     ActionType,
     AdministrationDataType,
@@ -140,7 +140,24 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         void (async () => {
             try {
+                const projectResponse = await ApiUtils.GET(`projects/${projectId}`, signal)
+                if (projectResponse.status === StatusCodes.NOT_FOUND) {
+                    redirectWithWarning(PROJECT_NOT_FOUND_WARNING_KEY, '/projects')
+                    return
+                }
+                if (projectResponse.status !== StatusCodes.OK) {
+                    const err = (await projectResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: projectResponse.status,
+                    })
+                }
+                const project = (await projectResponse.json()) as Project
+
                 const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
+                if (response.status === StatusCodes.NOT_FOUND) {
+                    redirectWithWarning(PROJECT_NOT_FOUND_WARNING_KEY, '/projects')
+                    return
+                }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -153,13 +170,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
 
-                const project = (await (await ApiUtils.GET(`projects/${projectId}`, signal)).json()) as Project
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
                 const ob = {} as {
                     [k: string]: LinkedProjectData
                 }
