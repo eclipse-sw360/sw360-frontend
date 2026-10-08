@@ -20,12 +20,14 @@ import { LinkedReleaseData, MainlineState, ProjectPayload, ReleaseDetail, Releas
 import CommonUtils from '@/utils/common.utils'
 
 interface Props {
+    existingReleaseData?: Record<string, LinkedReleaseData>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     isReleaseLoading?: boolean
 }
 
 export default function LinkedReleases({
+    existingReleaseData,
     projectPayload,
     setProjectPayload,
     isReleaseLoading = false,
@@ -152,9 +154,23 @@ export default function LinkedReleases({
     )
 
     useEffect(() => {
-        const data = Object.entries(projectPayload.linkedReleases ?? {})
+        const linkedReleases = projectPayload.linkedReleases ?? {}
+        const data = Object.entries(linkedReleases).map(
+            ([releaseId, releaseData]) =>
+                [
+                    releaseId,
+                    {
+                        ...existingReleaseData?.[releaseId],
+                        ...releaseData,
+                    },
+                ] as [
+                    string,
+                    LinkedReleaseData,
+                ],
+        )
         setTableData(data)
     }, [
+        existingReleaseData,
         projectPayload.linkedReleases,
     ])
 
