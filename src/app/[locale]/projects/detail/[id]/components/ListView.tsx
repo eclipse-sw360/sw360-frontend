@@ -268,6 +268,59 @@ const buildTable = (
     return finalData
 }
 
+const extractSearchFields = (entity: unknown): (string | number)[] => {
+    if (!entity || typeof entity !== 'object') return []
+    const anyEntity = entity as Record<string, unknown>
+
+    const mainLicenseIds = Array.isArray(anyEntity.mainLicenseIds) ? anyEntity.mainLicenseIds : []
+    const otherLicenseIds = Array.isArray(anyEntity.otherLicenseIds) ? anyEntity.otherLicenseIds : []
+    const comment = anyEntity.comment
+    const projectType = anyEntity.projectType
+    const componentType = anyEntity.componentType
+    const clearingState = anyEntity.clearingState
+    const state = anyEntity.state
+    const mainlineState = anyEntity.mainlineState
+    const name = anyEntity.name
+    const version = anyEntity.version
+    const path = anyEntity.path
+    const nameWithVersion =
+        typeof name === 'string' && typeof version === 'string' && version.length > 0
+            ? `${name} (${version})`
+            : undefined
+
+    return [
+        name,
+        version,
+        nameWithVersion,
+        projectType,
+        componentType,
+        clearingState,
+        state,
+        mainlineState,
+        comment,
+        path,
+        ...mainLicenseIds,
+        ...otherLicenseIds,
+    ].filter(Boolean) as (string | number)[]
+}
+
+const filterRows = (rows: (TypedProject | TypedRelease)[], searchTerm: string): (TypedProject | TypedRelease)[] => {
+    const lower = searchTerm.trim().toLowerCase()
+    if (!lower) return rows
+
+    // ignore spacing/parentheses differences, e.g. "Atest 1.0" should match the displayed "Atest (1.0)"
+    const normalize = (value: string) => value.toLowerCase().replace(/[()\s]/g, '')
+    const normalizedLower = normalize(lower)
+
+    const matches = (value: unknown): boolean => {
+        if (value === undefined || value === null) return false
+        const stringValue = String(value)
+        return stringValue.toLowerCase().includes(lower) || normalize(stringValue).includes(normalizedLower)
+    }
+
+    return rows.filter((row) => extractSearchFields(row.entity).some((f) => matches(f)))
+}
+
 export default function ListView({
     projectName,
     projectVersion,
@@ -289,6 +342,7 @@ export default function ListView({
 
     const [sorting, setSorting] = useState<SortingState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
+    const [search, setSearch] = useState('')
 
     const [showProcessing, setShowProcessing] = useState(false)
     const [showModal, setShowModal] = useState(false)
@@ -311,6 +365,7 @@ export default function ListView({
         ],
     )
 
+    const [allRowData, setAllRowData] = useState<(TypedProject | TypedRelease)[]>([])
     const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
 
     useEffect(() => {
@@ -694,7 +749,7 @@ export default function ListView({
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) return
         const data = buildTable(memoizedLicenseClearing, memoizedLinkedProjects, projectName, projectVersion)
-        setRowData(data)
+        setAllRowData(data)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,
@@ -702,12 +757,34 @@ export default function ListView({
         projectVersion,
     ])
 
+    useEffect(() => {
+        setRowData(filterRows(allRowData, search))
+    }, [
+        allRowData,
+        search,
+    ])
+
     return (
         <>
+            <div className='d-flex justify-content-between align-items-center mb-3'>
+                <ClientSidePageSizeSelector table={table} />
+                <input
+                    type='search'
+                    placeholder={t('Search')}
+                    className='form-control form-control-sm'
+                    style={{
+                        width: '250px',
+                    }}
+                    value={search}
+                    onChange={(e) => {
+                        table.resetPagination()
+                        setSearch(e.target.value)
+                    }}
+                />
+            </div>
             <div className='mb-3'>
                 {table ? (
                     <>
-                        <ClientSidePageSizeSelector table={table} />
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
