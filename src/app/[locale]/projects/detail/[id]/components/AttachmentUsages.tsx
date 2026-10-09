@@ -26,7 +26,7 @@ import { notFound } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     Attachment,
@@ -1049,7 +1049,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     }, [
         memoizedAttachmentUsages,
         memoizedLinkedProjects,
-        saveUsagesPayload,
         projectId,
         sort,
     ])
@@ -1076,6 +1075,46 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                         showProcessing={
                             showProcessingLinkedProjects || showProcessingAttachmentUsages || isTableBuilding
                         }
+                        renderRow={(row, defaultRow) => {
+                            if (row.original.node.type !== 'attachment') return defaultRow
+
+                            const attachment = row.original.node.entity
+                            const tooltipContent = [
+                                `Created On: ${attachment.createdOn ?? ''}`,
+                                `Status: ${attachment.checkStatus ?? ''}`,
+                                ...(attachment.checkedBy
+                                    ? [
+                                          `Checked By: ${attachment.checkedBy}`,
+                                      ]
+                                    : []),
+                                ...(attachment.checkedOn
+                                    ? [
+                                          `Checked On: ${attachment.checkedOn}`,
+                                      ]
+                                    : []),
+                            ].join('\n')
+
+                            return (
+                                <OverlayTrigger
+                                    key={row.id}
+                                    placement='top'
+                                    overlay={(tooltipProps) => (
+                                        <Tooltip {...tooltipProps}>
+                                            <span
+                                                className='text-start d-inline-block'
+                                                style={{
+                                                    whiteSpace: 'pre-line',
+                                                }}
+                                            >
+                                                {tooltipContent}
+                                            </span>
+                                        </Tooltip>
+                                    )}
+                                >
+                                    {defaultRow}
+                                </OverlayTrigger>
+                            )
+                        }}
                     />
                 ) : (
                     <div className='col-12 mt-1 text-center'>
