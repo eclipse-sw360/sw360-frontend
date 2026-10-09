@@ -35,6 +35,7 @@ test.describe('Components - Update', () => {
             categories: 'Library',
             componentType: 'OSS',
             description: 'Original description before update',
+            visbility: 'ME_AND_MODERATORS',
         })
     })
 
@@ -79,6 +80,21 @@ test.describe('Components - Update', () => {
         await page.goto(`/components/edit/${componentId}`)
         await waitForComponentPageLoad(page)
         await expect(page.locator(selectors.form.description)).toHaveValue('Original description before update')
+    })
+
+    test('TC48a: Edit page has pre-populated visibility and all visibility options', async ({ page }) => {
+        await page.goto(`/components/edit/${componentId}`)
+        await waitForComponentPageLoad(page)
+        const visibility = page.locator(selectors.form.visibility)
+        await expect(visibility).toHaveValue('ME_AND_MODERATORS', { timeout: 15000 })
+        await expect(visibility.locator('option')).toHaveText([
+            'Private',
+            'Me and Moderators',
+            'Group and Moderators',
+            'Everyone',
+        ])
+        await visibility.selectOption('PRIVATE')
+        await expect(visibility).toHaveValue('PRIVATE')
     })
 
     // ─── Update Flow ─────────────────────────────────────
