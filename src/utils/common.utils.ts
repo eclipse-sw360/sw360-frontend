@@ -394,10 +394,23 @@ const formatDocumentTitle = (name: string, version?: string | null): string => {
     return `${nameWithVersion} | SW360`.trim()
 }
 
+/**
+ * Capitalizes the first letter of each word in a string, replacing underscores with spaces.
+ * Useful for formatting enum values or other strings.
+ * @param text The string to capitalize.
+ * @returns The capitalized string.
+ */
+const Capitalize = (text: string) => {
+    return text
+        ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+        : undefined
+}
+
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
     createUrlWithParams,
+    Capitalize,
     isNullEmptyOrUndefinedArray,
     isCrAllowed,
     getIdFromUrl,

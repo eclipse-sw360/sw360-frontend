@@ -29,9 +29,6 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type EmbeddedECC = Embedded<ECCInterface, 'sw360:releases'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 function ECC(): ReactNode {
     const t = useTranslations('default')
     const [sorting, setSorting] = useState<SortingState>([])
@@ -42,7 +39,7 @@ function ECC(): ReactNode {
                 id: 'status',
                 header: t('Status'),
                 accessorFn: (row) => row.eccInformation?.eccStatus ?? '',
-                cell: ({ row }) => <>{Capitalize(row.original.eccInformation.eccStatus)}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.eccInformation.eccStatus)}</>,
                 meta: {
                     width: '10%',
                 },

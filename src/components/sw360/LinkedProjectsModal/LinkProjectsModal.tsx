@@ -49,9 +49,6 @@ interface Props {
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 export default function LinkProjectsModal({
     projectPayload,
     setProjectPayload,
@@ -132,7 +129,9 @@ export default function LinkProjectsModal({
                             {state && clearingState && (
                                 <div className='text-center'>
                                     <OverlayTrigger
-                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
+                                        overlay={
+                                            <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state)}`}</Tooltip>
+                                        }
                                     >
                                         {state === 'ACTIVE' ? (
                                             <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -144,7 +143,7 @@ export default function LinkProjectsModal({
                                     </OverlayTrigger>
                                     <OverlayTrigger
                                         overlay={
-                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
+                                            <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(clearingState)}`}</Tooltip>
                                         }
                                     >
                                         {clearingState === 'OPEN' ? (

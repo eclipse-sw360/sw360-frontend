@@ -32,9 +32,6 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { ExpandableList } from './ExpandableComponents'
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
 interface ProjectInfo {
@@ -154,7 +151,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             {
                 id: 'status',
                 header: t('Status'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].status ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].status ?? '')}</>,
                 meta: {
                     width: '10%',
                 },
@@ -162,7 +159,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             {
                 id: 'type',
                 header: t('Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].obligationType ?? '')}</>,
                 meta: {
                     width: '10%',
                 },

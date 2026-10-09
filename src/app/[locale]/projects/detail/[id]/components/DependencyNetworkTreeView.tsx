@@ -27,7 +27,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
 import ExpandableTextList from '@/components/ExpandableList/ExpandableTextLink'
-import { Attachment, ErrorDetails, FilterOption, NestedRows, TypedEntity } from '@/object-types'
+import { Attachment, ErrorDetails, FilterOption, NestedRows, ReleaseRelationship, TypedEntity } from '@/object-types'
 import { ApiError } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import CommonUtils from '@/utils/common.utils'
@@ -109,52 +109,16 @@ const typeFilterOptions: FilterOption[] = [
     },
 ]
 
-const relationFilterOptions: FilterOption[] = [
-    {
-        tag: 'Contained',
-        value: 'CONTAINED',
-    },
-    {
-        tag: 'Related',
-        value: 'REFERRED',
-    },
-    {
-        tag: 'Unknown',
-        value: 'UNKNOWN',
-    },
-    {
-        tag: 'Dynamically Linked',
-        value: 'DYNAMICALLY_LINKED',
-    },
-    {
-        tag: 'Statically Linked',
-        value: 'STATICALLY_LINKED',
-    },
-    {
-        tag: 'Side By Side',
-        value: 'SIDE_BY_SIDE',
-    },
-    {
-        tag: 'Standalone',
-        value: 'STANDALONE',
-    },
-    {
-        tag: 'Internal Use',
-        value: 'INTERNAL_USE',
-    },
-    {
-        tag: 'Optional',
-        value: 'OPTIONAL',
-    },
-    {
-        tag: 'To Be Replaced',
-        value: 'TO_BE_REPLACED',
-    },
-    {
-        tag: 'Code Snippet',
-        value: 'CODE_SNIPPET',
-    },
-]
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map((value) => {
+    let tag = CommonUtils.Capitalize(value)
+    if (value === ReleaseRelationship.REFERRED) {
+        tag = 'Related'
+    }
+    return {
+        tag: tag,
+        value: value,
+    } as FilterOption
+})
 
 const stateFilterOptions: FilterOption[] = [
     {
@@ -186,9 +150,6 @@ const stateFilterOptions: FilterOption[] = [
         value: 'INTERNAL_USE_SCAN_AVAILABLE',
     },
 ]
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 type TypedProject = TypedEntity<ProjectClearingState, 'project'>
 
@@ -290,7 +251,9 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                 cell: ({ row }) => {
                     if (row.original.node.type === 'project') {
                         return (
-                            <div className='text-center'>{Capitalize(row.original.node.entity.projectType ?? '')}</div>
+                            <div className='text-center'>
+                                {CommonUtils.Capitalize(row.original.node.entity.projectType ?? '')}
+                            </div>
                         )
                     } else {
                         return (
@@ -330,7 +293,22 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                 },
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
-                        return <div className='text-center'>{row.original.node.entity.releaseRelationship}</div>
+                        return (
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `release_relation_${row.original.node.entity.releaseRelationship ? row.original.node.entity.releaseRelationship.toLowerCase() : 'contained'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(row.original.node.entity.releaseRelationship ?? '')}
+                                </span>
+                            </OverlayTrigger>
+                        )
                     }
                 },
                 meta: {
@@ -395,7 +373,9 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                         return (
                             <div className='text-center'>
                                 <OverlayTrigger
-                                    overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state ?? '')}`}</Tooltip>}
+                                    overlay={
+                                        <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state ?? '')}`}</Tooltip>
+                                    }
                                 >
                                     {state === 'ACTIVE' ? (
                                         <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -405,7 +385,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                                 </OverlayTrigger>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -426,7 +406,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                             <div className='text-center'>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Release Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -455,7 +435,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                     if (row.original.node.type === 'release') {
                         return (
                             <div className='text-center'>
-                                {Capitalize(row.original.node.entity.releaseMainLineState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.releaseMainLineState ?? '')}
                             </div>
                         )
                     }
@@ -472,7 +452,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                     if (row.original.node.type === 'release') {
                         return (
                             <div className='text-center'>
-                                {Capitalize(row.original.node.entity.mainlineState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.mainlineState ?? '')}
                             </div>
                         )
                     }

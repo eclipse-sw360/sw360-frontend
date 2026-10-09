@@ -41,9 +41,6 @@ interface SearchReleasesModalProps {
 
 type EmbeddedReleases = Embedded<ReleaseDetail, 'sw360:releases'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 export default function SearchReleasesModal({
     show,
     setShow,
@@ -156,7 +153,7 @@ export default function SearchReleasesModal({
                 id: 'clearingState',
                 header: t('Clearing State'),
                 accessorKey: 'clearingState',
-                cell: ({ row }) => <>{Capitalize(row.original.clearingState ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.clearingState ?? '')}</>,
                 meta: {
                     width: '15%',
                 },
@@ -165,7 +162,7 @@ export default function SearchReleasesModal({
                 id: 'mainlineState',
                 header: t('Mainline State'),
                 accessorKey: 'mainlineState',
-                cell: ({ row }) => <>{Capitalize(row.original.mainlineState ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.mainlineState ?? '')}</>,
                 meta: {
                     width: '15%',
                 },
