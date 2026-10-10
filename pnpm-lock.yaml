@@ -61,7 +61,7 @@ importers:
         version: 2.0.1
       preact:
         specifier: ^10.29.8
-        version: 10.29.8(preact-render-to-string@5.2.6(preact@10.29.8))
+        version: 10.29.8(preact-render-to-string@5.2.6)
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -136,8 +136,8 @@ importers:
         specifier: ^5.7.0
         version: 5.7.0(react@19.3.0)
       systeminformation:
-        specifier: ^5.33.1
-        version: 5.33.1
+        specifier: ^5.33.15
+        version: 5.33.15
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.47(@swc/helpers@0.5.23))(@types/node@26.3.0)(typescript@7.0.2)
@@ -2340,14 +2340,8 @@ packages:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
 
-  systeminformation@5.33.1:
-    resolution: {integrity: sha512-DEN6ICHk3Tk0Uf/hrAHh7xlt7iL5CJFBtPZinA0H62DrGG/KPKqq/Nzj6lCXPS4Ay/sf/14zNnk9LpqKzBIc+w==}
-    engines: {node: '>=10.0.0'}
-    os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
-    hasBin: true
-
-  systeminformation@5.33.8:
-    resolution: {integrity: sha512-v4F6OGYGh7wDvV68YmjOmZwGixV9A/GQ7d2b84t0UF4CaOy9jipNWIJDkHqYDYiTPuiojqlwVQd0hfUKOUN7tQ==}
+  systeminformation@5.33.15:
+    resolution: {integrity: sha512-s5RloL0F7xhN0ZjfHtLGnbf7EW74EI0N8NFL+1xR7Oxz9QA33obNZsl7lyfnJOhN04E/kGFPoJPlvY7TZ5fzmw==}
     engines: {node: '>=10.0.0'}
     os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
     hasBin: true
@@ -3627,7 +3621,7 @@ snapshots:
       proxy-from-env: 1.0.0
       request-progress: 3.0.0
       supports-color: 8.1.1
-      systeminformation: 5.33.8
+      systeminformation: 5.33.15
       tmp: 0.2.7
       tree-kill: 1.2.2
       untildify: 4.0.0
@@ -4118,7 +4112,7 @@ snapshots:
       next: 16.3.8(@playwright/test@1.63.0)(@types/node@26.3.0)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)
       oauth: 0.9.15
       openid-client: 5.7.1
-      preact: 10.29.8(preact-render-to-string@5.2.6(preact@10.29.8))
+      preact: 10.29.8(preact-render-to-string@5.2.6)
       preact-render-to-string: 5.2.6(preact@10.29.8)
       react: 19.3.0
       react-dom: 19.2.8(react@19.3.0)
@@ -4264,10 +4258,10 @@ snapshots:
 
   preact-render-to-string@5.2.6(preact@10.29.8):
     dependencies:
-      preact: 10.29.8(preact-render-to-string@5.2.6(preact@10.29.8))
+      preact: 10.29.8(preact-render-to-string@5.2.6)
       pretty-format: 3.8.0
 
-  preact@10.29.8(preact-render-to-string@5.2.6(preact@10.29.8)):
+  preact@10.29.8(preact-render-to-string@5.2.6):
     optionalDependencies:
       preact-render-to-string: 5.2.6(preact@10.29.8)
 
@@ -4574,9 +4568,7 @@ snapshots:
     dependencies:
       has-flag: 4.0.0
 
-  systeminformation@5.33.1: {}
-
-  systeminformation@5.33.8: {}
+  systeminformation@5.33.15: {}
 
   tabbable@6.4.0: {}
 
