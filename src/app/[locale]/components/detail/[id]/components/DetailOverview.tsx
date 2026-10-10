@@ -42,6 +42,7 @@ import DownloadService from '@/services/download.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
 
@@ -336,31 +337,31 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                             <ListGroup>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.SUMMARY}
+                                    {...sidebarTabLinkProps(CommonTabIds.SUMMARY)}
                                 >
                                     <div className='my-2'>{t('Summary')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.RELEASES}
+                                    {...sidebarTabLinkProps(CommonTabIds.RELEASES)}
                                 >
                                     <div className='my-2'>{t('Release Overview')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.ATTACHMENTS}
+                                    {...sidebarTabLinkProps(CommonTabIds.ATTACHMENTS)}
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.VULNERABILITIES}
+                                    {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
                                 >
                                     <div className='my-2'>{t('Vulnerabilities')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.CHANGE_LOG}
+                                    {...sidebarTabLinkProps(CommonTabIds.CHANGE_LOG)}
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>
                                 </ListGroup.Item>
