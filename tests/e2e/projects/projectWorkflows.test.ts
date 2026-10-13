@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import { expect, test } from '@playwright/test'
+import ExportReportFormat from '../../../src/object-types/enums/ExportReportFormat'
 import { projectFixtures } from './fixtures'
 import { selectors } from './selectors'
 import {
@@ -155,13 +156,42 @@ test.describe('Projects - Import SBOM', () => {
 /**
  * Projects Export Spreadsheet — Tests for export functionality.
  */
-test.describe('Projects - Export Spreadsheet', () => {
+test.describe('Projects - Export List', () => {
+    for (const format of Object.values(ExportReportFormat)) {
+        for (const withLinkedReleases of [false, true]) {
+            test(`Export ${format}, linked releases ${withLinkedReleases}: request and error notification`, async ({ page }) => {
+                await gotoProjectsPage(page)
+                await page.route('**/reports?**', async (route) => {
+                    await route.fulfill({ status: 403, body: 'Forbidden' })
+                })
+                await page.getByRole('button', { name: 'Export List' }).click()
+                const modal = page.getByRole('dialog', { name: 'Export List' })
+                await modal.getByLabel('Export format').selectOption(format)
+                if (withLinkedReleases) {
+                    await modal.getByRole('radio', { name: 'Projects with linked releases' }).check()
+                }
+                const requestPromise = page.waitForRequest((request) => {
+                    const url = new URL(request.url())
+                    return url.pathname.endsWith('/reports') && url.searchParams.get('module') === 'PROJECTS'
+                })
+                await modal.getByRole('button', { name: 'Export', exact: true }).click()
+                const request = await requestPromise
+                const query = new URL(request.url()).searchParams
+                expect(query.get('format')).toBe(format)
+                expect(query.get('withlinkedreleases')).toBe(String(withLinkedReleases))
+                await expect(page.getByText('Access Denied', { exact: true })).toBeVisible()
+                await expect(modal.getByRole('alert')).toHaveCount(0)
+                await expect(modal.getByRole('button', { name: 'Export', exact: true })).toBeEnabled()
+            })
+        }
+    }
+
     test('TC80: Export projects only triggers download', async ({ page }) => {
         test.setTimeout(60000)
         await gotoProjectsPage(page)
         await waitForProjectPageLoad(page)
 
-        await page.getByRole('button', { name: 'Export Spreadsheet' }).click()
+        await page.getByRole('button', { name: 'Export List' }).click()
         const downloadPromise = page.waitForEvent('download', { timeout: 30000 }).catch(() => null)
         const reportResponsePromise = page
             .waitForResponse(
@@ -169,7 +199,9 @@ test.describe('Projects - Export Spreadsheet', () => {
                 { timeout: 30000 },
             )
             .catch(() => null)
-        await page.getByText('Projects only').click()
+        const modal = page.getByRole('dialog', { name: 'Export List' })
+        await modal.getByRole('radio', { name: 'Projects only', exact: true }).check()
+        await modal.getByRole('button', { name: 'Export', exact: true }).click()
 
         const [download, reportResponse] = await Promise.all([
             downloadPromise,
@@ -197,9 +229,11 @@ test.describe('Projects - Export Spreadsheet', () => {
         await gotoProjectsPage(page)
         await waitForProjectPageLoad(page)
 
-        await page.getByRole('button', { name: 'Export Spreadsheet' }).click()
+        await page.getByRole('button', { name: 'Export List' }).click()
         const downloadPromise = page.waitForEvent('download', { timeout: 30000 }).catch(() => null)
-        await page.getByText('Projects with linked releases').click()
+        const modal = page.getByRole('dialog', { name: 'Export List' })
+        await modal.getByRole('radio', { name: 'Projects with linked releases' }).check()
+        await modal.getByRole('button', { name: 'Export', exact: true }).click()
 
         const download = await downloadPromise
         if (download) {

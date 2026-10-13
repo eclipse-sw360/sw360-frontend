@@ -44,6 +44,7 @@ import ActionType from './enums/ActionType'
 import ClearingRequestStates from './enums/ClearingRequestStates'
 import ConfigKeys from './enums/ConfigKeys'
 import DocumentTypes from './enums/DocumentTypes'
+import ExportReportFormat from './enums/ExportReportFormat'
 import MainlineState from './enums/MainlineState'
 import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
 import ObligationType from './enums/ObligationType'
@@ -268,6 +269,7 @@ export {
     ConfigKeys,
     ConfigurationContainers,
     DocumentTypes,
+    ExportReportFormat,
     LicenseTabIds,
     MainlineState,
     MaxEntries,
