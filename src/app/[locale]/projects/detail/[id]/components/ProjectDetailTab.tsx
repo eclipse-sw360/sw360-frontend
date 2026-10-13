@@ -38,6 +38,11 @@ import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import {
+    getProjectApiResponse,
+    type ProjectPrefetchTarget,
+    prefetchProjectTabData,
+} from '@/utils/api/projectApiQueries'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -51,6 +56,14 @@ import LinkedPackagesTab from './LinkedPackagesTab'
 import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
+
+const PROJECT_TAB_PREFETCH_TARGETS: Partial<Record<string, ProjectPrefetchTarget>> = {
+    licenseClearing: 'licenseClearing',
+    obligations: 'obligations',
+    attachmentUsages: 'attachmentUsages',
+    vulnerabilities: 'vulnerabilities',
+    changeLog: 'changeLog',
+}
 
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
@@ -131,7 +144,17 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
+        const prefetchTarget = PROJECT_TAB_PREFETCH_TARGETS[key ?? '']
+        if (prefetchTarget) void prefetchProjectTabData(projectId, prefetchTarget)
         router.push(`?tab=${key}`)
+    }
+
+    const prefetchOnIntent = (target: ProjectPrefetchTarget) => {
+        const prefetch = () => void prefetchProjectTabData(projectId, target)
+        return {
+            onFocus: prefetch,
+            onMouseEnter: prefetch,
+        }
     }
 
     useEffect(() => {
@@ -153,7 +176,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
 
-                const project = (await (await ApiUtils.GET(`projects/${projectId}`, signal)).json()) as Project
+                const project = (await (await getProjectApiResponse(`projects/${projectId}`, signal)).json()) as Project
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -387,6 +410,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='licenseClearing'
+                                    {...prefetchOnIntent('licenseClearing')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
@@ -402,6 +426,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='obligations'
+                                    {...prefetchOnIntent('obligations')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
@@ -441,6 +466,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='attachmentUsages'
+                                    {...prefetchOnIntent('attachmentUsages')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachment Usages')}</div>
@@ -448,6 +474,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilities'
+                                    {...prefetchOnIntent('vulnerabilities')}
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={vulnerabilitiesBadgeClassName}
@@ -460,6 +487,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='changeLog'
+                                    {...prefetchOnIntent('changeLog')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>

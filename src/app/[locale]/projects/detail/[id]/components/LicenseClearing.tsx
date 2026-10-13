@@ -30,6 +30,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getProjectApiResponse, logPrefetch, prefetchGenerateLicenseInfo } from '@/utils/api/projectApiQueries'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
 import DependencyNetworkTreeView from './DependencyNetworkTreeView'
@@ -92,7 +93,7 @@ function LicenseClearing({
 
         void (async () => {
             try {
-                const linkedProjectsResponse = await ApiUtils.GET(
+                const linkedProjectsResponse = await getProjectApiResponse(
                     `projects/${projectId}/linkedProjects?transitive=true`,
                     signal,
                 )
@@ -136,7 +137,7 @@ function LicenseClearing({
                     .join('&')
 
                 const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? `&${filterParams}` : ''}`
-                const response = await ApiUtils.GET(url, signal)
+                const response = await getProjectApiResponse(url, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -166,6 +167,13 @@ function LicenseClearing({
         const isCalledFromProjectLicenseTab = true
         sessionStorage.setItem('isCalledFromProjectLicenseTab', JSON.stringify(isCalledFromProjectLicenseTab))
         router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`)
+    }
+
+    const prefetchLicenseInfo = (withSubProjects: boolean): void => {
+        const destination = `/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`
+        router.prefetch(destination)
+        logPrefetch('route-requested', destination)
+        void prefetchGenerateLicenseInfo(projectId, withSubProjects).catch(() => undefined)
     }
 
     const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
@@ -262,10 +270,18 @@ function LicenseClearing({
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
-                                        <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
+                                        <Dropdown.Item
+                                            onMouseEnter={() => prefetchLicenseInfo(false)}
+                                            onFocus={() => prefetchLicenseInfo(false)}
+                                            onClick={() => generateLicenseInfo(false)}
+                                        >
                                             {t('Projects only')}
                                         </Dropdown.Item>
-                                        <Dropdown.Item onClick={() => generateLicenseInfo(true)}>
+                                        <Dropdown.Item
+                                            onMouseEnter={() => prefetchLicenseInfo(true)}
+                                            onFocus={() => prefetchLicenseInfo(true)}
+                                            onClick={() => generateLicenseInfo(true)}
+                                        >
                                             {t('Projects with sub projects')}
                                         </Dropdown.Item>
                                     </Dropdown.Menu>
