@@ -50,6 +50,12 @@
       "@/components/*": [
         "./src/components/*"
       ],
+      "@/config/*": [
+        "./src/config/*"
+      ],
+      "@/config/permissions": [
+        "./src/config/permissions"
+      ],
       "@/constants": [
         "./src/object-types/Constants"
       ],

@@ -299,4 +299,5 @@ function AddProjects(): JSX.Element {
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(AddProjects, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])

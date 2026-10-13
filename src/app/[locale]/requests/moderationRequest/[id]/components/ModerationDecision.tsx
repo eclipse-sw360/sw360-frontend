@@ -112,4 +112,5 @@ function ModerationDecision({ data, moderationRequestPayload, setModerationReque
 // Pass notAllowedUserGroups to AccessControl to restrict access
 export default AccessControl(ModerationDecision, [
     UserGroupType.SECURITY_USER,
+    UserGroupType.VIEWER,
 ])
