@@ -18,6 +18,7 @@ import { BsCaretRightFill } from 'react-icons/bs'
 import { PaddedCell, SW360Table } from '@/components/sw360'
 import { NestedRows, TypedEntity } from '@/object-types'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getProjectApiResponse } from '@/utils/api/projectApiQueries'
 
 interface ViewRelease {
     id: string
@@ -83,7 +84,10 @@ export default function ReleaseView({
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(`projects/${projectId}/licenseObligations?view=true`, signal)
+                const response = await getProjectApiResponse(
+                    `projects/${projectId}/licenseObligations?view=true`,
+                    signal,
+                )
                 const obligations: ObligationsReleaseView = await response.json()
                 const tableData: NestedRows<TypedRelease | TypedLicense | TypedObligation | TypedLicenseType>[] = []
                 for (const x of obligations.processedLicenses) {

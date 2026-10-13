@@ -34,6 +34,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.104.2",
     "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
     "country-list": "^2.4.1",

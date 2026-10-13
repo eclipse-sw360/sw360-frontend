@@ -28,6 +28,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { clearProjectLicensePrefetchCache } from '@/utils/api/projectApiQueries'
 
 const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map((value) => {
     let tag = CommonUtils.Capitalize(value)
@@ -174,6 +175,7 @@ export default function DownloadLicenseInfoModal({
             setLoading(true)
             const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
             if (response.status === StatusCodes.CREATED || response.status === StatusCodes.OK) {
+                clearProjectLicensePrefetchCache()
                 await downloadHandler(response)
             } else if (response.status === StatusCodes.FORBIDDEN) {
                 MessageService.warn(t('Could not save the attachment usages'))

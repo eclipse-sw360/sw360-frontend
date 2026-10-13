@@ -12,6 +12,7 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useEffect, useMemo, useRef } from 'react'
+import { clearProjectLicensePrefetchCache } from '@/utils/api/projectApiQueries'
 import {
     buildLoginRedirectPath,
     isProtectedRoute,
@@ -25,6 +26,23 @@ export default function SessionStatusHandler() {
     const searchParams = useSearchParams()
     const { data: session, status } = useSession()
     const isHandlingSessionRef = useRef(false)
+    const accessTokenRef = useRef(session?.user.access_token)
+    const accessToken = session?.user.access_token
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            clearProjectLicensePrefetchCache()
+            accessTokenRef.current = undefined
+            return
+        }
+        if (status === 'authenticated' && accessTokenRef.current !== accessToken) {
+            clearProjectLicensePrefetchCache()
+            accessTokenRef.current = accessToken
+        }
+    }, [
+        accessToken,
+        status,
+    ])
 
     const currentPathWithSearch = useMemo(() => {
         const query = searchParams.toString()
