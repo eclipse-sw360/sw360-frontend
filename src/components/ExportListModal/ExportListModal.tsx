@@ -20,27 +20,30 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
-interface ExportProjectListModalProps {
+interface ExportListModalProps {
+    module: 'projects' | 'components'
     onHide: () => void
 }
 
-export default function ExportProjectListModal({ onHide }: ExportProjectListModalProps): JSX.Element {
+export default function ExportListModal({ module, onHide }: ExportListModalProps): JSX.Element {
     const t = useTranslations('default')
     const params = useSearchParams()
-    const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
+    const mailRequestForReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
     const [exportFormat, setExportFormat] = useState<ExportReportFormat>(ExportReportFormat.XLSX)
     const [exportWithLinkedReleases, setExportWithLinkedReleases] = useState<boolean>(false)
     const [exporting, setExporting] = useState<boolean>(false)
+    const isProject = module === 'projects'
 
-    const exportProjectList = async (): Promise<void> => {
+    const exportList = async (): Promise<void> => {
         if (exporting) return
         setExporting(true)
         try {
-            const mailEnabled = mailRequestForProjectReport === 'true'
-            const exportParams = new URLSearchParams(params.toString())
-            exportParams.set('module', 'PROJECTS')
+            const mailEnabled = mailRequestForReport === 'true'
+            const exportParams = new URLSearchParams(isProject ? params.toString() : '')
+            exportParams.set('module', isProject ? 'PROJECTS' : 'components')
             exportParams.set('withlinkedreleases', String(exportWithLinkedReleases))
             exportParams.set('format', exportFormat)
+            if (!isProject) exportParams.set('mailrequest', String(mailEnabled))
             const url = `reports?${exportParams.toString()}`
 
             let statusCode: number | undefined
@@ -49,7 +52,7 @@ export default function ExportProjectListModal({ onHide }: ExportProjectListModa
                 statusCode = response.status
             } else {
                 const currentDate = new Date().toISOString().split('T')[0]
-                const fileName = `Projects-${currentDate}.${exportFormat}`
+                const fileName = `${isProject ? 'Projects' : 'components'}-${currentDate}.${exportFormat}`
                 statusCode = await DownloadService.download(url, fileName)
             }
 
@@ -83,15 +86,15 @@ export default function ExportProjectListModal({ onHide }: ExportProjectListModa
             centered
             backdrop={exporting ? 'static' : true}
             keyboard={!exporting}
-            aria-labelledby='export-project-list-title'
+            aria-labelledby='export-list-title'
         >
             <Modal.Header closeButton={!exporting}>
-                <Modal.Title id='export-project-list-title'>{t('Export List')}</Modal.Title>
+                <Modal.Title id='export-list-title'>{t('Export List')}</Modal.Title>
             </Modal.Header>
             <Form
                 onSubmit={(event) => {
                     event.preventDefault()
-                    void exportProjectList()
+                    void exportList()
                 }}
             >
                 <Modal.Body>
@@ -99,25 +102,25 @@ export default function ExportProjectListModal({ onHide }: ExportProjectListModa
                         className='mb-3'
                         disabled={exporting}
                     >
-                        <legend className='fs-6'>{t('Projects')}</legend>
+                        <legend className='fs-6'>{isProject ? t('Projects') : t('Components')}</legend>
                         <Form.Check
                             type='radio'
-                            id='export-projects-only'
-                            name='projectExportScope'
-                            label={t('Projects only')}
+                            id='export-list-only'
+                            name='exportListScope'
+                            label={isProject ? t('Projects only') : t('Components only')}
                             checked={!exportWithLinkedReleases}
                             onChange={() => setExportWithLinkedReleases(false)}
                         />
                         <Form.Check
                             type='radio'
-                            id='export-projects-with-releases'
-                            name='projectExportScope'
-                            label={t('Projects with linked releases')}
+                            id='export-list-with-releases'
+                            name='exportListScope'
+                            label={isProject ? t('Projects with linked releases') : t('Components with releases')}
                             checked={exportWithLinkedReleases}
                             onChange={() => setExportWithLinkedReleases(true)}
                         />
                     </fieldset>
-                    <Form.Group controlId='project-export-format'>
+                    <Form.Group controlId='export-list-format'>
                         <Form.Label>{t('Export format')}</Form.Label>
                         <Form.Select
                             value={exportFormat}

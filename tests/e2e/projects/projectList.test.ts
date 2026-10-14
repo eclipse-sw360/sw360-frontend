@@ -57,10 +57,15 @@ test.describe('Projects List Page', () => {
         await exportToggle.click()
 
         const modal = page.getByRole('dialog', { name: 'Export List' })
-        await expect(modal.getByRole('radio', { name: 'Projects only', exact: true })).toBeChecked()
+        await expect(modal.getByRole('radio', { name: 'Projects Only', exact: true })).toBeChecked()
         await expect(modal.getByRole('radio', { name: 'Projects with linked releases' })).not.toBeChecked()
         await expect(modal.getByLabel('Export format')).toHaveValue(ExportReportFormat.XLSX)
-        await expect(modal.locator('option')).toHaveText(['XLSX', 'CSV', 'JSON', 'XML'])
+        await expect(modal.locator('option')).toHaveText([
+            ExportReportFormat.XLSX.toUpperCase(),
+            ExportReportFormat.CSV.toUpperCase(),
+            ExportReportFormat.JSON.toUpperCase(),
+            ExportReportFormat.XML.toUpperCase(),
+        ])
         await modal.getByLabel('Export format').selectOption(ExportReportFormat.CSV)
         await modal.getByRole('button', { name: 'Cancel' }).click()
         await expect(modal).toBeHidden()

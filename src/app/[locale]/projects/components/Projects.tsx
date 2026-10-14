@@ -35,6 +35,7 @@ import {
     BsPaperclip,
     BsPencil,
 } from 'react-icons/bs'
+import ExportListModal from '@/components/ExportListModal/ExportListModal'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import {
@@ -58,7 +59,6 @@ import ImportSBOMMetadata from '../../../../object-types/cyclonedx/ImportSBOMMet
 import CreateClearingRequestModal from '../detail/[id]/components/CreateClearingRequestModal'
 import ViewClearingRequestModal from '../detail/[id]/components/ViewClearingRequestModal'
 import DeleteProjectDialog from './DeleteProjectDialog'
-import ExportProjectListModal from './ExportProjectListModal'
 import ImportSBOMModal from './ImportSBOMModal'
 
 type EmbeddedProjects = Embedded<TypeProject, 'sw360:projects'>
@@ -1060,7 +1060,12 @@ function Project(): JSX.Element {
 
     return (
         <>
-            {showExportListModal && <ExportProjectListModal onHide={() => setShowExportListModal(false)} />}
+            {showExportListModal && (
+                <ExportListModal
+                    module='projects'
+                    onHide={() => setShowExportListModal(false)}
+                />
+            )}
             <ImportSBOMModal
                 importSBOMMetadata={importSBOMMetadata}
                 setImportSBOMMetadata={setImportSBOMMetadata}

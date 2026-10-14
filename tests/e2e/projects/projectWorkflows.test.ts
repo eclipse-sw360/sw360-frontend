@@ -179,7 +179,7 @@ test.describe('Projects - Export List', () => {
                 const query = new URL(request.url()).searchParams
                 expect(query.get('format')).toBe(format)
                 expect(query.get('withlinkedreleases')).toBe(String(withLinkedReleases))
-                await expect(page.getByText('Access Denied', { exact: true })).toBeVisible()
+                await expect(page.locator('.global-message .alert-warning')).toContainText('Access Denied!')
                 await expect(modal.getByRole('alert')).toHaveCount(0)
                 await expect(modal.getByRole('button', { name: 'Export', exact: true })).toBeEnabled()
             })
@@ -200,7 +200,7 @@ test.describe('Projects - Export List', () => {
             )
             .catch(() => null)
         const modal = page.getByRole('dialog', { name: 'Export List' })
-        await modal.getByRole('radio', { name: 'Projects only', exact: true }).check()
+        await modal.getByRole('radio', { name: 'Projects Only', exact: true }).check()
         await modal.getByRole('button', { name: 'Export', exact: true }).click()
 
         const [download, reportResponse] = await Promise.all([
