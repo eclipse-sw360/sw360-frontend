@@ -1053,9 +1053,7 @@ export default function TreeView({
                     <SW360Table
                         table={table}
                         showProcessing={showProcessing}
-                        noRecordsFoundMessage={t(
-                            'No releases linked to this project. Add releases to view license clearing information.',
-                        )}
+                        noRecordsFoundMessage={t('No releases linked to this project')}
                     />
                 ) : (
                     <div className='col-12 mt-1 text-center'>

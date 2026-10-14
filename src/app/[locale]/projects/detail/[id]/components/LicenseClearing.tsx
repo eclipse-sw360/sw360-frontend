@@ -53,6 +53,7 @@ function LicenseClearing({
     clearingState,
     visibility,
     totalReleases,
+    hasLinkedProjects,
 }: {
     projectId: string
     projectName: string
@@ -63,6 +64,7 @@ function LicenseClearing({
     clearingState: string
     visibility?: string
     totalReleases?: number
+    hasLinkedProjects?: boolean
 }): JSX.Element {
     const t = useTranslations('default')
     const [key, setKey] = useState('tree-view')
@@ -92,7 +94,7 @@ function LicenseClearing({
 
         setIsLoadingLinkedProjects(true)
 
-        if (totalReleases === 0) {
+        if (totalReleases === 0 && hasLinkedProjects === false) {
             setLinkedProjectsData([])
             setIsLoadingLinkedProjects(false)
             return
@@ -129,6 +131,7 @@ function LicenseClearing({
     }, [
         projectId,
         totalReleases,
+        hasLinkedProjects,
     ])
 
     useEffect(() => {
@@ -137,7 +140,7 @@ function LicenseClearing({
 
         setIsLoadingLicenseClearing(true)
 
-        if (totalReleases === 0) {
+        if (totalReleases === 0 && hasLinkedProjects === false) {
             setLicenseClearingData({
                 linkedReleases: [],
             } as unknown as LicenseClearingData)
@@ -174,6 +177,7 @@ function LicenseClearing({
         projectId,
         columnFilters,
         totalReleases,
+        hasLinkedProjects,
     ])
 
     const generateSourceCodeBundle = (withSubProjects: boolean) => {

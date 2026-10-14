@@ -958,6 +958,7 @@
     "No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading": "Aucune sélection précédente trouvée. \nSi vous disposez des autorisations d'écriture sur ce projet, votre sélection sera automatiquement stockée lors du téléchargement.",
     "No recent components available": "Aucun composant récent disponible",
     "No recent releases available": "Aucune version récente disponible",
+    "No releases linked to this project": "Aucune version n'est liée à ce projet. Ajoutez des versions pour afficher les informations de vérification des licences.",
     "No source release found": "Aucune version source trouvée",
     "No subscriptions available": "Aucun abonnement disponible.",
     "No token found": "Aucun jeton trouvé. \nVeuillez ajouter un nouveau jeton ici!",

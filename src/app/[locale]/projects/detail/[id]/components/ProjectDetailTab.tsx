@@ -58,6 +58,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
+    const [isClearingDetailCountLoaded, setIsClearingDetailCountLoaded] = useState(false)
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
     const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
     const [obligationsLoading, setObligationsLoading] = useState<boolean>(false)
@@ -74,6 +75,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const DEFAULT_ACTIVE_TAB = 'summary'
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>()
+    const [hasLinkedProjects, setHasLinkedProjects] = useState<boolean>()
+    const [isProjectLinksLoaded, setIsProjectLinksLoaded] = useState(false)
     const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
     const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
     const TABS = [
@@ -138,6 +141,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
+        setIsProjectLinksLoaded(false)
+        setHasLinkedProjects(undefined)
 
         void (async () => {
             try {
@@ -154,13 +159,18 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
 
-                const project = (await (await ApiUtils.GET(`projects/${projectId}`, signal)).json()) as Project
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
+                const projectResponse = await ApiUtils.GET(`projects/${projectId}`, signal)
+                if (projectResponse.status !== StatusCodes.OK) {
+                    const err = (await projectResponse.json()) as ErrorDetails
                     throw new ApiError(err.message, {
-                        status: response.status,
+                        status: projectResponse.status,
                     })
                 }
+                const project = (await projectResponse.json()) as Project
+                setHasLinkedProjects(
+                    (project.linkedProjects?.length ?? 0) > 0 ||
+                        (project._embedded?.['sw360:projects']?.length ?? 0) > 0,
+                )
                 const ob = {} as {
                     [k: string]: LinkedProjectData
                 }
@@ -182,6 +192,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 })
             } catch (error) {
                 ApiUtils.reportError(error)
+            } finally {
+                if (!signal.aborted) setIsProjectLinksLoaded(true)
             }
         })()
 
@@ -193,6 +205,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
+        setIsClearingDetailCountLoaded(false)
+        setClearingDetailCount(undefined)
         void (async () => {
             try {
                 const response = await ApiUtils.GET(`projects/${projectId}/clearingDetailsCount`, signal)
@@ -206,6 +220,8 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setClearingDetailCount(data)
             } catch (error: unknown) {
                 ApiUtils.reportError(error)
+            } finally {
+                if (!signal.aborted) setIsClearingDetailCountLoaded(true)
             }
         })()
         return () => controller.abort()
@@ -618,18 +634,22 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                         )}
                                     </Tab.Pane>
                                     <Tab.Pane eventKey='licenseClearing'>
-                                        {summaryData && administrationData && (
-                                            <LicenseClearing
-                                                projectId={projectId}
-                                                projectName={summaryData.name}
-                                                projectVersion={summaryData.version ?? ''}
-                                                clearingRequestId={summaryData.clearingRequestId ?? ''}
-                                                businessUnit={summaryData.businessUnit ?? ''}
-                                                clearingState={summaryData.clearingState ?? ''}
-                                                visibility={summaryData.visibility}
-                                                totalReleases={clearingDetailCount?.totalReleases}
-                                            />
-                                        )}
+                                        {summaryData &&
+                                            administrationData &&
+                                            isClearingDetailCountLoaded &&
+                                            isProjectLinksLoaded && (
+                                                <LicenseClearing
+                                                    projectId={projectId}
+                                                    projectName={summaryData.name}
+                                                    projectVersion={summaryData.version ?? ''}
+                                                    clearingRequestId={summaryData.clearingRequestId ?? ''}
+                                                    businessUnit={summaryData.businessUnit ?? ''}
+                                                    clearingState={summaryData.clearingState ?? ''}
+                                                    visibility={summaryData.visibility}
+                                                    totalReleases={clearingDetailCount?.totalReleases}
+                                                    hasLinkedProjects={hasLinkedProjects}
+                                                />
+                                            )}
                                     </Tab.Pane>
                                     {isPackageFeatureEnabled && (
                                         <Tab.Pane eventKey='linkedPackages'>
