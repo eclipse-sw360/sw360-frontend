@@ -107,6 +107,18 @@ const FeatureConfigurations = (): JSX.Element => {
                                 </tr>
                             </thead>
                             <tbody>
+                                <tr id='custom-welcome-page'>
+                                    <td className='align-middle fw-bold'>{t('Custom welcome page')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={currentConfig[ConfigKeys.CUSTOM_WELCOME_PAGE] === 'true'}
+                                            propKey={ConfigKeys.CUSTOM_WELCOME_PAGE}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('custom_welcome_page_description')}</td>
+                                </tr>
                                 <tr id='spdx-document'>
                                     <td className='align-middle fw-bold'>{t('SPDX Document Feature')}</td>
                                     <td>

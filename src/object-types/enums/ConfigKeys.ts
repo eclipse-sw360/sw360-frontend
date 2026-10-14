@@ -10,6 +10,7 @@
 // License-Filename: LICENSE
 
 enum ConfigKeys {
+    CUSTOM_WELCOME_PAGE = 'custom.welcome.page',
     SPDX_DOCUMENT_ENABLED = 'spdx.document.enabled',
     ENABLE_FLEXIBLE_PROJECT_RELEASE_RELATIONSHIP = 'enable.flexible.project.release.relationship',
     IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED = 'component.visibility.restriction.enabled',

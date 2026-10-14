@@ -39,6 +39,14 @@ body {
     text-align: inherit;
 }
 
+.custom-welcome-frame {
+    display: flow-root;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    overflow-wrap: anywhere;
+}
+
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
