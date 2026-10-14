@@ -85,7 +85,7 @@ export default function EditClearingRequestInfo({
                         <td>
                             <input
                                 type='text'
-                                className='form-control'
+                                className='form-control cursor-pointer'
                                 id='editClearingRequest.requestingUser'
                                 readOnly={true}
                                 name='requestingUser'

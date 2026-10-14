@@ -53,9 +53,6 @@ type TypedRelease = TypedEntity<Release, 'release'>
 
 type TypedProject = TypedEntity<Project, 'project'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 function isLicenseInfoEnabled(type: string): boolean {
     const types = [
         'CLI',
@@ -629,7 +626,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 return (
                                     <div className='text-center'>
                                         {id &&
-                                            Capitalize(
+                                            CommonUtils.Capitalize(
                                                 memoizedAttachmentUsages?.['releaseIdToUsage']?.[id]?.releaseRelation ??
                                                     '',
                                             )}
@@ -640,7 +637,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 return (
                                     <div className='text-center'>
                                         {id &&
-                                            Capitalize(
+                                            CommonUtils.Capitalize(
                                                 memoizedAttachmentUsages?.['linkedProjects']?.[id]
                                                     ?.projectRelationship ?? '',
                                             )}

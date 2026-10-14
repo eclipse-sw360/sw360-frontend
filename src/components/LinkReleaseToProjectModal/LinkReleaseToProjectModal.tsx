@@ -31,9 +31,6 @@ interface Props {
 
 type EmbeddedProjects = Embedded<Project, 'sw360:projects'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Element => {
     const t = useTranslations('default')
     const [linkingReleaseName, setLinkingReleaseName] = useState('')
@@ -109,7 +106,9 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                             {state && clearingState && (
                                 <div className='text-center'>
                                     <OverlayTrigger
-                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
+                                        overlay={
+                                            <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state)}`}</Tooltip>
+                                        }
                                     >
                                         {state === 'ACTIVE' ? (
                                             <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -121,7 +120,7 @@ const LinkReleaseToProjectModal = ({ releaseId, show, setShow }: Props): JSX.Ele
                                     </OverlayTrigger>
                                     <OverlayTrigger
                                         overlay={
-                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
+                                            <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(clearingState)}`}</Tooltip>
                                         }
                                     >
                                         {clearingState === 'OPEN' ? (

@@ -15,6 +15,8 @@ export const fixtures = {
     urls: {
         admin: '/admin',
         users: '/admin/users',
+        userEdit: '/admin/users/edit',
+        userAdd: '/admin/users/add',
         departments: '/admin/departments',
         vendors: '/admin/vendors',
         bulkReleaseEdit: '/admin/bulkreleaseedit',

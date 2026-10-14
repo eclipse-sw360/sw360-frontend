@@ -109,7 +109,7 @@ const CommercialDetailsAdministration = ({
                             </label>
                             <input
                                 type='text'
-                                className='form-control'
+                                className='form-control cursor-pointer'
                                 placeholder='Click to edit'
                                 id='COTS_responsible'
                                 aria-describedby='COTS_responsible'

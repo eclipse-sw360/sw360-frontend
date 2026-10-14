@@ -16,7 +16,8 @@ import { Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
 import { SW360Table } from '@/components/sw360'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
-import { LinkedProjectData, ProjectPayload } from '@/object-types'
+import { LinkedProjectData, ProjectPayload, ProjectRelationship } from '@/object-types'
+import { CommonUtils } from '@/utils'
 
 interface Props {
     projectPayload: ProjectPayload
@@ -50,7 +51,10 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                         ...prev.linkedProjects,
                         [projectId]: {
                             ...prev.linkedProjects[projectId],
-                            projectRelationship: updatedProjectRelationship,
+                            projectRelationship:
+                                Object.values(ProjectRelationship).find(
+                                    (relation) => relation === updatedProjectRelationship,
+                                ) ?? ProjectRelationship.CONTAINED,
                         },
                     },
                 }
@@ -148,10 +152,26 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                                 }}
                                 required
                             >
-                                <option value='UNKNOWN'>{t('Unknown')}</option>
-                                <option value='REFERRED'>{t('Related')}</option>
-                                <option value='CONTAINED'>{t('Is a subproject')}</option>
-                                <option value='DUPLICATE'>{t('Duplicate')}</option>
+                                {Object.values(ProjectRelationship).map((rel) => {
+                                    let tag = CommonUtils.Capitalize(rel)
+                                    if (rel === ProjectRelationship.CONTAINED) {
+                                        tag = 'Is a subproject'
+                                    } else if (rel === ProjectRelationship.REFERRED) {
+                                        tag = 'Related'
+                                    }
+
+                                    return (
+                                        <option
+                                            key={rel}
+                                            value={rel}
+                                            title={t(
+                                                `project_relation_${rel ? rel.toLowerCase() : 'contained'}_tooltip`,
+                                            )}
+                                        >
+                                            {tag}
+                                        </option>
+                                    )
+                                })}
                             </select>
                         </div>
                     )

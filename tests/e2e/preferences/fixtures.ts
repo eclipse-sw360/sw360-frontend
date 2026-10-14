@@ -25,4 +25,11 @@ export const fixtures = {
 
     /** REST API Token section title */
     tokenSectionTitle: 'REST API Token',
+
+    /** User General Information Write Access config */
+    userGeneralInfoWriteAccess: {
+        configKey: 'ui.enable.user.general.information.write.access',
+        labelText: 'Enable User General Information Write Access',
+        descriptionText: 'Allow editing user general information from the UI',
+    },
 }

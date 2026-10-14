@@ -16,7 +16,15 @@ import { useTranslations } from 'next-intl'
 import React, { type JSX, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Tooltip as BootstrapTooltip, Button, Form, Modal, OverlayTrigger, Spinner } from 'react-bootstrap'
 import { BsArrowCounterclockwise, BsFillTrashFill, BsInfoCircle, BsPlusLg, BsQuestionCircle } from 'react-icons/bs'
-import { Embedded, ProjectPayload, ReleaseDetail, ReleaseLink, ReleaseNode } from '@/object-types'
+import {
+    Embedded,
+    MainlineState,
+    ProjectPayload,
+    ReleaseDetail,
+    ReleaseLink,
+    ReleaseNode,
+    ReleaseRelationship,
+} from '@/object-types'
 import MessageService from '@/services/message.service'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
@@ -45,28 +53,6 @@ type EmptyEmbeddedResponse = {
     _embedded?: {
         'sw360:releaseLinks': undefined
     }
-}
-
-const releaseRelationship = {
-    UNKNOWN: 'UNKNOWN',
-    CONTAINED: 'CONTAINED',
-    REFERRED: 'REFERRED',
-    DYNAMICALLY_LINKED: 'DYNAMICALLY_LINKED',
-    STATICALLY_LINKED: 'STATICALLY_LINKED',
-    SIDE_BY_SIDE: 'SIDE_BY_SIDE',
-    STANDALONE: 'STANDALONE',
-    INTERNAL_USE: 'INTERNAL_USE',
-    OPTIONAL: 'OPTIONAL',
-    TO_BE_REPLACED: 'TO_BE_REPLACED',
-    CODE_SNIPPET: 'CODE_SNIPPET',
-}
-
-const mainlineStates = {
-    OPEN: 'OPEN',
-    MAINLINE: 'MAINLINE',
-    SPECIFIC: 'SPECIFIC',
-    PHASEOUT: 'PHASEOUT',
-    DENIED: 'DENIED',
 }
 
 const Tooltip = ({ text, children, className }: { text: string; children: ReactNode; className?: string }) => {
@@ -213,15 +199,24 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                                     onChange={(event) => changeReleaseRelationship(release, event)}
                                     name='releaseRelationship'
                                 >
-                                    {Object.entries(releaseRelationship).map(([key, value]: Array<string>) => (
-                                        <option
-                                            key={key}
-                                            value={key}
-                                            selected={key === release.releaseRelationship}
-                                        >
-                                            {t(value as never)}
-                                        </option>
-                                    ))}
+                                    {Object.values(ReleaseRelationship).map((rel) => {
+                                        let tag = CommonUtils.Capitalize(rel)
+                                        if (rel === ReleaseRelationship.REFERRED) {
+                                            tag = 'Related'
+                                        }
+
+                                        return (
+                                            <option
+                                                key={rel}
+                                                value={rel}
+                                                title={t(
+                                                    `release_relation_${rel ? rel.toLowerCase() : 'contained'}_tooltip`,
+                                                )}
+                                            >
+                                                {tag}
+                                            </option>
+                                        )
+                                    })}
                                 </Form.Select>
                             </td>
                             <td className='align-middle'>
@@ -229,13 +224,14 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                                     onChange={(event) => changeMainlineState(release, event)}
                                     name='mainlineState'
                                 >
-                                    {Object.entries(mainlineStates).map(([key, value]: Array<string>) => (
+                                    {Object.values(MainlineState).map((state) => (
                                         <option
-                                            key={key}
-                                            value={key}
-                                            selected={key === release.mainlineState}
+                                            key={state}
+                                            value={state}
+                                            title={t(`mainline_state_${state ? state.toLowerCase() : 'open'}_tooltip`)}
+                                            selected={state === release.mainlineState}
                                         >
-                                            {t(value as never)}
+                                            {CommonUtils.Capitalize(state)}
                                         </option>
                                     ))}
                                 </Form.Select>
@@ -315,8 +311,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                 releaseId: rel.id,
                 releaseName: rel.name,
                 releaseVersion: rel.version,
-                releaseRelationship: 'CONTAINED',
-                mainlineState: 'OPEN',
+                releaseRelationship: ReleaseRelationship.CONTAINED,
+                mainlineState: MainlineState.OPEN,
                 releaseLink: rel._embedded
                     ? convertReleaseLinksToReleaseNodes(rel._embedded['sw360:releaseLinks'])
                     : [],
@@ -353,8 +349,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
             if (!releasesInSameLevel.includes(rel.id)) {
                 const newNode: ReleaseNode = {
                     releaseId: rel.id,
-                    releaseRelationship: 'CONTAINED',
-                    mainlineState: 'OPEN',
+                    releaseRelationship: ReleaseRelationship.CONTAINED,
+                    mainlineState: MainlineState.OPEN,
                     comment: '',
                     releaseLink: [],
                     releaseName: rel.name,
@@ -430,7 +426,8 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     const changeMainlineState = (release: ReleaseNode, event: React.ChangeEvent<HTMLSelectElement>) => {
         if (network === undefined) return
-        release.mainlineState = event.target.value
+        release.mainlineState =
+            Object.values(MainlineState).find((state) => state === event.target.value) ?? MainlineState.OPEN
         setNetwork([
             ...network,
         ])
@@ -438,7 +435,9 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
 
     const changeReleaseRelationship = (release: ReleaseNode, event: React.ChangeEvent<HTMLSelectElement>) => {
         if (network === undefined) return
-        release.releaseRelationship = event.target.value
+        release.releaseRelationship =
+            Object.values(ReleaseRelationship).find((rel) => rel === event.target.value) ??
+            ReleaseRelationship.CONTAINED
         setNetwork([
             ...network,
         ])

@@ -7,15 +7,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Links, Release } from '@/object-types'
+import { Links, MainlineState, Release, ReleaseRelationship } from '@/object-types'
 
 interface LinkedRelease {
     createdBy: string
     release: string
-    mainlineState: string
+    mainlineState?: MainlineState
     comment: string
     createdOn: string
-    relation: string
+    relation?: ReleaseRelationship
 }
 
 interface LinkedProject {

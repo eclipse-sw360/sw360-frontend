@@ -30,6 +30,7 @@ import {
     Project,
     ProjectDetailTabCounts,
     ProjectPayload,
+    ProjectRelationship,
     SummaryDataType,
     UserGroupPriority,
     UserGroupType,
@@ -169,7 +170,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                         name: p.name ?? '',
                         projectRelationship:
                             project.linkedProjects?.filter((pr) => pr.project.split('/').at(-1) === p.id)?.[0]
-                                ?.relation ?? 'CONTAINED',
+                                ?.relation ?? ProjectRelationship.CONTAINED,
                         version: p.version ?? '',
                     }
                 })

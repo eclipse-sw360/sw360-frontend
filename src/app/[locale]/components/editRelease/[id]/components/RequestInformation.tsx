@@ -96,7 +96,7 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props): React
                             <input
                                 type='date'
                                 className='form-control'
-                                placeholder='Enter ECC comment'
+                                placeholder='Enter evaluation start date'
                                 id='evaluation_start'
                                 aria-describedby='version'
                                 required
@@ -115,7 +115,7 @@ const RequestInformation = ({ releasePayload, setReleasePayload }: Props): React
                             <input
                                 type='date'
                                 className='form-control'
-                                placeholder='Enter ECC comment'
+                                placeholder='Enter evaluation end date'
                                 id='evaluation_end'
                                 aria-describedby='version'
                                 required

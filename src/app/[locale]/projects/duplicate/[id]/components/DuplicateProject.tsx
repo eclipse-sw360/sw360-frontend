@@ -24,9 +24,12 @@ import {
     InputKeyValue,
     LinkedPackageData,
     LinkedProjectData,
+    MainlineState,
     Project,
     ProjectPayload,
+    ProjectRelationship,
     ReleaseDetail,
+    ReleaseRelationship,
     User,
     UserGroupType,
     Vendor,
@@ -42,17 +45,17 @@ interface Props {
 
 interface LinkedReleaseProps {
     release?: string
-    relation?: string
-    mainlineState?: string
-    releaseRelation?: string
+    relation?: ReleaseRelationship
+    mainlineState?: MainlineState
+    releaseRelation?: ReleaseRelationship
     comment?: string
 }
 
 interface LinkedReleaseData {
     comment: string
-    mainlineState: string
+    mainlineState?: MainlineState
     name: string
-    releaseRelation: string
+    releaseRelation?: ReleaseRelationship
     version: string
 }
 
@@ -87,6 +90,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         [k: string]: string
     }>({})
     const [projectManager, setProjectManager] = useState<{
+        [k: string]: string
+    }>({})
+    const [projectResponsible, setProjectResponsible] = useState<{
         [k: string]: string
     }>({})
     const [leadArchitect, setLeadArchitect] = useState<{
@@ -194,8 +200,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 linkedReleasesObject[releaseId] = {
                     name: releaseData.name,
                     version: releaseData.version,
-                    releaseRelation: l.relation ?? '',
-                    mainlineState: l.mainlineState ?? '',
+                    releaseRelation: l.relation ?? ReleaseRelationship.CONTAINED,
+                    mainlineState: l.mainlineState ?? MainlineState.OPEN,
                     comment: l.comment ?? '',
                 }
             }
@@ -222,19 +228,19 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     return notFound()
                 }
                 const project = (await response.json()) as Project
-                if (project.externalIds !== undefined) {
+                if (project.externalIds != null) {
                     setExternalIds(CommonUtils.convertObjectToMap(project.externalIds))
                 }
 
-                if (project.externalUrls !== undefined) {
+                if (project.externalUrls != null) {
                     setExternalUrls(CommonUtils.convertObjectToMap(project.externalUrls))
                 }
 
-                if (project.additionalData !== undefined) {
+                if (project.additionalData != null) {
                     setAdditionalData(CommonUtils.convertObjectToMap(project.additionalData))
                 }
 
-                if (project.roles !== undefined) {
+                if (project.roles != null) {
                     setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
                 }
 
@@ -262,17 +268,14 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     }
                 }
 
-                if (project?.projectResponsible !== undefined) {
-                    const userData = await fetchUserData(project?.projectResponsible)
-                    if (!CommonUtils.isNullOrUndefined(userData)) {
-                        setProjectManager({
-                            [project?.projectResponsible]: userData?.fullName ?? project?.projectResponsible,
-                        })
-                    } else {
-                        setProjectManager({
-                            [project?.projectResponsible]: project?.projectResponsible,
-                        })
+                const projectResponsibleEmail = project?.projectResponsible?.trim()
+                if (projectResponsibleEmail) {
+                    const userData = await fetchUserData(projectResponsibleEmail)
+                    const projectResponsibleMap = {
+                        [projectResponsibleEmail]: userData?.fullName ?? projectResponsibleEmail,
                     }
+                    setProjectManager(projectResponsibleMap)
+                    setProjectResponsible(projectResponsibleMap)
                 }
 
                 if (project['_embedded']?.['sw360:moderators'] !== undefined) {
@@ -291,11 +294,21 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     setContributors(Object.fromEntries(contributorMap))
                 }
 
-                if (project['_embedded']?.['sw360:securityResponsibles'] !== undefined) {
+                const directSecurityResponsibles = project.securityResponsibles ?? []
+                if (
+                    directSecurityResponsibles.length > 0 ||
+                    project['_embedded']?.['sw360:securityResponsibles'] !== undefined
+                ) {
                     const securityResponsiblesMap = new Map<string, string>()
-                    project['_embedded']['sw360:securityResponsibles'].map((securityResponsible) => {
-                        securityResponsiblesMap.set(securityResponsible.email, securityResponsible.fullName ?? '')
-                    })
+                    for (const securityResponsible of directSecurityResponsibles) {
+                        securityResponsiblesMap.set(securityResponsible, securityResponsible)
+                    }
+                    for (const securityResponsible of project['_embedded']?.['sw360:securityResponsibles'] ?? []) {
+                        securityResponsiblesMap.set(
+                            securityResponsible.email,
+                            securityResponsible.fullName ?? securityResponsible.email,
+                        )
+                    }
                     setSecurityResponsibles(Object.fromEntries(securityResponsiblesMap))
                 }
 
@@ -315,7 +328,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     ownerAccountingUnit: project.ownerAccountingUnit ?? '',
                     ownerGroup: project.ownerGroup ?? '',
                     ownerCountry: project.ownerCountry ?? '',
-                    clearingState: project.clearingState ?? 'OPEN',
+                    // Duplicates always start with an open clearing state; backend enforces this too.
+                    clearingState: 'OPEN',
                     businessUnit: project.businessUnit ?? 'CT',
                     preevaluationDeadline: project.preevaluationDeadline ?? '',
                     clearingSummary: project.clearingSummary ?? '',
@@ -347,7 +361,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                         ?.enableSvm === 'true',
                                 projectRelationship:
                                     project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
-                                        ?.relation ?? '',
+                                        ?.relation ?? ProjectRelationship.CONTAINED,
                             }
                             return acc
                         },
@@ -526,6 +540,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                     setProjectOwner={setProjectOwner}
                                                     projectManager={projectManager}
                                                     setProjectManager={setProjectManager}
+                                                    projectResponsible={projectResponsible}
+                                                    setProjectResponsible={setProjectResponsible}
                                                     leadArchitect={leadArchitect}
                                                     setLeadArchitect={setLeadArchitect}
                                                 />

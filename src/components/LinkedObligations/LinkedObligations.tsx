@@ -16,15 +16,13 @@ import { type JSX, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import { LicensePayload, NestedRows, Obligation } from '@/object-types'
+import { CommonUtils } from '@/utils'
 import DeleteObligationDialog from './TableLinkedObligations/DeleteObligationDialog'
 
 interface Props {
     licensePayload: LicensePayload
     setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 const LinkedObligations = ({ licensePayload, setLicensePayload }: Props): JSX.Element => {
     const t = useTranslations('default')
@@ -52,7 +50,7 @@ const LinkedObligations = ({ licensePayload, setLicensePayload }: Props): JSX.El
             {
                 id: 'type',
                 header: t('Obligation Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node?.obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node?.obligationType ?? '')}</>,
             },
             {
                 id: 'actions',

@@ -29,9 +29,6 @@ interface Props {
     setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
 
 const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayload }: Props): JSX.Element => {
@@ -146,7 +143,7 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
             {
                 id: 'type',
                 header: t('Obligation Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node?.obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node?.obligationType ?? '')}</>,
             },
         ],
         [

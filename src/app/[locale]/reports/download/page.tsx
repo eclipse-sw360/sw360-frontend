@@ -28,6 +28,7 @@ function ReportDownloadPage(): JSX.Element {
     const projectId = searchParams.get('projectId') ?? ''
     const generatorClassName = searchParams.get('generatorClassName') ?? ''
     const variant = searchParams.get('variant') ?? ''
+    const format = searchParams.get('format') ?? ''
 
     const triggerDownload = useCallback(async () => {
         if (!module || !token) {
@@ -42,6 +43,9 @@ function ReportDownloadPage(): JSX.Element {
             let url = `reports/download?module=${encodeURIComponent(module)}&token=${encodeURIComponent(token)}&extendedByReleases=${extendedByReleases}`
             if (projectId) {
                 url += `&projectId=${encodeURIComponent(projectId)}`
+            }
+            if (format) {
+                url += `&format=${encodeURIComponent(format)}`
             }
             if (generatorClassName) {
                 url += `&generatorClassName=${encodeURIComponent(generatorClassName)}`
@@ -87,6 +91,10 @@ function ReportDownloadPage(): JSX.Element {
         token,
         extendedByReleases,
         projectId,
+        format,
+        generatorClassName,
+        variant,
+        t,
     ])
 
     useEffect(() => {

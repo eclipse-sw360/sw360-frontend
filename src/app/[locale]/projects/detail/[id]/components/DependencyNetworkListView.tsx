@@ -25,7 +25,7 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW3
 import { useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsPencil } from 'react-icons/bs'
-import { ErrorDetails, FilterOption } from '@/object-types'
+import { ErrorDetails, FilterOption, MainlineState, ReleaseRelationship } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import ClearingStateBadge from './ClearingStateBadge'
@@ -35,8 +35,8 @@ interface ListViewData {
     clearingState: string
     mainLicenses: string
     type: string
-    projectMainlineState: string
-    relation: string
+    projectMainlineState?: MainlineState
+    relation?: ReleaseRelationship
     isRelease: boolean | string
     releaseMainlineState: string
     projectOrigin: string
@@ -47,9 +47,6 @@ interface ListViewData {
     projectState?: string
     version: string
 }
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 const typeFilterOptions: FilterOption[] = [
     {
@@ -86,52 +83,16 @@ const typeFilterOptions: FilterOption[] = [
     },
 ]
 
-const relationFilterOptions: FilterOption[] = [
-    {
-        tag: 'Contained',
-        value: 'CONTAINED',
-    },
-    {
-        tag: 'Related',
-        value: 'REFERRED',
-    },
-    {
-        tag: 'Unknown',
-        value: 'UNKNOWN',
-    },
-    {
-        tag: 'Dynamically Linked',
-        value: 'DYNAMICALLY_LINKED',
-    },
-    {
-        tag: 'Statically Linked',
-        value: 'STATICALLY_LINKED',
-    },
-    {
-        tag: 'Side By Side',
-        value: 'SIDE_BY_SIDE',
-    },
-    {
-        tag: 'Standalone',
-        value: 'STANDALONE',
-    },
-    {
-        tag: 'Internal Use',
-        value: 'INTERNAL_USE',
-    },
-    {
-        tag: 'Optional',
-        value: 'OPTIONAL',
-    },
-    {
-        tag: 'To Be Replaced',
-        value: 'TO_BE_REPLACED',
-    },
-    {
-        tag: 'Code Snippet',
-        value: 'CODE_SNIPPET',
-    },
-]
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map((value) => {
+    let tag = CommonUtils.Capitalize(value)
+    if (value === ReleaseRelationship.REFERRED) {
+        tag = 'Related'
+    }
+    return {
+        tag: tag,
+        value: value,
+    } as FilterOption
+})
 
 const stateFilterOptions: FilterOption[] = [
     {
@@ -229,7 +190,7 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
                         </>
                     )
                 },
-                cell: ({ row }) => <div className='text-center'>{Capitalize(row.original.type ?? '')}</div>,
+                cell: ({ row }) => <div className='text-center'>{CommonUtils.Capitalize(row.original.type ?? '')}</div>,
                 meta: {
                     width: '6%',
                 },
@@ -269,7 +230,9 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
                         </>
                     )
                 },
-                cell: ({ row }) => <div className='text-center'>{Capitalize(row.original.relation ?? '')}</div>,
+                cell: ({ row }) => (
+                    <div className='text-center'>{CommonUtils.Capitalize(row.original.relation ?? '')}</div>
+                ),
                 meta: {
                     width: '8%',
                 },
@@ -322,7 +285,7 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
                 header: t('Release Mainline State'),
                 enableColumnFilter: false,
                 cell: ({ row }) => (
-                    <div className='text-center'>{Capitalize(row.original.releaseMainlineState ?? '')}</div>
+                    <div className='text-center'>{CommonUtils.Capitalize(row.original.releaseMainlineState ?? '')}</div>
                 ),
                 meta: {
                     width: '8%',
@@ -333,7 +296,7 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
                 header: t('Project Mainline State'),
                 enableColumnFilter: false,
                 cell: ({ row }) => (
-                    <div className='text-center'>{Capitalize(row.original.projectMainlineState ?? '')}</div>
+                    <div className='text-center'>{CommonUtils.Capitalize(row.original.projectMainlineState ?? '')}</div>
                 ),
                 meta: {
                     width: '8%',
@@ -343,7 +306,9 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
                 id: 'comment',
                 header: t('Comment'),
                 enableColumnFilter: false,
-                cell: ({ row }) => <div className='text-center'>{Capitalize(row.original.comment ?? '')}</div>,
+                cell: ({ row }) => (
+                    <div className='text-center'>{CommonUtils.Capitalize(row.original.comment ?? '')}</div>
+                ),
                 meta: {
                     width: '8%',
                 },
@@ -388,11 +353,11 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
         const data = listViewData.filter((elem) => {
             for (const fil of columnFilters) {
                 const vals = fil.value as string[]
-                let elemVal: string | undefined
+                let elemVal: string
                 if (fil.id === 'type') {
                     elemVal = elem.type
                 } else if (fil.id === 'relation') {
-                    elemVal = elem.relation
+                    elemVal = elem.relation ?? ReleaseRelationship.CONTAINED
                 } else {
                     elemVal = elem.clearingState
                 }

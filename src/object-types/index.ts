@@ -44,10 +44,13 @@ import ActionType from './enums/ActionType'
 import ClearingRequestStates from './enums/ClearingRequestStates'
 import ConfigKeys from './enums/ConfigKeys'
 import DocumentTypes from './enums/DocumentTypes'
+import MainlineState from './enums/MainlineState'
 import MergeOrSplitActionType from './enums/MergeOrSplitActionType'
 import ObligationType from './enums/ObligationType'
+import ProjectRelationship from './enums/ProjectRelationship'
 import ProjectVulnerabilityTabType from './enums/ProjectVulnerabilityTabType'
 import ReleaseClearingStateMapping from './enums/ReleaseClearingStateMapping'
+import ReleaseRelationship from './enums/ReleaseRelationship'
 import RequestDocumentTypes from './enums/RequestDocumentTypes'
 import RequestType from './enums/RequestType'
 import { ArrayTypeUIConfigKeys, UIConfigKeys } from './enums/UIConfigKeys'
@@ -266,14 +269,17 @@ export {
     ConfigurationContainers,
     DocumentTypes,
     LicenseTabIds,
+    MainlineState,
     MaxEntries,
     MergeOrSplitActionType,
     NavList,
     ObligationType,
     Preferences,
+    ProjectRelationship,
     ProjectVulnerabilityTabType,
     parseRawUiConfig,
     ReleaseClearingStateMapping,
+    ReleaseRelationship,
     ReleaseTabIds,
     RequestDocumentTypes,
     RequestType,

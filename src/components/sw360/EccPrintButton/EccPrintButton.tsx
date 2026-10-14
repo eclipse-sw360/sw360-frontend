@@ -45,9 +45,6 @@ const escapeHtml = (value: string): string =>
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;')
 
-const capitalizeEccStatus = (text: string): string =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 const EccPrintButton = ({
     title,
     rows,
@@ -70,7 +67,7 @@ const EccPrintButton = ({
 
         const tableRows = rows
             .map((record) => {
-                const status = capitalizeEccStatus(record.eccInformation?.eccStatus ?? '')
+                const status = CommonUtils.Capitalize(record.eccInformation?.eccStatus) ?? ''
                 const releaseName = `${record.name ?? ''} (${record.version ?? ''})`
                 const eccn = record.eccInformation?.eccn ?? ''
                 const releaseVersion = record.version ?? ''

@@ -162,7 +162,7 @@ function UpdateReleaseModal({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     placeholder={t('Click to set vendor')}
                                     readOnly
                                     id='bulkReleaseEdit.vendor'
