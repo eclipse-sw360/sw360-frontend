@@ -9,9 +9,11 @@
 // License-Filename: LICENSE
 
 'use client'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { SessionProvider } from 'next-auth/react'
 
 import type { JSX } from 'react'
+import { projectQueryClient } from '@/utils/api/projectApiQueries'
 import SessionStatusHandler from './SessionStatusHandler'
 
 type Props = {
@@ -27,12 +29,14 @@ export const Providers = ({ children, refetchIntervalSeconds }: Props): JSX.Elem
             : DEFAULT_SESSION_REFETCH_INTERVAL_SECONDS
 
     return (
-        <SessionProvider
-            refetchOnWindowFocus={false}
-            refetchInterval={resolvedRefetchIntervalSeconds}
-        >
-            <SessionStatusHandler />
-            {children}
-        </SessionProvider>
+        <QueryClientProvider client={projectQueryClient}>
+            <SessionProvider
+                refetchOnWindowFocus={false}
+                refetchInterval={resolvedRefetchIntervalSeconds}
+            >
+                <SessionStatusHandler />
+                {children}
+            </SessionProvider>
+        </QueryClientProvider>
     )
 }

@@ -43,6 +43,7 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getProjectApiResponse } from '@/utils/api/projectApiQueries'
 import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
@@ -335,7 +336,10 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal)
+                const response = await getProjectApiResponse(
+                    `projects/${projectId}/linkedProjects?transitive=true`,
+                    signal,
+                )
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
@@ -375,7 +379,10 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
         void (async () => {
             try {
-                const response = await ApiUtils.GET(`projects/${projectId}/attachmentUsage?transitive=true`, signal)
+                const response = await getProjectApiResponse(
+                    `projects/${projectId}/attachmentUsage?transitive=true`,
+                    signal,
+                )
 
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
