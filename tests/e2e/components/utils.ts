@@ -49,6 +49,7 @@ export async function fillComponentSummary(
         name?: string
         categories?: string
         componentType?: string
+        visbility?: string
         homepage?: string
         blogUrl?: string
         wikiUrl?: string
@@ -71,6 +72,9 @@ export async function fillComponentSummary(
     }
     if (data.componentType !== undefined) {
         await page.locator(selectors.form.componentType).selectOption(data.componentType)
+    }
+    if (data.visbility !== undefined) {
+        await page.locator(selectors.form.visibility).selectOption(data.visbility)
     }
     if (data.homepage !== undefined) {
         const input = page.locator(selectors.form.homepage)
@@ -195,6 +199,7 @@ export async function createComponentApi(data: {
     categories?: string
     componentType?: string
     description?: string
+    visbility?: string
 }): Promise<string> {
     const token = getBasicAuthToken()
     const apiContext = await playwrightRequest.newContext()
@@ -204,6 +209,7 @@ export async function createComponentApi(data: {
             categories: data.categories ? [data.categories] : ['Library'],
             componentType: data.componentType || 'OSS',
             description: data.description || '',
+            visbility: data.visbility || 'EVERYONE',
         }
         let response = await apiContext.post(`${config.apiUrl}/resource/api/components`, {
             headers: {

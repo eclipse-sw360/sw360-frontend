@@ -90,6 +90,7 @@ export default function ComponentEditSummary({
                             setVendor={setVendor}
                             componentPayload={componentPayload}
                             setComponentPayload={setComponentPayload}
+                            showVisibility={true}
                         />
                         <RolesInformation
                             componentOwner={componentOwner}
