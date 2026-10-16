@@ -17,12 +17,12 @@ import { Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { useConfigKeyValue } from '@/contexts'
 import {
+    AttachmentUsage,
     ConfigKeys,
     ErrorDetails,
     FilterOption,
     ProjectRelationship,
     ReleaseRelationship,
-    SaveUsagesPayload,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -56,7 +56,7 @@ const projectProjFilterOptions: FilterOption[] = Object.values(ProjectRelationsh
 export default function DownloadLicenseInfoModal({
     show,
     setShow,
-    saveUsagesPayload,
+    attachmentUsages,
     setShowConfirmation,
     projectId,
     isCalledFromProjectLicenseTab,
@@ -66,7 +66,7 @@ export default function DownloadLicenseInfoModal({
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
     setShowConfirmation: Dispatch<SetStateAction<boolean>>
-    saveUsagesPayload: SaveUsagesPayload
+    attachmentUsages: AttachmentUsage[]
     projectId: string
     isCalledFromProjectLicenseTab: boolean
     projectReleaseRelationships: string[]
@@ -172,8 +172,8 @@ export default function DownloadLicenseInfoModal({
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
             setLoading(true)
-            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
-            if (response.status === StatusCodes.CREATED || response.status === StatusCodes.OK) {
+            const response = await ApiUtils.PUT(`projects/${projectId}/attachmentUsage`, attachmentUsages)
+            if (response.status === StatusCodes.OK || response.status === StatusCodes.NO_CONTENT) {
                 await downloadHandler(response)
             } else if (response.status === StatusCodes.FORBIDDEN) {
                 MessageService.warn(t('Could not save the attachment usages'))
