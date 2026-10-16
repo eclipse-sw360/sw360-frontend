@@ -28,6 +28,7 @@ import { useConfigKeyValue } from '@/contexts'
 import { useDocumentTitle } from '@/hooks'
 import {
     ActionType,
+    Attachment,
     ClearingInformation,
     COTSDetails,
     CommonTabIds,
@@ -35,6 +36,7 @@ import {
     Creator,
     DocumentCreationInformation,
     ECCInformation,
+    Embedded,
     MainlineState,
     Release,
     ReleaseDetail,
@@ -119,6 +121,22 @@ const EditRelease = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
                     return notFound()
                 }
                 const release: ReleaseDetail = (await response.json()) as ReleaseDetail
+                if (!CommonUtils.isNullOrUndefined(release._embedded?.['sw360:attachments'])) {
+                    try {
+                        const attachmentsResponse = await ApiUtils.GET(`releases/${releaseId}/attachments`)
+                        if (attachmentsResponse.status === StatusCodes.OK) {
+                            const attachmentsData = (await attachmentsResponse.json()) as Embedded<
+                                Attachment,
+                                'sw360:attachments'
+                            >
+                            if (!CommonUtils.isNullOrUndefined(attachmentsData._embedded?.['sw360:attachments'])) {
+                                release._embedded['sw360:attachments'] = attachmentsData._embedded['sw360:attachments']
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
                 let createdDate = release._embedded['sw360:documentCreationInformation']?.created
                 if (CommonUtils.isNullEmptyOrUndefinedString(createdDate)) {
                     createdDate = new Date().toISOString()

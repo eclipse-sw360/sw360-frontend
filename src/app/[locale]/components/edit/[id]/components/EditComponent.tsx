@@ -23,9 +23,11 @@ import CreateMRCommentDialog from '@/components/CreateMRCommentDialog/CreateMRCo
 import { useDocumentTitle } from '@/hooks'
 import {
     ActionType,
+    Attachment,
     CommonTabIds,
     Component,
     ComponentPayload,
+    Embedded,
     ErrorDetails,
     InputKeyValue,
     Vendor,
@@ -100,6 +102,24 @@ const EditComponent = ({ componentId }: Props): ReactNode => {
                     })
                 }
                 const component = (await response.json()) as Component
+
+                if (component._embedded !== undefined && component._embedded['sw360:attachments'] !== undefined) {
+                    try {
+                        const attachmentsResponse = await ApiUtils.GET(`components/${componentId}/attachments`, signal)
+                        if (attachmentsResponse.status === StatusCodes.OK) {
+                            const attachmentsData = (await attachmentsResponse.json()) as Embedded<
+                                Attachment,
+                                'sw360:attachments'
+                            >
+                            if (attachmentsData._embedded?.['sw360:attachments'] !== undefined) {
+                                component._embedded['sw360:attachments'] =
+                                    attachmentsData._embedded['sw360:attachments']
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
 
                 if (component.externalIds) {
                     setExternalIds(CommonUtils.convertObjectToMap(component.externalIds))
