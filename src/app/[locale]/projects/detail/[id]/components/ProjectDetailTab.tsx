@@ -19,7 +19,7 @@ import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import { useConfigKeyValue } from '@/contexts'
-import { useDocumentTitle } from '@/hooks'
+import { PROJECT_NOT_FOUND_WARNING_KEY, redirectWithWarning, useDocumentTitle } from '@/hooks'
 import {
     ActionType,
     AdministrationDataType,
@@ -57,6 +57,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const t = useTranslations('default')
     const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
+    const [projectExists, setProjectExists] = useState<boolean | null>(null)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [isClearingDetailCountLoaded, setIsClearingDetailCountLoaded] = useState(false)
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
@@ -146,7 +147,26 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         void (async () => {
             try {
+                const projectResponse = await ApiUtils.GET(`projects/${projectId}`, signal)
+                if (projectResponse.status === StatusCodes.NOT_FOUND) {
+                    setProjectExists(false)
+                    redirectWithWarning(PROJECT_NOT_FOUND_WARNING_KEY, '/projects')
+                    return
+                }
+                if (projectResponse.status !== StatusCodes.OK) {
+                    const err = (await projectResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: projectResponse.status,
+                    })
+                }
+                setProjectExists(true)
+                const project = (await projectResponse.json()) as Project
+
                 const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
+                if (response.status === StatusCodes.NOT_FOUND) {
+                    redirectWithWarning(PROJECT_NOT_FOUND_WARNING_KEY, '/projects')
+                    return
+                }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -159,14 +179,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
 
-                const projectResponse = await ApiUtils.GET(`projects/${projectId}`, signal)
-                if (projectResponse.status !== StatusCodes.OK) {
-                    const err = (await projectResponse.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: projectResponse.status,
-                    })
-                }
-                const project = (await projectResponse.json()) as Project
                 setHasLinkedProjects(
                     (project.linkedProjects?.length ?? 0) > 0 ||
                         (project._embedded?.['sw360:projects']?.length ?? 0) > 0,
@@ -203,6 +215,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     ])
 
     useEffect(() => {
+        if (projectExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
         setIsClearingDetailCountLoaded(false)
@@ -227,6 +243,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
+        projectExists,
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {
@@ -276,6 +293,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }
 
     useEffect(() => {
+        if (projectExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -313,6 +334,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
+        projectExists,
     ])
 
     const isVulnerabilitiesDisplayEnabled = summaryData?.enableVulnerabilitiesDisplay ?? false
