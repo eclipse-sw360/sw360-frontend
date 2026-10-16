@@ -1796,20 +1796,37 @@ input[checked] + .slider:before {
     transform: none !important;
 }
 
-.SCAN_AVAILABLE,
-.REPORT_AVAILABLE,
-.UNDER_CLEARING {
+/* Release clearing-state circle badges (used by the release version dropdown).
+   Scoped to .badge-circle so they don't collide with the unrelated, generically
+   named .APPROVED/.OPEN/.IN_PROGRESS/.REJECTED status classes used elsewhere
+   (e.g. ECC status), which previously overrode this badge's size/shape. */
+.badge-circle.SCAN_AVAILABLE,
+.badge-circle.REPORT_AVAILABLE,
+.badge-circle.UNDER_CLEARING,
+.badge-circle.INTERNAL_USE_SCAN_AVAILABLE {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.5rem;
     background-color: #b95000;
     color: #fff;
 }
 
-.APPROVED {
+.badge-circle.APPROVED {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.5rem;
     background-color: #287d3c;
     color: #fff;
+    /* Overrides the unscoped ECC ".APPROVED" rule's conflicting margin. */
+    margin: 0 5px 0 0;
 }
 
-.NEW_CLEARING,
-.SENT_TO_CLEARING_TOOL {
+.badge-circle.NEW,
+.badge-circle.NEW_CLEARING,
+.badge-circle.SENT_TO_CLEARING_TOOL {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.5rem;
     background-color: #da1414;
     color: #fff;
 }
