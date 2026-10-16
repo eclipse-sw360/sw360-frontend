@@ -959,6 +959,7 @@
     "No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading": "找不到以前的選擇。\n如果您對此項目具有寫入權限，則下載時將自動儲存您的選擇。",
     "No recent components available": "沒有可用的最新組件",
     "No recent releases available": "沒有可用的最新版本",
+    "No releases linked to this project": "此專案未關聯任何發布版本。請新增發布版本以檢視授權審查資訊。",
     "No source release found": "未找到源代碼發布",
     "No subscriptions available": "沒有訂閱 。",
     "No token found": "找不到令牌。請在這裡添加新的令牌！",
