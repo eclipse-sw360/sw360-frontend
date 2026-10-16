@@ -27,7 +27,9 @@ import { useConfigKeyValue } from '@/contexts'
 import { useDocumentTitle } from '@/hooks'
 import {
     ActionType,
+    Attachment,
     ConfigKeys,
+    Embedded,
     ErrorDetails,
     InputKeyValue,
     LinkedPackageData,
@@ -315,6 +317,23 @@ function EditProject({
                     return notFound()
                 }
                 const project = (await response.json()) as Project
+
+                if (project._embedded !== undefined && project._embedded['sw360:attachments'] !== undefined) {
+                    try {
+                        const attachmentsResponse = await ApiUtils.GET(`projects/${projectId}/attachments`)
+                        if (attachmentsResponse.status === StatusCodes.OK) {
+                            const attachmentsData = (await attachmentsResponse.json()) as Embedded<
+                                Attachment,
+                                'sw360:attachments'
+                            >
+                            if (attachmentsData._embedded?.['sw360:attachments'] !== undefined) {
+                                project._embedded['sw360:attachments'] = attachmentsData._embedded['sw360:attachments']
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
 
                 // Check if project has open clearing request using clearingState from project response
                 if (project.clearingRequestId && project.clearingRequestId !== '') {
