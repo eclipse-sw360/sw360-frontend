@@ -25,7 +25,7 @@ export const selectors = {
         table: '.sw360-table',
         addProjectButton: 'button.btn-primary:has-text(\"Add Project\")',
         importSBOMDropdown: 'text=Import SBOM',
-        exportSpreadsheetDropdown: 'text=Export Spreadsheet',
+        exportSpreadsheetDropdown: 'text=Export List',
         pageContent: '.container.page-content',
         processingSpinner: '.spinner',
         noDataRow: '.sw360-table tbody tr',

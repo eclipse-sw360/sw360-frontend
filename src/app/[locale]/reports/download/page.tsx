@@ -13,6 +13,7 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Alert, Spinner } from 'react-bootstrap'
+import { ExportReportFormat } from '@/object-types'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 function ReportDownloadPage(): JSX.Element {
@@ -65,7 +66,14 @@ function ReportDownloadPage(): JSX.Element {
 
             // Extract filename from Content-Disposition header, fall back to default
             const disposition = response.headers.get('Content-Disposition')
-            let fileName = `${module}-report.xlsx`
+            const reportFormat = [
+                'projects',
+                'components',
+            ].includes(module.toLowerCase())
+                ? (Object.values(ExportReportFormat).find((value) => value === format.toLowerCase()) ??
+                  ExportReportFormat.XLSX)
+                : ExportReportFormat.XLSX
+            let fileName = `${module}-report.${reportFormat}`
             if (disposition) {
                 const match = disposition.match(/filename="?([^"]+)"?/)
                 if (match) {
