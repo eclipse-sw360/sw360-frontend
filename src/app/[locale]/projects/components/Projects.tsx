@@ -1,4 +1,4 @@
-// Copyright (C) Siemens AG, 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2023-2026. Part of the SW360 Frontend Project.
 // Copyright (c) Helio Chissini de Castro, 2023. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
@@ -35,6 +35,7 @@ import {
     BsPaperclip,
     BsPencil,
 } from 'react-icons/bs'
+import ExportListModal from '@/components/ExportListModal/ExportListModal'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import { PROJECT_NOT_FOUND_WARNING_KEY, useStoredWarning } from '@/hooks'
@@ -79,6 +80,7 @@ function Project(): JSX.Element {
     const router = useRouter()
     const [deleteProjectId, setDeleteProjectId] = useState<string>('')
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [showExportListModal, setShowExportListModal] = useState<boolean>(false)
     const [hasClearingRequest, setHasClearingRequest] = useState(false)
     const [importSBOMMetadata, setImportSBOMMetadata] = useState<ImportSBOMMetadata>({
         show: false,
@@ -88,7 +90,6 @@ function Project(): JSX.Element {
     const [linkedProjectsData, setLinkedProjectsData] = useState<Record<string, TypeProject[]>>({})
 
     // Configs from backend
-    const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
     const clearingRequestDisabledGroups = useConfigValue(
         UIConfigKeys.UI_ORG_ECLIPSE_SW360_DISABLE_CLEARING_REQUEST_FOR_PROJECT_GROUP,
     ) as string[] | null
@@ -954,47 +955,6 @@ function Project(): JSX.Element {
         },
     })
 
-    const exportProjectSpreadsheet = async ({ withLinkedRelease }: { withLinkedRelease: boolean }) => {
-        try {
-            const mailEnabled = mailRequestForProjectReport === 'true'
-            const searchParamsString = params.toString()
-            const baseUrl = withLinkedRelease
-                ? 'reports?module=PROJECTS&withlinkedreleases=true'
-                : 'reports?module=PROJECTS'
-            const url = searchParamsString ? `${baseUrl}&${searchParamsString}` : baseUrl
-
-            if (!mailEnabled) {
-                // If mail is not enabled, download the file immediately
-                const currentDate = new Date().toISOString().split('T')[0]
-                const fileName = `Projects-${currentDate}.xlsx`
-                const statusCode = await DownloadService.download(url, fileName)
-                if (statusCode === StatusCodes.OK) {
-                    MessageService.success(t('Spreadsheet download is successful'))
-                } else if (statusCode === StatusCodes.FORBIDDEN) {
-                    MessageService.warn(t('Access Denied'))
-                } else if (statusCode === StatusCodes.INTERNAL_SERVER_ERROR) {
-                    MessageService.error(t('Internal server error'))
-                } else if (statusCode === StatusCodes.UNAUTHORIZED) {
-                    MessageService.error(t('Unauthorized request'))
-                }
-            } else {
-                // If mail is enabled, just send the request and show message
-                const response = await ApiUtils.GET(url)
-                if (response.status === StatusCodes.OK) {
-                    MessageService.success(t('Excel report generation has started'))
-                } else if (response.status === StatusCodes.FORBIDDEN) {
-                    MessageService.warn(t('Access Denied'))
-                } else if (response.status === StatusCodes.INTERNAL_SERVER_ERROR) {
-                    MessageService.error(t('Internal server error'))
-                } else if (response.status === StatusCodes.UNAUTHORIZED) {
-                    MessageService.error(t('Unauthorized request'))
-                }
-            }
-        } catch (e) {
-            ApiUtils.reportError(e)
-        }
-    }
-
     const advancedSearch = [
         {
             fieldName: t('Project Name'),
@@ -1103,6 +1063,12 @@ function Project(): JSX.Element {
 
     return (
         <>
+            {showExportListModal && (
+                <ExportListModal
+                    module='projects'
+                    onHide={() => setShowExportListModal(false)}
+                />
+            )}
             <ImportSBOMModal
                 importSBOMMetadata={importSBOMMetadata}
                 setImportSBOMMetadata={setImportSBOMMetadata}
@@ -1171,29 +1137,15 @@ function Project(): JSX.Element {
                                                 </Dropdown>
                                             )}
                                     </div>
-                                    <Dropdown className='col-auto'>
-                                        <Dropdown.Toggle variant='secondary'>{t('Export Spreadsheet')}</Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item
-                                                onClick={() =>
-                                                    void exportProjectSpreadsheet({
-                                                        withLinkedRelease: false,
-                                                    })
-                                                }
-                                            >
-                                                {t('Projects only')}
-                                            </Dropdown.Item>
-                                            <Dropdown.Item
-                                                onClick={() =>
-                                                    void exportProjectSpreadsheet({
-                                                        withLinkedRelease: true,
-                                                    })
-                                                }
-                                            >
-                                                {t('Projects with linked releases')}
-                                            </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
+                                    <div className='col-auto'>
+                                        <button
+                                            type='button'
+                                            className='btn btn-secondary'
+                                            onClick={() => setShowExportListModal(true)}
+                                        >
+                                            {t('Export List')}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div className='col-auto buttonheader-title'>{t('PROJECTS')}</div>
