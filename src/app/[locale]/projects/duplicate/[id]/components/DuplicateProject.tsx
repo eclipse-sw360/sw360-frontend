@@ -24,12 +24,10 @@ import {
     InputKeyValue,
     LinkedPackageData,
     LinkedProjectData,
-    MainlineState,
+    LinkedReleaseData,
     Project,
     ProjectPayload,
     ProjectRelationship,
-    ReleaseDetail,
-    ReleaseRelationship,
     User,
     UserGroupType,
     Vendor,
@@ -43,21 +41,7 @@ interface Props {
     isDependencyNetworkFeatureEnabled: boolean
 }
 
-interface LinkedReleaseProps {
-    release?: string
-    relation?: ReleaseRelationship
-    mainlineState?: MainlineState
-    releaseRelation?: ReleaseRelationship
-    comment?: string
-}
-
-interface LinkedReleaseData {
-    comment: string
-    mainlineState?: MainlineState
-    name: string
-    releaseRelation?: ReleaseRelationship
-    version: string
-}
+type LinkedReleaseMap = Record<string, LinkedReleaseData>
 
 function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Props): JSX.Element {
     const router = useRouter()
@@ -99,6 +83,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         [k: string]: string
     }>({})
     const [isDuplicateProjectFetched, setIsDuplicateProjectFetched] = useState(false)
+    const [sourceLinkedReleases, setSourceLinkedReleases] = useState<LinkedReleaseMap>({})
 
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>({
         name: '',
@@ -186,35 +171,37 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         }
     }, [])
 
-    const setObjectToMap = async (linkedReleases: LinkedReleaseProps[]) => {
-        try {
-            setIsReleaseLoading(true)
-            const linkedReleasesObject: {
-                [key: string]: LinkedReleaseData
-            } = {}
-            for (const l of linkedReleases) {
-                const releaseId = l['release']?.split('/').pop()
-                if (releaseId === undefined) continue
-                const response = await ApiUtils.GET(`releases/${releaseId}`)
-                const releaseData = (await response.json()) as ReleaseDetail
-                linkedReleasesObject[releaseId] = {
-                    name: releaseData.name,
-                    version: releaseData.version,
-                    releaseRelation: l.relation ?? ReleaseRelationship.CONTAINED,
-                    mainlineState: l.mainlineState ?? MainlineState.OPEN,
-                    comment: l.comment ?? '',
-                }
-            }
-            setProjectPayload((prevProjectPayload) => ({
-                ...prevProjectPayload,
-                linkedReleases: linkedReleasesObject,
-            }))
-        } catch (e) {
-            ApiUtils.reportError(e)
-        } finally {
-            setIsReleaseLoading(false)
+    const buildLinkedReleasesMap = useCallback((project: Project) => {
+        if ((project.linkedReleases ?? []).length === 0) {
+            return {} as LinkedReleaseMap
         }
-    }
+
+        const embeddedReleases = new Map(
+            (project._embedded?.['sw360:releases'] ?? [])
+                .filter((release) => !CommonUtils.isNullOrUndefined(release.id))
+                .map((release) => [
+                    release.id as string,
+                    release,
+                ]),
+        )
+
+        const linkedReleasesObject: LinkedReleaseMap = {}
+        for (const linkedRelease of project.linkedReleases ?? []) {
+            const releaseId = linkedRelease.release?.split('/').pop()
+            if (releaseId === undefined) continue
+
+            const releaseData = embeddedReleases.get(releaseId)
+            linkedReleasesObject[releaseId] = {
+                name: releaseData?.name ?? releaseId,
+                version: releaseData?.version ?? '',
+                releaseRelation: linkedRelease.relation ?? undefined,
+                mainlineState: linkedRelease.mainlineState ?? undefined,
+                comment: linkedRelease.comment ?? '',
+            }
+        }
+
+        return linkedReleasesObject
+    }, [])
 
     useDocumentTitle(
         projectPayload.name ? CommonUtils.formatDocumentTitle(projectPayload.name, projectPayload.version) : undefined,
@@ -244,9 +231,9 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     setAdditionalRoles(CommonUtils.convertObjectToMapRoles(project.roles))
                 }
 
-                if (project.linkedReleases !== undefined) {
-                    void setObjectToMap(project.linkedReleases)
-                }
+                setIsReleaseLoading(true)
+                const linkedReleases = buildLinkedReleasesMap(project)
+                setSourceLinkedReleases(linkedReleases)
 
                 if (project['_embedded']?.['leadArchitect'] !== undefined) {
                     setLeadArchitect({
@@ -350,7 +337,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     projectOwner: project._embedded?.projectOwner?.email ?? '',
                     projectResponsible: project?.projectResponsible ?? '',
                     leadArchitect: project._embedded?.leadArchitect?.email ?? '',
-                    linkedReleases: projectPayload.linkedReleases ?? {},
+                    linkedReleases,
                     linkedProjects: (project._embedded?.['sw360:projects'] ?? []).reduce(
                         (acc, proj) => {
                             acc[proj.id ?? ''] = {
@@ -394,9 +381,12 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 setIsDuplicateProjectFetched(true)
             } catch (e) {
                 ApiUtils.reportError(e)
+            } finally {
+                setIsReleaseLoading(false)
             }
         })()
     }, [
+        buildLinkedReleasesMap,
         projectId,
         setProjectPayload,
     ])
@@ -557,6 +547,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                     <LinkedReleasesAndProjects
                                                         projectId={projectId}
                                                         projectPayload={projectPayload}
+                                                        existingReleaseData={sourceLinkedReleases}
                                                         setProjectPayload={setProjectPayload}
                                                         isDependencyNetworkFeatureEnabled={
                                                             isDependencyNetworkFeatureEnabled
