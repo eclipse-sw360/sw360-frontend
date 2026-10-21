@@ -42,19 +42,10 @@ const GeneralInfoComponent = ({ componentPayload, setComponentPayload, vendor, s
     }
 
     const setCategoriesData = (input: string) => {
-        const data: string[] = input === '' ? [] : splitValueCategories(input)
-        setComponentPayload((currentPayload) => {
-            const currentCategories = currentPayload.categories ?? []
-            if (
-                currentCategories.length === data.length &&
-                currentCategories.every((category, index) => category === data[index])
-            ) {
-                return currentPayload
-            }
-            return {
-                ...currentPayload,
-                categories: data,
-            }
+        const data: string[] = splitValueCategories(input)
+        setComponentPayload({
+            ...componentPayload,
+            categories: data,
         })
     }
 

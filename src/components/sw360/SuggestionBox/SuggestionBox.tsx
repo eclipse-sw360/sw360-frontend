@@ -41,10 +41,16 @@ function SuggestionBox({
 
     // Sometimes initialValues are loaded with an API call, thus async
     useEffect(() => {
-        const nextValue = initialValue ?? ''
-        setInputValue((currentValue) => (currentValue === nextValue ? currentValue : nextValue))
+        setInputValue(initialValue ?? '')
     }, [
         initialValue,
+    ])
+
+    // Whenever input changes, call the user provided value change function
+    useEffect(() => {
+        onValueChange(inputValue)
+    }, [
+        inputValue,
     ])
 
     useEffect(() => {
@@ -78,7 +84,6 @@ function SuggestionBox({
                     : []
         }
         setInputValue(value)
-        onValueChange(value)
         setFocusedIndex(-1)
         if (values.length > 0) {
             const lastInput = values.at(-1) ?? ''
@@ -109,9 +114,7 @@ function SuggestionBox({
 
     // User clicked on a suggestion, add it to the inputValue at the end and clear suggestions
     const handleSuggestionClick = (value: string) => {
-        const nextValue = addToCsvEnd(inputValue, value)
-        setInputValue(nextValue)
-        onValueChange(nextValue)
+        setInputValue(addToCsvEnd(inputValue, value))
         setSuggestions([])
         setFocusedIndex(-1)
     }
