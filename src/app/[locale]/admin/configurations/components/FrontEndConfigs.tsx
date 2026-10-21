@@ -378,6 +378,21 @@ const FrontEndConfigs = (): JSX.Element => {
                                     </td>
                                     <td>{t('ui_enable_security_vulnerability_monitoring')}</td>
                                 </tr>
+                                <tr id='ui-enable-ads-information-display'>
+                                    <td className='align-middle fw-bold'>{t('Enable ADS Information Display')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            checked={
+                                                currentUiConfig[UIConfigKeys.UI_ENABLE_ADS_INFORMATION_DISPLAY] ===
+                                                'true'
+                                            }
+                                            propKey={UIConfigKeys.UI_ENABLE_ADS_INFORMATION_DISPLAY}
+                                        />
+                                    </td>
+                                    <td>{t('ui_enable_ads_information_display')}</td>
+                                </tr>
                                 <tr id='ui-rest-apitoken-generator-enable'>
                                     <td className='align-middle fw-bold'>{t('Enable REST API Token generator')}</td>
                                     <td>
