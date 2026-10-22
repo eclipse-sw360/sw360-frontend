@@ -530,12 +530,12 @@ function GenerateLicenseInfo({
         const approved = key === 'only_approved' ? filterApprovedReleases(tableData) : tableData
         return hideWithUsage
             ? filterReleasesWithUsage(
-                approved,
-                [
-                    projectId,
-                ],
-                storeRef.current,
-            )
+                  approved,
+                  [
+                      projectId,
+                  ],
+                  storeRef.current,
+              )
             : approved
     }, [
         tableData,
@@ -727,10 +727,11 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             ></div>
                         )
                     } else if (row.original.node.type === 'license') {
@@ -783,8 +784,9 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    (row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'
+                                }`}
                             >
                                 <PaddedCell row={row}>
                                     <div className='text-center'>{row.depth + 1}</div>
@@ -820,11 +822,12 @@ function GenerateLicenseInfo({
                         const detailKey = `${releaseId}_${attachmentId}`
                         return (
                             <div
-                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                    ?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                        ?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 {row.original.node.entity.filename}
                                 {row.getIsExpanded() && detailErrors.has(detailKey) ? (
@@ -849,10 +852,11 @@ function GenerateLicenseInfo({
                         const { name, version } = row.original.node.entity
                         return (
                             <div
-                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 <Link
                                     className='text-link'
@@ -886,10 +890,11 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 {row.original.node.entity.componentType ?? ''}
                             </div>
@@ -900,18 +905,19 @@ function GenerateLicenseInfo({
                         const att = row.original.node.entity
                         return (
                             <p
-                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                    ?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                        ?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 {att.attachmentUsageCount === undefined || att.attachmentUsageCount === 0
                                     ? t('not used in any project yet')
                                     : t.rich('USED_BY ATTACHMENTS', {
-                                        num: att.attachmentUsageCount,
-                                        strong: (chunks) => <b>{chunks}</b>,
-                                    })}
+                                          num: att.attachmentUsageCount,
+                                          strong: (chunks) => <b>{chunks}</b>,
+                                      })}
                             </p>
                         )
                     } else {
@@ -930,10 +936,11 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
@@ -947,11 +954,12 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                    ?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                        ?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 {CommonUtils.Capitalize(row.original.node.entity.checkStatus ?? '')}
                             </div>
@@ -969,11 +977,12 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                    ?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                        ?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 {row.original.node.entity.createdBy}
                             </div>
@@ -981,10 +990,11 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             ></div>
                         )
                     }
@@ -1000,11 +1010,12 @@ function GenerateLicenseInfo({
                     if (row.original.node.type === 'attachment') {
                         return (
                             <div
-                                className={`text-center ${((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
-                                    ?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    ((row.getParentRow()?.original.node.entity as ReleaseWithAttachmentInfo | undefined)
+                                        ?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             >
                                 {row.original.node.entity.checkedTeam}
                             </div>
@@ -1012,10 +1023,11 @@ function GenerateLicenseInfo({
                     } else if (row.original.node.type === 'release') {
                         return (
                             <div
-                                className={`text-center ${(row.original.node.entity?.hasMultipleAttachments ?? false)
-                                    ? 'orange-cell'
-                                    : 'green-cell'
-                                    }`}
+                                className={`text-center ${
+                                    (row.original.node.entity?.hasMultipleAttachments ?? false)
+                                        ? 'orange-cell'
+                                        : 'green-cell'
+                                }`}
                             ></div>
                         )
                     }
@@ -1105,8 +1117,10 @@ function GenerateLicenseInfo({
             if (row.original.node.type !== 'attachment' && row.original.node.type !== 'license') {
                 expandedIds[row.id] = true
             }
-            if (row.original.node.type === 'attachment' && row.getIsExpanded()) {
-                expandedIds[row.id] = true
+            if (row.original.node.type === 'attachment') {
+                const excludedLicenseIds =
+                    storeRef.current[row.original.id ?? '']?.usageData?.licenseInfo?.excludedLicenseIds ?? []
+                if (row.getIsExpanded() || excludedLicenseIds.length > 0) expandedIds[row.id] = true
             }
         }
         table.setExpanded(expandedIds)
