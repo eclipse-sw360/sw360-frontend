@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb, ShowInfoOnHover } from 'next-sw360'
-import { Dispatch, type JSX, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, type JSX, SetStateAction, useEffect, useRef, useState } from 'react'
 import { Button, Col, Dropdown, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
@@ -39,6 +39,12 @@ import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import {
+    cancelProjectTabPrefetch,
+    getProjectApiResponse,
+    type ProjectPrefetchTarget,
+    prefetchProjectTabData,
+} from '@/utils/api/projectApiQueries'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -52,6 +58,14 @@ import LinkedPackagesTab from './LinkedPackagesTab'
 import ProjectVulnerabilities from './ProjectVulnerabilities'
 import Summary from './Summary'
 import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
+
+const PROJECT_TAB_PREFETCH_TARGETS: Partial<Record<string, ProjectPrefetchTarget>> = {
+    licenseClearing: 'licenseClearing',
+    obligations: 'obligations',
+    attachmentUsages: 'attachmentUsages',
+    vulnerabilities: 'vulnerabilities',
+    changeLog: 'changeLog',
+}
 
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
@@ -106,6 +120,20 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
+    const hoverPrefetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+    const pendingHoverPrefetchRef = useRef<ProjectPrefetchTarget | undefined>(undefined)
+    const backgroundPrefetchTargetRef = useRef<ProjectPrefetchTarget | undefined>(undefined)
+    const clickedTabPrefetchInFlightRef = useRef(false)
+
+    useEffect(() => {
+        return () => {
+            if (hoverPrefetchTimerRef.current) clearTimeout(hoverPrefetchTimerRef.current)
+            pendingHoverPrefetchRef.current = undefined
+            backgroundPrefetchTargetRef.current = undefined
+        }
+    }, [
+        projectId,
+    ])
 
     useDocumentTitle(
         summaryData?.name ? CommonUtils.formatDocumentTitle(summaryData.name, summaryData.version) : undefined,
@@ -131,9 +159,60 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         searchParams,
     ])
 
+    const runQueuedHoverPrefetch = () => {
+        if (clickedTabPrefetchInFlightRef.current || backgroundPrefetchTargetRef.current) return
+        const queuedTarget = pendingHoverPrefetchRef.current
+        if (!queuedTarget) return
+
+        pendingHoverPrefetchRef.current = undefined
+        backgroundPrefetchTargetRef.current = queuedTarget
+        void prefetchProjectTabData(projectId, queuedTarget).finally(() => {
+            if (backgroundPrefetchTargetRef.current === queuedTarget) backgroundPrefetchTargetRef.current = undefined
+            runQueuedHoverPrefetch()
+        })
+    }
+
     const handleSelect = (key: string | null) => {
-        setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
+        const selectedKey = key ?? DEFAULT_ACTIVE_TAB
+        const prefetchTarget = PROJECT_TAB_PREFETCH_TARGETS[selectedKey]
+        if (hoverPrefetchTimerRef.current) {
+            clearTimeout(hoverPrefetchTimerRef.current)
+            hoverPrefetchTimerRef.current = undefined
+        }
+
+        if (prefetchTarget) {
+            if (pendingHoverPrefetchRef.current === prefetchTarget) pendingHoverPrefetchRef.current = undefined
+            const backgroundTarget = backgroundPrefetchTargetRef.current
+            if (backgroundTarget && backgroundTarget !== prefetchTarget) {
+                pendingHoverPrefetchRef.current ??= backgroundTarget
+                backgroundPrefetchTargetRef.current = undefined
+                void cancelProjectTabPrefetch(projectId, backgroundTarget, prefetchTarget)
+            }
+
+            clickedTabPrefetchInFlightRef.current = true
+            void prefetchProjectTabData(projectId, prefetchTarget).finally(() => {
+                clickedTabPrefetchInFlightRef.current = false
+                runQueuedHoverPrefetch()
+            })
+        }
+
+        setActiveKey(selectedKey)
         router.push(`?tab=${key}`)
+    }
+
+    const prefetchOnIntent = (target: ProjectPrefetchTarget) => {
+        const prefetch = () => {
+            pendingHoverPrefetchRef.current = target
+            if (hoverPrefetchTimerRef.current) clearTimeout(hoverPrefetchTimerRef.current)
+            hoverPrefetchTimerRef.current = setTimeout(() => {
+                hoverPrefetchTimerRef.current = undefined
+                runQueuedHoverPrefetch()
+            }, 300)
+        }
+        return {
+            onFocus: prefetch,
+            onMouseEnter: prefetch,
+        }
     }
 
     useEffect(() => {
@@ -142,7 +221,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         void (async () => {
             try {
-                const projectResponse = await ApiUtils.GET(`projects/${projectId}`, signal)
+                const projectResponse = await getProjectApiResponse(`projects/${projectId}`, signal)
                 if (projectResponse.status === StatusCodes.NOT_FOUND) {
                     setProjectExists(false)
                     redirectWithWarning(PROJECT_NOT_FOUND_WARNING_KEY, '/projects')
@@ -411,6 +490,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='licenseClearing'
+                                    {...prefetchOnIntent('licenseClearing')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
@@ -426,6 +506,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='obligations'
+                                    {...prefetchOnIntent('obligations')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
@@ -465,6 +546,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='attachmentUsages'
+                                    {...prefetchOnIntent('attachmentUsages')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachment Usages')}</div>
@@ -472,6 +554,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='vulnerabilities'
+                                    {...prefetchOnIntent('vulnerabilities')}
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={vulnerabilitiesBadgeClassName}
@@ -484,6 +567,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     eventKey='changeLog'
+                                    {...prefetchOnIntent('changeLog')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>

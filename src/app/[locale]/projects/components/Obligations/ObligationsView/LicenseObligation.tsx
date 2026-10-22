@@ -30,6 +30,7 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getProjectApiResponse } from '@/utils/api/projectApiQueries'
 import CompareObligation from '../CompareObligation'
 import { ExpandableList } from './ExpandableComponents'
 import LicenseDbObligationsModal from './LicenseDbObligationsModal'
@@ -453,7 +454,7 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl, signal)
+                const response = await getProjectApiResponse(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
