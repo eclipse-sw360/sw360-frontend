@@ -324,6 +324,26 @@ const filterTreeNodes = (
     return result
 }
 
+const countNodes = (
+    nodes: NestedRows<TypedProject | TypedRelease>[],
+): {
+    releases: number
+    projects: number
+} => {
+    const counts = {
+        releases: 0,
+        projects: 0,
+    }
+    for (const node of nodes) {
+        if (node.node.type === 'release') counts.releases++
+        else counts.projects++
+        const childCounts = countNodes(node.children ?? [])
+        counts.releases += childCounts.releases
+        counts.projects += childCounts.projects
+    }
+    return counts
+}
+
 const buildTable = (
     setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease>[]>>,
     licenseClearing: LicenseClearing,
@@ -454,6 +474,13 @@ export default function TreeView({
         isAsc: true,
     })
 
+    const linkedCounts = useMemo(
+        () => countNodes(rowData),
+        [
+            rowData,
+        ],
+    )
+
     useEffect(() => {
         setLicenseClearing(licenseClearingData)
         setLinkedProjects(linkedProjectsData)
@@ -508,6 +535,10 @@ export default function TreeView({
                             {t('Collapse all')}
                         </Link>
                         {')'}
+                        <div>
+                            {t('Linked Releases')}: {linkedCounts.releases} | {t('Linked Projects')}:{' '}
+                            {linkedCounts.projects}
+                        </div>
                     </>
                 ),
                 cell: ({ row }) => {
@@ -916,6 +947,7 @@ export default function TreeView({
             columnFilters,
             showFilter,
             memoizedLicenseClearing,
+            linkedCounts,
         ],
     )
 
