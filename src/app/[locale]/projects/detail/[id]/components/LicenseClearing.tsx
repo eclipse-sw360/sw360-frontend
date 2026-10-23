@@ -68,6 +68,9 @@ function LicenseClearing({
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
     const [licenseClearingData, setLicenseClearingData] = useState<LicenseClearingData | undefined>(undefined)
+    const [unfilteredLicenseClearingData, setUnfilteredLicenseClearingData] = useState<LicenseClearingData | undefined>(
+        undefined,
+    )
     const [linkedProjectsData, setLinkedProjectsData] = useState<Project[]>([])
     const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState<boolean>(true)
     const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState<boolean>(true)
@@ -144,7 +147,9 @@ function LicenseClearing({
                     })
                 }
 
-                setLicenseClearingData((await response.json()) as LicenseClearingData)
+                const data = (await response.json()) as LicenseClearingData
+                setLicenseClearingData(data)
+                if (!filterParams) setUnfilteredLicenseClearingData(data)
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
@@ -317,6 +322,7 @@ function LicenseClearing({
                             <TreeView
                                 projectId={projectId}
                                 licenseClearingData={licenseClearingData}
+                                unfilteredLicenseClearingData={unfilteredLicenseClearingData}
                                 linkedProjectsData={linkedProjectsData}
                                 isLoadingClearingData={isLoadingClearingData}
                                 columnFilters={columnFilters}
