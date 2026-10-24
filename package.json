@@ -79,7 +79,7 @@
     "prettier": "^3.9.10",
     "prettier-plugin-organize-imports": "^4.3.0",
     "react-icons": "^5.7.0",
-    "systeminformation": "^5.33.15",
+    "systeminformation": "^5.33.16",
     "ts-node": "^10.9.2",
     "tsc-files": "^1.1.4",
     "typescript": "^7.0.2"
