@@ -14,7 +14,7 @@ import { StatusCodes } from 'http-status-codes'
 import { useRouter } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
-import { type JSX, useEffect, useState } from 'react'
+import { type JSX, useEffect, useRef, useState } from 'react'
 import { Button, Dropdown, Nav, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
@@ -30,6 +30,7 @@ import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getProjectApiResponse, logPrefetch, prefetchGenerateLicenseInfo } from '@/utils/api/projectApiQueries'
 import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
 import DependencyNetworkTreeView from './DependencyNetworkTreeView'
@@ -73,6 +74,7 @@ function LicenseClearing({
     const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState<boolean>(true)
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const isLoadingClearingData = isLoadingLicenseClearing || isLoadingLinkedProjects
+    const didPrefetchLicenseInfo = useRef(false)
 
     // Configs from backend
     const mailRequestForProjectReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
@@ -85,6 +87,15 @@ function LicenseClearing({
     const disableCrButton = !crIsAllowed
 
     useEffect(() => {
+        if (isLoadingClearingData || didPrefetchLicenseInfo.current) return
+        didPrefetchLicenseInfo.current = true
+        void prefetchGenerateLicenseInfo(projectId, true).catch(() => undefined)
+    }, [
+        isLoadingClearingData,
+        projectId,
+    ])
+
+    useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -92,7 +103,7 @@ function LicenseClearing({
 
         void (async () => {
             try {
-                const linkedProjectsResponse = await ApiUtils.GET(
+                const linkedProjectsResponse = await getProjectApiResponse(
                     `projects/${projectId}/linkedProjects?transitive=true`,
                     signal,
                 )
@@ -136,7 +147,7 @@ function LicenseClearing({
                     .join('&')
 
                 const url = `projects/${projectId}/licenseClearing?transitive=true${filterParams ? `&${filterParams}` : ''}`
-                const response = await ApiUtils.GET(url, signal)
+                const response = await getProjectApiResponse(url, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -166,6 +177,13 @@ function LicenseClearing({
         const isCalledFromProjectLicenseTab = true
         sessionStorage.setItem('isCalledFromProjectLicenseTab', JSON.stringify(isCalledFromProjectLicenseTab))
         router.push(`/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`)
+    }
+
+    const prefetchLicenseInfo = (withSubProjects: boolean): void => {
+        const destination = `/projects/generateLicenseInfo/${projectId}?withSubProjects=${withSubProjects ? 'true' : 'false'}`
+        router.prefetch(destination)
+        logPrefetch('route-requested', destination)
+        void prefetchGenerateLicenseInfo(projectId, withSubProjects).catch(() => undefined)
     }
 
     const exportProjectSpreadsheet = async (withLinkedRelease: boolean) => {
@@ -262,10 +280,18 @@ function LicenseClearing({
                                 <Dropdown className='col-auto'>
                                     <Dropdown.Toggle variant='secondary'>{t('Generate License Info')}</Dropdown.Toggle>
                                     <Dropdown.Menu>
-                                        <Dropdown.Item onClick={() => generateLicenseInfo(false)}>
+                                        <Dropdown.Item
+                                            onMouseEnter={() => prefetchLicenseInfo(false)}
+                                            onFocus={() => prefetchLicenseInfo(false)}
+                                            onClick={() => generateLicenseInfo(false)}
+                                        >
                                             {t('Projects only')}
                                         </Dropdown.Item>
-                                        <Dropdown.Item onClick={() => generateLicenseInfo(true)}>
+                                        <Dropdown.Item
+                                            onMouseEnter={() => prefetchLicenseInfo(true)}
+                                            onFocus={() => prefetchLicenseInfo(true)}
+                                            onClick={() => generateLicenseInfo(true)}
+                                        >
                                             {t('Projects with sub projects')}
                                         </Dropdown.Item>
                                     </Dropdown.Menu>

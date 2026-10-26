@@ -44,6 +44,7 @@ import {
 } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { getProjectApiResponse } from '@/utils/api/projectApiQueries'
 import DownloadLicenseInfoModal from './DownloadLicenseInfoModal'
 import LicenseInfoDownloadConfirmationModal from './LicenseInfoDownloadConfirmation'
 import {
@@ -1101,19 +1102,19 @@ function GenerateLicenseInfo({
         void (async () => {
             try {
                 const requests = [
-                    ApiUtils.GET(`projects/${projectId}`, signal),
+                    getProjectApiResponse(`projects/${projectId}`, signal),
                 ]
                 if (withSubProjects === 'true') {
                     requests.push(
-                        ApiUtils.GET(
+                        getProjectApiResponse(
                             `projects/${projectId}/attachmentUsage?transitive=true&filter=withCliAttachment`,
                             signal,
                         ),
-                        ApiUtils.GET(`projects/${projectId}/linkedProjects?transitive=true`, signal),
+                        getProjectApiResponse(`projects/${projectId}/linkedProjects?transitive=true`, signal),
                     )
                 } else {
                     requests.push(
-                        ApiUtils.GET(
+                        getProjectApiResponse(
                             `projects/${projectId}/attachmentUsage?transitive=false&filter=withCliAttachment`,
                             signal,
                         ),
