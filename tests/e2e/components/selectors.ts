@@ -23,9 +23,7 @@ export const selectors = {
         table: '.sw360-table',
         addComponentButton: 'button.btn-primary:has-text("Add Component"), a:has-text("Add Component")',
         importSBOMButton: 'button:has-text("Import SBOM"), a:has-text("Import SBOM")',
-        exportDropdown: '#project-export, button:has-text("Export Spreadsheet")',
-        exportComponentsOnly: 'text=Components only',
-        exportWithReleases: 'text=Components with releases',
+        exportListButton: 'button:has-text("Export List")',
         pageContent: '.container.page-content',
     },
 

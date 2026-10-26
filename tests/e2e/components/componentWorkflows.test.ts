@@ -7,7 +7,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
+import ExportReportFormat from '../../../src/object-types/enums/ExportReportFormat'
 import { selectors } from './selectors'
 import {
     clickButtonPreventingLink,
@@ -67,27 +68,76 @@ test.describe('Components - Workflows', () => {
         })
     })
 
-    // ─── Export Spreadsheet ──────────────────────────────
-
-    test.describe('Export Spreadsheet', () => {
-        test('TC65: Export dropdown is visible on list page', async ({ page }) => {
+    test.describe('Export List', () => {
+        async function openExportModal(page: Page, mailEnabled = false) {
+            await page.addInitScript((enabled) => {
+                const cached = JSON.parse(localStorage.getItem('sw360BackendConfig') ?? 'null')
+                localStorage.setItem('sw360BackendConfig', JSON.stringify({
+                    data: { ...cached?.data, 'send.export.to.mail.enabled': String(enabled) },
+                    timestamp: Date.now(),
+                }))
+            }, mailEnabled)
             await gotoComponentsPage(page)
-            const exportBtn = page.locator(selectors.list.exportDropdown).first()
-            await expect(exportBtn).toBeVisible({ timeout: 10000 })
+            await page.locator(selectors.list.exportListButton).click()
+            return page.getByRole('dialog', { name: 'Export List' })
+        }
+
+        test('TC65: Export modal defaults to Components only and XLSX', async ({ page }) => {
+            const modal = await openExportModal(page)
+            await expect(modal.getByRole('radio', { name: 'Components Only', exact: true })).toBeChecked()
+            await expect(modal.getByLabel('Export format')).toHaveValue(ExportReportFormat.XLSX)
         })
 
-        test('TC66: Export dropdown shows Components only option', async ({ page }) => {
-            await gotoComponentsPage(page)
-            const exportBtn = page.locator(selectors.list.exportDropdown).first()
-            await exportBtn.click()
-            await expect(page.locator(selectors.list.exportComponentsOnly).first()).toBeVisible({ timeout: 5000 })
+        for (const format of Object.values(ExportReportFormat)) {
+            test(`TC66: Download components as ${format}`, async ({ page }) => {
+                const modal = await openExportModal(page)
+                await page.route('**/reports?**', async (route) => {
+                    const query = new URL(route.request().url()).searchParams
+                    expect(query.get('module')).toBe('components')
+                    expect(query.get('format')).toBe(format)
+                    expect(query.get('withlinkedreleases')).toBe('false')
+                    expect(query.get('mailrequest')).toBe('false')
+                    await route.fulfill({ status: 200, body: 'mock report' })
+                })
+                await modal.getByLabel('Export format').selectOption(format)
+                const downloadPromise = page.waitForEvent('download')
+                await modal.getByRole('button', { name: 'Export', exact: true }).click()
+                const download = await downloadPromise
+                expect(download.suggestedFilename()).toMatch(new RegExp(`^components-\\d{4}-\\d{2}-\\d{2}\\.${format}$`))
+                await expect(modal).toBeHidden()
+                await expect(page.locator('.global-message .alert-success')).toContainText('Report download is successful')
+            })
+        }
+
+        test('TC67: Export linked releases reports access denied and allows retry', async ({ page }) => {
+            const modal = await openExportModal(page)
+            await page.route('**/reports?**', async (route) => {
+                expect(new URL(route.request().url()).searchParams.get('withlinkedreleases')).toBe('true')
+                await route.fulfill({ status: 403, body: 'Forbidden' })
+            })
+            await modal.getByRole('radio', { name: 'Components with releases' }).check()
+            await expect(modal.getByRole('radio', { name: 'Components Only', exact: true })).not.toBeChecked()
+            await modal.getByRole('button', { name: 'Export', exact: true }).click()
+            await expect(page.locator('.global-message .alert-warning')).toContainText('Access Denied!')
+            await expect(modal.getByRole('alert')).toHaveCount(0)
+            await expect(modal.getByRole('button', { name: 'Export', exact: true })).toBeEnabled()
         })
 
-        test('TC67: Export dropdown shows Components with releases option', async ({ page }) => {
-            await gotoComponentsPage(page)
-            const exportBtn = page.locator(selectors.list.exportDropdown).first()
-            await exportBtn.click()
-            await expect(page.locator(selectors.list.exportWithReleases).first()).toBeVisible({ timeout: 5000 })
+        test('Export by email does not download locally', async ({ page }) => {
+            const modal = await openExportModal(page, true)
+            await page.route('**/reports?**', async (route) => {
+                const query = new URL(route.request().url()).searchParams
+                expect(query.get('format')).toBe(ExportReportFormat.CSV)
+                expect(query.get('mailrequest')).toBe('true')
+                await route.fulfill({ status: 200, body: '' })
+            })
+            let downloaded = false
+            page.on('download', () => { downloaded = true })
+            await modal.getByLabel('Export format').selectOption(ExportReportFormat.CSV)
+            await modal.getByRole('button', { name: 'Export', exact: true }).click()
+            await expect(modal).toBeHidden()
+            await expect(page.locator('.global-message .alert-success')).toContainText('Report generation has started')
+            expect(downloaded).toBe(false)
         })
     })
 

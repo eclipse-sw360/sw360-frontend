@@ -8,6 +8,7 @@
 // License-Filename: LICENSE
 
 import { expect, test } from '@playwright/test'
+import ExportReportFormat from '../../../src/object-types/enums/ExportReportFormat'
 import { selectors } from './selectors'
 import { gotoComponentsPage } from './utils'
 
@@ -45,13 +46,28 @@ test.describe('Components List Page', () => {
         await expect(importBtn).toBeVisible()
     })
 
-    test('TC06: Export Spreadsheet dropdown has correct options', async ({ page }) => {
-        const exportToggle = page.locator(selectors.list.exportDropdown).first()
+    test('TC06: Export List modal has scope and format options', async ({ page }) => {
+        const exportToggle = page.locator(selectors.list.exportListButton)
         await expect(exportToggle).toBeVisible()
         await exportToggle.click()
 
-        await expect(page.getByText('Components only')).toBeVisible()
-        await expect(page.getByText('Components with releases')).toBeVisible()
+        const modal = page.getByRole('dialog', { name: 'Export List' })
+        await expect(modal.getByRole('radio', { name: 'Components Only', exact: true })).toBeChecked()
+        await expect(modal.getByRole('radio', { name: 'Components with releases' })).not.toBeChecked()
+        await expect(modal.getByLabel('Export format')).toHaveValue(ExportReportFormat.XLSX)
+        await expect(modal.locator('option')).toHaveText([
+            ExportReportFormat.XLSX.toUpperCase(),
+            ExportReportFormat.CSV.toUpperCase(),
+            ExportReportFormat.JSON.toUpperCase(),
+            ExportReportFormat.XML.toUpperCase(),
+        ])
+        await modal.getByLabel('Export format').selectOption(ExportReportFormat.CSV)
+        await modal.getByRole('radio', { name: 'Components with releases' }).check()
+        await modal.getByRole('button', { name: 'Cancel' }).click()
+        await expect(modal).toBeHidden()
+        await exportToggle.click()
+        await expect(modal.getByLabel('Export format')).toHaveValue(ExportReportFormat.XLSX)
+        await expect(modal.getByRole('radio', { name: 'Components Only', exact: true })).toBeChecked()
     })
 
     test('TC07: Table displays correct column headers', async ({ page }) => {

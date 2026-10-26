@@ -12,13 +12,12 @@
 'use client'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
-import { Alert, Dropdown } from 'react-bootstrap'
 
+import ExportListModal from '@/components/ExportListModal/ExportListModal'
 import { AdvancedSearch, PageButtonHeader } from '@/components/sw360'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import { COMPONENT_NOT_FOUND_WARNING_KEY, useStoredWarning } from '@/hooks'
 import { ConfigKeys, UIConfigKeys, UserGroupPriority, UserGroupType } from '@/object-types'
-import DownloadService from '@/services/download.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import ComponentsTable from './ComponentsTable'
@@ -32,9 +31,7 @@ const ComponentIndex = (): ReactNode => {
     const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
     const platformsSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
     const osSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
-    const [showExportMessage, setShowExportMessage] = useState(false)
-    const [showExportError, setShowExportError] = useState(false)
-    const exportViaMail = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT) === 'true'
+    const [showExportListModal, setShowExportListModal] = useState<boolean>(false)
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
@@ -216,38 +213,14 @@ const ComponentIndex = (): ReactNode => {
         },
     ]
 
-    const handleExportComponent = async (withLinkedReleases: string) => {
-        const currentDate = new Date().toISOString().split('T')[0]
-        const mailRequestParam = exportViaMail ? 'true' : 'false'
-        const url = `reports?withlinkedreleases=${withLinkedReleases}&mimetype=xlsx&mailrequest=${mailRequestParam}&module=components`
-
-        const handleSuccess = () => {
-            setShowExportMessage(true)
-            setShowExportError(false)
-        }
-
-        const handleError = () => {
-            setShowExportError(true)
-            setShowExportMessage(false)
-        }
-
-        try {
-            if (exportViaMail) {
-                const response = await ApiUtils.GET(url)
-
-                response.status === 200 ? handleSuccess() : handleError()
-            } else {
-                const statusCode = await DownloadService.download(url, `components-${currentDate}.xlsx`)
-
-                statusCode === 200 ? handleSuccess() : handleError()
-            }
-        } catch {
-            handleError()
-        }
-    }
-
     return (
         <div className='container page-content'>
+            {showExportListModal && (
+                <ExportListModal
+                    module='components'
+                    onHide={() => setShowExportListModal(false)}
+                />
+            )}
             <div className='row'>
                 <div className='col-2 sidebar'>
                     <AdvancedSearch
@@ -260,51 +233,14 @@ const ComponentIndex = (): ReactNode => {
                         title={`${t('Components')} (${numberOfComponent})`}
                         buttons={headerbuttons}
                     >
-                        <div
-                            style={{
-                                marginLeft: '5px',
-                            }}
-                            className='btn-group'
-                            role='group'
+                        <button
+                            type='button'
+                            className='btn btn-secondary ms-1'
+                            onClick={() => setShowExportListModal(true)}
                         >
-                            <Dropdown>
-                                <Dropdown.Toggle
-                                    variant='secondary'
-                                    id='project-export'
-                                >
-                                    {t('Export Spreadsheet')}
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item onClick={() => handleExportComponent('false')}>
-                                        {t('Components only')}
-                                    </Dropdown.Item>
-                                    <Dropdown.Item onClick={() => handleExportComponent('true')}>
-                                        {t('Components with releases')}
-                                    </Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </div>
+                            {t('Export List')}
+                        </button>
                     </PageButtonHeader>
-                    {showExportMessage && (
-                        <Alert
-                            variant='success'
-                            onClose={() => setShowExportMessage(false)}
-                            dismissible
-                        >
-                            {exportViaMail
-                                ? t('Excel report generation has started')
-                                : t('Spreadsheet download is successful')}
-                        </Alert>
-                    )}
-                    {showExportError && (
-                        <Alert
-                            variant='danger'
-                            onClose={() => setShowExportError(false)}
-                            dismissible
-                        >
-                            {t('Export report generation has failed')}
-                        </Alert>
-                    )}
                     <div
                         className='row'
                         style={{
