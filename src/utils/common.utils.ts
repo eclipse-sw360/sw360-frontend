@@ -402,7 +402,10 @@ const formatDocumentTitle = (name: string, version?: string | null): string => {
  */
 const Capitalize = (text: string) => {
     return text
-        ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
+        ? text
+              .split('_')
+              .map((word) => word.charAt(0).toLocaleUpperCase() + word.substring(1).toLocaleLowerCase())
+              .join(' ')
         : undefined
 }
 
