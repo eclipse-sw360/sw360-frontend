@@ -1571,6 +1571,7 @@
     "Version": "バージョン",
     "Version Control System": "バージョン管理システム",
     "View Change Logs": "ログの変更を表示します",
+    "View Moderation Request": "モデレーションリクエストを表示",
     "View Clearing Request": "決済リクエストの表示",
     "View Logs": "ログを表示します",
     "View clearing request detail": "プロジェクトのリクエスト <strong>{id}</strong> の詳細をクリアします",

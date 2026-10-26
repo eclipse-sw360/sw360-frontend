@@ -1571,6 +1571,7 @@
     "Version": "版本",
     "Version Control System": "版本控制系统",
     "View Change Logs": "查看更改日志",
+    "View Moderation Request": "查看仲裁请求",
     "View Clearing Request": "查看清算请求",
     "View Logs": "查看日志",
     "View clearing request detail": "清除项目的请求 <strong>{id}</strong> 详细信息",
