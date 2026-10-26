@@ -481,6 +481,7 @@ function GenerateLicenseInfo({
     const [licenses, setLicenses] = useState<Record<string, License[]>>({})
     const detailLoader = useRef<LicenseDetailLoader | null>(null)
     const detailStatuses = useRef(new Map<string, 'loading' | 'loaded' | 'error'>())
+    const [isLoadingLicenseDetails, setIsLoadingLicenseDetails] = useState(false)
     const [detailErrors, setDetailErrors] = useState<Set<string>>(new Set())
     const loadLicenses = useCallback(async (releaseId: string, attachmentId: string, retry = false) => {
         const loader = detailLoader.current
@@ -493,6 +494,7 @@ function GenerateLicenseInfo({
             (!retry && detailStatuses.current.has(key))
         )
             return
+        setIsLoadingLicenseDetails(true)
         detailStatuses.current.set(key, 'loading')
         setDetailErrors((previous) => {
             const next = new Set(previous)
@@ -512,6 +514,10 @@ function GenerateLicenseInfo({
             detailStatuses.current.set(key, 'error')
             setDetailErrors((previous) => new Set(previous).add(key))
             ApiUtils.reportError(error)
+        } finally {
+            setIsLoadingLicenseDetails(
+                Array.from(detailStatuses.current.values()).some((status) => status === 'loading'),
+            )
         }
     }, [])
     const tableData = useMemo(
@@ -1244,8 +1250,8 @@ function GenerateLicenseInfo({
             <DownloadLicenseInfoModal
                 show={show}
                 setShow={setShow}
+                isLoadingLicenseDetails={isLoadingLicenseDetails}
                 attachmentUsages={downloadPayload}
-                setShowConfirmation={setShowConfirmation}
                 projectId={projectId}
                 isCalledFromProjectLicenseTab={isCalledFromProjectLicenseTab}
                 projectReleaseRelationships={projectReleaseRelationships}
@@ -1283,7 +1289,7 @@ function GenerateLicenseInfo({
                                             <Button
                                                 variant='primary'
                                                 className='me-2 py-2 col-auto'
-                                                disabled={!metadataLoaded || showProcessing}
+                                                disabled={!metadataLoaded || showProcessing || isLoadingLicenseDetails}
                                                 onClick={() => {
                                                     setDownloadPayload(payloadFromStore(storeRef.current))
                                                     setShow(true)
@@ -1315,13 +1321,14 @@ function GenerateLicenseInfo({
                                         </Nav.Item>
                                     </Nav>
                                 </div>
-                                <div className='subscriptionBox subscriptionBox-wide my-2'>
+                                <div className='subscriptionBox-wide my-2'>
                                     {(CommonUtils.isNullOrUndefined(attachmentUsages) ||
                                         Object.keys(attachmentUsages).length === 0) ??
                                         `${t('No previous selection found')}.`}
                                     {t(
                                         'If you have writing permissions to this project your selection will be stored automatically when downloading',
                                     )}
+                                    .
                                 </div>
                                 <div className='mb-3 mt-3'>
                                     {table ? (

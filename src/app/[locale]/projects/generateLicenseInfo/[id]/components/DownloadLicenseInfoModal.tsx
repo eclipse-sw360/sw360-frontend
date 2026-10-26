@@ -56,8 +56,8 @@ const projectProjFilterOptions: FilterOption[] = Object.values(ProjectRelationsh
 export default function DownloadLicenseInfoModal({
     show,
     setShow,
+    isLoadingLicenseDetails,
     attachmentUsages,
-    setShowConfirmation,
     projectId,
     isCalledFromProjectLicenseTab,
     projectReleaseRelationships,
@@ -65,7 +65,7 @@ export default function DownloadLicenseInfoModal({
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
-    setShowConfirmation: Dispatch<SetStateAction<boolean>>
+    isLoadingLicenseDetails: boolean
     attachmentUsages: AttachmentUsage[]
     projectId: string
     isCalledFromProjectLicenseTab: boolean
@@ -251,7 +251,9 @@ export default function DownloadLicenseInfoModal({
                                     <OverlayTrigger
                                         placement='top'
                                         overlay={
-                                            <Tooltip>{t(`release_relation_${fil.tag.toLowerCase()}_tooltip`)}</Tooltip>
+                                            <Tooltip>
+                                                {t(`release_relation_${fil.value.toLowerCase()}_tooltip`)}
+                                            </Tooltip>
                                         }
                                     >
                                         <span className='text-center'>{CommonUtils.Capitalize(fil.tag)}</span>
@@ -303,7 +305,7 @@ export default function DownloadLicenseInfoModal({
                                                 placement='top'
                                                 overlay={
                                                     <Tooltip>
-                                                        {t(`project_relation_${fil.tag.toLowerCase()}_tooltip`)}
+                                                        {t(`project_relation_${fil.value.toLowerCase()}_tooltip`)}
                                                     </Tooltip>
                                                 }
                                             >
@@ -378,7 +380,7 @@ export default function DownloadLicenseInfoModal({
                         onClick={() => {
                             handleLicenseInfoDownload(projectId)
                         }}
-                        disabled={loading}
+                        disabled={loading || isLoadingLicenseDetails}
                     >
                         {t('Download')}
                     </button>

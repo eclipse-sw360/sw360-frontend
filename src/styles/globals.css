@@ -728,6 +728,15 @@ body {
     border-radius: 5px;
 }
 
+.subscriptionBox-wide {
+    border: 1px solid #2e5aac;
+    background-color: #eef2fa;
+    color: #2e5aac;
+    padding: 10px;
+    font-size: small;
+    border-radius: 5px;
+}
+
 .list-group-item-action:hover {
     border-color: #dbdce4 !important;
     color: #6b6c7e !important;

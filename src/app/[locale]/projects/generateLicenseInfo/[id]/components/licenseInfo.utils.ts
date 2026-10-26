@@ -118,7 +118,10 @@ export const toggleLicenseInStore = (
             return true
         } else {
             usage.usageData.licenseInfo.excludedLicenseIds.push(license)
-            if (usage.usageData.licenseInfo.excludedLicenseIds.length === allLicenses.length) return false
+            if (usage.usageData.licenseInfo.excludedLicenseIds.length === allLicenses.length) {
+                applyAttachmentToggle(store, key)
+                return false
+            }
             return true
         }
     }
