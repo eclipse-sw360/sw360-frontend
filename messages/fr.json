@@ -1570,6 +1570,7 @@
     "Version": "Version",
     "Version Control System": "Système de contrôle de version",
     "View Change Logs": "Afficher les journaux de modification",
+    "View Moderation Request": "Afficher la demande de modération",
     "View Clearing Request": "Afficher la demande de compensation",
     "View Logs": "Afficher les journaux",
     "View clearing request detail": "Demande de compensation <strong>{id}</strong> détails pour le projet",

@@ -624,6 +624,10 @@ body {
     color: #f7941e;
 }
 
+.moderation_request_icon {
+    fill: #6c7a89;
+}
+
 .alert-warning {
     background-color: #fff4ec !important;
     color: #b95042 !important;
