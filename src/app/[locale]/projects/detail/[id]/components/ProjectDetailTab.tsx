@@ -336,6 +336,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
         : '?/?'
 
+    const eccClosedCount = Math.max(0, eccClassifiedCount - eccOpenCount)
     const eccBadgeClassName =
         eccOpenCount > 0
             ? 'obligations-badge--danger'
@@ -343,7 +344,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
               ? 'obligations-badge--success'
               : 'obligations-badge'
 
-    const eccCountValue = `${eccOpenCount} / ${eccClassifiedCount}`
+    const eccCountValue = `${eccClosedCount} / ${eccClassifiedCount}`
 
     const obligationsBadgeClassName =
         obligationsNonOpenCount === 0
