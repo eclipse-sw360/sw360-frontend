@@ -554,7 +554,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                     ]) => (
                                                         <Dropdown.Item
                                                             key={index}
-                                                            href={`/components/releases/detail/${item.id}`}
+                                                            onClick={(event) => {
+                                                                event.stopPropagation()
+                                                                router.push(`/components/releases/detail/${item.id}`)
+                                                            }}
                                                         >
                                                             <span
                                                                 className={`badge-circle ${item.clearingState ?? 'NEW'}`}
