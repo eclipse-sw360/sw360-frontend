@@ -76,18 +76,10 @@ export default function DownloadLicenseInfoModal({
     const params = useSearchParams()
     const mailRequestForReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
-    const [withSubProject, setWithSubProject] = useState(true)
+    const withSubProject = params.get('withSubProjects') === 'true'
     const [selectedRelRelationship, setSelectedRelRelationship] = useState<string[]>([])
     const [selectedProjectRelationship, setSelectedProjectRelationship] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false) {
-            setWithSubProject(false)
-        }
-    }, [
-        params,
-    ])
 
     useEffect(() => {
         setSelectedRelRelationship(projectReleaseRelationships)
@@ -119,10 +111,11 @@ export default function DownloadLicenseInfoModal({
             withlinkedreleases: 'false',
             projectId,
             module: 'licenseInfo',
-            withSubProject: withSubProject ? 'true' : 'false',
+            withSubProject: withSubProject && selectedProjectRelationship.length > 0 ? 'true' : 'false',
             generatorClassName,
             variant,
             selectedRelRelationship,
+            selectedProjectRelationship: withSubProject ? selectedProjectRelationship : [],
         })
         const mailEnabled = mailRequestForReport === 'true'
         if (!mailEnabled) {
@@ -261,7 +254,7 @@ export default function DownloadLicenseInfoModal({
                                 </label>
                             </div>
                         ))}
-                    {Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === true && (
+                    {withSubProject && (
                         <>
                             <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
                             {projectProjFilterOptions
