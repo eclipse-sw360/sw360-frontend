@@ -391,7 +391,7 @@ const formatObligationText = (text: string): string =>
  */
 const formatDocumentTitle = (name: string, version?: string | null): string => {
     const nameWithVersion = isNullEmptyOrUndefinedString(version) ? name : `${name} (${version})`
-    return `${nameWithVersion} | SW360`.trim()
+    return collapseSpaces(`${nameWithVersion} | SW360`)
 }
 
 /**
@@ -408,6 +408,14 @@ const Capitalize = (text: string) => {
               .join(' ')
         : undefined
 }
+
+/**
+ * Trims leading/trailing whitespace and collapses repeated internal whitespace into a single space.
+ * Prevents sending malformed values (e.g. names with multiple consecutive spaces) to the backend.
+ * @param text - The string to collapse spaces in.
+ * @returns The string with collapsed spaces.
+ */
+const collapseSpaces = (text: string): string => text.trim().replace(/\s+/g, ' ')
 
 const CommonUtils = {
     isNullOrUndefined,
@@ -430,6 +438,7 @@ const CommonUtils = {
     nullToEmptyString,
     formatObligationText,
     formatDocumentTitle,
+    collapseSpaces,
 }
 
 export default CommonUtils
