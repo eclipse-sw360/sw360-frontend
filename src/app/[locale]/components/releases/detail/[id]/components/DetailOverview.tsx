@@ -386,7 +386,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             link: `/components/editRelease/${releaseId}`,
             type: 'primary',
             name: t('Edit release'),
-            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
+            disable:
+                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                userIdentity?.userGroup === UserGroupType.VIEWER,
         },
         'Link To Project': {
             link: '',
@@ -395,7 +397,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 setLinkProjectModalShow(true)
             },
             name: t('Link To Project'),
-            disable: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
+            disable:
+                userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
+                userIdentity?.userGroup === UserGroupType.VIEWER,
         },
         Merge: {
             link: `/components/releases/detail/${releaseId}/merge`,
@@ -403,7 +407,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             name: t('Merge'),
             hidden:
                 userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
-                userIdentity?.userGroup === UserGroupType.USER,
+                userIdentity?.userGroup === UserGroupType.USER ||
+                userIdentity?.userGroup === UserGroupType.VIEWER,
         },
         Subscribe: {
             link: '',
