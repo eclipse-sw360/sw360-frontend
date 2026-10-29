@@ -1584,6 +1584,13 @@ input[checked] + .slider:before {
     max-height: calc(2 * 1lh); /* clamp to at most 2 lines, but shrink to content */
 }
 
+/* Lets the verification popup escape the clamped cell. */
+.restrict-row-height:has(.verification-tooltip) {
+    display: block;
+    overflow: visible;
+    max-height: none;
+}
+
 .table-text-link {
     text-decoration: none;
     color: var(--sw360-primary-color);
@@ -2056,6 +2063,40 @@ input[checked] + .slider:before {
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-top: 8px solid #000;
+}
+
+.verification-tooltip {
+    position: relative;
+    line-height: 20px;
+}
+
+.verification-tooltip:hover {
+    cursor: pointer;
+}
+
+.verification-tooltip-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    text-align: left;
+
+    width: 280px;
+    max-height: 200px;
+    overflow-y: auto;
+
+    background-color: #fff;
+    color: #000;
+
+    border-radius: 4px;
+    box-shadow: 4px 4px 4px lightgray;
+    border: 1px solid gray;
+    padding: 6px 10px;
+
+    z-index: 6;
 }
 
 .formatedMessageForVul {

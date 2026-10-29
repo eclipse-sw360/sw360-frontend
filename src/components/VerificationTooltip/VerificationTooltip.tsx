@@ -8,12 +8,30 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { type JSX, ReactNode, useState } from 'react'
 import { VerificationStateInfo } from '@/object-types'
 
 interface Props {
     verificationStateInfos: Array<VerificationStateInfo>
+    emptyMessage?: string
     children: ReactNode
+}
+
+// Unparsable checkedOn values rank lowest; ties resolve to the later array entry.
+export const getLatestVerificationState = (infos: Array<VerificationStateInfo>): string | undefined => {
+    let latest: VerificationStateInfo | undefined
+    let latestTime = Number.NEGATIVE_INFINITY
+    for (const info of infos) {
+        const parsed = Date.parse(info.checkedOn)
+        const time = Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed
+        if (latest === undefined || time >= latestTime) {
+            latest = info
+            latestTime = time
+        }
+    }
+    return latest?.verificationState
 }
 
 const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationStateInfo }) => {
@@ -24,7 +42,7 @@ const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationState
                 <span className='formatedMessageForVulDate'>({stateInfo.checkedOn})</span>
             </span>
             <span className='formatedMessageForVulItem'>
-                <i>Checked By: </i>
+                <i>Checked by: </i>
                 <span>{stateInfo.checkedBy}</span>
             </span>
             <span className='formatedMessageForVulItem'>
@@ -41,27 +59,31 @@ const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationState
     )
 }
 
-const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.Element => {
+const VerificationTooltip = ({ verificationStateInfos, emptyMessage, children }: Props): JSX.Element => {
     const [show, setShow] = useState(false)
     return (
         <div
-            className='tooltip'
+            className='verification-tooltip'
             onMouseOver={() => setShow(true)}
             onMouseLeave={() => setShow(false)}
         >
             {show && (
-                <div className='tooltip-content'>
-                    <ol
-                        className='formatedMessageForVul'
-                        reversed
-                    >
-                        {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (
-                            <VerificationStateFormater
-                                key={index}
-                                stateInfo={info}
-                            />
-                        ))}
-                    </ol>
+                <div className='verification-tooltip-content'>
+                    {verificationStateInfos.length === 0 ? (
+                        <span>{emptyMessage}</span>
+                    ) : (
+                        <ol
+                            className='formatedMessageForVul'
+                            reversed
+                        >
+                            {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (
+                                <VerificationStateFormater
+                                    key={index}
+                                    stateInfo={info}
+                                />
+                            ))}
+                        </ol>
+                    )}
                 </div>
             )}
             {children}
