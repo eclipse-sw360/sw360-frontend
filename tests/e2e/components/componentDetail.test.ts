@@ -9,7 +9,13 @@
 
 import { expect, test } from '@playwright/test'
 import { selectors } from './selectors'
-import { clickDetailTab, createComponentApi, deleteComponentApi, waitForComponentPageLoad } from './utils'
+import {
+    clickDetailTab,
+    createComponentApi,
+    deleteComponentApi,
+    setComponentVisibilityConfig,
+    waitForComponentPageLoad,
+} from './utils'
 
 const ts = Date.now().toString(36)
 
@@ -71,10 +77,14 @@ test.describe('Components - Detail Page', () => {
         await expect(page.getByText(/SW360 Admin|setup@sw360/).first()).toBeVisible()
     })
 
-    test('TC34a: Summary tab displays component visibility', async ({ page }) => {
+    test('TC34a: Summary tab respects the component visibility feature flag', async ({ page }) => {
+        await setComponentVisibilityConfig(page, true)
         const visibilityLabel = page.getByText('Visibility:', { exact: true })
         await expect(visibilityLabel).toBeVisible()
         await expect(visibilityLabel.locator('xpath=following-sibling::td')).toHaveText('Group and Moderators')
+
+        await setComponentVisibilityConfig(page, false)
+        await expect(visibilityLabel).toHaveCount(0)
     })
 
     // ─── Release Overview Tab ────────────────────────────────

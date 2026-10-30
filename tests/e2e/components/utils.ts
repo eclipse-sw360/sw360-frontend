@@ -259,3 +259,22 @@ export async function deleteComponentApi(componentId: string): Promise<void> {
         await apiContext.dispose()
     }
 }
+
+/** Set the client configuration for visibility rendering without changing the shared backend. */
+export async function setComponentVisibilityConfig(page: Page, enabled: boolean): Promise<void> {
+    await page.evaluate((enabled) => {
+        const cached = JSON.parse(localStorage.getItem('sw360BackendConfig') || 'null')
+        localStorage.setItem(
+            'sw360BackendConfig',
+            JSON.stringify({
+                data: {
+                    ...cached?.data,
+                    'component.visibility.restriction.enabled': String(enabled),
+                },
+                timestamp: Date.now(),
+            }),
+        )
+    }, enabled)
+    await page.reload()
+    await waitForComponentPageLoad(page)
+}

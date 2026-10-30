@@ -17,7 +17,8 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import AdditionalData from '@/components/AdditionalData/AdditionalData'
 import ExternalIds from '@/components/ExternalIds/ExternalIds'
-import { Component } from '@/object-types'
+import { useConfigKeyValue } from '@/contexts'
+import { Component, ConfigKeys } from '@/object-types'
 import CommonUtils from '@/utils/common.utils'
 
 interface Props {
@@ -28,6 +29,8 @@ interface Props {
 const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
     const t = useTranslations('default')
     const [toggle, setToggle] = useState(false)
+    const isComponentVisibilityEnabled =
+        useConfigKeyValue(ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED) === 'true'
 
     const Clipboard = ({ text }: { text: string }) => {
         const [copied, setCopied] = useState(false)
@@ -132,14 +135,16 @@ const ComponentGeneral = ({ component, componentId }: Props): ReactNode => {
                         <span className='sw360-tt'>{component.componentType}</span>
                     </td>
                 </tr>
-                <tr>
-                    <td>{t('Visibility')}:</td>
-                    <td>
-                        {component.visbility === 'BUISNESSUNIT_AND_MODERATORS'
-                            ? t('Group and Moderators')
-                            : component.visbility}
-                    </td>
-                </tr>
+                {isComponentVisibilityEnabled && (
+                    <tr>
+                        <td>{t('Visibility')}:</td>
+                        <td>
+                            {component.visbility === 'BUISNESSUNIT_AND_MODERATORS'
+                                ? t('Group and Moderators')
+                                : component.visbility}
+                        </td>
+                    </tr>
+                )}
                 <tr>
                     <td>{t('CycloneDX Component Type')}:</td>
                     <td>

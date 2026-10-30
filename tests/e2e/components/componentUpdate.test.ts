@@ -15,6 +15,7 @@ import {
     deleteComponentApi,
     fillComponentSummary,
     gotoEditFromDetail,
+    setComponentVisibilityConfig,
     waitForComponentPageLoad,
 } from './utils'
 
@@ -82,9 +83,10 @@ test.describe('Components - Update', () => {
         await expect(page.locator(selectors.form.description)).toHaveValue('Original description before update')
     })
 
-    test('TC48a: Edit page has pre-populated visibility and all visibility options', async ({ page }) => {
+    test('TC48a: Edit page respects the component visibility feature flag', async ({ page }) => {
         await page.goto(`/components/edit/${componentId}`)
         await waitForComponentPageLoad(page)
+        await setComponentVisibilityConfig(page, true)
         const visibility = page.locator(selectors.form.visibility)
         await expect(visibility).toHaveValue('ME_AND_MODERATORS', { timeout: 15000 })
         await expect(visibility.locator('option')).toHaveText([
@@ -95,6 +97,9 @@ test.describe('Components - Update', () => {
         ])
         await visibility.selectOption('PRIVATE')
         await expect(visibility).toHaveValue('PRIVATE')
+
+        await setComponentVisibilityConfig(page, false)
+        await expect(visibility).toHaveCount(0)
     })
 
     // ─── Update Flow ─────────────────────────────────────
