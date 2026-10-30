@@ -16,8 +16,8 @@ import { AddAdditionalRoles, AddKeyValue } from 'next-sw360'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
 import GeneralInfoComponent from '@/components/GeneralInfoComponent/GeneralInfoComponent'
 import RolesInformation from '@/components/RolesInformation/RolesInformation'
-import { useConfigValue } from '@/contexts'
-import { ComponentPayload, DocumentTypes, InputKeyValue, UIConfigKeys, Vendor } from '@/object-types'
+import { useConfigKeyValue, useConfigValue } from '@/contexts'
+import { ComponentPayload, ConfigKeys, DocumentTypes, InputKeyValue, UIConfigKeys, Vendor } from '@/object-types'
 import { CommonUtils } from '@/utils'
 
 interface Props {
@@ -50,6 +50,9 @@ export default function ComponentEditSummary({
     setModerators,
 }: Props): ReactNode {
     const t = useTranslations('default')
+
+    const isComponentVisibilityEnabled =
+        useConfigKeyValue(ConfigKeys.IS_COMPONENT_VISIBILITY_RESTRICTION_ENABLED) === 'true'
 
     // Configs from backend
     const componentExternalIdSuggestions =
@@ -90,6 +93,7 @@ export default function ComponentEditSummary({
                             setVendor={setVendor}
                             componentPayload={componentPayload}
                             setComponentPayload={setComponentPayload}
+                            showVisibility={isComponentVisibilityEnabled}
                         />
                         <RolesInformation
                             componentOwner={componentOwner}
