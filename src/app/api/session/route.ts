@@ -32,12 +32,11 @@ export async function GET(): Promise<NextResponse> {
             session,
         })
     } catch (error) {
-        console.error('Authentication error:', error)
-
         return NextResponse.json(
             {
                 status: 'error',
-                message: 'Internal authentication error',
+                message:
+                    'Internal authentication error' + (error && error instanceof Error ? ': ' + error.message : ''),
             },
             {
                 status: 500,
