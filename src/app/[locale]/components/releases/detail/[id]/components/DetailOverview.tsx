@@ -57,6 +57,7 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -454,14 +455,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                 <ListGroup>
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.SUMMARY}
+                                        {...sidebarTabLinkProps(CommonTabIds.SUMMARY)}
                                     >
                                         <div className='my-2'>{t('Summary')}</div>
                                     </ListGroup.Item>
                                     {isSPDXFeatureEnabled && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.SPDX_DOCUMENT}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.SPDX_DOCUMENT)}
                                         >
                                             <div className='my-2'>{t('SPDX Document')}</div>
                                         </ListGroup.Item>
@@ -469,7 +470,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     {showLinkedReleases && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.LINKED_RELEASES)}
                                         >
                                             <div className='my-2'>{t('Linked Releases')}</div>
                                         </ListGroup.Item>
@@ -477,20 +478,20 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     {isPackageFeatureEnabled && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.LINKED_PACKAGES}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.LINKED_PACKAGES)}
                                         >
                                             <div className='my-2'>{t('Linked Packages')}</div>
                                         </ListGroup.Item>
                                     )}
                                     <ListGroup.Item
                                         action
-                                        eventKey={ReleaseTabIds.CLEARING_DETAILS}
+                                        {...sidebarTabLinkProps(ReleaseTabIds.CLEARING_DETAILS)}
                                     >
                                         <div className='my-2'>{t('Clearing Details')}</div>
                                     </ListGroup.Item>
                                     <ListGroup.Item
                                         action
-                                        eventKey={ReleaseTabIds.ECC_DETAILS}
+                                        {...sidebarTabLinkProps(ReleaseTabIds.ECC_DETAILS)}
                                     >
                                         <div className='my-2'>
                                             {t('ECC Details')}{' '}
@@ -499,21 +500,21 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     </ListGroup.Item>
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.ATTACHMENTS}
+                                        {...sidebarTabLinkProps(CommonTabIds.ATTACHMENTS)}
                                     >
                                         <div className='my-2'>{t('Attachments')}</div>
                                     </ListGroup.Item>
                                     {release.componentType === 'COTS' && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.COMMERCIAL_DETAILS)}
                                         >
                                             <div className='my-2'>{t('Commercial Details')}</div>
                                         </ListGroup.Item>
                                     )}
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.VULNERABILITIES}
+                                        {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
                                     >
                                         <div className='my-2'>
                                             {t('Vulnerabilities')}{' '}
@@ -527,7 +528,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     </ListGroup.Item>
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.CHANGE_LOG}
+                                        {...sidebarTabLinkProps(CommonTabIds.CHANGE_LOG)}
                                     >
                                         <div className='my-2'>{t('Change Log')}</div>
                                     </ListGroup.Item>
