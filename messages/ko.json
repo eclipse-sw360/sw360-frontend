@@ -960,6 +960,7 @@
     "No previous selection found": "이전 선택 항목이 없습니다",
     "No recent components available": "사용 가능한 최신 구성 요소가 없습니다.",
     "No recent releases available": "최신 릴리스가 없습니다.",
+    "No releases linked to this project": "이 프로젝트에 연결된 릴리스가 없습니다. 라이선스 클리어링 정보를 보려면 릴리스를 추가하세요.",
     "No source release found": "소스 릴리스를 찾을 수 없습니다.",
     "No subscriptions available": "구독이 없습니다.",
     "No token found": "토큰이 발견되지 않았습니다. \n여기에 새 토큰을 추가 해주세요!",

@@ -960,6 +960,7 @@
     "No previous selection found": "以前の選択が見つかりません。",
     "No recent components available": "利用可能な最近のコンポーネントはありません",
     "No recent releases available": "利用可能な最近のリリースはありません",
+    "No releases linked to this project": "このプロジェクトにリンクされたリリースはありません。ライセンスクリアリング情報を表示するには、リリースを追加してください。",
     "No source release found": "ソースリリースが見つかりません",
     "No subscriptions available": "利用できるサブスクリプションはありません。",
     "No token found": "トークンは見つかりません。\nここに新しいトークンを追加してください！",

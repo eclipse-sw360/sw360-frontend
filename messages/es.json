@@ -960,6 +960,7 @@
     "No previous selection found": "No se encontró ninguna selección anterior",
     "No recent components available": "No hay componentes recientes disponibles",
     "No recent releases available": "No hay lanzamientos recientes disponibles",
+    "No releases linked to this project": "No hay versiones vinculadas a este proyecto. Añada versiones para ver la información de revisión de licencias.",
     "No source release found": "No se encontró ninguna versión de fuente",
     "No subscriptions available": "No hay suscripciones disponibles.",
     "No token found": "No se encontró token. \n¡Agregue un token nuevo aquí!",
