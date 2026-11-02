@@ -409,7 +409,29 @@ const Capitalize = (text: string) => {
         : undefined
 }
 
+/**
+ * Runs an action that re-renders the page (e.g. removing a list row) and keeps the
+ * window scroll position unchanged afterwards, including after a closing modal
+ * has finished its transition.
+ * @param action The action to run.
+ */
+const preserveScrollPosition = (action: () => void) => {
+    const { scrollX, scrollY } = window
+    action()
+    const restore = () => {
+        if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
+            window.scrollTo(scrollX, scrollY)
+        }
+    }
+    requestAnimationFrame(() => {
+        restore()
+        requestAnimationFrame(restore)
+    })
+    setTimeout(restore, 400)
+}
+
 const CommonUtils = {
+    preserveScrollPosition,
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
     createUrlWithParams,

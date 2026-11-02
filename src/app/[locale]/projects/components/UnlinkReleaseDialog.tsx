@@ -14,6 +14,7 @@ import { Dispatch, ReactNode, SetStateAction } from 'react'
 import { Modal } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { LinkedReleaseData, ProjectPayload } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 
 export default function DeleteReleseLinkConfirmationModal({
     release,
@@ -40,17 +41,19 @@ export default function DeleteReleseLinkConfirmationModal({
     const t = useTranslations('default')
 
     const handleDelete = () => {
-        setProjectPayload((prev) => {
-            if (!prev.linkedReleases) return prev
+        CommonUtils.preserveScrollPosition(() => {
+            setProjectPayload((prev) => {
+                if (!prev.linkedReleases) return prev
 
-            const { [release?.[0] ?? '']: _, ...remainingReleases } = prev.linkedReleases
+                const { [release?.[0] ?? '']: _, ...remainingReleases } = prev.linkedReleases
 
-            return {
-                ...prev,
-                linkedReleases: remainingReleases,
-            }
+                return {
+                    ...prev,
+                    linkedReleases: remainingReleases,
+                }
+            })
+            setRelease(undefined)
         })
-        setRelease(undefined)
     }
 
     return (
@@ -60,6 +63,7 @@ export default function DeleteReleseLinkConfirmationModal({
                 centered
                 show={release !== undefined}
                 onHide={() => setRelease(undefined)}
+                restoreFocus={false}
                 scrollable
             >
                 <Modal.Header
