@@ -16,7 +16,7 @@ export const selectors = {
         title: '.buttonheader-title',
     },
     quickFilter: {
-        input: '#vunerabilities\\.quickSearch',
+        input: '#ecc\\.quickSearch',
     },
     table: {
         container: '.sw360-table',
