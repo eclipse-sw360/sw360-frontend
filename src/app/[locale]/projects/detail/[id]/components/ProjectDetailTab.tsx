@@ -39,6 +39,7 @@ import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -351,6 +352,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
         : '?/?'
 
+    const eccClosedCount = Math.max(0, eccClassifiedCount - eccOpenCount)
     const eccBadgeClassName =
         eccOpenCount > 0
             ? 'obligations-badge--danger'
@@ -358,7 +360,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
               ? 'obligations-badge--success'
               : 'obligations-badge'
 
-    const eccCountValue = `${eccOpenCount} / ${eccClassifiedCount}`
+    const eccCountValue = `${eccClosedCount} / ${eccClassifiedCount}`
 
     const obligationsBadgeClassName =
         obligationsNonOpenCount === 0
@@ -413,19 +415,19 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                             <ListGroup>
                                 <ListGroup.Item
                                     action
-                                    eventKey='summary'
+                                    {...sidebarTabLinkProps('summary')}
                                 >
                                     <div className='my-2'>{t('Summary')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='administration'
+                                    {...sidebarTabLinkProps('administration')}
                                 >
                                     <div className='my-2'>{t('Administration')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='licenseClearing'
+                                    {...sidebarTabLinkProps('licenseClearing')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
@@ -433,14 +435,14 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 {isPackageFeatureEnabled && (
                                     <ListGroup.Item
                                         action
-                                        eventKey='linkedPackages'
+                                        {...sidebarTabLinkProps('linkedPackages')}
                                     >
                                         <div className='my-2'>{t('Linked Packages')}</div>
                                     </ListGroup.Item>
                                 )}
                                 <ListGroup.Item
                                     action
-                                    eventKey='obligations'
+                                    {...sidebarTabLinkProps('obligations')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
@@ -453,7 +455,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='ecc'
+                                    {...sidebarTabLinkProps('ecc')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
@@ -466,27 +468,27 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='vulnerabilityTrackingStatus'
+                                    {...sidebarTabLinkProps('vulnerabilityTrackingStatus')}
                                 >
                                     <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='attachments'
+                                    {...sidebarTabLinkProps('attachments')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='attachmentUsages'
+                                    {...sidebarTabLinkProps('attachmentUsages')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachment Usages')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='vulnerabilities'
+                                    {...sidebarTabLinkProps('vulnerabilities')}
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={vulnerabilitiesBadgeClassName}
@@ -498,7 +500,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='changeLog'
+                                    {...sidebarTabLinkProps('changeLog')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>

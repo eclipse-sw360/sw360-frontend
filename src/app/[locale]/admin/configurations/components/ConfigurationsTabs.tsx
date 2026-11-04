@@ -9,20 +9,35 @@
 
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { type JSX, useState } from 'react'
+import { type JSX, useEffect, useState } from 'react'
 import { Col, ListGroup, Row, Tab } from 'react-bootstrap'
 
 import FeatureConfigurations from '@/app/[locale]/admin/configurations/components/FeatureConfigurations'
 import FrontEndConfigs from '@/app/[locale]/admin/configurations/components/FrontEndConfigs'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 
 export default function ConfigurationsTabs(): JSX.Element {
     const t = useTranslations('default')
     const DEFAULT_ACTIVE_TAB = 'backend'
+    const TABS = [
+        'backend',
+        'frontend',
+    ]
     const [activeKey, setActiveKey] = useState(DEFAULT_ACTIVE_TAB)
 
     const router = useRouter()
+    const searchParams = useSearchParams()
+
+    // Opens the tab named in `?tab=`, so a sidebar link opened in a new browser tab lands on it
+    useEffect(() => {
+        const tab = searchParams.get('tab')
+        setActiveKey(tab !== null && TABS.includes(tab) ? tab : DEFAULT_ACTIVE_TAB)
+    }, [
+        searchParams,
+    ])
+
     const handleSelect = (key: string | null) => {
         setActiveKey(key ?? DEFAULT_ACTIVE_TAB)
         router.push(`?tab=${key}`)
@@ -45,13 +60,13 @@ export default function ConfigurationsTabs(): JSX.Element {
                             <ListGroup>
                                 <ListGroup.Item
                                     action
-                                    eventKey='backend'
+                                    {...sidebarTabLinkProps('backend')}
                                 >
                                     <div className='my-2'>{t('Backend Configurations')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='frontend'
+                                    {...sidebarTabLinkProps('frontend')}
                                 >
                                     <div className='my-2'>{t('Frontend Configurations')}</div>
                                 </ListGroup.Item>

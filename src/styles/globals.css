@@ -624,6 +624,10 @@ body {
     color: #f7941e;
 }
 
+.moderation_request_icon {
+    fill: #6c7a89;
+}
+
 .alert-warning {
     background-color: #fff4ec !important;
     color: #b95042 !important;
@@ -724,6 +728,15 @@ body {
     color: #2e5aac;
     padding: 10px;
     text-align: center;
+    font-size: small;
+    border-radius: 5px;
+}
+
+.subscriptionBox-wide {
+    border: 1px solid #2e5aac;
+    background-color: #eef2fa;
+    color: #2e5aac;
+    padding: 10px;
     font-size: small;
     border-radius: 5px;
 }

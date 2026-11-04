@@ -17,12 +17,12 @@ import { Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsQuestionCircle } from 'react-icons/bs'
 import { useConfigKeyValue } from '@/contexts'
 import {
+    AttachmentUsage,
     ConfigKeys,
     ErrorDetails,
     FilterOption,
     ProjectRelationship,
     ReleaseRelationship,
-    SaveUsagesPayload,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
 import MessageService from '@/services/message.service'
@@ -56,8 +56,8 @@ const projectProjFilterOptions: FilterOption[] = Object.values(ProjectRelationsh
 export default function DownloadLicenseInfoModal({
     show,
     setShow,
-    saveUsagesPayload,
-    setShowConfirmation,
+    isLoadingLicenseDetails,
+    attachmentUsages,
     projectId,
     isCalledFromProjectLicenseTab,
     projectReleaseRelationships,
@@ -65,8 +65,8 @@ export default function DownloadLicenseInfoModal({
 }: {
     show: boolean
     setShow: Dispatch<SetStateAction<boolean>>
-    setShowConfirmation: Dispatch<SetStateAction<boolean>>
-    saveUsagesPayload: SaveUsagesPayload
+    isLoadingLicenseDetails: boolean
+    attachmentUsages: AttachmentUsage[]
     projectId: string
     isCalledFromProjectLicenseTab: boolean
     projectReleaseRelationships: string[]
@@ -76,18 +76,10 @@ export default function DownloadLicenseInfoModal({
     const params = useSearchParams()
     const mailRequestForReport = useConfigKeyValue(ConfigKeys.MAIL_REQUEST_FOR_REPORT)
     const [generatorClassName, setGeneratorClassName] = useState('DocxGenerator')
-    const [withSubProject, setWithSubProject] = useState(true)
+    const withSubProject = params.get('withSubProjects') === 'true'
     const [selectedRelRelationship, setSelectedRelRelationship] = useState<string[]>([])
     const [selectedProjectRelationship, setSelectedProjectRelationship] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
-
-    useEffect(() => {
-        if (Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === false) {
-            setWithSubProject(false)
-        }
-    }, [
-        params,
-    ])
 
     useEffect(() => {
         setSelectedRelRelationship(projectReleaseRelationships)
@@ -119,10 +111,11 @@ export default function DownloadLicenseInfoModal({
             withlinkedreleases: 'false',
             projectId,
             module: 'licenseInfo',
-            withSubProject: withSubProject ? 'true' : 'false',
+            withSubProject: withSubProject && selectedProjectRelationship.length > 0 ? 'true' : 'false',
             generatorClassName,
             variant,
             selectedRelRelationship,
+            selectedProjectRelationship: withSubProject ? selectedProjectRelationship : [],
         })
         const mailEnabled = mailRequestForReport === 'true'
         if (!mailEnabled) {
@@ -172,8 +165,8 @@ export default function DownloadLicenseInfoModal({
     const handleLicenseInfoDownload = async (projectId: string) => {
         try {
             setLoading(true)
-            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
-            if (response.status === StatusCodes.CREATED || response.status === StatusCodes.OK) {
+            const response = await ApiUtils.PUT(`projects/${projectId}/attachmentUsage`, attachmentUsages)
+            if (response.status === StatusCodes.OK || response.status === StatusCodes.NO_CONTENT) {
                 await downloadHandler(response)
             } else if (response.status === StatusCodes.FORBIDDEN) {
                 MessageService.warn(t('Could not save the attachment usages'))
@@ -251,7 +244,9 @@ export default function DownloadLicenseInfoModal({
                                     <OverlayTrigger
                                         placement='top'
                                         overlay={
-                                            <Tooltip>{t(`release_relation_${fil.tag.toLowerCase()}_tooltip`)}</Tooltip>
+                                            <Tooltip>
+                                                {t(`release_relation_${fil.value.toLowerCase()}_tooltip`)}
+                                            </Tooltip>
                                         }
                                     >
                                         <span className='text-center'>{CommonUtils.Capitalize(fil.tag)}</span>
@@ -259,7 +254,7 @@ export default function DownloadLicenseInfoModal({
                                 </label>
                             </div>
                         ))}
-                    {Object.hasOwn(Object.fromEntries(params), 'withSubProjects') === true && (
+                    {withSubProject && (
                         <>
                             <h5 className='fw-bold'>{t('Uncheck Linked Project Relationships to be excluded')}:</h5>
                             {projectProjFilterOptions
@@ -303,7 +298,7 @@ export default function DownloadLicenseInfoModal({
                                                 placement='top'
                                                 overlay={
                                                     <Tooltip>
-                                                        {t(`project_relation_${fil.tag.toLowerCase()}_tooltip`)}
+                                                        {t(`project_relation_${fil.value.toLowerCase()}_tooltip`)}
                                                     </Tooltip>
                                                 }
                                             >
@@ -378,7 +373,7 @@ export default function DownloadLicenseInfoModal({
                         onClick={() => {
                             handleLicenseInfoDownload(projectId)
                         }}
-                        disabled={loading}
+                        disabled={loading || isLoadingLicenseDetails}
                     >
                         {t('Download')}
                     </button>

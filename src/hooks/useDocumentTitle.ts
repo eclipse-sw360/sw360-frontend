@@ -17,6 +17,12 @@ export function useDocumentTitle(title: string | undefined): void {
             return
         }
 
+        // Callers are expected to pass an already-normalized title (e.g. via
+        // `CommonUtils.formatDocumentTitle()`), since the `document.title` setter
+        // itself strips/collapses whitespace before storing the value. Comparing
+        // against a non-normalized `title` here would never match the stored
+        // value, causing the MutationObserver below to reset the title on every
+        // mutation in an infinite loop that pegs the CPU.
         document.title = title
 
         // Next.js re-applies the static route `metadata` title on in-page
