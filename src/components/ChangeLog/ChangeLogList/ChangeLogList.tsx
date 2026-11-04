@@ -9,12 +9,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnDef, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useMemo } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFileEarmarkFill } from 'react-icons/bs'
+import icons from '@/assets/icons/icons.svg'
 import { Changelogs, PageableQueryParam, PaginationMeta } from '@/object-types'
 
 interface Props {
@@ -91,9 +95,9 @@ const ChangeLogList = ({
                 id: 'actions',
                 header: t('Actions'),
                 cell: ({ row }) => {
-                    const { id } = row.original
+                    const { id, documentId, documentType } = row.original
                     return (
-                        <>
+                        <div className='d-flex align-items-center gap-2'>
                             {id && (
                                 <OverlayTrigger overlay={<Tooltip>{t('View Change Logs')}</Tooltip>}>
                                     <div className='cursor-pointer'>
@@ -111,7 +115,20 @@ const ChangeLogList = ({
                                     </div>
                                 </OverlayTrigger>
                             )}
-                        </>
+                            {documentType === 'moderation' && documentId && (
+                                <OverlayTrigger overlay={<Tooltip>{t('View Moderation Request')}</Tooltip>}>
+                                    <Link href={`/requests/moderationRequest/${documentId}`}>
+                                        <svg
+                                            className='moderation_request_icon'
+                                            height={18}
+                                            width={18}
+                                        >
+                                            <use href={`${icons.src}#moderationRequest`}></use>
+                                        </svg>
+                                    </Link>
+                                </OverlayTrigger>
+                            )}
+                        </div>
                     )
                 },
                 meta: {

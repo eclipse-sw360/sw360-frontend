@@ -9,11 +9,14 @@
 
 import { expect, test } from '@playwright/test'
 import {
+    applyAttachmentToggle,
+    clearExcludedLicenses,
+    createStoreFromAttachmentUsages,
     type License,
     LicenseDetailLoader,
-    restoreLicenseUsages,
-    toggleAttachmentUsage,
-    toggleLicenseUsage,
+    isLicenseExcluded,
+    payloadFromStore,
+    toggleLicenseInStore,
 } from '../../src/app/[locale]/projects/generateLicenseInfo/[id]/components/licenseInfo.utils'
 import type { AttachmentUsage, AttachmentUsages } from '../../src/object-types/AttachmentUsages'
 
@@ -73,150 +76,153 @@ function attachmentUsages(usages: AttachmentUsage[]): AttachmentUsages {
     }
 }
 
-test('restores all path-specific choices and concluded settings without loading any license details', () => {
+const storeKey = (projectPath: string, usageType: string = 'licenseInfo', attachmentId = 'attachment'): string => JSON.stringify([
+    attachmentId,
+    'release',
+    projectPath,
+    usageType,
+])
+
+test('creates a path-specific store from attachment usages', () => {
     const usages = attachmentUsages([
         savedUsage('root:left', true),
         savedUsage('root:right', false, [
             'Apache-2.0',
         ]),
-        savedUsage('root:left', true),
-    ])
-    const payload = restoreLicenseUsages(usages)
-    expect(payload.selected).toEqual([
-        'root:left-release_licenseInfo_attachment',
-        'root:right-release_licenseInfo_attachment',
-    ])
-    expect(payload.ignoredLicenses).toEqual({
-        'root:left-release_attachment': [
-            'MIT',
-        ],
-        'root:right-release_attachment': [
-            'Apache-2.0',
-        ],
-    })
-    expect(payload.selectedConcludedUsages).toEqual([
-        'root:left-release_licenseInfo_attachment',
-    ])
-    expect(payload.deselectedConcludedUsages).toEqual([
-        'root:right-release_licenseInfo_attachment',
-    ])
-})
-
-test('restores large saved usage sets in one pass without collapsing project paths', () => {
-    const payload = restoreLicenseUsages(
-        attachmentUsages(
-            Array.from(
-                {
-                    length: 15170,
-                },
-                (_, index) => savedUsage(`root:path${index}`, true),
-            ),
-        ),
-    )
-    expect(payload.selected).toHaveLength(15170)
-    expect(Object.keys(payload.ignoredLicenses)).toHaveLength(15170)
-})
-
-test('uses the usage owner when multiple releases share attachment content, with a legacy fallback', () => {
-    const usage = savedUsage('root', true)
-    const usages = attachmentUsages([
-        usage,
-    ])
-    usages._embedded['sw360:release'].push({
-        _links: {
-            self: {
-                href: '/releases/other',
+        {
+            attachmentContentId: 'source-only',
+            owner: {
+                releaseId: 'release',
+            },
+            usedBy: {
+                projectId: 'source-project',
+            },
+            usageData: {
+                sourcePackage: {},
             },
         },
-        attachments: [
-            {
-                attachmentContentId: 'attachment',
-                filename: 'licenses.xml',
+        {
+            attachmentContentId: 'manual-only',
+            owner: {
+                releaseId: 'release',
             },
-        ],
-    })
-    expect(restoreLicenseUsages(usages).selected).toEqual([
-        'root-release_licenseInfo_attachment',
+            usedBy: {
+                projectId: 'manual-project',
+            },
+            usageData: {
+                manuallySet: {},
+            },
+        },
     ])
-    delete usage.owner
-    expect(restoreLicenseUsages(usages).selected).toEqual([
-        'root-release_licenseInfo_attachment',
-        'root-other_licenseInfo_attachment',
+    const store = createStoreFromAttachmentUsages(usages)
+
+    expect(Object.keys(store)).toEqual([
+        storeKey('root:left'),
+        storeKey('root:right'),
+        storeKey('source-project', 'sourcePackage', 'source-only'),
+        storeKey('manual-project', 'manuallySet', 'manual-only'),
+    ])
+    expect(store[storeKey('root:left')]).toEqual(savedUsage('root:left', true))
+    expect(store[storeKey('root:right')]).toEqual(savedUsage('root:right', false, [
+        'Apache-2.0',
+    ]))
+    expect(store[storeKey('source-project', 'sourcePackage', 'source-only')]).toEqual(usages._embedded[
+        'sw360:attachmentUsages'
+    ][2])
+    expect(store[storeKey('manual-project', 'manuallySet', 'manual-only')]).toEqual(usages._embedded[
+        'sw360:attachmentUsages'
+    ][3])
+})
+
+test('payloadFromStore returns selected attachment usage records', () => {
+    const left = savedUsage('root:left', true)
+    const right = savedUsage('root:right', false)
+    const store = createStoreFromAttachmentUsages(attachmentUsages([
+        left,
+        right,
+    ]))
+
+    expect(payloadFromStore(store)).toEqual([
+        left,
+        right,
     ])
 })
 
-test('attachment selection does not erase exclusions or concluded settings in unloaded paths', () => {
-    const payload = restoreLicenseUsages(
-        attachmentUsages([
-            savedUsage('root:left', true),
-            savedUsage('root:right', false),
-            savedUsage('root:unopened', true),
-        ]),
-    )
-    const key = 'root:left-release_licenseInfo_attachment'
-    const deselected = toggleAttachmentUsage(payload, key)
-    expect(deselected.selected).toEqual([
-        'root:right-release_licenseInfo_attachment',
-        'root:unopened-release_licenseInfo_attachment',
-    ])
-    expect(deselected.deselected).toEqual([
-        key,
-    ])
-    const reselected = toggleAttachmentUsage(deselected, key)
-    expect(deselected.ignoredLicenses).not.toHaveProperty('root:left-release_attachment')
-    expect(deselected.selectedConcludedUsages).not.toContain(key)
-    expect(deselected.deselectedConcludedUsages).not.toContain(key)
-    expect(reselected.ignoredLicenses).toEqual({
-        'root:right-release_attachment': [
-            'MIT',
-        ],
-        'root:unopened-release_attachment': [
-            'MIT',
-        ],
+test('attachment toggle removes an existing usage and creates a fresh usage when reselected', () => {
+    const key = storeKey('root:left')
+    const store = createStoreFromAttachmentUsages(attachmentUsages([
+        savedUsage('root:left', true),
+    ]))
+
+    expect(applyAttachmentToggle(store, key)).toBe(false)
+    expect(store[key]).toBeUndefined()
+    expect(payloadFromStore(store)).toEqual([])
+
+    expect(applyAttachmentToggle(store, key)).toBe(true)
+    expect(store[key]).toEqual({
+        attachmentContentId: 'attachment',
+        owner: {
+            releaseId: 'release',
+        },
+        usedBy: {
+            projectId: 'root',
+        },
+        usageData: {
+            licenseInfo: {
+                excludedLicenseIds: [],
+                projectPath: 'root:left',
+                includeConcludedLicense: false,
+            },
+        },
     })
-    expect(reselected.selectedConcludedUsages).toEqual([
-        'root:unopened-release_licenseInfo_attachment',
-    ])
-    expect(reselected.deselectedConcludedUsages).toEqual(payload.deselectedConcludedUsages)
-    expect(payload.selected).toHaveLength(3)
-    expect(payload.ignoredLicenses['root:left-release_attachment']).toEqual([
-        'MIT',
-    ])
-    const deselectedFalseUsage = toggleAttachmentUsage(payload, 'root:right-release_licenseInfo_attachment')
-    expect(deselectedFalseUsage.deselectedConcludedUsages).toEqual([])
-    expect(deselectedFalseUsage.selectedConcludedUsages).toEqual(payload.selectedConcludedUsages)
 })
 
-test('license selection is immutable, path-specific, and handles all licenses deselected', () => {
-    const payload = restoreLicenseUsages(
-        attachmentUsages([
-            savedUsage('root:left', true, [
-                'MIT',
-                'old-license',
-            ]),
-            savedUsage('root:right', false),
+test('license toggles add and remove exclusions and deselect when every license is excluded', () => {
+    const key = storeKey('root:left')
+    const store = createStoreFromAttachmentUsages(attachmentUsages([
+        savedUsage('root:left', true, [
+            'MIT',
         ]),
-    )
-    const attachmentKey = 'root:left-release_licenseInfo_attachment'
-    const ignoredKey = 'root:left-release_attachment'
-    const deselected = toggleLicenseUsage(payload, attachmentKey, ignoredKey, 'Apache-2.0', licenses)
-    expect(deselected.selected).not.toContain(attachmentKey)
-    expect(deselected.deselected).toContain(attachmentKey)
-    expect(deselected.selectedConcludedUsages).not.toContain(attachmentKey)
-    expect(deselected.ignoredLicenses).not.toHaveProperty(ignoredKey)
-    const selected = toggleLicenseUsage(deselected, attachmentKey, ignoredKey, 'MIT', licenses)
-    expect(selected.selected).toContain(attachmentKey)
-    expect(selected.deselected).not.toContain(attachmentKey)
-    expect(selected.ignoredLicenses[ignoredKey]).toEqual([
+    ]))
+
+    expect(toggleLicenseInStore(store, key, 'MIT', licenses)).toBe(true)
+    expect(store[key].usageData?.licenseInfo?.excludedLicenseIds).toEqual([])
+    expect(toggleLicenseInStore(store, key, 'Apache-2.0', licenses)).toBe(true)
+    expect(store[key].usageData?.licenseInfo?.excludedLicenseIds).toEqual([
         'Apache-2.0',
     ])
-    expect(selected.ignoredLicenses['root:right-release_attachment']).toEqual([
+    expect(toggleLicenseInStore(store, key, 'MIT', licenses)).toBe(false)
+    expect(store[key].usageData?.licenseInfo?.excludedLicenseIds).toEqual([
+        'Apache-2.0',
         'MIT',
     ])
-    expect(payload.ignoredLicenses[ignoredKey]).toEqual([
-        'MIT',
-        'old-license',
+})
+
+test('toggling a license creates a usage with all sibling licenses except the selected one excluded', () => {
+    const key = storeKey('root:left')
+    const store: Record<string, AttachmentUsage> = {}
+
+    expect(toggleLicenseInStore(store, key, 'MIT', licenses)).toBe(true)
+    expect(store[key].usageData?.licenseInfo?.excludedLicenseIds).toEqual([
+        'Apache-2.0',
     ])
+})
+
+test('excluded-license helpers report and clear exclusions without disturbing other usage fields', () => {
+    const key = storeKey('root:left')
+    const store = createStoreFromAttachmentUsages(attachmentUsages([
+        savedUsage('root:left', true),
+    ]))
+
+    expect(isLicenseExcluded(store, key, 'MIT')).toBe(true)
+    expect(isLicenseExcluded(store, key, 'Apache-2.0')).toBe(false)
+    clearExcludedLicenses(store, key)
+    expect(isLicenseExcluded(store, key, 'MIT')).toBe(false)
+    expect(store[key].usageData?.licenseInfo).toEqual({
+        excludedLicenseIds: [],
+        projectPath: 'root:left',
+        includeConcludedLicense: true,
+    })
 })
 
 test('does no eager work, deduplicates requests across paths and retains normalized results', async () => {
