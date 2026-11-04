@@ -688,6 +688,7 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}
+                            noRecordsFoundMessage={t('No releases linked to this project')}
                         />
                     </>
                 ) : (
