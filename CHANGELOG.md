@@ -6,6 +6,304 @@ the first project location:
 
 https://github.com/eclipse-sw360/sw360/releases
 
+## v1.1.0-rc.1
+
+This is the first release candidate for SW360-Frontend in the line of next minor
+release version 1.1.0 of SW360-Frontend project. The candidate includes numerous
+features, corrections, and improvements over the previous major release
+[v1.0.0](https://github.com/eclipse-sw360/sw360-frontend/releases/tag/v1.0.0)
+
+This release candidate servers as a preview of the upcoming minor version 1.1.0
+for testing and should not be used in production environmens.
+
+Major highlights since last release:
+* Improved user experience with enhanced performance
+* Fixes in language translations
+* New features in report downloads
+* Table rendering, searching and pagination enhancements
+
+### Credits
+
+The following GitHub users have contributed to the source code since the last release (in alphabetical order):
+
+```
+> Akshit Joshi <akshit.joshi@siemens-healthineers.com>
+> Amrit Kumar Verma <amrit.verma@siemens.com>
+> Bibhuti Bhusan Dash <bibhuti230185@gmail.com>
+> Dearsh Oberoi <oberoidearsh@gmail.com>
+> dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+> Farooq Fateh Aftab <farooq-fateh.aftab@siemens.com>
+> Gauransh Ahuja <111078621+gauranshahuja@users.noreply.github.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+> Harish Vishwa <harishvishwa12003@gmail.com>
+> KOUSHIKGO4 <koushikgdatta5@gmail.com>
+> Neet2516 <getneet.25@gmail.com>
+> Nikesh Kumar <kumar.nikesh@siemens.com>
+> Pratyay-Patel <pratyay.a.patel@gmail.com>
+> rudra-superrr <prabhuchopra@gmail.com>
+> Shivani m <shivani.m@siemens.com>
+```
+
+### Features
+
+* `6d83bf6f` feat(sidebar): Allow opening sidebar tabs in a new browser tab
+* `75043b89` feat(Project): Add export functionality for obligations report
+* `3e66372c` feat(docker): Add missing SVM and source props
+* `0607449c` feat(attachUsage): Show tooltip on attachments
+* `c25c62b2` feat(licenseclearing): Add search functionality to List View
+* `5eb70573` feat(docker): Add schedule configs
+* `5e7f235e` feat: Add readonly toggle for user general information in admin configurations
+* `366dd081` feat(report): Allow filtering Projects with Rel
+* `a07dfd55` feat(clearingrequest): Add new advanced filter for open and closed cr page
+* `55bd9d0c` feat(Moderation): Display moderation decision comment
+* `5bbeb69f` feat(config): Add missing release.friendly.url
+* `b1e66b34` feat(projects): Add strict closed project config
+* `193bd7e7` feat(licenseclearing): Add sort for state and mainline states in license clearing table
+* `56333128` feat(Config): Add REST token write-access preferences toggle
+* `52d3b17c` feat(api): Make max page size configurable
+* `cd460372` feat(sbom): Fix license and add sbom pipeline
+* `d49562ee` feat(components): Add All option to components page
+* `4653f000` feat(release): Use new filter field for search
+* `c789d4d5` feat(release): Search bar for releases in component
+* `eaadc281` feat(project): Formatting the obligation text
+* `400a661c` feat(email): S/MIME sign outgoing emails
+* `3dda76bf` feat(projects): Use new filter field for search
+
+### Corrections
+
+* `11c54cd0` fix(UI): Double spaces in name/version freeze the browser tab
+* `ae123f63` fix(route): Remove console.log
+* `8f715a9b` fix(auth): Add error handling for getServerSession
+* `fe5b0f5b` fix(node): Update node version in docker to solve cve
+* `4ae0d5f2` fix(projects): Correct ECC count and badge colors
+* `06972966` fix(UI): Respect subproject exclusions in ReadmeOSS exports
+* `8a043f5a` fix(Release): Release version dropdown navigation issue
+* `16436eae` fix(ChnageLogs): Missing moderation request view icon
+* `1b715694` fix(overlay): Fix translation key for release and project relations
+* `baaf5442` fix(generatelicenseinfo): Pre-expand attachments which have ignored licenses
+* `cc16c2fb` fix(sanitization): Incomplete multi-character sanitization
+* `6a51d2e4` fix(project): Preserve linked releases when duplicating
+* `32dc4821` fix(release): Use consistent circular status icons for release versions in dropdown
+* `41395e8e` fix(translations): Restore dropped placeholders and tags in locale files
+* `d0cbe27f` fix(ui): Handle deleted project, component, and release redirects with warnings
+* `3b80418e` fix(translations): Restore placeholder and tag names in locale files
+* `fc8ad692` fix(project): Fixes the frontend inconsistency during duplicate
+* `fb51bc6e` fix(Report): Resolving the report download extension
+* `80c42224` fix(css): Fixed remaining cursor pointers issues
+* `c8b86697` fix(Release): Prevent deleting one package-url from removing all others
+* `9a769cc6` fix(clear): Use button icon instead of x
+* `4d6c15cf` fix(css): Fix cursor-pointer CSS
+* `ea1d1ba1` fix(UI):  add ECCN, sorting, and print support on ECC overview
+* `357b4418` fix(Project): Added missing comment at license clearing tab
+* `39717f0d` fix(projects): Improve license info loading for large projects
+* `46fe6e53` fix(docker): Enforce LF line endings for config and secret files
+* `da987058` fix(releasemerge): Add server pagination and search to merge releases table
+* `9345f142` fix(Project): Add server-side sorting to SearchReleasesModal component
+* `4f382b74` fix(UI): Add table-level select-all for attachment usages
+* `44813149` fix(project): Link project table pagination fix
+* `900fc21a` fix(projects): Add confirmation to delete release link
+* `e17328b9` fix(table): Fix the brief empty table flash before data shows after processing
+* `b87311ab` fix(UI): Add global enter key event for form submission
+* `c66873a6` fix(project): Project name display while editing
+* `229209b4` fix(component): Fix hang in component pages due to space in name
+* `11a9222b` fix(Project): Bug fixes and alert message re-structured
+* `cab9a3d2` fix(project): Linked to projects bug
+* `e1642084` fix(attachmentusage): Add sorting by name to generate license info page
+* `7ddefc2a` fix(attachmentusages): Fix filtering on generate license info page
+* `6e6fb0ca` fix(attachments): Fix disappearing status on tab change
+* `e7c4ee51` fix(Fossology): Trigger fossology workflow
+* `453d4d57` fix(projects): Stop treating External URLs as mailto links
+* `6f7e54dc` fix(Fossology): Fossology clearing process stuck at step 2
+* `60a5760f` fix(Attachment): Fix drag and drop attachment
+* `23167690` fix(Project): Update clearing state colors for better visibility
+* `d24234b4` fix(comment): Add default comment for admin users on object deletion
+* `c373ab77` fix(Request): Added tab title for requests page
+* `b5af8fda` fix(Vul): Added tab title for vulnerabilities page
+* `22a3f6f1` fix(License): Added tab title for license page
+* `dca35599` fix(Package): Added tab title for packages page
+* `167a57c3` fix(Component): Added tab title for components and releases
+* `fda2e9a0` fix(Project): Added tab title with project name and version
+* `80628043` fix(ui): Rename browser pill app name from 'SW360 Frontend' to 'SW360'
+* `59e2bad7` fix(comment): Add a default comment for admin users while accepting moderation requests
+* `c891672e` fix(sort): Add client side sorting to attachment usages page
+* `42f63a39` fix(sort): Add sorting in linked releases and projects table
+* `ed35a1da` fix(importsbom): Make import sbom configurable
+* `f9982096` fix(release): Sorting of release version in dropdown
+* `c6bf0fa0` fix(sort): Add case insensitive sorting for name in license clearing
+* `db9efc28` fix(search): Remove redundant logic for building table
+* `aabb4356` fix(state): Add clearing state badge for releases with internal use scan available
+* `1a87eaac` fix(Project): Display text in all license obligation tab and change background color
+* `4ce286fd` fix(Project): Project Mainline State column
+* `7f7a7477` fix(Project): Update button lable name
+* `235ec9fd` fix(packages): Show clear error message for invalid pURL
+* `da2f23b7` fix(moderation): Use correct counters
+* `7eeaf013` fix(moderation): Fix search and add sort in moderation requests
+* `0d0f55ea` fix: Display warnings from backend in Obligations tabs
+* `8215e7ad` fix(Fossology): Updating fossology config error msg
+* `3847ab89` fix(Release): Ecc info hover text
+* `5e245e43` fix(Attachment): Display attachment types as short forms
+* `f0a79e5d` fix(release): Adding the clearing report column in release overview table
+* `5e93600c` fix(UI): Show Used By Projects loader during API fetch
+* `cbad6b87` fix(test): Fix checkbox states
+* `5c001e10` fix(search): Enable all filters by default
+* `f84b1f75` fix(Project): Update multiple obligation
+* `f154bebb` fix(sort): Remove sorting by score where it should be sorted by default
+* `be336c49` fix(Project): Fixed linked release loading on duplicate
+* `ba1fc3f9` fix(UI): Resolve global search API call issue and display filtered results
+* `e726593f` fix(UI): Show ECC pill in red when open ECC exists
+* `a17d8f22` fix(date): Fix min and max date for date selector
+* `76317b32` fix(component): Correct homepage URL placeholder
+* `5ac6a558` fix(ci): Remove untrusted head_ref interpolation
+* `8374573b` fix(projects): Use Edit Project singular
+* `d6243a41` fix(home): Fixed mySubscription update on refresh
+* `bce2157f` fix(ci): Fixed post perform codeql analysis
+* `f76a7691` fix(Component): Refesh subscribe button name and color
+
+
+### Infrastructure
+
+* `9768cc40` chore(deps): bump step-security/harden-runner from 2.22.2 to 2.22.3
+* `1998c5c6` chore(deps): bump docker/login-action from 4.6.0 to 4.7.0
+* `980363dc` chore(deps): bump qs from 6.16.0 to 6.17.1
+* `4e8b18f8` refactor(generatelicenseinfo): Make generate license info an uncontrolled component
+* `97b197ff` chore(deps): bump he from 1.2.0 to 2.0.0
+* `ae75101c` chore(deps-dev): bump @types/node from 26.3.0 to 26.6.5
+* `47dd43a3` chore(deps-dev): bump systeminformation from 5.33.15 to 5.33.16
+* `c54adf29` chore(deps): bump html-react-parser from 6.1.8 to 6.1.9
+* `f38f05cd` chore(deps-dev): bump cypress from 16.1.1 to 16.2.0
+* `be044974` chore(deps): bump fast-uri from 3.1.8 to 3.1.9
+* `3ab79c9a` chore(deps): bump next from 16.4.0 to 16.4.1
+* `b4e9b350` chore(deps): bump step-security/harden-runner from 2.22.1 to 2.22.2
+* `78a5d533` chore(deps): bump github/codeql-action/upload-sarif
+* `3de8c03b` chore(deps): bump github/codeql-action/init from 4.38.3 to 4.39.1
+* `d01b98de` chore(deps): bump github/codeql-action/analyze from 4.38.3 to 4.39.1
+* `12a1f58e` chore(deps-dev): bump @playwright/test from 1.63.0 to 1.64.1
+* `c0718d66` chore(deps): bump js-yaml from 4.3.1 to 4.3.2
+* `fb9ce64a` chore(deps): bump html-react-parser from 6.1.7 to 6.1.8
+* `8d7eaacf` chore(deps-dev): bump cypress from 16.1.0 to 16.1.1
+* `6c5d5118` chore(deps-dev): bump prettier from 3.9.9 to 3.9.10
+* `d2d40413` chore(deps-dev): bump @commitlint/cli from 21.2.2 to 21.2.3
+* `32e3437c` chore(deps): bump ossf/scorecard-action from 2.4.4 to 2.5.0
+* `237d5116` chore(deps): bump github/codeql-action/upload-sarif
+* `77e5484c` chore(deps): bump github/codeql-action/init from 4.38.2 to 4.38.3
+* `ee9a12b8` chore(deps): bump github/codeql-action/analyze from 4.38.2 to 4.38.3
+* `4fb0a1b9` chore(relations): Refactor MainlineState and rels
+* `1d40adc2` chore(relations): Refactor MainlineState and rels
+* `93aa1b63` chore(deps): bump next from 16.3.8 to 16.4.0
+* `8935af97` chore(deps): bump next-intl from 4.13.7 to 4.14.9
+* `01a9179f` chore(deps-dev): bump lint-staged from 17.5.1 to 17.6.0
+* `4c7b56b3` chore(deps): bump actions/upload-artifact from 7.0.1 to 7.0.2
+* `28623673` chore(deps): bump actions/setup-node from 7.0.0 to 7.1.0
+* `fde07430` chore(deps): bump step-security/harden-runner from 2.21.1 to 2.22.1
+* `d786a103` chore(deps-dev): bump systeminformation from 5.33.1 to 5.33.15
+* `f62667b1` chore(deps): bump next from 16.3.7 to 16.3.8
+* `7496cff4` chore(deps): bump sharp from 0.35.4 to 0.35.5
+* `2b1e2725` chore(deps): bump react and @types/react
+* `7812505c` chore(deps): bump next from 16.3.4 to 16.3.7
+* `75e13859` chore(deps-dev): bump prettier from 3.9.8 to 3.9.9
+* `2e1bcfd4` chore(deps): bump source-map-js from 1.2.1 to 1.2.2
+* `447d4670` chore(deps): bump github/codeql-action/analyze from 4.38.1 to 4.38.2
+* `b54aab0b` chore(deps): bump github/codeql-action/init from 4.38.1 to 4.38.2
+* `e6464d85` chore(deps): bump github/codeql-action/upload-sarif
+* `8edb4245` chore(lint): Lint fixes at component merge's general section
+* `66bc30aa` chore: Update biome schema to match CLI version
+* `79d5a86b` chore(deps-dev): bump @biomejs/biome from 2.5.13 to 2.5.14
+* `4514ef90` chore(deps): bump fast-uri from 3.1.5 to 3.1.8
+* `11143fb8` chore(deps-dev): bump prettier from 3.9.6 to 3.9.8
+* `fb363b0e` chore(deps): bump dotenv from 17.4.2 to 18.0.3
+* `914fe12d` chore(deps): bump library/nginx from 1.31.5-trixie to 1.31.6-trixie
+* `09e7ffac` chore(deps): bump github/codeql-action/upload-sarif
+* `dcf2cf19` chore(deps): bump github/codeql-action/analyze from 4.38.0 to 4.38.1
+* `34ef40a8` chore(deps): bump github/codeql-action/init from 4.38.0 to 4.38.1
+* `95d4bb21` chore(commit): Added .gitattributes to ignored paths
+* `1e219073` chore(deps): bump docker/setup-buildx-action from 4.3.0 to 4.4.1
+* `a0660611` chore: Update biome schema to match CLI version
+* `0841b845` chore(deps-dev): bump @biomejs/biome from 2.5.12 to 2.5.13
+* `f19b5268` chore(deps-dev): bump cypress from 16.0.0 to 16.1.0
+* `883f4b08` chore(deps-dev): bump lint-staged from 17.3.0 to 17.5.1
+* `c505479d` chore(deps): bump docker/build-push-action from 7.3.0 to 7.4.0
+* `5fc4608b` chore(deps-dev): bump @types/react from 19.2.17 to 19.2.18
+* `bd0a4126` chore: Update biome schema to match CLI version
+* `53c5e83b` chore(deps-dev): bump @biomejs/biome from 2.5.9 to 2.5.12
+* `464dc2ea` chore(deps-dev): bump @playwright/test from 1.62.1 to 1.63.0
+* `93085466` chore(deps): bump preact from 10.29.7 to 10.29.8
+* `7f0a41f9` chore(deps): bump pnpm/action-setup from 6.0.10 to 6.1.0
+* `e06e4469` chore(deps): bump github/codeql-action/init from 4.37.9 to 4.38.0
+* `53d3f680` chore(deps): bump github/codeql-action/analyze from 4.37.9 to 4.38.0
+* `7dc26fc6` chore(l10n): Update German translation
+* `5d7de034` chore(deps): bump github/codeql-action/upload-sarif
+* `d73f2358` chore(deps): bump next from 16.3.0 to 16.3.4
+* `16ebe20c` chore(deps-dev): bump @types/react-dom from 19.2.4 to 19.2.7
+* `a3d11b88` chore(deps-dev): bump cypress from 15.20.1 to 16.0.0
+* `2eeef825` chore(deps-dev): bump @types/node from 26.2.0 to 26.3.0
+* `b6f092a4` chore(deps): bump library/nginx from 1.31.3-trixie to 1.31.5-trixie
+* `6168b73d` chore(deps): bump softprops/action-gh-release from 3.0.2 to 3.0.3
+* `d64a6842` chore(deps): bump apache/skywalking-eyes/header from 0.8.0 to 0.9.0
+* `ad444e19` chore(deps): bump step-security/harden-runner from 2.21.0 to 2.21.1
+* `a11bc6e8` chore(deps): bump github/codeql-action/upload-sarif
+* `aaf5f4d6` chore(deps): bump github/codeql-action/init from 4.37.7 to 4.37.9
+* `be82921d` chore(deps): bump github/codeql-action/analyze from 4.37.7 to 4.37.9
+* `60461e61` chore(ci): Fixed hardcoded pnpm version
+* `e1fb7d3e` chore: Update biome schema to match CLI version
+* `d4b965e3` chore(deps-dev): bump @biomejs/biome from 2.5.7 to 2.5.9
+* `d2f51eee` test(e2e): Temporary disable TC17
+* `8047e16f` chore(deps): bump next-intl from 4.13.5 to 4.13.7
+* `ac62a60d` chore(deps): bump html-react-parser from 6.1.5 to 6.1.7
+* `93200d2a` chore(deps-dev): bump @commitlint/cli from 21.2.1 to 21.2.2
+* `69e21f22` chore(deps): bump github/codeql-action/analyze from 4.37.6 to 4.37.7
+* `b4acd4a1` chore(deps): bump github/codeql-action/upload-sarif
+* `92baacc6` chore(deps): bump github/codeql-action/init from 4.37.6 to 4.37.7
+* `7612700e` chore(deps): bump step-security/harden-runner from 2.20.1 to 2.21.0
+* `f07deba7` chore(deps): bump library/postgres from 18.4-alpine to 18.6-alpine
+* `017cd397` chore(deps): bump docker/setup-buildx-action from 4.2.0 to 4.3.0
+* `33e310c2` refactor(oauth): Use tanstack for oauth table
+* `3f121b44` chore(deps-dev): bump cypress from 15.18.1 to 15.20.1
+* `2cae7a74` chore(deps-dev): bump @playwright/test from 1.61.0 to 1.62.1
+* `c3807946` chore(ci): Fixed e2e ci failure
+* `4d4cb885` chore(ip): Add missing legal info and docs
+* `2607b78d` chore(ci): Run e2e on changes to src
+* `3414139e` chore(README): Add information about Weblate
+* `2baf173b` chore(deps): bump pnpm/action-setup from 6.0.8 to 6.0.10
+* `e169f677` chore(deps): bump actions/checkout from 6.0.2 to 7.0.1
+* `5a728b6d` chore(deps-dev): bump prettier from 3.9.5 to 3.9.6
+* `521e8b2b` chore(deps): bump actions/setup-node from 6.4.0 to 7.0.0
+* `7e7b7492` chore(deps-dev): bump @types/node from 26.1.2 to 26.2.0
+* `c7e8cf34` chore(deps): bump step-security/harden-runner from 2.19.3 to 2.20.1
+* `9c2f98d7` chore(deps): bump actions/upload-artifact from 4.6.2 to 7.0.1
+* `4ea4e442` chore(readme): Seperated readme based on details for tests
+* `cba90160` chore(ci): Fix edit project tests
+* `f6b4ca4b` chore(ci): Increased backend wait timeout at e2e_tests
+* `6c590589` test(readme): Fixed deps and updated readme with ui tests
+* `66b1dee0` test(projects): add Playwright E2E test suite for Projects module
+* `3f4df3a0` chore(deps-dev): bump typescript from 6.0.3 to 7.0.2
+* `a150f439` chore(deps): bump next from 16.2.12 to 16.3.0
+* `a1c27688` chore: Update biome schema to match CLI version
+* `f0e4c026` chore(deps-dev): bump @biomejs/biome from 2.5.4 to 2.5.7
+* `1f70d328` chore(deps-dev): bump lint-staged from 17.2.0 to 17.3.0
+* `8a6a1c4f` chore(deps): bump pnpm/action-setup from 6.0.9 to 6.0.10
+* `a7e5e7bf` chore(deps): bump step-security/harden-runner from 2.20.0 to 2.20.1
+* `e7899111` chore(deps): bump github/codeql-action/upload-sarif
+* `ad88f2d0` chore(deps): bump github/codeql-action/analyze from 4.37.3 to 4.37.6
+* `9ae67183` chore(deps): bump github/codeql-action/init from 4.37.3 to 4.37.6
+* `1d52af1b` chore(deps): bump next from 16.2.10 to 16.2.12
+* `4018e94a` chore(deps): bump react-dom and @types/react-dom
+* `8d4b5102` chore(deps): bump docker/login-action from 4.5.1 to 4.6.0
+* `d16c78a8` chore(deps-dev): bump systeminformation from 5.31.17 to 5.33.1
+* `038175e7` chore(deps-dev): bump @types/node from 26.1.1 to 26.1.2
+* `9363733b` chore(deps): bump react from 19.2.7 to 19.2.8
+* `99e8cebb` chore(deps): bump next-auth from 4.24.14 to 4.24.15
+* `0d3a0a5d` chore(deps): bump next-intl from 4.13.2 to 4.13.4
+* `012b3f42` chore(deps-dev): bump lint-staged from 17.0.8 to 17.2.0
+* `066ef7fb` chore(deps): bump github/codeql-action/upload-sarif
+* `0295fcfe` chore(deps): bump ossf/scorecard-action from 2.4.3 to 2.4.4
+* `4fde18be` chore(deps): bump docker/login-action from 4.4.0 to 4.5.1
+* `4b3b69e6` chore(deps): bump github/codeql-action/analyze from 4.37.1 to 4.37.3
+* `fa060f0a` chore(deps): bump actions/checkout from 7.0.0 to 7.0.1
+* `85187237` chore(deps): bump library/nginx from 1.31.2-trixie to 1.31.3-trixie
+
+**Full Changelog**: https://github.com/eclipse-sw360/sw360-frontend/compare/v1.0.0...v1.1.0-rc.1
+
 ## v1.0.0
 
 This is the first stable major release (1.0.0) of the new SW360 frontend from Liferay.
