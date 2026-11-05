@@ -12,7 +12,6 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
 import { useTranslations } from 'next-intl'
 import { type JSX, ReactNode, useCallback, useEffect, useState } from 'react'
@@ -38,7 +37,7 @@ function RecentComponentsWidget(): ReactNode {
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return dispatchSessionExpiredEvent()
         } else {
-            notFound()
+            return undefined
         }
     }, [])
 
