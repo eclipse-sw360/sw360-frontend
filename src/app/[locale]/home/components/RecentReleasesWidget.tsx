@@ -37,6 +37,8 @@ function RecentReleasesWidget(): ReactNode {
         if (response.status == StatusCodes.OK) {
             const data = (await response.json()) as EmbeddedReleases
             return data
+        } else if (response.status == StatusCodes.NO_CONTENT) {
+            return undefined
         } else if (response.status == StatusCodes.UNAUTHORIZED) {
             return dispatchSessionExpiredEvent()
         } else {
