@@ -50,6 +50,7 @@ import {
     applyAttachmentToggle,
     clearExcludedLicenses,
     createStoreFromAttachmentUsages,
+    isKeyInSubproject,
     isLicenseExcluded,
     type License,
     LicenseDetailLoader,
@@ -172,6 +173,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                 entity: p,
             },
             children: extractLinkedProjectsAndTheirLinkedReleases(releasesById, licenses, p, projectPath),
+            projectPath: projectPath.join(':'),
         }
         projectPath.pop()
         if (nodeProject.children && nodeProject.children.length !== 0) {
@@ -262,6 +264,7 @@ const buildTable = (
             },
             // adding releases and attachments of > 1st level linked projects
             children: extractLinkedProjectsAndTheirLinkedReleases(releasesById, licenses, project, projectPath),
+            projectPath: projectPath.join(':'),
         }
         projectPath.pop()
         if (nodeProject.children && nodeProject.children.length !== 0) {
@@ -667,6 +670,24 @@ function GenerateLicenseInfo({
         ],
     )
 
+    const handleUseSubprojectSelection = useCallback(
+        (subprojectPath: string) => {
+            const store = storeRef.current
+            for (const key of attachmentSelectionKeysRef.current) {
+                if (!isKeyInSubproject(key, subprojectPath)) continue
+                if (!(key in store)) applyAttachmentToggle(store, key)
+                else clearExcludedLicenses(store, key)
+                const attEl = attachmentInputRefs.current.get(key)
+                if (attEl) attEl.checked = true
+                for (const el of licenseInputRefs.current.get(key)?.values() ?? []) el.checked = true
+            }
+            updateSelectAllHeader()
+        },
+        [
+            updateSelectAllHeader,
+        ],
+    )
+
     const registerAttachmentInput = useCallback(
         (key: string) => (el: HTMLInputElement | null) => {
             if (el) attachmentInputRefs.current.set(key, el)
@@ -872,13 +893,32 @@ function GenerateLicenseInfo({
                         )
                     } else if (row.original.node.type === 'project') {
                         const { name, version, id } = row.original.node.entity
+                        const subprojectPath = row.original.projectPath ?? ''
                         return (
-                            <Link
-                                className='text-link'
-                                href={`/projects/detail/${id}`}
-                            >
-                                {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
-                            </Link>
+                            <div>
+                                <Link
+                                    className='text-link'
+                                    href={`/projects/detail/${id}`}
+                                >
+                                    {name} {!CommonUtils.isNullEmptyOrUndefinedString(version) && `(${version})`}
+                                </Link>
+                                {subprojectPath !== '' && (
+                                    <div className='d-flex flex-wrap align-items-center mt-1'>
+                                        <Button
+                                            variant='secondary'
+                                            size='sm'
+                                            className='me-2'
+                                            onClick={() => handleUseSubprojectSelection(subprojectPath)}
+                                        >
+                                            {t('Use selection of this subproject')}
+                                        </Button>
+                                        <span className='text-danger'>
+                                            <i className='fa fa-exclamation-triangle me-1' />
+                                            {t('Current selection will be overwritten!')}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         )
                     } else {
                         const { name } = row.original.node.entity
@@ -887,6 +927,7 @@ function GenerateLicenseInfo({
                 },
                 meta: {
                     width: '30%',
+                    unrestrictedRowHeight: true,
                 },
             },
             {
@@ -1052,6 +1093,7 @@ function GenerateLicenseInfo({
             handleToggleAllAttachments,
             handleToggleAttachment,
             handleToggleLicense,
+            handleUseSubprojectSelection,
             registerAttachmentInput,
             registerLicenseInput,
         ],
