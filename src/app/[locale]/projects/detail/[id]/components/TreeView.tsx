@@ -324,13 +324,30 @@ const filterTreeNodes = (
     return result
 }
 
-const buildTable = (
-    setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease>[]>>,
+const countNodes = (
+    nodes: NestedRows<TypedProject | TypedRelease>[],
+): {
+    releases: number
+    projects: number
+} => {
+    const counts = {
+        releases: 0,
+        projects: 0,
+    }
+    for (const node of nodes) {
+        if (node.node.type === 'release') counts.releases++
+        else counts.projects++
+        const childCounts = countNodes(node.children ?? [])
+        counts.releases += childCounts.releases
+        counts.projects += childCounts.projects
+    }
+    return counts
+}
+
+const buildRows = (
     licenseClearing: LicenseClearing,
     linkedProjects: Project[],
-    searchTerm = '',
-    sort?: Sort,
-) => {
+): NestedRows<TypedProject | TypedRelease>[] => {
     const embeddedReleases = licenseClearing._embedded?.['sw360:release'] ?? []
     const linkedProjectRows = extractLinkedProjectsAndTheirLinkedReleases(embeddedReleases, linkedProjects)
     const releaseRows: NestedRows<TypedProject | TypedRelease>[] = []
@@ -351,10 +368,20 @@ const buildTable = (
         releaseRows.push(nodeRelease)
     }
 
-    const rows = [
+    return [
         ...linkedProjectRows,
         ...releaseRows,
     ]
+}
+
+const buildTable = (
+    setRowData: Dispatch<SetStateAction<NestedRows<TypedProject | TypedRelease>[]>>,
+    licenseClearing: LicenseClearing,
+    linkedProjects: Project[],
+    searchTerm = '',
+    sort?: Sort,
+) => {
+    const rows = buildRows(licenseClearing, linkedProjects)
 
     sortAllLevels(rows, sort)
 
@@ -409,6 +436,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
 export default function TreeView({
     projectId,
     licenseClearingData,
+    unfilteredLicenseClearingData,
     linkedProjectsData,
     isLoadingClearingData,
     columnFilters,
@@ -416,6 +444,7 @@ export default function TreeView({
 }: {
     projectId: string
     licenseClearingData?: LicenseClearing
+    unfilteredLicenseClearingData?: LicenseClearing
     linkedProjectsData: Project[]
     isLoadingClearingData: boolean
     columnFilters: ColumnFiltersState
@@ -453,6 +482,18 @@ export default function TreeView({
         columnName: 'name',
         isAsc: true,
     })
+
+    // Totals are based on the unfiltered data, so they don't change with filters or search
+    const linkedCounts = useMemo(
+        () =>
+            countNodes(
+                unfilteredLicenseClearingData ? buildRows(unfilteredLicenseClearingData, linkedProjectsData) : [],
+            ),
+        [
+            unfilteredLicenseClearingData,
+            linkedProjectsData,
+        ],
+    )
 
     useEffect(() => {
         setLicenseClearing(licenseClearingData)
@@ -508,6 +549,10 @@ export default function TreeView({
                             {t('Collapse all')}
                         </Link>
                         {')'}
+                        <div>
+                            {t('Linked Releases')}: {linkedCounts.releases} | {t('Linked Projects')}:{' '}
+                            {linkedCounts.projects}
+                        </div>
                     </>
                 ),
                 cell: ({ row }) => {
@@ -916,6 +961,7 @@ export default function TreeView({
             columnFilters,
             showFilter,
             memoizedLicenseClearing,
+            linkedCounts,
         ],
     )
 
