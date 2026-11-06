@@ -319,7 +319,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: 'version,asc',
+        sort: 'version,desc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
