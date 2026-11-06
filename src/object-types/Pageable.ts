@@ -22,6 +22,8 @@ export interface PaginationMeta {
 
 export interface ColumnMeta {
     width?: string
+    // opt out of the table-wide row height clamp (see TableMeta.rowHeightConstant)
+    unrestrictedRowHeight?: boolean
 }
 
 export interface TypedEntity<K, Type extends string> {
