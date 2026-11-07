@@ -11,8 +11,8 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { type JSX, useCallback, useEffect, useState } from 'react'
-import { Alert, Spinner } from 'react-bootstrap'
+import { type JSX, useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, Button, Spinner } from 'react-bootstrap'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 function ReportDownloadPage(): JSX.Element {
@@ -21,6 +21,9 @@ function ReportDownloadPage(): JSX.Element {
     const [error, setError] = useState<string | null>(null)
     const [downloading, setDownloading] = useState(false)
     const [downloaded, setDownloaded] = useState(false)
+    // Start the download automatically only once. A failed attempt must not
+    // re-trigger it; the user can retry manually from the error alert.
+    const autoDownloadStartedRef = useRef(false)
 
     const module = searchParams.get('module') ?? ''
     const token = searchParams.get('token') ?? ''
@@ -98,12 +101,10 @@ function ReportDownloadPage(): JSX.Element {
     ])
 
     useEffect(() => {
-        if (!downloaded && !downloading) {
-            void triggerDownload()
-        }
+        if (autoDownloadStartedRef.current) return
+        autoDownloadStartedRef.current = true
+        void triggerDownload()
     }, [
-        downloaded,
-        downloading,
         triggerDownload,
     ])
 
@@ -122,6 +123,17 @@ function ReportDownloadPage(): JSX.Element {
                     className='mt-3'
                 >
                     {error}
+                    {module && token && !downloading && (
+                        <div className='mt-2'>
+                            <Button
+                                variant='danger'
+                                size='sm'
+                                onClick={() => void triggerDownload()}
+                            >
+                                {t('Retry')}
+                            </Button>
+                        </div>
+                    )}
                 </Alert>
             )}
             {downloaded && (
