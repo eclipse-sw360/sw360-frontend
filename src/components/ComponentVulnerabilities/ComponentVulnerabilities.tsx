@@ -9,6 +9,8 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -17,12 +19,27 @@ import { type JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
 import { BsInfoCircle } from 'react-icons/bs'
 import VerificationTooltip from '@/components/VerificationTooltip/VerificationTooltip'
-import { LinkedVulnerability, VulnerabilitiesVerificationState } from '@/object-types'
+import { LinkedVulnerability, VerificationStateInfo, VulnerabilitiesVerificationState } from '@/object-types'
 import ChangeStateDialog from './ChangeStateDialog'
 import VulnerabilitiesMatchingStatistics from './VulnerabilityMatchingStatistics'
 
 interface Props {
     vulnerData: Array<LinkedVulnerability>
+}
+
+// Unparsable checkedOn values rank lowest; ties resolve to the later array entry.
+const getLatestVerificationState = (infos: Array<VerificationStateInfo>): string | undefined => {
+    let latest: VerificationStateInfo | undefined
+    let latestTime = Number.NEGATIVE_INFINITY
+    for (const info of infos) {
+        const parsed = Date.parse(info.checkedOn)
+        const time = Number.isNaN(parsed) ? Number.NEGATIVE_INFINITY : parsed
+        if (latest === undefined || time >= latestTime) {
+            latest = info
+            latestTime = time
+        }
+    }
+    return latest?.verificationState
 }
 
 interface SelectedVulnerability {
@@ -179,22 +196,25 @@ const ComponentVulnerabilities = ({ vulnerData }: Props): JSX.Element => {
                 header: t('Verification'),
                 cell: ({ row }) => {
                     const verificationStateInfos = row.original.releaseVulnerabilityRelation.verificationStateInfo ?? []
-                    if (verificationStateInfos.length > 0) {
-                        return (
-                            <VerificationTooltip verificationStateInfos={verificationStateInfos}>
-                                <BsInfoCircle
-                                    style={{
-                                        marginRight: '5px',
-                                        color: 'gray',
-                                        width: '15px',
-                                        height: '15px',
-                                    }}
-                                    size={20}
-                                />
-                                {verificationStateInfos.at(-1)?.verificationState}
-                            </VerificationTooltip>
-                        )
-                    }
+                    return (
+                        <VerificationTooltip
+                            verificationStateInfos={verificationStateInfos}
+                            emptyMessage={t('Not Checked yet')}
+                        >
+                            <BsInfoCircle
+                                style={{
+                                    marginRight: '5px',
+                                    color: 'gray',
+                                    width: '15px',
+                                    height: '15px',
+                                }}
+                                size={20}
+                            />
+                            {verificationStateInfos.length > 0
+                                ? getLatestVerificationState(verificationStateInfos)
+                                : t('Not Checked')}
+                        </VerificationTooltip>
+                    )
                 },
             },
             {
