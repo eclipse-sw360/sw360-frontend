@@ -86,11 +86,15 @@ const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element
         )
     }
 
+    const importErrorCount = Number.parseInt(data.compImportErrorCount ?? '0', 10) || 0
+
     return (
         <>
             {isNewProject == true ? (
                 <h5>
-                    <strong>{t('SBOM imported successfully')}...</strong>
+                    <strong>
+                        {importErrorCount > 0 ? t('SBOM imported with errors') : t('SBOM imported successfully')}...
+                    </strong>
                 </h5>
             ) : (
                 <h5>
@@ -118,6 +122,17 @@ const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element
                             </>
                         )}
                     </p>
+                </Alert>
+            )}
+
+            {importErrorCount > 0 && (
+                <Alert
+                    variant='danger'
+                    className='p-3'
+                >
+                    {t('Errors during import count', {
+                        count: importErrorCount,
+                    })}
                 </Alert>
             )}
 
@@ -173,6 +188,24 @@ const CDXImportStatus = ({ data, importTime, isNewProject }: Props): JSX.Element
                     'primary',
                     data.invalidComp,
                     t('Orphan Packages'),
+                )}
+
+            {data.invalidVcsComponent != null &&
+                data.invalidVcsComponent.length > 0 &&
+                renderListAlert(
+                    t('Components with an invalid VCS URL'),
+                    'danger',
+                    data.invalidVcsComponent,
+                    t('Not Imported'),
+                )}
+
+            {data.nonPkgManagedCompWithoutVCS != null &&
+                data.nonPkgManagedCompWithoutVCS.length > 0 &&
+                renderListAlert(
+                    t('Components without VCS information'),
+                    'warning',
+                    data.nonPkgManagedCompWithoutVCS,
+                    t('Not Imported'),
                 )}
 
             {data.dupPkg != null &&
