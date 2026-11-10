@@ -38,6 +38,10 @@ interface ProjectPayload {
         [k: string]: string
     }
     clearingState?: string
+    copyVulnerabilityRatings?: boolean
+    copyPackages?: boolean
+    copyAttachments?: boolean
+    copyObligations?: boolean
     businessUnit?: string
     preevaluationDeadline?: string
     clearingSummary?: string

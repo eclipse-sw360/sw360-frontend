@@ -13,7 +13,6 @@ import { selectors } from './selectors'
 import {
     createProjectApi,
     deleteProjectApi,
-    expectSuccessMessage,
     fillProjectSummary,
     gotoProjectsPage,
     waitForProjectPageLoad,
@@ -48,7 +47,9 @@ test.describe('Projects - Duplicate', () => {
         })
         if (await projectRow.isVisible()) {
             await projectRow.locator('a[href*="/projects/duplicate/"]').click()
-            await page.waitForURL('**/projects/duplicate/**', { timeout: 10000 })
+            await page.waitForURL('**/projects/duplicate/**', {
+                timeout: 10000,
+            })
         } else {
             // Direct navigation fallback
             await page.goto(`/projects/duplicate/${sourceProjectId}`)
@@ -73,9 +74,146 @@ test.describe('Projects - Duplicate', () => {
         await page.goto(`/projects/duplicate/${sourceProjectId}`)
         await waitForProjectPageLoad(page)
 
-        await expect(page.getByText('Summary', { exact: true }).first()).toBeVisible()
-        await expect(page.getByText('Administration', { exact: true }).first()).toBeVisible()
+        await expect(
+            page
+                .getByText('Summary', {
+                    exact: true,
+                })
+                .first(),
+        ).toBeVisible()
+        await expect(
+            page
+                .getByText('Administration', {
+                    exact: true,
+                })
+                .first(),
+        ).toBeVisible()
         await expect(page.getByText('Linked Releases and Projects')).toBeVisible()
+        await expect(
+            page
+                .getByText('Copy Options', {
+                    exact: true,
+                })
+                .first(),
+        ).toBeVisible()
+    })
+
+    test('TC73a: Duplicate form submits the selected vulnerability copy option', async ({ page }) => {
+        await page.goto(`/projects/duplicate/${sourceProjectId}`)
+        await waitForProjectPageLoad(page)
+
+        await page
+            .getByText('Copy Options', {
+                exact: true,
+            })
+            .first()
+            .click()
+        const copyOption = page.getByRole('checkbox', {
+            name: 'Copy vulnerability ratings and actions',
+        })
+        await expect(copyOption).toBeChecked()
+        await expect(
+            page.getByRole('checkbox', {
+                name: 'Keep linked packages',
+            }),
+        ).toBeChecked()
+        await expect(
+            page.getByRole('checkbox', {
+                name: 'Keep project attachments',
+            }),
+        ).toBeChecked()
+        await expect(
+            page.getByRole('checkbox', {
+                name: 'Copy obligation statuses and comments',
+            }),
+        ).toBeChecked()
+        await copyOption.uncheck()
+
+        let submittedPayload: Record<string, unknown> | undefined
+        await page.route('**/projects/duplicate/**', async (route) => {
+            submittedPayload = route.request().postDataJSON() as Record<string, unknown>
+            await route.fulfill({
+                status: 201,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    _links: {
+                        self: {
+                            href: '/api/projects/duplicate-result',
+                        },
+                    },
+                }),
+            })
+        })
+
+        await page
+            .getByRole('button', {
+                name: 'Create Project',
+            })
+            .click()
+        await expect.poll(() => submittedPayload?.copyVulnerabilityRatings).toBe(false)
+        await expect.poll(() => submittedPayload?.copyPackages).toBe(true)
+        await expect.poll(() => submittedPayload?.copyAttachments).toBe(true)
+        await expect.poll(() => submittedPayload?.copyObligations).toBe(true)
+    })
+
+    test('TC73b: Duplicate project shows a blocking progress dialog while copying', async ({ page }) => {
+        await page.goto(`/projects/duplicate/${sourceProjectId}`)
+        await waitForProjectPageLoad(page)
+
+        await page.route('**/projects/duplicate/**', async (route) => {
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            await route.fulfill({
+                status: 201,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    _links: {
+                        self: {
+                            href: '/api/projects/duplicate-result',
+                        },
+                    },
+                }),
+            })
+        })
+        await page.route('**/resource/api/projects/duplicate-result', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    _links: {
+                        self: {
+                            href: '/api/projects/duplicate-result',
+                        },
+                    },
+                    name: 'Duplicated project',
+                    version: '1.0',
+                    linkedProjects: [],
+                }),
+            })
+        })
+        await page.route('**/resource/api/projects/duplicate-result/summaryAdministration', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    name: 'Duplicated project',
+                    version: '1.0',
+                }),
+            })
+        })
+
+        const createButton = page.getByRole('button', {
+            name: 'Create Project',
+        })
+        await createButton.click()
+        await expect(page.getByText('Copying project. Please wait...')).toBeVisible()
+        await expect(createButton).toBeDisabled()
+        await expect(
+            page.getByRole('button', {
+                name: 'Cancel',
+            }),
+        ).toBeDisabled()
+        await expect(page).toHaveURL(/projects\/detail\/duplicate-result/)
+        await expect(page.getByText('Copying project. Please wait...')).toBeHidden()
     })
 
     test('TC74: Create duplicate with modified name and version', async ({ page }) => {
@@ -89,16 +227,28 @@ test.describe('Projects - Duplicate', () => {
         })
 
         // Submit — duplicate page has no data-testid, use role selector
-        await page.getByRole('button', { name: 'Create Project' }).click()
-        await page.waitForURL('**/projects/detail/**', { timeout: 20000 })
+        await page
+            .getByRole('button', {
+                name: 'Create Project',
+            })
+            .click()
+        await page.waitForURL('**/projects/detail/**', {
+            timeout: 20000,
+        })
     })
 
     test('TC75: Cancel on duplicate returns to projects list', async ({ page }) => {
         await page.goto(`/projects/duplicate/${sourceProjectId}`)
         await waitForProjectPageLoad(page)
 
-        await page.getByRole('button', { name: 'Cancel' }).click()
-        await page.waitForURL('**/projects', { timeout: 10000 })
+        await page
+            .getByRole('button', {
+                name: 'Cancel',
+            })
+            .click()
+        await page.waitForURL('**/projects', {
+            timeout: 10000,
+        })
     })
 })
 
@@ -109,8 +259,16 @@ test.describe('Projects - Import SBOM', () => {
     test('TC76: Import SBOM SPDX modal opens from list page', async ({ page }) => {
         await gotoProjectsPage(page)
 
-        await page.getByRole('button', { name: 'Import SBOM' }).click()
-        await page.getByText('SPDX', { exact: true }).click()
+        await page
+            .getByRole('button', {
+                name: 'Import SBOM',
+            })
+            .click()
+        await page
+            .getByText('SPDX', {
+                exact: true,
+            })
+            .click()
 
         const modal = page.locator(selectors.importSbom.modal)
         await expect(modal).toBeVisible()
@@ -120,7 +278,11 @@ test.describe('Projects - Import SBOM', () => {
     test('TC77: Import SBOM CycloneDX modal opens from list page', async ({ page }) => {
         await gotoProjectsPage(page)
 
-        await page.getByRole('button', { name: 'Import SBOM' }).click()
+        await page
+            .getByRole('button', {
+                name: 'Import SBOM',
+            })
+            .click()
         await page.getByText('CycloneDX').click()
 
         const modal = page.locator(selectors.importSbom.modal)
@@ -130,8 +292,16 @@ test.describe('Projects - Import SBOM', () => {
     test('TC78: Import SBOM modal has file input and upload button', async ({ page }) => {
         await gotoProjectsPage(page)
 
-        await page.getByRole('button', { name: 'Import SBOM' }).click()
-        await page.getByText('SPDX', { exact: true }).click()
+        await page
+            .getByRole('button', {
+                name: 'Import SBOM',
+            })
+            .click()
+        await page
+            .getByText('SPDX', {
+                exact: true,
+            })
+            .click()
 
         const modal = page.locator(selectors.importSbom.modal)
         // File input is hidden (d-none), check it exists in DOM
@@ -141,8 +311,16 @@ test.describe('Projects - Import SBOM', () => {
     test('TC79: Import SBOM modal close button works', async ({ page }) => {
         await gotoProjectsPage(page)
 
-        await page.getByRole('button', { name: 'Import SBOM' }).click()
-        await page.getByText('SPDX', { exact: true }).click()
+        await page
+            .getByRole('button', {
+                name: 'Import SBOM',
+            })
+            .click()
+        await page
+            .getByText('SPDX', {
+                exact: true,
+            })
+            .click()
 
         const modal = page.locator(selectors.importSbom.modal)
         await expect(modal).toBeVisible()
@@ -161,12 +339,22 @@ test.describe('Projects - Export Spreadsheet', () => {
         await gotoProjectsPage(page)
         await waitForProjectPageLoad(page)
 
-        await page.getByRole('button', { name: 'Export Spreadsheet' }).click()
-        const downloadPromise = page.waitForEvent('download', { timeout: 30000 }).catch(() => null)
+        await page
+            .getByRole('button', {
+                name: 'Export Spreadsheet',
+            })
+            .click()
+        const downloadPromise = page
+            .waitForEvent('download', {
+                timeout: 30000,
+            })
+            .catch(() => null)
         const reportResponsePromise = page
             .waitForResponse(
                 (resp) => resp.url().includes('/reports?module=PROJECTS') && resp.request().method() === 'GET',
-                { timeout: 30000 },
+                {
+                    timeout: 30000,
+                },
             )
             .catch(() => null)
         await page.getByText('Projects only').click()
@@ -188,7 +376,9 @@ test.describe('Projects - Export Spreadsheet', () => {
         } else {
             await expect(
                 page.locator('.Toastify__toast, .alert-success, .alert-info, .alert-danger').first(),
-            ).toBeVisible({ timeout: 15000 })
+            ).toBeVisible({
+                timeout: 15000,
+            })
         }
     })
 
@@ -197,17 +387,25 @@ test.describe('Projects - Export Spreadsheet', () => {
         await gotoProjectsPage(page)
         await waitForProjectPageLoad(page)
 
-        await page.getByRole('button', { name: 'Export Spreadsheet' }).click()
-        const downloadPromise = page.waitForEvent('download', { timeout: 30000 }).catch(() => null)
+        await page
+            .getByRole('button', {
+                name: 'Export Spreadsheet',
+            })
+            .click()
+        const downloadPromise = page
+            .waitForEvent('download', {
+                timeout: 30000,
+            })
+            .catch(() => null)
         await page.getByText('Projects with linked releases').click()
 
         const download = await downloadPromise
         if (download) {
             expect(download.suggestedFilename().toLowerCase()).toContain('projects')
         } else {
-            await expect(
-                page.locator('.alert-success, .alert-info, .alert-danger').first(),
-            ).toBeVisible({ timeout: 15000 })
+            await expect(page.locator('.alert-success, .alert-info, .alert-danger').first()).toBeVisible({
+                timeout: 15000,
+            })
         }
     })
 })
@@ -221,7 +419,11 @@ test.describe('Projects - Linked Releases and Projects Tab', () => {
         await page.getByText('Linked Releases and Projects').click()
         await page.waitForTimeout(500)
 
-        await expect(page.getByRole('button', { name: /add releases/i })).toBeVisible()
+        await expect(
+            page.getByRole('button', {
+                name: /add releases/i,
+            }),
+        ).toBeVisible()
     })
 
     test('TC83: Linked Releases tab shows Add Projects button on add page', async ({ page }) => {
@@ -229,7 +431,11 @@ test.describe('Projects - Linked Releases and Projects Tab', () => {
         await page.getByText('Linked Releases and Projects').click()
         await page.waitForTimeout(500)
 
-        await expect(page.getByRole('button', { name: /add projects/i })).toBeVisible()
+        await expect(
+            page.getByRole('button', {
+                name: /add projects/i,
+            }),
+        ).toBeVisible()
     })
 
     test('TC84: Add Releases button opens search modal', async ({ page }) => {
@@ -238,7 +444,11 @@ test.describe('Projects - Linked Releases and Projects Tab', () => {
         await page.getByText('Linked Releases and Projects').click()
         await page.waitForTimeout(500)
 
-        await page.getByRole('button', { name: /add releases/i }).click()
+        await page
+            .getByRole('button', {
+                name: /add releases/i,
+            })
+            .click()
 
         const modal = page.locator(selectors.common.modalShow)
         await expect(modal).toBeVisible()
@@ -249,7 +459,11 @@ test.describe('Projects - Linked Releases and Projects Tab', () => {
         await page.getByText('Linked Releases and Projects').click()
         await page.waitForTimeout(500)
 
-        await page.getByRole('button', { name: /add projects/i }).click()
+        await page
+            .getByRole('button', {
+                name: /add projects/i,
+            })
+            .click()
 
         const modal = page.locator(selectors.common.modalShow)
         await expect(modal).toBeVisible()
@@ -264,7 +478,11 @@ test.describe('Projects - Linked Packages Tab', () => {
         await gotoProjectsPage(page, 'add')
         await page.getByText('Linked Packages').first().click()
 
-        await expect(page.getByRole('button', { name: /add packages/i })).toBeVisible()
+        await expect(
+            page.getByRole('button', {
+                name: /add packages/i,
+            }),
+        ).toBeVisible()
     })
 
     test('TC87: Add Packages button opens search modal', async ({ page }) => {
@@ -272,7 +490,11 @@ test.describe('Projects - Linked Packages Tab', () => {
         await gotoProjectsPage(page, 'add')
         await page.getByText('Linked Packages').first().click()
 
-        await page.getByRole('button', { name: /add packages/i }).click()
+        await page
+            .getByRole('button', {
+                name: /add packages/i,
+            })
+            .click()
 
         const modal = page.locator(selectors.common.modalShow)
         await expect(modal).toBeVisible()
@@ -285,7 +507,12 @@ test.describe('Projects - Linked Packages Tab', () => {
 test.describe('Projects - License Info Header', () => {
     test('TC88: License Info Header textarea is present in Administration tab', async ({ page }) => {
         await gotoProjectsPage(page, 'add')
-        await page.getByText('Administration', { exact: true }).first().click()
+        await page
+            .getByText('Administration', {
+                exact: true,
+            })
+            .first()
+            .click()
 
         const licenseHeaderInput = page.locator(selectors.admin.licenseInfoHeader)
         await expect(licenseHeaderInput).toBeVisible()
@@ -293,7 +520,12 @@ test.describe('Projects - License Info Header', () => {
 
     test('TC89: Set to default text button populates license header', async ({ page }) => {
         await gotoProjectsPage(page, 'add')
-        await page.getByText('Administration', { exact: true }).first().click()
+        await page
+            .getByText('Administration', {
+                exact: true,
+            })
+            .first()
+            .click()
 
         const defaultBtn = page.locator(selectors.admin.setDefaultTextButton)
         if (await defaultBtn.isVisible()) {

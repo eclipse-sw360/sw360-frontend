@@ -14,7 +14,7 @@ import { notFound, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Breadcrumb } from 'next-sw360'
 import { type JSX, useCallback, useEffect, useState } from 'react'
-import { Button, Col, ListGroup, Row, Tab } from 'react-bootstrap'
+import { Button, Col, Form, ListGroup, Modal, Row, Spinner, Tab } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import Administration from '@/components/ProjectAddSummary/Administration'
 import LinkedReleasesAndProjects from '@/components/ProjectAddSummary/LinkedReleasesAndProjects'
@@ -52,6 +52,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     })
 
     const [isReleaseLoading, setIsReleaseLoading] = useState(false)
+    const [isCopying, setIsCopying] = useState(false)
 
     const [externalUrls, setExternalUrls] = useState<InputKeyValue[]>([])
 
@@ -100,6 +101,10 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
         ownerGroup: '',
         ownerCountry: '',
         clearingState: '',
+        copyVulnerabilityRatings: true,
+        copyPackages: true,
+        copyAttachments: true,
+        copyObligations: true,
         businessUnit: '',
         preevaluationDeadline: '',
         clearingSummary: '',
@@ -317,6 +322,10 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     ownerCountry: project.ownerCountry ?? '',
                     // Duplicates always start with an open clearing state; backend enforces this too.
                     clearingState: 'OPEN',
+                    copyVulnerabilityRatings: true,
+                    copyPackages: true,
+                    copyAttachments: true,
+                    copyObligations: true,
                     businessUnit: project.businessUnit ?? 'CT',
                     preevaluationDeadline: project.preevaluationDeadline ?? '',
                     clearingSummary: project.clearingSummary ?? '',
@@ -392,6 +401,10 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
     ])
 
     const createProject = async () => {
+        if (isCopying) {
+            return
+        }
+        setIsCopying(true)
         const createProjectUrl =
             isDependencyNetworkFeatureEnabled === true
                 ? `projects/network/duplicate/${projectId}`
@@ -424,6 +437,8 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                 return
             }
             MessageService.error(t('There are some errors while creating project'))
+        } finally {
+            setIsCopying(false)
         }
     }
 
@@ -469,6 +484,12 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                         >
                                             <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                         </ListGroup.Item>
+                                        <ListGroup.Item
+                                            action
+                                            eventKey='copyOptions'
+                                        >
+                                            <div className='my-2'>{t('Copy Options')}</div>
+                                        </ListGroup.Item>
                                     </ListGroup>
                                 </Col>
                                 <Col className='me-3'>
@@ -480,7 +501,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                     type='submit'
                                                     className='me-2 col-auto'
                                                     onClick={() => void createProject()}
-                                                    disabled={isReleaseLoading}
+                                                    disabled={isReleaseLoading || isCopying}
                                                 >
                                                     {t('Create Project')}
                                                 </Button>
@@ -488,6 +509,7 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                     variant='secondary'
                                                     className='col-auto'
                                                     onClick={() => handleCancelClick()}
+                                                    disabled={isCopying}
                                                 >
                                                     {t('Cancel')}
                                                 </Button>
@@ -556,6 +578,64 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                                                     />
                                                 )}
                                             </Tab.Pane>
+                                            <Tab.Pane eventKey='copyOptions'>
+                                                <div className='mt-3'>
+                                                    <h5>{t('Copy Options')}</h5>
+                                                    <Form.Check
+                                                        id='copy-vulnerability-ratings'
+                                                        type='checkbox'
+                                                        label={t('Copy vulnerability ratings and actions')}
+                                                        checked={projectPayload.copyVulnerabilityRatings ?? true}
+                                                        onChange={(event) =>
+                                                            setProjectPayload({
+                                                                ...projectPayload,
+                                                                copyVulnerabilityRatings: event.currentTarget.checked,
+                                                            })
+                                                        }
+                                                    />
+                                                    <Form.Text className='text-muted'>
+                                                        {t(
+                                                            'Keep vulnerability ratings, actions, comments, and history for releases linked to the copied project.',
+                                                        )}
+                                                    </Form.Text>
+                                                    <Form.Check
+                                                        id='copy-linked-packages'
+                                                        type='checkbox'
+                                                        label={t('Keep linked packages')}
+                                                        checked={projectPayload.copyPackages ?? true}
+                                                        onChange={(event) =>
+                                                            setProjectPayload({
+                                                                ...projectPayload,
+                                                                copyPackages: event.currentTarget.checked,
+                                                            })
+                                                        }
+                                                    />
+                                                    <Form.Check
+                                                        id='copy-project-attachments'
+                                                        type='checkbox'
+                                                        label={t('Keep project attachments')}
+                                                        checked={projectPayload.copyAttachments ?? true}
+                                                        onChange={(event) =>
+                                                            setProjectPayload({
+                                                                ...projectPayload,
+                                                                copyAttachments: event.currentTarget.checked,
+                                                            })
+                                                        }
+                                                    />
+                                                    <Form.Check
+                                                        id='copy-project-obligations'
+                                                        type='checkbox'
+                                                        label={t('Copy obligation statuses and comments')}
+                                                        checked={projectPayload.copyObligations ?? true}
+                                                        onChange={(event) =>
+                                                            setProjectPayload({
+                                                                ...projectPayload,
+                                                                copyObligations: event.currentTarget.checked,
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            </Tab.Pane>
                                         </Tab.Content>
                                     </Row>
                                 </Col>
@@ -564,6 +644,23 @@ function DuplicateProject({ projectId, isDependencyNetworkFeatureEnabled }: Prop
                     </div>
                 </form>
             </div>
+            <Modal
+                show={isCopying}
+                centered
+                backdrop='static'
+                keyboard={false}
+                aria-labelledby='copy-project-progress-title'
+            >
+                <Modal.Body className='text-center p-4'>
+                    <Spinner
+                        animation='border'
+                        role='status'
+                        aria-label={t('Copying project. Please wait...')}
+                        className='mb-3'
+                    />
+                    <div id='copy-project-progress-title'>{t('Copying project. Please wait...')}</div>
+                </Modal.Body>
+            </Modal>
         </>
     )
 }
