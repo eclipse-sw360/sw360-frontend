@@ -84,7 +84,7 @@ const AddLicenseDetail = ({
                     return notFound()
                 }
                 const licenses = (await response.json()) as EmbeddedLicenseTypes
-                setLicenseTypes(licenses._embedded['sw360:licenseTypes'])
+                setLicenseTypes(licenses._embedded?.['sw360:licenseTypes'] ?? [])
             } catch (e) {
                 ApiUtils.reportError(e)
             }
