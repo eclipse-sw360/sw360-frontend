@@ -14,7 +14,6 @@
       "tsconfig.json",
       "package.json",
       "next.config.ts",
-      "**/*.md",
       "scripts/**"
     ]
   },
