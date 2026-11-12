@@ -436,6 +436,7 @@ export function FilterComponent({
     setShow,
     header,
     resetPaginationParams,
+    closeOnChange = false,
 }: {
     renderFilterOptions: FilterOption[]
     setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>
@@ -445,6 +446,7 @@ export function FilterComponent({
     setShow: Dispatch<SetStateAction<string | undefined>>
     header: string
     resetPaginationParams?: () => void
+    closeOnChange?: boolean
 }): ReactNode {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -477,6 +479,9 @@ export function FilterComponent({
         ]
         setColumnFilters(newFilters)
         resetPaginationParams?.()
+        if (closeOnChange) {
+            setShow(undefined)
+        }
     }
 
     const selectedValues = (columnFilters.find((f) => f.id === id)?.value ?? []) as string[]
@@ -489,7 +494,7 @@ export function FilterComponent({
             className='filter-button'
             show={show === id}
             onToggle={() => setShow(show === id ? undefined : id)}
-            autoClose={false}
+            autoClose='outside'
         >
             <Dropdown.Item
                 href='#'
