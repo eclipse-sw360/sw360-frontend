@@ -31,6 +31,8 @@ export enum UIConfigKeys {
     UI_CUSTOMMAP_PROJECT_ROLES = 'ui.custommap.project.roles',
     UI_ENABLE_USER_GENERAL_INFORMATION_WRITE_ACCESS = 'ui.enable.user.general.information.write.access',
     UI_ENABLE_SECURITY_VULNERABILITY_MONITORING = 'ui.enable.security.vulnerability.monitoring',
+    UI_ENABLE_ADS_INFORMATION_DISPLAY = 'ui.enable.ads.in.clearing.details.display',
+    UI_REST_APITOKEN_WRITE_GENERATOR_ENABLE = 'ui.rest.apitoken.write.generator.enable',
     UI_REST_APITOKEN_GENERATOR_ENABLE = 'ui.rest.apitoken.generator.enable',
     UI_REST_API_WRITE_ACCESS_TOKEN_IN_PREFERENCES_ENABLED = 'ui.rest.api.write.access.token.in.preferences.enabled',
     UI_SVM_NOTIFICATION_URL = 'svm.notification.url',
