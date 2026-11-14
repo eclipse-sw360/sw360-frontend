@@ -34,7 +34,7 @@ export default function AddValues({
             return {
                 ...prev,
                 [payloadKeyName]: [
-                    ...(prev[payloadKeyName] as Array<string>),
+                    ...((prev[payloadKeyName] as Array<string> | undefined) ?? []),
                     '',
                 ],
             }
@@ -46,7 +46,9 @@ export default function AddValues({
         i: number,
     ) => {
         setPayload((prev: Vulnerability) => {
-            const refs = prev[payloadKeyName] as string[]
+            const refs = [
+                ...((prev[payloadKeyName] as Array<string> | undefined) ?? []),
+            ]
             refs[i] = e.target.value
             return {
                 ...prev,
@@ -57,7 +59,9 @@ export default function AddValues({
 
     const deleteValue = (i: number) => {
         setPayload((prev: Vulnerability) => {
-            const refs = (prev[payloadKeyName] as string[]).slice()
+            const refs = [
+                ...((prev[payloadKeyName] as Array<string> | undefined) ?? []),
+            ]
             refs.splice(i, 1)
             return {
                 ...prev,
