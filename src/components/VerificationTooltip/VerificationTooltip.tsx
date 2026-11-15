@@ -1,5 +1,6 @@
 // Copyright (C) TOSHIBA CORPORATION, 2023. Part of the SW360 Frontend Project.
 // Copyright (C) Toshiba Software Development (Vietnam) Co., Ltd., 2023. Part of the SW360 Frontend Project.
+// Copyright (C) Siemens AG, 2026. Part of the SW360 Frontend Project.
 
 // This program and the accompanying materials are made
 // available under the terms of the Eclipse Public License 2.0
@@ -8,12 +9,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { type JSX, ReactNode, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { type JSX, ReactNode } from 'react'
+import { OverlayTrigger, Popover, Tooltip } from 'react-bootstrap'
+import { BsInfoCircle } from 'react-icons/bs'
 import { VerificationStateInfo } from '@/object-types'
 
 interface Props {
-    verificationStateInfos: Array<VerificationStateInfo>
-    children: ReactNode
+    verificationStateInfos?: Array<VerificationStateInfo>
+    children?: ReactNode
 }
 
 const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationStateInfo }) => {
@@ -41,31 +45,73 @@ const VerificationStateFormater = ({ stateInfo }: { stateInfo: VerificationState
     )
 }
 
-const VerificationTooltip = ({ verificationStateInfos, children }: Props): JSX.Element => {
-    const [show, setShow] = useState(false)
-    return (
-        <div
-            className='tooltip'
-            onMouseOver={() => setShow(true)}
-            onMouseLeave={() => setShow(false)}
+const VerificationTooltip = ({ verificationStateInfos = [], children }: Props): JSX.Element => {
+    const t = useTranslations('default')
+
+    if (verificationStateInfos.length === 0) {
+        return (
+            <OverlayTrigger
+                placement='top'
+                overlay={<Tooltip id='verification-not-checked-tooltip'>{t('Not Checked yet')}</Tooltip>}
+            >
+                <span className='d-inline-flex align-items-center'>
+                    <BsInfoCircle
+                        style={{
+                            marginRight: '5px',
+                            color: 'gray',
+                            width: '15px',
+                            height: '15px',
+                        }}
+                        size={20}
+                    />
+                    {children ?? t('Not Checked')}
+                </span>
+            </OverlayTrigger>
+        )
+    }
+
+    const popover = (
+        <Popover
+            id='verification-history-popover'
+            className='verification-tooltip-content'
         >
-            {show && (
-                <div className='tooltip-content'>
-                    <ol
-                        className='formatedMessageForVul'
-                        reversed
-                    >
-                        {Object.entries(verificationStateInfos.slice().reverse()).map(([index, info]) => (
+            <Popover.Body className='p-1'>
+                <ol
+                    className='formatedMessageForVul mb-0 ps-3'
+                    reversed
+                >
+                    {verificationStateInfos
+                        .slice()
+                        .reverse()
+                        .map((info, index) => (
                             <VerificationStateFormater
                                 key={index}
                                 stateInfo={info}
                             />
                         ))}
-                    </ol>
-                </div>
-            )}
-            {children}
-        </div>
+                </ol>
+            </Popover.Body>
+        </Popover>
+    )
+
+    return (
+        <OverlayTrigger
+            placement='top'
+            overlay={popover}
+        >
+            <span className='d-inline-flex align-items-center'>
+                <BsInfoCircle
+                    style={{
+                        marginRight: '5px',
+                        color: 'gray',
+                        width: '15px',
+                        height: '15px',
+                    }}
+                    size={20}
+                />
+                {children ?? verificationStateInfos.at(-1)?.verificationState}
+            </span>
+        </OverlayTrigger>
     )
 }
 
