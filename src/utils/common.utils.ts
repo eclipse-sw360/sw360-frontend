@@ -410,6 +410,27 @@ const Capitalize = (text: string) => {
 }
 
 /**
+ * Runs an action that re-renders the page (e.g. removing a list row) and keeps the
+ * window scroll position unchanged afterwards, including after a closing modal
+ * has finished its transition.
+ * @param action The action to run.
+ */
+const preserveScrollPosition = (action: () => void) => {
+    const { scrollX, scrollY } = window
+    action()
+    const restore = () => {
+        if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
+            window.scrollTo(scrollX, scrollY)
+        }
+    }
+    requestAnimationFrame(() => {
+        restore()
+        requestAnimationFrame(restore)
+    })
+    setTimeout(restore, 400)
+}
+
+/**
  * Trims leading/trailing whitespace and collapses repeated internal whitespace into a single space.
  * Prevents sending malformed values (e.g. names with multiple consecutive spaces) to the backend.
  * @param text - The string to collapse spaces in.
@@ -418,6 +439,7 @@ const Capitalize = (text: string) => {
 const collapseSpaces = (text: string): string => text.trim().replace(/\s+/g, ' ')
 
 const CommonUtils = {
+    preserveScrollPosition,
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
     createUrlWithParams,

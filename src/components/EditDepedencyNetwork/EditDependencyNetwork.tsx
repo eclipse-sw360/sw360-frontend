@@ -395,6 +395,10 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
     }
 
     const confirmToDelete = () => {
+        CommonUtils.preserveScrollPosition(deleteSelectedNode)
+    }
+
+    const deleteSelectedNode = () => {
         if (network === undefined) return
         if (nodeRefToRemove.current === undefined) {
             closeConfirmDeleteModal()
@@ -768,6 +772,7 @@ const EditDependencyNetwork = ({ projectId, projectPayload, setProjectPayload }:
                     className='modal-danger'
                     show={showConfirmDelete}
                     setShow={setShowConfirmDelete}
+                    restoreFocus={false}
                     backdrop='static'
                     centered
                     size='lg'
