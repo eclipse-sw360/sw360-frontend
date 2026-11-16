@@ -87,7 +87,7 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
 
     const [secondaryDepartments, setSecondaryDepartments] = useState<SecondaryDepartments>(() => ({}))
     const memoizedData = useMemo(
-        () => secondaryDepartments,
+        () => Object.entries(secondaryDepartments),
         [
             secondaryDepartments,
         ],
@@ -132,7 +132,7 @@ const SecondaryDepartmentsTable = (): JSX.Element => {
     }, [])
 
     const table = useReactTable({
-        data: Object.entries(memoizedData),
+        data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
 

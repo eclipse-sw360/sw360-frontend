@@ -89,4 +89,7 @@ export const selectors = {
         generalInfoSection: '.row.header:has-text("General Information")',
         secondaryDeptsSection: '.row.header:has-text("Secondary Departments")',
     },
+    departments: {
+        folderPathInput: '#pathFolderDepartment',
+    },
 }
