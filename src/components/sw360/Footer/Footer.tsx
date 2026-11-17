@@ -21,6 +21,8 @@ import { ApiUtils } from '@/utils'
 
 function Footer(): JSX.Element {
     const [versionInfo, setVersionInfo] = useState<VersionInfo>()
+    const apiDocsBaseUrl = (process.env.NEXT_PUBLIC_SW360_API_URL ?? '').replace(/\/+$/, '')
+    const apiDocsUrl = `${apiDocsBaseUrl}/resource/swagger-ui/index.html#/`
 
     useEffect(() => {
         const controller = new AbortController()
@@ -69,7 +71,7 @@ function Footer(): JSX.Element {
                     |
                     <Link
                         className='text-link'
-                        href={`${process.env.NEXT_PUBLIC_SW360_API_URL}/resource/swagger-ui/index.html#/`}
+                        href={apiDocsUrl}
                         rel='noopener noreferrer'
                         target='_blank'
                     >
