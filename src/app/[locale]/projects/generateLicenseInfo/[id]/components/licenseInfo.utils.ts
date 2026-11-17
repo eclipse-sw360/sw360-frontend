@@ -66,6 +66,14 @@ export const createStoreFromAttachmentUsages = (
     return store
 }
 
+const isInSubtree = (projectPath: string, subprojectPath: string): boolean =>
+    projectPath === subprojectPath || projectPath.startsWith(`${subprojectPath}:`)
+
+export const isKeyInSubproject = (key: string, subprojectPath: string): boolean => {
+    const [, , projectPath, usageType] = JSON.parse(key) as AttachmentKey
+    return usageType === 'licenseInfo' && isInSubtree(projectPath, subprojectPath)
+}
+
 export const payloadFromStore = (store: Record<string, AttachmentUsage>): AttachmentUsage[] => Object.values(store)
 
 export const applyAttachmentToggle = (
