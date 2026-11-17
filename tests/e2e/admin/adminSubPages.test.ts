@@ -249,4 +249,12 @@ test.describe('Admin Departments Page', () => {
             ).toBeVisible()
         }
     })
+
+    test('TC38: should accept typing in the Registration Folder Path box', async ({ page }) => {
+        const folderPath = page.locator(selectors.departments.folderPathInput)
+        await expect(folderPath).toBeVisible()
+        await folderPath.click()
+        await folderPath.pressSequentially('/path/to/departments')
+        await expect(folderPath).toHaveValue('/path/to/departments')
+    })
 })
