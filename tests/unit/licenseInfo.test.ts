@@ -192,10 +192,7 @@ test('license toggles add and remove exclusions and deselect when every license 
         'Apache-2.0',
     ])
     expect(toggleLicenseInStore(store, key, 'MIT', licenses)).toBe(false)
-    expect(store[key].usageData?.licenseInfo?.excludedLicenseIds).toEqual([
-        'Apache-2.0',
-        'MIT',
-    ])
+    expect(store[key]).toBeUndefined()
 })
 
 test('toggling a license creates a usage with all sibling licenses except the selected one excluded', () => {

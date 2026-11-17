@@ -22,7 +22,6 @@ import {
 } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
@@ -36,7 +35,6 @@ import {
     ErrorDetails,
     Project,
     Release,
-    SaveUsagesPayload,
     TypedEntity,
     UserGroupType,
 } from '@/object-types'
@@ -44,6 +42,7 @@ import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAttachmentTypeShortForm } from '@/utils/attachments.utils'
+import { indexUsages, setUsageSelected, type UsageSelection, type UsageType, usageKey } from './attachmentUsages.utils'
 
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
@@ -121,8 +120,8 @@ const sortAllLevels = (
 const releaseMatchesFilter = (
     release: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>,
     filter: string,
-    saveUsagesPayload?: SaveUsagesPayload,
-    projectPath?: string,
+    usages: Set<string>,
+    projectId: string,
 ): boolean => {
     const releaseId = release.node.entity._links?.self.href.split('/').at(-1) ?? ''
 
@@ -144,7 +143,7 @@ const releaseMatchesFilter = (
         case 'withoutAttachments':
             return attachments.length === 0
         case 'withoutCliUsage': {
-            if (!saveUsagesPayload || !releaseId) return true
+            if (!releaseId) return true
             const cliAttachments = attachments.filter((a) => {
                 const att = a.node.entity as Attachment
                 return att.attachmentType === 'CLI' || att.attachmentType === 'CLX' || att.attachmentType === 'ISR'
@@ -153,14 +152,19 @@ const releaseMatchesFilter = (
 
             return cliAttachments.some((a) => {
                 const att = a.node.entity as Attachment
-                const projectPath = a.projectPath
-                return !saveUsagesPayload.selected.includes(
-                    `${projectPath ? `${projectPath}-` : ''}${releaseId}_licenseInfo_${att.attachmentContentId}`,
+                return !usages.has(
+                    usageKey({
+                        attachmentContentId: att.attachmentContentId ?? '',
+                        releaseId,
+                        projectId,
+                        projectPath: a.projectPath ?? projectId,
+                        type: 'licenseInfo',
+                    }),
                 )
             })
         }
         case 'withoutSourceUsage': {
-            if (!saveUsagesPayload || !releaseId) return true
+            if (!releaseId) return true
             const sourceAttachments = attachments.filter((a) => {
                 const att = a.node.entity as Attachment
                 return att.attachmentType === 'SOURCE' || att.attachmentType === 'SRC'
@@ -169,7 +173,15 @@ const releaseMatchesFilter = (
 
             return sourceAttachments.some((a) => {
                 const att = a.node.entity as Attachment
-                return !saveUsagesPayload.selected.includes(`${releaseId}_sourcePackage_${att.attachmentContentId}`)
+                return !usages.has(
+                    usageKey({
+                        attachmentContentId: att.attachmentContentId ?? '',
+                        releaseId,
+                        projectId,
+                        projectPath: '',
+                        type: 'sourcePackage',
+                    }),
+                )
             })
         }
         default:
@@ -205,7 +217,8 @@ const filterRows = (
     rows: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
     filter: string,
     term: string,
-    saveUsagesPayload?: SaveUsagesPayload,
+    usages: Set<string>,
+    projectId: string,
 ): ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] => {
     const result: ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[] = []
     for (const row of rows) {
@@ -216,12 +229,13 @@ const filterRows = (
                       row.children as ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[],
                       filter,
                       term,
-                      saveUsagesPayload,
+                      usages,
+                      projectId,
                   )
                 : []
         let matchesFilter = true
         if (node.type === 'release') {
-            matchesFilter = releaseMatchesFilter(row, filter, saveUsagesPayload)
+            matchesFilter = releaseMatchesFilter(row, filter, usages, projectId)
         }
         const matchesSearch = rowMatchesSearch(row, term)
         let keepRow = false
@@ -243,13 +257,12 @@ const filterRows = (
 function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const tableRef = useRef<Table<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>> | null>(null)
-    const [saveUsagesPayload, setSaveUsagesPayload] = useState<SaveUsagesPayload>({
-        selected: [],
-        deselected: [],
-        selectedConcludedUsages: [],
-        deselectedConcludedUsages: [],
-        ignoredLicenses: {},
-    })
+    const usageStoreRef = useRef<AttachmentUsage[]>([])
+    const usageIndexRef = useRef<Set<string>>(new Set())
+    const initialUsagesRef = useRef<AttachmentUsage[]>([])
+    const inputRefs = useRef(new Map<string, Set<HTMLInputElement>>())
+    const [filterRevision, setFilterRevision] = useState(false)
+    const [loadedProjectId, setLoadedProjectId] = useState<string | undefined>()
     const [saveUsagesLoading, setSaveUsagesLoading] = useState(false)
 
     const [showProcessingLinkedProjects, setShowProcessingLinkedProjects] = useState(false)
@@ -271,7 +284,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
             attachmentUsages,
         ],
     )
-
     const [data, setData] = useState<ExtendedNestedRows<TypedProject | TypedRelease | TypedAttachment>[]>(() => [])
 
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
@@ -282,23 +294,29 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     const [releaseFilter, setReleaseFilter] = useState<string>('')
     const [searchTerm, setSearchTerm] = useState<string>('')
     const filteredData = useMemo(
-        () => (releaseFilter || searchTerm ? filterRows(data, releaseFilter, searchTerm, saveUsagesPayload) : data),
+        () =>
+            releaseFilter || searchTerm
+                ? filterRows(data, releaseFilter, searchTerm, usageIndexRef.current, projectId)
+                : data,
         [
             data,
             releaseFilter,
             searchTerm,
-            saveUsagesPayload,
+            projectId,
+            filterRevision,
         ],
     )
 
     const handleSaveUsages = async () => {
         try {
             setSaveUsagesLoading(true)
-            const response = await ApiUtils.POST(`projects/${projectId}/saveAttachmentUsages`, saveUsagesPayload)
-            if (response.status !== StatusCodes.CREATED) {
+            const savedUsages = usageStoreRef.current
+            const response = await ApiUtils.PUT(`projects/${projectId}/attachmentUsage`, savedUsages)
+            if (response.status !== StatusCodes.OK && response.status !== StatusCodes.NO_CONTENT) {
                 MessageService.error(t('Something went wrong'))
-                return notFound()
+                return
             }
+            initialUsagesRef.current = savedUsages
 
             // Check for warnings in response (e.g. stale sub-project or release references)
             try {
@@ -369,6 +387,9 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         const signal = controller.signal
 
         const timeLimit = memoizedAttachmentUsages === undefined ? 700 : 0
+        setLoadedProjectId(undefined)
+        setAttachmentUsages(undefined)
+        setData([])
         const timeout = setTimeout(() => {
             setShowProcessingAttachmentUsages(true)
         }, timeLimit)
@@ -385,52 +406,15 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 }
 
                 const usages = (await response.json()) as AttachmentUsages
+                usageStoreRef.current = [
+                    ...usages._embedded['sw360:attachmentUsages'],
+                ]
+                usageIndexRef.current = indexUsages(usageStoreRef.current)
+                initialUsagesRef.current = [
+                    ...usageStoreRef.current,
+                ]
                 setAttachmentUsages(usages)
-
-                const saveUsages: SaveUsagesPayload = {
-                    selected: [],
-                    deselected: [],
-                    selectedConcludedUsages: [],
-                    deselectedConcludedUsages: [],
-                    ignoredLicenses: {},
-                }
-
-                for (const r of usages['_embedded']['sw360:release']) {
-                    for (const att of r.attachments ?? []) {
-                        const usage = usages['_embedded']['sw360:attachmentUsages'].filter(
-                            (elem: AttachmentUsage) => elem.attachmentContentId === att.attachmentContentId,
-                        )
-                        for (const u of usage) {
-                            if (u.usageData) {
-                                if (u.usageData.sourcePackage) {
-                                    saveUsages.selected = [
-                                        ...new Set<string>([
-                                            ...saveUsages.selected,
-                                            `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${att.attachmentContentId}`,
-                                        ]),
-                                    ]
-                                }
-                                if (u.usageData.manuallySet) {
-                                    saveUsages.selected = [
-                                        ...new Set<string>([
-                                            ...saveUsages.selected,
-                                            `${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${att.attachmentContentId}`,
-                                        ]),
-                                    ]
-                                }
-                                if (u.usageData.licenseInfo) {
-                                    saveUsages.selected = [
-                                        ...new Set<string>([
-                                            ...saveUsages.selected,
-                                            `${u.usageData.licenseInfo.projectPath}-${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${att.attachmentContentId}`,
-                                        ]),
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                }
-                setSaveUsagesPayload(saveUsages)
+                setLoadedProjectId(projectId)
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
@@ -448,6 +432,61 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     }, [
         projectId,
     ])
+
+    const renderUsageCheckbox = (
+        row: Row<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>>,
+        type: UsageType,
+    ): JSX.Element | null => {
+        if (row.original.node.type !== 'attachment') return null
+        const { attachmentType, attachmentContentId } = row.original.node.entity
+        const release = row.getParentRow()?.original.node.entity as Release | undefined
+        const selection: UsageSelection = {
+            attachmentContentId: attachmentContentId ?? '',
+            releaseId: release?._links?.self.href.split('/').at(-1) ?? '',
+            projectId,
+            projectPath: row.original.projectPath ?? projectId,
+            type,
+        }
+        const key = usageKey(selection)
+        return (
+            <input
+                key={key}
+                type='checkbox'
+                className='form-check-input'
+                disabled={
+                    !selection.releaseId ||
+                    !selection.attachmentContentId ||
+                    !(type === 'licenseInfo'
+                        ? isLicenseInfoEnabled(attachmentType ?? '')
+                        : isSourceCodeBundleEnabled(attachmentType ?? ''))
+                }
+                defaultChecked={usageIndexRef.current.has(key)}
+                ref={(input) => {
+                    if (!input) return
+                    const inputs = inputRefs.current.get(key) ?? new Set<HTMLInputElement>()
+                    inputs.add(input)
+                    inputRefs.current.set(key, inputs)
+                    return () => {
+                        inputs.delete(input)
+                        if (inputs.size === 0) inputRefs.current.delete(key)
+                    }
+                }}
+                onChange={(event) => {
+                    const checked = event.currentTarget.checked
+                    usageStoreRef.current = setUsageSelected(
+                        usageStoreRef.current,
+                        initialUsagesRef.current,
+                        selection,
+                        checked,
+                    )
+                    if (checked) usageIndexRef.current.add(key)
+                    else usageIndexRef.current.delete(key)
+                    for (const input of inputRefs.current.get(key) ?? []) input.checked = checked
+                    setFilterRevision((revision) => !revision)
+                }}
+            />
+        )
+    }
 
     const columns = useMemo<ColumnDef<ExtendedNestedRows<TypedAttachment | TypedRelease | TypedProject>>[]>(
         () => [
@@ -687,60 +726,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 columns: [
                                     {
                                         id: 'licenseInfo.checked',
-                                        cell: ({ row }) => {
-                                            if (row.original.node.type === 'attachment') {
-                                                const { attachmentType, attachmentContentId } = row.original.node.entity
-                                                const r = row.getParentRow()?.original.node.entity as Release
-                                                return (
-                                                    <input
-                                                        type='checkbox'
-                                                        className='form-check-input'
-                                                        disabled={!isLicenseInfoEnabled(attachmentType ?? '')}
-                                                        checked={
-                                                            saveUsagesPayload.selected.indexOf(
-                                                                `${
-                                                                    row.original.projectPath &&
-                                                                    row.original.projectPath !== ''
-                                                                        ? `${row.original.projectPath}-`
-                                                                        : ''
-                                                                }${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${attachmentContentId}`,
-                                                            ) !== -1
-                                                        }
-                                                        onChange={() => {
-                                                            const val = `${
-                                                                row.original.projectPath &&
-                                                                row.original.projectPath !== ''
-                                                                    ? `${row.original.projectPath}-`
-                                                                    : ''
-                                                            }${r._links?.self.href.split('/').at(-1) ?? ''}_licenseInfo_${attachmentContentId}`
-                                                            if (saveUsagesPayload.selected.indexOf(val) === -1) {
-                                                                setSaveUsagesPayload({
-                                                                    ...saveUsagesPayload,
-                                                                    selected: [
-                                                                        ...saveUsagesPayload.selected,
-                                                                        val,
-                                                                    ],
-                                                                    deselected: saveUsagesPayload.deselected.filter(
-                                                                        (item) => item !== val,
-                                                                    ),
-                                                                })
-                                                            } else {
-                                                                setSaveUsagesPayload({
-                                                                    ...saveUsagesPayload,
-                                                                    selected: saveUsagesPayload.selected.filter(
-                                                                        (item) => item !== val,
-                                                                    ),
-                                                                    deselected: [
-                                                                        ...saveUsagesPayload.deselected,
-                                                                        val,
-                                                                    ],
-                                                                })
-                                                            }
-                                                        }}
-                                                    />
-                                                )
-                                            }
-                                        },
+                                        cell: ({ row }) => renderUsageCheckbox(row, 'licenseInfo'),
                                         meta: {
                                             width: '5%',
                                         },
@@ -757,50 +743,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                             {
                                 id: 'sourceCodeBundle',
                                 header: t('Source Code Bundle'),
-                                cell: ({ row }) => {
-                                    if (row.original.node.type === 'attachment') {
-                                        const { attachmentType, attachmentContentId } = row.original.node.entity
-                                        const r = row.getParentRow()?.original.node.entity as Release
-                                        return (
-                                            <input
-                                                type='checkbox'
-                                                className='form-check-input'
-                                                disabled={!isSourceCodeBundleEnabled(attachmentType ?? '')}
-                                                checked={
-                                                    saveUsagesPayload.selected.indexOf(
-                                                        `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${attachmentContentId}`,
-                                                    ) !== -1
-                                                }
-                                                onChange={() => {
-                                                    const val = `${r._links?.self.href.split('/').at(-1) ?? ''}_sourcePackage_${attachmentContentId}`
-                                                    if (saveUsagesPayload.selected.indexOf(val) === -1) {
-                                                        setSaveUsagesPayload({
-                                                            ...saveUsagesPayload,
-                                                            selected: [
-                                                                ...saveUsagesPayload.selected,
-                                                                val,
-                                                            ],
-                                                            deselected: saveUsagesPayload.deselected.filter(
-                                                                (item) => item !== val,
-                                                            ),
-                                                        })
-                                                    } else {
-                                                        setSaveUsagesPayload({
-                                                            ...saveUsagesPayload,
-                                                            selected: saveUsagesPayload.selected.filter(
-                                                                (item) => item !== val,
-                                                            ),
-                                                            deselected: [
-                                                                ...saveUsagesPayload.deselected,
-                                                                val,
-                                                            ],
-                                                        })
-                                                    }
-                                                }}
-                                            />
-                                        )
-                                    }
-                                },
+                                cell: ({ row }) => renderUsageCheckbox(row, 'sourcePackage'),
                                 meta: {
                                     width: '10%',
                                 },
@@ -808,50 +751,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                             {
                                 id: 'other',
                                 header: t('Other'),
-                                cell: ({ row }) => {
-                                    if (row.original.node.type === 'attachment') {
-                                        const { attachmentType, attachmentContentId } = row.original.node.entity
-                                        const r = row.getParentRow()?.original.node.entity as Release
-                                        return (
-                                            <input
-                                                type='checkbox'
-                                                className='form-check-input'
-                                                disabled={!isSourceCodeBundleEnabled(attachmentType ?? '')}
-                                                checked={
-                                                    saveUsagesPayload.selected.indexOf(
-                                                        `${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${attachmentContentId}`,
-                                                    ) !== -1
-                                                }
-                                                onChange={() => {
-                                                    const val = `${r._links?.self.href.split('/').at(-1) ?? ''}_manuallySet_${attachmentContentId}`
-                                                    if (saveUsagesPayload.selected.indexOf(val) === -1) {
-                                                        setSaveUsagesPayload({
-                                                            ...saveUsagesPayload,
-                                                            selected: [
-                                                                ...saveUsagesPayload.selected,
-                                                                val,
-                                                            ],
-                                                            deselected: saveUsagesPayload.deselected.filter(
-                                                                (item) => item !== val,
-                                                            ),
-                                                        })
-                                                    } else {
-                                                        setSaveUsagesPayload({
-                                                            ...saveUsagesPayload,
-                                                            selected: saveUsagesPayload.selected.filter(
-                                                                (item) => item !== val,
-                                                            ),
-                                                            deselected: [
-                                                                ...saveUsagesPayload.deselected,
-                                                                val,
-                                                            ],
-                                                        })
-                                                    }
-                                                }}
-                                            />
-                                        )
-                                    }
-                                },
+                                cell: ({ row }) => renderUsageCheckbox(row, 'manuallySet'),
                                 meta: {
                                     width: '10%',
                                 },
@@ -864,8 +764,8 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
         [
             t,
             memoizedAttachmentUsages,
-            saveUsagesPayload,
             releaseFilter,
+            projectId,
         ],
     )
 
@@ -883,6 +783,13 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
 
         data: filteredData,
         columns,
+        getRowId: (row, index, parent) => {
+            const entityId =
+                row.node.type === 'attachment'
+                    ? (row.node.entity.attachmentContentId ?? row.node.entity._links?.self.href ?? String(index))
+                    : (row.node.entity._links?.self.href ?? row.node.entity.id ?? String(index))
+            return `${parent?.id ?? 'root'}:${row.node.type}:${entityId}`
+        },
         getCoreRowModel: getCoreRowModel(),
 
         // expand config
@@ -1056,6 +963,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 type='button'
                 className='btn btn-secondary mb-2'
                 onClick={() => void handleSaveUsages()}
+                disabled={loadedProjectId !== projectId || saveUsagesLoading}
             >
                 {t('Save Usages')}{' '}
                 {saveUsagesLoading === true && (
