@@ -21,6 +21,9 @@ interface ImportSummary {
     projectId: string
     dupComp: string
     invalidComp: string
+    invalidVcsComponent?: string
+    nonPkgManagedCompWithoutVCS?: string
+    compImportErrorCount?: string
     message: string
     result: string
     fileName: string
