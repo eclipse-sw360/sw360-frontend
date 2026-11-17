@@ -34,7 +34,7 @@ import CreateClearingRequestModal from './CreateClearingRequestModal'
 import DependencyNetworkListView from './DependencyNetworkListView'
 import DependencyNetworkTreeView from './DependencyNetworkTreeView'
 import ListView from './ListView'
-import TreeView from './TreeView'
+import TreeView, { getLinkedCounts, type LinkedCounts } from './TreeView'
 import ViewClearingRequestModal from './ViewClearingRequestModal'
 
 const tableIdToUrlParamMapper: Record<string, string> = {
@@ -68,6 +68,12 @@ function LicenseClearing({
     const [showCreateClearingRequestModal, setShowCreateClearingRequestModal] = useState(false)
     const [showViewClearingRequestModal, setShowViewClearingRequestModal] = useState(false)
     const [licenseClearingData, setLicenseClearingData] = useState<LicenseClearingData | undefined>(undefined)
+    // Holds the unfiltered response only until the counts are computed
+    const [pendingUnfilteredData, setPendingUnfilteredData] = useState<LicenseClearingData | undefined>(undefined)
+    const [linkedCounts, setLinkedCounts] = useState<LinkedCounts>({
+        releases: 0,
+        projects: 0,
+    })
     const [linkedProjectsData, setLinkedProjectsData] = useState<Project[]>([])
     const [isLoadingLicenseClearing, setIsLoadingLicenseClearing] = useState<boolean>(true)
     const [isLoadingLinkedProjects, setIsLoadingLinkedProjects] = useState<boolean>(true)
@@ -144,7 +150,9 @@ function LicenseClearing({
                     })
                 }
 
-                setLicenseClearingData((await response.json()) as LicenseClearingData)
+                const data = (await response.json()) as LicenseClearingData
+                setLicenseClearingData(data)
+                if (!filterParams) setPendingUnfilteredData(data)
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
@@ -156,6 +164,16 @@ function LicenseClearing({
     }, [
         projectId,
         columnFilters,
+    ])
+
+    useEffect(() => {
+        if (pendingUnfilteredData === undefined || isLoadingLinkedProjects) return
+        setLinkedCounts(getLinkedCounts(pendingUnfilteredData, linkedProjectsData))
+        setPendingUnfilteredData(undefined)
+    }, [
+        pendingUnfilteredData,
+        linkedProjectsData,
+        isLoadingLinkedProjects,
     ])
 
     const generateSourceCodeBundle = (withSubProjects: boolean) => {
@@ -317,6 +335,7 @@ function LicenseClearing({
                             <TreeView
                                 projectId={projectId}
                                 licenseClearingData={licenseClearingData}
+                                linkedCounts={linkedCounts}
                                 linkedProjectsData={linkedProjectsData}
                                 isLoadingClearingData={isLoadingClearingData}
                                 columnFilters={columnFilters}
