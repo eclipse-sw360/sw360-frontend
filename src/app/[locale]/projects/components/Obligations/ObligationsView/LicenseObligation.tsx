@@ -222,31 +222,29 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
                 id: 'title',
                 header: t('License Obligation'),
                 cell: ({ row }) => {
-                    let releaseMatch = true,
-                        licensesMatch = true
-                    const obligationMatch =
-                        selectedProjectObligationData?.obligations?.[row.original.node[0]] !== undefined
-
-                    const licenseIds =
-                        selectedProjectObligationData?.obligations?.[row.original.node[0]]?.licenseIds ?? []
-                    for (const lic of row.original.node[1].licenseIds ?? []) {
-                        if (licenseIds.indexOf(lic) === -1) {
-                            licensesMatch = false
-                            break
-                        }
+                    const current = row.original.node[1]
+                    const compared = selectedProjectObligationData?.obligations?.[row.original.node[0]]
+                    const isSameSet = (a: (string | undefined)[], b: (string | undefined)[]) => {
+                        const setA = new Set(a.filter((v): v is string => !CommonUtils.isNullOrUndefined(v)))
+                        const setB = new Set(b.filter((v): v is string => !CommonUtils.isNullOrUndefined(v)))
+                        return (
+                            setA.size === setB.size &&
+                            [
+                                ...setA,
+                            ].every((v) => setB.has(v))
+                        )
                     }
-
-                    const releases = selectedProjectObligationData?.obligations?.[row.original.node[0]]?.releases ?? []
-                    for (const rel of row.original.node[1].releases ?? []) {
-                        if (releases.filter((r) => rel.id === r.id)) {
-                            releaseMatch = false
-                            break
-                        }
-                    }
+                    const isMatch =
+                        compared !== undefined &&
+                        isSameSet(current.licenseIds ?? [], compared.licenseIds ?? []) &&
+                        isSameSet(
+                            (current.releases ?? []).map((r) => r.id),
+                            (compared.releases ?? []).map((r) => r.id),
+                        )
 
                     return (
                         <div
-                            className={`text-center ${selectedProjectObligationData ? (obligationMatch && releaseMatch && licensesMatch ? 'green-cell' : 'red-cell') : ''}`}
+                            className={`text-center ${selectedProjectObligationData ? (isMatch ? 'green-cell' : 'red-cell') : ''}`}
                         >
                             <span>{row.original.node[0]}</span>
                         </div>
@@ -509,16 +507,35 @@ export default function LicenseObligation({ projectId, actionType, payload, setP
         void (async () => {
             try {
                 setShowProcessing(true)
-                const response = await ApiUtils.GET(`projects/${selectedProjectId}/licenseObligations`, signal)
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
+                // The current table is paginated, so load every page of the compared project
+                // to avoid marking obligations as missing just because they are on another page.
+                const obligations: ObligationEntry = {}
+                let page = 0
+                let totalPages = 1
+                do {
+                    const queryUrl = CommonUtils.createUrlWithParams(
+                        `projects/${selectedProjectId}/licenseObligations`,
+                        {
+                            page: String(page),
+                            page_entries: '100',
+                        },
+                    )
+                    const response = await ApiUtils.GET(queryUrl, signal)
+                    if (response.status !== StatusCodes.OK) {
+                        const err = (await response.json()) as ErrorDetails
+                        throw new ApiError(err.message, {
+                            status: response.status,
+                        })
+                    }
+                    const data = (await response.json()) as ObligationResponse
+                    Object.assign(obligations, data.obligations ?? {})
+                    totalPages = data.page?.totalPages ?? 1
+                    page++
+                } while (page < totalPages)
 
-                const data = (await response.json()) as ObligationResponse
-                setSelectedProjectObligationData(data)
+                setSelectedProjectObligationData({
+                    obligations,
+                })
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
