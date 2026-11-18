@@ -40,6 +40,7 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
+import { isVulnerabilityFeatureEnabled, isVulnerabilityTabCountHidden } from '@/utils/vulnerabilityFeature.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -57,6 +58,7 @@ import VulnerabilityTrackingStatusComponent from './VulnerabilityTrackingStatus'
 export default function ViewProjects({ projectId }: { projectId: string }): JSX.Element {
     const t = useTranslations('default')
     const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
+    const vulnerabilityFeatureValue = useConfigKeyValue(ConfigKeys.IS_VULNERABILITY_FEATURE_ENABLED)
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
     const [projectExists, setProjectExists] = useState<boolean | null>(null)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
@@ -78,21 +80,34 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [projectPayload, setProjectPayload] = useState<ProjectPayload>()
     const [showExportProjectSbomModal, setShowExportProjectSbomModal] = useState<boolean>(false)
     const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
+    const isVulnerabilityFeatureAvailable = isVulnerabilityFeatureEnabled(vulnerabilityFeatureValue)
+    const isVulnerabilitiesTabAvailable =
+        isVulnerabilityFeatureAvailable &&
+        !isVulnerabilityTabCountHidden(vulnerabilitiesTotal) &&
+        !isVulnerabilityTabCountHidden(vulnerabilitiesRatedCount)
     const TABS = [
         'summary',
         'administration',
         'licenseClearing',
         'obligations',
         'ecc',
-        'vulnerabilityTrackingStatus',
         'eventKey',
         'attachmentUsages',
-        'vulnerabilities',
         'attachments',
         'changeLog',
         ...(isPackageFeatureEnabled
             ? [
                   'linkedPackages',
+              ]
+            : []),
+        ...(isVulnerabilityFeatureAvailable
+            ? [
+                  'vulnerabilityTrackingStatus',
+              ]
+            : []),
+        ...(isVulnerabilitiesTabAvailable
+            ? [
+                  'vulnerabilities',
               ]
             : []),
     ]
@@ -107,7 +122,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const [userIdentity, setUserIdentity] = useState<Awaited<ReturnType<typeof getAuthenticatedUserIdentity>> | null>(
         null,
     )
-
     useDocumentTitle(
         summaryData?.name ? CommonUtils.formatDocumentTitle(summaryData.name, summaryData.version) : undefined,
     )
@@ -130,6 +144,23 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         setActiveKey(tab)
     }, [
         searchParams,
+    ])
+
+    useEffect(() => {
+        if (
+            (activeKey !== 'vulnerabilityTrackingStatus' || isVulnerabilityFeatureAvailable) &&
+            (activeKey !== 'vulnerabilities' || isVulnerabilitiesTabAvailable)
+        ) {
+            return
+        }
+
+        setActiveKey(DEFAULT_ACTIVE_TAB)
+        router.replace(`?tab=${DEFAULT_ACTIVE_TAB}`)
+    }, [
+        activeKey,
+        isVulnerabilityFeatureAvailable,
+        isVulnerabilitiesTabAvailable,
+        router,
     ])
 
     const handleSelect = (key: string | null) => {
@@ -334,7 +365,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
             : 'obligations-badge'
 
     const vulnerabilitiesCountValue = isVulnerabilitiesDisplayEnabled
-        ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
+        ? `${Math.max(0, vulnerabilitiesRatedCount)} / ${Math.max(0, vulnerabilitiesTotal)}`
         : '?/?'
 
     const eccClosedCount = Math.max(0, eccClassifiedCount - eccOpenCount)
@@ -454,6 +485,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     {...sidebarTabLinkProps('vulnerabilityTrackingStatus')}
+                                    hidden={!isVulnerabilityFeatureAvailable}
                                 >
                                     <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
                                 </ListGroup.Item>
@@ -474,6 +506,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 <ListGroup.Item
                                     action
                                     {...sidebarTabLinkProps('vulnerabilities')}
+                                    hidden={!isVulnerabilitiesTabAvailable}
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={vulnerabilitiesBadgeClassName}
@@ -675,20 +708,22 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                             />
                                         )}
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey='vulnerabilityTrackingStatus'>
-                                        {summaryData && (
-                                            <VulnerabilityTrackingStatusComponent
-                                                projectData={{
-                                                    id: projectId,
-                                                    name: summaryData.name,
-                                                    version: summaryData.version ?? '',
-                                                    enableSvm: summaryData.enableSvm ?? false,
-                                                    enableVulnerabilitiesDisplay:
-                                                        summaryData.enableVulnerabilitiesDisplay ?? false,
-                                                }}
-                                            />
-                                        )}
-                                    </Tab.Pane>
+                                    {isVulnerabilityFeatureAvailable && (
+                                        <Tab.Pane eventKey='vulnerabilityTrackingStatus'>
+                                            {summaryData && (
+                                                <VulnerabilityTrackingStatusComponent
+                                                    projectData={{
+                                                        id: projectId,
+                                                        name: summaryData.name,
+                                                        version: summaryData.version ?? '',
+                                                        enableSvm: summaryData.enableSvm ?? false,
+                                                        enableVulnerabilitiesDisplay:
+                                                            summaryData.enableVulnerabilitiesDisplay ?? false,
+                                                    }}
+                                                />
+                                            )}
+                                        </Tab.Pane>
+                                    )}
                                     <Tab.Pane eventKey='attachments'>
                                         <Attachments
                                             documentId={projectId}
@@ -698,20 +733,22 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                     <Tab.Pane eventKey='attachmentUsages'>
                                         <AttachmentUsages projectId={projectId} />
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey='vulnerabilities'>
-                                        {summaryData && (
-                                            <ProjectVulnerabilities
-                                                projectData={{
-                                                    id: projectId,
-                                                    name: summaryData.name,
-                                                    version: summaryData.version ?? '',
-                                                    enableSvm: summaryData.enableSvm ?? false,
-                                                    enableVulnerabilitiesDisplay:
-                                                        summaryData.enableVulnerabilitiesDisplay ?? false,
-                                                }}
-                                            />
-                                        )}
-                                    </Tab.Pane>
+                                    {isVulnerabilitiesTabAvailable && (
+                                        <Tab.Pane eventKey='vulnerabilities'>
+                                            {summaryData && (
+                                                <ProjectVulnerabilities
+                                                    projectData={{
+                                                        id: projectId,
+                                                        name: summaryData.name,
+                                                        version: summaryData.version ?? '',
+                                                        enableSvm: summaryData.enableSvm ?? false,
+                                                        enableVulnerabilitiesDisplay:
+                                                            summaryData.enableVulnerabilitiesDisplay ?? false,
+                                                    }}
+                                                />
+                                            )}
+                                        </Tab.Pane>
+                                    )}
                                     <Tab.Pane eventKey='changeLog'>
                                         <ChangeLog projectId={projectId} />
                                     </Tab.Pane>

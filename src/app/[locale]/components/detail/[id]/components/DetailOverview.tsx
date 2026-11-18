@@ -24,6 +24,7 @@ import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDet
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import { PageButtonHeader } from '@/components/sw360'
+import { useConfigKeyValue } from '@/contexts'
 import {
     COMPONENT_NOT_FOUND_WARNING_KEY,
     LAST_RELEASE_COMPONENT_ID_KEY,
@@ -36,6 +37,7 @@ import {
     Changelogs,
     CommonTabIds,
     Component,
+    ConfigKeys,
     DocumentTypes,
     Embedded,
     ErrorDetails,
@@ -50,6 +52,7 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
+import { isVulnerabilityFeatureEnabled, isVulnerabilityForbiddenStatus } from '@/utils/vulnerabilityFeature.utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
 
@@ -62,6 +65,9 @@ interface Props {
 
 const DetailOverview = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
+    const isVulnerabilityFeatureVisible = isVulnerabilityFeatureEnabled(
+        useConfigKeyValue(ConfigKeys.IS_VULNERABILITY_FEATURE_ENABLED),
+    )
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -95,6 +101,19 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         setActiveKey(fragment)
     }, [
         searchParams,
+    ])
+
+    useEffect(() => {
+        if (isVulnerabilityFeatureVisible || activeKey !== CommonTabIds.VULNERABILITIES) {
+            return
+        }
+
+        setActiveKey(CommonTabIds.SUMMARY)
+        router.replace(`?tab=${CommonTabIds.SUMMARY}`)
+    }, [
+        activeKey,
+        isVulnerabilityFeatureVisible,
+        router,
     ])
 
     const handleSelect = (key: string | null) => {
@@ -145,7 +164,8 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     ])
 
     useEffect(() => {
-        if (componentExists !== true) {
+        if (componentExists !== true || !isVulnerabilityFeatureVisible) {
+            setVulnerData([])
             return
         }
 
@@ -156,6 +176,11 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             try {
                 const response = await ApiUtils.GET(`components/${componentId}/vulnerabilities`, signal)
                 if (response.status !== StatusCodes.OK) {
+                    if (isVulnerabilityForbiddenStatus(response.status)) {
+                        setVulnerData([])
+                        return
+                    }
+
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
                         status: response.status,
@@ -173,6 +198,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     }, [
         componentId,
         componentExists,
+        isVulnerabilityFeatureVisible,
     ])
 
     const getSubcribersEmail = (component: Component) => {
@@ -380,12 +406,14 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
                                 </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
-                                >
-                                    <div className='my-2'>{t('Vulnerabilities')}</div>
-                                </ListGroup.Item>
+                                {isVulnerabilityFeatureVisible && (
+                                    <ListGroup.Item
+                                        action
+                                        {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
+                                    >
+                                        <div className='my-2'>{t('Vulnerabilities')}</div>
+                                    </ListGroup.Item>
+                                )}
                                 <ListGroup.Item
                                     action
                                     {...sidebarTabLinkProps(CommonTabIds.CHANGE_LOG)}
@@ -469,9 +497,11 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                                             documentType={DocumentTypes.COMPONENT}
                                         />
                                     </Tab.Pane>
-                                    <Tab.Pane eventKey={CommonTabIds.VULNERABILITIES}>
-                                        <ComponentVulnerabilities vulnerData={vulnerData} />
-                                    </Tab.Pane>
+                                    {isVulnerabilityFeatureVisible && (
+                                        <Tab.Pane eventKey={CommonTabIds.VULNERABILITIES}>
+                                            <ComponentVulnerabilities vulnerData={vulnerData} />
+                                        </Tab.Pane>
+                                    )}
                                     <Tab.Pane eventKey={CommonTabIds.CHANGE_LOG}>
                                         <div className='col'>
                                             <div
