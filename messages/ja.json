@@ -1720,6 +1720,8 @@
     "ui_custommap_release_roles": "リリースのカスタム役割のリスト",
     "ui_domains": "プロジェクトに許可されるドメインのリスト",
     "ui_enable_add_license_info_to_release_button": "リリース ビューで [リリースにライセンス情報を追加] ボタンを有効にする",
+    "Enable Manual License Editing on Release Edit Page": "リリース編集ページでのライセンスの手動編集を有効にする",
+    "ui_enable_manual_license_editing_on_release_edit_page": "リリース編集時にメインおよびその他のライセンスIDの手動変更を許可する",
     "ui_enable_security_vulnerability_monitoring": "プロジェクトのセキュリティ脆弱性監視の有効化を許可する",
     "ui_operating_systems": "リリースに表示するオペレーティング システム",
     "ui_org_eclipse_sw360_disable_clearing_request_for_project_group": "決済リクエストが無効になっているプロジェクト グループのリスト",

@@ -1720,6 +1720,8 @@
     "ui_custommap_release_roles": "发布的自定义角色列表",
     "ui_domains": "项目允许的域列表",
     "ui_enable_add_license_info_to_release_button": "在发布视图中启用“将许可证信息添加到发布”按钮",
+    "Enable Manual License Editing on Release Edit Page": "启用发布编辑页面中的手动许可证编辑",
+    "ui_enable_manual_license_editing_on_release_edit_page": "允许在编辑发布时手动更改主要及其他许可证 ID",
     "ui_enable_security_vulnerability_monitoring": "允许为项目启用安全漏洞监控",
     "ui_operating_systems": "要在版本中显示的操作系统",
     "ui_org_eclipse_sw360_disable_clearing_request_for_project_group": "禁用清算请求的项目组列表",

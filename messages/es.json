@@ -1720,6 +1720,8 @@
     "ui_custommap_release_roles": "Lista de roles personalizados para versiones",
     "ui_domains": "Lista de dominios permitidos para Proyectos",
     "ui_enable_add_license_info_to_release_button": "Habilite el botón 'Agregar información de licencia a la versión' en la vista de versión",
+    "Enable Manual License Editing on Release Edit Page": "Habilitar la edición manual de licencias en la página de edición de versiones",
+    "ui_enable_manual_license_editing_on_release_edit_page": "Permitir cambios manuales en los ID de licencias principales y otras al editar una versión",
     "ui_enable_security_vulnerability_monitoring": "Permitir habilitar el monitoreo de vulnerabilidades de seguridad para proyectos",
     "ui_operating_systems": "Sistemas operativos para mostrar en versiones",
     "ui_org_eclipse_sw360_disable_clearing_request_for_project_group": "Lista de grupos de proyectos para los cuales las solicitudes de compensación están deshabilitadas",

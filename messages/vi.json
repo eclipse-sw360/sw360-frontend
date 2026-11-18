@@ -1720,6 +1720,8 @@
     "ui_custommap_release_roles": "Danh sách vai trò tùy chỉnh cho các bản phát hành",
     "ui_domains": "Danh sách các miền được phép cho Dự án",
     "ui_enable_add_license_info_to_release_button": "Bật nút 'Thêm thông tin giấy phép để phát hành' trong Chế độ xem bản phát hành",
+    "Enable Manual License Editing on Release Edit Page": "Bật chỉnh sửa giấy phép thủ công trên trang chỉnh sửa bản phát hành",
+    "ui_enable_manual_license_editing_on_release_edit_page": "Cho phép thay đổi thủ công ID giấy phép chính và khác khi chỉnh sửa bản phát hành",
     "ui_enable_security_vulnerability_monitoring": "Cho phép bật Giám sát lỗ hổng bảo mật cho dự án",
     "ui_operating_systems": "Hệ điều hành sẽ hiển thị trong Bản phát hành",
     "ui_org_eclipse_sw360_disable_clearing_request_for_project_group": "Danh sách các nhóm dự án bị vô hiệu hóa yêu cầu xóa",
