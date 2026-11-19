@@ -1720,6 +1720,8 @@
     "ui_custommap_release_roles": "List of Custom Roles for Releases",
     "ui_domains": "List of domains allowed for Projects",
     "ui_enable_add_license_info_to_release_button": "Enable 'Add License Info to Release' button in Release View",
+    "Enable Manual License Editing on Release Edit Page": "Enable Manual License Editing on Release Edit Page",
+    "ui_enable_manual_license_editing_on_release_edit_page": "Allow manual changes to main and other license IDs when editing a release",
     "ui_enable_security_vulnerability_monitoring": "Allow enabling Security Vulnerability Monitoring for Projects",
     "ui_operating_systems": "Operating Systems to display in Releases",
     "ui_org_eclipse_sw360_disable_clearing_request_for_project_group": "List of Project Groups for which Clearing Requests are disabled",

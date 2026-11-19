@@ -83,6 +83,9 @@ const ReleaseSummary = ({
     const operatingSystemSuggestions = useConfigValue(UIConfigKeys.UI_OPERATING_SYSTEMS) as string[] | null
     const languagesSuggestions = useConfigValue(UIConfigKeys.UI_PROGRAMMING_LANGUAGES) as string[] | null
     const platformSuggestions = useConfigValue(UIConfigKeys.UI_SOFTWARE_PLATFORMS) as string[] | null
+    const manualReleaseLicenseEditingEnabled =
+        useConfigValue(UIConfigKeys.UI_ENABLE_MANUAL_LICENSE_EDITING_ON_RELEASE_EDIT_PAGE) !== false
+    const canEditReleaseLicenses = actionType !== ActionType.EDIT || manualReleaseLicenseEditingEnabled
 
     useEffect(() => {
         setSourceCodeDownloadUrlInput(releasePayload.sourceCodeDownloadurl ?? '')
@@ -456,23 +459,25 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control cursor-pointer'
-                                    data-bs-toggle='modal'
-                                    data-bs-target='#search_mainLicense_modal'
-                                    placeholder={t('Click to set Licenses')}
+                                    className={`form-control${canEditReleaseLicenses ? ' cursor-pointer' : ''}`}
+                                    data-bs-toggle={canEditReleaseLicenses ? 'modal' : undefined}
+                                    data-bs-target={canEditReleaseLicenses ? '#search_mainLicense_modal' : undefined}
+                                    placeholder={canEditReleaseLicenses ? t('Click to set Licenses') : ''}
                                     id='mainLicenseIds'
                                     aria-describedby='MainLicense'
                                     readOnly={true}
                                     name='mainLicenseIds'
                                     value={(releasePayload.mainLicenseIds ?? []).join(', ')}
-                                    onClick={handleClickSearchMainLicenses}
+                                    onClick={canEditReleaseLicenses ? handleClickSearchMainLicenses : undefined}
                                 />
-                                <LicensesDialog
-                                    show={dialogOpenMainLicenses}
-                                    setShow={setDialogOpenMainLicenses}
-                                    selectLicenses={setMainLicensesToPayload}
-                                    releaseLicenses={releasePayload.mainLicenseIds ?? []}
-                                />
+                                {canEditReleaseLicenses && (
+                                    <LicensesDialog
+                                        show={dialogOpenMainLicenses}
+                                        setShow={setDialogOpenMainLicenses}
+                                        selectLicenses={setMainLicensesToPayload}
+                                        releaseLicenses={releasePayload.mainLicenseIds ?? []}
+                                    />
+                                )}
                             </div>
                         </div>
                         <div className='row pt-2 pb-2 with-divider'>
@@ -485,23 +490,25 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control cursor-pointer'
-                                    data-bs-toggle='modal'
-                                    data-bs-target='#search_licenses_modal'
-                                    placeholder={t('Click to set Licenses')}
+                                    className={`form-control${canEditReleaseLicenses ? ' cursor-pointer' : ''}`}
+                                    data-bs-toggle={canEditReleaseLicenses ? 'modal' : undefined}
+                                    data-bs-target={canEditReleaseLicenses ? '#search_licenses_modal' : undefined}
+                                    placeholder={canEditReleaseLicenses ? t('Click to set Licenses') : ''}
                                     id='otherLicenseIds'
                                     aria-describedby='License'
                                     readOnly={true}
                                     name='otherLicenseIds'
-                                    onClick={handleClickSearchOtherLicenses}
+                                    onClick={canEditReleaseLicenses ? handleClickSearchOtherLicenses : undefined}
                                     value={(releasePayload.otherLicenseIds ?? []).join(', ')}
                                 />
-                                <LicensesDialog
-                                    show={dialogOpenOtherLicenses}
-                                    setShow={setDialogOpenOtherLicenses}
-                                    selectLicenses={setOtherLicensesToPayload}
-                                    releaseLicenses={releasePayload.otherLicenseIds ?? []}
-                                />
+                                {canEditReleaseLicenses && (
+                                    <LicensesDialog
+                                        show={dialogOpenOtherLicenses}
+                                        setShow={setDialogOpenOtherLicenses}
+                                        selectLicenses={setOtherLicensesToPayload}
+                                        releaseLicenses={releasePayload.otherLicenseIds ?? []}
+                                    />
+                                )}
                             </div>
                             <div className='col-lg-4'>
                                 <label
