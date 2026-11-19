@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
+import DeletePackageLinkConfirmationModal from '@/app/[locale]/projects/components/UnlinkPackageDialog'
 import { SW360Table } from '@/components/sw360'
 import LinkPackagesModal from '@/components/sw360/LinkedPackagesModal/LinkPackagesModal'
 import { LinkedPackageData } from '@/object-types'
@@ -38,6 +39,13 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
             LinkedPackageData,
         ][]
     >([])
+    const [packageToBeDeleted, setPackageToBeDeleted] = useState<
+        | [
+              string,
+              LinkedPackageData,
+          ]
+        | undefined
+    >(undefined)
 
     const handleComments = useCallback(
         (packageId: string, updatedComment: string) => {
@@ -56,29 +64,6 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
                         _newLinkedPackageData[pid] = {
                             ...p,
                         }
-                    }
-                }
-                return {
-                    ...prev,
-                    packageIds: _newLinkedPackageData,
-                }
-            })
-        },
-        [
-            setPayload,
-        ],
-    )
-
-    const handleDeletePackage = useCallback(
-        (packageId: string) => {
-            setPayload((prev) => {
-                const _newLinkedPackageData: {
-                    [key: string]: LinkedPackageData
-                } = {}
-
-                for (const [pid, p] of Object.entries(prev.packageIds ?? {})) {
-                    if (pid !== packageId) {
-                        _newLinkedPackageData[pid] = p
                     }
                 }
                 return {
@@ -173,7 +158,7 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
                         <span className='d-inline-block'>
                             <BsFillTrashFill
                                 className='btn-icon'
-                                onClick={() => handleDeletePackage(row.original[0])}
+                                onClick={() => setPackageToBeDeleted(row.original)}
                                 style={{
                                     color: 'gray',
                                     fontSize: '18px',
@@ -188,7 +173,6 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
         [
             t,
             handleComments,
-            handleDeletePackage,
         ],
     )
 
@@ -218,6 +202,11 @@ export default function LinkedPackages<T extends HasLinkedPackages>({ payload, s
                 setPayload={setPayload}
                 show={showLinkedPackagesModal}
                 setShow={setShowLinkedPackagesModal}
+            />
+            <DeletePackageLinkConfirmationModal
+                pkg={packageToBeDeleted}
+                setPackage={setPackageToBeDeleted}
+                setPayload={setPayload}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>
