@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { FaTrashAlt } from 'react-icons/fa'
+import DeleteProjectLinkConfirmationModal from '@/app/[locale]/projects/components/UnlinkProjectDialog'
 import { SW360Table } from '@/components/sw360'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import { LinkedProjectData, ProjectPayload, ProjectRelationship } from '@/object-types'
@@ -39,6 +40,13 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
             LinkedProjectData,
         ][]
     >([])
+    const [projectToBeDeleted, setProjectToBeDeleted] = useState<
+        | [
+              string,
+              LinkedProjectData,
+          ]
+        | undefined
+    >(undefined)
 
     const updateProjectData = useCallback(
         (projectId: string, updatedProjectRelationship: string) => {
@@ -79,24 +87,6 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                             enableSvm: !prev.linkedProjects[projectId].enableSvm,
                         },
                     },
-                }
-            })
-        },
-        [
-            setProjectPayload,
-        ],
-    )
-
-    const handleClickDelete = useCallback(
-        (projectId: string) => {
-            setProjectPayload((prev) => {
-                if (!prev.linkedProjects) return prev
-
-                const { [projectId]: _, ...remainingProjects } = prev.linkedProjects
-
-                return {
-                    ...prev,
-                    linkedProjects: remainingProjects,
                 }
             })
         },
@@ -213,7 +203,7 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                                 border: 'none',
                                 minWidth: 'fit-content',
                             }}
-                            onClick={() => handleClickDelete(row.original[0])}
+                            onClick={() => setProjectToBeDeleted(row.original)}
                             title={t('Delete')}
                             aria-label={t('Delete linked project')}
                         >
@@ -230,7 +220,6 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
             t,
             updateProjectData,
             handleEnableSvm,
-            handleClickDelete,
         ],
     )
 
@@ -260,6 +249,11 @@ export default function LinkedProjects({ projectPayload, setProjectPayload }: Pr
                 show={showLinkedProjectsModal}
                 setShow={setShowLinkedProjectsModal}
                 mode='SET'
+            />
+            <DeleteProjectLinkConfirmationModal
+                project={projectToBeDeleted}
+                setProject={setProjectToBeDeleted}
+                setProjectPayload={setProjectPayload}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>
