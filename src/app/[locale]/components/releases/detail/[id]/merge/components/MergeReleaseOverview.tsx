@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useConfigValue, useUiConfigContext } from '@/contexts'
 import { useDocumentTitle } from '@/hooks'
 import {
     Attachment,
@@ -24,6 +25,7 @@ import {
     Release,
     ReleaseDetail,
     ReleaseUsages,
+    UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
 import MessageService from '@/services/message.service'
@@ -63,6 +65,8 @@ function MergeReleaseOverview({
 }>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
+    const componentAndReleaseMergeEnabled = useConfigValue(UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE) !== false
+    const { isLoading: isUiConfigLoading } = useUiConfigContext()
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
     const [targetRelease, setTargetRelease] = useState<null | ReleaseDetail>(null)
     const [sourceRelease, setSourceRelease] = useState<null | ReleaseDetail>(null)
@@ -74,6 +78,17 @@ function MergeReleaseOverview({
     const [targetAttachments, setTargetAttachments] = useState<Array<Attachment>>([])
     const [releaseUsages, setReleaseUsages] = useState<null | ReleaseUsages>(null)
     const [heavyUsage, setHeavyUsage] = useState(false)
+
+    useEffect(() => {
+        if (!isUiConfigLoading && !componentAndReleaseMergeEnabled) {
+            router.replace(`/components/releases/detail/${releaseId}`)
+        }
+    }, [
+        componentAndReleaseMergeEnabled,
+        isUiConfigLoading,
+        releaseId,
+        router,
+    ])
 
     const fetchData = useCallback(async (url: string) => {
         const response = await ApiUtils.GET(url)
@@ -98,6 +113,10 @@ function MergeReleaseOverview({
     )
 
     useEffect(() => {
+        if (isUiConfigLoading || !componentAndReleaseMergeEnabled) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
         ;(async () => {
@@ -131,10 +150,16 @@ function MergeReleaseOverview({
 
         return () => controller.abort()
     }, [
+        componentAndReleaseMergeEnabled,
+        isUiConfigLoading,
         releaseId,
     ])
 
     useEffect(() => {
+        if (isUiConfigLoading || !componentAndReleaseMergeEnabled) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
         ;(async () => {
@@ -161,6 +186,8 @@ function MergeReleaseOverview({
 
         return () => controller.abort()
     }, [
+        componentAndReleaseMergeEnabled,
+        isUiConfigLoading,
         releaseId,
     ])
 
@@ -254,7 +281,11 @@ function MergeReleaseOverview({
 
     return (
         <div className='mx-5 mt-3'>
-            {targetRelease ? (
+            {isUiConfigLoading || !componentAndReleaseMergeEnabled ? (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            ) : targetRelease ? (
                 <>
                     <div className='col-auto buttonheader-title mb-3'>
                         {t.rich('MERGE_INTO_TARGET', {

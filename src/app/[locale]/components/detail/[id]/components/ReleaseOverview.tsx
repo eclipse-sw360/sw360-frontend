@@ -24,6 +24,7 @@ import { BsClipboard, BsDownload, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil 
 import fossologyIcon from '@/assets/images/fossology.svg'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import FossologyClearing from '@/components/sw360/FossologyClearing/FossologyClearing'
+import { useConfigValue } from '@/contexts'
 import {
     Attachment,
     Embedded,
@@ -32,6 +33,7 @@ import {
     PageableQueryParam,
     PaginationMeta,
     ReleaseLink,
+    UIConfigKeys,
     UserGroupType,
 } from '@/object-types'
 import DownloadService from '@/services/download.service'
@@ -49,6 +51,7 @@ interface Props {
 
 const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Props): ReactNode => {
     const t = useTranslations('default')
+    const componentAndReleaseMergeEnabled = useConfigValue(UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE) !== false
     const [search, setSearch] = useState<{
         searchText: string
         luceneSearch?: boolean
@@ -286,14 +289,16 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                                     onClick={() => handleLinkToProject(id)}
                                 />
                             </OverlayTrigger>
-                            <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
-                                <Link href={`/components/releases/detail/${id}/merge`}>
-                                    <BsGit
-                                        size={20}
-                                        className='btn-icon'
-                                    />
-                                </Link>
-                            </OverlayTrigger>
+                            {componentAndReleaseMergeEnabled && (
+                                <OverlayTrigger overlay={<Tooltip>{t('Merge')}</Tooltip>}>
+                                    <Link href={`/components/releases/detail/${id}/merge`}>
+                                        <BsGit
+                                            size={20}
+                                            className='btn-icon'
+                                        />
+                                    </Link>
+                                </OverlayTrigger>
+                            )}
                             <OverlayTrigger overlay={<Tooltip>{t('Delete')}</Tooltip>}>
                                 <span className='d-inline-block'>
                                     <BsFillTrashFill

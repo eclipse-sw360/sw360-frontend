@@ -333,6 +333,21 @@ const FrontEndConfigs = (): JSX.Element => {
                                     </td>
                                     <td>{t('ui_enable_add_license_info_to_release_button')}</td>
                                 </tr>
+                                <tr id='ui-enable-component-and-release-merge'>
+                                    <td className='align-middle fw-bold'>{t('Enable Component and Release Merge')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            checked={
+                                                currentUiConfig[UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE] ===
+                                                'true'
+                                            }
+                                            propKey={UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE}
+                                        />
+                                    </td>
+                                    <td>{t('ui_enable_component_and_release_merge')}</td>
+                                </tr>
                                 <tr id='ui-custommap-release-roles'>
                                     <td className='align-middle fw-bold'>{t('Release Roles')}</td>
                                     <td>
