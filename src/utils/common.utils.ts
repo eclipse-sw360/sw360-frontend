@@ -38,7 +38,7 @@ const isNullEmptyOrUndefinedString = (str: string | undefined | null): str is nu
 }
 
 interface UrlWithParams {
-    [key: string]: string | string[]
+    [key: string]: string | number | boolean | (string | number | boolean | null | undefined)[] | null | undefined
 }
 
 /**
@@ -57,11 +57,11 @@ const createUrlWithParams = (url: string, params: UrlWithParams): string => {
         if (Array.isArray(value)) {
             value.forEach((item) => {
                 if (item !== undefined && item !== null && item !== '') {
-                    queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`)
+                    queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(item))}`)
                 }
             })
-        } else {
-            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        } else if (value !== undefined && value !== null && value !== '') {
+            queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
         }
     })
 
@@ -69,7 +69,8 @@ const createUrlWithParams = (url: string, params: UrlWithParams): string => {
         return url // No parameters to add
     }
 
-    return `${url}?${queryParts.join('&')}`
+    const separator = url.includes('?') ? (url.endsWith('?') || url.endsWith('&') ? '' : '&') : '?'
+    return `${url}${separator}${queryParts.join('&')}`
 }
 
 /**
