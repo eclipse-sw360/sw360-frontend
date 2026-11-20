@@ -545,6 +545,7 @@ export default function TreeView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Component Type')}
+                                closeOnChange
                             />
                         </>
                     )
@@ -717,6 +718,7 @@ export default function TreeView({
                                 show={showFilter}
                                 setShow={setShowFilter}
                                 header={t('Release Clearing State')}
+                                closeOnChange
                             />
                         </>
                     )

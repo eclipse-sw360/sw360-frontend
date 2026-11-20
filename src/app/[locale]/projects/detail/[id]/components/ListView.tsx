@@ -404,6 +404,7 @@ export default function ListView({
                                 setShow={setShowFilter}
                                 header={t('Component Type')}
                                 resetPaginationParams={() => table.resetPagination()}
+                                closeOnChange
                             />
                         </>
                     )
@@ -547,6 +548,7 @@ export default function ListView({
                                 setShow={setShowFilter}
                                 header={t('Release Clearing State')}
                                 resetPaginationParams={() => table.resetPagination()}
+                                closeOnChange
                             />
                         </>
                     )
