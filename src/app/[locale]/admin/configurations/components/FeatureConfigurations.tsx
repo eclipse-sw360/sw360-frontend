@@ -21,6 +21,7 @@ import { ConfigKeys, Configuration, ConfigurationContainers } from '@/object-typ
 import MessageService from '@/services/message.service'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { isVulnerabilityFeatureEnabled } from '@/utils/vulnerabilityFeature.utils'
 import AttachmentStorageConfigurations from './AttachmentStorageConfigurations'
 import MailConfigurations from './MailConfigurations'
 import OnOffSwitch from './OnOffSwitch'
@@ -231,6 +232,20 @@ const FeatureConfigurations = (): JSX.Element => {
                                         />
                                     </td>
                                     <td className='align-middle'>{t('projects_closed_update_strict_description')}</td>
+                                </tr>
+                                <tr id='vulnerability-feature-enabled'>
+                                    <td className='align-middle fw-bold'>{t('Enable Vulnerability Feature')}</td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentConfig={setCurrentConfig}
+                                            checked={isVulnerabilityFeatureEnabled(
+                                                currentConfig[ConfigKeys.IS_VULNERABILITY_FEATURE_ENABLED],
+                                            )}
+                                            propKey={ConfigKeys.IS_VULNERABILITY_FEATURE_ENABLED}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('vulnerability_feature_enabled_description')}</td>
                                 </tr>
                                 <tr id='admin-private-access-enabled'>
                                     <td className='align-middle fw-bold'>{t('Enable Admin Private Access')}</td>

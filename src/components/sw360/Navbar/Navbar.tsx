@@ -18,6 +18,7 @@ import { type FormEvent, type JSX, useState } from 'react'
 import { Navbar as BSNavbar, Container, Form, Nav, NavDropdown } from 'react-bootstrap'
 import { useConfigKeyValue } from '@/contexts'
 import { ConfigKeys, NavList } from '@/object-types'
+import { isVulnerabilityFeatureEnabled } from '@/utils/vulnerabilityFeature.utils'
 
 function Navbar(): JSX.Element {
     const router = useRouter()
@@ -35,6 +36,14 @@ function Navbar(): JSX.Element {
     // Filter out Packages item if feature is disabled
     if (!isPackageFeatureEnabled) {
         navlist = navlist.filter((item) => item.id !== 'packages')
+    }
+
+    const isVulnerabilityFeatureVisible = isVulnerabilityFeatureEnabled(
+        useConfigKeyValue(ConfigKeys.IS_VULNERABILITY_FEATURE_ENABLED),
+    )
+
+    if (!isVulnerabilityFeatureVisible) {
+        navlist = navlist.filter((item) => item.id !== 'vulnerabilities')
     }
 
     const getLocalizedPath = (path: string) => {
