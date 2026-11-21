@@ -11,6 +11,10 @@ name: Build
 
 on:
   pull_request:
+    paths-ignore:
+      - Dockerfile
+      - docker-compose*.yml
+      - .github/workflows/docker_deploy.yml
   workflow_dispatch:
 
 permissions:
@@ -18,7 +22,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  build:
+  build-and-test:
+    name: Frontend Build and Test
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -91,3 +96,20 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             dist/sw360-frontend-*.tgz
+
+  build:
+    name: build
+    needs: [build-and-test]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check build result
+        run: |
+          result="${{ needs.build-and-test.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "✅ Required check passed (build result: $result)"
+            exit 0
+          else
+            echo "❌ Required check failed (build result: $result)"
+            exit 1
+          fi
