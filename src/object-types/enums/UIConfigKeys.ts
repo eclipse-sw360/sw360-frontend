@@ -19,6 +19,7 @@ export enum UIConfigKeys {
     UI_CUSTOM_WELCOME_PAGE_GUIDELINE = 'ui.custom.welcome.page.guideline',
     UI_PROJECT_TAG = 'ui.project.tag',
     UI_ENABLE_ADD_LICENSE_INFO_TO_RELEASE_BUTTON = 'ui.enable.add.license.info.to.release.button',
+    UI_ENABLE_COMPONENT_AND_RELEASE_MERGE = 'ui.enable.component.and.release.merge',
     UI_PROGRAMMING_LANGUAGES = 'ui.programming.languages',
     UI_CUSTOMMAP_RELEASE_ROLES = 'ui.custommap.release.roles',
     UI_SOFTWARE_PLATFORMS = 'ui.software.platforms',

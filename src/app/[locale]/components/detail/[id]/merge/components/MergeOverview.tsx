@@ -16,8 +16,9 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
+import { useConfigValue, useUiConfigContext } from '@/contexts'
 import { useDocumentTitle } from '@/hooks'
-import { Component, ErrorDetails, MergeOrSplitActionType, UserGroupType } from '@/object-types'
+import { Component, ErrorDetails, MergeOrSplitActionType, UIConfigKeys, UserGroupType } from '@/object-types'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
@@ -52,12 +53,25 @@ function MergeOverview({
 }>): ReactNode {
     const router = useRouter()
     const t = useTranslations('default')
+    const componentAndReleaseMergeEnabled = useConfigValue(UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE) !== false
+    const { isLoading: isUiConfigLoading } = useUiConfigContext()
     const [mergeState, setMergeState] = useState<MergeOrSplitActionType>(MergeOrSplitActionType.CHOOSE_SOURCE)
     const [targetComponent, setTargetComponent] = useState<null | Component>(null)
     const [sourceComponent, setSourceComponent] = useState<null | Component>(null)
     const [finalComponentPayload, setFinalComponentPayload] = useState<null | Component>(null)
     const [err, setErr] = useState<null | string>(null)
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (!isUiConfigLoading && !componentAndReleaseMergeEnabled) {
+            router.replace(`/components/detail/${id}`)
+        }
+    }, [
+        componentAndReleaseMergeEnabled,
+        id,
+        isUiConfigLoading,
+        router,
+    ])
 
     const handleMergeComponent = async () => {
         try {
@@ -88,6 +102,10 @@ function MergeOverview({
     useDocumentTitle(targetComponent?.name ? CommonUtils.formatDocumentTitle(targetComponent.name) : undefined)
 
     useEffect(() => {
+        if (isUiConfigLoading || !componentAndReleaseMergeEnabled) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -116,12 +134,18 @@ function MergeOverview({
 
         return () => controller.abort()
     }, [
+        componentAndReleaseMergeEnabled,
         id,
+        isUiConfigLoading,
     ])
 
     return (
         <div className='mx-5 mt-3'>
-            {targetComponent ? (
+            {isUiConfigLoading || !componentAndReleaseMergeEnabled ? (
+                <div className='col-12 text-center'>
+                    <Spinner className='spinner' />
+                </div>
+            ) : targetComponent ? (
                 <>
                     <div className='col-auto buttonheader-title mb-3'>
                         {t.rich('MERGE_INTO', {

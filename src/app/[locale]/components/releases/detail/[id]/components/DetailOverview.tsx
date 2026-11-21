@@ -26,7 +26,7 @@ import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import { PageButtonHeader } from '@/components/sw360'
-import { useConfigKeyValue } from '@/contexts'
+import { useConfigKeyValue, useConfigValue } from '@/contexts'
 import {
     LAST_RELEASE_COMPONENT_ID_KEY,
     RELEASE_NOT_FOUND_WARNING_KEY,
@@ -48,6 +48,7 @@ import {
     ReleaseLink,
     ReleaseTabIds,
     SrcFileList,
+    UIConfigKeys,
     User,
     UserGroupType,
     VulnerabilitiesVerificationState,
@@ -76,6 +77,7 @@ interface Props {
 
 const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode => {
     const t = useTranslations('default')
+    const componentAndReleaseMergeEnabled = useConfigValue(UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE) !== false
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -403,6 +405,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
             type: 'secondary',
             name: t('Merge'),
             hidden:
+                !componentAndReleaseMergeEnabled ||
                 userIdentity?.userGroup === UserGroupType.SECURITY_USER ||
                 userIdentity?.userGroup === UserGroupType.USER,
         },
