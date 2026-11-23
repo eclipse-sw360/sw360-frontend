@@ -12,7 +12,7 @@ import AddKeyValue from './AddKeyValue/AddKeyValue'
 import AdvancedSearch from './AdvancedSearch/AdvancedSearch'
 import AuthScreen from './AuthScreen/AuthScreen'
 import Breadcrumb from './Breadcrumb/Breadcrumb'
-import EnumValueWithToolTip from './EnumValueWithToolTip/EnumValueWIthToolTip'
+import EccPrintButton from './EccPrintButton/EccPrintButton'
 import Footer from './Footer/Footer'
 import FossologyClearing from './FossologyClearing/FossologyClearing'
 import GlobalMessages from './GlobalMessages'
@@ -28,7 +28,7 @@ import ProfileDropdown from './ProfileDropdown/ProfileDropdown'
 import QuickFilter from './QuickFilter/QuickFilter'
 import SearchReleasesModal from './SearchReleasesModal'
 import SelectUsersDialog from './SearchUsersDialog/SelectUsersDialog'
-import SearchUsersModal from './SearchUsersModal//SearchUsersModal'
+import SearchUsersModal from './SearchUsersModal/SearchUsersModal'
 import VendorDialog from './SearchVendorsModal/VendorDialog'
 import SelectCountry from './SelectCountry/SelectCountry'
 import ShowInfoOnHover from './ShowInfoOnHover/ShowInfoOnHover'
@@ -53,7 +53,7 @@ export {
     Breadcrumb,
     ClientSidePageSizeSelector,
     ClientSideTableFooter,
-    EnumValueWithToolTip,
+    EccPrintButton,
     FilterComponent,
     Footer,
     FossologyClearing,

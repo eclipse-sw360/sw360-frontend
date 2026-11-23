@@ -13,17 +13,21 @@ import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTa
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { FaTrashAlt } from 'react-icons/fa'
+import DeleteReleseLinkConfirmationModal from '@/app/[locale]/projects/components/UnlinkReleaseDialog'
 import { SW360Table } from '@/components/sw360'
 import SearchReleasesModal from '@/components/sw360/SearchReleasesModal'
-import { LinkedReleaseData, ProjectPayload, ReleaseDetail } from '@/object-types'
+import { LinkedReleaseData, MainlineState, ProjectPayload, ReleaseDetail, ReleaseRelationship } from '@/object-types'
+import CommonUtils from '@/utils/common.utils'
 
 interface Props {
+    existingReleaseData?: Record<string, LinkedReleaseData>
     projectPayload: ProjectPayload
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     isReleaseLoading?: boolean
 }
 
 export default function LinkedReleases({
+    existingReleaseData,
     projectPayload,
     setProjectPayload,
     isReleaseLoading = false,
@@ -42,6 +46,13 @@ export default function LinkedReleases({
             LinkedReleaseData,
         ][]
     >([])
+    const [releaseToBeDeleted, setReleaseToBeDeleted] = useState<
+        | [
+              string,
+              LinkedReleaseData,
+          ]
+        | undefined
+    >(undefined)
 
     const updateReleaseRelation = useCallback(
         (releaseId: string, updatedReleaseRelation: string) => {
@@ -54,7 +65,10 @@ export default function LinkedReleases({
                         ...prev.linkedReleases,
                         [releaseId]: {
                             ...prev.linkedReleases[releaseId],
-                            releaseRelation: updatedReleaseRelation,
+                            releaseRelation:
+                                Object.values(ReleaseRelationship).find(
+                                    (relation) => relation === updatedReleaseRelation,
+                                ) ?? ReleaseRelationship.CONTAINED,
                         },
                     },
                 }
@@ -76,7 +90,9 @@ export default function LinkedReleases({
                         ...prev.linkedReleases,
                         [releaseId]: {
                             ...prev.linkedReleases[releaseId],
-                            mainlineState: updatedProjectMainlineState,
+                            mainlineState:
+                                Object.values(MainlineState).find((state) => state === updatedProjectMainlineState) ??
+                                MainlineState.OPEN,
                         },
                     },
                 }
@@ -109,24 +125,6 @@ export default function LinkedReleases({
         ],
     )
 
-    const handleClickDelete = useCallback(
-        (releaseId: string) => {
-            setProjectPayload((prev) => {
-                if (!prev.linkedReleases) return prev
-
-                const { [releaseId]: _, ...remainingReleases } = prev.linkedReleases
-
-                return {
-                    ...prev,
-                    linkedReleases: remainingReleases,
-                }
-            })
-        },
-        [
-            setProjectPayload,
-        ],
-    )
-
     const handleSelectReleases = useCallback(
         (selectedReleases: ReleaseDetail[]) => {
             const newLinkedReleases: Record<string, LinkedReleaseData> = {}
@@ -135,8 +133,8 @@ export default function LinkedReleases({
                     newLinkedReleases[release.id] = {
                         name: release.name ?? '',
                         version: release.version ?? '',
-                        mainlineState: release.mainlineState ?? '',
-                        releaseRelation: 'UNKNOWN',
+                        mainlineState: release.mainlineState ?? MainlineState.OPEN,
+                        releaseRelation: ReleaseRelationship.UNKNOWN,
                         comment: '',
                     }
                 }
@@ -156,9 +154,23 @@ export default function LinkedReleases({
     )
 
     useEffect(() => {
-        const data = Object.entries(projectPayload.linkedReleases ?? {})
+        const linkedReleases = projectPayload.linkedReleases ?? {}
+        const data = Object.entries(linkedReleases).map(
+            ([releaseId, releaseData]) =>
+                [
+                    releaseId,
+                    {
+                        ...existingReleaseData?.[releaseId],
+                        ...releaseData,
+                    },
+                ] as [
+                    string,
+                    LinkedReleaseData,
+                ],
+        )
         setTableData(data)
     }, [
+        existingReleaseData,
         projectPayload.linkedReleases,
     ])
 
@@ -195,17 +207,22 @@ export default function LinkedReleases({
                             }}
                             required
                         >
-                            <option value='UNKNOWN'>{t('Unknown')}</option>
-                            <option value='CONTAINED'>{t('Contained')}</option>
-                            <option value='REFERRED'>{t('Related')}</option>
-                            <option value='DYNAMICALLY_LINKED'>{t('Dynamically linked')}</option>
-                            <option value='STATICALLY_LINKED'>{t('Statically linked')}</option>
-                            <option value='SIDE_BY_SIDE'>{t('Side by side')}</option>
-                            <option value='STANDALONE'>{t('Standalone')}</option>
-                            <option value='INTERNAL_USE'>{t('Internal use')}</option>
-                            <option value='OPTIONAL'>{t('Optional')}</option>
-                            <option value='TO_BE_REPLACED'>{t('To be replaced')}</option>
-                            <option value='CODE_SNIPPET'>{t('Code Snippet')}</option>
+                            {Object.values(ReleaseRelationship).map((rel) => {
+                                let tag = CommonUtils.Capitalize(rel)
+                                if (rel === ReleaseRelationship.REFERRED) {
+                                    tag = 'Related'
+                                }
+
+                                return (
+                                    <option
+                                        key={rel}
+                                        value={rel}
+                                        title={t(`release_relation_${rel ? rel.toLowerCase() : 'contained'}_tooltip`)}
+                                    >
+                                        {tag}
+                                    </option>
+                                )
+                            })}
                         </select>
                     </div>
                 ),
@@ -223,11 +240,15 @@ export default function LinkedReleases({
                             }}
                             required
                         >
-                            <option value='OPEN'>{t('Open')}</option>
-                            <option value='MAINLINE'>{t('Mainline')}</option>
-                            <option value='SPECIFIC'>{t('Specific')}</option>
-                            <option value='PHASEOUT'>{t('Phaseout')}</option>
-                            <option value='DENIED'>{t('Denied')}</option>
+                            {Object.values(MainlineState).map((state) => (
+                                <option
+                                    key={state}
+                                    value={state}
+                                    title={t(`mainline_state_${state ? state.toLowerCase() : 'open'}_tooltip`)}
+                                >
+                                    {CommonUtils.Capitalize(state)}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 ),
@@ -253,7 +274,7 @@ export default function LinkedReleases({
                                 border: 'none',
                                 minWidth: 'fit-content',
                             }}
-                            onClick={() => handleClickDelete(row.original[0])}
+                            onClick={() => setReleaseToBeDeleted(row.original)}
                             title={t('Delete')}
                             aria-label={t('Delete linked release')}
                         >
@@ -268,7 +289,6 @@ export default function LinkedReleases({
             updateReleaseRelation,
             updateProjectMainlineState,
             handleComments,
-            handleClickDelete,
         ],
     )
 
@@ -295,6 +315,11 @@ export default function LinkedReleases({
                 show={showLinkedReleasesModal}
                 setShow={setShowLinkedReleasesModal}
                 onSelect={handleSelectReleases}
+            />
+            <DeleteReleseLinkConfirmationModal
+                release={releaseToBeDeleted}
+                setRelease={setReleaseToBeDeleted}
+                setProjectPayload={setProjectPayload}
             />
             <div className='row mb-4'>
                 <div className='row header-1'>

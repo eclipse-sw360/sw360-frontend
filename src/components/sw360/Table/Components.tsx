@@ -7,9 +7,11 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+'use client'
+
 import { ColumnFiltersState, flexRender, Row, Table } from '@tanstack/react-table'
 import { useTranslations } from 'next-intl'
-import { ChangeEvent, Dispatch, Fragment, ReactNode, SetStateAction } from 'react'
+import { ChangeEvent, Dispatch, Fragment, ReactElement, ReactNode, SetStateAction, useRef } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import { BiSort } from 'react-icons/bi'
 import { BsCaretDownFill, BsCaretRightFill, BsSortDown, BsSortDownAlt } from 'react-icons/bs'
@@ -148,6 +150,7 @@ function TableFooterUI({
                 <ul className='pagination mb-0'>
                     <li className={`page-item ${currentPage === 0 ? 'disabled' : ''}`}>
                         <button
+                            type='button'
                             className='page-link'
                             onClick={() => goToPage(currentPage - 1)}
                             disabled={currentPage === 0}
@@ -171,6 +174,7 @@ function TableFooterUI({
                                 key={page}
                             >
                                 <button
+                                    type='button'
                                     className='page-link'
                                     onClick={() => goToPage(page)}
                                 >
@@ -182,6 +186,7 @@ function TableFooterUI({
 
                     <li className={`page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}`}>
                         <button
+                            type='button'
                             className='page-link'
                             onClick={() => goToPage(currentPage + 1)}
                             disabled={currentPage === totalPages - 1}
@@ -288,10 +293,12 @@ export function SW360Table<K>({
     table,
     showProcessing,
     noRecordsFoundMessage,
+    renderRow,
 }: {
     table: Table<K>
     showProcessing: boolean
     noRecordsFoundMessage?: string
+    renderRow?: (row: Row<K>, defaultRow: ReactElement) => ReactNode
 }): ReactNode {
     const t = useTranslations('default')
 
@@ -349,8 +356,8 @@ export function SW360Table<K>({
                             </td>
                         </tr>
                     )}
-                    {table.getRowModel().rows.map((row) =>
-                        row.meta?.isFullSpanRow ? (
+                    {table.getRowModel().rows.map((row) => {
+                        const defaultRow = row.meta?.isFullSpanRow ? (
                             <tr key={row.id}>
                                 <td colSpan={table.getVisibleLeafColumns().length}>
                                     <div className={table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''}>
@@ -376,8 +383,10 @@ export function SW360Table<K>({
                                     </td>
                                 ))}
                             </tr>
-                        ),
-                    )}
+                        )
+
+                        return renderRow ? renderRow(row, defaultRow) : defaultRow
+                    })}
                 </tbody>
             </table>
             {showProcessing && (
@@ -516,12 +525,23 @@ export function FilterComponent({
     )
 }
 
-export function TableSearch({
-    searchFunction,
-}: {
-    searchFunction: (event: React.KeyboardEvent<HTMLInputElement>) => void
-}) {
+export function TableSearch({ searchFunction }: { searchFunction: (value: string) => void }) {
     const t = useTranslations('default')
+
+    const debounceRef = useRef<NodeJS.Timeout | null>(null)
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current)
+        }
+
+        debounceRef.current = setTimeout(() => {
+            searchFunction?.(value)
+        }, 700)
+    }
+
     return (
         <div className='row mt-3'>
             <div className='col-auto px-0'>
@@ -536,7 +556,7 @@ export function TableSearch({
                 <input
                     className='form-control'
                     type='text'
-                    onKeyUp={searchFunction}
+                    onChange={handleChange}
                     id='table-search'
                 />
             </div>

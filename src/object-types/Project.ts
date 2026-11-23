@@ -9,15 +9,25 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
-import { Attachment, Links, Package, Release, User, Vendor } from '@/object-types'
+import {
+    Attachment,
+    Links,
+    MainlineState,
+    Package,
+    ProjectRelationship,
+    Release,
+    ReleaseRelationship,
+    User,
+    Vendor,
+} from '@/object-types'
 
 export interface ProjectLinkedRelease {
     createdBy: string
     release: string
-    mainlineState: string
+    mainlineState?: MainlineState
     comment: string
     createdOn: string
-    relation: string
+    relation?: ReleaseRelationship
 }
 
 export interface Project {
@@ -77,7 +87,7 @@ export interface Project {
     enableSvm?: boolean
     linkedProjects?: {
         project: string
-        relation: string
+        relation?: ProjectRelationship
         enableSvm: string
     }[]
     linkedReleases?: ProjectLinkedRelease[]

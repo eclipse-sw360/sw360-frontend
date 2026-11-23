@@ -9,10 +9,10 @@
 
 'use client'
 
-import { ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
-import { PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
+import { EccPrintButton, PageSizeSelector, QuickFilter, SW360Table, TableFooter } from 'next-sw360'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
@@ -29,18 +29,18 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 
 type EmbeddedECC = Embedded<ECCInterface, 'sw360:releases'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 function ECC(): ReactNode {
     const t = useTranslations('default')
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [searchText, setSearchText] = useState('')
 
     const columns = useMemo<ColumnDef<ECCInterface>[]>(
         () => [
             {
                 id: 'status',
                 header: t('Status'),
-                cell: ({ row }) => <>{Capitalize(row.original.eccInformation.eccStatus)}</>,
+                accessorFn: (row) => row.eccInformation?.eccStatus ?? '',
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.eccInformation.eccStatus)}</>,
                 meta: {
                     width: '10%',
                 },
@@ -48,6 +48,7 @@ function ECC(): ReactNode {
             {
                 id: 'releaseName',
                 header: t('Release name'),
+                accessorFn: (row) => row.name ?? '',
                 cell: ({ row }) => {
                     const { name, version } = row.original
                     return <div>{`${name} (${version})`}</div>
@@ -57,11 +58,19 @@ function ECC(): ReactNode {
                 },
             },
             {
+                id: 'eccn',
+                header: t('ECCN'),
+                accessorFn: (row) => row.eccInformation?.eccn ?? '',
+                cell: ({ row }) => <>{row.original.eccInformation?.eccn ?? ''}</>,
+                meta: {
+                    width: '10%',
+                },
+            },
+            {
                 id: 'version',
                 header: t('Release version'),
                 accessorKey: 'version',
                 cell: (info) => info.getValue(),
-                enableSorting: false,
                 meta: {
                     width: '10%',
                 },
@@ -69,6 +78,7 @@ function ECC(): ReactNode {
             {
                 id: 'creatorGroup',
                 header: t('Creator Group'),
+                accessorFn: (row) => row.eccInformation?.creatorGroup ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.creatorGroup}</>,
                 meta: {
                     width: '10%',
@@ -77,25 +87,28 @@ function ECC(): ReactNode {
             {
                 id: 'eccAssessor',
                 header: t('ECC Assessor'),
+                accessorFn: (row) => row.eccInformation?.assessorContactPerson ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessorContactPerson}</>,
                 meta: {
-                    width: '20%',
+                    width: '12%',
                 },
             },
             {
                 id: 'eccAssessorGroup',
                 header: t('ECC Assessor Group'),
+                accessorFn: (row) => row.eccInformation?.assessorDepartment ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessorDepartment}</>,
                 meta: {
-                    width: '20%',
+                    width: '18%',
                 },
             },
             {
                 id: 'ecc.eccAssessmentDate',
                 header: t('ECC Assessment Date'),
+                accessorFn: (row) => row.eccInformation?.assessmentDate ?? '',
                 cell: ({ row }) => <>{row.original.eccInformation.assessmentDate}</>,
                 meta: {
-                    width: '10%',
+                    width: '16%',
                 },
             },
         ],
@@ -137,7 +150,14 @@ function ECC(): ReactNode {
                 const queryUrl = CommonUtils.createUrlWithParams(
                     `ecc`,
                     Object.fromEntries(
-                        Object.entries(pageableQueryParam).map(([key, value]) => [
+                        Object.entries({
+                            ...pageableQueryParam,
+                            ...(searchText.trim()
+                                ? {
+                                      searchText: searchText.trim(),
+                                  }
+                                : {}),
+                        }).map(([key, value]) => [
                             key,
                             String(value),
                         ]),
@@ -162,27 +182,44 @@ function ECC(): ReactNode {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
+        searchText,
     ])
+
+    const handleQuickFilter = (value: string) => {
+        setSearchText(value)
+        setPageableQueryParam((prev) => ({
+            ...prev,
+            page: 0,
+        }))
+    }
 
     const table = useReactTable({
         data: memoizedData,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
 
         // table state config
         state: {
+            sorting,
             pagination: {
                 pageIndex: pageableQueryParam.page,
                 pageSize: pageableQueryParam.page_entries,
             },
         },
+        onSortingChange: setSorting,
 
         // server side pagination config
         manualPagination: true,
@@ -213,7 +250,10 @@ function ECC(): ReactNode {
             <div className='row'>
                 <div className='col-lg-2'>
                     <div className='row mb-3'>
-                        <QuickFilter id='vunerabilities.quickSearch' />
+                        <QuickFilter
+                            id='ecc.quickSearch'
+                            searchFunction={handleQuickFilter}
+                        />
                     </div>
                 </div>
                 <div className='col-lg-10'>
@@ -221,10 +261,29 @@ function ECC(): ReactNode {
                     <div className='mb-3'>
                         {pageableQueryParam && table && paginationMeta ? (
                             <>
-                                <PageSizeSelector
-                                    pageableQueryParam={pageableQueryParam}
-                                    setPageableQueryParam={setPageableQueryParam}
-                                />
+                                <div className='d-flex justify-content-between align-items-center mb-2'>
+                                    <PageSizeSelector
+                                        pageableQueryParam={pageableQueryParam}
+                                        setPageableQueryParam={setPageableQueryParam}
+                                    />
+                                    <EccPrintButton
+                                        title={t('ECC Overview')}
+                                        rows={table.getRowModel().rows.map((row) => row.original)}
+                                        headers={{
+                                            status: t('Status'),
+                                            releaseName: t('Release name'),
+                                            eccn: t('ECCN'),
+                                            releaseVersion: t('Release version'),
+                                            creatorGroup: t('Creator Group'),
+                                            eccAssessor: t('ECC Assessor'),
+                                            eccAssessorGroup: t('ECC Assessor Group'),
+                                            eccAssessmentDate: t('ECC Assessment Date'),
+                                        }}
+                                        noRowsMessage='No ECC rows available for the current page.'
+                                        label='Print'
+                                        className='py-1 px-2 ms-2'
+                                    />
+                                </div>
                                 <SW360Table
                                     table={table}
                                     showProcessing={showProcessing}

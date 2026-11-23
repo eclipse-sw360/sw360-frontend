@@ -420,7 +420,7 @@ export default function CreateOrEditPackage({
                             </label>
                             <input
                                 type='text'
-                                className='form-control'
+                                className='form-control cursor-pointer'
                                 id='createOrEditPackage.licenseIds'
                                 placeholder={t('Click to set Licenses')}
                                 value={packagePayload.licenseIds?.join(', ') ?? ''}

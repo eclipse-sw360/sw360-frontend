@@ -150,6 +150,34 @@ const convertObjectToMap = (data: { [k: string]: string }): InputKeyValue[] => {
 }
 
 /**
+ * Converts an array of key-value pairs to a map.
+ * Special handling for 'package-url' key: multiple entries with this key are
+ * combined into a single JSON array string instead of overwriting one another.
+ * @param list - The array of key-value pairs to convert.
+ * @returns A map of key-value pairs.
+ */
+const convertInputListToMap = (list: InputKeyValue[]): Map<string, string> => {
+    const map = new Map<string, string>()
+    const multiValues: string[] = []
+
+    list.forEach((item) => {
+        if (item.key === 'package-url') {
+            if (item.value.trim() !== '') {
+                multiValues.push(item.value)
+            }
+        } else {
+            map.set(item.key, item.value)
+        }
+    })
+
+    if (multiValues.length > 0) {
+        map.set('package-url', JSON.stringify(multiValues))
+    }
+
+    return map
+}
+
+/**
  * Converts an object with string keys and string array values to an array of key-value pairs.
  * @param data - The object to convert.
  * @returns An array of key-value pairs.
@@ -363,18 +391,43 @@ const formatObligationText = (text: string): string =>
  */
 const formatDocumentTitle = (name: string, version?: string | null): string => {
     const nameWithVersion = isNullEmptyOrUndefinedString(version) ? name : `${name} (${version})`
-    return `${nameWithVersion} | SW360`.trim()
+    return collapseSpaces(`${nameWithVersion} | SW360`)
 }
+
+/**
+ * Capitalizes the first letter of each word in a string, replacing underscores with spaces.
+ * Useful for formatting enum values or other strings.
+ * @param text The string to capitalize.
+ * @returns The capitalized string.
+ */
+const Capitalize = (text: string) => {
+    return text
+        ? text
+              .split('_')
+              .map((word) => word.charAt(0).toLocaleUpperCase() + word.substring(1).toLocaleLowerCase())
+              .join(' ')
+        : undefined
+}
+
+/**
+ * Trims leading/trailing whitespace and collapses repeated internal whitespace into a single space.
+ * Prevents sending malformed values (e.g. names with multiple consecutive spaces) to the backend.
+ * @param text - The string to collapse spaces in.
+ * @returns The string with collapsed spaces.
+ */
+const collapseSpaces = (text: string): string => text.trim().replace(/\s+/g, ' ')
 
 const CommonUtils = {
     isNullOrUndefined,
     isNullEmptyOrUndefinedString,
     createUrlWithParams,
+    Capitalize,
     isNullEmptyOrUndefinedArray,
     isCrAllowed,
     getIdFromUrl,
     getEmailsModerators,
     convertObjectToMap,
+    convertInputListToMap,
     convertObjectToMapRoles,
     convertRoles,
     truncateText,
@@ -385,6 +438,7 @@ const CommonUtils = {
     nullToEmptyString,
     formatObligationText,
     formatDocumentTitle,
+    collapseSpaces,
 }
 
 export default CommonUtils

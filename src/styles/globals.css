@@ -320,6 +320,37 @@ body {
     text-decoration: none;
 }
 
+.ecc-print-page {
+    font-family: Arial, sans-serif;
+    margin: 24px;
+}
+
+.ecc-print-page h1 {
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.ecc-print-page table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ecc-print-page th,
+.ecc-print-page td {
+    border: 1px solid #d1d5db;
+    padding: 8px;
+    text-align: left;
+    font-size: 12px;
+}
+
+.ecc-print-page th {
+    background: #f3f4f6;
+}
+
+.ecc-print-page p {
+    font-size: 14px;
+}
+
 .loaded {
     opacity: 1;
     transition: all 0.2ms ease-in;
@@ -593,6 +624,10 @@ body {
     color: #f7941e;
 }
 
+.moderation_request_icon {
+    fill: #6c7a89;
+}
+
 .alert-warning {
     background-color: #fff4ec !important;
     color: #b95042 !important;
@@ -683,12 +718,25 @@ body {
     text-transform: none;
 }
 
+.tableSearchInput {
+    width: 250px !important;
+}
+
 .subscriptionBox {
     border: 1px solid #2e5aac;
     background-color: #eef2fa;
     color: #2e5aac;
     padding: 10px;
     text-align: center;
+    font-size: small;
+    border-radius: 5px;
+}
+
+.subscriptionBox-wide {
+    border: 1px solid #2e5aac;
+    background-color: #eef2fa;
+    color: #2e5aac;
+    padding: 10px;
     font-size: small;
     border-radius: 5px;
 }
@@ -722,7 +770,7 @@ body {
 }
 
 .overlay-badge {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .overlay-trigger {
@@ -1198,8 +1246,8 @@ a.text-primary {
     color: var(--sw360-primary-color) !important;
 }
 
-.cursor-pointer {
-    cursor: pointer;
+.form-control.cursor-pointer {
+    cursor: pointer !important;
 }
 
 .tooltip-inner {
@@ -1761,20 +1809,37 @@ input[checked] + .slider:before {
     transform: none !important;
 }
 
-.SCAN_AVAILABLE,
-.REPORT_AVAILABLE,
-.UNDER_CLEARING {
+/* Release clearing-state circle badges (used by the release version dropdown).
+   Scoped to .badge-circle so they don't collide with the unrelated, generically
+   named .APPROVED/.OPEN/.IN_PROGRESS/.REJECTED status classes used elsewhere
+   (e.g. ECC status), which previously overrode this badge's size/shape. */
+.badge-circle.SCAN_AVAILABLE,
+.badge-circle.REPORT_AVAILABLE,
+.badge-circle.UNDER_CLEARING,
+.badge-circle.INTERNAL_USE_SCAN_AVAILABLE {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.5rem;
     background-color: #b95000;
     color: #fff;
 }
 
-.APPROVED {
+.badge-circle.APPROVED {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.5rem;
     background-color: #287d3c;
     color: #fff;
+    /* Overrides the unscoped ECC ".APPROVED" rule's conflicting margin. */
+    margin: 0 5px 0 0;
 }
 
-.NEW_CLEARING,
-.SENT_TO_CLEARING_TOOL {
+.badge-circle.NEW,
+.badge-circle.NEW_CLEARING,
+.badge-circle.SENT_TO_CLEARING_TOOL {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.5rem;
     background-color: #da1414;
     color: #fff;
 }

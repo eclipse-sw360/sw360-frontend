@@ -30,9 +30,11 @@ import { useConfigValue } from '@/contexts'
 import {
     FilterOption,
     LicenseClearing,
+    MainlineState,
     NestedRows,
     Project,
     Release,
+    ReleaseRelationship,
     TypedEntity,
     UIConfigKeys,
     UserGroupType,
@@ -41,13 +43,10 @@ import { CommonUtils } from '@/utils'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import AddLicenseInfoToReleaseModal from './AddLicenseInfoToReleaseModal'
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 type TypedProject = TypedEntity<Project, 'project'>
 
 interface TreeViewRelease extends Release {
-    projectMainlineState?: string
+    projectMainlineState?: MainlineState | undefined
 }
 
 type TypedRelease = TypedEntity<TreeViewRelease, 'release'>
@@ -92,52 +91,16 @@ const typeFilterOptions: FilterOption[] = [
     },
 ]
 
-const relationFilterOptions: FilterOption[] = [
-    {
-        tag: 'Contained',
-        value: 'CONTAINED',
-    },
-    {
-        tag: 'Related',
-        value: 'REFERRED',
-    },
-    {
-        tag: 'Unknown',
-        value: 'UNKNOWN',
-    },
-    {
-        tag: 'Dynamically Linked',
-        value: 'DYNAMICALLY_LINKED',
-    },
-    {
-        tag: 'Statically Linked',
-        value: 'STATICALLY_LINKED',
-    },
-    {
-        tag: 'Side By Side',
-        value: 'SIDE_BY_SIDE',
-    },
-    {
-        tag: 'Standalone',
-        value: 'STANDALONE',
-    },
-    {
-        tag: 'Internal Use',
-        value: 'INTERNAL_USE',
-    },
-    {
-        tag: 'Optional',
-        value: 'OPTIONAL',
-    },
-    {
-        tag: 'To Be Replaced',
-        value: 'TO_BE_REPLACED',
-    },
-    {
-        tag: 'Code Snippet',
-        value: 'CODE_SNIPPET',
-    },
-]
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map((value) => {
+    let tag = CommonUtils.Capitalize(value)
+    if (value === ReleaseRelationship.REFERRED) {
+        tag = 'Related'
+    }
+    return {
+        tag: tag,
+        value: value,
+    } as FilterOption
+})
 
 const stateFilterOptions: FilterOption[] = [
     {
@@ -235,7 +198,7 @@ const comparatorReleaseMainlineState = (
             return ''
         }
 
-        return row.node.entity.mainlineState ?? ''
+        return row.node.entity.mainlineState ?? MainlineState.OPEN
     }
 
     const aState = getMainlineStateValue(a)
@@ -380,6 +343,7 @@ const buildTable = (
                 entity: {
                     ...release,
                     projectMainlineState: l.mainlineState,
+                    comment: l.comment,
                 },
             },
             children: [],
@@ -429,6 +393,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                     entity: {
                         ...release,
                         projectMainlineState: l.mainlineState,
+                        comment: l.comment,
                     },
                 },
                 children: [],
@@ -587,7 +552,9 @@ export default function TreeView({
                 cell: ({ row }) => {
                     if (row.original.node.type === 'project') {
                         return (
-                            <div className='text-center'>{Capitalize(row.original.node.entity.projectType ?? '')}</div>
+                            <div className='text-center'>
+                                {CommonUtils.Capitalize(row.original.node.entity.projectType ?? '')}
+                            </div>
                         )
                     } else {
                         const componentType = (row.original.node.entity as Release).componentType
@@ -628,12 +595,20 @@ export default function TreeView({
                             )
                             if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
                                 return (
-                                    <div className='text-center'>
-                                        {linkedRelease?.[0].relation &&
-                                            relationFilterOptions.filter(
-                                                (op) => op.value === linkedRelease?.[0].relation,
-                                            )[0].tag}
-                                    </div>
+                                    <OverlayTrigger
+                                        placement='top'
+                                        overlay={
+                                            <Tooltip>
+                                                {t(
+                                                    `release_relation_${linkedRelease?.[0].relation ? linkedRelease?.[0].relation.toLowerCase() : 'contained'}_tooltip`,
+                                                )}
+                                            </Tooltip>
+                                        }
+                                    >
+                                        <span className='text-center'>
+                                            {CommonUtils.Capitalize(linkedRelease?.[0].relation ?? '')}
+                                        </span>
+                                    </OverlayTrigger>
                                 )
                             }
                         } else {
@@ -642,11 +617,49 @@ export default function TreeView({
                             )
                             if (index !== -1) {
                                 return (
-                                    <div className='text-center'>
-                                        {Capitalize(memoizedLicenseClearing?.linkedReleases?.[index].relation ?? '')}
-                                    </div>
+                                    <OverlayTrigger
+                                        placement='top'
+                                        overlay={
+                                            <Tooltip>
+                                                {t(
+                                                    `release_relation_${memoizedLicenseClearing?.linkedReleases?.[index].relation ? memoizedLicenseClearing?.linkedReleases?.[index].relation.toLowerCase() : 'contained'}_tooltip`,
+                                                )}
+                                            </Tooltip>
+                                        }
+                                    >
+                                        <span className='text-center'>
+                                            {CommonUtils.Capitalize(
+                                                memoizedLicenseClearing?.linkedReleases?.[index].relation ?? '',
+                                            )}
+                                        </span>
+                                    </OverlayTrigger>
                                 )
                             }
+                        }
+                    } else if (row.original.node.type === 'project') {
+                        const { id: projectId } = row.original.node.entity
+                        const index = (memoizedLicenseClearing?.linkedProjects ?? []).findIndex(
+                            (rel) => rel.project.split('/').at(-1) === projectId,
+                        )
+                        if (index !== -1) {
+                            return (
+                                <OverlayTrigger
+                                    placement='top'
+                                    overlay={
+                                        <Tooltip>
+                                            {t(
+                                                `project_relation_${memoizedLicenseClearing?.linkedProjects?.[index].relation ? memoizedLicenseClearing?.linkedProjects?.[index].relation.toLowerCase() : 'contained'}_tooltip`,
+                                            )}
+                                        </Tooltip>
+                                    }
+                                >
+                                    <span className='text-center'>
+                                        {CommonUtils.Capitalize(
+                                            memoizedLicenseClearing?.linkedProjects?.[index].relation ?? '',
+                                        )}
+                                    </span>
+                                </OverlayTrigger>
+                            )
                         }
                     }
                 },
@@ -714,7 +727,9 @@ export default function TreeView({
                         return (
                             <div className='text-center'>
                                 <OverlayTrigger
-                                    overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state ?? '')}`}</Tooltip>}
+                                    overlay={
+                                        <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state ?? '')}`}</Tooltip>
+                                    }
                                 >
                                     {state === 'ACTIVE' ? (
                                         <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -724,7 +739,7 @@ export default function TreeView({
                                 </OverlayTrigger>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -745,7 +760,7 @@ export default function TreeView({
                             <div className='text-center'>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Release Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -787,9 +802,20 @@ export default function TreeView({
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
                         return (
-                            <div className='text-center'>
-                                {Capitalize(row.original.node.entity.mainlineState ?? '')}
-                            </div>
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `mainline_state_${row.original.node.entity.mainlineState ? row.original.node.entity.mainlineState.toLowerCase() : 'open'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(row.original.node.entity.mainlineState ?? '')}
+                                </span>
+                            </OverlayTrigger>
                         )
                     }
                 },
@@ -805,10 +831,22 @@ export default function TreeView({
                 enableColumnFilter: false,
                 cell: ({ row }) => {
                     if (row.original.node.type === 'release') {
+                        const projectMainlineState = (row.original.node.entity as TreeViewRelease).projectMainlineState
                         return (
-                            <div className='text-center'>
-                                {Capitalize((row.original.node.entity as TreeViewRelease).projectMainlineState ?? '')}
-                            </div>
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `mainline_state_${projectMainlineState ? projectMainlineState.toLowerCase() : 'open'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(projectMainlineState ?? '')}
+                                </span>
+                            </OverlayTrigger>
                         )
                     }
                 },
@@ -821,18 +859,22 @@ export default function TreeView({
                 header: t('Comment'),
                 enableColumnFilter: false,
                 cell: ({ row }) => {
-                    if (row.original.node.type === 'release') {
-                        const { id: releaseId } = row.original.node.entity
-                        const entity = row.getParentRow()?.original.node.entity as Project
-                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
-                            const linkedRelease = entity.linkedReleases.filter(
-                                (lr) => lr.release.split('/').at(-1) === releaseId,
-                            )
-                            if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
-                                return <div className='text-center'>{linkedRelease?.[0].comment}</div>
-                            }
-                        }
+                    if (row.original.node.type !== 'release') return null
+
+                    const comment = row.original.node.entity.comment ?? ''
+
+                    if (comment === '') {
+                        return <div className='text-center' />
                     }
+
+                    return (
+                        <OverlayTrigger
+                            placement='top'
+                            overlay={<Tooltip>{comment}</Tooltip>}
+                        >
+                            <span className='overlay-badge'>{CommonUtils.truncateText(comment, 10)}</span>
+                        </OverlayTrigger>
+                    )
                 },
                 meta: {
                     width: '8%',
@@ -935,9 +977,9 @@ export default function TreeView({
 
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) {
-            setIsDataReady(!isLoadingClearingData)
             return
         }
+        setIsDataReady(false)
         buildTable(setRowData, memoizedLicenseClearing, memoizedLinkedProjects, searchTerm, sort)
         // Mark data as ready only after setting row data
         setIsDataReady(true)

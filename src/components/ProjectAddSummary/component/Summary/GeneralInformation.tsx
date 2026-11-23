@@ -319,7 +319,7 @@ export default function GeneralInformation({
                         </label>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             id='addProjects.vendor'
                             placeholder={t('Click to set vendor')}
                             readOnly={true}

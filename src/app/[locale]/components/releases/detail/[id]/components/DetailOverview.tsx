@@ -13,7 +13,7 @@
 
 import { StatusCodes } from 'http-status-codes'
 import Link from 'next/link'
-import { notFound, useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { Col, Dropdown, ListGroup, Row, Tab } from 'react-bootstrap'
@@ -27,7 +27,12 @@ import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/Comp
 import LinkReleaseToProjectModal from '@/components/LinkReleaseToProjectModal/LinkReleaseToProjectModal'
 import { PageButtonHeader } from '@/components/sw360'
 import { useConfigKeyValue } from '@/contexts'
-import { useDocumentTitle } from '@/hooks'
+import {
+    LAST_RELEASE_COMPONENT_ID_KEY,
+    RELEASE_NOT_FOUND_WARNING_KEY,
+    redirectWithWarning,
+    useDocumentTitle,
+} from '@/hooks'
 import {
     Attachment,
     Changelogs,
@@ -52,6 +57,7 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -77,6 +83,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
+    const [releaseExists, setReleaseExists] = useState<boolean | null>(null)
     const [releasesSameComponent, setReleasesSameComponent] = useState<Array<ReleaseLink>>([])
     const [embeddedAttachments, setEmbeddedAttachments] = useState<Array<Attachment>>([])
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
@@ -142,8 +149,8 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         router.push(`?tab=${key}`)
     }
 
-    const fetchData = useCallback(async (url: string) => {
-        const response = await ApiUtils.GET(url)
+    const fetchData = useCallback(async (url: string, signal?: AbortSignal) => {
+        const response = await ApiUtils.GET(url, signal)
         if (response.status === StatusCodes.OK) {
             const data = (await response.json()) as ReleaseDetail &
                 EmbeddedReleaseLinks &
@@ -164,42 +171,57 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }
 
     useEffect(() => {
-        fetchData(`releases/${releaseId}`)
-            .then((release) => {
-                if (CommonUtils.isNullOrUndefined(release)) {
-                    notFound()
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        void (async () => {
+            try {
+                const response = await ApiUtils.GET(`releases/${releaseId}`, signal)
+
+                if (response.status === StatusCodes.NOT_FOUND) {
+                    setReleaseExists(false)
+                    const storedComponentId = window.sessionStorage.getItem(LAST_RELEASE_COMPONENT_ID_KEY)
+                    const targetPath = storedComponentId ? `/components/detail/${storedComponentId}` : '/components'
+
+                    redirectWithWarning(RELEASE_NOT_FOUND_WARNING_KEY, targetPath)
+                    return
                 }
 
-                setRelease(release)
-
-                setSubscribers(getSubcribersEmail(release))
-
-                if (
-                    !CommonUtils.isNullOrUndefined(release._embedded) &&
-                    !CommonUtils.isNullOrUndefined(release._embedded['sw360:attachments'])
-                ) {
-                    setEmbeddedAttachments(release._embedded['sw360:attachments'])
+                if (response.status === StatusCodes.UNAUTHORIZED) {
+                    dispatchSessionExpiredEvent()
+                    return
                 }
 
-                return release
-            })
-            .then((release: ReleaseDetail) => {
-                fetchData(`components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`)
-                    .then((embeddedReleaseLinks) => {
-                        if (embeddedReleaseLinks) {
-                            setReleasesSameComponent(
-                                embeddedReleaseLinks['_embedded']['sw360:releaseLinks']
-                                    .slice()
-                                    .sort((left, right) => left.version.localeCompare(right.version)),
-                            )
-                        }
+                if (response.status !== StatusCodes.OK) {
+                    const err = (await response.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: response.status,
                     })
-                    .catch((err) => console.error(err))
-            })
-            .catch((err) => console.error(err))
+                }
 
-        fetchData(`releases/${releaseId}/vulnerabilities`)
-            .then((vulnerabilities) => {
+                const release = (await response.json()) as ReleaseDetail
+                setReleaseExists(true)
+                setRelease(release)
+                window.sessionStorage.setItem(
+                    LAST_RELEASE_COMPONENT_ID_KEY,
+                    release._links['sw360:component'].href.split('/').at(-1) ?? '',
+                )
+                setSubscribers(getSubcribersEmail(release))
+                setEmbeddedAttachments(release._embedded?.['sw360:attachments'] ?? [])
+
+                const componentReleases = await fetchData(
+                    `components/${release._links['sw360:component'].href.split('/').at(-1)}/releases`,
+                    signal,
+                )
+                if (componentReleases) {
+                    setReleasesSameComponent(
+                        componentReleases['_embedded']['sw360:releaseLinks']
+                            .slice()
+                            .sort((left, right) => left.version.localeCompare(right.version)),
+                    )
+                }
+
+                const vulnerabilities = await fetchData(`releases/${releaseId}/vulnerabilities`, signal)
                 if (
                     vulnerabilities &&
                     !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
@@ -209,14 +231,22 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 } else {
                     setVulnerData([])
                 }
-            })
-            .catch((err) => console.error(err))
+            } catch (error) {
+                ApiUtils.reportError(error)
+            }
+        })()
+
+        return () => controller.abort()
     }, [
         fetchData,
         releaseId,
     ])
 
     useEffect(() => {
+        if (releaseExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -241,6 +271,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         return () => controller.abort()
     }, [
         releaseId,
+        releaseExists,
     ])
 
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
@@ -264,6 +295,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
+        if (releaseExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -308,14 +343,20 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
         releaseId,
+        releaseExists,
     ])
 
     const downloadBundle = async () => {
@@ -414,14 +455,14 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                 <ListGroup>
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.SUMMARY}
+                                        {...sidebarTabLinkProps(CommonTabIds.SUMMARY)}
                                     >
                                         <div className='my-2'>{t('Summary')}</div>
                                     </ListGroup.Item>
                                     {isSPDXFeatureEnabled && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.SPDX_DOCUMENT}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.SPDX_DOCUMENT)}
                                         >
                                             <div className='my-2'>{t('SPDX Document')}</div>
                                         </ListGroup.Item>
@@ -429,7 +470,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     {showLinkedReleases && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.LINKED_RELEASES}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.LINKED_RELEASES)}
                                         >
                                             <div className='my-2'>{t('Linked Releases')}</div>
                                         </ListGroup.Item>
@@ -437,20 +478,20 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     {isPackageFeatureEnabled && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.LINKED_PACKAGES}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.LINKED_PACKAGES)}
                                         >
                                             <div className='my-2'>{t('Linked Packages')}</div>
                                         </ListGroup.Item>
                                     )}
                                     <ListGroup.Item
                                         action
-                                        eventKey={ReleaseTabIds.CLEARING_DETAILS}
+                                        {...sidebarTabLinkProps(ReleaseTabIds.CLEARING_DETAILS)}
                                     >
                                         <div className='my-2'>{t('Clearing Details')}</div>
                                     </ListGroup.Item>
                                     <ListGroup.Item
                                         action
-                                        eventKey={ReleaseTabIds.ECC_DETAILS}
+                                        {...sidebarTabLinkProps(ReleaseTabIds.ECC_DETAILS)}
                                     >
                                         <div className='my-2'>
                                             {t('ECC Details')}{' '}
@@ -459,21 +500,21 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     </ListGroup.Item>
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.ATTACHMENTS}
+                                        {...sidebarTabLinkProps(CommonTabIds.ATTACHMENTS)}
                                     >
                                         <div className='my-2'>{t('Attachments')}</div>
                                     </ListGroup.Item>
                                     {release.componentType === 'COTS' && (
                                         <ListGroup.Item
                                             action
-                                            eventKey={ReleaseTabIds.COMMERCIAL_DETAILS}
+                                            {...sidebarTabLinkProps(ReleaseTabIds.COMMERCIAL_DETAILS)}
                                         >
                                             <div className='my-2'>{t('Commercial Details')}</div>
                                         </ListGroup.Item>
                                     )}
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.VULNERABILITIES}
+                                        {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
                                     >
                                         <div className='my-2'>
                                             {t('Vulnerabilities')}{' '}
@@ -487,7 +528,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                     </ListGroup.Item>
                                     <ListGroup.Item
                                         action
-                                        eventKey={CommonTabIds.CHANGE_LOG}
+                                        {...sidebarTabLinkProps(CommonTabIds.CHANGE_LOG)}
                                     >
                                         <div className='my-2'>{t('Change Log')}</div>
                                     </ListGroup.Item>
@@ -514,7 +555,10 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                     ]) => (
                                                         <Dropdown.Item
                                                             key={index}
-                                                            href={`/components/releases/detail/${item.id}`}
+                                                            onClick={(event) => {
+                                                                event.stopPropagation()
+                                                                router.push(`/components/releases/detail/${item.id}`)
+                                                            }}
                                                         >
                                                             <span
                                                                 className={`badge-circle ${item.clearingState ?? 'NEW'}`}

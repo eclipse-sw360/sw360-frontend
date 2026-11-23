@@ -26,7 +26,7 @@ import { notFound } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PaddedCell, SW360Table } from 'next-sw360'
 import { Dispatch, type JSX, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { AccessControl } from '@/components/AccessControl/AccessControl'
 import {
     Attachment,
@@ -52,9 +52,6 @@ type TypedAttachment = TypedEntity<Attachment, 'attachment'>
 type TypedRelease = TypedEntity<Release, 'release'>
 
 type TypedProject = TypedEntity<Project, 'project'>
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 function isLicenseInfoEnabled(type: string): boolean {
     const types = [
@@ -353,11 +350,16 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessingLinkedProjects(false)
+                if (!signal.aborted) {
+                    setShowProcessingLinkedProjects(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
     ])
@@ -433,11 +435,16 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessingAttachmentUsages(false)
+                if (!signal.aborted) {
+                    setShowProcessingAttachmentUsages(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
     ])
@@ -619,7 +626,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 return (
                                     <div className='text-center'>
                                         {id &&
-                                            Capitalize(
+                                            CommonUtils.Capitalize(
                                                 memoizedAttachmentUsages?.['releaseIdToUsage']?.[id]?.releaseRelation ??
                                                     '',
                                             )}
@@ -630,7 +637,7 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                                 return (
                                     <div className='text-center'>
                                         {id &&
-                                            Capitalize(
+                                            CommonUtils.Capitalize(
                                                 memoizedAttachmentUsages?.['linkedProjects']?.[id]
                                                     ?.projectRelationship ?? '',
                                             )}
@@ -1039,7 +1046,6 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
     }, [
         memoizedAttachmentUsages,
         memoizedLinkedProjects,
-        saveUsagesPayload,
         projectId,
         sort,
     ])
@@ -1066,6 +1072,46 @@ function AttachmentUsagesComponent({ projectId }: { projectId: string }): JSX.El
                         showProcessing={
                             showProcessingLinkedProjects || showProcessingAttachmentUsages || isTableBuilding
                         }
+                        renderRow={(row, defaultRow) => {
+                            if (row.original.node.type !== 'attachment') return defaultRow
+
+                            const attachment = row.original.node.entity
+                            const tooltipContent = [
+                                `Created On: ${attachment.createdOn ?? ''}`,
+                                `Status: ${attachment.checkStatus ?? ''}`,
+                                ...(attachment.checkedBy
+                                    ? [
+                                          `Checked By: ${attachment.checkedBy}`,
+                                      ]
+                                    : []),
+                                ...(attachment.checkedOn
+                                    ? [
+                                          `Checked On: ${attachment.checkedOn}`,
+                                      ]
+                                    : []),
+                            ].join('\n')
+
+                            return (
+                                <OverlayTrigger
+                                    key={row.id}
+                                    placement='top'
+                                    overlay={(tooltipProps) => (
+                                        <Tooltip {...tooltipProps}>
+                                            <span
+                                                className='text-start d-inline-block'
+                                                style={{
+                                                    whiteSpace: 'pre-line',
+                                                }}
+                                            >
+                                                {tooltipContent}
+                                            </span>
+                                        </Tooltip>
+                                    )}
+                                >
+                                    {defaultRow}
+                                </OverlayTrigger>
+                            )
+                        }}
                     />
                 ) : (
                     <div className='col-12 mt-1 text-center'>

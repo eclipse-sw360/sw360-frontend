@@ -134,7 +134,7 @@ export default function EditClearingDecision({
                     <td>
                         <input
                             type='text'
-                            className='form-control'
+                            className='form-control cursor-pointer'
                             id='editClearingRequest.clearingTeam'
                             readOnly={true}
                             name='clearingTeam'

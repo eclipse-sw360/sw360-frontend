@@ -23,7 +23,15 @@ import { ClientSidePageSizeSelector, ClientSideTableFooter, FilterComponent, SW3
 import { Dispatch, type JSX, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap'
 import { FaFile, FaPencilAlt } from 'react-icons/fa'
-import { FilterOption, LicenseClearing, Project, Release, TypedEntity } from '@/object-types'
+import {
+    FilterOption,
+    LicenseClearing,
+    MainlineState,
+    Project,
+    Release,
+    ReleaseRelationship,
+    TypedEntity,
+} from '@/object-types'
 import { CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 
@@ -32,17 +40,14 @@ interface Attachment {
     filename: string
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 interface ListViewProject extends Project {
     path?: string
 }
 
 interface ListViewRelease extends Release {
-    releaseRelation?: string
+    releaseRelation?: ReleaseRelationship
     path?: string
-    projectMainlineState?: string
+    projectMainlineState?: MainlineState
 }
 
 type TypedProject = TypedEntity<ListViewProject, 'project'>
@@ -83,52 +88,16 @@ const typeFilterOptions: FilterOption[] = [
     },
 ]
 
-const relationFilterOptions: FilterOption[] = [
-    {
-        tag: 'Contained',
-        value: 'CONTAINED',
-    },
-    {
-        tag: 'Related',
-        value: 'REFERRED',
-    },
-    {
-        tag: 'Unknown',
-        value: 'UNKNOWN',
-    },
-    {
-        tag: 'Dynamically Linked',
-        value: 'DYNAMICALLY_LINKED',
-    },
-    {
-        tag: 'Statically Linked',
-        value: 'STATICALLY_LINKED',
-    },
-    {
-        tag: 'Side By Side',
-        value: 'SIDE_BY_SIDE',
-    },
-    {
-        tag: 'Standalone',
-        value: 'STANDALONE',
-    },
-    {
-        tag: 'Internal Use',
-        value: 'INTERNAL_USE',
-    },
-    {
-        tag: 'Optional',
-        value: 'OPTIONAL',
-    },
-    {
-        tag: 'To Be Replaced',
-        value: 'TO_BE_REPLACED',
-    },
-    {
-        tag: 'Code Snippet',
-        value: 'CODE_SNIPPET',
-    },
-]
+const relationFilterOptions: FilterOption[] = Object.values(ReleaseRelationship).map((value) => {
+    let tag = CommonUtils.Capitalize(value)
+    if (value === ReleaseRelationship.REFERRED) {
+        tag = 'Related'
+    }
+    return {
+        tag: tag,
+        value: value,
+    } as FilterOption
+})
 
 const stateFilterOptions: FilterOption[] = [
     {
@@ -191,6 +160,7 @@ const extractLinkedProjectsAndTheirLinkedReleases = (
                     path: path.join(' -> '),
                     releaseRelation: l.relation,
                     projectMainlineState: l.mainlineState,
+                    comment: l.comment,
                 },
             })
         }
@@ -225,6 +195,7 @@ const extractLinkedReleases = (
                 path: path.join('->'),
                 releaseRelation: l.relation,
                 projectMainlineState: l.mainlineState,
+                comment: l.comment,
             },
         })
     }
@@ -266,6 +237,59 @@ const buildTable = (
     return finalData
 }
 
+const extractSearchFields = (entity: unknown): (string | number)[] => {
+    if (!entity || typeof entity !== 'object') return []
+    const anyEntity = entity as Record<string, unknown>
+
+    const mainLicenseIds = Array.isArray(anyEntity.mainLicenseIds) ? anyEntity.mainLicenseIds : []
+    const otherLicenseIds = Array.isArray(anyEntity.otherLicenseIds) ? anyEntity.otherLicenseIds : []
+    const comment = anyEntity.comment
+    const projectType = anyEntity.projectType
+    const componentType = anyEntity.componentType
+    const clearingState = anyEntity.clearingState
+    const state = anyEntity.state
+    const mainlineState = anyEntity.mainlineState
+    const name = anyEntity.name
+    const version = anyEntity.version
+    const path = anyEntity.path
+    const nameWithVersion =
+        typeof name === 'string' && typeof version === 'string' && version.length > 0
+            ? `${name} (${version})`
+            : undefined
+
+    return [
+        name,
+        version,
+        nameWithVersion,
+        projectType,
+        componentType,
+        clearingState,
+        state,
+        mainlineState,
+        comment,
+        path,
+        ...mainLicenseIds,
+        ...otherLicenseIds,
+    ].filter(Boolean) as (string | number)[]
+}
+
+const filterRows = (rows: (TypedProject | TypedRelease)[], searchTerm: string): (TypedProject | TypedRelease)[] => {
+    const lower = searchTerm.trim().toLowerCase()
+    if (!lower) return rows
+
+    // ignore spacing/parentheses differences, e.g. "Atest 1.0" should match the displayed "Atest (1.0)"
+    const normalize = (value: string) => value.toLowerCase().replace(/[()\s]/g, '')
+    const normalizedLower = normalize(lower)
+
+    const matches = (value: unknown): boolean => {
+        if (value === undefined || value === null) return false
+        const stringValue = String(value)
+        return stringValue.toLowerCase().includes(lower) || normalize(stringValue).includes(normalizedLower)
+    }
+
+    return rows.filter((row) => extractSearchFields(row.entity).some((f) => matches(f)))
+}
+
 export default function ListView({
     projectName,
     projectVersion,
@@ -287,6 +311,7 @@ export default function ListView({
 
     const [sorting, setSorting] = useState<SortingState>([])
     const [showFilter, setShowFilter] = useState<undefined | string>()
+    const [search, setSearch] = useState('')
 
     const [showProcessing, setShowProcessing] = useState(false)
     const [showModal, setShowModal] = useState(false)
@@ -309,6 +334,7 @@ export default function ListView({
         ],
     )
 
+    const [allRowData, setAllRowData] = useState<(TypedProject | TypedRelease)[]>([])
     const [rowData, setRowData] = useState<(TypedProject | TypedRelease)[]>([])
 
     useEffect(() => {
@@ -391,7 +417,11 @@ export default function ListView({
                 },
                 cell: ({ row }) => {
                     if (row.original.type === 'project') {
-                        return <div className='text-center'>{Capitalize(row.original.entity.projectType ?? '')}</div>
+                        return (
+                            <div className='text-center'>
+                                {CommonUtils.Capitalize(row.original.entity.projectType ?? '')}
+                            </div>
+                        )
                     } else {
                         const matchedOption = typeFilterOptions.find(
                             (op) => op.value === (row.original.entity as Release).componentType,
@@ -440,8 +470,46 @@ export default function ListView({
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
                         return (
-                            <div className='text-center'>{Capitalize(row.original.entity.releaseRelation ?? '')}</div>
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `release_relation_${row.original.entity.releaseRelation ? row.original.entity.releaseRelation.toLowerCase() : 'contained'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(row.original.entity.releaseRelation ?? '')}
+                                </span>
+                            </OverlayTrigger>
                         )
+                    } else if (row.original.type === 'project') {
+                        const { id: projectId } = row.original.entity
+                        const index = (memoizedLicenseClearing?.linkedProjects ?? []).findIndex(
+                            (rel) => rel.project.split('/').at(-1) === projectId,
+                        )
+                        if (index !== -1) {
+                            return (
+                                <OverlayTrigger
+                                    placement='top'
+                                    overlay={
+                                        <Tooltip>
+                                            {t(
+                                                `project_relation_${memoizedLicenseClearing?.linkedProjects?.[index].relation ? memoizedLicenseClearing?.linkedProjects?.[index].relation.toLowerCase() : 'contained'}_tooltip`,
+                                            )}
+                                        </Tooltip>
+                                    }
+                                >
+                                    <span className='text-center'>
+                                        {CommonUtils.Capitalize(
+                                            memoizedLicenseClearing?.linkedProjects?.[index].relation ?? '',
+                                        )}
+                                    </span>
+                                </OverlayTrigger>
+                            )
+                        }
                     }
                 },
                 meta: {
@@ -490,7 +558,9 @@ export default function ListView({
                         return (
                             <div className='text-center'>
                                 <OverlayTrigger
-                                    overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state ?? '')}`}</Tooltip>}
+                                    overlay={
+                                        <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state ?? '')}`}</Tooltip>
+                                    }
                                 >
                                     {state === 'ACTIVE' ? (
                                         <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -500,7 +570,7 @@ export default function ListView({
                                 </OverlayTrigger>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -521,7 +591,7 @@ export default function ListView({
                             <div className='text-center'>
                                 <OverlayTrigger
                                     overlay={
-                                        <Tooltip>{`${t('Release Clearing State')}: ${Capitalize(
+                                        <Tooltip>{`${t('Release Clearing State')}: ${CommonUtils.Capitalize(
                                             clearingState ?? '',
                                         )}`}</Tooltip>
                                     }
@@ -566,7 +636,22 @@ export default function ListView({
                 },
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
-                        return <div className='text-center'>{Capitalize(row.original.entity.mainlineState ?? '')}</div>
+                        return (
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `mainline_state_${row.original.entity.mainlineState ? row.original.entity.mainlineState.toLowerCase() : 'open'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(row.original.entity.mainlineState ?? '')}
+                                </span>
+                            </OverlayTrigger>
+                        )
                     }
                 },
                 meta: {
@@ -580,10 +665,22 @@ export default function ListView({
                 enableSorting: false,
                 cell: ({ row }) => {
                     if (row.original.type === 'release') {
+                        const projectMainlineState = (row.original.entity as ListViewRelease).projectMainlineState
                         return (
-                            <div className='text-center'>
-                                {Capitalize((row.original.entity as ListViewRelease).projectMainlineState ?? '')}
-                            </div>
+                            <OverlayTrigger
+                                placement='top'
+                                overlay={
+                                    <Tooltip>
+                                        {t(
+                                            `mainline_state_${projectMainlineState ? projectMainlineState.toLowerCase() : 'open'}_tooltip`,
+                                        )}
+                                    </Tooltip>
+                                }
+                            >
+                                <span className='text-center'>
+                                    {CommonUtils.Capitalize(projectMainlineState ?? '')}
+                                </span>
+                            </OverlayTrigger>
                         )
                     }
                 },
@@ -597,18 +694,21 @@ export default function ListView({
                 enableColumnFilter: false,
                 enableSorting: false,
                 cell: ({ row }) => {
-                    if (row.original.type === 'release') {
-                        const { id: releaseId } = row.original.entity
-                        const entity = row.getParentRow()?.original.entity as Project
-                        if (!CommonUtils.isNullOrUndefined(entity?.linkedReleases)) {
-                            const linkedRelease = entity.linkedReleases.filter(
-                                (lr) => lr.release.split('/').at(-1) === releaseId,
-                            )
-                            if (!CommonUtils.isNullOrUndefined(linkedRelease?.[0])) {
-                                return <div className='text-center'>{linkedRelease?.[0].comment}</div>
-                            }
-                        }
+                    if (row.original.type !== 'release') return null
+
+                    const comment = row.original.entity.comment ?? ''
+                    if (comment === '') {
+                        return <div className='text-center' />
                     }
+
+                    return (
+                        <OverlayTrigger
+                            placement='top'
+                            overlay={<Tooltip>{comment}</Tooltip>}
+                        >
+                            <span className='overlay-badge'>{CommonUtils.truncateText(comment, 10)}</span>
+                        </OverlayTrigger>
+                    )
                 },
                 meta: {
                     width: '8%',
@@ -689,7 +789,7 @@ export default function ListView({
     useEffect(() => {
         if (memoizedLicenseClearing === undefined) return
         const data = buildTable(memoizedLicenseClearing, memoizedLinkedProjects, projectName, projectVersion)
-        setRowData(data)
+        setAllRowData(data)
     }, [
         memoizedLicenseClearing,
         memoizedLinkedProjects,
@@ -697,12 +797,31 @@ export default function ListView({
         projectVersion,
     ])
 
+    useEffect(() => {
+        setRowData(filterRows(allRowData, search))
+    }, [
+        allRowData,
+        search,
+    ])
+
     return (
         <>
+            <div className='d-flex justify-content-between align-items-center mb-3'>
+                <ClientSidePageSizeSelector table={table} />
+                <input
+                    type='search'
+                    placeholder={t('Search')}
+                    className='form-control form-control-sm tableSearchInput'
+                    value={search}
+                    onChange={(e) => {
+                        table.resetPagination()
+                        setSearch(e.target.value)
+                    }}
+                />
+            </div>
             <div className='mb-3'>
                 {table ? (
                     <>
-                        <ClientSidePageSizeSelector table={table} />
                         <SW360Table
                             table={table}
                             showProcessing={showProcessing}

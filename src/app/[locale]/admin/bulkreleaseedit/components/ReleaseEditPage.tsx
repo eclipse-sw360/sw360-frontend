@@ -162,7 +162,7 @@ function UpdateReleaseModal({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     placeholder={t('Click to set vendor')}
                                     readOnly
                                     id='bulkReleaseEdit.vendor'
@@ -410,14 +410,18 @@ export default function BulkReleaseEdit(): JSX.Element {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
-        search,
         reloadKey,
     ])
 

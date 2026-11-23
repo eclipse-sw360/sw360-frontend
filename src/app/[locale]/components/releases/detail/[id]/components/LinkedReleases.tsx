@@ -27,9 +27,6 @@ interface Props {
     releaseId: string
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 const LinkedReleases = ({ releaseId }: Props): ReactNode => {
     const t = useTranslations('default')
 
@@ -89,11 +86,16 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         releaseId,
     ])
@@ -136,7 +138,7 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
                 header: t('Release Relation'),
                 cell: ({ row }) => {
                     const { releaseRelationship } = row.original.node
-                    return <>{Capitalize(releaseRelationship ?? '')}</>
+                    return <>{CommonUtils.Capitalize(releaseRelationship ?? '')}</>
                 },
                 meta: {
                     width: '20%',
@@ -158,7 +160,7 @@ const LinkedReleases = ({ releaseId }: Props): ReactNode => {
                 header: t('Clearing State'),
                 cell: ({ row }) => {
                     const { clearingState } = row.original.node
-                    return <>{Capitalize(clearingState ?? '')}</>
+                    return <>{CommonUtils.Capitalize(clearingState ?? '')}</>
                 },
                 meta: {
                     width: '20%',

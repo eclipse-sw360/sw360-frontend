@@ -37,6 +37,7 @@ import {
 } from 'react-icons/bs'
 import LicenseClearing, { type LicenseClearingData } from '@/components/LicenseClearing'
 import { useConfigKeyValue, useConfigValue } from '@/contexts'
+import { PROJECT_NOT_FOUND_WARNING_KEY, useStoredWarning } from '@/hooks'
 import {
     Attachment,
     ConfigKeys,
@@ -66,9 +67,6 @@ type LicenseClearingMap = Record<string, LicenseClearingData>
 interface ProjectWithSubRows extends TypeProject {
     subRows?: ProjectWithSubRows[]
 }
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface GroupEntry {
     key: string
@@ -136,6 +134,8 @@ function Project(): JSX.Element {
             }
         })()
     }, [])
+
+    useStoredWarning(PROJECT_NOT_FOUND_WARNING_KEY, 'Project does not exist')
 
     const sbomImportExportAccessUserRole = useConfigKeyValue(ConfigKeys.SBOM_IMPORT_EXPORT_ACCESS_USER_ROLE)
     const normalizedSbomImportExportAccessUserRole: UserGroupType =
@@ -399,7 +399,9 @@ function Project(): JSX.Element {
                             {state && clearingState && (
                                 <div className='text-center'>
                                     <OverlayTrigger
-                                        overlay={<Tooltip>{`${t('Project State')}: ${Capitalize(state)}`}</Tooltip>}
+                                        overlay={
+                                            <Tooltip>{`${t('Project State')}: ${CommonUtils.Capitalize(state)}`}</Tooltip>
+                                        }
                                     >
                                         {state === 'ACTIVE' ? (
                                             <span className='badge bg-success capsule-left overlay-badge'>{'PS'}</span>
@@ -411,7 +413,7 @@ function Project(): JSX.Element {
                                     </OverlayTrigger>
                                     <OverlayTrigger
                                         overlay={
-                                            <Tooltip>{`${t('Project Clearing State')}: ${Capitalize(clearingState)}`}</Tooltip>
+                                            <Tooltip>{`${t('Project Clearing State')}: ${CommonUtils.Capitalize(clearingState)}`}</Tooltip>
                                         }
                                     >
                                         {clearingState === 'OPEN' ? (
@@ -798,14 +800,18 @@ function Project(): JSX.Element {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
-        params.toString(),
     ])
 
     useEffect(() => {

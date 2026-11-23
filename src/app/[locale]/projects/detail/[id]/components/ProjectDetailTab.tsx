@@ -19,7 +19,7 @@ import Attachments from '@/components/Attachments/Attachments'
 import LinkProjectsModal from '@/components/sw360/LinkedProjectsModal/LinkProjectsModal'
 import SidebarCountBadge from '@/components/sw360/SidebarCountBadge'
 import { useConfigKeyValue } from '@/contexts'
-import { useDocumentTitle } from '@/hooks'
+import { PROJECT_NOT_FOUND_WARNING_KEY, redirectWithWarning, useDocumentTitle } from '@/hooks'
 import {
     ActionType,
     AdministrationDataType,
@@ -30,6 +30,7 @@ import {
     Project,
     ProjectDetailTabCounts,
     ProjectPayload,
+    ProjectRelationship,
     SummaryDataType,
     UserGroupPriority,
     UserGroupType,
@@ -38,6 +39,7 @@ import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 import ImportSBOMMetadata from '../../../../../../object-types/cyclonedx/ImportSBOMMetadata'
 import ImportSBOMModal from '../../../components/ImportSBOMModal'
 import Obligations from '../../../components/Obligations/Obligations'
@@ -56,6 +58,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     const t = useTranslations('default')
     const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
     const [summaryData, setSummaryData] = useState<SummaryDataType | undefined>(undefined)
+    const [projectExists, setProjectExists] = useState<boolean | null>(null)
     const [clearingDetailCount, setClearingDetailCount] = useState<ClearingDetailsCount | undefined>()
     const [obligationsTotal, setObligationsTotal] = useState<number>(0)
     const [obligationsNonOpenCount, setObligationsNonOpenCount] = useState<number>(0)
@@ -140,7 +143,26 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
 
         void (async () => {
             try {
+                const projectResponse = await ApiUtils.GET(`projects/${projectId}`, signal)
+                if (projectResponse.status === StatusCodes.NOT_FOUND) {
+                    setProjectExists(false)
+                    redirectWithWarning(PROJECT_NOT_FOUND_WARNING_KEY, '/projects')
+                    return
+                }
+                if (projectResponse.status !== StatusCodes.OK) {
+                    const err = (await projectResponse.json()) as ErrorDetails
+                    throw new ApiError(err.message, {
+                        status: projectResponse.status,
+                    })
+                }
+                setProjectExists(true)
+                const project = (await projectResponse.json()) as Project
+
                 const response = await ApiUtils.GET(`projects/${projectId}/summaryAdministration`, signal)
+                if (response.status === StatusCodes.NOT_FOUND) {
+                    redirectWithWarning(PROJECT_NOT_FOUND_WARNING_KEY, '/projects')
+                    return
+                }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -153,13 +175,6 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                 setSummaryData(data as SummaryDataType)
                 setAdministrationData(data as AdministrationDataType)
 
-                const project = (await (await ApiUtils.GET(`projects/${projectId}`, signal)).json()) as Project
-                if (response.status !== StatusCodes.OK) {
-                    const err = (await response.json()) as ErrorDetails
-                    throw new ApiError(err.message, {
-                        status: response.status,
-                    })
-                }
                 const ob = {} as {
                     [k: string]: LinkedProjectData
                 }
@@ -169,7 +184,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                         name: p.name ?? '',
                         projectRelationship:
                             project.linkedProjects?.filter((pr) => pr.project.split('/').at(-1) === p.id)?.[0]
-                                ?.relation ?? 'CONTAINED',
+                                ?.relation ?? ProjectRelationship.CONTAINED,
                         version: p.version ?? '',
                     }
                 })
@@ -190,6 +205,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     ])
 
     useEffect(() => {
+        if (projectExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
         void (async () => {
@@ -210,6 +229,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
+        projectExists,
     ])
 
     const checkUpdateEligibility = async (projectId: string) => {
@@ -259,6 +279,10 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
     }
 
     useEffect(() => {
+        if (projectExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -296,6 +320,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         return () => controller.abort()
     }, [
         projectId,
+        projectExists,
     ])
 
     const isVulnerabilitiesDisplayEnabled = summaryData?.enableVulnerabilitiesDisplay ?? false
@@ -312,6 +337,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
         ? `${vulnerabilitiesRatedCount} / ${vulnerabilitiesTotal}`
         : '?/?'
 
+    const eccClosedCount = Math.max(0, eccClassifiedCount - eccOpenCount)
     const eccBadgeClassName =
         eccOpenCount > 0
             ? 'obligations-badge--danger'
@@ -319,7 +345,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
               ? 'obligations-badge--success'
               : 'obligations-badge'
 
-    const eccCountValue = `${eccOpenCount} / ${eccClassifiedCount}`
+    const eccCountValue = `${eccClosedCount} / ${eccClassifiedCount}`
 
     const obligationsBadgeClassName =
         obligationsNonOpenCount === 0
@@ -374,19 +400,19 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                             <ListGroup>
                                 <ListGroup.Item
                                     action
-                                    eventKey='summary'
+                                    {...sidebarTabLinkProps('summary')}
                                 >
                                     <div className='my-2'>{t('Summary')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='administration'
+                                    {...sidebarTabLinkProps('administration')}
                                 >
                                     <div className='my-2'>{t('Administration')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='licenseClearing'
+                                    {...sidebarTabLinkProps('licenseClearing')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('License Clearing')}</div>
@@ -394,14 +420,14 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 {isPackageFeatureEnabled && (
                                     <ListGroup.Item
                                         action
-                                        eventKey='linkedPackages'
+                                        {...sidebarTabLinkProps('linkedPackages')}
                                     >
                                         <div className='my-2'>{t('Linked Packages')}</div>
                                     </ListGroup.Item>
                                 )}
                                 <ListGroup.Item
                                     action
-                                    eventKey='obligations'
+                                    {...sidebarTabLinkProps('obligations')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
@@ -414,7 +440,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='ecc'
+                                    {...sidebarTabLinkProps('ecc')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <SidebarCountBadge
@@ -427,27 +453,27 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='vulnerabilityTrackingStatus'
+                                    {...sidebarTabLinkProps('vulnerabilityTrackingStatus')}
                                 >
                                     <div className='my-2'>{t('Vulnerability Tracking Status')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='attachments'
+                                    {...sidebarTabLinkProps('attachments')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='attachmentUsages'
+                                    {...sidebarTabLinkProps('attachmentUsages')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Attachment Usages')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='vulnerabilities'
+                                    {...sidebarTabLinkProps('vulnerabilities')}
                                 >
                                     <SidebarCountBadge
                                         badgeClassName={vulnerabilitiesBadgeClassName}
@@ -459,7 +485,7 @@ export default function ViewProjects({ projectId }: { projectId: string }): JSX.
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey='changeLog'
+                                    {...sidebarTabLinkProps('changeLog')}
                                     hidden={userIdentity?.userGroup === UserGroupType.SECURITY_USER}
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>

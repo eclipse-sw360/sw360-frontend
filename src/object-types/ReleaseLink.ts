@@ -9,13 +9,14 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { MainlineState, ReleaseRelationship } from '@/object-types'
 import Attachment from './Attachment'
 
 interface ReleaseLink {
     id: string
     name: string
     version: string
-    mainlineState?: string | undefined
+    mainlineState?: MainlineState
     clearingReport?:
         | {
               clearingReportStatus: string
@@ -25,7 +26,7 @@ interface ReleaseLink {
     clearingState?: string
     vendor?: string
     longName?: string
-    releaseRelationship: string
+    releaseRelationship?: ReleaseRelationship
     hasSubreleases?: boolean
     licenseIds?: Array<string>
     accessible?: boolean

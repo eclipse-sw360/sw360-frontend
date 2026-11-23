@@ -10,7 +10,7 @@
 'use client'
 
 import type { JSX } from 'react'
-import { ProjectPayload } from '@/object-types'
+import { LinkedReleaseData, ProjectPayload } from '@/object-types'
 import EditDependencyNetwork from '../EditDepedencyNetwork/EditDependencyNetwork'
 import LinkedProjects from './component/LinkedReleasesAndProjects/LinkedProjects'
 import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases'
@@ -18,23 +18,16 @@ import LinkedReleases from './component/LinkedReleasesAndProjects/LinkedReleases
 interface Props {
     projectId?: string
     projectPayload: ProjectPayload
-    existingReleaseData?: Map<string, LinkedReleaseData>
+    existingReleaseData?: Record<string, LinkedReleaseData>
     setProjectPayload: React.Dispatch<React.SetStateAction<ProjectPayload>>
     isDependencyNetworkFeatureEnabled: boolean
     isReleaseLoading?: boolean
 }
 
-interface LinkedReleaseData {
-    comment: string
-    mainlineState: string
-    name: string
-    releaseRelation: string
-    version: string
-}
-
 export default function LinkedReleasesAndProjects({
     projectId,
     projectPayload,
+    existingReleaseData,
     setProjectPayload,
     isDependencyNetworkFeatureEnabled,
     isReleaseLoading = false,
@@ -54,6 +47,7 @@ export default function LinkedReleasesAndProjects({
                     />
                 ) : (
                     <LinkedReleases
+                        existingReleaseData={existingReleaseData}
                         projectPayload={projectPayload}
                         setProjectPayload={setProjectPayload}
                         isReleaseLoading={isReleaseLoading}

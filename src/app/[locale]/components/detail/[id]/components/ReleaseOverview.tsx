@@ -18,7 +18,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { PageSizeSelector, SW360Table, TableFooter, TableSearch } from 'next-sw360'
-import { KeyboardEvent, ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard, BsDownload, BsFillTrashFill, BsGit, BsLink45Deg, BsPencil } from 'react-icons/bs'
 import fossologyIcon from '@/assets/images/fossology.svg'
@@ -28,6 +28,7 @@ import {
     Attachment,
     Embedded,
     ErrorDetails,
+    MainlineState,
     PageableQueryParam,
     PaginationMeta,
     ReleaseLink,
@@ -40,9 +41,6 @@ import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util
 import DeleteReleaseModal from './DeleteReleaseModal'
 
 type EmbeddedLinkedReleases = Embedded<ReleaseLink, 'sw360:releaseLinks'>
-
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
 
 interface Props {
     componentId: string
@@ -172,14 +170,14 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
         )
     }
 
-    const searchFunction = (event: KeyboardEvent<HTMLInputElement>) => {
-        if (event.currentTarget.value === '') {
+    const searchFunction = (value: string) => {
+        if (value === '') {
             setSearch({
                 searchText: '',
             })
         } else {
             setSearch({
-                searchText: event.currentTarget.value,
+                searchText: value,
                 luceneSearch: true,
             })
         }
@@ -222,7 +220,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 header: t('Clearing State'),
                 accessorKey: 'clearingState',
                 enableSorting: true,
-                cell: ({ row }) => <>{Capitalize(row.original.clearingState ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.clearingState ?? '')}</>,
 
                 meta: {
                     width: '16%',
@@ -242,7 +240,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 header: t('Release Mainline State'),
                 accessorKey: 'mainlineState',
                 enableSorting: true,
-                cell: ({ row }) => <>{Capitalize(row.original.mainlineState ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.mainlineState ?? MainlineState.OPEN)}</>,
                 meta: {
                     width: '16%',
                 },
@@ -321,7 +319,7 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
     const [pageableQueryParam, setPageableQueryParam] = useState<PageableQueryParam>({
         page: 0,
         page_entries: 10,
-        sort: 'version,asc',
+        sort: 'version,desc',
     })
     const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | undefined>({
         size: 0,
@@ -391,11 +389,16 @@ const ReleaseOverview = ({ componentId, calledFromModerationRequestDetail }: Pro
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         componentId,
         pageableQueryParam,

@@ -17,8 +17,9 @@ import React, { type JSX, useCallback, useEffect, useState } from 'react'
 import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
-import { ActionType, Release, ReleaseDetail, UIConfigKeys, UserGroupType, Vendor } from '@/object-types'
+import { ActionType, MainlineState, Release, ReleaseDetail, UIConfigKeys, UserGroupType, Vendor } from '@/object-types'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import CommonUtils from '@/utils/common.utils'
 import LicensesDialog from '../sw360/SearchLicensesDialog/LicensesDialog'
 
 interface Props {
@@ -248,7 +249,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_vendors_modal'
                                     placeholder={t('Click to set vendor')}
@@ -455,7 +456,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_mainLicense_modal'
                                     placeholder={t('Click to set Licenses')}
@@ -484,7 +485,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_licenses_modal'
                                     placeholder={t('Click to set Licenses')}
@@ -589,19 +590,23 @@ const ReleaseSummary = ({
                                     required
                                     name='mainlineState'
                                     onChange={updateField}
-                                    value={releasePayload.mainlineState ?? ''}
+                                    value={releasePayload.mainlineState ?? MainlineState.OPEN}
                                 >
-                                    <option value='OPEN'>{t('OPEN')}</option>
-                                    <option value='MAINLINE'> {t('MAINLINE')}</option>
-                                    <option value='SPECIFIC'>{t('SPECIFIC')}</option>
-                                    <option value='PHASEOUT'>{t('PHASEOUT')}</option>
-                                    <option value='DENIED'>{t('DENIED')}</option>
+                                    {Object.values(MainlineState).map((state) => (
+                                        <option
+                                            key={state}
+                                            value={state}
+                                            title={t(`mainline_state_${state ? state.toLowerCase() : 'open'}_tooltip`)}
+                                        >
+                                            {CommonUtils.Capitalize(state)}
+                                        </option>
+                                    ))}
                                 </select>
                                 <div
                                     id='mainlineState-i'
                                     className='form-text'
                                 >
-                                    <ShowInfoOnHover text={t('RELEASE_MAIN_STATE')} />
+                                    <ShowInfoOnHover text={t('MainlineState')} />
                                     {t('Learn more about mainline states')}.
                                 </div>
                             </div>
@@ -654,7 +659,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_users_modal'
                                     placeholder={t('Click to edit')}
@@ -682,7 +687,7 @@ const ReleaseSummary = ({
                                 </label>
                                 <input
                                     type='text'
-                                    className='form-control'
+                                    className='form-control cursor-pointer'
                                     data-bs-toggle='modal'
                                     data-bs-target='#search_users_modal'
                                     placeholder={t('Click to edit')}

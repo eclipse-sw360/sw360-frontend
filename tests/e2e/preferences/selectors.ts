@@ -44,4 +44,10 @@ export const selectors = {
     buttons: {
         updateSettings: 'button:has-text("Update settings")',
     },
+    userInfoWriteAccess: {
+        toggle: '#ui-user-general-information-write-access-enable input[type="checkbox"]',
+        toggleSwitch: '#ui-user-general-information-write-access-enable label.switch',
+        row: '#ui-user-general-information-write-access-enable',
+        label: '#ui-user-general-information-write-access-enable td.align-middle.fw-bold',
+    },
 }

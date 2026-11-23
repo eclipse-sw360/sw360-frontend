@@ -24,7 +24,14 @@ import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDet
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import { PageButtonHeader } from '@/components/sw360'
-import { useDocumentTitle } from '@/hooks'
+import {
+    COMPONENT_NOT_FOUND_WARNING_KEY,
+    LAST_RELEASE_COMPONENT_ID_KEY,
+    RELEASE_NOT_FOUND_WARNING_KEY,
+    redirectWithWarning,
+    useDocumentTitle,
+    useStoredWarning,
+} from '@/hooks'
 import {
     Changelogs,
     CommonTabIds,
@@ -42,6 +49,7 @@ import DownloadService from '@/services/download.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 import ReleaseOverview from './ReleaseOverview'
 import Summary from './Summary'
 
@@ -58,6 +66,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const searchParams = useSearchParams()
     const router = useRouter()
     const [component, setComponent] = useState<Component | undefined>(undefined)
+    const [componentExists, setComponentExists] = useState<boolean | null>(null)
     const [vulnerData, setVulnerData] = useState<Array<LinkedVulnerability>>([])
     const [attachmentNumber, setAttachmentNumber] = useState<number>(0)
     const [subscribers, setSubscribers] = useState<Array<string>>([])
@@ -78,6 +87,8 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             }
         })()
     }, [])
+
+    useStoredWarning(RELEASE_NOT_FOUND_WARNING_KEY, 'Release does not exist')
 
     useEffect(() => {
         const fragment = searchParams.get('tab') ?? CommonTabIds.SUMMARY
@@ -105,6 +116,11 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         void (async () => {
             try {
                 const response = await ApiUtils.GET(`components/${componentId}`, signal)
+                if (response.status === StatusCodes.NOT_FOUND) {
+                    setComponentExists(false)
+                    redirectWithWarning(COMPONENT_NOT_FOUND_WARNING_KEY, '/components')
+                    return
+                }
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -113,7 +129,9 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 }
 
                 const component = (await response.json()) as Component
+                setComponentExists(true)
                 setComponent(component)
+                window.sessionStorage.setItem(LAST_RELEASE_COMPONENT_ID_KEY, componentId)
                 setSubscribers(getSubcribersEmail(component))
                 setAttachmentNumber(component['_embedded']?.['sw360:attachments']?.length ?? 0)
             } catch (error) {
@@ -127,6 +145,10 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     ])
 
     useEffect(() => {
+        if (componentExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -150,6 +172,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
         return () => controller.abort()
     }, [
         componentId,
+        componentExists,
     ])
 
     const getSubcribersEmail = (component: Component) => {
@@ -235,6 +258,10 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
     const [showProcessing, setShowProcessing] = useState(false)
 
     useEffect(() => {
+        if (componentExists !== true) {
+            return
+        }
+
         const controller = new AbortController()
         const signal = controller.signal
 
@@ -279,14 +306,20 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
         componentId,
+        componentExists,
     ])
 
     const param = useParams()
@@ -331,31 +364,31 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
                             <ListGroup>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.SUMMARY}
+                                    {...sidebarTabLinkProps(CommonTabIds.SUMMARY)}
                                 >
                                     <div className='my-2'>{t('Summary')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.RELEASES}
+                                    {...sidebarTabLinkProps(CommonTabIds.RELEASES)}
                                 >
                                     <div className='my-2'>{t('Release Overview')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.ATTACHMENTS}
+                                    {...sidebarTabLinkProps(CommonTabIds.ATTACHMENTS)}
                                 >
                                     <div className='my-2'>{t('Attachments')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.VULNERABILITIES}
+                                    {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
                                 >
                                     <div className='my-2'>{t('Vulnerabilities')}</div>
                                 </ListGroup.Item>
                                 <ListGroup.Item
                                     action
-                                    eventKey={CommonTabIds.CHANGE_LOG}
+                                    {...sidebarTabLinkProps(CommonTabIds.CHANGE_LOG)}
                                 >
                                     <div className='my-2'>{t('Change Log')}</div>
                                 </ListGroup.Item>

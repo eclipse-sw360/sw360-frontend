@@ -75,4 +75,18 @@ export const selectors = {
         tabBackend: '.list-group-item[data-rr-ui-event-key="backend"]',
         tabFrontend: '.list-group-item[data-rr-ui-event-key="frontend"]',
     },
+    userEditForm: {
+        container: 'form.mx-5.mt-3',
+        givenNameInput: '#user\\.givenName',
+        lastNameInput: '#user\\.lastName',
+        emailInput: '#user\\.email',
+        externalIdInput: '#user\\.globalIdentifier',
+        passwordInput: '#user\\.password',
+        departmentInput: '#user\\.department',
+        primaryRoleSelect: 'select[name="userGroup"]',
+        updateButton: 'button[type="submit"]:has-text("Update User")',
+        cancelButton: 'button:has-text("Cancel")',
+        generalInfoSection: '.row.header:has-text("General Information")',
+        secondaryDeptsSection: '.row.header:has-text("Secondary Departments")',
+    },
 }

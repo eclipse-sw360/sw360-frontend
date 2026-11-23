@@ -29,9 +29,6 @@ interface Props {
     setLicensePayload: React.Dispatch<React.SetStateAction<LicensePayload>>
 }
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 type EmbeddedObligations = Embedded<Obligation, 'sw360:obligations'>
 
 const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayload }: Props): JSX.Element => {
@@ -42,14 +39,14 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
         search: '',
     })
 
-    const searchFunction = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.currentTarget.value === '') {
+    const searchFunction = (value: string) => {
+        if (value === '') {
             setSearch({
                 search: '',
             })
         } else {
             setSearch({
-                search: event.currentTarget.value,
+                search: value,
             })
         }
     }
@@ -146,7 +143,7 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
             {
                 id: 'type',
                 header: t('Obligation Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node?.obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node?.obligationType ?? '')}</>,
             },
         ],
         [
@@ -215,11 +212,16 @@ const LinkedObligationsDialog = ({ show, setShow, licensePayload, setLicensePayl
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         search,
     ])

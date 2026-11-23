@@ -8,13 +8,15 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { MainlineState, ReleaseRelationship } from '@/object-types'
+
 interface ReleaseNode {
     releaseId: string
     releaseName?: string
     releaseVersion?: string
     componentId?: string
-    mainlineState: string
-    releaseRelationship: string
+    mainlineState: MainlineState
+    releaseRelationship?: ReleaseRelationship
     comment: string
     releaseLink: Array<ReleaseNode>
     otherReleaseVersions?: Array<{

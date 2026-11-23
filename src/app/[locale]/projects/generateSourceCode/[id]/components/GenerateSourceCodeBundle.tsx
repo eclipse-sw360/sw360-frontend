@@ -45,9 +45,6 @@ type TypedRelease = TypedEntity<Release, 'release'>
 
 type TypedAttachment = TypedEntity<Attachment, 'attachment'>
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 function GenerateSourceCodeBundle({
     projectId,
 }: Readonly<{
@@ -65,7 +62,8 @@ function GenerateSourceCodeBundle({
     const [loading, setLoading] = useState(false)
     const [hideWithUsage, setHideWithUsage] = useState(false)
     const [expandedState, setExpandedState] = useState<ExpandedState>({})
-    const [showProcessing, setShowProcessing] = useState(false)
+    const [isFetchingData, setIsFetchingData] = useState(false)
+    const [isBuildingTable, setIsBuildingTable] = useState(false)
     const [project, setProject] = useState<Project>()
     const [linkedProjects, setLinkedProjects] = useState<Project[]>(() => [])
     const [attachmentUsages, setAttachmentUsages] = useState<AttachmentUsages | undefined>(undefined)
@@ -139,7 +137,7 @@ function GenerateSourceCodeBundle({
 
         const timeLimit = data.length !== 0 ? 700 : 0
         const timeout = setTimeout(() => {
-            setShowProcessing(true)
+            setIsFetchingData(true)
         }, timeLimit)
 
         void (async () => {
@@ -219,10 +217,17 @@ function GenerateSourceCodeBundle({
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setIsFetchingData(false)
+                    // keep the overlay up until the table effect rebuilds `data` from the fetched pieces
+                    setIsBuildingTable(true)
+                }
             }
         })()
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
         params,
@@ -230,7 +235,9 @@ function GenerateSourceCodeBundle({
 
     useEffect(() => {
         if (memoizedAttachmentUsages === undefined || memoizedLinkedProjects === undefined) return
+        setIsBuildingTable(true)
         buildTable(setData, memoizedAttachmentUsages, memoizedLinkedProjects, hideWithUsage)
+        setIsBuildingTable(false)
     }, [
         memoizedLinkedProjects,
         memoizedAttachmentUsages,
@@ -498,12 +505,14 @@ function GenerateSourceCodeBundle({
                             <div
                                 className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
-                                {Capitalize(row.original.node.entity.componentType ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.componentType ?? '')}
                             </div>
                         )
                     } else if (row.original.node.type === 'project') {
                         return (
-                            <div className='text-center'>{Capitalize(row.original.node.entity.projectType ?? '')}</div>
+                            <div className='text-center'>
+                                {CommonUtils.Capitalize(row.original.node.entity.projectType ?? '')}
+                            </div>
                         )
                     } else {
                         const att = row.original.node.entity
@@ -538,13 +547,13 @@ function GenerateSourceCodeBundle({
                             <div
                                 className={`text-center ${(row.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
-                                {Capitalize(row.original.node.entity.clearingState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
                         )
                     } else if (row.original.node.type === 'project') {
                         return (
                             <div className='text-center'>
-                                {Capitalize(row.original.node.entity.clearingState ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.clearingState ?? '')}
                             </div>
                         )
                     } else {
@@ -552,7 +561,7 @@ function GenerateSourceCodeBundle({
                             <div
                                 className={`text-center ${(row.getParentRow()?.original?.children?.length ?? 0) > 1 ? 'orange-cell' : 'green-cell'}`}
                             >
-                                {Capitalize(row.original.node.entity.checkStatus ?? '')}
+                                {CommonUtils.Capitalize(row.original.node.entity.checkStatus ?? '')}
                             </div>
                         )
                     }
@@ -675,15 +684,18 @@ function GenerateSourceCodeBundle({
                                 fontSize: '15px',
                             }}
                         >
+                            {(CommonUtils.isNullOrUndefined(attachmentUsages) ||
+                                Object.keys(attachmentUsages).length === 0) ??
+                                `${t('No previous selection found')}.`}
                             {t(
-                                'No previous selection found If you have writing permissions to this project your selection will be stored automatically when downloading',
+                                'If you have writing permissions to this project your selection will be stored automatically when downloading',
                             )}
                         </div>
                         <div className='mb-3'>
                             {table ? (
                                 <SW360Table
                                     table={table}
-                                    showProcessing={showProcessing}
+                                    showProcessing={isFetchingData || isBuildingTable}
                                 />
                             ) : (
                                 <div className='col-12 mt-1 text-center'>

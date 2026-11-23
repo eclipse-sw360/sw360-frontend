@@ -38,6 +38,7 @@ import {
     Project,
     ProjectDetailTabCounts,
     ProjectPayload,
+    ProjectRelationship,
     User,
     UserGroupType,
     Vendor,
@@ -45,6 +46,7 @@ import {
 import MessageService from '@/services/message.service'
 import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
+import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
 import DeleteProjectDialog from '../../../components/DeleteProjectDialog'
 import Obligations from '../../../components/Obligations/Obligations'
 
@@ -481,7 +483,7 @@ function EditProject({
                                         ?.enableSvm === 'true',
                                 projectRelationship:
                                     project.linkedProjects?.filter((p) => p.project.split('/').at(-1) === proj.id)?.[0]
-                                        ?.relation ?? '',
+                                        ?.relation ?? ProjectRelationship.CONTAINED,
                             }
                             return acc
                         },
@@ -758,39 +760,39 @@ function EditProject({
                                             <ListGroup>
                                                 <ListGroup.Item
                                                     action
-                                                    eventKey='summary'
+                                                    {...sidebarTabLinkProps('summary')}
                                                 >
                                                     <div className='my-2'>{t('Summary')}</div>
                                                 </ListGroup.Item>
                                                 <ListGroup.Item
                                                     action
-                                                    eventKey='administration'
+                                                    {...sidebarTabLinkProps('administration')}
                                                 >
                                                     <div className='my-2'>{t('Administration')}</div>
                                                 </ListGroup.Item>
                                                 <ListGroup.Item
                                                     action
-                                                    eventKey='linkedProjectsAndReleases'
+                                                    {...sidebarTabLinkProps('linkedProjectsAndReleases')}
                                                 >
                                                     <div className='my-2'>{t('Linked Releases and Projects')}</div>
                                                 </ListGroup.Item>
                                                 {isPackageFeatureEnabled && (
                                                     <ListGroup.Item
                                                         action
-                                                        eventKey='linkedPackages'
+                                                        {...sidebarTabLinkProps('linkedPackages')}
                                                     >
                                                         <div className='my-2'>{t('Linked Packages')}</div>
                                                     </ListGroup.Item>
                                                 )}
                                                 <ListGroup.Item
                                                     action
-                                                    eventKey='attachments'
+                                                    {...sidebarTabLinkProps('attachments')}
                                                 >
                                                     <div className='my-2'>{t('Attachments')}</div>
                                                 </ListGroup.Item>
                                                 <ListGroup.Item
                                                     action
-                                                    eventKey='obligations'
+                                                    {...sidebarTabLinkProps('obligations')}
                                                 >
                                                     <SidebarCountBadge
                                                         badgeClassName={obligationsBadgeClassName}

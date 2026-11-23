@@ -16,6 +16,8 @@ import {
     ECCInformation,
     LinkedPackageData,
     Links,
+    MainlineState,
+    ReleaseRelationship,
     Repository,
     Vendor,
 } from '@/object-types'
@@ -39,7 +41,7 @@ interface Release {
     createBy?: string
     modifiedBy?: string
     modifiedOn?: string
-    mainlineState?: string
+    mainlineState?: MainlineState
     contributors?: Array<string> | null
     moderators?: Array<string> | null
     roles?: {
@@ -56,7 +58,7 @@ interface Release {
     binaryDownloadurl?: string
     repository?: Repository | null
     releaseIdToRelationship?: {
-        [k: string]: string
+        [k: string]: ReleaseRelationship
     } | null
     clearingInformation?: ClearingInformation
     cotsDetails?: COTSDetails | null

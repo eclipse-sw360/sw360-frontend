@@ -32,9 +32,6 @@ import { ApiError, CommonUtils } from '@/utils'
 import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { ExpandableList } from './ExpandableComponents'
 
-const Capitalize = (text: string) =>
-    text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-
 type LinkedProjects = Embedded<Project, 'sw360:projects'>
 
 interface ProjectInfo {
@@ -154,7 +151,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             {
                 id: 'status',
                 header: t('Status'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].status ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].status ?? '')}</>,
                 meta: {
                     width: '10%',
                 },
@@ -162,7 +159,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
             {
                 id: 'type',
                 header: t('Type'),
-                cell: ({ row }) => <>{Capitalize(row.original.node[1].obligationType ?? '')}</>,
+                cell: ({ row }) => <>{CommonUtils.Capitalize(row.original.node[1].obligationType ?? '')}</>,
                 meta: {
                     width: '10%',
                 },
@@ -262,11 +259,16 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setIsLoadingObligations(false)
+                if (!signal.aborted) {
+                    setIsLoadingObligations(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
     ])
@@ -284,8 +286,7 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
         const controller = new AbortController()
         const signal = controller.signal
 
-        const timeLimit =
-            (!CommonUtils.isNullEmptyOrUndefinedArray(linkedProjects) && linkedProjects.length) !== 0 ? 700 : 0
+        const timeLimit = !CommonUtils.isNullEmptyOrUndefinedArray(linkedProjects) ? 700 : 0
         const timeout = setTimeout(() => {
             setIsLoadingLinkedProjects(true)
         }, timeLimit)
@@ -302,16 +303,21 @@ export default function LicenseObligation({ projectId }: { projectId: string }):
                 }
 
                 const linkedProjectsData = (await response.json()) as LinkedProjects
-                setLinkedProjects(linkedProjectsData['_embedded']['sw360:projects'])
+                setLinkedProjects(linkedProjectsData['_embedded']?.['sw360:projects'] ?? [])
             } catch (error) {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setIsLoadingLinkedProjects(false)
+                if (!signal.aborted) {
+                    setIsLoadingLinkedProjects(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         projectId,
     ])

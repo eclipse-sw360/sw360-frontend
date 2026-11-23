@@ -12,7 +12,7 @@
 import { useTranslations } from 'next-intl'
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { BsArrowCounterclockwise, BsArrowLeft, BsCheck2 } from 'react-icons/bs'
-import { ListFieldProcessComponent, Release, ReleaseDetail } from '@/object-types'
+import { ListFieldProcessComponent, Release, ReleaseDetail, ReleaseRelationship } from '@/object-types'
 
 export default function LinkedReleasesSection({
     targetRelease,
@@ -174,7 +174,7 @@ export default function LinkedReleasesSection({
                                                             [c.value]:
                                                                 targetLinkedReleases.find(
                                                                     (release) => release.id === c.value,
-                                                                )?.releaseRelationship ?? '',
+                                                                )?.releaseRelationship ?? ReleaseRelationship.UNKNOWN,
                                                         }
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,
@@ -225,7 +225,7 @@ export default function LinkedReleasesSection({
                                                             [c.value]:
                                                                 sourceLinkedReleases.find(
                                                                     (release) => release.id === c.value,
-                                                                )?.releaseRelationship ?? '',
+                                                                )?.releaseRelationship ?? ReleaseRelationship.UNKNOWN,
                                                         }
                                                         setFinalReleasePayload({
                                                             ...finalReleasePayload,

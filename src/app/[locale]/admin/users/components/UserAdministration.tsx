@@ -253,7 +253,7 @@ export default function UserAdminstration(): JSX.Element {
 
     useEffect(() => {
         const controller = new AbortController()
-        const _signal = controller.signal
+        const signal = controller.signal
 
         const timeLimit = userData.length !== 0 ? 700 : 0
         const timeout = setTimeout(() => {
@@ -275,7 +275,7 @@ export default function UserAdminstration(): JSX.Element {
                         ]),
                     ),
                 )
-                const response = await ApiUtils.GET(queryUrl)
+                const response = await ApiUtils.GET(queryUrl, signal)
                 if (response.status !== StatusCodes.OK) {
                     const err = (await response.json()) as ErrorDetails
                     throw new ApiError(err.message, {
@@ -295,14 +295,18 @@ export default function UserAdminstration(): JSX.Element {
                 ApiUtils.reportError(error)
             } finally {
                 clearTimeout(timeout)
-                setShowProcessing(false)
+                if (!signal.aborted) {
+                    setShowProcessing(false)
+                }
             }
         })()
 
-        return () => controller.abort()
+        return () => {
+            controller.abort()
+            clearTimeout(timeout)
+        }
     }, [
         pageableQueryParam,
-        params.toString(),
         refreshTrigger,
     ])
 

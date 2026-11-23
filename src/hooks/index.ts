@@ -10,7 +10,27 @@
 
 import { useDocumentTitle } from './useDocumentTitle'
 import useLocalStorage from './useLocalStorage'
+import useStoredWarning, {
+    COMPONENT_NOT_FOUND_WARNING_KEY,
+    consumeWarning,
+    LAST_RELEASE_COMPONENT_ID_KEY,
+    PROJECT_NOT_FOUND_WARNING_KEY,
+    RELEASE_NOT_FOUND_WARNING_KEY,
+    redirectWithWarning,
+} from './useStoredWarning'
 import { useSW360BackendConfig } from './useSW360BackendConfig'
 import { useUiConfig } from './useUiConfig'
 
-export { useDocumentTitle, useLocalStorage, useSW360BackendConfig, useUiConfig }
+export {
+    COMPONENT_NOT_FOUND_WARNING_KEY,
+    consumeWarning,
+    LAST_RELEASE_COMPONENT_ID_KEY,
+    PROJECT_NOT_FOUND_WARNING_KEY,
+    RELEASE_NOT_FOUND_WARNING_KEY,
+    redirectWithWarning,
+    useDocumentTitle,
+    useLocalStorage,
+    useStoredWarning,
+    useSW360BackendConfig,
+    useUiConfig,
+}

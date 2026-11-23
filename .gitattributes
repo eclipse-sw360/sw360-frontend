@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.sh text eol=lf
+config/** text eol=lf
+*.ini text eol=lf
+*.properties text eol=lf
+*.template text eol=lf
+*.jks binary
+*.pfx binary

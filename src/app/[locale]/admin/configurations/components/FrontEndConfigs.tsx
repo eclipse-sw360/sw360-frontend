@@ -411,6 +411,24 @@ const FrontEndConfigs = (): JSX.Element => {
                                     </td>
                                     <td>{t('rest_api_write_access_token_in_preferences_enabled')}</td>
                                 </tr>
+                                <tr id='ui-user-general-information-write-access-enable'>
+                                    <td className='align-middle fw-bold'>
+                                        {t('Enable User General Information Write Access')}
+                                    </td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            checked={
+                                                currentUiConfig[
+                                                    UIConfigKeys.UI_ENABLE_USER_GENERAL_INFORMATION_WRITE_ACCESS
+                                                ] === 'true'
+                                            }
+                                            propKey={UIConfigKeys.UI_ENABLE_USER_GENERAL_INFORMATION_WRITE_ACCESS}
+                                        />
+                                    </td>
+                                    <td>{t('ui_enable_user_general_information_write_access')}</td>
+                                </tr>
                                 <tr id='enable-linked-projects-display'>
                                     <td className='align-middle fw-bold'>{t('Enable Linked Projects Display')}</td>
                                     <td>

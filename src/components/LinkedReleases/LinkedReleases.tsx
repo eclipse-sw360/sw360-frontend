@@ -14,7 +14,7 @@
 import { useTranslations } from 'next-intl'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
-import { ActionType, Release, ReleaseDetail, ReleaseLink } from '@/object-types'
+import { ActionType, Release, ReleaseDetail, ReleaseLink, ReleaseRelationship } from '@/object-types'
 import { CommonUtils } from '@/utils'
 import SearchReleasesModal from '../sw360/SearchReleasesModal'
 import TableLinkedReleases from './TableLinkedReleases/TableLinkedReleases'
@@ -32,7 +32,7 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
     const [linkedReleasesDiaglog, setLinkedReleasesDiaglog] = useState(false)
 
     const setReleaseIdToRelationshipsToReleasePayLoad = useCallback(
-        (releaseIdToRelationships: Map<string, string>) => {
+        (releaseIdToRelationships: Map<string, ReleaseRelationship>) => {
             const obj = Object.fromEntries(releaseIdToRelationships)
             setReleasePayload({
                 ...releasePayload,
@@ -54,7 +54,7 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
                 mainlineState: release.mainlineState,
                 clearingState: release.clearingState,
                 vendor: release.vendor ? release.vendor.fullName : '',
-                releaseRelationship: 'CONTAINED',
+                releaseRelationship: ReleaseRelationship.CONTAINED,
             }))
 
             const updatedReleaseLinks = [
@@ -63,9 +63,9 @@ const LinkedReleases = ({ release, actionType, releasePayload, setReleasePayload
             ]
             setReleaseLinks(updatedReleaseLinks)
 
-            const mapReleaseRelationship = new Map<string, string>()
+            const mapReleaseRelationship = new Map<string, ReleaseRelationship>()
             updatedReleaseLinks.forEach((item) => {
-                mapReleaseRelationship.set(item.id, item.releaseRelationship)
+                mapReleaseRelationship.set(item.id, item.releaseRelationship ?? ReleaseRelationship.CONTAINED)
             })
             const obj = Object.fromEntries(mapReleaseRelationship)
             setReleasePayload({

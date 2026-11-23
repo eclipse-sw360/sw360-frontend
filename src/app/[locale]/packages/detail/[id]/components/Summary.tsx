@@ -15,12 +15,7 @@ import { ReactNode, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsClipboard } from 'react-icons/bs'
 import { Package } from '@/object-types'
-
-const Capitalize = (text: string) => {
-    return text
-        ? text.split('_').reduce((s, c) => s + ' ' + (c.charAt(0) + c.substring(1).toLocaleLowerCase()), '')
-        : undefined
-}
+import { CommonUtils } from '@/utils'
 
 export default function Summary({ summaryData }: { summaryData: Package }): ReactNode {
     const t = useTranslations('default')
@@ -89,7 +84,7 @@ export default function Summary({ summaryData }: { summaryData: Package }): Reac
                     </tr>
                     <tr>
                         <td>{t('Package Type')}:</td>
-                        <td>{Capitalize(summaryData.packageType ?? '')}</td>
+                        <td>{CommonUtils.Capitalize(summaryData.packageType ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{`PURL (${t('Package URL')})`}:</td>
@@ -106,7 +101,7 @@ export default function Summary({ summaryData }: { summaryData: Package }): Reac
                     </tr>
                     <tr>
                         <td>{t('Package Manager')}:</td>
-                        <td>{Capitalize(summaryData.packageManager ?? '')}</td>
+                        <td>{CommonUtils.Capitalize(summaryData.packageManager ?? '')}</td>
                     </tr>
                     <tr>
                         <td>{`VCS (${t('Version Control System')})`}:</td>

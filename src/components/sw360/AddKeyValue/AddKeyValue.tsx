@@ -10,7 +10,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React, { type JSX, useCallback, useEffect, useState } from 'react'
+import React, { type JSX, useEffect, useState } from 'react'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { BsFillTrashFill } from 'react-icons/bs'
 import DeleteItemWarning from '@/components/sw360/DeleteItemWarning/DeleteItemWarning'
@@ -44,33 +44,6 @@ function AddKeyValue(props: Props): JSX.Element {
         props.data,
     ])
 
-    /**
-     * Converts an input list to a map, with special handling for 'package-url' key.
-     * Multiple 'package-url' entries are combined into a single JSON array string.
-     */
-    const convertListToMap = useCallback((list: Input[]): Map<string, string> => {
-        const map = new Map<string, string>()
-        const packageUrls: string[] = []
-
-        list.forEach((item) => {
-            if (item.key === 'package-url') {
-                // Collect all package-url values
-                if (item.value.trim() !== '') {
-                    packageUrls.push(item.value)
-                }
-            } else {
-                map.set(item.key, item.value)
-            }
-        })
-
-        // Combine package-url values into a JSON array string
-        if (packageUrls.length > 0) {
-            map.set('package-url', JSON.stringify(packageUrls))
-        }
-
-        return map
-    }, [])
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value } = e.target
         const list: Input[] = [
@@ -79,7 +52,7 @@ function AddKeyValue(props: Props): JSX.Element {
         list[index][name as keyof Input] = value
         props.setData(list)
         if (props.setObject) {
-            props.setObject(convertListToMap(list))
+            props.setObject(CommonUtils.convertInputListToMap(list))
         }
     }
 
@@ -90,7 +63,7 @@ function AddKeyValue(props: Props): JSX.Element {
         list[index].key = value
         props.setData(list)
         if (props.setObject) {
-            props.setObject(convertListToMap(list))
+            props.setObject(CommonUtils.convertInputListToMap(list))
         }
     }
 

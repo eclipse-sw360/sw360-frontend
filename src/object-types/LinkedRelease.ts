@@ -8,14 +8,16 @@
 // SPDX-License-Identifier: EPL-2.0
 // License-Filename: LICENSE
 
+import { MainlineState, ReleaseRelationship } from '@/object-types'
+
 interface LinkedRelease {
     id: string
     name: string
     version: string
-    mainlineState: string
+    mainlineState?: MainlineState
     clearingState: string
     vendor: string
-    releaseRelationship: string
+    releaseRelationship?: ReleaseRelationship
 }
 
 export default LinkedRelease

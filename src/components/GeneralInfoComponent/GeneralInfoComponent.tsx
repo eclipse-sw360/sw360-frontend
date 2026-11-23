@@ -14,6 +14,7 @@
 import { useTranslations } from 'next-intl'
 import { ShowInfoOnHover, VendorDialog } from 'next-sw360'
 import React, { useCallback, useState } from 'react'
+import { BsXCircle } from 'react-icons/bs'
 import SuggestionBox from '@/components/sw360/SuggestionBox/SuggestionBox'
 import { useConfigValue } from '@/contexts'
 import { ComponentPayload, UIConfigKeys, Vendor } from '@/object-types'
@@ -258,7 +259,7 @@ const GeneralInfoComponent = ({
                             </label>
                             <input
                                 type='text'
-                                className='form-control'
+                                className='form-control cursor-pointer'
                                 data-bs-toggle='modal'
                                 data-bs-target='#search_vendors_modal'
                                 placeholder={t('Click to set vendor')}
@@ -275,7 +276,13 @@ const GeneralInfoComponent = ({
                                 setVendor={setVendorId}
                                 vendor={vendor}
                             />
-                            <span onClick={handleClearVendor}>x</span>
+                            <div
+                                className='form-text'
+                                onClick={handleClearVendor}
+                            >
+                                {' '}
+                                <BsXCircle size={20} />
+                            </div>
                         </div>
                         <div className='col-lg-4'>
                             <label
