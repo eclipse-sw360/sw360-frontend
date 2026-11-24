@@ -35,9 +35,21 @@ function Gravatar({ email }: { email: string }): JSX.Element {
         const gravatarUrl = `https://www.gravatar.com/avatar/${MD5(email)}?d=404`
 
         fetch(gravatarUrl)
-            .then((response) => response.blob())
+            .then((response) => {
+                // Gravatar answers 404 for users without a Gravatar image.
+                // Fetch resolves for error statuses too, so check the status
+                // here and clear the stored image to show the fallback icon
+                // instead of a broken image.
+                if (!response.ok) {
+                    setGravatarImage(null)
+                    return null
+                }
+                return response.blob()
+            })
             .then((blob) => {
-                setGravatarImage(gravatarUrl)
+                if (blob) {
+                    setGravatarImage(gravatarUrl)
+                }
             })
             .catch((error) => console.error('Error downloading Gravatar image:', error))
     }, [
@@ -74,7 +86,7 @@ function Gravatar({ email }: { email: string }): JSX.Element {
                 </div>
                 <div className='gap-2 d-flex align-items-center justify-contents-end'>
                     <Image
-                        src={useGravatar ? (gravatarImage ?? '') : (sw360ProfileIcon.src as string)}
+                        src={useGravatar && gravatarImage ? gravatarImage : (sw360ProfileIcon.src as string)}
                         width={iconSize}
                         height={iconSize}
                         alt='Gravatar'
