@@ -64,6 +64,15 @@ const FeatureConfigurations = (): JSX.Element => {
             MessageService.error(t('API Token Length must be at least 20'))
             return
         }
+        // Validate Deletion Sanity Check Threshold
+        const deletionThreshold = currentConfig[ConfigKeys.DELETION_SANITY_CHECK_THRESHOLD]
+        if (
+            deletionThreshold !== undefined &&
+            (!/^\d+$/.test(deletionThreshold.trim()) || parseInt(deletionThreshold) < 1)
+        ) {
+            MessageService.error(t('Deletion Sanity Check Threshold must be a positive integer'))
+            return
+        }
         const response = await ApiUtils.PATCH(apiEndpoint, currentConfig)
         if (response.status == StatusCodes.OK) {
             refreshConfig()
@@ -257,6 +266,34 @@ const FeatureConfigurations = (): JSX.Element => {
                                         />
                                     </td>
                                     <td className='align-middle'>{t('nested_release_enabled_description')}</td>
+                                </tr>
+                                <tr id='deletion-sanity-check-threshold'>
+                                    <td className='align-middle fw-bold'>
+                                        <label htmlFor='deletion-sanity-check-threshold-input'>
+                                            {t('Deletion Sanity Check Threshold')}
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input
+                                            type='number'
+                                            className='form-control form-control-sm'
+                                            id='deletion-sanity-check-threshold-input'
+                                            name={ConfigKeys.DELETION_SANITY_CHECK_THRESHOLD}
+                                            min='1'
+                                            step='1'
+                                            value={currentConfig[ConfigKeys.DELETION_SANITY_CHECK_THRESHOLD] ?? ''}
+                                            onChange={(event) => {
+                                                setCurrentConfig((prev) => {
+                                                    return {
+                                                        ...prev,
+                                                        [ConfigKeys.DELETION_SANITY_CHECK_THRESHOLD]:
+                                                            event.target.value.toString(),
+                                                    } as Configuration
+                                                })
+                                            }}
+                                        />
+                                    </td>
+                                    <td className='align-middle'>{t('deletion_sanity_check_threshold_description')}</td>
                                 </tr>
                                 <tr id='sbom-import-export-access-usergroup'>
                                     <td className='align-middle fw-bold'>

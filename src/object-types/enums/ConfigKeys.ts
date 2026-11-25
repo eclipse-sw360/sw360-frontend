@@ -34,6 +34,7 @@ enum ConfigKeys {
     REST_API_TOKEN_LENGTH = 'rest.apitoken.length',
     IS_NESTED_RELEASE_ENABLED = 'nested.release.enabled',
     PROJECTS_CLOSED_UPDATE_STRICT = 'projects.closed.update.strict',
+    DELETION_SANITY_CHECK_THRESHOLD = 'deletion.sanity.check.threshold',
 }
 
 export default ConfigKeys
