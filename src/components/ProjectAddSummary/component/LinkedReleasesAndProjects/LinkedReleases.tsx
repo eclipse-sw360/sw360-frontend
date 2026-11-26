@@ -133,7 +133,7 @@ export default function LinkedReleases({
                     newLinkedReleases[release.id] = {
                         name: release.name ?? '',
                         version: release.version ?? '',
-                        mainlineState: release.mainlineState ?? MainlineState.OPEN,
+                        mainlineState: MainlineState.OPEN,
                         releaseRelation: ReleaseRelationship.UNKNOWN,
                         comment: '',
                     }
