@@ -58,6 +58,7 @@ import ApiUtils from '@/utils/api/authenticatedApi.util'
 import { getAuthenticatedUserIdentity } from '@/utils/api/authenticatedUser.util'
 import { dispatchSessionExpiredEvent } from '@/utils/sessionExpiry.utils'
 import { sidebarTabLinkProps } from '@/utils/sidebarTab.utils'
+import { isVulnerabilityFeatureEnabled } from '@/utils/vulnerabilityFeature.utils'
 import ClearingDetails from './ClearingDetails'
 import CommercialDetails from './CommercialDetails'
 import ECCDetails from './ECCDetails'
@@ -81,6 +82,9 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     const router = useRouter()
     const isNestedReleaseEnabled = useConfigKeyValue(ConfigKeys.IS_NESTED_RELEASE_ENABLED)
     const isPackageFeatureEnabled = useConfigKeyValue(ConfigKeys.IS_PACKAGE_PORTLET_ENABLED) === 'true'
+    const isVulnerabilityFeatureVisible = isVulnerabilityFeatureEnabled(
+        useConfigKeyValue(ConfigKeys.IS_VULNERABILITY_FEATURE_ENABLED),
+    )
     const showLinkedReleases = isNestedReleaseEnabled !== 'false'
     const [release, setRelease] = useState<ReleaseDetail>()
     const [releaseExists, setReleaseExists] = useState<boolean | null>(null)
@@ -142,6 +146,19 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
         setActiveKey(fragment)
     }, [
         searchParams,
+    ])
+
+    useEffect(() => {
+        if (isVulnerabilityFeatureVisible || activeKey !== CommonTabIds.VULNERABILITIES) {
+            return
+        }
+
+        setActiveKey(CommonTabIds.SUMMARY)
+        router.replace(`?tab=${CommonTabIds.SUMMARY}`)
+    }, [
+        activeKey,
+        isVulnerabilityFeatureVisible,
+        router,
     ])
 
     const handleSelect = (key: string | null) => {
@@ -221,13 +238,17 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                     )
                 }
 
-                const vulnerabilities = await fetchData(`releases/${releaseId}/vulnerabilities`, signal)
-                if (
-                    vulnerabilities &&
-                    !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
-                    !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
-                ) {
-                    setVulnerData(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
+                if (isVulnerabilityFeatureVisible) {
+                    const vulnerabilities = await fetchData(`releases/${releaseId}/vulnerabilities`, signal)
+                    if (
+                        vulnerabilities &&
+                        !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']) &&
+                        !CommonUtils.isNullOrUndefined(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
+                    ) {
+                        setVulnerData(vulnerabilities['_embedded']['sw360:vulnerabilityDTOes'])
+                    } else {
+                        setVulnerData([])
+                    }
                 } else {
                     setVulnerData([])
                 }
@@ -240,6 +261,7 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
     }, [
         fetchData,
         releaseId,
+        isVulnerabilityFeatureVisible,
     ])
 
     useEffect(() => {
@@ -512,20 +534,22 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                             <div className='my-2'>{t('Commercial Details')}</div>
                                         </ListGroup.Item>
                                     )}
-                                    <ListGroup.Item
-                                        action
-                                        {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
-                                    >
-                                        <div className='my-2'>
-                                            {t('Vulnerabilities')}{' '}
-                                            <span
-                                                id='numberOfVulnerabilitiesDiv'
-                                                className='badge badge-light'
-                                            >
-                                                {`${vulInfo?.[0] ?? 0} + ${vulInfo?.[1] ?? 0}`}
-                                            </span>
-                                        </div>
-                                    </ListGroup.Item>
+                                    {isVulnerabilityFeatureVisible && (
+                                        <ListGroup.Item
+                                            action
+                                            {...sidebarTabLinkProps(CommonTabIds.VULNERABILITIES)}
+                                        >
+                                            <div className='my-2'>
+                                                {t('Vulnerabilities')}{' '}
+                                                <span
+                                                    id='numberOfVulnerabilitiesDiv'
+                                                    className='badge badge-light'
+                                                >
+                                                    {`${vulInfo?.[0] ?? 0} + ${vulInfo?.[1] ?? 0}`}
+                                                </span>
+                                            </div>
+                                        </ListGroup.Item>
+                                    )}
                                     <ListGroup.Item
                                         action
                                         {...sidebarTabLinkProps(CommonTabIds.CHANGE_LOG)}
@@ -678,9 +702,11 @@ const DetailOverview = ({ releaseId, isSPDXFeatureEnabled }: Props): ReactNode =
                                                 />
                                             </Tab.Pane>
                                         )}
-                                        <Tab.Pane eventKey={CommonTabIds.VULNERABILITIES}>
-                                            <ComponentVulnerabilities vulnerData={vulnerData} />
-                                        </Tab.Pane>
+                                        {isVulnerabilityFeatureVisible && (
+                                            <Tab.Pane eventKey={CommonTabIds.VULNERABILITIES}>
+                                                <ComponentVulnerabilities vulnerData={vulnerData} />
+                                            </Tab.Pane>
+                                        )}
                                         <Tab.Pane eventKey={CommonTabIds.CHANGE_LOG}>
                                             <div className='col'>
                                                 <div
