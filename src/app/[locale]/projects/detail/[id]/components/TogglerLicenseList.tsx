@@ -182,11 +182,31 @@ const FileListModal = ({
     }
 
     const fetchReleasesToFilesMapping = useCallback(async () => {
-        const response = await ApiUtils.GET(`releases/${releaseId}/licensesToSourceFiles`)
-        const data = (await response.json()) as LicensesToSourcesMapping
-        setLicensesToSourceFilesMapping(data)
-        if (data.status === 'success' && data.licensesData !== undefined) {
-            for (const licenseData of data.licensesData) {
+        const response = await ApiUtils.GET(`releases/${releaseId}/licenseFileList`)
+        const backendData = await response.json()
+
+        // Transform backend response to frontend expected format
+        const mappedData: LicensesToSourcesMapping = {
+            releaseId: backendData.relId,
+            releaseName: backendData.relName,
+            attachmentName: backendData.attName,
+            licensesData:
+                backendData.data?.map(
+                    (item: { licName: string; licType: string; licSpdxId: string; srcFiles: string[] }) => ({
+                        licenseName: item.licName,
+                        licenseType: item.licType,
+                        licenseSpdxId: item.licSpdxId,
+                        sourcesFiles: item.srcFiles ?? [],
+                    }),
+                ) ?? [],
+            status: response.ok ? 'success' : 'failure',
+            message: response.ok ? undefined : (backendData.message ?? 'Unknown error'),
+        }
+
+        setLicensesToSourceFilesMapping(mappedData)
+
+        if (mappedData.status === 'success' && mappedData.licensesData !== undefined) {
+            for (const licenseData of mappedData.licensesData) {
                 if (
                     licenseData.licenseName.toUpperCase() === license.toUpperCase() &&
                     !CommonUtils.isNullEmptyOrUndefinedArray(licenseData.sourcesFiles)
