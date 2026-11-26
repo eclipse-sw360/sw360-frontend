@@ -355,11 +355,11 @@ const DependencyNetworkListView = ({ projectId }: { projectId: string }) => {
                 const vals = fil.value as string[]
                 let elemVal: string
                 if (fil.id === 'type') {
-                    elemVal = elem.type
+                    elemVal = upperCaseWithUnderscore(elem.type) ?? ''
                 } else if (fil.id === 'relation') {
                     elemVal = elem.relation ?? ReleaseRelationship.CONTAINED
                 } else {
-                    elemVal = elem.clearingState
+                    elemVal = upperCaseWithUnderscore(elem.clearingState) ?? ''
                 }
                 if (vals.indexOf(elemVal) === -1) {
                     return false

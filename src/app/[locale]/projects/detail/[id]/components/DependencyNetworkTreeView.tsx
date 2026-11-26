@@ -151,6 +151,10 @@ const stateFilterOptions: FilterOption[] = [
     },
 ]
 
+const upperCaseWithUnderscore = (text: string | undefined) => {
+    return text !== undefined ? text.trim().toUpperCase().replace(/ /g, '_') : undefined
+}
+
 type TypedProject = TypedEntity<ProjectClearingState, 'project'>
 
 type TypedRelease = TypedEntity<ReleaseClearingState, 'release'>
@@ -579,11 +583,11 @@ const DependencyNetworkTreeView = ({ projectId }: Props) => {
                     const vals = fil.value as string[]
                     let elemVal: string | undefined
                     if (fil.id === 'type') {
-                        elemVal = elem.componentType ?? ''
+                        elemVal = upperCaseWithUnderscore(elem.componentType) ?? ''
                     } else if (fil.id === 'relation') {
                         elemVal = elem.releaseRelationship ?? ''
                     } else {
-                        elemVal = elem.clearingState ?? ''
+                        elemVal = upperCaseWithUnderscore(elem.clearingState) ?? ''
                     }
                     if (vals.indexOf(elemVal) === -1) {
                         return false
