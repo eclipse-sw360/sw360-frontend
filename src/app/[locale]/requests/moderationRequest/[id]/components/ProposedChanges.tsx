@@ -10,6 +10,7 @@
 'use client'
 
 import { ColumnDef, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { diffWordsWithSpace } from 'diff'
 import { StatusCodes } from 'http-status-codes'
 import { useTranslations } from 'next-intl'
 import { SW360Table } from 'next-sw360'
@@ -66,6 +67,11 @@ export default function ProposedChanges({
                         header: t('Current Value'),
                         cell: ({ row }) => {
                             const { currentValue } = row.original
+                            // Current Value always shows the complete value currently stored on
+                            // the document (e.g. every externalIds entry, every linked package),
+                            // regardless of what changed. Former/Suggested below show only the
+                            // actual diff, as produced by the backend's moderation request
+                            // generators.
                             return <>{convertToReactNode(currentValue)}</>
                         },
                     },
@@ -73,16 +79,16 @@ export default function ProposedChanges({
                         id: 'formerValue',
                         header: t('Former Value'),
                         cell: ({ row }) => {
-                            const { formerValue } = row.original
-                            return <>{convertToReactNode(formerValue)}</>
+                            const { formerValue, suggestedValue } = row.original
+                            return renderDiffCell(formerValue, suggestedValue, 'former')
                         },
                     },
                     {
                         id: 'suggestedValue',
                         header: t('Suggested Value'),
                         cell: ({ row }) => {
-                            const { suggestedValue } = row.original
-                            return <>{convertToReactNode(suggestedValue)}</>
+                            const { formerValue, suggestedValue } = row.original
+                            return renderDiffCell(formerValue, suggestedValue, 'suggested')
                         },
                     },
                 ],
@@ -317,6 +323,95 @@ export default function ProposedChanges({
             t,
         ],
     )
+
+    // Serializes a value the same way the field would be compared (pretty-printed
+    // JSON for objects/arrays, raw text for strings), so it can be fed into a
+    // word-level diff.
+    const toDiffText = (value: RowValue): string => {
+        if (value === undefined || value === null) return ''
+        if (typeof value === 'string') return value
+        return JSON.stringify(value, null, 2)
+    }
+
+    // Renders Former/Suggested Value cells the same way change logs do: the full
+    // value is always shown (nothing is hidden or filtered out), but the parts
+    // that differ between formerValue and suggestedValue are highlighted -
+    // removed content in red (Former Value column), added content in green
+    // (Suggested Value column). Unchanged content is shown without highlighting.
+    const renderDiffCell = (
+        formerValue: RowValue,
+        suggestedValue: RowValue,
+        side: 'former' | 'suggested',
+    ): ReactNode => {
+        const formerEmpty = formerValue === undefined || formerValue === null
+        const suggestedEmpty = suggestedValue === undefined || suggestedValue === null
+
+        if (side === 'former' && formerEmpty) {
+            return (
+                <>
+                    {'--'}
+                    {t('not set')}
+                    {'--'}
+                </>
+            )
+        }
+        if (side === 'suggested' && suggestedEmpty) {
+            return (
+                <>
+                    {'--'}
+                    {t('not set')}
+                    {'--'}
+                </>
+            )
+        }
+
+        // field was newly added (nothing to diff against): show it fully highlighted
+        if (side === 'suggested' && formerEmpty) {
+            return (
+                <pre className='change-text'>
+                    <span className='new-val-change-highlight'>{toDiffText(suggestedValue)}</span>
+                </pre>
+            )
+        }
+        // field was entirely removed (nothing to diff against): show old value fully highlighted
+        if (side === 'former' && suggestedEmpty) {
+            return (
+                <pre className='change-text'>
+                    <span className='old-val-change-highlight'>{toDiffText(formerValue)}</span>
+                </pre>
+            )
+        }
+
+        const diffParts = diffWordsWithSpace(toDiffText(formerValue), toDiffText(suggestedValue))
+
+        return (
+            <pre className='change-text'>
+                {diffParts.map((part, index) => {
+                    if (side === 'former') {
+                        if (part.added) return null
+                        return (
+                            <span
+                                key={index}
+                                className={part.removed ? 'old-val-change-highlight' : undefined}
+                            >
+                                {part.value}
+                            </span>
+                        )
+                    } else {
+                        if (part.removed) return null
+                        return (
+                            <span
+                                key={index}
+                                className={part.added ? 'new-val-change-highlight' : undefined}
+                            >
+                                {part.value}
+                            </span>
+                        )
+                    }
+                })}
+            </pre>
+        )
+    }
 
     const populateTableData = (
         additions: Record<string, RowValue>,
