@@ -333,6 +333,24 @@ const FrontEndConfigs = (): JSX.Element => {
                                     </td>
                                     <td>{t('ui_enable_add_license_info_to_release_button')}</td>
                                 </tr>
+                                <tr id='ui-enable-manual-license-editing-on-release-edit-page'>
+                                    <td className='align-middle fw-bold'>
+                                        {t('Enable Manual License Editing on Release Edit Page')}
+                                    </td>
+                                    <td>
+                                        <OnOffSwitch
+                                            size={25}
+                                            setCurrentUiConfig={setCurrentUiConfig}
+                                            checked={
+                                                currentUiConfig[
+                                                    UIConfigKeys.UI_ENABLE_MANUAL_LICENSE_EDITING_ON_RELEASE_EDIT_PAGE
+                                                ] === 'true'
+                                            }
+                                            propKey={UIConfigKeys.UI_ENABLE_MANUAL_LICENSE_EDITING_ON_RELEASE_EDIT_PAGE}
+                                        />
+                                    </td>
+                                    <td>{t('ui_enable_manual_license_editing_on_release_edit_page')}</td>
+                                </tr>
                                 <tr id='ui-custommap-release-roles'>
                                     <td className='align-middle fw-bold'>{t('Release Roles')}</td>
                                     <td>
