@@ -375,7 +375,11 @@ export function SW360Table<K>({
                                     <td key={cell.id}>
                                         <div
                                             className={
-                                                table.options.meta?.rowHeightConstant ? 'restrict-row-height' : ''
+                                                table.options.meta?.rowHeightConstant &&
+                                                !(cell.column.columnDef.meta as ColumnMeta | undefined)
+                                                    ?.unrestrictedRowHeight
+                                                    ? 'restrict-row-height'
+                                                    : ''
                                             }
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
