@@ -23,7 +23,7 @@ export type ProcessedUiConfig = {
 }
 
 // Helper functions to process raw configuration
-export function parseConfigValue(key: UIConfigKeys, value: string): string[] | string | boolean {
+export function parseConfigValue(key: UIConfigKeys, value: string | undefined): string[] | string | boolean {
     if (ArrayTypeUIConfigKeys.includes(key)) {
         if (value === undefined) {
             return []
@@ -45,12 +45,15 @@ export function parseConfigValue(key: UIConfigKeys, value: string): string[] | s
 }
 
 // Function to transform raw config to processed config
-export function parseRawUiConfig(rawConfig: UiConfiguration): ProcessedUiConfig {
+export function parseRawUiConfig(rawConfig: Partial<UiConfiguration>): ProcessedUiConfig {
     const processedConfig = {} as ProcessedUiConfig
 
     for (const key of Object.values(UIConfigKeys)) {
         // @ts-expect-error The types are assigned dynamically
-        processedConfig[key] = parseConfigValue(key, rawConfig[key])
+        processedConfig[key] = parseConfigValue(
+            key,
+            rawConfig[key] ?? (key === UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE ? 'true' : undefined),
+        )
     }
 
     return processedConfig

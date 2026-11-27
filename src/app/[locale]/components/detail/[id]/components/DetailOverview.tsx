@@ -18,12 +18,12 @@ import { useTranslations } from 'next-intl'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Col, ListGroup, Row, Spinner, Tab } from 'react-bootstrap'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
-
 import Attachments from '@/components/Attachments/Attachments'
 import ChangeLogDetail from '@/components/ChangeLog/ChangeLogDetail/ChangeLogDetail'
 import ChangeLogList from '@/components/ChangeLog/ChangeLogList/ChangeLogList'
 import ComponentVulnerabilities from '@/components/ComponentVulnerabilities/ComponentVulnerabilities'
 import { PageButtonHeader } from '@/components/sw360'
+import { useConfigValue } from '@/contexts'
 import {
     COMPONENT_NOT_FOUND_WARNING_KEY,
     LAST_RELEASE_COMPONENT_ID_KEY,
@@ -42,6 +42,7 @@ import {
     LinkedVulnerability,
     PageableQueryParam,
     PaginationMeta,
+    UIConfigKeys,
     User,
     UserGroupType,
 } from '@/object-types'
@@ -62,6 +63,7 @@ interface Props {
 
 const DetailOverview = ({ componentId }: Props): ReactNode => {
     const t = useTranslations('default')
+    const componentAndReleaseMergeEnabled = useConfigValue(UIConfigKeys.UI_ENABLE_COMPONENT_AND_RELEASE_MERGE) !== false
     const [activeKey, setActiveKey] = useState(CommonTabIds.SUMMARY)
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -221,7 +223,7 @@ const DetailOverview = ({ componentId }: Props): ReactNode => {
             link: `/components/detail/${componentId}/merge`,
             type: 'secondary',
             name: t('Merge'),
-            hidden: userIdentity?.userGroup === UserGroupType.SECURITY_USER,
+            hidden: !componentAndReleaseMergeEnabled || userIdentity?.userGroup === UserGroupType.SECURITY_USER,
         },
         Split: {
             link: `/components/detail/${componentId}/split`,
